@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 public abstract class Repo {
 
-  public static final String DEFAULT_INSTALL_DIR = "libraries/jar";
+  public static String DEFAULT_INSTALL_DIR = null;//"libraries/jar";
 
   // Repo is an interface to a singleton of each "type" of repo
   private static String defaultRepoManagerType = "IvyWrapper";
@@ -43,24 +43,56 @@ public abstract class Repo {
 
   protected List<RemoteRepo> remotes;
 
-  public static final String REPO_STATE_FILE_NAME = "repo.json";
+  private final String REPO_STATE_FILE_NAME = "repo.json";
 
   public static final String INSTALL_PROGRESS = "installProgress";
+  
+  /**
+   * location of repo's libraries - if not explicitly set will be set to 
+   * "libraries"
+   */
+  protected static String LOCATION = null;
 
   List<Status> errors = new ArrayList<Status>();
 
   Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
+  
+  public String getRepoPath() {
+    return LOCATION + File.separator + REPO_STATE_FILE_NAME;
+  }
 
   public void error(String format, Object... args) {
     publishStatus(Status.error(format, args));
   }
 
   static public Repo getInstance() {
-    return getInstance(defaultRepoManagerType);
+    return getInstance(null, defaultRepoManagerType);
+  }
+  
+  public static Repo getInstance(String simpleType) {
+    return getInstance(null, simpleType);
   }
 
-  public static Repo getInstance(String simpleType) {
+  public static Repo getInstance(String location, String simpleType) {
 
+    if (LOCATION == null && location != null) {
+     LOCATION = location;
+    } else {
+      LOCATION = "libraries";
+    }
+    
+    if (DEFAULT_INSTALL_DIR == null) {      
+      DEFAULT_INSTALL_DIR = LOCATION + File.separator + "jar";
+    }
+    
+    File libraries = new File(LOCATION);
+    libraries.mkdirs();
+    if (!libraries.exists()) {
+      log.error("could not create repo {}", libraries);
+    } else {
+      log.info("create repo {}", LOCATION);
+    }
+    
     String type = makeFullTypeName(simpleType);
 
     if (localInstances.containsKey(type)) {
@@ -83,6 +115,10 @@ public abstract class Repo {
       }
       return null;
     }
+  }
+  
+  public String getInstallDir() {
+    return DEFAULT_INSTALL_DIR;
   }
 
   public final static String makeFullTypeName(String type) {
@@ -138,8 +174,8 @@ public abstract class Repo {
     FileIO.rm("libraries");
     log.info("Repo.clear - clearing repo");
     FileIO.rm("repo");
-    log.info("Repo.clear - {}", REPO_STATE_FILE_NAME);
-    FileIO.rm(REPO_STATE_FILE_NAME);
+    log.info("Repo.clear - {}", getRepoPath());
+    FileIO.rm(getRepoPath());
     log.info("Repo.clear - clearing memory");
     installedLibraries.clear();
     log.info("clearing errors");
@@ -309,7 +345,7 @@ public abstract class Repo {
       types = new String[] { serviceType };
     }
 
-    install(DEFAULT_INSTALL_DIR, types);
+    install(getInstallDir(), types);
   }
 
   synchronized public void install(String location, String serviceType) {
@@ -319,7 +355,7 @@ public abstract class Repo {
   abstract public void install(String location, String[] serviceTypes);
 
   synchronized public void install(String[] serviceTypes) {
-    install(DEFAULT_INSTALL_DIR, serviceTypes);
+    install(getInstallDir(), serviceTypes);
   }
 
   public void installEach() {
@@ -382,9 +418,9 @@ public abstract class Repo {
   public void load() {
     try {
 
-      File f = new File(REPO_STATE_FILE_NAME);
+      File f = new File(getRepoPath());
       if (f.exists()) {
-        log.info("loading {}", REPO_STATE_FILE_NAME);
+        log.info("loading {}", getRepoPath());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         FileInputStream is = new FileInputStream(f);
@@ -404,14 +440,14 @@ public abstract class Repo {
         }
 
       } else {
-        log.info("{} not found", REPO_STATE_FILE_NAME);
+        log.info("{} not found", getRepoPath());
       }
 
     } catch (Exception e) {
       log.error("loading threw", e);
     }
 
-    log.info("loaded repo.json");
+    log.info("loaded {}", getRepoPath());
   }
 
   /**
@@ -419,7 +455,7 @@ public abstract class Repo {
    */
   public void save() {
     try {
-      FileOutputStream fos = new FileOutputStream(REPO_STATE_FILE_NAME);
+      FileOutputStream fos = new FileOutputStream(getRepoPath());
       fos.write(CodecUtils.toJson(installedLibraries).getBytes());
       fos.close();
     } catch (Exception e) {

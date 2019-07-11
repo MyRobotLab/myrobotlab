@@ -54,6 +54,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.myrobotlab.service.Runtime;
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.image.Util;
@@ -87,7 +88,7 @@ public class FileIO {
    * At some point this should be the single point where all data and .myrobotlab dir stuff use -
    * that way it can be "configured" to point somewhere else ..
    */
-  static private String cfgDir = null;
+  // static private String cfgDir = null;
 
   
   /**
@@ -423,7 +424,7 @@ public class FileIO {
 
     return extract(resourceName, null);
   }
-    
+    /*
   static public String setCfgDir(String dirName) {
     log.info("setting cfgDir to {}", dirName);
     cfgDir = dirName;
@@ -434,6 +435,7 @@ public class FileIO {
     }
     return cfgDir;
   }
+  */
 
   /**
    * get configuration directory
@@ -442,13 +444,16 @@ public class FileIO {
    */
   static public final String getCfgDir() {
     try {
-      
-      if (cfgDir != null) {
-        return cfgDir;
+
+      String baseDir = null;
+      if (Runtime.getOptions() == null) {
+        baseDir = System.getProperty("user.dir");
+      } else {
+        baseDir = Runtime.getOptions().dataDir;
       }
-      
       // TODO: is user.dir the same as MRL_HOME / install dir?
-      String dirName = System.getProperty("user.dir") + File.separator + ".myrobotlab";
+      // "always" associated with the data dir
+      String dirName = baseDir + File.separator + ".myrobotlab";
       File dir = new File(dirName);
 
       if (!dir.exists()) {
@@ -462,8 +467,7 @@ public class FileIO {
         log.error("{} is not a file", dirName);
       }
       
-      cfgDir = dirName;
-      return cfgDir;
+      return dirName;
 
     } catch (Exception e) {
       Logging.logError(e);

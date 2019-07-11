@@ -249,7 +249,7 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   public String getStoreFileName() {
-    return String.format("%s%s%s", FileIO.getCfgDir(), File.separator, storeFileName);
+    return String.format("%s%s%s", getDataDir(), File.separator, storeFileName);
   }
 
   // default group permissions - for new user/group
