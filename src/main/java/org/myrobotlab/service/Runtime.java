@@ -1104,15 +1104,15 @@ public class Runtime extends Service implements MessageListener {
       // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
-      
+
       // fix paths
       Platform platform = Platform.getLocalInstance();
       if (options.id != null) {
         platform.setId(options.id);
       }
-      options.dataDir = (platform.isWindows())?options.dataDir.replace("/", "\\"):options.dataDir.replace("\\", "/");
-      options.libraries = (platform.isWindows())?options.libraries.replace("/", "\\"):options.libraries.replace("\\", "/");
-      options.resourceDir = (platform.isWindows())?options.resourceDir.replace("/", "\\"):options.resourceDir.replace("\\", "/");
+      options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
+      options.libraries = (platform.isWindows()) ? options.libraries.replace("/", "\\") : options.libraries.replace("\\", "/");
+      options.resourceDir = (platform.isWindows()) ? options.resourceDir.replace("/", "\\") : options.resourceDir.replace("\\", "/");
 
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
@@ -1178,7 +1178,11 @@ public class Runtime extends Service implements MessageListener {
           security.setKey(options.addKeys[i], options.addKeys[i + 1]);
           log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
         }
-        shutdown();
+        // TODO - save all the crazy logic to the end with a single shutdown,
+        // which handles all cases when it should and should not be shutdown
+        if (options.services.size() == 0) {
+          shutdown();
+        }
         return;
       }
 
