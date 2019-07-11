@@ -1104,6 +1104,15 @@ public class Runtime extends Service implements MessageListener {
       // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
+      
+      // fix paths
+      Platform platform = Platform.getLocalInstance();
+      if (options.id != null) {
+        platform.setId(options.id);
+      }
+      options.dataDir = (platform.isWindows())?options.dataDir.replace("/", "\\"):options.dataDir.replace("\\", "/");
+      options.libraries = (platform.isWindows())?options.libraries.replace("/", "\\"):options.libraries.replace("\\", "/");
+      options.resourceDir = (platform.isWindows())?options.resourceDir.replace("/", "\\"):options.resourceDir.replace("\\", "/");
 
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
@@ -1142,11 +1151,6 @@ public class Runtime extends Service implements MessageListener {
 
       if (options.virtual) {
         Platform.setVirtual(true);
-      }
-
-      if (options.id != null) {
-        Platform platform = Platform.getLocalInstance();
-        platform.setId(options.id);
       }
 
       // Runtime runtime = Runtime.getInstance();
@@ -1708,14 +1712,6 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
         + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
     public String addKeys[];
-
-    /*
-     * not needed with branche/version isolation
-     * 
-     * @Option(names = { "-e", "--extract" }, description =
-     * "forces extraction of all resources onto the filesystem") public boolean
-     * extract = false;
-     */
 
     @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
     public String jvm;
