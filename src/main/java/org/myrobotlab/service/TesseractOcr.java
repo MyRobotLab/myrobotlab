@@ -1,7 +1,7 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.javacpp.lept.pixDestroy;
-import static org.bytedeco.javacpp.lept.pixRead;
+import static org.bytedeco.leptonica.global.lept.pixDestroy;
+import static org.bytedeco.leptonica.global.lept.pixRead;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,8 +11,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.lept.PIX;
-import org.bytedeco.javacpp.tesseract.TessBaseAPI;
+import org.bytedeco.leptonica.PIX;
+import org.bytedeco.tesseract.TessBaseAPI;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
