@@ -1183,7 +1183,6 @@ public class Runtime extends Service implements MessageListener {
         if (options.services.size() == 0) {
           shutdown();
         }
-        return;
       }
 
       // FIXME TEST THIS !! 0 length, single service, multiple !
