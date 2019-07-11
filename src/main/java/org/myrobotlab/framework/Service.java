@@ -775,18 +775,38 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public String getDataDir() {
+    String dataDir = Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
+    File f = new File(dataDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
     return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
   }
 
   public String getDataInstanceDir() {
+    String dataDir = Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    File f = new File(dataDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
     return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
   public String getResourceDir() {
+    String dataDir = Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName();
+    File f = new File(dataDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
     return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName();
   }
 
   public String getResourceInstanceDir() {
+    String dataDir = Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    File f = new File(dataDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
     return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName() + File.separator + getName();
   }
 
