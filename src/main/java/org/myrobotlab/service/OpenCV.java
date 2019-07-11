@@ -396,7 +396,7 @@ public class OpenCV extends AbstractComputerVision {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.5";
+    String javaCvVersion = "1.5.1";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
 
