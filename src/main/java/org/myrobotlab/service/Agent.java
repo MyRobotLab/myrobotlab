@@ -222,7 +222,7 @@ public class Agent extends Service {
           agent.update();
         }
       } catch (Exception e) {
-        log.info("updater threw", e);
+        log.error("updater threw", e);
       }
       log.info("updater stopping");
       updateLog("info", "updater stopping");
@@ -417,8 +417,8 @@ public class Agent extends Service {
         if (globalOptions.src != null) {
           log.info("checking for github updates on branch {}", process.options.branch);
           String newVersion = getLatestSrc(process.options.branch);
-          if (newVersion != null && process.isRunning()) {
-            log.info("updating process [{}] from {} -to-> {}", process.options.id, process.options.version, newVersion);
+          if (newVersion != null && process.isRunning()) {            
+            warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
             // FIXME set currentVersion ???
             currentVersion = newVersion;
             process.options.version = newVersion;
@@ -430,15 +430,15 @@ public class Agent extends Service {
           log.info("checking for updates on jenkins");
           // getRemoteVersions
           log.info("getting version");
-          String version = getLatestVersion(process.options.branch, true);
-          if (version == null || version.equals(process.options.version)) {
-            log.info("same version {}", version);
+          String newVersion = getLatestVersion(process.options.branch, true);
+          if (newVersion == null || newVersion.equals(process.options.version)) {
+            log.info("same version {}", newVersion);
             continue;
           }
 
           // we have a possible update
-          log.info("WOOHOO ! updating to version {}", version);
-          process.options.version = version;
+          log.info("WOOHOO ! updating to version {}", newVersion);
+          process.options.version = newVersion;
           process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
 
           getLatestJar(process.options.branch);
@@ -449,7 +449,10 @@ public class Agent extends Service {
             restart(process.options.id);
             log.info("restarted");
           }
+          warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
         }
+      } catch (TransportException e) {
+        log.info("cannot connect to - are we connected to the internet ? {}", e.getMessage());
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
       }
@@ -1018,7 +1021,10 @@ public class Agent extends Service {
     String exeName = platform.isWindows() ? "javaw" : "java";
     pd.javaExe = String.format("%s%sbin%s%s", System.getProperty("java.home"), fs, fs, exeName);
 
-    String jvmArgs = "-Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8";
+    String jvmArgs = String.format("-Djava.library.path=%s/native -Djna.library.path=%s/native -Dfile.encoding=UTF-8", pd.options.libraries, pd.options.libraries);
+    if (platform.isWindows()) {
+      jvmArgs = jvmArgs.replace("/", "\\");
+    }
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
@@ -1048,14 +1054,21 @@ public class Agent extends Service {
     return currentBranch;
   }
 
-  static public Map<String, String> setEnv(Map<String, String> env) {
+  static public Map<String, String> setEnv(ProcessData pd, Map<String, String> env) {
     Platform platform = Platform.getLocalInstance();
     String platformId = platform.getPlatformId();
     if (platform.isLinux()) {
-      String ldPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}", platformId);
+      File f = new File(pd.options.libraries);
+      String ldPath = String.format("%s/native:%s/native/%s:${LD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
+      // String ldPath =
+      // String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${LD_LIBRARY_PATH}",
+      // platformId);
       env.put("LD_LIBRARY_PATH", ldPath);
     } else if (platform.isMac()) {
-      String dyPath = String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}", platformId);
+      // String dyPath =
+      // String.format("'pwd'/libraries/native:'pwd'/libraries/native/%s:${DYLD_LIBRARY_PATH}",
+      // platformId);
+      String dyPath = String.format("%s/native:%s/native/%s:${DYLD_LIBRARY_PATH}", pd.options.libraries, pd.options.libraries, platformId);
       env.put("DYLD_LIBRARY_PATH", dyPath);
     } else if (platform.isWindows()) {
       // this just borks the path in Windows - additionally (unlike Linux)
@@ -1112,13 +1125,23 @@ public class Agent extends Service {
 
     // step 1 - get current env data
     Platform platform = Platform.getLocalInstance();
-    String cpTemplate = "%s%s./libraries/jar/jython.jar%s./libraries/jar/*%s./bin%s./build/classes";
-    if (platform.isWindows()) {
-      cpTemplate.replace("/", "\\");
-    }
+    // File f = new File(pd.options.libraries);
+    // String libraries = f.getAbsolutePath();
+    // String cpTemplate = "%s%s%s/jar/*%s./bin%s./build/classes";
 
     String ps = File.pathSeparator;
-    String classpath = String.format(cpTemplate, pd.jarPath, ps, ps, ps, ps);
+    String fs = File.separator;
+
+    // order of cp paths - higher precedence first
+    // develop "could do" (".."+fs+".."+fs+"build"+fs+"classes") .. but we
+    // already have --src and a whole framework to build
+    // the latest
+    String classpath = (pd.jarPath) + ps + (pd.options.libraries + fs + "jar" + fs + "*");
+    // String classpath = String.format(cpTemplate, pd.jarPath, ps, libraries,
+    // ps, libraries, ps, ps);
+    if (platform.isWindows()) {
+      classpath = classpath.replace("/", "\\");
+    }
     cmd.add(classpath);
 
     cmd.add("org.myrobotlab.service.Runtime");
@@ -1131,8 +1154,15 @@ public class Agent extends Service {
       }
     }
 
+    // FIXME !!!! - this less than ideal !
+    // "MOST" of the flags are "relayed" through so CmdOptions are handled in
+    // the spawned process - but a few are handled by the agent and should not be
+    // relayed
     cmd.add("--id");
     cmd.add(pd.options.id);
+
+    cmd.add("--data-dir");
+    cmd.add(pd.options.dataDir);
 
     if (globalOptions.logLevel != null) {
       cmd.add("--log-level");
@@ -1147,9 +1177,9 @@ public class Agent extends Service {
     }
 
     // FIXME - adding new CmdOption
-    if (pd.options.cfgDir != null) {
+    if (pd.options.cfg != null) {
       cmd.add("-c");
-      cmd.add(globalOptions.cfgDir);
+      cmd.add(globalOptions.cfg);
     }
 
     if (pd.options.addKeys != null) {
@@ -1164,6 +1194,13 @@ public class Agent extends Service {
       for (String keyPart : globalOptions.invoke) {
         cmd.add(keyPart);
       }
+    }
+
+    cmd.add("--libraries");
+    cmd.add(pd.options.libraries);
+    
+    if (pd.options.virtual) {
+      cmd.add("--virtual");
     }
 
     return cmd.toArray(new String[cmd.size()]);
@@ -1200,7 +1237,7 @@ public class Agent extends Service {
     log.info("SPAWNING ! --> [{}]", spawning);
 
     // environment variables setup
-    setEnv(builder.environment());
+    setEnv(pd, builder.environment());
 
     Process process = builder.start();
     pd.process = process;
@@ -1392,15 +1429,23 @@ public class Agent extends Service {
         // options.fork = true;
         // lets check and get the latest jar if there is new one
 
-        if (globalOptions.src == null) {
-          // get the latest from Jenkins
-          agent.getLatestJar(agent.getBranch());
-        } else {
-          // get the latest from GitHub
-          agent.getLatestSrc(agent.getBranch());
+        try {
+          if (globalOptions.src == null) {
+            // get the latest from Jenkins
+            agent.getLatestJar(agent.getBranch());
+          } else {
+            // get the latest from GitHub
+            agent.getLatestSrc(agent.getBranch());
+          }
+        } catch (TransportException e) {
+          log.info("could not get latest myrobotlab - {}", e.getMessage());
+        } catch (Exception e) {
+          log.error("trying to update failed", e);
         }
+
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
+        log.info("will attempt to spawn the latest local version [{}-{}]", agent.getBranch(), globalOptions.version);
       }
 
       // FIXME - use wsclient for remote access
@@ -1519,7 +1564,7 @@ public class Agent extends Service {
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
 
-//      cmd.add("\"" + sb.toString() + "\"");
+      // cmd.add("\"" + sb.toString() + "\"");
       cmd.add(sb.toString());
 
       StringBuilder sb1 = new StringBuilder();
@@ -1527,15 +1572,14 @@ public class Agent extends Service {
         sb1.append(c);
         sb1.append(" ");
       }
-      
-      
+
       // src path ..
       log.info("build [{}]", sb1);
       // ProcessBuilder pb = new
       // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
       ProcessBuilder pb = new ProcessBuilder(cmd);
       Map<String, String> envs = pb.environment();
-      log.info("PATH={}",envs.get("PATH"));
+      log.info("PATH={}", envs.get("PATH"));
 
       pb.directory(new File(src));
 

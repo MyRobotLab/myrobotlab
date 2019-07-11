@@ -97,11 +97,11 @@ public class RepoTest extends AbstractTest implements StatusPublisher {
   public void testSave() {
     if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     Repo repo = Repo.getInstance();
-    FileIO.rm(Repo.REPO_STATE_FILE_NAME);
-    assertFalse(new File(Repo.REPO_STATE_FILE_NAME).exists());
+    FileIO.rm(repo.getRepoPath());
+    assertFalse(new File(repo.getRepoPath()).exists());
     // Repo repo = Repo.getInstance();
     repo.save();
-    assertTrue(new File(Repo.REPO_STATE_FILE_NAME).exists());
+    assertTrue(new File(repo.getRepoPath()).exists());
   }
 
 }
