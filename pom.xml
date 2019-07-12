@@ -302,6 +302,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Esp8266_01 begin -->
+  <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
+      <scope>provided</scope>
+  </dependency>
+<!-- Esp8266_01 end -->
+
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -926,13 +935,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.5</version>
+    <version>1.5.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5</version>
+    <version>1.5.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1294,9 +1303,9 @@
 
 <!-- TesseractOcr begin -->
   <dependency>
-    <groupId>org.bytedeco.javacpp-presets</groupId>
+    <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.0.0-rc2-1.4.3</version>
+    <version>4.1.0-1.5.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- TesseractOcr end -->
