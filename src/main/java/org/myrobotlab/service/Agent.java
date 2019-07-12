@@ -45,6 +45,7 @@ import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -258,6 +259,8 @@ public class Agent extends Service {
 
   public static String BRANCHES_ROOT = "branches";
 
+  public static String VERSION_ROOT = "./";
+
   Updater updater;
 
   public Agent(String n) throws IOException {
@@ -280,6 +283,10 @@ public class Agent extends Service {
   }
 
   public String getDir(String branch, String version) {
+    return System.getProperty("user.dir");
+  }
+
+  public String getDirx(String branch, String version) {
     if (branch == null) {
       branch = Platform.getLocalInstance().getBranch();
     }
@@ -294,13 +301,14 @@ public class Agent extends Service {
   }
 
   public String getJarName(String branch, String version) {
-    return getDir(branch, version) + File.separator + "myrobotlab.jar";
+    return "myrobotlab-" + branch + "-" + version + ".jar";
+    // return getDir(branch, version) + File.separator + "myrobotlab.jar";
   }
 
   private void setup() throws IOException {
-
-    String agentBranch = Platform.getLocalInstance().getBranch();
-    String agentVersion = Platform.getLocalInstance().getVersion();
+    Platform platform = Platform.getLocalInstance();
+    String agentBranch = platform.getBranch();
+    String agentVersion = platform.getVersion();
 
     // location of the agent's branch (and version)
     String agentVersionPath = getDir(agentBranch, agentVersion);
@@ -316,17 +324,25 @@ public class Agent extends Service {
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
 
       if (!new File(agentJar).exists() || !agentJar.endsWith(".jar")) {
-        // not operating in released runtime mode - probably operating in ide
-        String ideTargetJar = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "myrobotlab.jar").getAbsolutePath();
-        if (!new File(ideTargetJar).exists()) {
-          error("no source agent jar can be found checked:\n%s\n%s\nare you using ide? please package a build (mvn package -DskipTest)", agentJar, ideTargetJar);
+        log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
+        log.info("i will build a jar for you on src from {}", FileIO.cwd());
+        // guessing the src root is in cwd
+        // globalOptions.src
+        String newVersion = mvn(FileIO.cwd(), agentBranch, null); // FIXME -
+                                                                  // what to do
+                                                                  // on failure
+        if (newVersion != null) {
+          log.info("built version {}", newVersion);
         } else {
-          agentJar = ideTargetJar;
+          log.error("could not build");
+          return;
         }
+        log.info("agents expects its own version {} to be available version - copying from {}", agentVersion, newVersion);
+        String newJar = getJarName(agentBranch, newVersion);
+        String newJarLoc = getJarName(agentBranch, agentVersion);
+        log.info("copy {} to {}", newJar, newJarLoc);
+        Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
       }
-
-      log.info("on branch {} copying agent's current jar to appropriate location {} -> {}", currentBranch, agentJar, agentMyRobotLabJar);
-      Files.copy(Paths.get(agentJar), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
     }
   }
 
@@ -417,7 +433,7 @@ public class Agent extends Service {
         if (globalOptions.src != null) {
           log.info("checking for github updates on branch {}", process.options.branch);
           String newVersion = getLatestSrc(process.options.branch);
-          if (newVersion != null && process.isRunning()) {            
+          if (newVersion != null && process.isRunning()) {
             warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
             // FIXME set currentVersion ???
             currentVersion = newVersion;
@@ -827,18 +843,16 @@ public class Agent extends Service {
   public Set<String> getLocalVersions(String branch) {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
-    File branchDir = new File(BRANCHES_ROOT);
+    File branchDir = new File(VERSION_ROOT);
     // get local existing versions
     File[] listOfFiles = branchDir.listFiles();
     for (int i = 0; i < listOfFiles.length; ++i) {
       File file = listOfFiles[i];
-      if (file.isDirectory()) {
-        if (file.getName().startsWith(branch)) {
-          String version = file.getName().substring(branch.length() + 1);// getFileVersion(file.getName());
-          if (version != null) {
-            versions.add(version);
-          }
-        }
+
+      if (file.getName().startsWith("myrobotlab-" + branch) && file.getName().endsWith(".jar")) {
+        String version = file.getName().substring(("myrobotlab-" + branch).length() + 1, file.getName().length() - ".jar".length());
+        log.info("found {} on branch {} with version {}", file.getName(), branch, version);
+        versions.add(version);
       }
     }
     return versions;
@@ -1156,7 +1170,8 @@ public class Agent extends Service {
 
     // FIXME !!!! - this less than ideal !
     // "MOST" of the flags are "relayed" through so CmdOptions are handled in
-    // the spawned process - but a few are handled by the agent and should not be
+    // the spawned process - but a few are handled by the agent and should not
+    // be
     // relayed
     cmd.add("--id");
     cmd.add(pd.options.id);
@@ -1198,7 +1213,7 @@ public class Agent extends Service {
 
     cmd.add("--libraries");
     cmd.add(pd.options.libraries);
-    
+
     if (pd.options.virtual) {
       cmd.add("--virtual");
     }
@@ -1563,6 +1578,7 @@ public class Agent extends Service {
       // cmd.add("-f");
       // cmd.add(pathToPom);
       // cmd.add("-o"); // offline
+      sb.append("-o"); // offline
 
       // cmd.add("\"" + sb.toString() + "\"");
       cmd.add(sb.toString());
