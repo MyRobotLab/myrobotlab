@@ -1208,6 +1208,7 @@ public class Runtime extends Service implements MessageListener {
       }
 
     } catch (Exception e) {
+      log.error("runtime exception", e);
       Runtime.mainHelp();
       shutdown();
       log.error("main threw", e);
