@@ -320,33 +320,29 @@ public class Agent extends Service {
 
     String agentMyRobotLabJar = getJarName(agentBranch, agentVersion);
     if (!new File(agentMyRobotLabJar).exists()) {
-
+      log.info("agent versioned {} does not exist", agentMyRobotLabJar);
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-
-      if (!new File(agentJar).exists()) {
-        log.info("versioned jar does not exist");
-        if (!agentJar.endsWith(".jar")) {
-          log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
-          log.info("i will build a jar for you on src from {}", FileIO.cwd());
-          // guessing the src root is in cwd
-          // globalOptions.src
-          // FIXME - what do we do on failure of compile ?
-          String newVersion = mvn(FileIO.cwd(), agentBranch, null); 
-          if (newVersion != null) {
-            log.info("built version {}", newVersion);
-          } else {
-            log.error("could not build");
-            return;
-          }
-          log.info("agents expects its own version {} to be available version - copying from {}", agentVersion, newVersion);
-          String newJar = getJarName(agentBranch, newVersion);
-          String newJarLoc = getJarName(agentBranch, agentVersion);
-          log.info("copy {} to {}", newJar, newJarLoc);
-          Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+      if (!agentJar.endsWith(".jar")) {
+        log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
+        log.info("i will build a jar for you on src from {}", FileIO.cwd());
+        // guessing the src root is in cwd
+        // globalOptions.src
+        // FIXME - what do we do on failure of compile ?
+        String newVersion = mvn(FileIO.cwd(), agentBranch, null);
+        if (newVersion != null) {
+          log.info("built version {}", newVersion);
         } else {
-          log.info("new directory or new version perhaps - we'll copy ./myrobotlab.jar to {}", agentJar);
-          Files.copy(Paths.get("myrobotlab.jar"), Paths.get(agentJar), StandardCopyOption.REPLACE_EXISTING);
+          log.error("could not build");
+          return;
         }
+        log.info("agents expects its own version {} to be available version - copying from {}", agentVersion, newVersion);
+        String newJar = getJarName(agentBranch, newVersion);
+        String newJarLoc = getJarName(agentBranch, agentVersion);
+        log.info("copy {} to {}", newJar, newJarLoc);
+        Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+      } else {
+        log.info("new directory or new version perhaps - we'll copy ./myrobotlab.jar to {}", agentJar);
+        Files.copy(Paths.get("myrobotlab.jar"), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
       }
     }
   }
