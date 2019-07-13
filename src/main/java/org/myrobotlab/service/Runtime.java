@@ -1208,6 +1208,7 @@ public class Runtime extends Service implements MessageListener {
       }
 
     } catch (Exception e) {
+      log.error("runtime exception", e);
       Runtime.mainHelp();
       shutdown();
       log.error("main threw", e);
@@ -1687,7 +1688,7 @@ public class Runtime extends Service implements MessageListener {
     // AGENT ONLY INFO
     @Option(names = { "-w",
         "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
-    public String webgui = "localhost";
+    public String webgui;
 
     // FIXME - implement
     // AGENT INFO

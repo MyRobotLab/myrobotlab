@@ -320,17 +320,15 @@ public class Agent extends Service {
 
     String agentMyRobotLabJar = getJarName(agentBranch, agentVersion);
     if (!new File(agentMyRobotLabJar).exists()) {
-
+      log.info("agent versioned {} does not exist", agentMyRobotLabJar);
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-
-      if (!new File(agentJar).exists() || !agentJar.endsWith(".jar")) {
+      if (!agentJar.endsWith(".jar")) {
         log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
         log.info("i will build a jar for you on src from {}", FileIO.cwd());
         // guessing the src root is in cwd
         // globalOptions.src
-        String newVersion = mvn(FileIO.cwd(), agentBranch, null); // FIXME -
-                                                                  // what to do
-                                                                  // on failure
+        // FIXME - what do we do on failure of compile ?
+        String newVersion = mvn(FileIO.cwd(), agentBranch, null);
         if (newVersion != null) {
           log.info("built version {}", newVersion);
         } else {
@@ -342,6 +340,9 @@ public class Agent extends Service {
         String newJarLoc = getJarName(agentBranch, agentVersion);
         log.info("copy {} to {}", newJar, newJarLoc);
         Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+      } else {
+        log.info("new directory or new version perhaps - we'll copy ./myrobotlab.jar to {}", agentJar);
+        Files.copy(Paths.get("myrobotlab.jar"), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
       }
     }
   }
@@ -1499,7 +1500,7 @@ public class Agent extends Service {
       }
 
     } catch (Exception e) {
-      log.error("unsuccessful spawn", e);
+      log.error("agent main exception", e);
     }
   }
 
