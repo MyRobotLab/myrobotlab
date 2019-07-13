@@ -257,8 +257,6 @@ public class Agent extends Service {
 
   }
 
-  public static String BRANCHES_ROOT = "branches";
-
   public static String VERSION_ROOT = "./";
 
   Updater updater;
@@ -286,19 +284,6 @@ public class Agent extends Service {
     return System.getProperty("user.dir");
   }
 
-  public String getDirx(String branch, String version) {
-    if (branch == null) {
-      branch = Platform.getLocalInstance().getBranch();
-    }
-    if (version == null) {
-      try {
-        version = getLatestVersion(branch, autoUpdate);
-      } catch (Exception e) {
-        log.error("getDir threw", e);
-      }
-    }
-    return BRANCHES_ROOT + File.separator + branch + "-" + version;
-  }
 
   public String getJarName(String branch, String version) {
     return "myrobotlab-" + branch + "-" + version + ".jar";
@@ -815,21 +800,16 @@ public class Agent extends Service {
   public Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
-    File branchDir = new File(BRANCHES_ROOT);
+    File branchDir = new File(VERSION_ROOT);
     // get local existing versions
     File[] listOfFiles = branchDir.listFiles();
     for (int i = 0; i < listOfFiles.length; ++i) {
       File file = listOfFiles[i];
-      if (file.isDirectory()) {
-        // if (file.getName().startsWith(branch)) {
-        // String version = file.getName().substring(branch.length() + 1);//
-        // getFileVersion(file.getName());
-        // if (version != null) {
-        int pos = file.getName().lastIndexOf("-");
-        String branchAndVersion = file.getName().substring(0, pos - 1) + " " + file.getName().substring(pos + 1);
-        versions.add(branchAndVersion);
-        // }
-        // }
+
+      if (file.getName().startsWith("myrobotlab-") && file.getName().endsWith(".jar")) {
+        String version = file.getName().substring(("myrobotlab-").length() + 1, file.getName().length() - ".jar".length());
+        log.info("found {} branch-version {}", file.getName(), version);
+        versions.add(version);
       }
     }
     return versions;
