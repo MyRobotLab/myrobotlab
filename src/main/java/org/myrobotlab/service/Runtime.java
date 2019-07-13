@@ -1763,7 +1763,7 @@ public class Runtime extends Service implements MessageListener {
     public String branch;
 
     @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
-    public String libraries = "libraries";
+    public String libraries = "libraries/jar";
 
     // FIXME - get version vs force version - perhaps just always print version
     // in help
@@ -1816,12 +1816,7 @@ public class Runtime extends Service implements MessageListener {
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-
-    // 3 states
-    // isAgent == make default directory (with pid) if custom not supplied
-    // fromAgent == needs agentId
-    // neither ... == normal pid file !isAgent & !fromAgent
-
+    
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 

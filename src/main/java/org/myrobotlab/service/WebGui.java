@@ -929,7 +929,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       if (nettosphere != null && nettosphere.isStarted()) {
         // is running
-        info("{} currently running on port {} - stop first, then start");
+        info("currently running on port %s - stop first, then start", port);
         return;
       }
 
