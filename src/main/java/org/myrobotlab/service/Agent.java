@@ -390,7 +390,7 @@ public class Agent extends Service {
           port = 8887;
         }
         webgui = (WebGui) Runtime.create("webgui", "WebGui");
-        webgui.autoStartBrowser(false);
+        // webgui.autoStartBrowser(false);
         webgui.setPort(port);
         webgui.setAddress(address);
         webgui.startService();
