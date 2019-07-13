@@ -336,20 +336,19 @@ public abstract class Repo {
   }
 
   synchronized public void install(String serviceType) {
+    install(getInstallDir(), serviceType);
+  }
 
+  synchronized public void install(String location, String serviceType) {
+    
     String[] types = null;
     if (serviceType == null) {
       ServiceData sd = ServiceData.getLocalInstance();
       types = sd.getServiceTypeNames();
     } else {
       types = new String[] { serviceType };
-    }
-
-    install(getInstallDir(), types);
-  }
-
-  synchronized public void install(String location, String serviceType) {
-    install(location, new String[] { serviceType });
+    }    
+    install(location, types);
   }
 
   abstract public void install(String location, String[] serviceTypes);
