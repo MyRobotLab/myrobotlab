@@ -1762,8 +1762,9 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
 
+    // installation root of libraries - jars will be installed under {libraries}/jar natives under {libraries}/native
     @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
-    public String libraries = "libraries/jar";
+    public String libraries = "libraries";
 
     // FIXME - get version vs force version - perhaps just always print version
     // in help
