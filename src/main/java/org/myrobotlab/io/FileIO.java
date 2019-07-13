@@ -1551,5 +1551,9 @@ public class FileIO {
     return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
   }
 
+  public static String cwd() {
+    return System.getProperty("user.dir");
+  }
+
 
 }

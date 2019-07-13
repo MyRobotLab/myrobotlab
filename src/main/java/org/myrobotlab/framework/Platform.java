@@ -380,5 +380,4 @@ public class Platform implements Serializable {
       // log.info("Exception: ", e);
     }
   }
-
 }

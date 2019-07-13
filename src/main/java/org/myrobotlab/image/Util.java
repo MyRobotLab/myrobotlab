@@ -218,7 +218,7 @@ public class Util {
         icon = ImageIO.read(imgURL);
         return icon;
       } catch (IOException e) {
-        log.error("read image threw", e);
+        log.error("read image threw trying to read file {}", imgURL, e);
       }
     }
 

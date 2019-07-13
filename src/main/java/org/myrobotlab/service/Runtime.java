@@ -1682,11 +1682,12 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
 
+    // FIXME HOW DO YOU "nullify" values !?!?!? does this need --noWebGui ???
     // FIXME - when instances connect via ws - default will become true
     // AGENT ONLY INFO
     @Option(names = { "-w",
         "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
-    public String webgui;
+    public String webgui = "localhost";
 
     // FIXME - implement
     // AGENT INFO
@@ -1794,6 +1795,12 @@ public class Runtime extends Service implements MessageListener {
     synchronized (instanceLockObject) {
       if (runtime == null) {
         runtime = this;
+        // if main(argv) args did not create options we must create
+        // a new one with defaults
+        if (options == null) {
+          options = new CmdOptions();
+        }
+        
         repo = Repo.getInstance(options.libraries, "IvyWrapper");
         if (options == null) {
           options = new CmdOptions();
