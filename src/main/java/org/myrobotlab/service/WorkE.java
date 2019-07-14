@@ -339,8 +339,8 @@ public class WorkE extends Service implements StatusListener {
     brain.attach(mouth);
     sleep(1000);
 
-    speak("opening eye");
-    capture();
+//    speak("opening eye");
+ //   capture();
     sleep(1000);
 
     speak("connecting serial port");
