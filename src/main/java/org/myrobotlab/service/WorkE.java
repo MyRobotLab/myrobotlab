@@ -507,9 +507,15 @@ public class WorkE extends Service implements StatusListener {
 
   @Override
   public void onStatus(Status status) {
-    if (status.isError() || status.isWarn()) {
-      speak(status.toString());
+    if (status.isError()) {
+      // speak(status.toString());
+      speak("%s has had an error", status.source);
       lastErrors.add(status);
+    }
+    if (status.isWarn()) {
+      // speak(status.toString());
+      speak("%s has had a warning", status.source);
+      // lastErrors.add(status);
     }
   }
 
