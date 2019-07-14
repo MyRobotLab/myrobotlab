@@ -317,14 +317,14 @@ public class WorkE extends Service implements StatusListener {
     motorLeft.setInverted(true);
     sleep(1000);
 
-    String workeBrainPath = System.getProperty("user.dir") + File.separator + "github";
+    String workeBrainPath = getHomeDir() + File.separator + "github";
     File workeBrain = new File(workeBrainPath + File.separator + "bots" + File.separator + "worke");
 
     if (workeBrain.exists()) {
 
       speak("attaching brain");
       // brain.setPath("..");
-      brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
+      brain.setPath(workeBrainPath);
       brain.setCurrentBotName("worke"); // does this create a session ?
       brain.reloadSession("greg", "worke");
       // brain.reloadSession("greg", "worke"); // is this necessary??
@@ -637,6 +637,8 @@ public class WorkE extends Service implements StatusListener {
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
       webgui = (WebGui) startPeer("webgui");
+      
+      attach();
 
     } catch (Exception e) {
       error(e);
