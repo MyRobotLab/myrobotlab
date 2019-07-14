@@ -1519,9 +1519,20 @@ public class Agent extends Service {
   // mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop clean package -o
   public String mvn(String src, String branch, Long buildNumber) {
     try {
+      
       if (src == null) {
         src = "data" + File.separator + branch + ".src";
       }
+      String fs = File.separator;
+      File myroborlabJar = new File(src + fs + "target" + fs + "myrobotlab");
+      if (myroborlabJar.exists()) {
+        myroborlabJar.delete();
+      }
+      File snapshot = new File(src + fs + "target" + fs + "mrl-0.0.1-SNAPSHOT.jar");
+      if (snapshot.exists()) {
+        snapshot.delete();
+      }
+      
       if (buildNumber == null) {
         // epoch minute build time number
         buildNumber = System.currentTimeMillis() / 1000;
@@ -1531,9 +1542,7 @@ public class Agent extends Service {
 
       Platform platform = Platform.getLocalInstance();
       List<String> cmd = new ArrayList<>();
-
-      String pathToPom = src + File.separator + "pom.xml";
-
+      
       cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
 
