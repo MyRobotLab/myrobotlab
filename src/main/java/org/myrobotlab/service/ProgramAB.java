@@ -739,11 +739,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     }
   }
 
-  public void setPath(String path) {
+  public String setPath(String path) {
     if (path != null && !path.equals(this.path)) {
       this.path = path;
       broadcastState();
     }
+    return this.path;
   }
 
   public void setCurrentBotName(String currentBotName) {

@@ -1516,7 +1516,6 @@ public class Agent extends Service {
     return mvn(null, branch, null);
   }
 
-  // mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop clean package -o
   public String mvn(String src, String branch, Long buildNumber) {
     try {
       
