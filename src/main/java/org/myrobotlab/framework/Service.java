@@ -773,6 +773,14 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     return "------\r\n" + sw.toString() + "------\r\n";
   }
+  
+  public String getRootDataDir() {
+    return Runtime.getOptions().dataDir;
+  }
+  
+  public String getHomeDir() {
+    return System.getProperty("user.home");
+  }
 
   public String getDataDir() {
     String dataDir = Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
