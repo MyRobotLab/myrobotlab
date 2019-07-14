@@ -117,5 +117,12 @@ public interface SpeechSynthesis extends NameProvider {
   public void onRequestConfirmation(String text);
 
   public List<Voice> getVoices();
+  
+  /**
+   * puts all speaking into blocking mode - default is false
+   * @param b
+   * @return
+   */
+  public Boolean setBlocking(Boolean b);
 
 }
