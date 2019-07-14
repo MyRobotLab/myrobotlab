@@ -49,6 +49,8 @@ public class WorkE extends Service implements StatusListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(WorkE.class);
+    
+    meta.addPeer("cli", "Cli", "command line interface for worke");
 
     // motor control - output
     meta.addPeer("joystick ", "Joystick", "joystick control");
@@ -170,6 +172,7 @@ public class WorkE extends Service implements StatusListener {
   transient AbstractSpeechSynthesis mouth;
   transient ProgramAB brain;
   transient AbstractMotorController controller;
+  transient Cli cli;
   transient OpenCV cv;
   transient ImageDisplay display;
   transient AbstractSpeechRecognizer ear;
@@ -236,6 +239,7 @@ public class WorkE extends Service implements StatusListener {
 
     if (isVirtual()) {
       speak("running in virtual mode");
+      // FIXME - services should know when and how to become virtual
       // controller virtualization
       uart = Serial.connectVirtualUart(serialPort);
       uart.logRecv(true);// # dump bytes sent from controller
@@ -620,6 +624,7 @@ public class WorkE extends Service implements StatusListener {
 
       // FIXME FIXME FIXME - make worky through framework - no manual starts
       // here !!!
+      cli = (Cli) startPeer("cli");
       controller = (AbstractMotorController) startPeer("controller");
       joystick = (Joystick) startPeer("joystick");
       motorLeft = (AbstractMotor) startPeer("motorLeft");
