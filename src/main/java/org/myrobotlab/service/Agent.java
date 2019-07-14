@@ -1623,7 +1623,7 @@ public class Agent extends Service {
     }
 
     if (src == null) {
-      src = "data" + File.separator + branch + ".src";
+      src = getRootDataDir() + File.separator + branch + ".src";
     }
 
     List<String> branches = new ArrayList<String>();
