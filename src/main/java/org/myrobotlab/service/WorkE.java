@@ -49,6 +49,8 @@ public class WorkE extends Service implements StatusListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(WorkE.class);
+    
+    meta.addPeer("cli", "Cli", "command line interface for worke");
 
     // motor control - output
     meta.addPeer("joystick ", "Joystick", "joystick control");
@@ -170,6 +172,7 @@ public class WorkE extends Service implements StatusListener {
   transient AbstractSpeechSynthesis mouth;
   transient ProgramAB brain;
   transient AbstractMotorController controller;
+  transient Cli cli;
   transient OpenCV cv;
   transient ImageDisplay display;
   transient AbstractSpeechRecognizer ear;
@@ -236,6 +239,7 @@ public class WorkE extends Service implements StatusListener {
 
     if (isVirtual()) {
       speak("running in virtual mode");
+      // FIXME - services should know when and how to become virtual
       // controller virtualization
       uart = Serial.connectVirtualUart(serialPort);
       uart.logRecv(true);// # dump bytes sent from controller
@@ -313,14 +317,14 @@ public class WorkE extends Service implements StatusListener {
     motorLeft.setInverted(true);
     sleep(1000);
 
-    String workeBrainPath = System.getProperty("user.dir") + File.separator + "github";
+    String workeBrainPath = getHomeDir() + File.separator + "github";
     File workeBrain = new File(workeBrainPath + File.separator + "bots" + File.separator + "worke");
 
     if (workeBrain.exists()) {
 
       speak("attaching brain");
       // brain.setPath("..");
-      brain.setPath(System.getProperty("user.dir" + File.separator + "github"));
+      brain.setPath(workeBrainPath);
       brain.setCurrentBotName("worke"); // does this create a session ?
       brain.reloadSession("greg", "worke");
       // brain.reloadSession("greg", "worke"); // is this necessary??
@@ -335,8 +339,8 @@ public class WorkE extends Service implements StatusListener {
     brain.attach(mouth);
     sleep(1000);
 
-    speak("opening eye");
-    capture();
+//    speak("opening eye");
+ //   capture();
     sleep(1000);
 
     speak("connecting serial port");
@@ -503,9 +507,15 @@ public class WorkE extends Service implements StatusListener {
 
   @Override
   public void onStatus(Status status) {
-    if (status.isError() || status.isWarn()) {
-      speak(status.toString());
+    if (status.isError()) {
+      // speak(status.toString());
+      speak("%s has had an error", status.source);
       lastErrors.add(status);
+    }
+    if (status.isWarn()) {
+      // speak(status.toString());
+      speak("%s has had a warning", status.source);
+      // lastErrors.add(status);
     }
   }
 
@@ -620,6 +630,7 @@ public class WorkE extends Service implements StatusListener {
 
       // FIXME FIXME FIXME - make worky through framework - no manual starts
       // here !!!
+      cli = (Cli) startPeer("cli");
       controller = (AbstractMotorController) startPeer("controller");
       joystick = (Joystick) startPeer("joystick");
       motorLeft = (AbstractMotor) startPeer("motorLeft");
@@ -632,6 +643,8 @@ public class WorkE extends Service implements StatusListener {
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
       webgui = (WebGui) startPeer("webgui");
+      
+      attach();
 
     } catch (Exception e) {
       error(e);

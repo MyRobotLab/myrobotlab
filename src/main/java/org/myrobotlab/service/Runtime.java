@@ -1168,6 +1168,7 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
+      // FIXME willSpawn()  if not willSpawn - then shutdown with this option (and others like it)
       if (options.addKeys != null) {
         if (options.addKeys.length < 2) {
           Runtime.mainHelp();
@@ -1761,6 +1762,7 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
 
+    // installation root of libraries - jars will be installed under {libraries}/jar natives under {libraries}/native
     @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
     public String libraries = "libraries";
 
@@ -1770,7 +1772,7 @@ public class Runtime extends Service implements MessageListener {
     public String version;
 
     @Option(names = { "-s", "--service",
-        "--services" }, arity = "1..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+        "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
     public List<String> services = new ArrayList<>();
 
     // FIXME - implement !
@@ -1815,12 +1817,7 @@ public class Runtime extends Service implements MessageListener {
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-
-    // 3 states
-    // isAgent == make default directory (with pid) if custom not supplied
-    // fromAgent == needs agentId
-    // neither ... == normal pid file !isAgent & !fromAgent
-
+    
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
