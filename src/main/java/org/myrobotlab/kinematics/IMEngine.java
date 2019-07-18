@@ -660,10 +660,10 @@ public class IMEngine extends Thread implements Genetic {
           decodedGenome.add(null);
           continue;
         }
-        // if (link.getState() == Servo.SERVO_EVENT_POSITION_UPDATE) {
-        //  decodedGenome.add(link.getTargetPos());
-        //   continue;
-        // }
+         if (link.getState() != ServoStatus.SERVO_STOPPED) {
+          decodedGenome.add(link.getTargetPos());
+           continue;
+         }
         Mapper map = null;
         if (link.getMinDegree() == link.getMaxDegree()) {
           decodedGenome.add(link.getMinDegree());

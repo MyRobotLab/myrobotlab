@@ -226,16 +226,16 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // they need to go so that their part they where attach to
     // move by the input degree
     HobbyServo mtorso = (HobbyServo) Runtime.start("mtorso", "HobbyServo");
-    mtorso.attach(arduino.getName(), 26, 90.0);
-    mtorso.map(15.0, 165.0, 148.0, 38.0);
+    mtorso.attach(arduino.getName(), 26, 0.0);
+    mtorso.map(-75.0, 75.0, 148.0, 38.0);
     // mtorso.map(89.9,90.1,93.1,92.9);
     mtorso.setRest(90.0);
     // #mtorso.setMinMax(35,150);
     mtorso.setVelocity(13.0);
     mtorso.moveTo(90.0);
     HobbyServo ttorso = (HobbyServo) Runtime.start("ttorso", "HobbyServo");
-    ttorso.attach(arduino.getName(), 7, 90.0);
-    ttorso.map(80.0, 100.0, 92.0, 118.0);
+    ttorso.attach(arduino.getName(), 7, 0.0);
+    ttorso.map(-10.0, 10.0, 92.0, 118.0);
     // ttorso.setInverted(False)
     // #ttorso.setMinMax(85,125)
     ttorso.setVelocity(13.0);
@@ -317,9 +317,9 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     // #define the DH parameters for the ik service
     ik.setNewDHRobotArm("leftArm");
-    ik.setDHLink("leftArm", mtorso, 113, 90, 0, -90);
+    ik.setDHLink("leftArm", mtorso, 113, 180, 0, -90);
     // ik.setDHLink("rightArm",ttorso,0,90+65.6,346,0);
-    ik.setDHLink("leftArm", ttorso, 0, 180, 292, 90);
+    ik.setDHLink("leftArm", ttorso, 0, 0, 292, 90);
     ik.setDHLink("leftArm", "rightS", 143, 180, 0, 90);
     ik.setDHLink("leftArm", omoplate, 0, -5.6, 45, -90);
     ik.setDHLink("leftArm", shoulder, 77, -30 + 90, 0, 90);
@@ -330,12 +330,12 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("leftArm", "wristup", 0, -5, 110, 0);
     ik.setDHLink("leftArm", "wristdown", 0, 0, 105, 45);
     ik.setDHLink("leftArm", "finger", 5, -90, 5, 0);
-
+    ik.removeAi("leftArm", Ai.AVOID_COLLISION);
     ik.startEngine("leftArm");
 
     ik.setNewDHRobotArm("rightArm");
-    ik.setDHLink("rightArm", mtorso, 113, 90, 0, -90);
-    ik.setDHLink("rightArm", ttorso, 0, 180, 292, 90);
+    ik.setDHLink("rightArm", mtorso, 113, 180, 0, -90);
+    ik.setDHLink("rightArm", ttorso, 0, 0, 292, 90);
     // ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
     ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
     ik.setDHLink("rightArm", Romoplate, 0, -5.6, 45, 90);
@@ -348,6 +348,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("rightArm", "Rwristup", 0, 5, 110, 0);
     ik.setDHLink("rightArm", "Rwristdown", 0, 0, 105, -45);
     ik.setDHLink("rightArm", "Rfinger", 5, 90, 5, 0);
+    ik.removeAi("rightArm", Ai.AVOID_COLLISION);
     ik.startEngine("rightArm");
 
     ik.setNewDHRobotArm("kinect");
@@ -356,7 +357,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLink("kinect", "camera", 0, 90, 10, 90);
     //
     ik.startEngine("kinect");
-
+    ik.removeAi("kinect", Ai.AVOID_COLLISION);
     // #define object, each dh link are set as an object, but the
     // #start point and end point will be update by the ik service, but still
     // need
@@ -417,8 +418,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // ik.holdTarget("leftArm", true);
     ik.visualize();
     ((TestJmeIMModel) ik.jmeApp).addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0, 0, 0), Vector3f.UNIT_X.mult(1), (float) Math.toRadians(0));
-    ((TestJmeIMModel) ik.jmeApp).addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0, 0, 0), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(-90));
-    ((TestJmeIMModel) ik.jmeApp).addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0, 105f, 10), Vector3f.UNIT_Z, (float) Math.toRadians(-90));
+    ((TestJmeIMModel) ik.jmeApp).addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0, 0, 0), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(0));
+    ((TestJmeIMModel) ik.jmeApp).addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0, 105f, 10), Vector3f.UNIT_Z, (float) Math.toRadians(0));
     ((TestJmeIMModel) ik.jmeApp).addPart("rightS", null, 1f, "ttorso", new Vector3f(0, 300f, 0), Vector3f.UNIT_Z, (float) Math.toRadians(0));
     ((TestJmeIMModel) ik.jmeApp).addPart("Romoplate", "Models/Romoplate1.j3o", 1f, "rightS", new Vector3f(-143f, 0, -17), Vector3f.UNIT_Z.mult(-1), (float) Math.toRadians(-4));
     ((TestJmeIMModel) ik.jmeApp).addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f, "Romoplate", new Vector3f(-23, -45f, 0), Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(-32));
@@ -438,13 +439,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // ((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new
     // Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1),
     // (float)Math.toRadians(0));
-
+    /*print ik.currentPosition("rightArm")
+print ik.currentPosition("leftArm")
+     */
     // TODO add the object that can collide with the model
     // ik.jmeApp.addObject();
 
     // need to move a little so the position update
-    mtorso.moveTo(91.0);
-    ttorso.moveTo(91.0);
+    mtorso.moveTo(1.0);
+    ttorso.moveTo(1.0);
     Romoplate.moveTo(11.0);
     Rshoulder.moveTo(31.0);
     Rrotate.moveTo(91.0);
@@ -456,8 +459,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     wrist.moveTo(91.0);
     Rwrist.moveTo(91.0);
 
-    mtorso.moveTo(90.0);
-    ttorso.moveTo(90.0);
+    mtorso.moveTo(0.0);
+    ttorso.moveTo(0.0);
     Romoplate.moveTo(10.0);
     Rshoulder.moveTo(30.0);
     Rrotate.moveTo(90.0);
@@ -496,7 +499,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     // ik.setAi("rightArm", Ai.KEEP_BALANCE);
     // ik.setAi("leftArm", Ai.KEEP_BALANCE);
-    ik.removeAi("kinect", Ai.AVOID_COLLISION);
+    
 
   }
 
