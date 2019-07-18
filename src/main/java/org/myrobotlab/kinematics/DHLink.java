@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+//import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 //import marytts.util.math.MathUtils;
@@ -41,13 +42,11 @@ public class DHLink implements Serializable {
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
-  private double velocity; // FIXME - is this set by IK being dp/dt ? .. it
+  private double speed; // FIXME - is this set by IK being dp/dt ? .. it
   // should be
-  // private int state = Servo.SERVO_EVENT_STOPPED; // FIXME - no servo info
+  private ServoStatus state = ServoStatus.SERVO_STOPPED; // FIXME - no servo info
   public double targetPos;
-  public boolean hasServo = false; // FIXME - no servo info
-  public double servoMin;
-  public double servoMax;
+  public boolean hasActuator = false; // FIXME - no servo info
   public double currentPos = 0.0;
   public double offset = 0.0;
 
@@ -83,12 +82,10 @@ public class DHLink implements Serializable {
     this.max = copy.max;
     this.name = copy.name;
     this.initialTheta = copy.initialTheta;
-    // this.state = copy.state;
+    this.state = copy.state;
     this.targetPos = copy.targetPos;
-    this.velocity = copy.velocity;
-    this.hasServo = copy.hasServo;
-    this.servoMax = copy.servoMax;
-    this.servoMin = copy.servoMin;
+    this.speed = copy.speed;
+    this.hasActuator = copy.hasActuator;
     this.currentPos = copy.currentPos;
   }
 
@@ -316,12 +313,12 @@ public class DHLink implements Serializable {
     return 0.0;
   }
 
-  public double getVelocity() {
-    return velocity;
+  public double getSpeed() {
+    return speed;
   }
 
-  public void setVelocity(double velocity) {
-    this.velocity = velocity;
+  public void setSpeed(double speed) {
+    this.speed = speed;
   }
 
   /**
@@ -371,4 +368,21 @@ public class DHLink implements Serializable {
   public double getOffset() {
     return offset ;
   }
+  
+  public double getMinDegree() {
+	  return Math.toDegrees(getMin() - getInitialTheta() );
+  }
+  
+  public double getMaxDegree() {
+	  return Math.toDegrees(getMax() - getInitialTheta());
+  }
+
+public void setState(ServoStatus state) {
+	this.state = state;	
+}
+
+public ServoStatus getState() {
+	return state;
+}
+
 }

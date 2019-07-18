@@ -193,31 +193,19 @@ public class DHRobotArm implements Serializable {
     // double ws = m.elements[3][3];
     // log.debug("World Scale : " + ws);
     // TODO: pass /compute the roll pitch and yaw ..
-    double pitch = Math.atan2(-1.0 * (m.elements[2][0]), Math.sqrt(m.elements[0][0] * m.elements[0][0] + m.elements[1][0] * m.elements[1][0]));
+    double pitch = Math.atan2(-1.0*(m.elements[2][0]), Math.sqrt(m.elements[2][1]*m.elements[2][1] + m.elements[2][2]*m.elements[2][2]));
     double roll = 0;
     double yaw = 0;
-    if (pitch == Math.PI / 2) {
-      roll = Math.atan2(m.elements[0][1], m.elements[1][1]);
-    } else if (pitch == -1 * Math.PI / 2) {
-      roll = Math.atan2(m.elements[0][1], m.elements[1][1]) * -1;
-    } else {
-      roll = Math.atan2(m.elements[2][1] / Math.cos(pitch), m.elements[2][2]) / Math.cos(pitch);
-      yaw = Math.atan2(m.elements[1][0] / Math.cos(pitch), m.elements[0][0] / Math.cos(pitch)) - Math.PI / 2;
+    if (pitch == Math.PI/2) {
+      roll =  Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) - Math.PI/2;
     }
-    // double pitch=0, roll=0, yaw=0; //attitude, bank, heading
-    // if (m.elements[1][0] > 0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = Math.PI/2;
-    // }
-    // else if (m.elements[1][0] < -0.998) {
-    // yaw = Math.atan2(m.elements[0][2], m.elements[2][2]);
-    // pitch = -Math.PI/2;
-    // }
-    // else {
-    // yaw = Math.atan2(-m.elements[2][0], m.elements[0][0]);
-    // roll = Math.atan2(-m.elements[1][2], m.elements[1][1]);
-    // pitch = Math.asin(m.elements[1][0]);
-    // }
+    else if (pitch == -1 * Math.PI/2) {
+      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) *-1 + Math.PI/2;
+    }
+    else {
+      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]);
+      yaw = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]);
+    }
     Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
 
     return palm;

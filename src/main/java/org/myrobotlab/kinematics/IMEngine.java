@@ -14,8 +14,9 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -134,20 +135,16 @@ public class IMEngine extends Thread implements Genetic {
       CollisionDectection cd = new CollisionDectection(service.collisionItems);
       for (int i = 0; i < maxIter; i++) {
         for (DHLink link : computeArm.getLinks()) {
-          /*
-          if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
+          if (link.getState() != ServoStatus.SERVO_STOPPED) {
             link.addPositionValue(link.getTargetPos());
             continue;
           }
-          */
         }
         for (int j = computeArm.getNumLinks() - 1; j >= 0; j--) {
           // for (int j = 0; j < computeArm.getNumLinks(); j++) {
-          /*
-          if (computeArm.getLink(j).getState() != Servo.SERVO_EVENT_STOPPED) {
+          if (computeArm.getLink(j).getState() != ServoStatus.SERVO_STOPPED) {
             continue;
           }
-          */
           Point cogIni = service.cog.computeCoG(cd);
           cogIni.setZ(0.0);
           // cogIni.setY(0.0);
@@ -197,54 +194,8 @@ public class IMEngine extends Thread implements Genetic {
           computeArm.getLink(j).incrRotate(MathUtils.degToRad(deltaDegree));
         }
       }
-      // int geneticPoolSize=100;
-      // double geneticRecombinationRate = 0.7;
-      // double geneticMutationRate = 0.01;
-      // int geneticGeneration = 50;
-      // calcFitnessType = CalcFitnessType.POSITION;
-      // GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize,
-      // arm.getNumLinks(), 12, geneticRecombinationRate,
-      // geneticMutationRate );
-      // Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the
-      // number of time the chromosome pool will be
-      // recombined and mutate
-      // for (int i = 0; i < computeArm.getNumLinks(); i++) {
-      // if (bestFit.getDecodedGenome().get(i) != null) {
-      // DHLink link = computeArm.getLink(i);
-      // double degrees = link.getPositionValueDeg();
-      // double deltaDegree = java.lang.Math.abs(degrees -
-      // (double)bestFit.getDecodedGenome().get(i));
-      // if (degrees > ((double)bestFit.getDecodedGenome().get(i))) {
-      // degrees -= deltaDegree;
-      // }
-      // else if (degrees < ((double)bestFit.getDecodedGenome().get(i))) {
-      // degrees += deltaDegree;
-      // }
-      // link.addPositionValue( degrees);
-      // }
-      // }
-      // double[][] jp = computeArm.createJointPositionMap();
-      // for (int k = 0; k < computeArm.getNumLinks(); k++) {
-      // CollisionItem ci = new CollisionItem(new Point(jp[k][0], jp[k][1],
-      // jp[k][2], 0 , 0, 0), new Point(jp[k+1][0], jp[k+1][1],
-      // jp[k+1][2], 0, 0, 0), computeArm.getLink(k).getName());
-      // if (k != computeArm.getNumLinks()-1) {
-      // ci.addIgnore(computeArm.getLink(k+1).getName());
-      // }
-      // cd.addItem(ci);
-      // }
-      // Point deltaCoG = service.cog.computeCoG(cd);
-      // deltaCoG.setZ(0.0);
-      // //deltaCoG.setY(0.0);
-      // if (deltaCoG.distanceTo(service.cog.getCoGTarget()) <
-      // service.cog.getMaxDistanceToCog()) {
-      // Point pos = computeArm.getPalmPosition();
-      // log.info("Moving to " + getName() + pos.toString());
-      // //publishAngles();
-      // return computeArm.getPalmPosition();
-      // }
+
       return computeArm.getPalmPosition();
-      // cogRetry++;
     }
     return null;
   }
@@ -283,10 +234,6 @@ public class IMEngine extends Thread implements Genetic {
       publishAngles();
     }
     // noUpdatePosition = false;
-  }
-
-  private boolean moveToGoal(Point goal) {
-    return moveToGoal(goal, null);
   }
 
   private boolean moveToGoal(Point goal, String lastDHLink) {
@@ -361,12 +308,12 @@ public class IMEngine extends Thread implements Genetic {
       double maxTimeToMove = 0;
       for (int i = 0; i < dTheta.getNumRows(); i++) {
         DHLink link = computeArm.getLink(i);
-        if (link.hasServo) {
+        if (link.hasActuator) {
           // update joint positions! move towards the goal!
           double d = dTheta.elements[i][0];
           // incr rotate needs to be min/max aware here!
           computeArm.getLink(i).incrRotate(d);
-          double timeToMove = Math.abs(d / link.getVelocity());
+          double timeToMove = Math.abs(d / link.getSpeed());
           if (timeToMove > maxTimeToMove) {
             maxTimeToMove = timeToMove;
           }
@@ -396,8 +343,8 @@ public class IMEngine extends Thread implements Genetic {
     while (time <= 2.0) {
       // rotate the checkArm by timePerLoop
       for (DHLink link : checkArm.getLinks()) {
-        if (link.hasServo) {
-          double delta = link.getVelocity() * timePerLoop;
+        if (link.hasActuator) {
+          double delta = link.getSpeed() * timePerLoop;
           double maxDelta = Math.abs(link.getTargetPos() - link.getPositionValueDeg());
           delta = Math.toRadians(Math.min(delta, maxDelta));
           if (link.getTargetPos() < link.getCurrentPos()) {
@@ -519,8 +466,8 @@ public class IMEngine extends Thread implements Genetic {
     timeToWait = 0;
     for (DHLink link : computeArm.getLinks()) {
       double timeToMove = 0;
-      if (link.hasServo && link.getVelocity() > 0) {
-        timeToMove = Math.abs(link.getCurrentPos() - link.getPositionValueDeg()) / link.getVelocity() * 1000;
+      if (link.hasActuator && link.getSpeed() > 0) {
+        timeToMove = Math.abs(link.getCurrentPos() - link.getPositionValueDeg()) / link.getSpeed() * 1000;
       }
       if (timeToMove > timeToWait) {
         timeToWait = timeToMove;
@@ -586,7 +533,7 @@ public class IMEngine extends Thread implements Genetic {
     for (DHLink l : arm.getLinks()) {
       if (l.getName().equals(data.name)) {
         l.addPositionValue(data.pos);
-        // l.setState(data.state);
+        l.setState(data.state);
         // l.setVelocity(data.speed);
         // l.setTargetPos(data.targetPos);
         l.setCurrentPos(data.pos);
@@ -595,6 +542,21 @@ public class IMEngine extends Thread implements Genetic {
 
   }
 
+  public void updateLinksPosition(ServoControl data) {
+	    if (noUpdatePosition)
+	      return;
+	    for (DHLink l : arm.getLinks()) {
+	      if (l.getName().equals(data.getName())) {
+	        //l.addPositionValue(data.pos);
+	         l.setState(ServoStatus.SERVO_START);
+	         l.setSpeed(data.getSpeed());
+	         l.setTargetPos(data.getTargetPos());
+	        //l.setCurrentPos(data.pos);
+	      }
+	    }
+
+	  }
+  
   public void holdTarget(boolean holdEnabled) {
     this.holdTargetEnabled = holdEnabled;
 
@@ -612,7 +574,7 @@ public class IMEngine extends Thread implements Genetic {
         if (chromosome.getDecodedGenome().get(i) != null) {
           newLink.addPositionValue((double) chromosome.getDecodedGenome().get(i));
           double delta = computeArm.getLink(i).getPositionValueDeg() - (double) chromosome.getDecodedGenome().get(i);
-          double timeOfMove = Math.abs(delta / newLink.getVelocity());
+          double timeOfMove = Math.abs(delta / newLink.getSpeed());
           if (timeOfMove > fitnessTime) {
             fitnessTime = timeOfMove;
           }
@@ -694,7 +656,7 @@ public class IMEngine extends Thread implements Genetic {
       int pos = 0;
       ArrayList<Object> decodedGenome = new ArrayList<Object>();
       for (DHLink link : computeArm.getLinks()) {
-        if (!link.hasServo) {
+        if (!link.hasActuator) {
           decodedGenome.add(null);
           continue;
         }
@@ -703,11 +665,11 @@ public class IMEngine extends Thread implements Genetic {
         //   continue;
         // }
         Mapper map = null;
-        if (link.servoMin == link.servoMax) {
-          decodedGenome.add(link.servoMin);
+        if (link.getMinDegree() == link.getMaxDegree()) {
+          decodedGenome.add(link.getMinDegree());
           continue;
         } else {
-          map = new Mapper(0, 8191, link.servoMin, link.servoMax);
+          map = new Mapper(0, 8191, link.getMinDegree(), link.getMaxDegree());
         }
         Double value = 0.0;
         for (int i = pos; i < chromosome.getGenome().length() && i < pos + 13; i++) {
