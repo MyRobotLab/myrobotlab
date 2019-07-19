@@ -3,6 +3,7 @@ package org.myrobotlab.service.abstracts;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -148,7 +149,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   /**
    * list of servo listeners names
    */
-  protected Set<String> listeners = new LinkedHashSet<>();
+  // @Deprecated /* use notifyEntries !!!*/
+  // protected Set<String> listenersx = new LinkedHashSet<>();
 
   /**
    * input mapper
@@ -277,6 +279,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
       attach((ServoController) service, null, null, null);
     } else if (EncoderControl.class.isAssignableFrom(service.getClass())) {
       attach((EncoderControl) service);
+    } else if (ServoDataListener.class.isAssignableFrom(service.getClass())) {
+      attach((ServoDataListener) service);
     } else {
       warn(String.format("%s.attach does not know how to attach to a %s", this.getClass().getSimpleName(), service.getClass().getSimpleName()));
     }
@@ -291,7 +295,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
-    attach(controller, pin, null, null, null);
+    attach(controller, pin, pos, null, null);
   }
 
   public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
@@ -362,7 +366,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void attach(ServoDataListener service) {
-    listeners.add(service.getName());
+    // listeners.add(service.getName());
+    addListener("publishServoData", service.getName());
   }
 
   // @Override
@@ -427,15 +432,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void detach(ServoDataListener service) {
-    if (service != null) {
-      listeners.remove(service.getName());
-    }
+    removeListener("publishServoData", service.getName(), CodecUtils.getCallbackTopicName("publishServoData"));
   }
 
   @Override
   public void disable() {
     for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
+      // ServiceInterface si = Runtime.getService(controller);
       /*
        * let the com manager figure this out if (si.isLocal()) {
        * ((ServoController) Runtime.getService(controller)).servoDisable(this);

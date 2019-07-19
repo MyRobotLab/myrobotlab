@@ -57,7 +57,6 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -773,11 +772,11 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     return "------\r\n" + sw.toString() + "------\r\n";
   }
-  
+
   public String getRootDataDir() {
     return Runtime.getOptions().dataDir;
   }
-  
+
   public String getHomeDir() {
     return System.getProperty("user.home");
   }
