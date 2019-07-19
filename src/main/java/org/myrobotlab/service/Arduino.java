@@ -267,7 +267,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
-    log.error("mds - {}", Arrays.toString(deviceSummary));
+    log.info("mds - {}", Arrays.toString(deviceSummary));
     DeviceSummary[] ds = new DeviceSummary[deviceSummary.length];
     for (int i = 0; i < deviceSummary.length; i++) {
       int id = deviceSummary[i];

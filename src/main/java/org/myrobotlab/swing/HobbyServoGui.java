@@ -33,8 +33,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -59,7 +57,6 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -68,12 +65,14 @@ import org.myrobotlab.service.HobbyServo;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
@@ -870,6 +869,8 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
       // Service.sleep(1000);
       // String python = LangUtils.toPython();
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
+      TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+      servo.attach((ServoDataListener)catcher);
       
       Runtime.exportAll("export.py");
 
@@ -882,3 +883,4 @@ public class HobbyServoGui extends ServiceGui implements ActionListener, ChangeL
   }
 
 }
+ 

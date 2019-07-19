@@ -31,7 +31,10 @@ public class Task extends TimerTask {
   public void run() {
     // info("task %s running - next run %s", taskName,
     // MathUtils.msToString(interval));
-    myService.getInbox().add(msg);
+    myService.invoke(msg);
+    
+    // GroG commented out 2019.07.14 for preferrable "blocking" task
+    // myService.getInbox().add(msg);
 
     if (interval > 0) {
       Task t = new Task(this);

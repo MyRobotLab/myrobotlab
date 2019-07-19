@@ -230,6 +230,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   private Map<String, Voice> voiceProviderIndex = new TreeMap<>();
 
   private List<Voice> voiceList = new ArrayList<>();
+  
+  boolean blocking = false;
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -509,7 +511,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param block
    * @return
    */
-  public List<AudioData> parse(String toSpeak, boolean block) {
+  public List<AudioData> parse(String toSpeak) {
 
     // TODO - not sure if we want to support this notation
     // but at the moment it seems useful
@@ -552,7 +554,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       }
 
       if (!mute) {
-        process(audioData, speak, block);
+        process(audioData, speak, blocking);
       }
 
       // effect files are handled differently from generated audio
@@ -620,12 +622,16 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public List<AudioData> speak(String toSpeak) {
-    return parse(toSpeak, false);
+    return parse(toSpeak);
   }
 
   @Override
   public List<AudioData> speakBlocking(String toSpeak) {
-    return parse(toSpeak, true);
+    boolean prevValue = blocking;
+    blocking = true;
+    List<AudioData> audioData = parse(toSpeak);
+    blocking = prevValue;
+    return audioData;
   }
 
   private String filterText(String toSpeak) {
@@ -1003,6 +1009,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void unmute() {
     this.mute = false;
+  }
+  
+  public Boolean setBlocking(Boolean b) {
+    blocking = b;
+    return b;
   }
 
   static public ServiceType getMetaData(String serviceType) {
