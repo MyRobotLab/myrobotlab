@@ -39,8 +39,10 @@ public interface ServiceInterface
    */
   public boolean isVirtual();
   
+  // FIXME - remove callback
   public void addListener(String localTopic, String otherService, String callback);
 
+  // FIXME - remove callback
   public void removeListener(String localTopic, String otherService, String callback);
 
   public String[] getDeclaredMethodNames();
