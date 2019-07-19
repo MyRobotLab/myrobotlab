@@ -80,7 +80,7 @@ public class Msg {
 	public boolean debug = false;
 	boolean invoke = true;
 	
-	boolean ackEnabled = false;
+	boolean ackEnabled = true;
 	
 	 public static class AckLock {
 	    // first is always true - since there
@@ -2387,7 +2387,7 @@ public class Msg {
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
+        ackRecievedLock.wait(20);
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
