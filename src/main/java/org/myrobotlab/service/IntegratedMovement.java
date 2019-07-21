@@ -31,6 +31,7 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoControlListener;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.ServoDataListener;
@@ -54,7 +55,7 @@ import com.jme3.system.AppSettings;
  * @author Christian/Calamity
  * 
  */
-public class IntegratedMovement extends Service implements IKJointAnglePublisher, ServoDataListener {
+public class IntegratedMovement extends Service implements IKJointAnglePublisher, ServoDataListener, ServoControlListener {
 
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(IntegratedMovement.class);
@@ -226,82 +227,53 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // they need to go so that their part they where attach to
     // move by the input degree
     HobbyServo mtorso = (HobbyServo) Runtime.start("mtorso", "HobbyServo");
-    mtorso.attach(arduino.getName(), 26, 0.0);
     mtorso.map(-75.0, 75.0, 148.0, 38.0);
-    // mtorso.map(89.9,90.1,93.1,92.9);
-    mtorso.setRest(90.0);
-    // #mtorso.setMinMax(35,150);
-    mtorso.setVelocity(13.0);
-    mtorso.moveTo(90.0);
+    mtorso.attach(arduino.getName(), 26, 0.0);
+    mtorso.setSpeed(13.0);
     HobbyServo ttorso = (HobbyServo) Runtime.start("ttorso", "HobbyServo");
     ttorso.attach(arduino.getName(), 7, 0.0);
     ttorso.map(-10.0, 10.0, 92.0, 118.0);
-    // ttorso.setInverted(False)
-    // #ttorso.setMinMax(85,125)
-    ttorso.setVelocity(13.0);
-    ttorso.moveTo(90.0);
+    ttorso.setSpeed(13.0);
     HobbyServo omoplate = (HobbyServo) Runtime.start("omoplate", "HobbyServo");
     omoplate.attach(arduino.getName(), 11, 10.0);
     omoplate.map(10.0, 70.0, 10.0, 70.0);
-    omoplate.setVelocity(15.0);
-    // #omoplate.setMinMax(10,70)
-    omoplate.moveTo(10.0);
+    omoplate.setSpeed(15.0);
     HobbyServo Romoplate = (HobbyServo) Runtime.start("Romoplate", "HobbyServo");
     Romoplate.attach(arduino.getName(), 31, 10.0);
     Romoplate.map(10.0, 70.0, 10.0, 70.0);
-    Romoplate.setVelocity(15.0);
-    // #omoplate.setMinMax(10,70)
-    Romoplate.moveTo(10.0);
+    Romoplate.setSpeed(15.0);
     HobbyServo shoulder = (HobbyServo) Runtime.start("shoulder", "HobbyServo");
     shoulder.attach(arduino.getName(), 26, 30.0);
     shoulder.map(0.0, 180.0, 0.0, 180.0);
-    // #shoulder.setMinMax(0,180)
-    shoulder.setVelocity(14.0);
-    shoulder.moveTo(30.0);
+    shoulder.setSpeed(14.0);
     HobbyServo Rshoulder = (HobbyServo) Runtime.start("Rshoulder", "HobbyServo");
     Rshoulder.attach(arduino.getName(), 6, 30.0);
     Rshoulder.map(0.0, 180.0, 0.0, 180.0);
-    // #shoulder.setMinMax(0,180)
-    Rshoulder.setVelocity(14.0);
-    Rshoulder.moveTo(30.0);
+    Rshoulder.setSpeed(14.0);
     HobbyServo rotate = (HobbyServo) Runtime.start("rotate", "HobbyServo");
     rotate.attach(arduino.getName(), 9, 90.0);
     rotate.map(46.0, 160.0, 46.0, 160.0);
-    // #rotate.setMinMax(46,180)
-    rotate.setVelocity(18.0);
-    rotate.moveTo(90.0);
+    rotate.setSpeed(18.0);
     HobbyServo Rrotate = (HobbyServo) Runtime.start("Rrotate", "HobbyServo");
     Rrotate.attach(arduino.getName(), 29, 90.0);
     Rrotate.map(46.0, 160.0, 46.0, 160.0);
-    // #rotate.setMinMax(46,180)
-    Rrotate.setVelocity(18.0);
-    Rrotate.moveTo(90.0);
+    Rrotate.setSpeed(18.0);
     HobbyServo bicep = (HobbyServo) Runtime.start("bicep", "HobbyServo");
     bicep.attach(arduino.getName(), 8, 10.0);
     bicep.map(5.0, 60.0, 5.0, 80.0);
-    bicep.setVelocity(26.0);
-    // #bicep.setMinMax(5,90)
-    bicep.moveTo(10.0);
+    bicep.setSpeed(26.0);
     HobbyServo Rbicep = (HobbyServo) Runtime.start("Rbicep", "HobbyServo");
     Rbicep.attach(arduino.getName(), 28, 10.0);
     Rbicep.map(5.0, 60.0, 5.0, 80.0);
-    Rbicep.setVelocity(26.0);
-    // #bicep.setMinMax(5,90)
-    Rbicep.moveTo(10.0);
+    Rbicep.setSpeed(26.0);
     HobbyServo wrist = (HobbyServo) Runtime.start("wrist", "HobbyServo");
     wrist.attach(arduino.getName(), 7, 90.0);
-    // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
-    wrist.setVelocity(26.0);
-    // #bicep.setMinMax(5,90)
-    wrist.moveTo(90.0);
+    wrist.setSpeed(26.0);
     HobbyServo Rwrist = (HobbyServo) Runtime.start("Rwrist", "HobbyServo");
     Rwrist.attach(arduino.getName(), 27, 90.0);
-    // #wrist.map(45,135,45,135)
     wrist.map(0.0, 180.0, 0.0, 180.0);
-    Rwrist.setVelocity(26.0);
-    // #bicep.setMinMax(5,90)
-    Rwrist.moveTo(90.0);
+    Rwrist.setSpeed(26.0);
     // Servo finger = (Servo) Runtime.start("finger","Servo");
     // finger.attach(arduino,18,90);
     // finger.map(89.999,90.001,89.999,90.001);
@@ -329,7 +301,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLinkType("wrist", DHLinkType.REVOLUTE_ALPHA);
     ik.setDHLink("leftArm", "wristup", 0, -5, 110, 0);
     ik.setDHLink("leftArm", "wristdown", 0, 0, 105, 45);
-    ik.setDHLink("leftArm", "finger", 5, -90, 5, 0);
+    //ik.setDHLink("leftArm", "finger", 5, -90, 5, 0);
     ik.removeAi("leftArm", Ai.AVOID_COLLISION);
     ik.startEngine("leftArm");
 
@@ -347,7 +319,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setDHLinkType("Rwrist", DHLinkType.REVOLUTE_ALPHA);
     ik.setDHLink("rightArm", "Rwristup", 0, 5, 110, 0);
     ik.setDHLink("rightArm", "Rwristdown", 0, 0, 105, -45);
-    ik.setDHLink("rightArm", "Rfinger", 5, 90, 5, 0);
+    //ik.setDHLink("rightArm", "Rfinger", 5, 90, 5, 0);
     ik.removeAi("rightArm", Ai.AVOID_COLLISION);
     ik.startEngine("rightArm");
 
@@ -390,7 +362,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.objectAddIgnore("Romoplate", "Rrotate");
     ik.objectAddIgnore("rightS", "shoulder");
     ik.objectAddIgnore("leftS", "Rshoulder");
-    sleep(1000);
+    //sleep(1000);
     // ik.addObject("Rfinger",10.0);
     // ik.addObject(-1000.0,400, 0, 1000, 425, 00, "obstacle",40, true);
     // #ik.addObject(360,540,117,360, 550,107,"cymbal",200)
@@ -471,7 +443,6 @@ print ik.currentPosition("leftArm")
     bicep.moveTo(5.0);
     wrist.moveTo(90.0);
     Rwrist.moveTo(90.0);
-
     // sleep(3000);
     // double[][] jp = ik.createJointPositionMap("leftArm");
     // Point x = new
@@ -483,7 +454,7 @@ print ik.currentPosition("leftArm")
     // ik.startOpenNI();
     // ik.processKinectData();
 
-    ik.cog = new GravityCenter(ik);
+/*    ik.cog = new GravityCenter(ik);
     ik.cog.setLinkMass("mtorso", 2.832, 0.5);
     ik.cog.setLinkMass("ttorso", 5.774, 0.5);
     ik.cog.setLinkMass("omoplate", 0.739, 0.5);
@@ -496,7 +467,7 @@ print ik.currentPosition("leftArm")
     ik.cog.setLinkMass("Rbicep", 0.940, 0.4559);
     ik.cog.setLinkMass("wrist", 0.176, 0.7474);
     ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
-
+*/
     // ik.setAi("rightArm", Ai.KEEP_BALANCE);
     // ik.setAi("leftArm", Ai.KEEP_BALANCE);
     
@@ -568,8 +539,9 @@ print ik.currentPosition("leftArm")
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
       // servo.addIKServoEventListener(this);
-      subscribe(servo.getName(),"publishMoveTo", getName(), "onPublishMoveTo");
+      subscribe(servo.getName(),"publishMoveTo", getName(), "onMoveTo");
       subscribe(servo.getName(),"publishServoData", getName(), "onServoData");
+      servo.attach((ServoDataListener)this);
       dhLink.addPositionValue(servo.getPos());
       dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
@@ -644,7 +616,7 @@ print ik.currentPosition("leftArm")
     collisionItems.removeIgnore(object1, object2);
   }
 
-  public void onPublishMoveTo(ServoControl data) {
+  public void onMoveTo(ServoControl data) {
 //    Mapper map = maps.get(data.getName());
     // data.pos = map.calcOutput(data.pos);
     // data.targetPos = map.calcOutput(data.targetPos);
