@@ -79,6 +79,7 @@ public:
     int getBufferSize();
     void reset();
     void flush();
+    long getLastHeartbeat();
 
     // utility methods
     static int b16(const unsigned char* buffer, const int start = 0);

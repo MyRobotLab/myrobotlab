@@ -133,9 +133,8 @@ void MrlComm::update() {
        // until it is reset after sending publishBoardInfo
         ++loopCount;
 	unsigned long now = millis();
-	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+	if ((now - msg->getLastHeartbeat() > 1500) && heartbeatEnabled) {
     onDisconnect();
-		lastHeartbeatUpdate = now;
     heartbeatEnabled = false;
 		return;
 	}
@@ -545,6 +544,7 @@ unsigned int MrlComm::getCustomMsg() {
  }
 
  void MrlComm::onDisconnect() {
+  msg->publishError("disconnected"); // mostly for debug purpose
   ListNode<Device*>* node = deviceList.getRoot();
   // iterate through our device list and call update on them.
   while (node != NULL) {

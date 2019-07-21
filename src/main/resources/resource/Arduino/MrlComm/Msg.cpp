@@ -806,3 +806,7 @@ void Msg::begin(HardwareSerial& hardwareSerial){
 byte Msg::getMethod(){
 	return ioCmd[0];
 }
+
+long Msg::getLastHeartbeat(){
+	return lastHeartbeatUpdate;
+}
