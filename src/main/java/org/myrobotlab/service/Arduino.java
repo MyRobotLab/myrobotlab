@@ -2244,6 +2244,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
   
   public void publishMrlCommBegin(Integer version) {
+	  msg.ackReceived(0);
     sync();
     log.error("publishMrlCommBegin {}", version);
     if (mrlCommBegin > 0) {

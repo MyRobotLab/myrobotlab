@@ -80,7 +80,7 @@ public class Msg {
 	public boolean debug = false;
 	boolean invoke = true;
 	
-	boolean ackEnabled = false;
+	boolean ackEnabled = true;
 	
 	 public static class AckLock {
 	    // first is always true - since there
@@ -605,6 +605,7 @@ public class Msg {
 	// Java-land --to--> MrlComm
 
 	public synchronized void getBoardInfo() {
+		if (ackEnabled && !ackRecievedLock.acknowledged) return;
 		try {
 		  if (ackEnabled){
 		    waitForAck();
@@ -2387,7 +2388,9 @@ public class Msg {
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
+        ackRecievedLock.wait(20); //do not really matthers the number put in, because with the
+                                  //new change, no other command should be send before the ack
+                                  //really get in or arduino reset
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
