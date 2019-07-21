@@ -256,6 +256,11 @@ public class Msg {
 	
 	transient private SerialDevice serial;
 	
+	/**
+	 * a previous thread is waiting
+	 */
+  private boolean waiting = false;
+	
 	public void setInvoke(boolean b){
 	  invoke = b;
 	}
@@ -2381,16 +2386,21 @@ public class Msg {
 	}
 	
 	public void waitForAck(){
-	  if (!ackEnabled || ackRecievedLock.acknowledged){
+	  if (!ackEnabled || ackRecievedLock.acknowledged || waiting){
 	    return;
 	  }
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        ackRecievedLock.wait(20);
+        waiting  = true;
+        log.error("waiting true");
+        ackRecievedLock.wait(50);
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
+      
+      waiting = false;
+      log.error("waiting false");
 
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
