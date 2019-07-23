@@ -256,11 +256,6 @@ public class Msg {
 	
 	transient private SerialDevice serial;
 	
-	/**
-	 * a previous thread is waiting
-	 */
-  private boolean waiting = false;
-	
 	public void setInvoke(boolean b){
 	  invoke = b;
 	}
@@ -336,6 +331,7 @@ public class Msg {
       break;
     }
     case PUBLISH_ACK: {
+      log.info("PUBLISH_ACK");
       Integer function = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
@@ -582,13 +578,14 @@ public class Msg {
       break;
     }
     case PUBLISH_MRL_COMM_BEGIN: {
+      
       Integer version = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
         arduino.invoke("publishMrlCommBegin",  version);
       } else { 
          arduino.publishMrlCommBegin( version);
-      }
+      }      
       if(record != null){
         rxBuffer.append("< publishMrlCommBegin");
         rxBuffer.append("/");
@@ -2385,21 +2382,20 @@ public class Msg {
 	  // }
 	}
 	
-	public void waitForAck(){
-	  if (!ackEnabled || ackRecievedLock.acknowledged || waiting){
+	public void waitForAck(){	  
+	  if (!ackEnabled || ackRecievedLock.acknowledged){
 	    return;
 	  }
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        waiting  = true;
         log.error("waiting true");
-        ackRecievedLock.wait(50);
+        ackRecievedLock.wait(100);
+        ackRecievedLock.acknowledged = true;
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
       
-      waiting = false;
       log.error("waiting false");
 
       if (!ackRecievedLock.acknowledged) {
@@ -2410,6 +2406,7 @@ public class Msg {
 	}
 	
 	public void ackReceived(int function){
+	  log.info("ackReceived 1");
 	   synchronized (ackRecievedLock) {
 	      ackRecievedLock.acknowledged = true;
 	      ackRecievedLock.notifyAll();

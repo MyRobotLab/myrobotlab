@@ -54,7 +54,7 @@
 #include "MrlComm.h"
 #include <Wire.h>
 #if defined(ESP8266)
-  #include <WebSocketsServer.h>
+#include <WebSocketsServer.h>
 #endif
 
 /***********************************************************************
@@ -63,11 +63,12 @@
  */
 MrlComm mrlComm;
 #if defined(ESP8266)
-  WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketsServer webSocket = WebSocketsServer(81);
 
-  void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght){
-    mrlComm.webSocketEvent(num, type, payload, lenght);
-  }
+void webSocketEvent(unsigned char num, WStype_t type, unsigned char *payload, unsigned int lenght)
+{
+  mrlComm.webSocketEvent(num, type, payload, lenght);
+}
 #endif
 /***********************************************************************
  * STANDARD ARDUINO BEGIN
@@ -76,22 +77,31 @@ MrlComm mrlComm;
  *
  * Here we default out serial port to 115.2kbps.
  */
-void setup() {
+void setup()
+{
 
   Wire.begin();
-  
-	Serial.begin(115200);
 
-	// start with standard serial & rate
+  // start with standard serial & rate
 #if defined(ESP8266)
   webSocket.onEvent(webSocketEvent);
   mrlComm.begin(webSocket);
 #else
-	mrlComm.begin(Serial);
+  Serial.begin(115200);
+
+  while (!Serial)
+  {
+    delay(100); // wait for serial port to connect. Needed for native USB
+  }
+
+  // clear serial
+  Serial.flush();
+
+  mrlComm.begin(Serial);
 #endif
 
   // send hello !
-  Msg* msg = mrlComm.getMsg();
+  Msg *msg = mrlComm.getMsg();
   msg->publishMrlCommBegin(MRLCOMM_VERSION);
 }
 
@@ -100,21 +110,21 @@ void setup() {
  * This method will be called over and over again by the arduino, it is the
  * main loop any arduino sketch runs
  */
-void loop() {
-	// get a command and process it from
-	// the serial port (if available.)
-//  wdt_disable();
-	if (mrlComm.readMsg()) {
-		mrlComm.processCommand();
-	}
-	// update devices
-	mrlComm.updateDevices();
-	// send back load time and memory
-        // driven by getBoardInfo now !!!
-        // mrlComm.publishBoardStatus();
-  #if defined(ESP8266)
-    webSocket.loop();
-  #endif
+void loop()
+{
+  // get a command and process it from
+  // the serial port (if available.)
+  //  wdt_disable();
+  if (mrlComm.readMsg())
+  {
+    mrlComm.processCommand();
+  }
+  // update devices
+  mrlComm.updateDevices();
+// send back load time and memory
+// driven by getBoardInfo now !!!
+// mrlComm.publishBoardStatus();
+#if defined(ESP8266)
+  webSocket.loop();
+#endif
 } // end of big loop
-
-

@@ -88,12 +88,14 @@ public class HobbyServo extends AbstractServo {
       Platform.setVirtual(false);
       
       Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
 
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       mega.connect("COM9");
       // mega.setBoardMega();
+      
       HobbyServo servo03 = (HobbyServo) Runtime.start("servo03", "HobbyServo");
+      /*
       HobbyServo servo04 = (HobbyServo) Runtime.start("servo04", "HobbyServo");
       HobbyServo servo05 = (HobbyServo) Runtime.start("servo05", "HobbyServo");
       HobbyServo servo06 = (HobbyServo) Runtime.start("servo06", "HobbyServo");
@@ -103,9 +105,11 @@ public class HobbyServo extends AbstractServo {
       HobbyServo servo10 = (HobbyServo) Runtime.start("servo10", "HobbyServo");
       HobbyServo servo11 = (HobbyServo) Runtime.start("servo11", "HobbyServo");
       HobbyServo servo12 = (HobbyServo) Runtime.start("servo12", "HobbyServo");
+      */
       // HobbyServo servo13 = (HobbyServo) Runtime.start("servo13", "HobbyServo");
 
-      servo03.attach(mega, 3, 38.0);
+      servo03.attach(mega, 8, 38.0);
+      /*
       servo04.attach(mega, 4, 38.0);
       servo05.attach(mega, 5, 38.0);
       servo06.attach(mega, 6, 38.0);
@@ -115,9 +119,10 @@ public class HobbyServo extends AbstractServo {
       servo10.attach(mega, 10, 38.0);
       servo11.attach(mega, 11, 38.0);
       servo12.attach(mega, 12, 38.0);
+      */
       
-      TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
-      servo03.attach((ServoDataListener)catcher);
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+      // servo03.attach((ServoDataListener)catcher);
       
       // servo.setPin(12);
       
