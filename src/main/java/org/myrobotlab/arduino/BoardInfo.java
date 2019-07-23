@@ -43,13 +43,7 @@ public class BoardInfo implements Serializable {
     return version;
   }
   public String toString() {
-    if (version != null) {
-      /*
-       * return
-       * String.format("%s version %s load %d heartbeat %d sram %d devices %d",
-       * boardName, version, microsPerLoop, heartbeatMs, sram, (deviceSummary !=
-       * null) ? deviceSummary.length : 0);
-       */
+    if (version != null) {      
       return String.format("version %s load %d heartbeat %d sram %d devices %d recvTs %d", version, microsPerLoop, heartbeatMs, sram, (deviceSummary != null) ? deviceSummary.length : 0, receiveTs);
     } else {
       return "unknown";
