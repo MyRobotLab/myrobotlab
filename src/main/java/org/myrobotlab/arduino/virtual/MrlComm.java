@@ -205,6 +205,11 @@ public class MrlComm {
 
   public Integer boardType;
 
+  // sends a series of get publishBoardInfo() back to the arduino every second
+  boolean boardInfoEnabled = true;
+
+  long lastBoardInfoTs = 0;
+
   public MrlComm(VirtualArduino virtual) {
     // msg = VirtualMsg.getInstance();
     this.virtual = virtual;
@@ -562,32 +567,7 @@ public class MrlComm {
     }
   }
 
-  /***********************************************************************
-   * PUBLISH_BOARD_INFO This function updates the average time it took to run
-   * the main loop and reports it back with a publishBoardStatus MRLComm message
-   *
-   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
-   *
-   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
-   */
-
-  public void publishBoardInfo() {
-    if (loopCount == 0) {
-      return;
-    }
-    int[] deviceSummary = new int[deviceList.size() * 2];
-    for (int i = 0; i < deviceList.size(); ++i) {
-      deviceSummary[i] = deviceList.get(i).id;
-      deviceSummary[i + 1] = deviceList.get(i).type;
-    }
-
-    long now = micros();
-    int load = (int) ((now - lastBoardInfoUs) / loopCount);
-    msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
-    lastBoardInfoUs = now;
-    loopCount = 0;
-  }
-
+ 
   public void publishError(java.lang.String f) {
     msg.publishMRLCommError(f);
   }
@@ -758,6 +738,27 @@ public class MrlComm {
     sensor.stopRanging();
   }
 
+
+  /***********************************************************************
+   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
+   * device list depending on their type. This method processes each loop.
+   * Typically this "back-end" processing will read data from pins, or change
+   * states of non-blocking pulses, or possibly regulate a motor based on pid
+   * values read from pins
+   */
+  public void updateDevices() {
+
+    // update self - the first device which
+    // is type Arduino
+    update();
+
+    // iterate through our device list and call update on them.
+    for (int i = 0; i < deviceList.size(); ++i) {
+      Device node = deviceList.get(i);
+      node.update();
+    }
+  }
+
   /***********************************************************************
    * UPDATE BEGIN updates self - reads from the pinList both analog and digital
    * sends pin data back
@@ -767,14 +768,22 @@ public class MrlComm {
     // until it is reset after sending publishBoardInfo
     ++loopCount;
     long now = millis();
-    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) 
+    {
       onDisconnect();
       lastHeartbeatUpdate = now;
       heartbeatEnabled = false;
       return;
     }
 
-    if (pinList.size() > 0) {
+     if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled)
+	{
+		lastBoardInfoTs = now;
+		publishBoardInfo();
+	}
+
+    if (pinList.size() > 0) 
+    {
 
       // size of payload - 1 int for address + 2 bytes per pin read
       // this is an optimization in that we send back "all" the read pin
@@ -816,23 +825,29 @@ public class MrlComm {
   }
 
   /***********************************************************************
-   * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
-   * device list depending on their type. This method processes each loop.
-   * Typically this "back-end" processing will read data from pins, or change
-   * states of non-blocking pulses, or possibly regulate a motor based on pid
-   * values read from pins
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run
+   * the main loop and reports it back with a publishBoardStatus MRLComm message
+   *
+   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
+   *
+   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
    */
-  public void updateDevices() {
 
-    // update self - the first device which
-    // is type Arduino
-    update();
-
-    // iterate through our device list and call update on them.
-    for (int i = 0; i < deviceList.size(); ++i) {
-      Device node = deviceList.get(i);
-      node.update();
+  public void publishBoardInfo() {
+    if (loopCount == 0) {
+      return;
     }
+    int[] deviceSummary = new int[deviceList.size()];
+    for (int i = 0; i < deviceList.size(); ++i) {
+      deviceSummary[i] = deviceList.get(i).id;
+    }
+
+    long now = micros();
+    int load = (int) ((now - lastBoardInfoUs) / loopCount);
+    msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
+    lastBoardInfoUs = now;
+    loopCount = 0;
   }
+
 
 }
