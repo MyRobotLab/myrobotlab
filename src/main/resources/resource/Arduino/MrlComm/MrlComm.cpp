@@ -137,75 +137,7 @@ void MrlComm::updateDevices()
 	}
 }
 
-/***********************************************************************
-   * UPDATE BEGIN updates self - reads from the pinList both analog and digital
- * sends pin data back
- */
-void MrlComm::update()
-{
-	// this counts cycles of updates
-	// until it is reset after sending publishBoardInfo
-	++loopCount;
-	unsigned long now = millis();
 
-	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled)
-	{
-		onDisconnect();
-		lastHeartbeatUpdate = now;
-		heartbeatEnabled = false;
-		return;
-	}
-
-	if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled)
-	{
-		lastBoardInfoTs = now;
-		publishBoardInfo();
-	}
-
-	if (pinList.size() > 0)
-	{
-
-		// size of payload - 1 int for address + 2 bytes per pin read
-		// this is an optimization in that we send back "all" the read pin
-		// data in a
-		// standard 2 int package - digital reads don't need both bytes,
-		// but the
-		// sending it all back in 1 msg and the simplicity is well worth it
-		// msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
-
-		ListNode<Pin *> *node = pinList.getRoot();
-		// iterate through our device list and call update on them.
-		unsigned int dataCount = 0;
-		while (node != NULL)
-		{
-			Pin *pin = node->data;
-			if (pin->rate == 0 || (now > pin->lastUpdate + (1000 / pin->rate)))
-			{
-				pin->lastUpdate = now;
-				// TODO: move the analog read outside of this method and pass it in!
-				if (pin->type == ANALOG)
-				{
-					pin->value = analogRead(pin->address);
-				}
-				else
-				{
-					pin->value = digitalRead(pin->address);
-				}
-
-				// loading both analog & digital data
-				msg->add(pin->address); // 1 byte
-				msg->add16(pin->value); // 2 byte b16 value
-
-				++dataCount;
-			}
-			node = node->next;
-		}
-		if (dataCount)
-		{
-			msg->publishPinArray(msg->getBuffer(), msg->getBufferSize());
-		}
-	}
-}
 
 int MrlComm::getCustomMsgSize()
 {
@@ -266,32 +198,6 @@ void MrlComm::begin(HardwareSerial &serial)
 }
 
 #endif
-
-/***********************************************************************
-   * PUBLISH_BOARD_INFO This function updates the average time it took to run
-   * the main loop and reports it back with a publishBoardStatus MRLComm message
-   *
-   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
-   *
-   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
-   */
-
-void MrlComm::publishBoardInfo()
-{
-
-	byte deviceSummary[deviceList.size()];
-	for (int i = 0; i < deviceList.size(); i++)
-	{
-		deviceSummary[i] = deviceList.get(i)->id;
-	}
-
-	long now = micros();
-	int load = (now - lastBoardInfoUs) / loopCount;
-	//msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
-	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD, load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
-	lastBoardInfoUs = now;
-	loopCount = 0;
-}
 
 /****************************************************************
    * GENERATED METHOD INTERFACE BEGIN All methods signatures below this line are
@@ -682,4 +588,74 @@ void MrlComm::setZeroPoint(byte deviceId)
 {
 	MrlAmt203Encoder *encoder = (MrlAmt203Encoder *)getDevice(deviceId);
 	encoder->setZeroPoint();
+}
+
+/***********************************************************************
+   * UPDATE BEGIN updates self - reads from the pinList both analog and digital
+ * sends pin data back
+ */
+void MrlComm::update()
+{
+	// this counts cycles of updates
+	// until it is reset after sending publishBoardInfo
+	++loopCount;
+	unsigned long now = millis();
+
+	if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled)
+	{
+		onDisconnect();
+		lastHeartbeatUpdate = now;
+		heartbeatEnabled = false;
+		return;
+	}
+
+	if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled)
+	{
+		lastBoardInfoTs = now;
+		publishBoardInfo();
+	}
+
+	if (pinList.size() > 0)
+	{
+
+		// size of payload - 1 int for address + 2 bytes per pin read
+		// this is an optimization in that we send back "all" the read pin
+		// data in a
+		// standard 2 int package - digital reads don't need both bytes,
+		// but the
+		// sending it all back in 1 msg and the simplicity is well worth it
+		// msg.addData(pinList.size() * 3 /* 1 address + 2 read bytes */);
+
+		ListNode<Pin *> *node = pinList.getRoot();
+		// iterate through our device list and call update on them.
+		unsigned int dataCount = 0;
+		while (node != NULL)
+		{
+			Pin *pin = node->data;
+			if (pin->rate == 0 || (now > pin->lastUpdate + (1000 / pin->rate)))
+			{
+				pin->lastUpdate = now;
+				// TODO: move the analog read outside of this method and pass it in!
+				if (pin->type == ANALOG)
+				{
+					pin->value = analogRead(pin->address);
+				}
+				else
+				{
+					pin->value = digitalRead(pin->address);
+				}
+
+				// loading both analog & digital data
+				msg->add(pin->address); // 1 byte
+				msg->add16(pin->value); // 2 byte b16 value
+
+				++dataCount;
+			}
+			node = node->next;
+		}
+		if (dataCount)
+		{
+			msg->publishPinArray(msg->getBuffer(), msg->getBufferSize());
+		}
+	}
 }
