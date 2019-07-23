@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.myrobotlab.IntegratedMovement.GravityCenter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -27,7 +28,6 @@ import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
-import org.myrobotlab.kinematics.GravityCenter;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -1894,7 +1894,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void startIntegratedMovement() {
-    integratedMovement = (IntegratedMovement) startPeer("integratedMovement");
+	  //removed for refactoring
+/*    integratedMovement = (IntegratedMovement) startPeer("integratedMovement");
     IntegratedMovement im = integratedMovement;
     // set the DH Links or each arms
     im.setNewDHRobotArm("leftArm");
@@ -2018,7 +2019,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     im.setJmeApp(vinMoovApp);
     im.setOpenni(openni);
-
+*/
   }
 
   public Double getUltrasonicSensorDistance() {

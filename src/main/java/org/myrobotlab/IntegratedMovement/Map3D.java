@@ -1,12 +1,14 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.myrobotlab.jme3.Jme3Servo;
+import org.myrobotlab.kinematics.Matrix;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;

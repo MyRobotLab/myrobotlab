@@ -1,7 +1,9 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
+
+import org.myrobotlab.kinematics.Point;
 
 /**
  * @author chris

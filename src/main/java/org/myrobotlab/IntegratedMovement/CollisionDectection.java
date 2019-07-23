@@ -1,10 +1,12 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.myrobotlab.kinematics.Point;
 
 /**
  * @author Christian

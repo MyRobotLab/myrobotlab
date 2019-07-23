@@ -1,14 +1,18 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.IntegratedMovement.CollisionDectection.CollisionResults;
 import org.myrobotlab.genetic.Chromosome;
 import org.myrobotlab.genetic.Genetic;
 import org.myrobotlab.genetic.GeneticAlgorithm;
-import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
+import org.myrobotlab.kinematics.DHLink;
+import org.myrobotlab.kinematics.DHRobotArm;
+import org.myrobotlab.kinematics.Matrix;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
@@ -52,6 +56,7 @@ public class IMEngine extends Thread implements Genetic {
   private CalcFitnessType calcFitnessType;
   private int cogRetry;
   private String lastDHLink;
+
 
   private enum CalcFitnessType {
     POSITION, COG;
@@ -841,5 +846,10 @@ public class IMEngine extends Thread implements Genetic {
       Ai -= ai.value;
     }
   }
+
+  public Point getPosition(){
+	  return getDHRobotArm().getPalmPosition();
+  }
+
 
 }

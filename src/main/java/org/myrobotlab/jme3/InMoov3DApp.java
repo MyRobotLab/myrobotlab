@@ -6,10 +6,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.myrobotlab.IntegratedMovement.CollisionItem;
+import org.myrobotlab.IntegratedMovement.Map3DPoint;
 import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.kinematics.CollisionItem;
-import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.Mapper;

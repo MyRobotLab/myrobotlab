@@ -1,7 +1,8 @@
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
 
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.service.IntegratedMovement;
 
 /**

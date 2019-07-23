@@ -203,10 +203,10 @@ public class DHRobotArm implements Serializable {
       roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) *-1 + Math.PI/2;
     }
     else {
-      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]);
-      yaw = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]);
+      roll = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) + Math.PI/2;
+      yaw = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]) - Math.PI;
     }
-    Point palm = new Point(x, y, z, pitch * 180 / Math.PI, roll * 180 / Math.PI, yaw * 180 / Math.PI);
+    Point palm = new Point(x, y, z, roll * 180 / Math.PI, pitch * 180 / Math.PI, yaw * 180 / Math.PI);
 
     return palm;
   }

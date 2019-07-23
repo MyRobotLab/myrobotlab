@@ -1,9 +1,10 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
-import org.myrobotlab.kinematics.Map3D.CoordStateValue;
+import org.myrobotlab.IntegratedMovement.Map3D.CoordStateValue;
+import org.myrobotlab.kinematics.Point;
 
 /**
  * @author Christian

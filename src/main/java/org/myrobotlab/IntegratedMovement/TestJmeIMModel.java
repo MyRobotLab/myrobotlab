@@ -1,4 +1,4 @@
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.service.interfaces.ServoData;
 
 import com.jme3.app.SimpleApplication;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;

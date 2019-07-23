@@ -321,7 +321,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     // update pos if non-null value supplied
     if (pos != null) {
-      targetPos = pos;
+      currentPos = targetPos = pos;
     }
 
     // update speed if non-null value supplied

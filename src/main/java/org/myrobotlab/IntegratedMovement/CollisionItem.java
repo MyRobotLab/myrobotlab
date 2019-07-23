@@ -1,9 +1,10 @@
-package org.myrobotlab.kinematics;
+package org.myrobotlab.IntegratedMovement;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.openni.PVector;
 import org.slf4j.Logger;

@@ -42,10 +42,10 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.myrobotlab.kinematics.CollisionItem;
-import org.myrobotlab.kinematics.IMEngine;
+import org.myrobotlab.IntegratedMovement.CollisionItem;
+import org.myrobotlab.IntegratedMovement.IMEngine;
+import org.myrobotlab.IntegratedMovement.PositionData;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.kinematics.PositionData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;

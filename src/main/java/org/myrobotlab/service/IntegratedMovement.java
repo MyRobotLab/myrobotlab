@@ -6,23 +6,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.myrobotlab.IntegratedMovement.CollisionDectection;
+import org.myrobotlab.IntegratedMovement.CollisionItem;
+import org.myrobotlab.IntegratedMovement.GravityCenter;
+import org.myrobotlab.IntegratedMovement.IMData;
+import org.myrobotlab.IntegratedMovement.IMEngine;
+import org.myrobotlab.IntegratedMovement.IMPart;
+import org.myrobotlab.IntegratedMovement.Map3D;
+import org.myrobotlab.IntegratedMovement.Map3DPoint;
+import org.myrobotlab.IntegratedMovement.PositionData;
+import org.myrobotlab.IntegratedMovement.TestJmeIMModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
-import org.myrobotlab.kinematics.CollisionDectection;
-import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.DHRobotArm;
-import org.myrobotlab.kinematics.GravityCenter;
-import org.myrobotlab.kinematics.IMEngine;
-import org.myrobotlab.kinematics.Map3D;
-import org.myrobotlab.kinematics.Map3DPoint;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.kinematics.PositionData;
-import org.myrobotlab.kinematics.TestJmeIMModel;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -32,6 +34,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.ServoDataListener;
@@ -62,7 +65,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   // private HashMap<String, DHRobotArm> arms = new HashMap<String,
   // DHRobotArm>();
-  private transient HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
+  
 
   private Matrix inputMatrix = null;
 
@@ -118,6 +121,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   public transient GravityCenter cog = new GravityCenter(this);
+  
+  private IMData imData = new IMData();
 
   /**
    * @return the jmeApp
@@ -130,9 +135,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     super(n);
   }
 
-  public Point currentPosition(String arm) {
-    if (engines.containsKey(arm)) {
-      return getArm(arm).getPalmPosition();
+  public Point currentPosition(String name) {
+	  IMEngine arm = imData.getArm(name);
+	  if (arm != null){
+      return arm.getPosition();
     }
     log.info("IK service have no data for {}", arm);
     return new Point(0, 0, 0, 0, 0, 0);
@@ -150,13 +156,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     moveTo(arm, point, null);
   }
 
-  public void moveTo(String arm, Point point, String lastDHLink) {
-    if (engines.containsKey(arm)) {
-      engines.get(arm).moveTo(point, lastDHLink);
-    } else {
+  public void moveTo(String name, Point point, String lastDHLink) {
+	  IMEngine arm = imData.getArm(name);
+	  if (arm!= null){
+		  arm.moveTo(point, lastDHLink);
+		  jmeApp.addPoint(point);
+	  }
       log.info("unknow arm {}", arm);
-    }
-    jmeApp.addPoint(point);
   }
 
   /**
@@ -184,18 +190,19 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     Matrix trMatrix = Matrix.translation(dx, dy, dz);
     Matrix rotMatrix = Matrix.zRotation(roll).multiply(Matrix.yRotation(yaw).multiply(Matrix.xRotation(pitch)));
     inputMatrix = trMatrix.multiply(rotMatrix);
-    for (IMEngine engine : engines.values()) {
-      engine.setInputMatrix(inputMatrix);
-    }
     return inputMatrix;
   }
 
-  public double[][] createJointPositionMap(String arm) {
-    return engines.get(arm).createJointPositionMap();
-    // return createJointPositionMap(getArm(arm));
+  public double[][] createJointPositionMap(String armName) {
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null){
+		  return arm.createJointPositionMap();
+	  }
+	  log.info("unknown arm {}",armName);
+	  return new double[0][0];
   }
 
-  public DHRobotArm getArm(String arm) {
+/*  public DHRobotArm getArm(String arm) {
     if (engines.containsKey(arm)) {
       return engines.get(arm).getDHRobotArm();
     } else {
@@ -205,18 +212,20 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       return newArm;
     }
   }
-
-  public void addArm(String name, DHRobotArm currentArm) {
+*/
+/*  public void addArm(String name, DHRobotArm currentArm) {
     IMEngine newEngine = new IMEngine(name, currentArm, this);
     engines.put(name, newEngine);
   }
-
+*/
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
     Runtime.createAndStart("python", "Python");
     Runtime.createAndStart("gui", "SwingGui");
     IntegratedMovement ik = (IntegratedMovement) Runtime.start("ik", "IntegratedMovement");
+    
+    //Setup controller and servo
     Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
     arduino.setBoardMega();
     //arduino.setVirtual(true);
@@ -226,14 +235,14 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // map is set so servo accept angle as input, output where
     // they need to go so that their part they where attach to
     // move by the input degree
-    HobbyServo mtorso = (HobbyServo) Runtime.start("mtorso", "HobbyServo");
-    mtorso.map(-75.0, 75.0, 148.0, 38.0);
-    mtorso.attach(arduino.getName(), 26, 0.0);
-    mtorso.setSpeed(13.0);
-    HobbyServo ttorso = (HobbyServo) Runtime.start("ttorso", "HobbyServo");
-    ttorso.attach(arduino.getName(), 7, 0.0);
-    ttorso.map(-10.0, 10.0, 92.0, 118.0);
-    ttorso.setSpeed(13.0);
+    HobbyServo midStom = (HobbyServo) Runtime.start("midStom", "HobbyServo");
+    midStom.map(-75.0, 75.0, 148.0, 38.0);
+    midStom.attach(arduino.getName(), 26, 0.0);
+    midStom.setSpeed(13.0);
+    HobbyServo topStom = (HobbyServo) Runtime.start("topStom", "HobbyServo");
+    topStom.map(-10.0, 10.0, 92.0, 118.0);
+    topStom.attach(arduino.getName(), 7, 0.0);
+    topStom.setSpeed(13.0);
     HobbyServo omoplate = (HobbyServo) Runtime.start("omoplate", "HobbyServo");
     omoplate.attach(arduino.getName(), 11, 10.0);
     omoplate.map(10.0, 70.0, 10.0, 70.0);
@@ -287,45 +296,64 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // //#bicep.setMinMax(5,90)
     // Rfinger.moveTo(90);
 
+    IMPart partMidStom = ik.createPart("midStom");
+    ik.setControl("torso", partMidStom,midStom);
+    ik.setControl("torsoReverse", partMidStom, midStom);
+
+    partMidStom.setDHParameters("torso",113,180,0,-90);
+    partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
+    
+    ik.addPart(partMidStom);
+    
     // #define the DH parameters for the ik service
-    ik.setNewDHRobotArm("leftArm");
-    ik.setDHLink("leftArm", mtorso, 113, 180, 0, -90);
+    ik.addArm("torso");
+    ik.setInputMatrix("torso",ik.createInputMatrix(0, 0, 0, 0, 0, 0));
+    ik.setFirstPart("torso",partMidStom.getName());
+    
+    ik.addArm("torsoReverse");
+    ik.setInputMatrix("torsoReverse", ik.createInputMatrix(0, 0, 113, 0, 0, 0));
+    
+    
+    
+/*    ik.addArm("leftArm");
+    
+    //ik.setDHLink("leftArm", mtorso, 113, 180, 0, -90);
     // ik.setDHLink("rightArm",ttorso,0,90+65.6,346,0);
-    ik.setDHLink("leftArm", ttorso, 0, 0, 292, 90);
-    ik.setDHLink("leftArm", "rightS", 143, 180, 0, 90);
-    ik.setDHLink("leftArm", omoplate, 0, -5.6, 45, -90);
-    ik.setDHLink("leftArm", shoulder, 77, -30 + 90, 0, 90);
-    ik.setDHLink("leftArm", rotate, 284, 90, 40, 90);
-    ik.setDHLink("leftArm", bicep, 0, -7 + 24.4 + 90, 300, 0);
-    ik.setDHLink("leftArm", wrist, 0, -90, 0, 0);
-    ik.setDHLinkType("wrist", DHLinkType.REVOLUTE_ALPHA);
-    ik.setDHLink("leftArm", "wristup", 0, -5, 110, 0);
-    ik.setDHLink("leftArm", "wristdown", 0, 0, 105, 45);
+    //ik.setDHLink("leftArm", ttorso, 0, -90, 292, 90);
+    //ik.setDHLink("leftArm", "rightS", 143, 180, 0, 90);
+    //ik.setDHLink("leftArm", omoplate, 0, -5.6, 45, -90);
+    //ik.setDHLink("leftArm", shoulder, 77, -30 + 90, 0, 90);
+    //ik.setDHLink("leftArm", rotate, 284, 90, 40, 90);
+    //ik.setDHLink("leftArm", bicep, 0, -7 + 24.4 + 90, 300, 0);
+    //ik.setDHLink("leftArm", wrist, 0, -90, 0, 0);
+    //ik.setDHLinkType("wrist", DHLinkType.REVOLUTE_ALPHA);
+    //ik.setDHLink("leftArm", "wristup", 0, -5, 110, 0);
+    //ik.setDHLink("leftArm", "wristdown", 0, 0, 105, 45);
     //ik.setDHLink("leftArm", "finger", 5, -90, 5, 0);
     ik.removeAi("leftArm", Ai.AVOID_COLLISION);
     ik.startEngine("leftArm");
 
-    ik.setNewDHRobotArm("rightArm");
-    ik.setDHLink("rightArm", mtorso, 113, 180, 0, -90);
-    ik.setDHLink("rightArm", ttorso, 0, 0, 292, 90);
+    ik.addArm("rightArm");
+//    ik.setDHLink("rightArm", mtorso, 113, 180, 0, -90);
+//    ik.setDHLink("rightArm", ttorso, 0, -90, 292, 90);
     // ik.setDHLink("leftArm",ttorso,0,180,297.5,90);
-    ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
-    ik.setDHLink("rightArm", Romoplate, 0, -5.6, 45, 90);
-    ik.setDHLink("rightArm", Rshoulder, -77, -30 + 90, 0, -90);
-    ik.setDHLink("rightArm", Rrotate, -284, 90, 40, -90);
-    ik.setDHLink("rightArm", Rbicep, 0, -7 + 24.4 + 90, 300, 0);
+    //ik.setDHLink("rightArm", "leftS", -143, 180, 0, -90);
+    //ik.setDHLink("rightArm", Romoplate, 0, -5.6, 45, 90);
+    //ik.setDHLink("rightArm", Rshoulder, -77, -30 + 90, 0, -90);
+    //ik.setDHLink("rightArm", Rrotate, -284, 90, 40, -90);
+    //ik.setDHLink("rightArm", Rbicep, 0, -7 + 24.4 + 90, 300, 0);
     //////////// //#ik.setDHLink(wrist,00,-90,200,0)
-    ik.setDHLink("rightArm", Rwrist, 00, -90, 0, 0);
-    ik.setDHLinkType("Rwrist", DHLinkType.REVOLUTE_ALPHA);
-    ik.setDHLink("rightArm", "Rwristup", 0, 5, 110, 0);
-    ik.setDHLink("rightArm", "Rwristdown", 0, 0, 105, -45);
+    //ik.setDHLink("rightArm", Rwrist, 00, -90, 0, 0);
+    //ik.setDHLinkType("Rwrist", DHLinkType.REVOLUTE_ALPHA);
+    //ik.setDHLink("rightArm", "Rwristup", 0, 5, 110, 0);
+    //ik.setDHLink("rightArm", "Rwristdown", 0, 0, 105, -45);
     //ik.setDHLink("rightArm", "Rfinger", 5, 90, 5, 0);
     ik.removeAi("rightArm", Ai.AVOID_COLLISION);
     ik.startEngine("rightArm");
 
-    ik.setNewDHRobotArm("kinect");
-    ik.setDHLink("kinect", mtorso, 113, 90, 0, -90);
-    ik.setDHLink("kinect", ttorso, 0, 90 + 90, 110, -90);
+    ik.addArm("kinect");
+//    ik.setDHLink("kinect", mtorso, 113, 90, 0, -90);
+//    ik.setDHLink("kinect", ttorso, 0, 90 + 90, 110, -90);
     ik.setDHLink("kinect", "camera", 0, 90, 10, 90);
     //
     ik.startEngine("kinect");
@@ -411,15 +439,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // ((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new
     // Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1),
     // (float)Math.toRadians(0));
-    /*print ik.currentPosition("rightArm")
+    print ik.currentPosition("rightArm")
 print ik.currentPosition("leftArm")
-     */
+     
     // TODO add the object that can collide with the model
     // ik.jmeApp.addObject();
-
+*/
     // need to move a little so the position update
-    mtorso.moveTo(1.0);
-    ttorso.moveTo(1.0);
+    midStom.moveTo(1.0);
+    topStom.moveTo(1.0);
     Romoplate.moveTo(11.0);
     Rshoulder.moveTo(31.0);
     Rrotate.moveTo(91.0);
@@ -431,8 +459,8 @@ print ik.currentPosition("leftArm")
     wrist.moveTo(91.0);
     Rwrist.moveTo(91.0);
 
-    mtorso.moveTo(0.0);
-    ttorso.moveTo(0.0);
+    midStom.moveTo(0.0);
+    topStom.moveTo(0.0);
     Romoplate.moveTo(10.0);
     Rshoulder.moveTo(30.0);
     Rrotate.moveTo(90.0);
@@ -474,18 +502,57 @@ print ik.currentPosition("leftArm")
 
   }
 
-  public void startEngine(String arm) {
-    getEngine(arm).start();
-    addTask("publishPosition-" + arm, 1000, 0, "publishPosition", arm);
-  }
 
-  public Thread getEngine(String arm) {
-    if (engines.containsKey(arm)) {
-      return engines.get(arm);
-    } else {
-      log.info("no engines found {}", arm);
-      return null;
-    }
+private void setControl(String armName, IMPart part, ServoControl control) {
+	part.setControl(armName, control.getName());
+	subscribe(control.getName(),"publishMoveTo", getName(), "onMoveTo");
+	subscribe(control.getName(),"publishServoData", getName(), "onServoData");
+}
+
+public void addPart(IMPart part) {
+	imData.addPart(part);
+}
+
+public void setFirstPart(String armName, String partName) {
+	IMEngine arm = imData.getArm(armName);
+	if (arm != null){
+		IMPart part= imData.getPart(partName);
+		if (part != null){
+			imData.setFirstPart(armName, partName);
+		}
+		else log.info("unknown part name {}", partName);
+	}
+	else log.info("unknown arm name {}", armName);
+	
+}
+
+public IMPart createPart(String partName) {
+	IMPart part = new IMPart(partName);
+	return part;
+}
+
+public void setInputMatrix(String armName, Matrix inputMatrix) {
+	if (inputMatrix.getNumCols()!= 4 || inputMatrix.getNumRows()!=4){
+		log.info("wrong dimention for setInputMatrix (must be 4 x 4)");
+	}
+	else {
+		IMEngine arm = imData.getArm(armName);
+		if (arm != null){
+			arm.setInputMatrix(inputMatrix);
+		}
+		else{
+			log.info("unknown arm {} for setInputMatrix",armName);
+		}
+	}
+}
+
+public void startEngine(String armName) {
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null){
+		  arm.start();
+		  addTask("publishPosition-" + armName, 1000, 0, "publishPosition", armName);
+	  }
+	  log.info("unknown arm {}",armName);
   }
 
   @Override
@@ -517,17 +584,16 @@ print ik.currentPosition("leftArm")
     return meta;
   }
 
-  public void setDHLink(String arm, String name, double d, double theta, double r, double alpha) {
-    if (engines.containsKey(arm)) {
-      DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-      IMEngine engine = engines.get(arm);
-      DHRobotArm dhArm = engine.getDHRobotArm();
-      dhArm.addLink(dhLink);
-      engine.setDHRobotArm(dhArm);
-      engines.put(arm, engine);
-    } else {
-      log.error("Unknow DH arm {}", arm);
+  public void setDHLink(String armName, String linkName, double d, double theta, double r, double alpha) {
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null){
+		  DHLink dhLink = new DHLink(linkName, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+		  DHRobotArm dhArm = arm.getDHRobotArm();
+		  dhArm.addLink(dhLink);
+		  arm.setDHRobotArm(dhArm);
+		  imData.addArm(arm);
     }
+	log.error("Unknow arm {}", armName);
   }
 
   public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha) {
@@ -535,37 +601,26 @@ print ik.currentPosition("leftArm")
   }
 
   public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
-    if (engines.containsKey(arm)) {
-      IMEngine engine = engines.get(arm);
-      DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-      // servo.addIKServoEventListener(this);
-      subscribe(servo.getName(),"publishMoveTo", getName(), "onMoveTo");
-      subscribe(servo.getName(),"publishServoData", getName(), "onServoData");
-      servo.attach((ServoDataListener)this);
-      dhLink.addPositionValue(servo.getPos());
-      dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
-      dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
-      dhLink.setState(ServoStatus.SERVO_STOPPED);
-      dhLink.setSpeed(servo.getSpeed());
-      dhLink.setTargetPos(servo.getPos());
-      dhLink.hasActuator = true;
-      DHRobotArm dhArm = engine.getDHRobotArm();
-      dhArm.addLink(dhLink);
-      engine.setDHRobotArm(dhArm);
-      engines.put(arm, engine);
-      // servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
-      Mapper map = new Mapper(servo.getMin(), servo.getMax(), minAngle, maxAngle);
-      maps.put(servo.getName(), map);
+	  IMEngine engine = imData.getArm(arm);
+	  if (engine != null) {
+		  DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
+		  subscribe(servo.getName(),"publishMoveTo", getName(), "onMoveTo");
+		  subscribe(servo.getName(),"publishServoData", getName(), "onServoData");
+		  servo.attach((ServoDataListener)this);
+		  dhLink.addPositionValue(servo.getPos());
+		  dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
+		  dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
+		  dhLink.setState(ServoStatus.SERVO_STOPPED);
+		  dhLink.setSpeed(servo.getSpeed());
+		  dhLink.setTargetPos(servo.getPos());
+		  dhLink.hasActuator = true;
+		  DHRobotArm dhArm = engine.getDHRobotArm();
+		  dhArm.addLink(dhLink);
+		  engine.setDHRobotArm(dhArm);
+		  imData.addArm(engine);
     } else {
-      log.error("Unknow DH arm {}", arm);
+      log.error("Unknow arm {}", arm);
     }
-  }
-
-  public void setNewDHRobotArm(String name) {
-    IMEngine engine = new IMEngine(name, this);
-    engine.setInputMatrix(inputMatrix);
-    engines.put(name, engine);
-
   }
 
   public String addObject(double oX, double oY, double oZ, double eX, double eY, double eZ, String name, double radius, boolean render) {
@@ -617,39 +672,38 @@ print ik.currentPosition("leftArm")
   }
 
   public void onMoveTo(ServoControl data) {
-//    Mapper map = maps.get(data.getName());
-    // data.pos = map.calcOutput(data.pos);
-    // data.targetPos = map.calcOutput(data.targetPos);
-    for (IMEngine e : engines.values()) {
+    for (IMEngine e : imData.getArms().values()) {
       e.updateLinksPosition(data);
     }
     if (openni != null) {
       map3d.updateKinectPosition(currentPosition(kinectName));
     }
     if (jmeApp != null) {
-      // jmeApp.updateObjects(collisionItems.getItems());
-      //jmeApp.updatePosition(data);
     }
+    imData.onMoveTo(data);
   }
 
   public void onServoData(ServoData data) {
-//	    Mapper map = maps.get(data.name);
-	    // data.pos = map.calcOutput(data.pos);
-	    // data.targetPos = map.calcOutput(data.targetPos);
-	    for (IMEngine e : engines.values()) {
+	    for (IMEngine e : imData.getArms().values()) {
 	      e.updateLinksPosition(data);
 	    }
 	    if (openni != null) {
 	      map3d.updateKinectPosition(currentPosition(kinectName));
 	    }
 	    if (jmeApp != null) {
-	      // jmeApp.updateObjects(collisionItems.getItems());
 	      jmeApp.updatePosition(data);
 	    }
+	    imData.onServoData(data);
 	  }
 
   public void moveTo(String armName, String objectName, ObjectPointLocation location, String lastDHLink) {
-    engines.get(armName).moveTo(collisionItems.getItem(objectName), location, lastDHLink);
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm!=null){
+		  arm.moveTo(collisionItems.getItem(objectName), location, lastDHLink);
+	  }
+	  else {
+		  log.info("unknown arm {}",armName);
+	  }
   }
 
   public void moveTo(String armName, String objectName, ObjectPointLocation location) {
@@ -657,7 +711,7 @@ print ik.currentPosition("leftArm")
   }
 
   public void stopMoving() {
-    for (IMEngine engine : engines.values()) {
+    for (IMEngine engine : imData.getArms().values()) {
       engine.target = null;
     }
   }
@@ -667,8 +721,6 @@ print ik.currentPosition("leftArm")
       openni = (OpenNi) startPeer("openni");
       openni.start3DData();
       map3d.updateKinectPosition(currentPosition(kinectName));
-      // this.subscribe(openni.getName(), "publishOpenNIData", this.getName(),
-      // "onOpenNiData");
     }
     return openni;
   }
@@ -716,7 +768,7 @@ print ik.currentPosition("leftArm")
   }
 
   public Collection<IMEngine> getArms() {
-    return engines.values();
+    return imData.getArms().values();
   }
 
   public void visualize() throws InterruptedException {
@@ -725,11 +777,9 @@ print ik.currentPosition("leftArm")
       return;
     }
     jmeApp = new TestJmeIMModel();
-    // jmeApp.setObjects(getCollisionObject());
     // jmeApp.setShowSettings(false);
     AppSettings settings = new AppSettings(true);
     settings.setResolution(800, 600);
-    // settings.setUseInput(false);
     jmeApp.setSettings(settings);
     jmeApp.setShowSettings(false);
     jmeApp.setPauseOnLostFocus(false);
@@ -759,7 +809,13 @@ print ik.currentPosition("leftArm")
   }
 
   public void holdTarget(String arm, boolean holdEnabled) {
-    engines.get(arm).holdTarget(holdEnabled);
+	  IMEngine engine = imData.getArm(arm);
+	  if (engine != null){
+		  engine.holdTarget(holdEnabled);
+	  }
+	  else {
+		  log.info("unknown arm {} for hold target",arm);
+	  }
   }
 
   public PositionData publishPosition(PositionData position) {
@@ -775,27 +831,18 @@ print ik.currentPosition("leftArm")
   }
 
   public void setMinMaxAngles(String partName, double min, double max) {
-    if (maps.containsKey(partName)) {
-      Mapper map = maps.get(partName);
-      map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
-      maps.put(partName, map);
-      for (IMEngine engine : engines.values()) {
+      for (IMEngine engine : imData.getArms().values()) {
         for (DHLink link : engine.getDHRobotArm().getLinks()) {
           if (link.getName().equals(partName)) {
-            //link.servoMin = min;
-            //link.servoMax = max;
             link.setMin(link.getInitialTheta() + Math.toRadians(min));
             link.setMax(link.getInitialTheta() + Math.toRadians(max));
           }
         }
       }
-    } else {
-      log.info("No part named {} found", partName);
-    }
   }
 
   public void setAi(Ai ai) {
-    for (IMEngine engine : engines.values()) {
+    for (IMEngine engine : imData.getArms().values()) {
       engine.setAi(ai);
     }
   }
@@ -811,33 +858,46 @@ print ik.currentPosition("leftArm")
   }
 
   public void removeAi(Ai ai) {
-    for (IMEngine engine : engines.values()) {
+    for (IMEngine engine : imData.getArms().values()) {
       engine.removeAi(ai);
     }
   }
 
   public void setAi(String armName, Ai ai) {
-    if (engines.containsKey(armName)) {
-      engines.get(armName).setAi(ai);
-    }
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null) {
+		  arm.setAi(ai);
+	  }
+	  else{
+		  log.info("unknown arm {} for setAI",armName);
+	  }
   }
 
   public void removeAi(String armName, Ai ai) {
-    if (engines.containsKey(armName)) {
-      engines.get(armName).removeAi(ai);
-    }
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null) {
+		  arm.removeAi(ai);
+	  }
+	  else {
+		  log.info("unknown arm {} for removeAi",armName);
+	  }
   }
 
   public Double getAngleWithObject(String armName, String objectName) {
-    CollisionItem ci = collisionItems.getItem(objectName);
-    Vector3f vo = new Vector3f((float) ci.getOrigin().getX(), (float) ci.getOrigin().getY(), (float) ci.getOrigin().getZ());
-    Vector3f ve = new Vector3f((float) ci.getEnd().getX(), (float) ci.getEnd().getY(), (float) ci.getEnd().getZ());
-    Vector3f vci = vo.subtract(ve);
-    Point armvector = engines.get(armName).getDHRobotArm().getVector();
-    Vector3f va = new Vector3f((float) armvector.getX(), (float) armvector.getY(), (float) armvector.getZ());
-    float angle = va.dot(vci);
-    double div = Math.sqrt(Math.pow(vci.x, 2) + Math.pow(vci.y, 2) + Math.pow(vci.z, 2)) * Math.sqrt(Math.pow(va.x, 2) + Math.pow(va.y, 2) + Math.pow(va.z, 2));
-    return MathUtils.radToDeg(Math.acos(angle / div));
+	  IMEngine arm = imData.getArm(armName);
+	  if (arm != null){
+		  CollisionItem ci = collisionItems.getItem(objectName);
+		  Vector3f vo = new Vector3f((float) ci.getOrigin().getX(), (float) ci.getOrigin().getY(), (float) ci.getOrigin().getZ());
+		  Vector3f ve = new Vector3f((float) ci.getEnd().getX(), (float) ci.getEnd().getY(), (float) ci.getEnd().getZ());
+		  Vector3f vci = vo.subtract(ve);
+		  Point armvector = arm.getDHRobotArm().getVector();
+		  Vector3f va = new Vector3f((float) armvector.getX(), (float) armvector.getY(), (float) armvector.getZ());
+		  float angle = va.dot(vci);
+		  double div = Math.sqrt(Math.pow(vci.x, 2) + Math.pow(vci.y, 2) + Math.pow(vci.z, 2)) * Math.sqrt(Math.pow(va.x, 2) + Math.pow(va.y, 2) + Math.pow(va.z, 2));
+		  return MathUtils.radToDeg(Math.acos(angle / div));
+	  }
+	  log.info("unknown arm {} for getAngleWithObject",armName);
+	  return 0.0;
     // return (double) va.angleBetween(vci);
   }
 
@@ -858,7 +918,7 @@ print ik.currentPosition("leftArm")
   }
 
   public void setDHLinkType(String name, DHLinkType type) {
-    for (IMEngine engine : engines.values()) {
+    for (IMEngine engine : imData.getArms().values()) {
       for (DHLink link : engine.getDHRobotArm().getLinks()) {
         if (link.getName().equals(name)) {
           link.setType(type);
@@ -866,4 +926,18 @@ print ik.currentPosition("leftArm")
       }
     }
   }
+  public void addArm(String name){
+	    IMEngine engine = new IMEngine(name, this);
+	    engine.setInputMatrix(inputMatrix);
+	    imData.addArm(engine);
+  }
+  
+  public void removeArm(String armName){
+	  if (!imData.removeArm(armName)) log.info("unknown arm {} for removeArm",armName);;
+  }
+
+public IMEngine getEngine(String armName) {
+	return imData.getArm(armName);
+}
+  
 }

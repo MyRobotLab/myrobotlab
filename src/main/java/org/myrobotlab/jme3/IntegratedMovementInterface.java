@@ -5,8 +5,8 @@ package org.myrobotlab.jme3;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.myrobotlab.IntegratedMovement.CollisionItem;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.service.interfaces.ServoData;
 
