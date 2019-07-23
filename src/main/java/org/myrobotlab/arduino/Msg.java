@@ -80,7 +80,7 @@ public class Msg {
 	public boolean debug = false;
 	boolean invoke = true;
 	
-	boolean ackEnabled = false;
+	boolean ackEnabled = true;
 	
 	 public static class AckLock {
 	    // first is always true - since there
@@ -331,6 +331,7 @@ public class Msg {
       break;
     }
     case PUBLISH_ACK: {
+      log.info("PUBLISH_ACK");
       Integer function = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
@@ -577,13 +578,14 @@ public class Msg {
       break;
     }
     case PUBLISH_MRL_COMM_BEGIN: {
+      
       Integer version = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
         arduino.invoke("publishMrlCommBegin",  version);
       } else { 
          arduino.publishMrlCommBegin( version);
-      }
+      }      
       if(record != null){
         rxBuffer.append("< publishMrlCommBegin");
         rxBuffer.append("/");
@@ -2380,17 +2382,21 @@ public class Msg {
 	  // }
 	}
 	
-	public void waitForAck(){
+	public void waitForAck(){	  
 	  if (!ackEnabled || ackRecievedLock.acknowledged){
 	    return;
 	  }
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
+        log.error("waiting true");
+        ackRecievedLock.wait(100);
+        ackRecievedLock.acknowledged = true;
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
+      
+      log.error("waiting false");
 
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
@@ -2400,6 +2406,7 @@ public class Msg {
 	}
 	
 	public void ackReceived(int function){
+	  log.info("ackReceived 1");
 	   synchronized (ackRecievedLock) {
 	      ackRecievedLock.acknowledged = true;
 	      ackRecievedLock.notifyAll();
