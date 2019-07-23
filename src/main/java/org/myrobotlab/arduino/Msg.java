@@ -217,7 +217,10 @@ public class Msg {
   // < publishMrlCommBegin/version
   public final static int PUBLISH_MRL_COMM_BEGIN = 55;
 
-
+  int ackMaxWaitMs = 1000;
+  
+  boolean waiting = false;
+  
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
  */
@@ -2383,20 +2386,19 @@ public class Msg {
 	}
 	
 	public void waitForAck(){	  
-	  if (!ackEnabled || ackRecievedLock.acknowledged){
+	  if (!ackEnabled || ackRecievedLock.acknowledged || waiting){
 	    return;
 	  }
     synchronized (ackRecievedLock) {
       try {
         // log.info("***** starting wait *****");
-        log.error("waiting true");
-        ackRecievedLock.wait(100);
-        ackRecievedLock.acknowledged = true;
+        waiting = true;
+        ackRecievedLock.wait(ackMaxWaitMs);
         // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
       } catch (InterruptedException e) {// don't care}
       }
       
-      log.error("waiting false");
+      log.error("waited over {} ms for an ack", ackMaxWaitMs);
 
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
@@ -2406,8 +2408,9 @@ public class Msg {
 	}
 	
 	public void ackReceived(int function){
-	  log.info("ackReceived 1");
+	  // log.info("ackReceived 1");
 	   synchronized (ackRecievedLock) {
+	      waiting = false;
 	      ackRecievedLock.acknowledged = true;
 	      ackRecievedLock.notifyAll();
 	    }
