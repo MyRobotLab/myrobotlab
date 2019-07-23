@@ -32,6 +32,7 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
@@ -63,10 +64,13 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
+import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
     /* SerialRelayListener, */PortListener, PortPublisher, EncoderController {
+  
+  transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
   public static class I2CDeviceMap {
     public String busAddress;
@@ -611,14 +615,13 @@ public class Arduino extends AbstractMicrocontroller
         reattach(device);
       }
 
-      /*
       List<PinDefinition> list = getPinList();
       for (PinDefinition pindef : list) {
         if (pindef.isEnabled()) {
           enablePin(pindef.getPinName());
         }
       }
-      */
+      
     } catch (Exception e) {
       log.error("sync threw", e);
     }
@@ -932,7 +935,12 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   public Attachable getDevice(Integer deviceId) {
-    return deviceIndex.get(deviceId).getDevice();
+    DeviceMapping dm = deviceIndex.get(deviceId);
+    if (dm == null) {
+      log.error("no device with deviceId {}", deviceId);
+      return null;
+    }
+    return dm.getDevice();
   }
 
   Integer getDeviceId(NameProvider device) {
@@ -952,6 +960,10 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   private String getDeviceName(int deviceId) {
+    if (getDevice(deviceId) == null) {
+      log.error("getDeviceName({} is null", deviceId);
+      return null;
+    }
     return getDevice(deviceId).getName();
   }
 
@@ -1712,6 +1724,10 @@ public class Arduino extends AbstractMicrocontroller
     for (int i = 0; i < pinArray.length; ++i) {
       int address = data[3 * i];
       PinDefinition pinDef = getPin(address);
+      if (pinDef == null) {
+        log.error("not a valid pin address {}", address);
+        continue;
+      }
       int value = Serial.bytesToInt(data, (3 * i) + 1, 2);
       PinData pinData = new PinData(pinDef.getPinName(), value);
       // update def with last value
@@ -2223,8 +2239,8 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   public void publishMrlCommBegin(Integer version) {
-    sync();
-    log.error("publishMrlCommBegin {}", version);
+    log.info("publishMrlCommBegin ({}) - going to sync", version);
+    sync();    
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
     }
