@@ -69,7 +69,7 @@ import org.slf4j.Logger;
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
     /* SerialRelayListener, */PortListener, PortPublisher, EncoderController {
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
   public static class I2CDeviceMap {
@@ -588,14 +588,18 @@ public class Arduino extends AbstractMicrocontroller
 
       // we might be connected now
       // see what our version is like...
-      Integer version = boardInfo.getVersion();
+      if (boardInfo != null) {
+        Integer version = boardInfo.getVersion();
 
-      if (version == null) {
-        error("%s did not get response from arduino....", serial.getPortName());
-      } else if (!version.equals(MRLCOMM_VERSION)) {
-        error("MrlComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
+        if (version == null) {
+          error("%s did not get response from arduino....", serial.getPortName());
+        } else if (!version.equals(MRLCOMM_VERSION)) {
+          error("MrlComm.ino responded with version %s expected version is %s", version, MRLCOMM_VERSION);
+        } else {
+          info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), version);
+        }
       } else {
-        info("%s connected on %s responded version %s ... goodtimes...", serial.getName(), serial.getPortName(), version);
+        log.error("board info is null ! - has MrlComm.ino been loaded ?");
       }
 
     } catch (Exception e) {
@@ -621,7 +625,7 @@ public class Arduino extends AbstractMicrocontroller
           enablePin(pindef.getPinName());
         }
       }
-      
+
     } catch (Exception e) {
       log.error("sync threw", e);
     }
@@ -2240,7 +2244,7 @@ public class Arduino extends AbstractMicrocontroller
 
   public void publishMrlCommBegin(Integer version) {
     log.info("publishMrlCommBegin ({}) - going to sync", version);
-    sync();    
+    sync();
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
     }
