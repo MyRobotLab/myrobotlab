@@ -659,3 +659,26 @@ void MrlComm::update()
 		}
 	}
 }
+
+/***********************************************************************
+   * PUBLISH_BOARD_INFO This function updates the average time it took to run
+   * the main loop and reports it back with a publishBoardStatus MRLComm message
+   *
+   * TODO: avgTiming could be 0 if loadTimingModule = 0 ?!
+   *
+   * MAGIC_NUMBER|7|[loadTime long0,1,2,3]|[freeMemory int0,1]
+   */
+
+void MrlComm::publishBoardInfo() {
+	byte deviceSummary[deviceList.size()];
+	for (int i = 0; i < deviceList.size(); ++i) {
+		deviceSummary[i] = deviceList.get(i)->id;
+	}
+        
+        long now = micros();
+        int load = (now - lastBoardInfoUs)/loopCount;
+	//msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  (int)((now - lastBoardInfoUs)/loopCount), getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+ 	msg->publishBoardInfo(MRLCOMM_VERSION, BOARD,  load, getFreeRam(), pinList.size(), deviceSummary, sizeof(deviceSummary));
+        lastBoardInfoUs = now;
+        loopCount = 0;
+}

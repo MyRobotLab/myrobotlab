@@ -30,7 +30,6 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractServo;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 
 /**
  * @author GroG
@@ -91,7 +90,7 @@ public class HobbyServo extends AbstractServo {
       // Runtime.start("python", "Python");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
-      mega.connect("COM9");
+      mega.connect("COM7");
       // mega.setBoardMega();
       
       HobbyServo servo03 = (HobbyServo) Runtime.start("servo03", "HobbyServo");

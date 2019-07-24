@@ -2,6 +2,11 @@
 	public synchronized void %name%(%javaMethodParameters%) {
 		try {
 		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
