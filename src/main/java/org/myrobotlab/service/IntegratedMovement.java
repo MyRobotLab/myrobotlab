@@ -8,10 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.IntegratedMovement.CollisionDectection;
 import org.myrobotlab.IntegratedMovement.CollisionItem;
+import org.myrobotlab.IntegratedMovement.FKinematics;
 import org.myrobotlab.IntegratedMovement.GravityCenter;
 import org.myrobotlab.IntegratedMovement.IMData;
 import org.myrobotlab.IntegratedMovement.IMEngine;
 import org.myrobotlab.IntegratedMovement.IMPart;
+import org.myrobotlab.IntegratedMovement.JmeManager;
+import org.myrobotlab.IntegratedMovement.JmeManager2;
 import org.myrobotlab.IntegratedMovement.Map3D;
 import org.myrobotlab.IntegratedMovement.Map3DPoint;
 import org.myrobotlab.IntegratedMovement.PositionData;
@@ -98,20 +101,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   private transient OpenNi openni = null;
 
-  /**
-   * @return the openni
-   */
-  public OpenNi getOpenni() {
-    return openni;
-  }
-
-  /**
-   * @param openni
-   *          the openni to set
-   */
-  public void setOpenni(OpenNi openni) {
-    this.openni = openni;
-  }
 
   private transient Map3D map3d = new Map3D();
   private String kinectName = "kinect";
@@ -123,6 +112,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public transient GravityCenter cog = new GravityCenter(this);
   
   private IMData imData = new IMData();
+  private transient JmeManager2 jmeManager=null;
 
   /**
    * @return the jmeApp
@@ -135,14 +125,15 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     super(n);
   }
 
-  public Point currentPosition(String name) {
-	  IMEngine arm = imData.getArm(name);
+  public Point currentPosition(String arm) {
+	  return FKinematics.getPosition(imData, arm, null);
+/*	  IMEngine arm = imData.getArm(name);
 	  if (arm != null){
       return arm.getPosition();
     }
     log.info("IK service have no data for {}", arm);
     return new Point(0, 0, 0, 0, 0, 0);
-  }
+*/  }
 
   public void moveTo(String arm, double x, double y, double z) {
     moveTo(arm, x, y, z, null);
@@ -298,20 +289,21 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     IMPart partMidStom = ik.createPart("midStom");
     ik.setControl("torso", partMidStom,midStom);
-    ik.setControl("torsoReverse", partMidStom, midStom);
-
     partMidStom.setDHParameters("torso",113,180,0,-90);
+    partMidStom.setRadius(150.0);
+    partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(0,0,0,0,0,0));
+    ik.setControl("torsoReverse", partMidStom, midStom);
     partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
-    
     ik.addPart(partMidStom);
+    
+    IMPart partTopStom = ik.createPart("topStom");
+    ik.setControl("torso", partTopStom, topStom);
+    //partMidStom.setDHParameters(", d, theta, r, alpha);
     
     // #define the DH parameters for the ik service
     ik.addArm("torso");
     ik.setInputMatrix("torso",ik.createInputMatrix(0, 0, 0, 0, 0, 0));
     ik.setFirstPart("torso",partMidStom.getName());
-    
-    ik.addArm("torsoReverse");
-    ik.setInputMatrix("torsoReverse", ik.createInputMatrix(0, 0, 113, 0, 0, 0));
     
     
     
@@ -498,7 +490,8 @@ print ik.currentPosition("leftArm")
 */
     // ik.setAi("rightArm", Ai.KEEP_BALANCE);
     // ik.setAi("leftArm", Ai.KEEP_BALANCE);
-    
+    ik.startSimulator();
+ 
 
   }
 
@@ -792,6 +785,16 @@ public void startEngine(String armName) {
     // add the existing objects
     jmeApp.addObject(collisionItems.getItems());
   }
+  public void startSimulator(){
+	  if (jmeManager != null){
+		  log.info("JmeApp already started");
+		  return;
+	  }
+	  jmeManager = new JmeManager2();
+	  jmeManager.start("JmeIMModel", "Jme3App");
+      jmeManager.loadParts(imData);
+
+  }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {
     double pos = 0;
@@ -936,8 +939,23 @@ public void startEngine(String armName) {
 	  if (!imData.removeArm(armName)) log.info("unknown arm {} for removeArm",armName);;
   }
 
-public IMEngine getEngine(String armName) {
-	return imData.getArm(armName);
-}
+	public IMEngine getEngine(String armName) {
+		return imData.getArm(armName);
+	}
+	/**
+	 * @return the openni
+	 */
+	public OpenNi getOpenni() {
+	  return openni;
+	}
+	
+	/**
+	 * @param openni
+	 *          the openni to set
+	 */
+	public void setOpenni(OpenNi openni) {
+	  this.openni = openni;
+	}
+
   
 }

@@ -16,13 +16,14 @@ public class IMControl {
 	private Double speed;
 	private Double targetPos;
 	private Double pos;
+	private ServoStatus state;
 
 	IMControl(String name){
 		this.name = name;
 	}
 
 	public void setState(ServoStatus state) {
-		this.setState(state);
+		this.state = state;
 	}
 
 	public void setSpeed(Double speed) {
@@ -35,5 +36,8 @@ public class IMControl {
 
 	public void setPos(Double pos) {
 		this.pos = pos; 
+	}
+	public Double getPos(){
+		return pos;
 	}
 }

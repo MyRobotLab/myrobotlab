@@ -851,5 +851,9 @@ public class IMEngine extends Thread implements Genetic {
 	  return getDHRobotArm().getPalmPosition();
   }
 
+  public Matrix getInputMatrix() {
+	  return inputMatrix;
+  }
+
 
 }
