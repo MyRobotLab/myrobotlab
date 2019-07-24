@@ -65,6 +65,11 @@ public class %javaClass% {
 	public static final int MAGIC_NUMBER = 170; // 10101010
 	public static final int MRLCOMM_VERSION = %MRLCOMM_VERSION%;
 	
+	int ackMaxWaitMs = 1000;
+  
+  	boolean waiting = false;
+	
+	
 	// send buffer
   int sendBufferSize = 0;
   int sendBuffer[] = new int[MAX_MSG_SIZE];
@@ -382,6 +387,9 @@ public class %javaClass% {
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
         log.error("Ack not received");
+        // part of resetting ?
+        // ackRecievedLock.acknowledged = true;
+        arduino.invoke("noAck");
       }
     }
 	}

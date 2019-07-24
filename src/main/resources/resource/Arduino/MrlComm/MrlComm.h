@@ -4,10 +4,11 @@
 #include "ArduinoMsgCodec.h"
 #include "MrlSerialRelay.h"
 #if defined(ESP8266)
-  #include <WebSocketsServer.h>
-  extern "C" {
-    #include "user_interface.h"
-  }
+#include <WebSocketsServer.h>
+extern "C"
+{
+#include "user_interface.h"
+}
 #endif
 
 // forward defines to break circular dependency
@@ -15,7 +16,6 @@ class Device;
 class Msg;
 class MrlComm;
 class Pin;
-
 
 /***********************************************************************
    * Class MrlComm - This class represents the Arduino service as a device. It
@@ -27,53 +27,61 @@ class Pin;
    * processing
  * 
 */
-class MrlComm{
-  private:
-    /**
+class MrlComm
+{
+private:
+  /**
      * "global var"
      */
   // The mighty device List. This contains all active devices that are attached
   // to the arduino.
-    LinkedList<Device*> deviceList;
+  LinkedList<Device *> deviceList;
 
   // list of pins currently being read from - can contain both digital and
   // analog
-    LinkedList<Pin*> pinList;
+  LinkedList<Pin *> pinList;
 
-    unsigned char* config;
-    // performance metrics  and load timing
-    // global debug setting, if set to true publishDebug will write to the serial port.
-    int byteCount;
-    int msgSize;
+  unsigned char *config;
+  // performance metrics  and load timing
+  // global debug setting, if set to true publishDebug will write to the serial port.
+  int byteCount;
+  int msgSize;
 
- // last time board info was published
+  // last time board info was published
   long lastBoardInfoUs;
 
-    boolean boardStatusEnabled;
- 
-    unsigned long lastHeartbeatUpdate;
+  // FIXME - DEPRECATE 
+  boolean boardStatusEnabled;
 
-    byte customMsgBuffer[MAX_MSG_SIZE];
-    int customMsgSize;
+  // sends a series of get publishBoardInfo() back to the arduino every second
+  boolean boardInfoEnabled = true;
 
-    // handles all messages to and from pc
-    Msg* msg;
+  unsigned long lastBoardInfoTs = 0;
 
-    bool heartbeatEnabled;
+  unsigned long lastHeartbeatUpdate;
+
+  byte customMsgBuffer[MAX_MSG_SIZE];
+
+  int customMsgSize;
+
+  // handles all messages to and from pc
+  Msg *msg;
+
+  bool heartbeatEnabled;
 
 public:
-    // utility methods
-    int getFreeRam();
-    Device* getDevice(int id);
-    Msg* getMsg();
-    bool ackEnabled = true;
+  // utility methods
+  int getFreeRam();
+  Device *getDevice(int id);
+  Msg *getMsg();
+  bool ackEnabled = true;
 
-    Device* addDevice(Device* device);
-    void update();
+  Device *addDevice(Device *device);
+  void update();
 
-    // Below are generated callbacks controlled by
-    // arduinoMsgs.schema
-    // <generatedCallBacks>
+  // Below are generated callbacks controlled by
+  // arduinoMsgs.schema
+  // <generatedCallBacks>
   // > getBoardInfo
   void getBoardInfo();
   // > enablePin/address/type/b16 rate
@@ -153,28 +161,28 @@ public:
   // > setZeroPoint/deviceId
   void setZeroPoint( byte deviceId);
     // </generatedCallBacks>
-    // end
+  // end
 
-  public:
-    unsigned long loopCount; // main loop count
-    MrlComm();
-    ~MrlComm();
-    void publishBoardStatus();
-    void publishVersion();
-    void publishBoardInfo();
-    void processCommand();
-    void processCommand(int ioType);
-    void updateDevices();
-    unsigned int getCustomMsg();
-    int getCustomMsgSize();
-    void begin(HardwareSerial& serial);
-    bool readMsg();
-    void onDisconnect();
-    void sendCustomMsg(const byte* msg, byte size);
+public:
+  unsigned long loopCount; // main loop count
+  MrlComm();
+  ~MrlComm();
+  void publishBoardStatus();
+  void publishVersion();
+  void publishBoardInfo();
+  void processCommand();
+  void processCommand(int ioType);
+  void updateDevices();
+  unsigned int getCustomMsg();
+  int getCustomMsgSize();
+  void begin(HardwareSerial &serial);
+  bool readMsg();
+  void onDisconnect();
+  void sendCustomMsg(const byte *msg, byte size);
 #if defined(ESP8266)
-    void begin(WebSocketsServer& wsServer);
-    void webSocketEvent(unsigned char num, WStype_t type, unsigned char* payload, unsigned int lenght);
+  void begin(WebSocketsServer &wsServer);
+  void webSocketEvent(unsigned char num, WStype_t type, unsigned char *payload, unsigned int lenght);
 #endif
 };
-  
+
 #endif

@@ -27,6 +27,8 @@ package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractServo;
 
 /**
@@ -81,21 +83,68 @@ public class HobbyServo extends AbstractServo {
   public static void main(String[] args) throws InterruptedException {
     try {
 
+      LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(false);
+      
       Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
-      
-      
-      Platform.setVirtual(true);
+      // Runtime.start("python", "Python");
 
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
+      mega.connect("COM7");
       // mega.setBoardMega();
-      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
-      servo.setPin(12);
-      servo.sweepDelay = 3;
+      
+      HobbyServo servo03 = (HobbyServo) Runtime.start("servo03", "HobbyServo");
+      /*
+      HobbyServo servo04 = (HobbyServo) Runtime.start("servo04", "HobbyServo");
+      HobbyServo servo05 = (HobbyServo) Runtime.start("servo05", "HobbyServo");
+      HobbyServo servo06 = (HobbyServo) Runtime.start("servo06", "HobbyServo");
+      HobbyServo servo07 = (HobbyServo) Runtime.start("servo07", "HobbyServo");
+      HobbyServo servo08 = (HobbyServo) Runtime.start("servo08", "HobbyServo");
+      HobbyServo servo09 = (HobbyServo) Runtime.start("servo09", "HobbyServo");
+      HobbyServo servo10 = (HobbyServo) Runtime.start("servo10", "HobbyServo");
+      HobbyServo servo11 = (HobbyServo) Runtime.start("servo11", "HobbyServo");
+      HobbyServo servo12 = (HobbyServo) Runtime.start("servo12", "HobbyServo");
+      */
+      // HobbyServo servo13 = (HobbyServo) Runtime.start("servo13", "HobbyServo");
+
+      servo03.attach(mega, 8, 38.0);
+      /*
+      servo04.attach(mega, 4, 38.0);
+      servo05.attach(mega, 5, 38.0);
+      servo06.attach(mega, 6, 38.0);
+      servo07.attach(mega, 7, 38.0);
+      servo08.attach(mega, 8, 38.0);
+      servo09.attach(mega, 9, 38.0);
+      servo10.attach(mega, 10, 38.0);
+      servo11.attach(mega, 11, 38.0);
+      servo12.attach(mega, 12, 38.0);
+      */
+      
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+      // servo03.attach((ServoDataListener)catcher);
+      
+      // servo.setPin(12);
+      
+      /*
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      */
+      
+      // servo.sweepDelay = 3;
       // servo.save();
-      servo.load();
-      servo.save();
-      log.info("sweepDely {}", servo.sweepDelay);
+      // servo.load();
+      // servo.save();
+      // log.info("sweepDely {}", servo.sweepDelay);
    
     } catch (Exception e) {
       log.error("main threw", e);
