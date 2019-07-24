@@ -2695,6 +2695,9 @@ public class Msg {
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
         log.error("Ack not received");
+        // part of resetting ?
+        // ackRecievedLock.acknowledged = true;
+        arduino.invoke("noAck");
       }
     }
 	}

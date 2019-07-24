@@ -2248,6 +2248,16 @@ public class Arduino extends AbstractMicrocontroller
   public Map<String, DeviceMapping> getDeviceList() {
     return deviceList;
   }
+  
+  public void noAck(){
+    log.error("no Ack we are resetting the serial port !");
+    /*
+    String portName = getPortName();
+    disconnect();
+    sleep(1000);
+    connect(portName);
+    */
+  }
 
   public void publishMrlCommBegin(Integer version) {
     log.info("publishMrlCommBegin ({}) - going to sync", version);
