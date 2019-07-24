@@ -85,82 +85,82 @@ public:
   // > getBoardInfo
   void getBoardInfo();
   // > enablePin/address/type/b16 rate
-  void enablePin(byte address, byte type, int rate);
+  void enablePin( byte address,  byte type,  int rate);
   // > setDebug/bool enabled
-  void setDebug(boolean enabled);
+  void setDebug( boolean enabled);
   // > setSerialRate/b32 rate
-  void setSerialRate(long rate);
+  void setSerialRate( long rate);
   // > softReset
   void softReset();
   // > enableAck/bool enabled
-  void enableAck(boolean enabled);
+  void enableAck( boolean enabled);
   // > echo/f32 myFloat/myByte/f32 secondFloat
-  void echo(float myFloat, byte myByte, float secondFloat);
+  void echo( float myFloat,  byte myByte,  float secondFloat);
   // > customMsg/[] msg
-  void customMsg(byte msgSize, const byte *msg);
+  void customMsg( byte msgSize, const byte*msg);
   // > deviceDetach/deviceId
-  void deviceDetach(byte deviceId);
+  void deviceDetach( byte deviceId);
   // > i2cBusAttach/deviceId/i2cBus
-  void i2cBusAttach(byte deviceId, byte i2cBus);
+  void i2cBusAttach( byte deviceId,  byte i2cBus);
   // > i2cRead/deviceId/deviceAddress/size
-  void i2cRead(byte deviceId, byte deviceAddress, byte size);
+  void i2cRead( byte deviceId,  byte deviceAddress,  byte size);
   // > i2cWrite/deviceId/deviceAddress/[] data
-  void i2cWrite(byte deviceId, byte deviceAddress, byte dataSize, const byte *data);
+  void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
-  void i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byte writeValue);
+  void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
   // > neoPixelAttach/deviceId/pin/b32 numPixels
-  void neoPixelAttach(byte deviceId, byte pin, long numPixels);
+  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels);
   // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
-  void neoPixelSetAnimation(byte deviceId, byte animation, byte red, byte green, byte blue, int speed);
+  void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
   // > neoPixelWriteMatrix/deviceId/[] buffer
-  void neoPixelWriteMatrix(byte deviceId, byte bufferSize, const byte *buffer);
+  void neoPixelWriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
   // > disablePin/pin
-  void disablePin(byte pin);
+  void disablePin( byte pin);
   // > disablePins
   void disablePins();
   // > setTrigger/pin/triggerValue
-  void setTrigger(byte pin, byte triggerValue);
+  void setTrigger( byte pin,  byte triggerValue);
   // > setDebounce/pin/delay
-  void setDebounce(byte pin, byte delay);
+  void setDebounce( byte pin,  byte delay);
   // > servoAttach/deviceId/pin/b16 initPos/b16 initVelocity/str name
-  void servoAttach(byte deviceId, byte pin, int initPos, int initVelocity, byte nameSize, const char *name);
+  void servoAttach( byte deviceId,  byte pin,  int initPos,  int initVelocity,  byte nameSize, const char*name);
   // > servoAttachPin/deviceId/pin
-  void servoAttachPin(byte deviceId, byte pin);
+  void servoAttachPin( byte deviceId,  byte pin);
   // > servoDetachPin/deviceId
-  void servoDetachPin(byte deviceId);
+  void servoDetachPin( byte deviceId);
   // > servoSetVelocity/deviceId/b16 velocity
-  void servoSetVelocity(byte deviceId, int velocity);
+  void servoSetVelocity( byte deviceId,  int velocity);
   // > servoSweepStart/deviceId/min/max/step
-  void servoSweepStart(byte deviceId, byte min, byte max, byte step);
+  void servoSweepStart( byte deviceId,  byte min,  byte max,  byte step);
   // > servoSweepStop/deviceId
-  void servoSweepStop(byte deviceId);
+  void servoSweepStop( byte deviceId);
   // > servoMoveToMicroseconds/deviceId/b16 target
-  void servoMoveToMicroseconds(byte deviceId, int target);
+  void servoMoveToMicroseconds( byte deviceId,  int target);
   // > servoSetAcceleration/deviceId/b16 acceleration
-  void servoSetAcceleration(byte deviceId, int acceleration);
+  void servoSetAcceleration( byte deviceId,  int acceleration);
   // > serialAttach/deviceId/relayPin
-  void serialAttach(byte deviceId, byte relayPin);
+  void serialAttach( byte deviceId,  byte relayPin);
   // > serialRelay/deviceId/[] data
-  void serialRelay(byte deviceId, byte dataSize, const byte *data);
+  void serialRelay( byte deviceId,  byte dataSize, const byte*data);
   // > ultrasonicSensorAttach/deviceId/triggerPin/echoPin
-  void ultrasonicSensorAttach(byte deviceId, byte triggerPin, byte echoPin);
+  void ultrasonicSensorAttach( byte deviceId,  byte triggerPin,  byte echoPin);
   // > ultrasonicSensorStartRanging/deviceId
-  void ultrasonicSensorStartRanging(byte deviceId);
+  void ultrasonicSensorStartRanging( byte deviceId);
   // > ultrasonicSensorStopRanging/deviceId
-  void ultrasonicSensorStopRanging(byte deviceId);
+  void ultrasonicSensorStopRanging( byte deviceId);
   // > setAref/b16 type
-  void setAref(int type);
+  void setAref( int type);
   // > motorAttach/deviceId/type/[] pins
-  void motorAttach(byte deviceId, byte type, byte pinsSize, const byte *pins);
+  void motorAttach( byte deviceId,  byte type,  byte pinsSize, const byte*pins);
   // > motorMove/deviceId/pwr
-  void motorMove(byte deviceId, byte pwr);
+  void motorMove( byte deviceId,  byte pwr);
   // > motorMoveTo/deviceId/pos
-  void motorMoveTo(byte deviceId, byte pos);
+  void motorMoveTo( byte deviceId,  byte pos);
   // > encoderAttach/deviceId/type/pin
-  void encoderAttach(byte deviceId, byte type, byte pin);
+  void encoderAttach( byte deviceId,  byte type,  byte pin);
   // > setZeroPoint/deviceId
-  void setZeroPoint(byte deviceId);
-  // </generatedCallBacks>
+  void setZeroPoint( byte deviceId);
+    // </generatedCallBacks>
   // end
 
 public:

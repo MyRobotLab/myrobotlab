@@ -22,15 +22,14 @@ import org.slf4j.Logger;
 /**
  * @author GroG
  * 
- * class to display set of pins
+ *         class to display set of pins
  * 
- * FIXME - auto-scaling amplitude
- * FIXME - min / max
- * FIXME - attempt to use completely by self, not embedded in any other service
- * FIXME - put in AbstractMicrocontroller !
- * FIXME - update with PinArrayController - all pin states
- * FIXME - line starts in the wrong direction 
- * FIXME - make a JButtonToggleImage with insets etc. - make a text one with 2 BG and 2 FG colors (maybe glass like)
+ *         FIXME - auto-scaling amplitude FIXME - min / max FIXME - attempt to
+ *         use completely by self, not embedded in any other service FIXME - put
+ *         in AbstractMicrocontroller ! FIXME - update with PinArrayController -
+ *         all pin states FIXME - line starts in the wrong direction FIXME -
+ *         make a JButtonToggleImage with insets etc. - make a text one with 2
+ *         BG and 2 FG colors (maybe glass like)
  *
  */
 public class Oscope extends ServiceGui implements ActionListener {
@@ -38,7 +37,7 @@ public class Oscope extends ServiceGui implements ActionListener {
   public final static Logger log = LoggerFactory.getLogger(Oscope.class);
 
   final JPanel buttonPanel = new JPanel(new GridBagLayout());
-  
+
   final Box screenPanel = Box.createVerticalBox();
 
   final Map<String, OscopePinTrace> traces = new HashMap<>();
@@ -54,14 +53,13 @@ public class Oscope extends ServiceGui implements ActionListener {
     flow = new JPanel();
     flow.add(screenPanel);
     add(flow);
-    
+
     // add(screenPanel);
 
     // since this is a widget - subscribeGui is not auto-magically called
     // by the framework
     // subscribeGui();
   }
-
 
   /**
    * function for "all" pins, global actions, e.g. clear all pins
@@ -72,7 +70,7 @@ public class Oscope extends ServiceGui implements ActionListener {
   }
 
   public void setPins(List<PinDefinition> pinList) {
-    
+
     buttonPanel.removeAll();
     screenPanel.removeAll();
 
@@ -93,7 +91,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 
     for (int i = 0; i < pinList.size(); ++i) {
       PinDefinition pinDef = pinList.get(i);
-      
+
       OscopePinTrace trace = new OscopePinTrace(this, pinDef, gradient * i);
       traces.put(pinDef.getPinName(), trace);
       buttonPanel.add(trace.getButtonDisplay(), bgc);
@@ -110,12 +108,15 @@ public class Oscope extends ServiceGui implements ActionListener {
 
   /**
    * process the pin data for each pin
+   * 
    * @param data
    */
   public void onPinArray(final PinData[] data) {
     for (PinData pinData : data) {
-      OscopePinTrace trace = traces.get(pinData.pin);
-      trace.update(pinData);
+      if (pinData != null && pinData.pin != null) {
+        OscopePinTrace trace = traces.get(pinData.pin);
+        trace.update(pinData);
+      }
     }
   }
 
@@ -130,16 +131,10 @@ public class Oscope extends ServiceGui implements ActionListener {
   }
 
   /*
-  public void subscribeGui() {
-    subscribe("publishPinDefinition");
-    subscribe("publishPinArray");
-    subscribe("getPinList");
-  }
-
-  public void unsubscribeGui() {
-    unsubscribe("publishPinDefinition");
-    unsubscribe("publishPinArray");
-    unsubscribe("getPinList");
-  }
-  */
+   * public void subscribeGui() { subscribe("publishPinDefinition");
+   * subscribe("publishPinArray"); subscribe("getPinList"); }
+   * 
+   * public void unsubscribeGui() { unsubscribe("publishPinDefinition");
+   * unsubscribe("publishPinArray"); unsubscribe("getPinList"); }
+   */
 }

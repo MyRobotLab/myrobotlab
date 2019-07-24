@@ -965,7 +965,7 @@ public class Arduino extends AbstractMicrocontroller
 
   private String getDeviceName(int deviceId) {
     if (getDevice(deviceId) == null) {
-      log.error("getDeviceName({} is null", deviceId);
+      log.error("getDeviceName({}) is null", deviceId);
       return null;
     }
     return getDevice(deviceId).getName();
@@ -1619,6 +1619,13 @@ public class Arduino extends AbstractMicrocontroller
       getPinList();
       // invoke("getPinList");
       broadcastState();
+    }
+    
+    if (boardInfo != null) {
+      DeviceSummary[] ds = boardInfo.getDeviceSummary();
+      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
+        sync();
+      }
     }
 
     // we send here - because this is a "command" message, and we don't want the
