@@ -84,7 +84,7 @@ public class HobbyServo extends AbstractServo {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(false);
+      Platform.setVirtual(true);
       
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");

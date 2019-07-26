@@ -1,5 +1,6 @@
 package org.myrobotlab.codec;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -59,9 +60,10 @@ public class ApiService extends Api {
    * 
    */
 
-  //
-  public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
-
+  // API SERVICE
+  public Object process(MessageSender sender, String apiKey, String uri, OutputStream out, String json) throws Exception {
+  // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
+    Message msgFromUri = Api.uriToMsg(uri);
     // FIXME change to CodecUtils.MIME_TYPE_JSON
     Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
@@ -160,5 +162,9 @@ public class ApiService extends Api {
     ApiDescription desc = new ApiDescription("message", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
         "An synchronous api useful for simple REST responses");
     return desc;
+  }
+
+  public Object process(OutputStream out, String uri) throws Exception {
+    return process(null, "service", uri, out, null);
   }
 }

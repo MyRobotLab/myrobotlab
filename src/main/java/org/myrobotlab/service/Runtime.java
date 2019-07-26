@@ -229,10 +229,6 @@ public class Runtime extends Service implements MessageListener {
    *
    */
 
-  // private boolean shutdownAfterUpdate = false;
-
-  static transient Cli cli;
-
   /**
    * global startingArgs - whatever came into main each runtime will have its
    * individual copy
@@ -500,18 +496,6 @@ public class Runtime extends Service implements MessageListener {
    */
   public static final void gc() {
     java.lang.Runtime.getRuntime().gc();
-  }
-
-  /**
-   * get the one and only Cli
-   * 
-   * @return - command line interpreter
-   */
-  public static Cli getCli() {
-    if (cli == null) {
-      cli = startCli();
-    }
-    return cli;
   }
 
   /**
@@ -1640,17 +1624,6 @@ public class Runtime extends Service implements MessageListener {
     return createAndStart(name, type);
   }
 
-  static public Cli startCli() {
-    cli = (Cli) start("cli", "Cli");
-    return cli;
-  }
-
-  static public void stopCli() {
-    if (cli != null) {
-      release(cli.getName());
-    }
-  }
-
   /**
    * <pre>
    * Command options for picocli library. This encapsulates all the available
@@ -1702,6 +1675,12 @@ public class Runtime extends Service implements MessageListener {
         "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
     public String agent;
 
+ // AGENT INFO
+    @Option(names = { 
+    "--proxy" }, description = "proxy config e.g. --proxy \"http://webproxy:8080\"")
+    public String proxy;
+
+    
     // FIXME -rename to daemon
     // AGENT INFO
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
@@ -1763,7 +1742,8 @@ public class Runtime extends Service implements MessageListener {
     public String branch;
 
     // installation root of libraries - jars will be installed under {libraries}/jar natives under {libraries}/native
-    @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
+    // @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
+    // CHANGING THIS IS NOT READY FOR PRIME TIME ! - not displaying it as a viable flag
     public String libraries = "libraries";
 
     // FIXME - get version vs force version - perhaps just always print version
@@ -2741,6 +2721,25 @@ public class Runtime extends Service implements MessageListener {
 
   public static CmdOptions getOptions() {
     return options;
+  }
+  
+  public String ls(String path) throws IOException {
+    String[] parts = path.split("/");
+
+    String ret = null;
+    if (path.equals("/")) {
+      // FIXME don't do this here !!!
+      ret = String.format("%s\n", CodecUtils.toJson(Runtime.getServiceNames()).toString());
+      
+    } else if (parts.length == 2 && !path.endsWith("/")) {
+      // FIXME don't do this here !!!
+      ret = String.format("%s\n", CodecUtils.toJson(Runtime.getService(parts[1])).toString());
+    } else if (parts.length == 2 && path.endsWith("/")) {
+      ServiceInterface si = Runtime.getService(parts[1]);
+      // FIXME don't do this here !!!
+      ret = String.format("%s\n", CodecUtils.toJson(si.getDeclaredMethodNames()).toString());
+    }
+    return ret;
   }
 
 }
