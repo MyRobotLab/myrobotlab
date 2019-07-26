@@ -506,10 +506,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * responsible for all parsing and pre-processing for the audio. Sound effect,
    * sound files, SSML, TarsosDsp would all be prepared here before the audio
    * data is generated
-   * 
-   * @param toSpeak
-   * @param block
-   * @return
+   *
+   * @param toSpeak - phrase to speak
+   * @return - list of audio data
    */
   public List<AudioData> parse(String toSpeak) {
 
