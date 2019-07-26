@@ -50,7 +50,7 @@ public class WorkE extends Service implements StatusListener {
 
     ServiceType meta = new ServiceType(WorkE.class);
 
-    meta.addPeer("cli", "Cli", "command line interface for worke");
+    // meta.addPeer("cli", "Cli", "command line interface for worke");
     meta.addPeer("git", "Git", "synching repos");
 
     // motor control - output
