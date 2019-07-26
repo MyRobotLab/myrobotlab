@@ -143,6 +143,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient protected Thread thisThread = null;
 
   transient protected Inbox inbox = null;
+  
+  /**
+   * for promoting portability and good pathing 
+   */
+  transient protected String fs = File.separator;
+  
+  /**
+   * for promoting portability and good pathing 
+   */
+  transient protected String ps = File.pathSeparator;
 
   /**
    * a more capable task handler
@@ -782,39 +792,39 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public String getDataDir() {
-    String dataDir = Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
+    String dataDir = Runtime.getOptions().dataDir + fs + getClass().getSimpleName();
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName();
+    return Runtime.getOptions().dataDir + fs + getClass().getSimpleName();
   }
 
   public String getDataInstanceDir() {
-    String dataDir = Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    String dataDir = Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().dataDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
   public String getResourceDir() {
-    String dataDir = Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName();
+    String dataDir = Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName();
+    return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
   }
 
   public String getResourceInstanceDir() {
-    String dataDir = Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    String dataDir = Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().resourceDir + File.separator + getClass().getSimpleName() + File.separator + getName();
+    return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
   // FIXME - make a static initialization part !!!
@@ -1283,7 +1293,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
    */
 
   public String getServiceResourceFile(String subpath) {
-    return FileIO.resourceToString(getSimpleName() + File.separator + subpath);
+    return FileIO.resourceToString(getSimpleName() + fs + subpath);
   }
 
   @Override
@@ -1593,7 +1603,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   }
 
   public JsonElement loadJsonTree() throws IOException {
-    String filename = String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+    String filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
     String json = FileIO.toString(filename);
     return loadJsonTree(json);
   }
@@ -1648,7 +1658,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
     if (inCfgFileName == null) {
-      filename = String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName()));
+      filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
     } else {
       filename = inCfgFileName;
     }
@@ -1916,7 +1926,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean save() {
 
     try {
-      File cfg = new File(String.format("%s%s%s.json", FileIO.getCfgDir(), File.separator, String.format("%s-%s", getClass().getSimpleName(), getName())));
+      File cfg = new File(String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName())));
       // serializer.write(this, cfg);
       // this is a spammy log message
       // info("saving %s", cfg.getName());
@@ -1939,7 +1949,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
   public boolean save(Object o, String cfgFileName) {
 
     try {
-      File cfg = new File(String.format("%s%s%s", FileIO.getCfgDir(), File.separator, cfgFileName));
+      File cfg = new File(String.format("%s%s%s", FileIO.getCfgDir(), fs, cfgFileName));
       String s = CodecUtils.toJson(o);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
@@ -1955,7 +1965,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     // saves user data in the .myrobotlab directory
     // with the file naming convention of name.<cfgFileName>
     try {
-      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), File.separator, this.getName(), cfgFileName), data);
+      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), fs, this.getName(), cfgFileName), data);
     } catch (Exception e) {
       Logging.logError(e);
       return false;
@@ -2607,12 +2617,12 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * @return the file to returned or null if does not exist
    */
   public File getFile(String filename) {
-    File file = new File(getDataDir() + File.separator + filename);
+    File file = new File(getDataDir() + fs + filename);
     if (file.exists()) {
       log.info("found file in data directory - {}", file.getAbsolutePath());
       return file;
     }
-    file = new File(getResourceDir() + File.separator + filename);
+    file = new File(getResourceDir() + fs + filename);
     if (file.exists()) {
       log.info("found file in resource directory - {}", file.getAbsolutePath());
       return file;

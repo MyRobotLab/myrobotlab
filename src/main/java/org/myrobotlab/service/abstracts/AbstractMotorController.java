@@ -84,7 +84,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   @Override
   public void detach() {
     for (String name : motors.keySet()) {
-      Motor m = (Motor) Runtime.getService(name);
+      MotorControl m = (MotorControl) Runtime.getService(name);
       if (m != null) {
         m.detach(this);
       }
