@@ -1,6 +1,9 @@
 package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
@@ -14,9 +17,11 @@ import com.jme3.scene.Spatial.CullHint;
 public class IMData {
 
 	private transient HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
-	private HashMap<String, IMPart> parts = new HashMap<String, IMPart>();
+	private ConcurrentHashMap<String, IMPart> parts = new ConcurrentHashMap<String, IMPart>();
 	private HashMap<String, String> firstParts = new HashMap<String, String>();
 	private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
+	private HashMap<String, Matrix> inputMatrixs = new HashMap<String, Matrix>();
+	private HashMap<String, String> armLinkTos = new HashMap<String, String>();
 	private long lastUpdatePositionTimeMs;
 	
 	
@@ -78,19 +83,42 @@ public class IMData {
 	private void updatePartPosition() {
 		//update no more than once/10 ms
 		//if (lastUpdatePositionTimeMs - System.currentTimeMillis() < 10) return;
+		Set<String> done = new HashSet<String>();
+		
 		for (IMEngine engine : engines.values()){
-			Matrix armMatrix = engine.getInputMatrix();
-			IMPart part = getPart(firstParts.get(engine.getName()));
-			while (part != null){
-				part.setOrigin(armMatrix);
-				DHLink link = part.getDHLink(engine.getName());
-				Matrix s = link.resolveMatrix();
-				armMatrix = armMatrix.multiply(s);
-				part.setEnd(armMatrix);
-				String nextPartName = part.getNextLink(engine.getName());
-				part = getPart(nextPartName);
-			}
+			checkPreRequireUpdatePosition(engine, done);
+			updateArmPosition(engine);
+			done.add(engine.getName());
 		}
+	}
+	
+	private void checkPreRequireUpdatePosition(IMEngine engine, Set<String> done){
+		if (armLinkTos.containsKey(engine.getName()) && !done.contains(engine.getName())){
+			String pre = armLinkTos.get(engine.getName());
+			checkPreRequireUpdatePosition(getArm(armLinkTos.get(engine.getName())),done);
+			inputMatrixs.put(engine.getName(),updateArmPosition(getArm(pre)));
+			done.add(pre);
+		}
+		
+	}
+
+	private Matrix updateArmPosition(IMEngine engine) {
+		Matrix armMatrix = inputMatrixs.getOrDefault(engine.getName(), new Matrix(4,4).loadIdentity());
+		IMPart part = getPart(firstParts.get(engine.getName()));
+		while (part != null){
+			part.setOrigin(armMatrix);
+			DHLink link = part.getDHLink(engine.getName());
+			if (controls.containsKey(part.getName())){
+				link.addPositionValue(getControl(part.getControl(engine.getName())).getPos());
+			}
+			Matrix s = link.resolveMatrix();
+			armMatrix = armMatrix.multiply(s);
+			part.setEnd(armMatrix);
+			String nextPartName = part.getNextLink(engine.getName());
+			parts.put(part.getName(), part);
+			part = getPart(nextPartName);
+		}
+		return armMatrix;
 	}
 
 	public String getFirstPart(String armName) {
@@ -101,8 +129,20 @@ public class IMData {
 		return controls.get(controlName);
 	}
 
-	public HashMap<String,IMPart> getParts() {
+	public ConcurrentHashMap<String,IMPart> getParts() {
 		return parts;
+	}
+
+	public void addInputMatrix(String armName, Matrix inputMatrix) {
+		inputMatrixs.put(armName, inputMatrix);
+	}
+
+	public void linkArmTo(String armName, String linkTo) {
+		armLinkTos.put(armName, linkTo);
+	}
+
+	public Matrix getInputMatrix(String arm) {
+		return inputMatrixs.getOrDefault(arm, Util.getIdentityMatrix());
 	}
 
 	

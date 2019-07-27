@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.kinematics.DHLink;
+import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.MathUtils;
@@ -29,9 +30,10 @@ public class IMPart {
 	private Double radius = 0.1;
 	private String modelPath;
 	private float scale = 1;
-	private Point initialTranslateRotate;
-	private Matrix origin = FKinematics.getIdentityMatrix();
-	private Matrix end = FKinematics.getIdentityMatrix();
+	private Point initialTranslateRotate = new Point(0,0,0,0,0,0);
+	private Matrix origin = Util.getIdentityMatrix();
+	private Matrix end = Util.getIdentityMatrix();
+	private boolean visible = true;
 
 	public IMPart(String partName){
 		name = partName;
@@ -123,4 +125,66 @@ public class IMPart {
 	public Point getInitialTranslateRotate() {
 		return initialTranslateRotate;
 	}
+
+
+
+	/**
+	 * @return the origin
+	 */
+	public Matrix getOrigin() {
+		return origin;
+	}
+
+
+
+	public Matrix getEnd() {
+		return end;
+	}
+
+
+
+	public void setDHType(String arm, DHLinkType dhLinkType) {
+		DHLinks.get(arm).setType(dhLinkType);
+	}
+
+
+
+	public void linkTo(String arm, String nextLink) {
+		nextLinks.put(arm, nextLink);
+	}
+
+
+
+	public double getRadius() {
+		return radius;
+	}
+	
+	public Point getOriginPoint(){
+		return Util.matrixToPoint(origin);
+	}
+
+
+
+	public Point getEndPoint() {
+		return Util.matrixToPoint(end);
+	}
+	
+	public double getLength() {
+		Point origin = getOriginPoint();
+		Point end = getEndPoint();
+		return (Math.sqrt(Math.pow(origin.getX() - end.getX(), 2) + Math.pow(origin.getY() - end.getY(), 2) + Math.pow(origin.getZ() - end.getZ(), 2)));
+	}
+
+
+
+	public void setVisible(boolean b) {
+		visible  = b;
+	}
+
+
+
+	public boolean isVisible() {
+		return visible;
+	}
+
 }

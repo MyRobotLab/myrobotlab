@@ -13,9 +13,9 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
  */
 public class IMControl {
 	private String name;
-	private Double speed;
-	private Double targetPos;
-	private Double pos;
+	private Double speed = 0.1;
+	private Double targetPos = 0.0;
+	private Double pos = 0.0;
 	private ServoStatus state;
 
 	IMControl(String name){

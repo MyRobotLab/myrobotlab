@@ -367,4 +367,18 @@ public class Matrix implements Serializable {
         ret.elements[c][r] = elements[r][c];
     return ret;
   }
+  
+  public Matrix loadIdentity(){
+	  for (int r = 0; r < numRows; r++){
+		  for (int c = 0; c < numCols; c++){
+			  if (c == r) {
+				  elements[r][c] = 1;
+			  }
+			  else{
+				  elements[r][c] = 0;
+			  }
+		  }
+	  }
+	  return this;
+  }
 }

@@ -217,7 +217,7 @@ public class JmeManager implements ActionListener {
 		    }
 		    Point ip = part.getInitialTranslateRotate();
 		    node.setLocalTranslation((float)ip.getX()*part.getScale(), (float)ip.getY()*part.getScale(), (float)ip.getZ()*part.getScale());
-		    node.setLocalRotation(FKinematics.eulerToMatrix(ip));
+		    node.setLocalRotation(Util.eulerToMatrix3f(ip));
 		    nodes.put(part.getName(), node);
 		    nodeQueue.add(node);
 		}

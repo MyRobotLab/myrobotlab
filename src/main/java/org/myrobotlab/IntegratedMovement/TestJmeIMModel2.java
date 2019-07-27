@@ -24,6 +24,7 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -44,6 +45,7 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
   private boolean ready = false;
   private transient JmeManager2 service;
   private transient Node point;
+private Node point2;
 
   public static void main(String[] args) {
     TestJmeIMModel2 app = new TestJmeIMModel2();
@@ -55,6 +57,8 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
     assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
     Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
     mat.setColor("Color", ColorRGBA.Green);
+    Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+    mat2.setColor("Color", ColorRGBA.Blue);
     viewPort.setBackgroundColor(ColorRGBA.Gray);
     inputManager.setCursorVisible(true);
     flyCam.setEnabled(false);
@@ -70,22 +74,30 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
     sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
     rootNode.addLight(sun);
     cam.setLocation(new Vector3f(0f, 0f, 900f));
-    rootNode.scale(.40f);
-    rootNode.setLocalTranslation(0, -200, 0);
+    //rootNode.scale(.40f);
+    //rootNode.setLocalTranslation(0, -200, 0);
     Cylinder c = new Cylinder(8, 50, 5, 10, true, false);
     Geometry geom = new Geometry("Cylinder", c);
     geom.setMaterial(mat);
     point = new Node("point");
     point.attachChild(geom);
     rootNode.attachChild(point);
-    ready = true;
+    Cylinder c2 = new Cylinder(8, 50, 5, 10, true, false);
+    Geometry geom2 = new Geometry("Cylinder", c2);
+    geom2.setMaterial(mat2);
+    point2 = new Node("point");
+    point2.attachChild(geom2);
+    point2.setLocalTranslation(300, 0, 0);
+    rootNode.attachChild(point2);
+   ready = true;
     synchronized (service) {
       if (service != null) {
         service.notifyAll();
       }
     }
+	inputManager = getInputManager();
     inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(analogListener, "MouseClickL");
+    inputManager.addListener(service, "MouseClickL");
     inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
     inputManager.addListener(analogListener, "MouseClickR");
     inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
@@ -109,6 +121,7 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
     // right
     // arrow
     inputManager.addListener(analogListener, new String[] { "Left", "Right", "Up", "Down" });
+    service.simpleInitApp();
   }
 
   /**
@@ -130,7 +143,7 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
    *          : initial angle of rotation of the part (in radian)
    */
   public void addPart(String name, String modelPath, float modelScale, String hookTo, Vector3f relativePosition, Vector3f rotationMask, float initialAngle) {
-    Node node = new Node(name);
+	Node node = new Node(name);
     if (hookTo != null) {
       // Node hookNode = nodes.get(hookTo);
       // hookNode.attachChild(node);
@@ -198,12 +211,12 @@ public class TestJmeIMModel2 extends SimpleApplication implements IntegratedMove
         node.setUserData("currentAngle", event.pos.floatValue());
         nodes.put(event.name, node);
       }
-
     }
     while (pointQueue.size() > 0) {
       Point p = pointQueue.remove();
       point.setLocalTranslation((float) p.getX(), (float) p.getZ(), (float) p.getY());
     }
+    service.simpleUpdate(tpf);
   }
 
   public boolean isReady() {

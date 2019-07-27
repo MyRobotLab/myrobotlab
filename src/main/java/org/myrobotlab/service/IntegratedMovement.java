@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.IntegratedMovement.CollisionDectection;
 import org.myrobotlab.IntegratedMovement.CollisionItem;
-import org.myrobotlab.IntegratedMovement.FKinematics;
+import org.myrobotlab.IntegratedMovement.Util;
 import org.myrobotlab.IntegratedMovement.GravityCenter;
 import org.myrobotlab.IntegratedMovement.IMData;
 import org.myrobotlab.IntegratedMovement.IMEngine;
@@ -126,7 +126,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   public Point currentPosition(String arm) {
-	  return FKinematics.getPosition(imData, arm, null);
+	  return Util.getPosition(imData, arm, null);
 /*	  IMEngine arm = imData.getArm(name);
 	  if (arm != null){
       return arm.getPosition();
@@ -227,7 +227,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // they need to go so that their part they where attach to
     // move by the input degree
     HobbyServo midStom = (HobbyServo) Runtime.start("midStom", "HobbyServo");
-    midStom.map(-75.0, 75.0, 148.0, 38.0);
+    midStom.map(-90.0, 90.0, 148.0, 38.0);
     midStom.attach(arduino.getName(), 26, 0.0);
     midStom.setSpeed(13.0);
     HobbyServo topStom = (HobbyServo) Runtime.start("topStom", "HobbyServo");
@@ -289,23 +289,37 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     IMPart partMidStom = ik.createPart("midStom");
     ik.setControl("torso", partMidStom,midStom);
-    partMidStom.setDHParameters("torso",113,180,0,-90);
+    partMidStom.setDHParameters("torso",0, -90, -113, 0);
+    partMidStom.setDHType("torso",DHLinkType.REVOLUTE_ALPHA);
     partMidStom.setRadius(150.0);
-    partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(0,0,0,0,0,0));
-    ik.setControl("torsoReverse", partMidStom, midStom);
-    partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
-    ik.addPart(partMidStom);
+    partMidStom.set3DModel("Models/mtorso.j3o", 1f, new Point(-0,0,0, 0,90, 0));
+    partMidStom.linkTo("torso","topStom");
+    //ik.setControl("torsoReverse", partMidStom, midStom);
+    //partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
+    ik.attach(partMidStom);
     
     IMPart partTopStom = ik.createPart("topStom");
     ik.setControl("torso", partTopStom, topStom);
-    //partMidStom.setDHParameters(", d, theta, r, alpha);
+    partTopStom.setDHParameters("torso", 0, 0, -290, 0);
+    partTopStom.setRadius(100.0);
+    partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-10,15,0,90, 0));
+    ik.attach(partTopStom);
+    
+    IMPart partLeftArmAttach = ik.createPart("leftArmAttach");
+    partLeftArmAttach.setDHParameters("leftArm", 0, -90, 143, 90);
+    partLeftArmAttach.setRadius(10.0);
+    partLeftArmAttach.setVisible(false);
+    ik.attach(partLeftArmAttach);
+    
     
     // #define the DH parameters for the ik service
     ik.addArm("torso");
     ik.setInputMatrix("torso",ik.createInputMatrix(0, 0, 0, 0, 0, 0));
     ik.setFirstPart("torso",partMidStom.getName());
     
-    
+    ik.addArm("leftArm");
+    ik.linkArmTo("leftArm", "torso");
+    ik.setFirstPart("leftArm", "leftArmAttach");
     
 /*    ik.addArm("leftArm");
     
@@ -496,13 +510,21 @@ print ik.currentPosition("leftArm")
   }
 
 
+private void linkArmTo(String armName, String linkTo) {
+	if (imData.getArm(armName) == null || imData.getArm(linkTo) == null) {
+		log.info("no arm named {} or {} in linkArmTo)",armName, linkTo);
+	}
+	imData.linkArmTo(armName, linkTo);
+	
+}
+
 private void setControl(String armName, IMPart part, ServoControl control) {
 	part.setControl(armName, control.getName());
 	subscribe(control.getName(),"publishMoveTo", getName(), "onMoveTo");
 	subscribe(control.getName(),"publishServoData", getName(), "onServoData");
 }
 
-public void addPart(IMPart part) {
+public void attach(IMPart part) {
 	imData.addPart(part);
 }
 
@@ -529,13 +551,7 @@ public void setInputMatrix(String armName, Matrix inputMatrix) {
 		log.info("wrong dimention for setInputMatrix (must be 4 x 4)");
 	}
 	else {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null){
-			arm.setInputMatrix(inputMatrix);
-		}
-		else{
-			log.info("unknown arm {} for setInputMatrix",armName);
-		}
+		imData.addInputMatrix(armName, inputMatrix);
 	}
 }
 
@@ -684,9 +700,10 @@ public void startEngine(String armName) {
 	      map3d.updateKinectPosition(currentPosition(kinectName));
 	    }
 	    if (jmeApp != null) {
-	      jmeApp.updatePosition(data);
+	      //jmeApp.updatePosition(data);
 	    }
 	    imData.onServoData(data);
+	   // jmeManager.updatePosition(imData);
 	  }
 
   public void moveTo(String armName, String objectName, ObjectPointLocation location, String lastDHLink) {
@@ -790,9 +807,9 @@ public void startEngine(String armName) {
 		  log.info("JmeApp already started");
 		  return;
 	  }
-	  jmeManager = new JmeManager2();
+	  jmeManager = new JmeManager2(this);
 	  jmeManager.start("JmeIMModel", "Jme3App");
-      jmeManager.loadParts(imData);
+      //jmeManager.loadParts(imData);
 
   }
 
@@ -957,5 +974,8 @@ public void startEngine(String armName) {
 	  this.openni = openni;
 	}
 
+	public IMData getData(){
+			return imData;
+	}
   
 }
