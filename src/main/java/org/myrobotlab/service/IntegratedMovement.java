@@ -289,8 +289,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     IMPart partMidStom = ik.createPart("midStom");
     ik.setControl("torso", partMidStom,midStom);
-    partMidStom.setDHParameters("torso",0, -90, -113, 0);
-    partMidStom.setDHType("torso",DHLinkType.REVOLUTE_ALPHA);
+    partMidStom.setDHParameters("torso",0, -90, -113, 0, DHLinkType.REVOLUTE_ALPHA);
     partMidStom.setRadius(150.0);
     partMidStom.set3DModel("Models/mtorso.j3o", 1f, new Point(-0,0,0, 0,90, 0));
     partMidStom.linkTo("torso","topStom");
@@ -300,17 +299,19 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     
     IMPart partTopStom = ik.createPart("topStom");
     ik.setControl("torso", partTopStom, topStom);
-    partTopStom.setDHParameters("torso", 0, 0, -290, 0);
+    partTopStom.setDHParameters("torso", 0, 0, -300, 0);
     partTopStom.setRadius(100.0);
-    partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-10,15,0,90, 0));
+    partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-0,15,0,90, 0));
     ik.attach(partTopStom);
     
     IMPart partLeftArmAttach = ik.createPart("leftArmAttach");
     partLeftArmAttach.setDHParameters("leftArm", 0, -90, 143, 90);
     partLeftArmAttach.setRadius(10.0);
-    partLeftArmAttach.setVisible(false);
+    partLeftArmAttach.setVisible(true);
     ik.attach(partLeftArmAttach);
     
+    IMPart partLeftOmoplate = ik.createPart("leftOmoplate");
+    partLeftOmoplate.setDHParameters("leftArm", 0, -5.6, 45, -90);
     
     // #define the DH parameters for the ik service
     ik.addArm("torso");

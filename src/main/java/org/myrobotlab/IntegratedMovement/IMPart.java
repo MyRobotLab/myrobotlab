@@ -53,9 +53,8 @@ public class IMPart {
 
 
 
-	public void setDHParameters(String armModel, int d, int theta, int r, int alpha) {
-		DHLink link = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-		DHLinks.put(armModel, link);
+	public void setDHParameters(String armModel, double d, double theta, double r, double alpha) {
+		setDHParameters(armModel, d, theta, r, alpha, DHLinkType.REVOLUTE);
 	}
 
 
@@ -185,6 +184,13 @@ public class IMPart {
 
 	public boolean isVisible() {
 		return visible;
+	}
+
+
+
+	public void setDHParameters(String armName, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
+		DHLink link = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha), dhLinkType);
+		DHLinks.put(armModel, link);
 	}
 
 }

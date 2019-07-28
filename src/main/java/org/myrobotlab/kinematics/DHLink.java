@@ -57,6 +57,10 @@ public class DHLink implements Serializable {
   }
 
   public DHLink(String name, double d, double r, double theta, double alpha, double offset) {
+	  this(name, d, r, theta, alpha, 0, DHLinkType.REVOLUTE);
+  }
+
+  public DHLink(String name, double d, double r, double theta, double alpha, double offset, DHLinkType linkType) {
     super();
     // The name of the servo that we are controlling.
     this.name = name;
@@ -67,7 +71,7 @@ public class DHLink implements Serializable {
     this.alpha = alpha;
     this.offset = offset;
     //
-    this.type = DHLinkType.REVOLUTE;
+    this.type = linkType;
     // m = resolveMatrix();
   }
 
@@ -89,7 +93,11 @@ public class DHLink implements Serializable {
     this.currentPos = copy.currentPos;
   }
 
-  /**
+  public DHLink(String name, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
+	this(name, d, theta, r, alpha, 0, dhLinkType);
+  }
+
+/**
    * @return a 4x4 homogenous transformation matrix for the given D-H parameters
    */
   public Matrix resolveMatrix() {
