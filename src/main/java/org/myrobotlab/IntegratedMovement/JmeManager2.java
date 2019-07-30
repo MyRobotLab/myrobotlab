@@ -104,28 +104,41 @@ public class JmeManager2 implements ActionListener {
 		        n.attachChild(spatial);
 		        node.attachChild(n);
 			    Point ip = part.getInitialTranslateRotate();
-				Quaternion i = new Quaternion().fromRotationMatrix(Util.eulerToMatrix3f(ip));
+			    float[] angles = new float[3];
+			    Quaternion i = new Quaternion().IDENTITY;
+			    Quaternion q1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getYaw(), Vector3f.UNIT_Y);
+			    Quaternion q2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getRoll(), Vector3f.UNIT_Z);
+			    Quaternion q3 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getPitch(), Vector3f.UNIT_X);
+				i = q1.multLocal(q2).multLocal(q3);
 				n.setLocalRotation(i);
+				spatial.setLocalTranslation(Util.pointToVector3f(ip));
 		    }
 		    else {
 		        Vector3f ori = Util.pointToVector3f(part.getOriginPoint());
 		        Vector3f end = Util.pointToVector3f(part.getEndPoint());
+		        Vector3f it = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
 		        Cylinder c = new Cylinder(8, 20, (float) part.getRadius(), (float) part.getLength(), true, false);
 		        Geometry geom = new Geometry("Cylinder", c);
 		        geom.setName(part.getName());
 		        geom.setMaterial(mat);
-		        Vector3f interpolate = FastMath.interpolateLinear(0.5f, ori, end);
 		        //geom.lookAt(end, Vector3f.UNIT_Z);
 		        Node n = new Node("n");
-		        Quaternion q = new Quaternion().fromAngles(0,(float)(Math.PI/2),0);
+		        Vector3f delta = end.subtract(ori);
+		        float length = (float)part.getLength();
+		        if (it.getZ() < 0) length = -length;
+		        Vector3f interpolate = FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), delta);
+		        
+		        //Quaternion q = new Quaternion().fromAngles((float)(Math.PI/2),0,0);
+		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, length)));
+		        //geom.setLocalRotation(new Quaternion().fromAngles(0, -FastMath.PI/2, 0));
+		        Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
+		        n.setLocalRotation(q/*.inverse()*/);
+		        
 		        n.attachChild(geom);
-		        geom.setLocalRotation(q);
-		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f((float)-part.getLength(),0,0)));
+//		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, ori, end));
+
+		       // n.rotate(0,0,FastMath.PI/2);
 		        node.attachChild(n);
-			    Point ip = part.getInitialTranslateRotate();
-			    //ip.add(new Point(0,0,0,0,0,90));
-				Quaternion i = new Quaternion().fromRotationMatrix(Util.eulerToMatrix3f(ip));
-				n.setLocalRotation(i);
 		        
 		    }
 		    nodes.put(part.getName(), node);
@@ -176,13 +189,11 @@ public class JmeManager2 implements ActionListener {
 			Point e = Util.matrixToPoint(end);
 			Vector3f y = new Vector3f();
 			y.setX(((float)o.getX()-y.getX()+(float)ini.getX()));
-			y.setY(((float)o.getY()-y.getY()+(float)ini.getY()));
-			y.setZ(((float)o.getZ()-y.getZ()+(float)ini.getZ()));
+			y.setY(((float)o.getZ()-y.getY()+(float)ini.getY()));
+			y.setZ(((float)o.getY()-y.getZ()+(float)ini.getZ()));
 			node.setLocalTranslation(y);
-			Quaternion qm = new Quaternion().fromRotationMatrix(Util.matrixToMatrix3f(end));
-			Quaternion i = new Quaternion().fromRotationMatrix(Util.eulerToMatrix3f(ini));
-			//qm.multLocal(i);
-			node.setLocalRotation(qm);
+			Quaternion i = Util.matrixToQuaternion(end);
+			node.setLocalRotation(i);
 			if (part.isVisible()){
 				node.setCullHint(CullHint.Never);
 			}

@@ -34,6 +34,7 @@ public class IMPart {
 	private Matrix origin = Util.getIdentityMatrix();
 	private Matrix end = Util.getIdentityMatrix();
 	private boolean visible = true;
+	private Matrix internTransform = Util.getIdentityMatrix();
 
 	public IMPart(String partName){
 		name = partName;
@@ -190,7 +191,25 @@ public class IMPart {
 
 	public void setDHParameters(String armName, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
 		DHLink link = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha), dhLinkType);
-		DHLinks.put(armModel, link);
+		DHLinks.put(armName, link);
+	}
+
+
+
+	/**
+	 * @return the internTransform
+	 */
+	public Matrix getInternTransform() {
+		return internTransform;
+	}
+
+
+
+	/**
+	 * @param internTransform the internTransform to set
+	 */
+	public void setInternTransform(Matrix internTransform) {
+		this.internTransform = internTransform;
 	}
 
 }

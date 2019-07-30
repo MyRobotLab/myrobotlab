@@ -165,6 +165,72 @@ public class DHLink implements Serializable {
 
   }
 
+  public Matrix resolveMatrixZeroAlpha() {
+	  	double zeroAlpha = 0; 
+	    Matrix m = new Matrix(4, 4);
+	    // elements we need
+	    double cosTheta = Math.cos(theta);
+	    double sinTheta = Math.sin(theta);
+	    double cosAlpha = Math.cos(zeroAlpha);
+	    double sinAlpha = Math.sin(zeroAlpha);
+
+	    // cosTheta = zeroQuantize(cosTheta);
+	    // sinTheta = zeroQuantize(sinTheta);
+	    // cosAlpha= zeroQuantize(cosAlpha);
+	    // sinAlpha = zeroQuantize(sinAlpha);
+
+	    // // first row of homogenous xform
+	    // m.elements[0][0] = cosTheta;
+	    // m.elements[0][1] = -1 * sinTheta;
+	    // m.elements[0][2] = 0;
+	    // m.elements[0][3] = r;
+	    //
+	    // // 2nd row of homogenous xform
+	    // m.elements[1][0] = sinTheta * cosAlpha;
+	    // m.elements[1][1] = cosTheta * cosAlpha;
+	    // m.elements[1][2] = -1 * sinAlpha;
+	    // m.elements[1][3] = -1 * d * sinAlpha;
+	    //
+	    // // 3rd row of homogenous xform
+	    // m.elements[2][0] = sinTheta * sinAlpha;
+	    // m.elements[2][1] = cosTheta * sinAlpha;
+	    // m.elements[2][2] = cosAlpha;
+	    // m.elements[2][3] = d * cosAlpha;
+	    //
+	    // // 4th row of homogenous xform
+	    // m.elements[3][0] = 0;
+	    // m.elements[3][1] = 0;
+	    // m.elements[3][2] = 0;
+	    // m.elements[3][3] = 1;
+
+	    // first row of homogenous xform
+	    m.elements[0][0] = cosTheta;
+	    m.elements[0][1] = -1 * cosAlpha * sinTheta;
+	    m.elements[0][2] = sinAlpha * sinTheta;
+	    m.elements[0][3] = r * cosTheta;
+
+	    // 2nd row of homogenous xform
+	    m.elements[1][0] = sinTheta;
+	    m.elements[1][1] = cosAlpha * cosTheta;
+	    m.elements[1][2] = -1 * sinAlpha * cosTheta;
+	    m.elements[1][3] = r * sinTheta;
+
+	    // 3rd row of homogenous xform
+	    m.elements[2][0] = 0;
+	    m.elements[2][1] = sinAlpha;
+	    m.elements[2][2] = cosAlpha;
+	    m.elements[2][3] = d;
+
+	    // 4th row of homogenous xform
+	    m.elements[3][0] = 0;
+	    m.elements[3][1] = 0;
+	    m.elements[3][2] = 0;
+	    m.elements[3][3] = 1;
+
+	    return m;
+
+	  }
+  
   public double zeroQuantize(double value) {
     // TODO: move this to a math utils class.
     double resolution = 0.000001;

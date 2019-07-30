@@ -287,31 +287,31 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // //#bicep.setMinMax(5,90)
     // Rfinger.moveTo(90);
 
-    IMPart partMidStom = ik.createPart("midStom");
+    IMPart partMidStom = ik.createPart("midStom", 10.0);
     ik.setControl("torso", partMidStom,midStom);
-    partMidStom.setDHParameters("torso",0, -90, -113, 0, DHLinkType.REVOLUTE_ALPHA);
-    partMidStom.setRadius(150.0);
-    partMidStom.set3DModel("Models/mtorso.j3o", 1f, new Point(-0,0,0, 0,90, 0));
+    partMidStom.setDHParameters("torso",113, 0, 0, 90, DHLinkType.REVOLUTE);
+    //partMidStom.set3DModel("Models/mtorso.j3o", 1f, new Point(-0,0,0, 0,-90, -90));
     partMidStom.linkTo("torso","topStom");
     //ik.setControl("torsoReverse", partMidStom, midStom);
     //partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
     ik.attach(partMidStom);
     
-    IMPart partTopStom = ik.createPart("topStom");
+    IMPart partTopStom = ik.createPart("topStom", 10.0);
     ik.setControl("torso", partTopStom, topStom);
-    partTopStom.setDHParameters("torso", 0, 0, -300, 0);
-    partTopStom.setRadius(100.0);
-    partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-0,15,0,90, 0));
+    partTopStom.setDHParameters("torso", 0, 90, 300, 90);
+    //partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-0,15,0,90, 0));
     ik.attach(partTopStom);
     
-    IMPart partLeftArmAttach = ik.createPart("leftArmAttach");
+    IMPart partLeftArmAttach = ik.createPart("leftArmAttach", 10.0);
     partLeftArmAttach.setDHParameters("leftArm", 0, -90, 143, 90);
-    partLeftArmAttach.setRadius(10.0);
     partLeftArmAttach.setVisible(true);
-    ik.attach(partLeftArmAttach);
+    partLeftArmAttach.linkTo("leftArm", "leftOmoplate");
+    //ik.attach(partLeftArmAttach);
     
-    IMPart partLeftOmoplate = ik.createPart("leftOmoplate");
+    IMPart partLeftOmoplate = ik.createPart("leftOmoplate",10);
     partLeftOmoplate.setDHParameters("leftArm", 0, -5.6, 45, -90);
+    ik.setControl("leftArm", partLeftOmoplate, omoplate);
+    //ik.attach(partLeftOmoplate);
     
     // #define the DH parameters for the ik service
     ik.addArm("torso");
@@ -542,8 +542,9 @@ public void setFirstPart(String armName, String partName) {
 	
 }
 
-public IMPart createPart(String partName) {
+public IMPart createPart(String partName, double radius) {
 	IMPart part = new IMPart(partName);
+	part.setRadius(radius);
 	return part;
 }
 

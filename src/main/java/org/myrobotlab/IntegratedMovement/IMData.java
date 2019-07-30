@@ -112,8 +112,12 @@ public class IMData {
 				link.addPositionValue(getControl(part.getControl(engine.getName())).getPos());
 			}
 			Matrix s = link.resolveMatrix();
-			armMatrix = armMatrix.multiply(s);
-			part.setEnd(armMatrix);
+			part.setInternTransform(s);
+			Matrix armMatrix1 = armMatrix.multiply(s);
+			s = link.resolveMatrixZeroAlpha();
+			Matrix armMatrix2 = armMatrix.multiply(s);
+			part.setEnd(armMatrix2);
+			armMatrix = armMatrix1;
 			String nextPartName = part.getNextLink(engine.getName());
 			parts.put(part.getName(), part);
 			part = getPart(nextPartName);
