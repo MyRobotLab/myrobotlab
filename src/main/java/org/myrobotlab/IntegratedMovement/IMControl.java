@@ -19,7 +19,7 @@ public class IMControl {
 	private ServoStatus state;
 
 	IMControl(String name){
-		this.name = name;
+		this.setName(name);
 	}
 
 	public void setState(ServoStatus state) {
@@ -39,5 +39,34 @@ public class IMControl {
 	}
 	public Double getPos(){
 		return pos;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the speed
+	 */
+	public Double getSpeed() {
+		return speed;
+	}
+
+	/**
+	 * @return the targetPos
+	 */
+	public Double getTargetPos() {
+		return targetPos;
+	}
+
+	/**
+	 * @return the state
+	 */
+	public ServoStatus getState() {
+		return state;
 	}
 }

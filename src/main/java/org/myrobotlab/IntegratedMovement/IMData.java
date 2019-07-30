@@ -11,8 +11,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
-import com.jme3.scene.Spatial.CullHint;
-
 
 public class IMData {
 

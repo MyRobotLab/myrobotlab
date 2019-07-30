@@ -5,15 +5,11 @@ package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
 
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-
-import com.jme3.math.Vector3f;
 
 /**
  * Contain Info about a part or object that can be used by IntegratedMovement

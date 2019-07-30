@@ -14,11 +14,9 @@ import org.myrobotlab.IntegratedMovement.IMData;
 import org.myrobotlab.IntegratedMovement.IMEngine;
 import org.myrobotlab.IntegratedMovement.IMPart;
 import org.myrobotlab.IntegratedMovement.JmeManager;
-import org.myrobotlab.IntegratedMovement.JmeManager2;
 import org.myrobotlab.IntegratedMovement.Map3D;
 import org.myrobotlab.IntegratedMovement.Map3DPoint;
 import org.myrobotlab.IntegratedMovement.PositionData;
-import org.myrobotlab.IntegratedMovement.TestJmeIMModel;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
@@ -31,21 +29,15 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.ServoDataListener;
-import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
-
 import com.jme3.math.Vector3f;
-import com.jme3.system.AppSettings;
 
 /**
  * 
@@ -108,11 +100,10 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   private transient IntegratedMovementInterface jmeApp = null;
 
-  private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
   public transient GravityCenter cog = new GravityCenter(this);
   
   private IMData imData = new IMData();
-  private transient JmeManager2 jmeManager=null;
+  private transient JmeManager jmeManager=null;
 
   /**
    * @return the jmeApp
@@ -127,13 +118,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   public Point currentPosition(String arm) {
 	  return Util.getPosition(imData, arm, null);
-/*	  IMEngine arm = imData.getArm(name);
-	  if (arm != null){
-      return arm.getPosition();
-    }
-    log.info("IK service have no data for {}", arm);
-    return new Point(0, 0, 0, 0, 0, 0);
-*/  }
+  }
 
   public void moveTo(String arm, double x, double y, double z) {
     moveTo(arm, x, y, z, null);
@@ -193,22 +178,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 	  return new double[0][0];
   }
 
-/*  public DHRobotArm getArm(String arm) {
-    if (engines.containsKey(arm)) {
-      return engines.get(arm).getDHRobotArm();
-    } else {
-      log.error("Unknow DHRobotArm {}", arm);
-      DHRobotArm newArm = new DHRobotArm();
-      newArm.name = arm;
-      return newArm;
-    }
-  }
-*/
-/*  public void addArm(String name, DHRobotArm currentArm) {
-    IMEngine newEngine = new IMEngine(name, currentArm, this);
-    engines.put(name, newEngine);
-  }
-*/
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
 
@@ -511,7 +480,7 @@ print ik.currentPosition("leftArm")
   }
 
 
-private void linkArmTo(String armName, String linkTo) {
+public void linkArmTo(String armName, String linkTo) {
 	if (imData.getArm(armName) == null || imData.getArm(linkTo) == null) {
 		log.info("no arm named {} or {} in linkArmTo)",armName, linkTo);
 	}
@@ -519,7 +488,7 @@ private void linkArmTo(String armName, String linkTo) {
 	
 }
 
-private void setControl(String armName, IMPart part, ServoControl control) {
+public void setControl(String armName, IMPart part, ServoControl control) {
 	part.setControl(armName, control.getName());
 	subscribe(control.getName(),"publishMoveTo", getName(), "onMoveTo");
 	subscribe(control.getName(),"publishServoData", getName(), "onServoData");
@@ -588,9 +557,32 @@ public void startEngine(String armName) {
     ServiceType meta = new ServiceType(IntegratedMovement.class.getCanonicalName());
     meta.addDescription("a 3D kinematics service supporting D-H parameters");
     meta.addCategory("robot", "control");
+    meta.addCategory("simulator");
     meta.addPeer("openni", "OpenNi", "Kinect service");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.9", "zip");
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
+    String jmeVersion = "3.2.2-stable";
+    meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    // meta.addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
+    meta.addDependency("com.simsilica", "lemur", "1.11.0");
+    meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
+
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
+    meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
+
+    // meta.addDependency("jme3utilities", "Minie", "0.6.2");
+
+    // "new" physics - ik forward kinematics ...
+
+    // not really supposed to use blender models - export to j3o
+    meta.addDependency("org.jmonkeyengine", "jme3-blender", jmeVersion);
+
+    // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
+
+    // audio dependencies
+    meta.addDependency("de.jarnbjo", "j-ogg-all", "1.0.0");
     meta.setAvailable(true);
     return meta;
   }
@@ -605,33 +597,6 @@ public void startEngine(String armName) {
 		  imData.addArm(arm);
     }
 	log.error("Unknow arm {}", armName);
-  }
-
-  public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha) {
-    setDHLink(arm, servo, d, theta, r, alpha, servo.getMin(), servo.getMax());
-  }
-
-  public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha, double minAngle, double maxAngle) {
-	  IMEngine engine = imData.getArm(arm);
-	  if (engine != null) {
-		  DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-		  subscribe(servo.getName(),"publishMoveTo", getName(), "onMoveTo");
-		  subscribe(servo.getName(),"publishServoData", getName(), "onServoData");
-		  servo.attach((ServoDataListener)this);
-		  dhLink.addPositionValue(servo.getPos());
-		  dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
-		  dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
-		  dhLink.setState(ServoStatus.SERVO_STOPPED);
-		  dhLink.setSpeed(servo.getSpeed());
-		  dhLink.setTargetPos(servo.getPos());
-		  dhLink.hasActuator = true;
-		  DHRobotArm dhArm = engine.getDHRobotArm();
-		  dhArm.addLink(dhLink);
-		  engine.setDHRobotArm(dhArm);
-		  imData.addArm(engine);
-    } else {
-      log.error("Unknow arm {}", arm);
-    }
   }
 
   public String addObject(double oX, double oY, double oZ, double eX, double eY, double eZ, String name, double radius, boolean render) {
@@ -783,46 +748,21 @@ public void startEngine(String armName) {
     return imData.getArms().values();
   }
 
-  public void visualize() throws InterruptedException {
-    if (jmeApp != null) {
-      log.info("JmeApp already started");
-      return;
-    }
-    jmeApp = new TestJmeIMModel();
-    // jmeApp.setShowSettings(false);
-    AppSettings settings = new AppSettings(true);
-    settings.setResolution(800, 600);
-    jmeApp.setSettings(settings);
-    jmeApp.setShowSettings(false);
-    jmeApp.setPauseOnLostFocus(false);
-    jmeApp.setService(this);
-    jmeApp.start();
-    // need to wait for jmeApp to be ready or the models won't load
-    synchronized (this) {
-      wait(5000);
-    }
-    // add the existing objects
-    jmeApp.addObject(collisionItems.getItems());
-  }
   public void startSimulator(){
 	  if (jmeManager != null){
 		  log.info("JmeApp already started");
 		  return;
 	  }
-	  jmeManager = new JmeManager2(this);
+	  jmeManager = new JmeManager(this);
 	  jmeManager.start("JmeIMModel", "Jme3App");
       //jmeManager.loadParts(imData);
 
   }
 
   public synchronized void sendAngles(String name, double positionValueDeg) {
-    double pos = 0;
-    if (maps.containsKey(name)) {
-      pos = maps.get(name).calcInput(positionValueDeg);
-    }
     //invoke("publishAngles", name, pos);
     ServoControl srv = (ServoControl)Runtime.getService(name);
-    if (srv != null) srv.moveTo(pos);
+    if (srv != null) srv.moveTo(positionValueDeg);
   }
 
   public Object[] publishAngles(String name, double positionValueDeg) {

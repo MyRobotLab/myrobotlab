@@ -3,8 +3,6 @@ package org.myrobotlab.IntegratedMovement;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
-
-import com.jme3.math.FastMath;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
