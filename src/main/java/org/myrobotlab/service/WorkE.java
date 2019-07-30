@@ -49,15 +49,16 @@ public class WorkE extends Service implements StatusListener {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(WorkE.class);
-    
-    meta.addPeer("cli", "Cli", "command line interface for worke");
+
+    // meta.addPeer("cli", "Cli", "command line interface for worke");
+    meta.addPeer("git", "Git", "synching repos");
 
     // motor control - output
     meta.addPeer("joystick ", "Joystick", "joystick control");
     meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
-    
+
     meta.addPeer("webgui", "WebGui", "web interface");
 
     // vision - input
@@ -87,75 +88,16 @@ public class WorkE extends Service implements StatusListener {
 
       // LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
-      // Runtime.getInstance(new String[] {"--virtual", "-l", "info"});
-
-      // allows the runtime to be configured by cmdline
-      Runtime.getInstance(args);
-
-      /*
-       * Polly polly = (Polly)Runtime.start("polly", "Polly");
-       * polly.getKeyNames(); Security security = Runtime.getSecurity();
-       * 
-       * security.setKey("amazon.polly.user.key", "xxx");
-       * security.setKey("amazon.polly.user.secret", "xxx");
-       */
-
+    
       // FIXME - should be allowed to do this..
       // Joystick.getControllerNames();
 
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
-      WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
+      // WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
 
       Runtime.start("gui", "SwingGui");
-
-      /*
-       * ProgramAB brain = worke.getBrain(); // FIXME - fix for 2 lines create
-       * and getResponse - use null brain.setCurrentBotName("worke"); // FIXME -
-       * scan directory for bots brain.startSession("default", "worke");
-       * log.info("response {}", brain.getResponse("hello robot"));
-       * log.info("response {}", brain.getResponse("what is a robot?"));
-       * log.info("response {}", brain.getResponse("what is a whale?"));
-       * log.info("response {}", brain.getResponse("my name is george"));
-       * log.info("response {}", brain.getResponse("what is my name?"));
-       * log.info("response {}", brain.getResponse("learn whale is an animal"));
-       * log.info("response {}", brain.getResponse("who am i?"));
-       * log.info("response {}",
-       * brain.getResponse("how tall is the empire state building ?"));
-       */
-
       Runtime.start("worke", "WorkE");
-
-      // worke.unmute();
-
-      // Runtime.start("gui", "SwingGui");
-      // FIXME joystick.virtualize();
-      // FIXME - make joystick.setDeadzone("x", 30, 30) -> setDeadzone(10)
-
-      // FIXME - this is 'really' a motorcontrol thing ? how would a builder
-      // handle it ?
-      // !!! Configuration !!!!
-      // 2 for virtual 0 for "real" worke
-      // worke.setJoystick("Rumble");
-      // worke.setJoystickControllerIndex(0);
-      // worke.setMinMax();
-      // worke.setMotorPortLeft("m1");
-      // worke.setMotorPorts();
-      // !!! Configuration !!!!
-
-      // mouth.speak("hello, my name is worke, what is your name?");
-
-      // FIXME configure stage
-      // FIXME default builder ???
-      // worke.configure();
-
-      // "apply !! configuration"
-      worke.attach();
-      worke.connect();
-      worke.stop();
-      // Runtime.start("servo", "Servo");
-      // Runtime.start("gui", "SwingGui");
-
       Runtime.exportAll("worke.py");
 
     } catch (Exception e) {
@@ -172,7 +114,7 @@ public class WorkE extends Service implements StatusListener {
   transient AbstractSpeechSynthesis mouth;
   transient ProgramAB brain;
   transient AbstractMotorController controller;
-  transient Cli cli;
+  transient Git git;
   transient OpenCV cv;
   transient ImageDisplay display;
   transient AbstractSpeechRecognizer ear;
@@ -181,7 +123,7 @@ public class WorkE extends Service implements StatusListener {
   transient Joystick joystick;
   transient AbstractMotor motorLeft;
   transient WebGui webgui;
-  
+
   // virtual uart for controller
   transient Serial uart = null;
 
@@ -203,7 +145,7 @@ public class WorkE extends Service implements StatusListener {
 
   String serialPort = "/dev/ttyUSB0";
 
-  boolean speakBlocking = false;
+  private String brainPath = "../github";
 
   public WorkE(String n) {
     super(n);
@@ -230,7 +172,7 @@ public class WorkE extends Service implements StatusListener {
 
     setVolume(0.75);
     /// speakBlocking(true);
-
+    // mouth.setBlocking(true);
     mouth.setVoice("Brian"); // Brian
     mouth.addSubstitution("worke", "work-ee");
     mouth.addSubstitution("worky", "work-ee");
@@ -238,7 +180,7 @@ public class WorkE extends Service implements StatusListener {
     mouth.addSubstitution("work e", "work-ee");
 
     if (isVirtual()) {
-      speak("running in virtual mode");
+      speak("running in virtual mode. creating virtual port");
       // FIXME - services should know when and how to become virtual
       // controller virtualization
       uart = Serial.connectVirtualUart(serialPort);
@@ -249,6 +191,7 @@ public class WorkE extends Service implements StatusListener {
       joystick = (Joystick) createPeer("joystick");
       // static ???
 
+      speak("loading virtual joystick data");
       joystick.loadVirtualController("src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json");
       // Runtime.start("gui", "SwingGui");
       broadcastState();
@@ -316,20 +259,24 @@ public class WorkE extends Service implements StatusListener {
     speak("setting left motor inverted");
     motorLeft.setInverted(true);
     sleep(1000);
-
-    String workeBrainPath = getHomeDir() + File.separator + "github";
-    File workeBrain = new File(workeBrainPath + File.separator + "bots" + File.separator + "worke");
-
-    if (workeBrain.exists()) {
+    
+    // String botsDir = getRootDataDir();
+    String fullBrainPath = brainPath + fs +  "bots" + fs + "worke";
+    
+    speak("synching repos");
+    git.sync(getResourceDir() + fs + "react", "https://github.com/MyRobotLab/myrobotlab-react.git");
+    git.sync(fullBrainPath, "https://github.com/MyRobotLab/worke.git");
+    
+    if (new File(fullBrainPath).exists()) {
 
       speak("attaching brain");
       // brain.setPath("..");
-      brain.setPath(workeBrainPath);
+      brain.setPath(brainPath);
       brain.setCurrentBotName("worke"); // does this create a session ?
       brain.reloadSession("greg", "worke");
       // brain.reloadSession("greg", "worke"); // is this necessary??
     } else {
-      speak("could not fine a brain.  i looked for it in %s", workeBrain);
+      speak("could not find a brain.  i looked everywhere for it");
     }
 
     speak("attaching ear to brain");
@@ -339,8 +286,8 @@ public class WorkE extends Service implements StatusListener {
     brain.attach(mouth);
     sleep(1000);
 
-//    speak("opening eye");
- //   capture();
+    // speak("opening eye");
+    // capture();
     sleep(1000);
 
     speak("connecting serial port");
@@ -409,8 +356,25 @@ public class WorkE extends Service implements StatusListener {
     lastErrors.clear();
   }
 
+  // FIXME ... FIND USB PORT - if /dev/ttyUSB0 doesn't exist find another
+  // report a status that port has changed - found new port
   public void connect() throws Exception {
-    connect(serialPort);
+    if (isVirtual()) {
+      connect(serialPort);
+    } else {
+      File f = new File("/dev/");
+      File[] dev = f.listFiles();
+      for (File d : dev) {
+        if (d.getAbsolutePath().equals(serialPort)) {
+          connect(serialPort);
+        } else {
+          speak("found new serial port %s", d.getName());
+          serialPort = d.getAbsolutePath();
+          connect(serialPort);
+        }
+      }
+      speak("could not find valid serial port for sabertooth");
+    }
   }
 
   public void connect(String port) throws Exception {
@@ -511,12 +475,15 @@ public class WorkE extends Service implements StatusListener {
       // speak(status.toString());
       speak("%s has had an error", status.source);
       lastErrors.add(status);
-    }
-    if (status.isWarn()) {
+    } else if (status.isWarn()) {
       // speak(status.toString());
       speak("%s has had a warning", status.source);
       // lastErrors.add(status);
+    } else {
+      // speak(status.toString());
     }
+    
+    
   }
 
   // FIXME - CheckResult pass / fail with Status detail
@@ -608,18 +575,13 @@ public class WorkE extends Service implements StatusListener {
 
   public void speak(String inText, Object... args) {
     String text = String.format(inText, args);
-    // IF NOT SILENT
     if (!mute) {
-      if (speakBlocking) {// FIXME - promote to Abstract
-        mouth.speakBlocking(text);
-      } else {
-        mouth.speak(text);
-      }
+      mouth.speak(text);
     }
   }
 
   public void speakBlocking(boolean b) {
-    speakBlocking = b;
+    mouth.setBlocking(b);
   }
 
   public void startService() {
@@ -629,8 +591,8 @@ public class WorkE extends Service implements StatusListener {
       // services here
 
       // FIXME FIXME FIXME - make worky through framework - no manual starts
-      // here !!!
-      cli = (Cli) startPeer("cli");
+      // here !!!      
+      git = (Git) startPeer("git");
       controller = (AbstractMotorController) startPeer("controller");
       joystick = (Joystick) startPeer("joystick");
       motorLeft = (AbstractMotor) startPeer("motorLeft");
@@ -643,12 +605,22 @@ public class WorkE extends Service implements StatusListener {
       fsm = emoji.getFsm();
       brain = (ProgramAB) startPeer("brain");
       webgui = (WebGui) startPeer("webgui");
-      
+
       attach();
 
     } catch (Exception e) {
       error(e);
     }
+  }
+  
+  /**
+   * must NOT end in bots - is its parent folder
+   * @param path
+   * @return
+   */
+  public String setBrainPath(String path) {
+    brainPath = path;
+    return brainPath;
   }
 
   public void stop() {
