@@ -223,6 +223,7 @@ public class SerialTest extends AbstractTest {
     log.info("testing connect & disconnect for remote service");
 
     serial.addByteListener(catcher);
+    catcher.clear();
 
     if (serial.isConnected()) {
       serial.disconnect();
@@ -230,7 +231,7 @@ public class SerialTest extends AbstractTest {
     }
 
     catcher.isLocal = false;
-
+    catcher.clear();
     serial.open(vport);
     catcher.checkMsg("onConnect", vport);
 

@@ -254,7 +254,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public String startURL = "http://localhost:%d/#/main";
 
-  transient final ConcurrentHashMap<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
+  transient final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
 
   // FIXME might need to change to HashMap<String, HashMap<String,String>> to
   // add client session
@@ -266,7 +266,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   transient Map<String, Map<String, Panel>> desktops;
 
-  transient ApiFactory api = null;
+  transient ApiFactory apix = null;
 
   String currentDesktop = "default";
 
@@ -274,7 +274,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public WebGui(String n) {
     super(n);
-    api = ApiFactory.getInstance(this);
+    // api = ApiFactory.getInstance(this);
     if (desktops == null) {
       desktops = new HashMap<String, Map<String, Panel>>();
     }
@@ -378,69 +378,68 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       log.error("certificate creation threw", e);
     }
 
-    configBuilder
-        /*
-         * FIXME - need a JarServlet handler to extract during runtime (not
-         * worth it) did not work :( .resource(
-         * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource")
-         * .resource(
-         * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
-         */
-        // .mappingPath("/app")
+    /*
+     * FIXME - need a JarServlet handler to extract during runtime (not worth
+     * it) did not work :( .resource(
+     * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource") .resource(
+     * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
+     */
+    // .mappingPath("/app")
 
-        // FIXME - find out how collisions of resources (priority) is handled
-        // ???
+    // FIXME - find out how collisions of resources (priority) is handled
+    // ???
 
-        .resource("/stream", stream)
-        // .resource("/video/ffmpeg.1443989700495.mp4", test)
+    configBuilder.resource("/stream", stream);
+    // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
-        // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
-        // :(
-        // for access after extracting
-        .resource("./resource/WebGui/app").resource("./resource")
+    // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
+    // :(
+    // for access after extracting
+    configBuilder.resource("./resource/WebGui/app");
+    configBuilder.resource("./resource");
 
-        // for debugging
-        // v- this makes http://localhost:8888/#/main worky
-        .resource("./src/main/resources/resource/WebGui/app")
-        // v- this makes http://localhost:8888/react/index.html worky
-        .resource("./src/main/resources/resource/WebGui")
-        // v- this makes http://localhost:8888/Runtime.png worky
-        .resource("./src/main/resources/resource")
+    // for debugging
+    // v- this makes http://localhost:8888/#/main worky
+    configBuilder.resource("./src/main/resources/resource/WebGui/app");
+    // v- this makes http://localhost:8888/react/index.html worky
+    configBuilder.resource("./src/main/resources/resource/WebGui");
+    // v- this makes http://localhost:8888/Runtime.png worky
+    configBuilder.resource("./src/main/resources/resource");
 
-        // for future references of resource - keep the html/js reference to
-        // "resource/x" not "/resource/x" which breaks moving the app
-        // FUTURE !!!
-        .resource("./src/main/resources")
+    // for future references of resource - keep the html/js reference to
+    // "resource/x" not "/resource/x" which breaks moving the app
+    // FUTURE !!!
+    configBuilder.resource("./src/main/resources");
 
-        // can't seem to make this work .mappingPath("resource/")
+    // can't seem to make this work .mappingPath("resource/")
 
-        // TO SUPPORT LEGACY - BEGIN
-        // for debugging
-        /*
-         * .resource("./src/main/resources/resource/WebGui/app")
-         * .resource("./resource/WebGui/app")
-         */
+    // TO SUPPORT LEGACY - BEGIN
+    // for debugging
+    /*
+     * .resource("./src/main/resources/resource/WebGui/app")
+     * .resource("./resource/WebGui/app")
+     */
 
-        // Support 2 APIs
-        // REST - http://host/object/method/param0/param1/...
-        // synchronous DO NOT SUSPEND
-        .resource("/api", this)
+    // Support 2 APIs
+    // REST - http://host/object/method/param0/param1/...
+    // synchronous DO NOT SUSPEND
+    configBuilder.resource("/api", this);
 
-        // if Jetty is in the classpath it will use it by default - we
-        // want to use Netty
-        /* org.atmosphere.websocket.maxTextMessageSize */
-        /*
-         * noWorky :(
-         * .initParam("org.atmosphere.websocket.maxTextMessageSize","-1")
-         * .initParam("org.atmosphere.websocket.maxBinaryMessageSize","-1")
-         * 
-         * .initParam(ApplicationConfig.WEBSOCKET_MAXTEXTSIZE,"-1")
-         * .initParam(ApplicationConfig.WEBSOCKET_MAXBINARYSIZE,"-1")
-         * .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
-         */
+    // if Jetty is in the classpath it will use it by default - we
+    // want to use Netty
+    /* org.atmosphere.websocket.maxTextMessageSize */
+    /*
+     * noWorky :( .initParam("org.atmosphere.websocket.maxTextMessageSize","-1")
+     * .initParam("org.atmosphere.websocket.maxBinaryMessageSize","-1")
+     * 
+     * .initParam(ApplicationConfig.WEBSOCKET_MAXTEXTSIZE,"-1")
+     * .initParam(ApplicationConfig.WEBSOCKET_MAXBINARYSIZE,"-1")
+     * .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
+     */
 
-        .initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport").initParam(ApplicationConfig.SCAN_CLASSPATH, "false")
-        .initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
+    configBuilder.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport");
+    configBuilder.initParam(ApplicationConfig.SCAN_CLASSPATH, "false");
+    configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
     // ips
 
     SSLContext sslContext = createSSLContext();
@@ -518,23 +517,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void handle(AtmosphereResource r) {
 
-    String apiKey = Api.getApiKey(r.getRequest().getRequestURI());
+    String apiKey = Api.getApiKey(r);
 
     AtmosphereRequest request = r.getRequest();
 
-    log.debug(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+    log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
 
-    try {
-
-      // FIXME - maintain single broadcaster for each session ?
-      // Broadcaster bc = r.getBroadcaster();
-      // if (bc != null || r.getBroadcaster() != broadcaster){
-      r.setBroadcaster(broadcaster);
-      // }
+   // try {
+      
+      Api api = ApiFactory.getApiProcessor(apiKey);
+      api.process(this, apiKey, r);
 
       String id = getId(r);
 
-      handleSession(r);
       // FIXME - header SAS token for authentication ???
       // Map<String, String> headers = getHeadersInfo(request);
 
@@ -552,10 +547,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // ========================================
 
       // TODO - add handleSwaggerApi
+      /*
       switch (apiKey) {
-
+        
         case ApiFactory.API_TYPE_MESSAGES: {
           handleMessagesApi(r);
+          break;
+        }
+        
+        case ApiFactory.API_TYPE_MESSAGES_BLOCKING: {
+          // decode to service api
+          // call service api
+          handleMessagesBlockingApi(r);
           break;
         }
 
@@ -570,40 +573,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
       }
 
-    } catch (Exception e) {
-      try {
-
-        AtmosphereResponse response = r.getResponse();
-        OutputStream out = response.getOutputStream();
-
-        response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-
-        Status error = Status.error(e);
-        Message msg = Message.createMessage(this, getName(), CodecUtils.getCallbackTopicName("getStatus"), error);
-        if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
-          // for the purpose of only returning the data
-          // e.g. http://api/services/runtime/getUptime -> return the uptime
-          // only not the message
-          if (msg.data == null) {
-            log.warn("<< {}", CodecJson.encode(null));
-            codec.encode(out, null);
-          } else {
-            // return the return type
-            log.warn("<< {}", CodecJson.encode(msg.data[0]));
-            codec.encode(out, msg.data[0]);
-          }
-        } else {
-          // API_TYPE_MESSAGES
-          // DEPRECATE - FOR LOGGING ONLY REMOVE
-          log.warn("<< {}", CodecJson.encode(msg)); // FIXME if logTraffic
-          codec.encode(out, msg);
-        }
-
-      } catch (Exception e2) {
-        log.error("respond threw", e);
-      }
+    } catch (Exception e) {  // TODO - handle in process
+ 
     }
+    */
   }
 
   /**
@@ -628,36 +601,32 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         r.suspend();
       }
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-
-      api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
-
-      /*
-       * // FIXME - GET or POST should work - so this "should" be unnecessary ..
-       * if ("GET".equals(httpMethod)) { // if post and parts.length < 3 ?? //
-       * respond(r, apiKey, "getPlatform", new Hello(Runtime.getId()));
-       * HashMap<URI, ServiceEnvironment> env = Runtime.getEnvironments();
-       * respond(r, apiKey, "getLocalServices", env); } else {
-       * doNotUseThisProcessMessageAPI(codec, request.body()); // FIXME data is
-       * double encoded .. can't put '1st' encoded json // api.process(this,
-       * out, r.getRequest().getRequestURI(), request.body().asString()); }
-       */
+      // api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
 
     } catch (Exception e) {
       log.error("handleMessagesApi -", e);
     }
   }
+  
+  public void handleMessagesBlockingApi(AtmosphereResource r) {
+    try {
+      AtmosphereResponse response = r.getResponse();
+      AtmosphereRequest request = r.getRequest();
+      OutputStream out = response.getOutputStream();
 
-  /**
-   * This is a middle level method to handle the details of Atmosphere and
-   * http/ws level of processing request. It will eventually call
-   * ApiFactory.process which handles the "pure" Jvm Java only processing
-   * 
-   * @param r
-   *          r
-   * @throws Exception
-   *           e
-   * 
-   */
+      if (!r.isSuspended()) {
+        r.suspend();
+      }
+      response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
+
+      // api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
+
+    } catch (Exception e) {
+      log.error("handleMessagesBlockingApi -", e);
+    }
+  }
+
+ 
   public void handleServiceApi(AtmosphereResource r) throws Exception {
     AtmosphereRequest request = r.getRequest();
     AtmosphereResponse response = r.getResponse();
@@ -674,16 +643,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         data = hack.getBytes();
       }
     }
-    api.process(out, r.getRequest().getRequestURI(), data);
-  }
-
-  public void handleSession(AtmosphereResource r) {
-    AtmosphereRequest request = r.getRequest();
-    HttpSession s = request.getSession(true);
-    if (s != null) {
-      log.debug("put session uuid {}", r.uuid());
-      sessions.put(r.uuid(), request.getSession(true));
-    }
+    // api.process(out, r.getRequest().getRequestURI(), data);
   }
 
   public void hide(String name) {
@@ -1054,9 +1014,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("python", "Python");
       // Runtime.start("gui", "SwingGui");
       // Runtime.getNetInfo();
-      
-      WebGui webgui = (WebGui) Runtime.start("webgui", "WebGui");
-      // webgui.autoStartBrowser(false);
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+      webgui.setPort(8887);
+      webgui.startService();
+      // Runtime.start("cli", "Cli2");
       // Runtime.start("webgui", "WebGui");
 
       // webgui.releaseService();
@@ -1067,6 +1030,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public Map<String, HttpSession> getSessions() {
+    return sessions;
+  }
+
+  public Broadcaster getBroadcaster() {
+    return broadcaster;
   }
 
 }

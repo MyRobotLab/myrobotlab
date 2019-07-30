@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -64,8 +63,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * data to hold the incoming messages
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
+  
+  // List<Message> msgs = new ArrayList<>();
 
-  ArrayList<Status> errorList = new ArrayList<Status>();
 
   boolean isLocal = true;
 
@@ -75,11 +75,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   public boolean isLocal() {
     return isLocal;
-  }
-
-  public Status onError(Status error) {
-    errorList.add(error);
-    return error;
   }
 
   public TestCatcher(String n) {
@@ -92,8 +87,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * is one of those methods
    */
   @Override
-  public Integer onByte(Integer b) {
-    addData("onByte", b);
+  public Integer onByte(Integer b) {    
     return b;
   }
 
@@ -107,23 +101,26 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   @Override
   public boolean preProcessHook(Message msg) {
-    try {
-      msgs.put(msg);
-      if (log.isDebugEnabled()) {
-        log.debug("{} msg {}", msgs.size(), msg);
-      }
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
+    log.error("msg - {}.{}", msg.name, msg.method);
+    put(msg); 
+    // TODO - determine if the callback method exists
+    // if not warn return false - if so - return true;
     return true;
+  }
+
+  private void put(Message msg) {
+    try {
+    if (log.isDebugEnabled()) {
+      log.debug("{} msg {}", msgs.size(), msg);
+    }
+    msgs.put(msg);
+    } catch(Exception e) {
+      
+    }
   }
 
   public void clear() {
     msgs.clear();
-  }
-
-  public BlockingQueue<Message> getMsgs() {
-    return msgs;
   }
 
   public Message getMsg(long timeout) throws InterruptedException {
@@ -131,10 +128,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return msg;
   }
 
-  public Object getData(long timeout) throws InterruptedException {
-    Message msg = msgs.poll(timeout, TimeUnit.MILLISECONDS);
-    return msg.data[0];
-  }
 
   public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
     return waitForMsgs(count, 1000);
@@ -191,13 +184,11 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public void onConnect(String portName) {
     info("connected to %s", portName);
-    addData("onConnect", portName);
   }
 
   @Override
   public void onDisconnect(String portName) {
     info("disconnect to %s", portName);
-    addData("onDisconnect", portName);
   }
 
   public void checkMsg(String method) throws InterruptedException, IOException {
@@ -208,7 +199,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     checkMsg(1000, method, checkParms);
   }
 
-  public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {
+  // FIXME - good idea 
+  public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {   
     Message msg = getMsg(timeout);
     if (msg == null) {
       log.error("{}", msg);
@@ -249,7 +241,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * "would have" been created to make this direct callback
    * 
    */
-  public void addData(String method, Object... parms) {
+  public void addDatax(String method, Object... parms) {
     try {
       Message msg = new Message();
       msg.method = method;

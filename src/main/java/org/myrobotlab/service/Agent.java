@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -283,7 +284,6 @@ public class Agent extends Service {
   public String getDir(String branch, String version) {
     return System.getProperty("user.dir");
   }
-
 
   public String getJarName(String branch, String version) {
     return "myrobotlab-" + branch + "-" + version + ".jar";
@@ -1020,6 +1020,14 @@ public class Agent extends Service {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
+    
+    if (pd.options.proxy != null) {
+      URI uri = new URI(pd.options.proxy); 
+      String host = uri.getHost();
+      Integer port = uri.getPort();
+      jvmArgs += " -Dhttp.proxyHost=" + host + " -Dhttp.proxyPort=" + port + " " + "-Dhttps.proxyHost=" + host + " -Dhttps.proxyPort=" + port;
+    }
+
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
@@ -1142,6 +1150,10 @@ public class Agent extends Service {
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (pd.options.services.size() > 0) {
+      if (pd.options.services.size()%2 != 0) {
+        error("--service requires {name} {Type} {name} {Type} even number of entries - you have %d", pd.options.services.size());
+        Runtime.shutdown();
+      }
       cmd.add("--service");
       for (int i = 0; i < pd.options.services.size(); i += 2) {
         cmd.add(pd.options.services.get(i));
@@ -1192,8 +1204,8 @@ public class Agent extends Service {
       }
     }
 
-    cmd.add("--libraries");
-    cmd.add(pd.options.libraries);
+    // cmd.add("--libraries");
+    // cmd.add(pd.options.libraries);
 
     if (pd.options.virtual) {
       cmd.add("--virtual");
@@ -1259,10 +1271,12 @@ public class Agent extends Service {
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
+      /** FIXME - integrate with cli api
       Cli cli = Runtime.getCli();
       cli.add(pd.options.id, process.getInputStream(), process.getOutputStream());
       cli.attach(pd.options.id);
       agent.broadcastState();
+      */
     }
     return process;
   }
@@ -1518,7 +1532,7 @@ public class Agent extends Service {
 
   public String mvn(String src, String branch, Long buildNumber) {
     try {
-      
+
       if (src == null) {
         src = "data" + File.separator + branch + ".src";
       }
@@ -1531,7 +1545,7 @@ public class Agent extends Service {
       if (snapshot.exists()) {
         snapshot.delete();
       }
-      
+
       if (buildNumber == null) {
         // epoch minute build time number
         buildNumber = System.currentTimeMillis() / 1000;
@@ -1541,7 +1555,7 @@ public class Agent extends Service {
 
       Platform platform = Platform.getLocalInstance();
       List<String> cmd = new ArrayList<>();
-      
+
       cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
 
