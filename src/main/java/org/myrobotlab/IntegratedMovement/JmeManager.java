@@ -4,27 +4,46 @@
 package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Future;
 
+import org.myrobotlab.jme3.Jme3Util;
+import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.IntegratedMovement;
+import org.slf4j.Logger;
+
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.plugins.FileLocator;
 import com.jme3.input.InputManager;
+import com.jme3.input.KeyInput;
+import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
+import com.jme3.scene.control.CameraControl.ControlDirection;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.Camera;
+import com.jme3.renderer.ViewPort;
 
 
 /**
@@ -34,24 +53,32 @@ import com.jme3.math.Vector3f;
  */
 public class JmeManager implements ActionListener {
 
-	private JmeIMModel jmeApp;
+	transient private JmeIMModel jmeApp;
 	transient AssetManager assetManager;
-	private HashMap<String, Node> nodes = new HashMap<String,Node>();
+	transient private HashMap<String, Node> nodes = new HashMap<String,Node>();
 	private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
 	private long startUpdateTs;
-	private Node rootNode;
+	transient private Node rootNode;
 	private long deltaMs;
 	private long sleepMs;
 	transient AnalogListener analog = null;
 	transient InputManager inputManager;
 	transient IntegratedMovement im = null;
 	long frameCount =0;
+	transient private MsgUtil msgUtil;
+	transient private ViewPort viewPort;
+	transient private Node point;
+	transient private Camera cameraSetting;
+	transient private CameraNode camNode;
+	transient private Node camera = new Node("camera");
+	public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
 	
 	public JmeManager(IntegratedMovement im){
 		this.im = im;
+		msgUtil = new MsgUtil(this);
 	}
 	
-	public void start(String string, String string2) {
+	public void start(String appName, String appType) {
 	    if (jmeApp != null) {
 	        //Log.info("JmeApp already started");
 	        return;
@@ -65,6 +92,27 @@ public class JmeManager implements ActionListener {
 	    jmeApp.setPauseOnLostFocus(false);
 	    jmeApp.setService(this);
 	    jmeApp.start();
+	    Callable<String> callable = new Callable<String>() {
+	    	public String call() throws Exception {
+	    		System.out.println("Asynchronous Callable");
+	    		return "Callable Result";
+	        }
+	    };
+	    Future<String> future = jmeApp.enqueue(callable);
+	    try {
+	        future.get();
+
+	        // default positioning
+	        //moveTo(CAMERA, 0, 3, 6);
+	        //cameraLookAtRoot();
+	        //rotateOnAxis(CAMERA, "x", -20);
+	        //enableGrid(true);
+
+	    } catch (Exception e) {
+	        log.warn("future threw", e);
+	    }
+	    info("already started app %s", appType);
+	    jmeApp.start();
 	    // need to wait for jmeApp to be ready or the models won't load
 	    synchronized (this) {
 	        try {
@@ -77,6 +125,11 @@ public class JmeManager implements ActionListener {
 	      // add the existing objects
 	      //jmeApp.addObject(collisionItems.getItems());
 	}
+
+	public void info(String format, Object... params) {
+		im.info(format, params);
+	}
+
 
 	public void loadParts(IMData data) {
 	    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -180,6 +233,71 @@ public class JmeManager implements ActionListener {
 	    //log.info("onAction {} {} {}", name, keyPressed, tpf);
 		
 	}
+
+	public void simpleInitApp() {
+		assetManager = jmeApp.getAssetManager();
+		assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
+		Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat.setColor("Color", ColorRGBA.Green);
+		Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+		mat2.setColor("Color", ColorRGBA.Blue);
+		viewPort = jmeApp.getViewPort();
+		viewPort.setBackgroundColor(ColorRGBA.Gray);
+		inputManager = jmeApp.getInputManager();
+		inputManager.setCursorVisible(true);
+		jmeApp.getFlyByCamera().setEnabled(false);
+		Node node = new Node("cam");
+		node.setLocalTranslation(0, 3, 0);
+		rootNode = jmeApp.getRootNode();
+		rootNode.attachChild(node);
+		loadParts(im.getData());
+	    Cylinder c = new Cylinder(8, 50, .005f, .010f, true, false);
+	    Geometry geom = new Geometry("Cylinder", c);
+	    geom.setMaterial(mat);
+	    point = new Node("point");
+	    point.attachChild(geom);
+	    rootNode.attachChild(point);
+	    Cylinder c2 = new Cylinder(8, 50, .005f, .010f, true, false);
+	    Geometry geom2 = new Geometry("Cylinder", c2);
+	    geom2.setMaterial(mat2);
+	    Node point2 = new Node("point");
+	    point2.attachChild(geom2);
+	    point2.setLocalTranslation(.3f, 0, 0);
+	    rootNode.attachChild(point2);
+	    DirectionalLight sun = new DirectionalLight();
+	    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
+	    rootNode.addLight(sun);
+	    cameraSetting = jmeApp.getCamera();
+	    cameraSetting.setLocation(new Vector3f(0f, 0f, 3f));
+	    camNode = new CameraNode("cam", cameraSetting);
+	    camNode.setControlDir(ControlDirection.SpatialToCamera);
+	    camera.attachChild(camNode);
+	    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+	    inputManager.addListener(analogListener, "MouseClickL");
+	    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+	    inputManager.addListener(analogListener, "MouseClickR");
+	    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
+	    inputManager.addListener(analogListener, "MMouseUp");
+	    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
+	    inputManager.addListener(analogListener, "MMouseDown");
+	    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT)); // A
+	    // and
+	    // left
+	    // arrow
+	    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT)); // D
+	    // and
+	    // right
+	    // arrow
+	    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP)); // A
+	    // and
+	    // left
+	    // arrow
+	    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN)); // D
+	    // and
+	    // right
+	    // arrow
+	    inputManager.addListener(analogListener, new String[] { "Left", "Right", "Up", "Down" });
+	}
 	private AnalogListener analogListener = new AnalogListener() {
 		public void onAnalog(String name, float keyPressed, float tpf) {
 			if (name.equals("MouseClickL")) {
@@ -205,8 +323,4 @@ public class JmeManager implements ActionListener {
 		      }
 		  }
 	};
-
-	public void simpleInitApp() {
-		loadParts(im.getData());
-	}
 }

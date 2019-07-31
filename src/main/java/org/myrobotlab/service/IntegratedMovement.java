@@ -256,18 +256,18 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     // //#bicep.setMinMax(5,90)
     // Rfinger.moveTo(90);
 
-    IMPart partMidStom = ik.createPart("midStom", 10.0);
+    IMPart partMidStom = ik.createPart("midStom", 0.010);
     ik.setControl("torso", partMidStom,midStom);
-    partMidStom.setDHParameters("torso",113, 0, 0, 90, DHLinkType.REVOLUTE);
+    partMidStom.setDHParameters("torso",0.113, 0, 0, 90, DHLinkType.REVOLUTE);
     //partMidStom.set3DModel("Models/mtorso.j3o", 1f, new Point(-0,0,0, 0,-90, -90));
     partMidStom.linkTo("torso","topStom");
     //ik.setControl("torsoReverse", partMidStom, midStom);
     //partMidStom.setDHParameters("torsoReverse", 0, -90, -292, 90);
     ik.attach(partMidStom);
     
-    IMPart partTopStom = ik.createPart("topStom", 10.0);
+    IMPart partTopStom = ik.createPart("topStom", 0.010);
     ik.setControl("torso", partTopStom, topStom);
-    partTopStom.setDHParameters("torso", 0, 90, 300, 90);
+    partTopStom.setDHParameters("torso", 0, 90, 0.300, 90);
     //partTopStom.set3DModel("Models/ttorso1.j3o", 1f, new Point(0,-0,15,0,90, 0));
     ik.attach(partTopStom);
     

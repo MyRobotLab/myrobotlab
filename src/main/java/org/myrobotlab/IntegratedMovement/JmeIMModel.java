@@ -5,27 +5,14 @@ import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.service.interfaces.ServoData;
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.plugins.FileLocator;
-import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseAxisTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 
@@ -33,143 +20,22 @@ import com.jme3.scene.shape.Cylinder;
  * @author Christian
  *
  */
-public class JmeIMModel extends SimpleApplication implements IntegratedMovementInterface {
-  private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
-  private Queue<ServoData> eventQueue = new ConcurrentLinkedQueue<ServoData>();
+public class JmeIMModel extends SimpleApplication {
   private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
   private Queue<Point> pointQueue = new ConcurrentLinkedQueue<Point>();
   private transient ArrayList<Node> collisionItems = new ArrayList<Node>();
-  private boolean ready = false;
   private transient JmeManager service;
   private transient Node point;
-private Node point2;
-
-  public static void main(String[] args) {
-    JmeIMModel app = new JmeIMModel();
-    app.start();
-  }
 
   @Override
   public void simpleInitApp() {
-    assetManager.registerLocator("inmoov/jm3/assets", FileLocator.class);
-    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    mat.setColor("Color", ColorRGBA.Green);
-    Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-    mat2.setColor("Color", ColorRGBA.Blue);
-    viewPort.setBackgroundColor(ColorRGBA.Gray);
-    inputManager.setCursorVisible(true);
-    flyCam.setEnabled(false);
-    Node node = new Node("cam");
-    node.setLocalTranslation(0, 300, 0);
-    rootNode.attachChild(node);
-    // ChaseCamera chaseCam = new ChaseCamera(cam, node, inputManager);
-    // chaseCam.setDefaultDistance(900);
-    // chaseCam.setMaxDistance(2000);
-    // chaseCam.setDefaultHorizontalRotation((float)Math.toRadians(90));
-    // chaseCam.setZoomSensitivity(10);
-    DirectionalLight sun = new DirectionalLight();
-    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
-    rootNode.addLight(sun);
-    cam.setLocation(new Vector3f(0f, 0f, 900f));
-    //rootNode.scale(.40f);
-    //rootNode.setLocalTranslation(0, -200, 0);
-    Cylinder c = new Cylinder(8, 50, 5, 10, true, false);
-    Geometry geom = new Geometry("Cylinder", c);
-    geom.setMaterial(mat);
-    point = new Node("point");
-    point.attachChild(geom);
-    rootNode.attachChild(point);
-    Cylinder c2 = new Cylinder(8, 50, 5, 10, true, false);
-    Geometry geom2 = new Geometry("Cylinder", c2);
-    geom2.setMaterial(mat2);
-    point2 = new Node("point");
-    point2.attachChild(geom2);
-    point2.setLocalTranslation(300, 0, 0);
-    rootNode.attachChild(point2);
-   ready = true;
+    service.simpleInitApp();
     synchronized (service) {
       if (service != null) {
         service.notifyAll();
       }
     }
-	inputManager = getInputManager();
-    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-    inputManager.addListener(service, "MouseClickL");
-    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-    inputManager.addListener(analogListener, "MouseClickR");
-    inputManager.addMapping("MMouseUp", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, false));
-    inputManager.addListener(analogListener, "MMouseUp");
-    inputManager.addMapping("MMouseDown", new MouseAxisTrigger(MouseInput.AXIS_WHEEL, true));
-    inputManager.addListener(analogListener, "MMouseDown");
-    inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_A), new KeyTrigger(KeyInput.KEY_LEFT)); // A
-    // and
-    // left
-    // arrow
-    inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_D), new KeyTrigger(KeyInput.KEY_RIGHT)); // D
-    // and
-    // right
-    // arrow
-    inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_W), new KeyTrigger(KeyInput.KEY_UP)); // A
-    // and
-    // left
-    // arrow
-    inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_S), new KeyTrigger(KeyInput.KEY_DOWN)); // D
-    // and
-    // right
-    // arrow
-    inputManager.addListener(analogListener, new String[] { "Left", "Right", "Up", "Down" });
-    service.simpleInitApp();
-  }
-
-  /**
-   * 
-   * @param name
-   *          : name of the part
-   * @param modelPath
-   *          : path leading the the 3dmesh (null for no model)
-   * @param modelScale
-   *          : model will be scale to this parameter
-   * @param hookTo
-   *          : attach this part to the hook part (null to hook to the root)
-   * @param relativePosition
-   *          : position relative to the hook part
-   * @param rotationMask
-   *          : set Vector3f.UNIT_X, Vector3f.UNIT_Y, Vector3f.UNIT_Z) for the
-   *          axe of rotation
-   * @param initialAngle
-   *          : initial angle of rotation of the part (in radian)
-   */
-  public void addPart(String name, String modelPath, float modelScale, String hookTo, Vector3f relativePosition, Vector3f rotationMask, float initialAngle) {
-	Node node = new Node(name);
-    if (hookTo != null) {
-      // Node hookNode = nodes.get(hookTo);
-      // hookNode.attachChild(node);
-      node.setUserData("hookTo", hookTo);
-    } else {
-      // rootNode.attachChild(node);
-      node.setUserData("hookTo", "rootNode");
-    }
-    if (modelPath != null) {
-      Spatial spatial = assetManager.loadModel(modelPath);
-      spatial.scale(modelScale);
-      spatial.setName(name);
-      node.attachChild(spatial);
-    }
-    node.setLocalTranslation(relativePosition);
-    Vector3f angle = rotationMask.mult(initialAngle);
-    node.rotate(angle.x, angle.y, angle.z);
-    node.setUserData("rotationMask_x", rotationMask.x);
-    node.setUserData("rotationMask_y", rotationMask.y);
-    node.setUserData("rotationMask_z", rotationMask.z);
-    float pos = 0.0f;
-    node.setUserData("currentAngle", pos);
-    nodes.put(name, node);
-    nodeQueue.add(node);
-  }
-
-  public void updatePosition(ServoData event) {
-    eventQueue.add(event);
-  }
+ }
 
   public void simpleUpdate(float tpf) {
     if (updateCollisionItem) {
@@ -181,34 +47,6 @@ private Node point2;
       }
       collisionItems.clear();
     }
-    while (nodeQueue.size() > 0) {
-      Node node = nodeQueue.remove();
-      Node hookNode = nodes.get(node.getUserData("hookTo"));
-      if (hookNode == null) {
-        hookNode = rootNode;
-      }
-      Spatial x = hookNode.getChild(node.getName());
-      if (x != null) {
-        rootNode.updateGeometricState();
-      }
-      hookNode.attachChild(node);
-      if (node.getUserData("collisionItem") != null) {
-        collisionItems.add(node);
-      }
-    }
-    while (eventQueue.size() > 0) {
-      ServoData event = eventQueue.remove();
-      if (nodes.containsKey(event.name)) {
-        Node node = nodes.get(event.name);
-        Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
-        float currentAngle = (float) node.getUserData("currentAngle");
-        double rotation = (event.pos - currentAngle) * Math.PI / 180;
-        Vector3f angle = rotMask.mult((float) rotation);
-        node.rotate(angle.x, angle.y, angle.z);
-        node.setUserData("currentAngle", event.pos.floatValue());
-        nodes.put(event.name, node);
-      }
-    }
     while (pointQueue.size() > 0) {
       Point p = pointQueue.remove();
       point.setLocalTranslation((float) p.getX(), (float) p.getZ(), (float) p.getY());
@@ -216,56 +54,11 @@ private Node point2;
     service.simpleUpdate(tpf);
   }
 
-  public boolean isReady() {
-    return ready;
-  }
-
   public void setService(JmeManager jmeManager2) {
     service = jmeManager2;
 
   }
 
-  public ActionListener actionListener = new ActionListener() {
-    public void onAction(String name, boolean keyPressed, float tpf) {
-      if (name.equals("MouseClickL")) {
-        // rotate+= keyPressed;
-        rootNode.rotate(0, 1, 0);
-        // Log.info(rotate);
-      }
-      // if (name.equals("Rotate")) {
-      // Vector3f camloc = cam.getLocation();
-      // camloc.x += 10;
-      // cam.setLocation(camloc);
-      // }
-      /** TODO: test for mapping names and implement actions */
-    }
-  };
-
-  private AnalogListener analogListener = new AnalogListener() {
-    public void onAnalog(String name, float keyPressed, float tpf) {
-      if (name.equals("MouseClickL")) {
-        // rotate+= keyPressed;
-        rootNode.rotate(0, -keyPressed, 0);
-        // Log.info(rotate);
-      } else if (name.equals("MouseClickR")) {
-        // rotate+= keyPressed;
-        rootNode.rotate(0, keyPressed, 0);
-        // Log.info(rotate);
-      } else if (name.equals("MMouseUp")) {
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.05f));
-      } else if (name.equals("MMouseDown")) {
-        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
-      } else if (name.equals("Up")) {
-        rootNode.move(0, keyPressed * 100, 0);
-      } else if (name.equals("Down")) {
-        rootNode.move(0, -keyPressed * 100, 0);
-      } else if (name.equals("Left")) {
-        rootNode.move(-keyPressed * 100, 0, 0);
-      } else if (name.equals("Right")) {
-        rootNode.move(keyPressed * 100, 0, 0);
-      }
-    }
-  };
   private HashMap<String, Geometry> shapes = new HashMap<String, Geometry>();
   private boolean updateCollisionItem = false;
 
@@ -325,10 +118,5 @@ private Node point2;
 
   }
 
-@Override
-public void setService(Service service) {
-	// TODO Auto-generated method stub
-	
-}
 
 }
