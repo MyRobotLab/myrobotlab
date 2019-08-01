@@ -196,21 +196,26 @@ public class JmeManager implements ActionListener {
 		        Spatial spatial = assetManager.loadModel(modelPath);
 		        spatial.scale(part.getScale());
 		        spatial.setName(part.getName());
-		        Node n = new Node("n");
-		        Node n2 = new Node("n2");
-		        n.attachChild(n2);
-		        n2.attachChild(spatial);
-		        node.attachChild(n2);
+		        Node theta = new Node("theta");
+		        Node iniRot = new Node("iniRot");
+		        Node sp = new Node("spatial");
+		        Node alpha = new Node("alpha");
+		        theta.attachChild(alpha);
+		        alpha.attachChild(iniRot);
+		        iniRot.attachChild(sp);
+		        sp.attachChild(spatial);
+		        
+		        node.attachChild(theta);
 			    Point ip = part.getInitialTranslateRotate();
 			    Quaternion i = new Quaternion();
 			    Quaternion q1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getYaw(), Vector3f.UNIT_Y);
 			    Quaternion q2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getRoll(), Vector3f.UNIT_Z);
 			    Quaternion q3 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getPitch(), Vector3f.UNIT_X);
 				i = q1.multLocal(q2).multLocal(q3);
-				n2.setLocalRotation(i);
+				sp.setLocalRotation(i);
 				spatial.setLocalTranslation(Util.pointToVector3f(ip));
 				Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
-				n.setLocalRotation(q.inverse());
+				iniRot.setLocalRotation(q.inverse());
 		    }
 		    else {
 		        Vector3f it = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
@@ -218,18 +223,25 @@ public class JmeManager implements ActionListener {
 		        Geometry geom = new Geometry("Cylinder", c);
 		        geom.setName(part.getName());
 		        geom.setMaterial(mat);
-		        Node n = new Node("n");
+		        Node iniRot = new Node("iniRot");
+		        Node theta = new Node("theta");
+		        Node alpha = new Node("alpha");
 		        float length = (float)part.getLength();
-		        if (it.getZ() < 0) length = -length;
+		        //if (it.getZ() < 0) length = -length;
 		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, length)));
-		        Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
-		        Quaternion q1 = new Quaternion().fromAngles( 0, 0, -FastMath.PI/2);
-		        //n.setLocalRotation(q1);
-		        n.setLocalRotation(q.inverse());
+		        //Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
+		        Matrix m = new Matrix(3,3).loadIdentity();
+		        Quaternion q2 = Util.matrixToQuaternion(m);
+		        
+		        Quaternion q1 = new Quaternion().fromAngles(-FastMath.PI/2,0,0);
+		        iniRot.setLocalRotation(q1.mult(q2.inverse()));
+		        //n.setLocalRotation(q.inverse());
 		        float[] angles = new float[3];
-		        n.getLocalRotation().toAngles(angles);
-		        n.attachChild(geom);
-		        node.attachChild(n);
+		        iniRot.getLocalRotation().toAngles(angles);
+		        iniRot.attachChild(geom);
+		        alpha.attachChild(iniRot);
+		        theta.attachChild(alpha);
+		        node.attachChild(theta);
 		        
 		    }
 		    nodes.put(part.getName(), node);
@@ -282,12 +294,21 @@ public class JmeManager implements ActionListener {
 			Quaternion q = Util.matrixToQuaternion(origin);
 			Vector3f[] axis = new Vector3f[3];
 			q.toAxes(axis);
-			Quaternion q1 = new Quaternion().fromAngleAxis((float)part.getTheta()*-1, axis[1]);
-			Quaternion q2 = new Quaternion().fromAngleAxis((float)part.getAlpha(), axis[0]);
-			
+			float[] angles = new float[3];
+			q.toAngles(angles);
+			Quaternion q1 = new Quaternion().fromAngleAxis((float)part.getTheta()*-1, axis[2]);
+			Quaternion q2 = new Quaternion().fromAngleAxis((float)part.getTheta(), Vector3f.UNIT_Z.mult(-1));
+			Quaternion q3 = new Quaternion().fromAngles(0, 0, (float)part.getTheta());
+			double alpha = part.getAlpha();
+			//if (part.getName() == "leftArmAttach") alpha = FastMath.DEG_TO_RAD * 180;
+			Quaternion q4 = new Quaternion().fromAngles(0,(float)alpha, 0);
+			Spatial n1 = node.getChild("theta");
+			Spatial n2 = node.getChild("alpha");
+			n1.setLocalRotation(q3);
+			n2.setLocalRotation(q4);
 			Quaternion i = Util.matrixToQuaternion(end);
-			node.setLocalRotation(i);
-			//node.setLocalRotation(q.mult(q1).mult(q2));
+			//node.setLocalRotation(i);
+			node.setLocalRotation(q);
 			if (part.isVisible()){
 				node.setCullHint(CullHint.Never);
 			}

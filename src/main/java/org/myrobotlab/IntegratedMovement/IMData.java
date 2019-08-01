@@ -84,8 +84,12 @@ public class IMData {
 		
 		for (IMEngine engine : engines.values()){
 			checkPreRequireUpdatePosition(engine, done);
-			updateArmPosition(engine);
+			if (!done.contains(engine.getName())) updateArmPosition(engine);
 			done.add(engine.getName());
+			String pre = armLinkTos.get(engine.getName());
+			if (pre != null){
+				parts.get(firstParts.get(engine.getName())).setAlpha(engines.get(pre).getNextAlpha());;
+			}
 		}
 	}
 	
@@ -117,12 +121,13 @@ public class IMData {
 			part.setInternTransform(s);
 			s = link.resolveMatrixZeroAlpha();
 			Matrix armMatrix2 = armMatrix.multiply(s);
-			part.setEnd(armMatrix2);
+			part.setEnd(armMatrix1);
 			armMatrix = armMatrix1;
 			String nextPartName = part.getNextLink(engine.getName());
 			parts.put(part.getName(), part);
 			part = getPart(nextPartName);
 		}
+		engine.setNextAlpha(nextAlpha);
 		return armMatrix;
 	}
 

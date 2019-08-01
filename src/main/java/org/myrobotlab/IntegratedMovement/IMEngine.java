@@ -57,6 +57,8 @@ public class IMEngine extends Thread implements Genetic {
   private int cogRetry;
   private String lastDHLink;
 
+private double nextAlpha;
+
 
   private enum CalcFitnessType {
     POSITION, COG;
@@ -853,6 +855,14 @@ public class IMEngine extends Thread implements Genetic {
 
   public Matrix getInputMatrix() {
 	  return inputMatrix;
+  }
+
+  public void setNextAlpha(double alpha) {
+	  nextAlpha = alpha;
+  }
+
+  public double getNextAlpha() {
+	  return nextAlpha;
   }
 
 

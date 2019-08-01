@@ -262,23 +262,30 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
     IMPart partMidStom = ik.createPart("midStom", 0.010); // create a part with his name and radius (used for collision & if no 3d model)
     ik.setControl("torso", partMidStom,midStom);  //set a servo to this part, (String configuration, part, servo)
-    partMidStom.setDHParameters("torso",0.113, 0, 0, 90, DHLinkType.REVOLUTE); //set the DH parameters for kinematic
+    partMidStom.setDHParameters("torso",0.113, 0, .00, 90, DHLinkType.REVOLUTE); //set the DH parameters for kinematic
    // partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(-0,0,0, 0, -90, 0));  //set the 3d model, scale, and offset)
     partMidStom.linkTo("torso","topStom"); // set the next part in the configuration
     ik.attach(partMidStom);  //add the part to the IntegratedMovement service.
     
     IMPart partTopStom = ik.createPart("topStom", 0.010);
     ik.setControl("torso", partTopStom, topStom);
-    partTopStom.setDHParameters("torso", 0, 90, 0.300, 180);
+    partTopStom.setDHParameters("torso", 0, 90, 0.300, 90);
     //partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0, -0.015f, 0f , -90 , 0, 180));
+    partTopStom.linkTo("torso", "leftArmAttach");
     ik.attach(partTopStom);
     
     IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .010);
-    partLeftArmAttach.setDHParameters("leftArm", 0, 90, 0.143, 90);
+    partLeftArmAttach.setDHParameters("torso", 0.143, 90, 0, 90);
+    partLeftArmAttach.setVisible(true);
+    //partLeftArmAttach.linkTo("leftArm", "leftOmoplate");
+    ik.attach(partLeftArmAttach);
+
+/*    IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .010);
+    partLeftArmAttach.setDHParameters("leftArm", 0.143, 90, 0, 90);
     partLeftArmAttach.setVisible(true);
     partLeftArmAttach.linkTo("leftArm", "leftOmoplate");
-    ik.attach(partLeftArmAttach);
-    
+    //ik.attach(partLeftArmAttach);
+*/    
     IMPart partLeftOmoplate = ik.createPart("leftOmoplate",10);
     partLeftOmoplate.setDHParameters("leftArm", 0, -5.6, 45, -90);
     ik.setControl("leftArm", partLeftOmoplate, omoplate);
@@ -290,8 +297,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     ik.setFirstPart("torso",partMidStom.getName());
     
     ik.addArm("leftArm");
-    ik.linkArmTo("leftArm", "torso");
-    ik.setFirstPart("leftArm", "leftArmAttach");
+    //ik.linkArmTo("leftArm", "torso");
+    //ik.setFirstPart("leftArm", "leftArmAttach");
     
 /*    ik.addArm("leftArm");
     
