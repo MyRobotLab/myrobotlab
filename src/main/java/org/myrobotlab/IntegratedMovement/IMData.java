@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -103,6 +102,7 @@ public class IMData {
 	private Matrix updateArmPosition(IMEngine engine) {
 		Matrix armMatrix = inputMatrixs.getOrDefault(engine.getName(), new Matrix(4,4).loadIdentity());
 		IMPart part = getPart(firstParts.get(engine.getName()));
+		double nextAlpha =0;
 		while (part != null){
 			part.setOrigin(armMatrix);
 			DHLink link = part.getDHLink(engine.getName());
@@ -110,8 +110,11 @@ public class IMData {
 				link.addPositionValue(getControl(part.getControl(engine.getName())).getPos());
 			}
 			Matrix s = link.resolveMatrix();
-			part.setInternTransform(s);
+			part.setTheta(link.getTheta());
+			part.setAlpha(nextAlpha);
+			nextAlpha = link.getAlpha();
 			Matrix armMatrix1 = armMatrix.multiply(s);
+			part.setInternTransform(s);
 			s = link.resolveMatrixZeroAlpha();
 			Matrix armMatrix2 = armMatrix.multiply(s);
 			part.setEnd(armMatrix2);

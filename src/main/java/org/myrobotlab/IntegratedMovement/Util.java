@@ -91,15 +91,6 @@ public class Util {
 		m.set(2,0,-1 * sh * ca);
 		m.set(2,1, (sh * sa * cb) + (ch * sb));
 		m.set(2,2, (-1 * sh * sa * sb) + (ch * cb));
-/*		m.set(0, 0, cy * cp);
-		m.set(0,1, ((cy * sp * sr) - (sy * cr)));
-		m.set(0,2,  (cy * sp * sr) + (sy * sr));
-		m.set(1,0,  sy * cp);
-		m.set(1,1, (sy * sp * sr) + (cy * cr));
-		m.set(1,2, (sy * sp * cr) + (cy * sr));
-		m.set(2,0, -1 * sp);
-		m.set(2,1, cp * sr);
-		m.set(2,2, cp * cr);*/
 		return m;
 	}
 	public static Transform matrixToJmeTransform(Matrix m) {

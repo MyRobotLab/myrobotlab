@@ -4,14 +4,13 @@
 package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
+import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
-import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
@@ -36,6 +35,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.control.CameraControl.ControlDirection;
+import com.jme3.scene.debug.Grid;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
 import com.jme3.math.ColorRGBA;
@@ -55,7 +55,7 @@ public class JmeManager implements ActionListener {
 
 	transient private JmeIMModel jmeApp;
 	transient AssetManager assetManager;
-	transient private HashMap<String, Node> nodes = new HashMap<String,Node>();
+	transient private HashMap<String, Spatial> nodes = new HashMap<String,Spatial>();
 	private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
 	private long startUpdateTs;
 	transient private Node rootNode;
@@ -72,6 +72,7 @@ public class JmeManager implements ActionListener {
 	transient private CameraNode camNode;
 	transient private Node camera = new Node("camera");
 	public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
+	protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
 	
 	public JmeManager(IntegratedMovement im){
 		this.im = im;
@@ -103,16 +104,16 @@ public class JmeManager implements ActionListener {
 	        future.get();
 
 	        // default positioning
-	        //moveTo(CAMERA, 0, 3, 6);
-	        //cameraLookAtRoot();
-	        //rotateOnAxis(CAMERA, "x", -20);
-	        //enableGrid(true);
+	        setTranslation(camera.getName(), 0, 3, 6);
+	        cameraLookAtRoot();
+	        rotateOnAxis(camera.getName(), "x", -20);
+	        enableGrid(true);
 
 	    } catch (Exception e) {
 	        log.warn("future threw", e);
 	    }
 	    info("already started app %s", appType);
-	    jmeApp.start();
+/*	    jmeApp.start();
 	    // need to wait for jmeApp to be ready or the models won't load
 	    synchronized (this) {
 	        try {
@@ -124,12 +125,66 @@ public class JmeManager implements ActionListener {
 	     assetManager = jmeApp.getAssetManager();
 	      // add the existing objects
 	      //jmeApp.addObject(collisionItems.getItems());
+*/	}
+
+	public void enableGrid(boolean b) {
+	    Spatial s = nodes.get("floor-grid");
+	    if (s == null) {
+	    	addGrid("floor-grid");
+	    	s = get("floor-grid");
+	    }
+	    if (b) {
+	    	s.setCullHint(CullHint.Never);
+	    } else {
+	    	s.setCullHint(CullHint.Always);
+	    }
+	}
+
+	private void addGrid(String name) {
+		addGrid(name, new Vector3f(0, -1, 0), 40, "CCCCCC");
+	}
+
+	private void addGrid(String name, Vector3f pos, int size, String color) {
+	    Spatial s = nodes.get(name);
+	    if (s != null) {
+	      log.warn("addGrid {} already exists");
+	      return;
+	    }
+	    Geometry g = new Geometry("wireframe grid", new Grid(size, size, 1.0f));
+	    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+	    mat.getAdditionalRenderState().setWireframe(true);
+	    mat.setColor("Color", Jme3Util.toColor(color));
+	    g.setMaterial(mat);
+	    g.center().move(pos);
+	    Node n = new Node(name);
+	    n.attachChild(g);
+	    rootNode.attachChild(n);
+	    nodes.put(name, n);
+	}
+
+	private void rotateOnAxis(String name, String axis, double degrees) {
+		addMsg("rotate", name, axis, degrees);
+	}
+
+	public void cameraLookAtRoot() {
+		cameraLookAt(rootNode);
+	}
+
+	public void cameraLookAt(Spatial spatial) {
+	    addMsg("lookAt", camera.getName(), spatial.getName());
 	}
 
 	public void info(String format, Object... params) {
 		im.info(format, params);
 	}
 
+	public void setTranslation(String name, double x, double y, double z) {
+		addMsg("setTranslation", name, x, y, z);
+	}
+
+	private void addMsg(String method, Object... params) {
+		jme3MsgQueue.add(new Jme3Msg(method, params));
+	}
 
 	public void loadParts(IMData data) {
 	    Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -142,16 +197,20 @@ public class JmeManager implements ActionListener {
 		        spatial.scale(part.getScale());
 		        spatial.setName(part.getName());
 		        Node n = new Node("n");
-		        n.attachChild(spatial);
-		        node.attachChild(n);
+		        Node n2 = new Node("n2");
+		        n.attachChild(n2);
+		        n2.attachChild(spatial);
+		        node.attachChild(n2);
 			    Point ip = part.getInitialTranslateRotate();
 			    Quaternion i = new Quaternion();
 			    Quaternion q1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getYaw(), Vector3f.UNIT_Y);
 			    Quaternion q2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getRoll(), Vector3f.UNIT_Z);
 			    Quaternion q3 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getPitch(), Vector3f.UNIT_X);
 				i = q1.multLocal(q2).multLocal(q3);
-				n.setLocalRotation(i);
+				n2.setLocalRotation(i);
 				spatial.setLocalTranslation(Util.pointToVector3f(ip));
+				Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
+				n.setLocalRotation(q.inverse());
 		    }
 		    else {
 		        Vector3f it = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
@@ -164,32 +223,34 @@ public class JmeManager implements ActionListener {
 		        if (it.getZ() < 0) length = -length;
 		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, length)));
 		        Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
+		        Quaternion q1 = new Quaternion().fromAngles( 0, 0, -FastMath.PI/2);
+		        //n.setLocalRotation(q1);
 		        n.setLocalRotation(q.inverse());
+		        float[] angles = new float[3];
+		        n.getLocalRotation().toAngles(angles);
 		        n.attachChild(geom);
 		        node.attachChild(n);
 		        
 		    }
 		    nodes.put(part.getName(), node);
-		    nodeQueue.add(node);
+		    addMsg("addNode", node.getName());
 		}
 	}
 
 	public void simpleUpdate(float tpf) {
-		frameCount++;
-		if (frameCount == 1) return;
 	    // start the clock on how much time we will take
 		startUpdateTs = System.currentTimeMillis();
-	    while (nodeQueue.size() > 0) {
-	        Node node = nodeQueue.remove();
-	        rootNode = jmeApp.getRootNode();
-	        Node pivot = new Node("pivot");
-	        rootNode.attachChild(pivot);
-	        pivot.attachChild(node);
-	        Spatial x = rootNode.getChild(node.getName());
-	        if (x != null) {
-	          rootNode.updateGeometricState();
+	    while (jme3MsgQueue.size() > 0) {
+	        Jme3Msg msg = null;
+	        try {
+
+	          // TODO - support relative & absolute moves
+	          msg = jme3MsgQueue.remove();
+	          msgUtil.invoke(msg);
+	        } catch (Exception e) {
+	          log.error("simpleUpdate failed for {} - targetName", msg, e);
 	        }
-	    }
+	      }
 		deltaMs = System.currentTimeMillis() - startUpdateTs;
 		sleepMs = 33 - deltaMs;
 
@@ -208,7 +269,7 @@ public class JmeManager implements ActionListener {
 		IMData data = im.getData();
 		for (IMPart part : data.getParts().values()){
 			
-			Node node = nodes.get(part.getName());
+			Node node = (Node)nodes.get(part.getName());
 			if (node == null) continue;
 			Matrix origin = part.getOrigin();
 			Matrix end = part.getEnd();
@@ -217,8 +278,16 @@ public class JmeManager implements ActionListener {
 			y.setY(((float)o.getZ()-y.getY()+(float)ini.getY()));
 			y.setZ(((float)o.getY()-y.getZ()+(float)ini.getZ()));
 */			node.setLocalTranslation(Util.pointToVector3f(Util.matrixToPoint(origin)));
+			
+			Quaternion q = Util.matrixToQuaternion(origin);
+			Vector3f[] axis = new Vector3f[3];
+			q.toAxes(axis);
+			Quaternion q1 = new Quaternion().fromAngleAxis((float)part.getTheta()*-1, axis[1]);
+			Quaternion q2 = new Quaternion().fromAngleAxis((float)part.getAlpha(), axis[0]);
+			
 			Quaternion i = Util.matrixToQuaternion(end);
 			node.setLocalRotation(i);
+			//node.setLocalRotation(q.mult(q1).mult(q2));
 			if (part.isVisible()){
 				node.setCullHint(CullHint.Never);
 			}
@@ -246,10 +315,10 @@ public class JmeManager implements ActionListener {
 		inputManager = jmeApp.getInputManager();
 		inputManager.setCursorVisible(true);
 		jmeApp.getFlyByCamera().setEnabled(false);
-		Node node = new Node("cam");
-		node.setLocalTranslation(0, 3, 0);
+		//Node node = new Node("cam");
+		//node.setLocalTranslation(0, 3, 0);
 		rootNode = jmeApp.getRootNode();
-		rootNode.attachChild(node);
+		//rootNode.attachChild(node);
 		loadParts(im.getData());
 	    Cylinder c = new Cylinder(8, 50, .005f, .010f, true, false);
 	    Geometry geom = new Geometry("Cylinder", c);
@@ -267,11 +336,13 @@ public class JmeManager implements ActionListener {
 	    DirectionalLight sun = new DirectionalLight();
 	    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
 	    rootNode.addLight(sun);
+	    nodes.put(rootNode.getName(), rootNode);
 	    cameraSetting = jmeApp.getCamera();
 	    cameraSetting.setLocation(new Vector3f(0f, 0f, 3f));
 	    camNode = new CameraNode("cam", cameraSetting);
 	    camNode.setControlDir(ControlDirection.SpatialToCamera);
 	    camera.attachChild(camNode);
+	    nodes.put(camera.getName(), camera);
 	    inputManager.addMapping("MouseClickL", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
 	    inputManager.addListener(analogListener, "MouseClickL");
 	    inputManager.addMapping("MouseClickR", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
@@ -313,14 +384,22 @@ public class JmeManager implements ActionListener {
 		      } else if (name.equals("MMouseDown")) {
 		        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
 		      } else if (name.equals("Up")) {
-		        rootNode.move(0, keyPressed * 100, 0);
+		        rootNode.move(0, keyPressed * 0.100f, 0);
 		      } else if (name.equals("Down")) {
-		        rootNode.move(0, -keyPressed * 100, 0);
+		        rootNode.move(0, -keyPressed * 0.100f, 0);
 		      } else if (name.equals("Left")) {
-		        rootNode.move(-keyPressed * 100, 0, 0);
+		        rootNode.move(-keyPressed * 0.100f, 0, 0);
 		      } else if (name.equals("Right")) {
-		        rootNode.move(keyPressed * 100, 0, 0);
+		        rootNode.move(keyPressed * 0.100f, 0, 0);
 		      }
 		  }
 	};
+
+	public Spatial get(String name) {
+		return nodes.get(name);
+	}
+
+	public Node getRootNode() {
+		return rootNode;
+	}
 }

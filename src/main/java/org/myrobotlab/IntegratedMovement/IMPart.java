@@ -31,6 +31,8 @@ public class IMPart {
 	private Matrix end = Util.getIdentityMatrix();
 	private boolean visible = true;
 	private Matrix internTransform = Util.getIdentityMatrix();
+	private double theta;
+	private double alpha;
 
 	public IMPart(String partName){
 		name = partName;
@@ -206,6 +208,26 @@ public class IMPart {
 	 */
 	public void setInternTransform(Matrix internTransform) {
 		this.internTransform = internTransform;
+	}
+
+
+
+	public void setTheta(double theta) {
+		this.theta = theta;
+	}
+
+
+
+	public void setAlpha(double alpha) {
+		this.alpha = alpha;
+	}
+	
+	public double getTheta(){
+		return theta;
+	}
+	
+	public double getAlpha(){
+		return alpha;
 	}
 
 }
