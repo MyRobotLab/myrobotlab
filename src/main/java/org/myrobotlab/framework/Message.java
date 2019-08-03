@@ -28,6 +28,7 @@ package org.myrobotlab.framework;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -85,8 +86,9 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  public HashSet<String> historyList;
-  public HashMap<String, String> security;
+  public Set<String> historyList;
+  
+  public HashMap<String, Object> annotations;
 
   /**
    * status is currently used for BLOCKING message calls the current valid state

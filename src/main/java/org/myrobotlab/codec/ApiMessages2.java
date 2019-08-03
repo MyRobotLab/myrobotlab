@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
+import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -12,9 +13,9 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
-public class ApiMessages extends Api {
+public class ApiMessages2 extends Api {
 
-  public final static Logger log = LoggerFactory.getLogger(ApiMessages.class);
+  public final static Logger log = LoggerFactory.getLogger(ApiMessages2.class);
 
   // API MESSAGES
   @Override
@@ -39,7 +40,7 @@ public class ApiMessages extends Api {
       }
 
       if (webgui == null) {
-        log.error("sender cannot be null for {}", ApiMessages.class.getSimpleName());
+        log.error("sender cannot be null for {}", ApiMessages2.class.getSimpleName());
         return null;
       }
 
@@ -67,6 +68,8 @@ public class ApiMessages extends Api {
         params = new Object[msg.data.length];
         encodedArray = msg.data;
       }
+      
+      // FIXME - you can start making changes now for getHelloResponse to be called with more parameters, authorization, etc.
 
       paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
 
@@ -115,30 +118,11 @@ public class ApiMessages extends Api {
       MethodCache.cache(clazz, method);
 
     } else {
-      // FIXME - this is terrible ! .. changing to a different api ??? wtf ???
-      // First GET /api/messages - has data == null !
-      // use different api to process GET ?
-      // return hello ?
-      // FALLBACK
-      apiKey = "service";
-      Api api = ApiFactory.getApiProcessor(apiKey);
-      String newUri = uri.replace("/messages", "/service");
-      // we send out = null, because we don't want service api to stream back a
-      // 'non' message response
-      // but we do want the functionality of the services api
-      retobj = api.process(webgui, apiKey, newUri, uuid, out, json);//(sender, null, newUri, json);
-
-      // FIXME - WebGui Client is expecting
-      // FIXME - WebGui Angular FIX is needed - this IS NOT getLocalServices its
-      // getEnvironments
-
-      // Create msg from the return - and send it back
-      // - is this correct ? should it be double encoded ?
-      Message msg = Message.createMessage(webgui, webgui.getName(), "onLocalServices", new Object[] { retobj });
-      // apiKey == messages api uses JSON
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-      codec.encode(out, msg);
-
+      // WE ARE IN THE INITIAL "GET" - no payload should be with /api/messages2 - 
+      // it "could" be possible to send /api/messages2/getHelloResponse/(bunch of data) - but not worth is
+      // So, a remote system has initiated contact, we will initiate "our" HelloResponse(HelloRequest)
+      Message msg = Message.createMessage(webgui, webgui.getName(), "getHelloResponse", new Object[] { new HelloRequest(Runtime.getId(), uuid) });      
+      out.write(CodecUtils.toJson(msg).getBytes());
     }
     return retobj;
   }

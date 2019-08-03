@@ -6,8 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
@@ -39,20 +37,17 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 
-import org.atmosphere.wasync.Client;
-import org.atmosphere.wasync.ClientFactory;
-import org.atmosphere.wasync.Decoder;
-import org.atmosphere.wasync.Encoder;
-import org.atmosphere.wasync.Event;
-import org.atmosphere.wasync.Function;
-import org.atmosphere.wasync.Request;
-import org.atmosphere.wasync.RequestBuilder;
-import org.atmosphere.wasync.Socket;
+import org.myrobotlab.client.Client;
+import org.myrobotlab.client.Client.ResponseHandler;
+import org.myrobotlab.client.InProcessCli;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.HelloRequest;
+import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -109,7 +104,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener {
+public class Runtime extends Service implements MessageListener, ResponseHandler {
   final static private long serialVersionUID = 1L;
 
   static public boolean is64bit() {
@@ -127,18 +122,35 @@ public class Runtime extends Service implements MessageListener {
    * environments of running mrl instances - the null environment is the current
    * local
    */
-  static private final Map<URI, ServiceEnvironment> environments = new HashMap<URI, ServiceEnvironment>();
+  static private final Map<URI, ServiceEnvironment> environments = new HashMap<>();
 
   /**
    * a registry of all services regardless of which environment they came from -
    * each must have a unique name
    */
-  static private final TreeMap<String, ServiceInterface> registry = new TreeMap<String, ServiceInterface>();
+  static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+
+  /**
+   * <pre>
+   * The set of client connections to this mrl instance Some of the connections
+   * are outbound to other webguis, others may be inbound if a webgui is
+   * listening in this instance. These details and many others (such as from
+   * which gateway a client is from) is in the Map<String, Object> information.
+   * Since different gateways have different requirements, and details regarding
+   * clients the only "fixed" required info to add a client is :
+   * 
+   * uuid - key unique identifier for the client
+   * gateway - name of the gateway currently managing the clients connection
+   * state - state of the client and/or connection
+   * (lots more attributes with the Map<String, Object> to provide necessary data for the connection)
+   * </pre>
+   */
+  static private final Map<String, Map<String, Object>> clients = new HashMap<>();
 
   /**
    * map to hide methods we are not interested in
    */
-  static private HashSet<String> hideMethods = new HashSet<String>();
+  static private Set<String> hideMethods = new HashSet<>();
 
   static private boolean needsRestart = false;
 
@@ -1152,7 +1164,8 @@ public class Runtime extends Service implements MessageListener {
         return;
       }
 
-      // FIXME willSpawn()  if not willSpawn - then shutdown with this option (and others like it)
+      // FIXME willSpawn() if not willSpawn - then shutdown with this option
+      // (and others like it)
       if (options.addKeys != null) {
         if (options.addKeys.length < 2) {
           Runtime.mainHelp();
@@ -1190,6 +1203,11 @@ public class Runtime extends Service implements MessageListener {
 
       if (options.invoke != null) {
         invokeCommands(options.invoke);
+      }
+
+      if (options.interactive) {
+        clientLocal = new InProcessCli(System.in, System.out);
+        clientLocal.start();
       }
 
     } catch (Exception e) {
@@ -1570,50 +1588,47 @@ public class Runtime extends Service implements MessageListener {
     return ret;
   }
 
-  static public void connectTo(String url) throws IOException {
-    connectTo(url, null);
+  // FIXME - should be a map of remotes ?
+  static Client clientRemote = new Client();
+  static InProcessCli clientLocal = null;
+
+  public void connect() throws IOException {
+    // FIXME - connect("myName",
+    connect("ws://localhost:8887/api/messages2");
   }
 
-  static public void connectTo(String url, String body) throws IOException {
+  // FIXME -
+  // step 1 - first bind the uuids (1 local and 1 remote)
+  // step 2 - Clients will contain attribute
+  public void connect(String url) throws IOException {
+    
+    UUID uuid = java.util.UUID.randomUUID();
+    clientRemote.connect(uuid.toString(), url);
+    Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    // put as many attribs as possible in 
+    Map<String, Object> attributes = new HashMap<String, Object>();
 
-    // connect via websocket
-    Client<?, ?, ?> client = ClientFactory.getDefault().newClient();
+    attributes.put("id", getId());
+    attributes.put("gateway", "runtime");
+    attributes.put("uuid", uuid);
+    attributes.put("User-Agent", "runtime-client");
+    attributes.put("cwd", "/");
+    attributes.put("uri", url);
+    attributes.put("user", "root");
+    attributes.put("host", "local");
+    
+    addClient(uuid.toString(), attributes);
+    clientRemote.addResponseHandler(this);
+    clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
+  }
 
-    RequestBuilder<?> request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() { // Stream
-                                                                                                                                       // the
-                                                                                                                                       // request
-                                                                                                                                       // body
-      @Override
-      public Reader encode(String s) {
-        return new StringReader(s);
-      }
-    }).decoder(new Decoder<String, Reader>() {
-      @Override
-      public Reader decode(Event type, String s) {
-        return new StringReader(s);
-      }
-    }).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
-        .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to Long-Polling
-
-    Socket socket = client.create();
-    socket.on(new Function<Reader>() {
-      @Override
-      public void on(Reader r) {
-        // Read the response
-        log.info("on(Reader) here");
-        // r.read(cbuf, off, len);
-      }
-    }).on(new Function<IOException>() {
-
-      @Override
-      public void on(IOException ioe) {
-        // Some IOException occurred
-        log.info("on(IOException) here");
-      }
-
-    }).open(request.build()).fire("echo").fire("bong");
-
-    // client.w
+  /**
+   * callback - from clientRemote - all client connections will recieve here
+   */
+  @Override // uuid
+  public void onResponse(String uuid, String data) {
+    log.info("here {}", data);
+    // get api - decode msg - process it  
   }
 
   public static void setRuntimeName(String inName) {
@@ -1662,7 +1677,7 @@ public class Runtime extends Service implements MessageListener {
     // AGENT ONLY INFO
     @Option(names = { "-w",
         "--webgui" }, arity = "0..1", description = "starts webgui for the agent - this starts a server on port 127.0.0.1:8887 that accepts websockets from spawned clients. --webgui {address}:{port}")
-    public String webgui;
+    public String webgui = "127.0.0.1:8887";
 
     // FIXME - implement
     // AGENT INFO
@@ -1675,16 +1690,20 @@ public class Runtime extends Service implements MessageListener {
         "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
     public String agent;
 
- // AGENT INFO
-    @Option(names = { 
-    "--proxy" }, description = "proxy config e.g. --proxy \"http://webproxy:8080\"")
+    // AGENT INFO
+    @Option(names = { "--proxy" }, description = "proxy config e.g. --proxy \"http://webproxy:8080\"")
     public String proxy;
 
-    
     // FIXME -rename to daemon
     // AGENT INFO
     @Option(names = { "-f", "--fork" }, description = "forks the agent, otherwise the agent will terminate self if all processes terminate")
     public boolean fork = false;
+
+    @Option(names = { "--interactive" }, description = "starts in interactive mode - reading from stdin")
+    public boolean interactive = false;
+
+    @Option(names = { "--from-agent" }, description = "signals if the current process has been started by an Agent")
+    public boolean fromAgent = false;
 
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
@@ -1741,9 +1760,12 @@ public class Runtime extends Service implements MessageListener {
     @Option(names = { "-b", "--branch" }, description = "requested branch")
     public String branch;
 
-    // installation root of libraries - jars will be installed under {libraries}/jar natives under {libraries}/native
-    // @Option(names = { "--libraries" }, description = "sets the location of the libraries directory")
-    // CHANGING THIS IS NOT READY FOR PRIME TIME ! - not displaying it as a viable flag
+    // installation root of libraries - jars will be installed under
+    // {libraries}/jar natives under {libraries}/native
+    // @Option(names = { "--libraries" }, description = "sets the location of
+    // the libraries directory")
+    // CHANGING THIS IS NOT READY FOR PRIME TIME ! - not displaying it as a
+    // viable flag
     public String libraries = "libraries";
 
     // FIXME - get version vs force version - perhaps just always print version
@@ -1783,7 +1805,7 @@ public class Runtime extends Service implements MessageListener {
         if (options == null) {
           options = new CmdOptions();
         }
-        
+
         repo = Repo.getInstance(options.libraries, "IvyWrapper");
         if (options == null) {
           options = new CmdOptions();
@@ -1797,7 +1819,7 @@ public class Runtime extends Service implements MessageListener {
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-    
+
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
@@ -2722,22 +2744,150 @@ public class Runtime extends Service implements MessageListener {
   public static CmdOptions getOptions() {
     return options;
   }
-  
-  public String ls(String path) throws IOException {
-    String[] parts = path.split("/");
+
+  // TODO - should be something more complex that a String[] ? - e.g. MrlFile[]
+  // ??
+  // public String[] ls(String cwd, String inPath) throws IOException {
+  public Object ls(String cwd, String inPath) throws IOException {
+
+    String absPath = null;
+
+    if (inPath.startsWith("/")) {
+      absPath = inPath;
+    } else {
+      absPath = cwd + inPath;
+    }
+
+    String[] parts = absPath.split("/");
 
     String ret = null;
-    if (path.equals("/")) {
-      // FIXME don't do this here !!!
-      ret = String.format("%s\n", CodecUtils.toJson(Runtime.getServiceNames()).toString());
-      
-    } else if (parts.length == 2 && !path.endsWith("/")) {
-      // FIXME don't do this here !!!
-      ret = String.format("%s\n", CodecUtils.toJson(Runtime.getService(parts[1])).toString());
-    } else if (parts.length == 2 && path.endsWith("/")) {
+    if (absPath.equals("/")) {
+      return Runtime.getServiceNames();
+    } else if (parts.length == 2 && !absPath.endsWith("/")) {
+      return Runtime.getService(parts[1]);
+    } else if (parts.length == 2 && absPath.endsWith("/")) {
       ServiceInterface si = Runtime.getService(parts[1]);
-      // FIXME don't do this here !!!
-      ret = String.format("%s\n", CodecUtils.toJson(si.getDeclaredMethodNames()).toString());
+      return si.getDeclaredMethodNames();
+    }
+    return ret;
+  }
+
+  // FIXME - needs to be paired with its client which has already been added
+  // its "meta-data"
+  public HelloResponse getHelloResponse(HelloRequest request) {
+    HelloResponse response = new HelloResponse(getId(), request);
+    // addClientAttribute(uuid, "request", request);
+    return response;
+  }
+
+  public void addClient(String uuid, Map<String, Object> attributes) {
+    Map<String, Object> attr = null;
+    if (!clients.containsKey(uuid)) {
+      attr = attributes;
+      invoke("publishNewClient", attributes);
+    } else {
+      attr = clients.get(uuid);
+      attr.putAll(attributes);
+    }
+    clients.put(uuid, attr);
+  }
+  
+  public Map<String, Object> publishNewClient(Map<String, Object> attributes) {
+    return attributes;
+  }
+
+  static public void removeClient(String uuid) {
+    clients.remove(uuid);
+  }
+
+  /**
+   * globally get all client
+   * 
+   * @return
+   */
+  static public Map<String, Map<String, Object>> getClients() {
+    return clients;
+  }
+
+  /**
+   * separated by gateway
+   * 
+   * @param name
+   * @return
+   */
+  static public Map<String, Map<String, Object>> getClients(String gatwayName) {
+    Map<String, Map<String, Object>> ret = new HashMap<>();
+    for (String uuid : clients.keySet()) {
+      Map<String, Object> c = clients.get(uuid);
+      String gateway = (String) c.get("gateway");
+      if (gatwayName == null || gateway.equals(gatwayName)) {
+        ret.put(uuid, c);
+      }
+    }
+    return ret;
+  }
+
+  static String formatClient(Map<String, Object> c) {
+    return String.format("%s@%s%s - %s", c.get("user"), c.get("host"), c.get("uri"), c.get("uuid"));
+  }
+
+  static public String getClientName(String uuid) {
+    Map<String, Object> c = Runtime.getClient(uuid);
+    if (c != null)
+      return formatClient(c);
+    else
+      return null;
+  }
+
+  // FIXME - if Gateway was an abstract this could be promoted or abstracted for
+  // every service display properties
+  static public List<String> getClientNames() {
+    List<String> ret = new ArrayList<>();
+    Map<String, Map<String, Object>> clients = Runtime.getClients();
+    for (String uuid : clients.keySet()) {
+      Map<String, Object> c = clients.get(uuid);
+      ret.add(formatClient(c));
+    }
+    return ret;
+  }
+
+  /**
+   * get a specific clients data
+   * 
+   * @param uuid
+   * @return
+   */
+  static public Map<String, Object> getClient(String uuid) {
+    return clients.get(uuid);
+  }
+
+  /**
+   * Globally get all client ids
+   * 
+   * @return
+   */
+  static public List<String> getClientIds() {
+    return getClientIds(null);
+  }
+
+  static public boolean clientExists(String uuid) {
+    return clients.containsKey(uuid);
+  }
+
+  /**
+   * Get client ids that belong to a specific gateway
+   * 
+   * @param name
+   * @return
+   */
+  static public List<String> getClientIds(String name) {
+    List<String> ret = new ArrayList<>();
+    for (String uuid : clients.keySet()) {
+      Map<String, Object> c = clients.get(uuid);
+      String gateway = (String) c.get("gateway");
+      if (name == null || gateway.equals(name)) {
+        ret.add(uuid);
+      }
     }
     return ret;
   }

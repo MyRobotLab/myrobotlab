@@ -256,7 +256,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public HashMap<URI, Connection> getClients() {
+  public List<String> getClientIds() {
     // TODO Auto-generated method stub
     return null;
   }

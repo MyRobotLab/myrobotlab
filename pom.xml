@@ -302,6 +302,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Esp8266_01 begin -->
+  <dependency>
+    <groupId>javax.xml.bind</groupId>
+    <artifactId>jaxb-api</artifactId>
+    <version>2.3.1</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Esp8266_01 end -->
+
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -1202,7 +1211,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>7.7.1</version>
+    <version>8.2.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1214,7 +1223,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>7.7.1</version>
+    <version>8.2.0</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1226,7 +1235,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>7.7.1</version>
+    <version>8.2.0</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
@@ -1403,9 +1412,24 @@
         </exclusion>
       </exclusions>
   </dependency>
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.9.9 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.9 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.9.9 skipping -->
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-core</artifactId>
+    <version>2.9.9</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.9.2</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-annotations</artifactId>
+    <version>2.9.9</version>
+    <scope>provided</scope>
+  </dependency>
 <!-- WikiDataFetcher end -->
 
 <!-- WolframAlpha begin -->

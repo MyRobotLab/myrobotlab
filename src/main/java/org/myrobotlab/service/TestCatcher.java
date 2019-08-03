@@ -236,22 +236,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   }
 
-  /*
-   * "unified"? way of testing direct callbacks. reconstruct the message that
-   * "would have" been created to make this direct callback
-   * 
-   */
-  public void addDatax(String method, Object... parms) {
-    try {
-      Message msg = new Message();
-      msg.method = method;
-      msg.data = parms;
-      msgs.put(msg);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
   static public ServiceType meta = null;
 
   /*

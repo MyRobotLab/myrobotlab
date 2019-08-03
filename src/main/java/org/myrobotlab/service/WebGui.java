@@ -12,11 +12,11 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.KeyManager;
@@ -26,11 +26,12 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.ApplicationConfig;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResourceEvent;
+import org.atmosphere.cpr.AtmosphereResourceEventListenerAdapter;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
@@ -43,7 +44,6 @@ import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecFactory;
-import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
@@ -59,10 +59,8 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
-//import org.myrobotlab.service.WebGUI3.Error;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
-//import org.myrobotlab.webgui.WebGUIServlet;
 import org.slf4j.Logger;
 
 /**
@@ -85,13 +83,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // TODO Auto-generated method stub
       try {
 
-        /*
-         * OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-         * OpenCVFilterFFMEG ffmpeg = new OpenCVFilterFFMEG("ffmpeg");
-         * opencv.addFilter(ffmpeg); opencv.capture(); sleep(1000);
-         * opencv.removeFilters(); ffmpeg.stopRecording();
-         */
-
         AtmosphereResponse response = r.getResponse();
         // response.setContentType("video/mp4");
         // response.setContentType("video/x-flv");
@@ -99,46 +90,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // FIXME - mime type of avi ??
 
         ServletOutputStream out = response.getOutputStream();
-        // response.addHeader(name, value);
 
-        // byte[] data = FileIO.fileToByteArray(new
-        // File("flvTest.flv"));
-        // byte[] data = FileIO.fileToByteArray(new
-        // File("src/main/resources/resource/WebGUI/video/ffmpeg.1443989700495.mp4"));
-        // byte[] data = FileIO.fileToByteArray(new
-        // File("mp4Test.mp4"));
         byte[] data = FileIO.toByteArray(new File("test.avi.h264.mp4"));
 
         log.info("bytes {}", data.length);
         out.write(data);
         out.flush();
-
-        // out.close();
-        // r.write(data);
-        // r.writeOnTimeout(arg0)
-        // r.forceBinaryWrite();
-        // r.close();
-
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("stream handler threw", e);
       }
-
     }
-
   }
 
   public static class Panel {
 
+    int height = 400;
+    boolean hide = false;
     String name;
-    String simpleName;
     int posX = 40;
     int posY = 20;
-    int zIndex = 1;
-    int width = 400;
-    int height = 400;
-    int preferredWidth = 800;
     int preferredHeight = 600;
-    boolean hide = false;
+    int preferredWidth = 800;
+    String simpleName;
+    int width = 400;
+    int zIndex = 1;
 
     public Panel(String panelName) {
       this.name = panelName;
@@ -150,13 +125,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       this.posY = y;
       this.zIndex = z;
     }
-
   }
 
-  private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(WebGui.class);
-
-  transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  // FIXME - move to security !
   transient private static final TrustManager DUMMY_TRUST_MANAGER = new X509TrustManager() {
     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
     }
@@ -172,6 +143,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   };
 
+  public final static Logger log = LoggerFactory.getLogger(WebGui.class);
+
+  private static final long serialVersionUID = 1L;
+
+  transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+
+  // FIXME - move to security
   private static SSLContext createSSLContext2() {
     try {
       InputStream keyStoreStream = new FileInputStream((Util.getResourceDir() + "/keys/selfsigned.jks"));
@@ -229,32 +207,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return meta;
   }
 
-  public Integer port;
-
   String address = "0.0.0.0";
 
-  public Integer sslPort = null;
-
-  transient Nettosphere nettosphere;
+  boolean autoStartBrowser = true;
 
   transient Broadcaster broadcaster;
-  transient BroadcasterFactory broadcastFactory;
 
-  public String root = "root";
+  transient BroadcasterFactory broadcasterFactory;
 
-  boolean useLocalResources = false;
+  String currentDesktop = "default";
 
-  boolean autoStartBrowser = true;
+  transient Map<String, Map<String, Panel>> desktops;
+
+  transient Nettosphere nettosphere;
 
   // SHOW INTERFACE
   // FIXME - allowAPI1(true|false)
   // FIXME - allowAPI2(true|false)
   // FIXME - allow Protobuf/Thrift/Avro
-  // FIXME - NO JSON ENCODING SHOULD BE IN THIS FILE !!!
 
-  public String startURL = "http://localhost:%d/#/main";
-
-  transient final Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+  transient AtmosphereResourceEventListenerAdapter onDisconnect;
 
   // FIXME might need to change to HashMap<String, HashMap<String,String>> to
   // add client session
@@ -262,15 +234,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // just marking as transient to remove some of the data load 10240 max frame
   transient Map<String, Panel> panels;
 
-  // ================ Gateway begin ===========================
+  public Integer port;
 
-  transient Map<String, Map<String, Panel>> desktops;
+  Map<String, List<String>> relays = new HashMap<>();
 
-  transient ApiFactory apix = null;
+  public String root = "root";
 
-  String currentDesktop = "default";
+  public Integer sslPort = null;
+
+  public String startURL = "http://localhost:%d/#/main";
 
   transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
+
+  boolean useLocalResources = false;
 
   public WebGui(String n) {
     super(n);
@@ -288,28 +264,80 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     subscribe(name, "registered");
     // FIXME - "unregistered" / "released"
 
+    onDisconnect = new AtmosphereResourceEventListenerAdapter() {
+
+      @Override
+      public void onDisconnect(AtmosphereResourceEvent event) {
+        String uuid = event.getResource().uuid();
+        log.info("onDisconnect - {} {}", event, uuid);
+        Runtime runtime = Runtime.getInstance();
+        runtime.removeClient(uuid);
+        // sessions.remove(uuid);
+        if (event.isCancelled()) {
+          log.info("{} is cancled", uuid);
+          // Unexpected closing. The client didn't send the close message when
+          // request.enableProtocol
+        } else if (event.isClosedByClient()) {
+          // atmosphere.js has send the close message.
+          // This API is only with 1.1 and up
+          log.info("{} is closed by client", uuid);
+        }
+      }
+    };
   }
 
-  @Override
+  @Override // FIXME - remove or implement addConnectionStateListener
   public void addConnectionListener(String name) {
     // TODO Auto-generated method stub
 
   }
 
-  @Override
+  @Override // FIXME - implement
   public boolean allowExport(String serviceName) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  public void attach(String from, String to) throws IOException {
+    attach(from, to, null);
+  }
+
+  public void attach(String from, String to, String uri) throws IOException {
+
+    // from --to--> to
+    List<String> listOfUuid = null;
+    if (relays.containsKey(from)) {
+      listOfUuid = relays.get(from);
+    } else {
+      listOfUuid = new ArrayList<>();
+      relays.put(from, listOfUuid);
+    }
+
+    if (!listOfUuid.contains(to)) {
+      listOfUuid.add(to);
+    }
+
+    // to --to--> from
+    if (relays.containsKey(to)) {
+      listOfUuid = relays.get(to);
+    } else {
+      listOfUuid = new ArrayList<>();
+      relays.put(to, listOfUuid);
+    }
+
+    if (!listOfUuid.contains(from)) {
+      listOfUuid.add(from);
+    }
+
+    // Pipe pipe = new Pipe(from, to);
+    // pipes.put(String.format("%s-%s", from, to), pipe);
   }
 
   public void autoStartBrowser(boolean autoStartBrowser) {
     this.autoStartBrowser = autoStartBrowser;
   }
 
-  // ================ Gateway end ===========================
-
-  // ================ AuthorizationProvider begin ===========================
-
+  // FIXME - only broadcast to clients who have subscribed
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
@@ -320,8 +348,30 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         broadcaster.broadcast(new String(bos.toByteArray())); // wtf
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      StringBuilder sb = new StringBuilder();
+      if (msg.data != null) {
+        for (Object o : msg.data) {
+          sb.append(o.getClass().getCanonicalName());
+        }
+      }
+      log.error("broadcast threw for data types {}", sb, e);
     }
+  }
+
+  public void broadcast(String str) {
+    try {
+      if (broadcaster != null) {
+        broadcaster.broadcast(str); // wtf
+      }
+    } catch (Exception e) {
+      log.error("broadcast threw", e);
+    }
+  }
+
+  // broadcast to specific uuid
+  public void broadcast(String uuid, String str) {
+    Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
+    broadcaster.broadcast(str);
   }
 
   @Override
@@ -341,9 +391,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return null;
   }
 
-  // ================ AuthorizationProvider end ===========================
-
-  // ================ Broadcaster begin ===========================
+  public void detach(String from, String to, String uri) {
+    log.error("IMPLEMENT ME !");
+  }
 
   public void extract() throws IOException {
     extract(false);
@@ -351,19 +401,42 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void extract(boolean overwrite) throws IOException {
 
-    // TODO - check resource version vs self version
-    // overwrite if different ?
+    // FIXME - check resource version vs self version
+    // overwrite if different ? - would be in manifest
 
     FileIO.extractResources(overwrite);
   }
 
-  @Override
-  public HashMap<URI, Connection> getClients() {
-    // TODO Auto-generated method stub
-    return null;
+  public Broadcaster getBroadcaster() {
+    return broadcaster;
   }
 
-  // ================ Broadcaster end ===========================
+  /**
+   * <pre>
+   * // FIXME IMPLEMENT !!!
+   * public Broadcaster getBroadcaster(String uuid) {
+   *   // ((AtmosphereResource)sessions.get(uuid).getAttribute("r")).get;
+   *   return null;
+   * }
+   * </pre>
+   */
+
+  public BroadcasterFactory getBroadcasterFactory() {
+    return broadcasterFactory;
+  }
+
+  private Map<String, Object> getClient(String uuid) {
+    return Runtime.getClient(uuid);
+  }
+
+  @Override
+  public List<String> getClientIds() {
+    return Runtime.getClientIds(getName());
+  }
+
+  public Map<String, Map<String, Object>> getClients() {
+    return Runtime.getClients(getName());
+  }
 
   public Config.Builder getConfig() {
 
@@ -378,23 +451,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       log.error("certificate creation threw", e);
     }
 
-    /*
-     * FIXME - need a JarServlet handler to extract during runtime (not worth
-     * it) did not work :( .resource(
-     * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource") .resource(
-     * "jar:file:/C:/mrl/myrobotlab/dist/myrobotlab.jar!/resource/WebGui" )
-     */
-    // .mappingPath("/app")
-
-    // FIXME - find out how collisions of resources (priority) is handled
-    // ???
-
     configBuilder.resource("/stream", stream);
     // .resource("/video/ffmpeg.1443989700495.mp4", test)
 
     // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
-    // :(
-    // for access after extracting
+    // for access after extracting :(
     configBuilder.resource("./resource/WebGui/app");
     configBuilder.resource("./resource");
 
@@ -453,7 +514,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return configBuilder;
   }
 
-  @Override
+  @Override /* DEPRECATE */
   public List<Connection> getConnections(URI clientKey) {
     // TODO Auto-generated method stub
     return null;
@@ -474,18 +535,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       String value = request.getHeader(key);
       map.put(key.toLowerCase(), value);
     }
-
     return map;
   }
 
-  public String getId(AtmosphereResource r) {
-    String id = r.getRequest().getHeader("id");
+  /*
+   * public Map<String, HttpSession> getSessions() { return sessions; }
+   */
 
-    if (id == null) {
-      id = "anonymous";
-    }
-    return id;
-  }
+  // FIXME - mappings for ease of use
+  /*
+   * public String getUuid(String simpleName) { for (HttpSession client :
+   * sessions.values()) { if (String.format("%s@%s",
+   * client.getAttribute("user"),
+   * client.getAttribute("host")).equals(simpleName)) { return
+   * client.getAttribute("uuid").toString(); } } return null; }
+   */
 
   public Integer getPort() {
     return port;
@@ -497,11 +561,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return null;
   }
 
-  /*
-   * SSLContext createSSLContext() { try { if (sslPort != null) { return
-   * SSLContext.getInstance("TLS"); } } catch (Exception e) {
-   * log.warn("can not make ssl context", e); } return null; }
-   */
+  public Map<String, List<String>> getRelays() {
+    return relays;
+  }
 
   /**
    * With a single method Atmosphere does so much !!! It sets up the connection,
@@ -516,67 +578,81 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   @Override
   public void handle(AtmosphereResource r) {
-
+ 
     String apiKey = Api.getApiKey(r);
+
+    Map<String, Object> attributes = new HashMap<>();
+    String uuid = r.uuid();
+    if (!Runtime.clientExists(r.uuid())) {
+      r.addEventListener(onDisconnect);
+      AtmosphereRequest request = r.getRequest();
+      Enumeration<String> headerNames = request.getHeaderNames();      
+      
+      attributes.put("r", r);
+      attributes.put("uuid", r.uuid());
+      attributes.put("cwd", "/");
+      attributes.put("uri", r.getRequest().getRequestURI());
+      attributes.put("user", "root");
+      attributes.put("host", r.getRequest().getRemoteAddr());
+      // attributes.put("session", session);
+      attributes.put("gateway", getName());
+      while (headerNames.hasMoreElements()) {
+          String headerName = headerNames.nextElement();          
+          Enumeration<String> headers = request.getHeaders(headerName);
+          while (headers.hasMoreElements()) {
+              String headerValue = headers.nextElement();
+              attributes.put(headerName, headerValue);              
+          }
+      } 
+      Runtime.getInstance().addClient(uuid, attributes);
+    } else {
+      // keeping it "fresh" - the resource changes every request ..
+      Runtime.getClient(uuid).put("r", r);
+    }
 
     AtmosphereRequest request = r.getRequest();
 
     log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
 
-   // try {
-      
-      Api api = ApiFactory.getApiProcessor(apiKey);
-      api.process(this, apiKey, r);
+    // try {
 
-      String id = getId(r);
+    Api api = ApiFactory.getApiProcessor(apiKey);
+    api.process(this, apiKey, r);
 
-      // FIXME - header SAS token for authentication ???
-      // Map<String, String> headers = getHeadersInfo(request);
+    // FIXME - header SAS token for authentication ???
+    // Map<String, String> headers = getHeadersInfo(request);
 
-      // GET vs POST - post assumes low-level messaging
-      // GET is high level synchronous
-      // String httpMethod = request.getMethod();
+    // GET vs POST - post assumes low-level messaging
+    // GET is high level synchronous
+    // String httpMethod = request.getMethod();
 
-      // get default encoder
-      // FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
-      // CHANGE to MIME_TYPE_APPLICATION_JSON !!!
+    // get default encoder
+    // FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
+    // CHANGE to MIME_TYPE_APPLICATION_JSON !!!
 
-      // ========================================
-      // POST || GET http://{host}:{port}/api/messages
-      // POST || GET http://{host}:{port}/api/services
-      // ========================================
+    // ========================================
+    // POST || GET http://{host}:{port}/api/messages
+    // POST || GET http://{host}:{port}/api/services
+    // ========================================
 
-      // TODO - add handleSwaggerApi
-      /*
-      switch (apiKey) {
-        
-        case ApiFactory.API_TYPE_MESSAGES: {
-          handleMessagesApi(r);
-          break;
-        }
-        
-        case ApiFactory.API_TYPE_MESSAGES_BLOCKING: {
-          // decode to service api
-          // call service api
-          handleMessagesBlockingApi(r);
-          break;
-        }
-
-        case ApiFactory.API_TYPE_SERVICE: {
-          handleServiceApi(r);
-          break;
-        }
-
-        default: {
-          // handleInvalidApi(r); // TODO - swagger list of apis ?
-          throw new IOException("invalid api: " + apiKey);
-        }
-      }
-
-    } catch (Exception e) {  // TODO - handle in process
- 
-    }
-    */
+    // TODO - add handleSwaggerApi
+    /*
+     * switch (apiKey) {
+     * 
+     * case ApiFactory.API_TYPE_MESSAGES: { handleMessagesApi(r); break; }
+     * 
+     * case ApiFactory.API_TYPE_MESSAGES_BLOCKING: { // decode to service api //
+     * call service api handleMessagesBlockingApi(r); break; }
+     * 
+     * case ApiFactory.API_TYPE_SERVICE: { handleServiceApi(r); break; }
+     * 
+     * default: { // handleInvalidApi(r); // TODO - swagger list of apis ? throw
+     * new IOException("invalid api: " + apiKey); } }
+     * 
+     * } catch (Exception e) { // TODO - handle in process
+     * 
+     * }
+     */
   }
 
   /**
@@ -601,13 +677,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         r.suspend();
       }
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-      // api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
+      // api.process(this, out, r.getRequest().getRequestURI(),
+      // request.body().asString());
 
     } catch (Exception e) {
       log.error("handleMessagesApi -", e);
     }
   }
-  
+
   public void handleMessagesBlockingApi(AtmosphereResource r) {
     try {
       AtmosphereResponse response = r.getResponse();
@@ -619,14 +696,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
 
-      // api.process(this, out, r.getRequest().getRequestURI(), request.body().asString());
+      // api.process(this, out, r.getRequest().getRequestURI(),
+      // request.body().asString());
 
     } catch (Exception e) {
       log.error("handleMessagesBlockingApi -", e);
     }
   }
 
- 
   public void handleServiceApi(AtmosphereResource r) throws Exception {
     AtmosphereRequest request = r.getRequest();
     AtmosphereResponse response = r.getResponse();
@@ -651,7 +728,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   @Override
-  public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+  public boolean isAuthorized(Map<String, Object> security, String serviceName, String method) {
     // TODO Auto-generated method stub
     return false;
   }
@@ -786,6 +863,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
   // === end positioning panels plumbing ===
 
+  /*
+   * public void put(String uuid, HttpSession s) { sessions.put(uuid, s); }
+   */
+
   public void publishPanels() {
     for (String key : panels.keySet()) {
       invoke("publishPanel", key);
@@ -836,6 +917,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     save();
   }
 
+  // FIXME
+
   @Override
   public void sendRemote(String key, Message msg) throws URISyntaxException {
     // TODO Auto-generated method stub
@@ -861,6 +944,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       panel = new Panel(name, x, y, z);
     }
     invoke("publishPanel", panel);
+  }
+
+  public void setAddress(String address) {
+    if (address != null) {
+      this.address = address;
+    }
   }
 
   public void setPort(Integer port) {
@@ -902,9 +991,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         log.error("starting nettosphere failed", e);
       }
 
-      broadcastFactory = nettosphere.framework().getBroadcasterFactory();
+      broadcasterFactory = nettosphere.framework().getBroadcasterFactory();
       // get default boadcaster
-      broadcaster = broadcastFactory.get("/*");
+      // GLOBAL - doesnt work because all come in with /api !
+      // broadcaster = broadcasterFactory.get("/*");
+      broadcaster = broadcasterFactory.lookup("/api"); // get("/api") throws
+                                                       // because already
+                                                       // created !
 
       log.info("WebGui {} started on port {}", getName(), port);
       // get all instances
@@ -974,8 +1067,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     stop();
   }
 
-  // FIXME
-
   /**
    * UseLocalResources determines if references to JQuery JavaScript library are
    * local or if the library is linked to using content delivery network.
@@ -986,12 +1077,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   public void useLocalResources(boolean useLocalResources) {
     this.useLocalResources = useLocalResources;
-  }
-
-  public void setAddress(String address) {
-    if (address != null) {
-      this.address = address;
-    }
   }
 
   public static void main(String[] args) {
@@ -1014,11 +1099,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("python", "Python");
       // Runtime.start("gui", "SwingGui");
       // Runtime.getNetInfo();
-
+      Runtime.main(new String[] {"--interactive"});
+      Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-//      webgui.autoStartBrowser(false);
+      webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
+      Runtime.start("gui", "SwingGui");
+
       // Runtime.start("cli", "Cli2");
       // Runtime.start("webgui", "WebGui");
 
@@ -1030,14 +1118,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
-
-  public Map<String, HttpSession> getSessions() {
-    return sessions;
-  }
-
-  public Broadcaster getBroadcaster() {
-    return broadcaster;
   }
 
 }
