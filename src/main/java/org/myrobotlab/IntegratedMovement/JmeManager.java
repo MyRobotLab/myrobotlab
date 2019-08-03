@@ -58,7 +58,6 @@ public class JmeManager implements ActionListener {
 	transient private JmeIMModel jmeApp;
 	transient AssetManager assetManager;
 	transient private HashMap<String, Spatial> nodes = new HashMap<String,Spatial>();
-	private transient Queue<Node> nodeQueue = new ConcurrentLinkedQueue<Node>();
 	private long startUpdateTs;
 	transient private Node rootNode;
 	private long deltaMs;
@@ -194,6 +193,7 @@ public class JmeManager implements ActionListener {
 		for (IMPart part : data.getParts().values()){
 		    Node node = new Node(part.getName());
 		    String modelPath = part.get3DModelPath();
+		    setVisible(part.getName(), part.isVisible());
 		    if (modelPath != null) {
 		        Spatial spatial = assetManager.loadModel(modelPath);
 		        spatial.scale(part.getScale());
@@ -220,7 +220,6 @@ public class JmeManager implements ActionListener {
 				iniRot.setLocalRotation(q.inverse());
 		    }
 		    else {
-		        Vector3f it = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
 		        Cylinder c = new Cylinder(8, 20, (float) part.getRadius(), (float) part.getLength(), true, false);
 		        Geometry geom = new Geometry("Cylinder", c);
 		        geom.setName(part.getName());
@@ -234,36 +233,17 @@ public class JmeManager implements ActionListener {
 		        float length = (float)part.getLength();
 		        if (part.getR()!=0)
 		        	length *=-1;
-		        Point ori = part.getOriginPoint();
-		        Point end = part.getEndPoint();
-		        //if (it.getZ() < 0) length = -length;
 		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, -length)));
-		        //Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
 		        Vector3f delta = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
 		        delta.normalizeLocal();
 		        float[] angles = new float[3];
 		        angles[0]=delta.angleBetween(Vector3f.UNIT_X);
 		        angles[1]=delta.angleBetween(Vector3f.UNIT_Y)+FastMath.PI;
 		        angles[2]=delta.angleBetween(Vector3f.UNIT_Z)-FastMath.PI/2;
-		        
-		        Quaternion d3 = new Quaternion().fromAngleAxis(angles[1], Vector3f.UNIT_Y);
-		        Quaternion d1 = new Quaternion().fromAngleAxis(angles[2], Vector3f.UNIT_Z);
-		        Quaternion d2 = new Quaternion().fromAngleAxis(angles[0], Vector3f.UNIT_Y);
-		        Quaternion d = d3.mult(d1).mult(d2);
-			    Matrix m = new Matrix(3,3).loadIdentity();
-		        //d.toAngles(angles);
-		        
-		        Quaternion q2 = Util.matrixToQuaternion(m);
-		        
-		        Quaternion q1 = new Quaternion().fromAngles(-FastMath.PI/2,0,0);
 		        iniRot.rotate(-angles[0],0, 0);
 		        iniRot.rotate(0,angles[1],0);
 		        iniRot.rotate(0,0,angles[2]);
 		        iniRot.rotate(0,0,(float)part.getInitialTheta());
-		        //iniRot.setLocalRotation(d);
-		        //iniRot.setLocalRotation(q1.mult(q2.inverse()));
-		        //n.setLocalRotation(q.inverse());
-		        //loat[] angles = new float[3];
 		        iniRot.getLocalRotation().toAngles(angles);
 		        iniRot.attachChild(geom);
 		        alpha.attachChild(iniRot);
@@ -282,8 +262,6 @@ public class JmeManager implements ActionListener {
 	    while (jme3MsgQueue.size() > 0) {
 	        Jme3Msg msg = null;
 	        try {
-
-	          // TODO - support relative & absolute moves
 	          msg = jme3MsgQueue.remove();
 	          msgUtil.invoke(msg);
 	        } catch (Exception e) {
@@ -307,48 +285,26 @@ public class JmeManager implements ActionListener {
 	public void updatePosition() {
 		IMData data = im.getData();
 		for (IMPart part : data.getParts().values()){
-			
 			Node node = (Node)nodes.get(part.getName());
 			if (node == null) continue;
 			Matrix origin = part.getOrigin();
-			Matrix end = part.getEnd();
-/*			Vector3f y = new Vector3f();
-			y.setX(((float)o.getX()-y.getX()+(float)ini.getX()));
-			y.setY(((float)o.getZ()-y.getY()+(float)ini.getY()));
-			y.setZ(((float)o.getY()-y.getZ()+(float)ini.getZ()));
-*/			node.setLocalTranslation(Util.pointToVector3f(Util.matrixToPoint(origin)));
-			
+			node.setLocalTranslation(Util.pointToVector3f(Util.matrixToPoint(origin)));
 			Quaternion q = Util.matrixToQuaternion(origin);
 			Vector3f[] axis = new Vector3f[3];
 			q.toAxes(axis);
 			float[] angles = new float[3];
 			q.toAngles(angles);
-			Quaternion q1 = new Quaternion().fromAngleAxis((float)part.getTheta()*-1, axis[2]);
-			Quaternion q2 = new Quaternion().fromAngleAxis((float)part.getTheta(), Vector3f.UNIT_Z.mult(-1));
 			Quaternion q3 = new Quaternion().fromAngles(0, (float)(part.getTheta()),0);
-			double alpha = part.getAlpha();
-			//if (part.getName() == "leftArmAttach") alpha = FastMath.DEG_TO_RAD * 180;
-			Quaternion q4 = new Quaternion().fromAngles(0,0,-(float)alpha);
 			Spatial n1 = node.getChild("theta");
-			Spatial n2 = node.getChild("alpha");
 			n1.setLocalRotation(q3);
-			//n2.setLocalRotation(q4);
 			Quaternion i = Util.matrixToQuaternion(origin);
 			node.setLocalRotation(i);
-			
-			//node.setLocalRotation(q);
-			if (part.isVisible()){
-				node.setCullHint(CullHint.Never);
-			}
-			else {
-				node.setCullHint(CullHint.Always);
-			}
 		}
 	}
 
 	@Override
 	public void onAction(String name, boolean isPressed, float tpf) {
-	    //log.info("onAction {} {} {}", name, keyPressed, tpf);
+	    log.info("onAction {} {} {}", name, isPressed, tpf);
 		
 	}
 
@@ -364,10 +320,7 @@ public class JmeManager implements ActionListener {
 		inputManager = jmeApp.getInputManager();
 		inputManager.setCursorVisible(true);
 		jmeApp.getFlyByCamera().setEnabled(false);
-		//Node node = new Node("cam");
-		//node.setLocalTranslation(0, 3, 0);
 		rootNode = jmeApp.getRootNode();
-		//rootNode.attachChild(node);
 		loadParts(im.getData());
 	    Cylinder c = new Cylinder(8, 50, .005f, .010f, true, false);
 	    Geometry geom = new Geometry("Cylinder", c);
@@ -421,21 +374,17 @@ public class JmeManager implements ActionListener {
 	private AnalogListener analogListener = new AnalogListener() {
 		public void onAnalog(String name, float keyPressed, float tpf) {
 			if (name.equals("MouseClickL")) {
-		        // rotate+= keyPressed;
 		        rootNode.rotate(0, -keyPressed, 0);
-		        // Log.info(rotate);
 		      } else if (name.equals("MouseClickR")) {
-		        // rotate+= keyPressed;
 		        rootNode.rotate(0, keyPressed, 0);
-		        // Log.info(rotate);
 		      } else if (name.equals("MMouseUp")) {
 		        rootNode.setLocalScale(rootNode.getLocalScale().mult(1.05f));
 		      } else if (name.equals("MMouseDown")) {
 		        rootNode.setLocalScale(rootNode.getLocalScale().mult(0.95f));
 		      } else if (name.equals("Up")) {
-		        rootNode.move(0, keyPressed * 0.100f, 0);
+		        rootNode.move(0, -keyPressed * 0.300f, 0);
 		      } else if (name.equals("Down")) {
-		        rootNode.move(0, -keyPressed * 0.100f, 0);
+		        rootNode.move(0, keyPressed * 0.300f, 0);
 		      } else if (name.equals("Left")) {
 		        rootNode.move(-keyPressed * 0.100f, 0, 0);
 		      } else if (name.equals("Right")) {
@@ -456,15 +405,13 @@ public class JmeManager implements ActionListener {
 
 		    Node n = new Node(name);
 		    Arrow arrow = new Arrow(Vector3f.UNIT_X);
-		    arrow.setLineWidth(4); // make arrow thicker
+		    n.setLocalScale(0.2f);
 		    n.attachChild(createAxis("x", arrow, ColorRGBA.Red));
 
 		    arrow = new Arrow(Vector3f.UNIT_Y);
-		    arrow.setLineWidth(4); // make arrow thicker
 		    n.attachChild(createAxis("y", arrow, ColorRGBA.Green));
 
 		    arrow = new Arrow(Vector3f.UNIT_Z);
-		    arrow.setLineWidth(4); // make arrow thicker
 		    n.attachChild(createAxis("z", arrow, ColorRGBA.Blue));
 		    return n;
 		  }
@@ -473,9 +420,26 @@ public class JmeManager implements ActionListener {
 		    Geometry g = new Geometry(name, shape);
 		    Material mat = new Material(jmeApp.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
 		    mat.getAdditionalRenderState().setWireframe(true);
+		    mat.getAdditionalRenderState().setLineWidth(1);
 		    mat.setColor("Color", color);
 		    g.setMaterial(mat);
 		    return g;
 		  }
+
+	public void setVisible(String name, boolean visible) {
+		addMsg("setVisible", name, visible);
+	}
+	
+	public void setAxesVisible(boolean b){
+		addMsg("setAxesVisible", b);
+	}
+
+	public HashMap<String, Spatial> getNodes() {
+		return nodes;
+	}
+	
+	public void setAxesVisible(String name, boolean b){
+		addMsg("setAxesVisible", name, b);
+	}
 
 }

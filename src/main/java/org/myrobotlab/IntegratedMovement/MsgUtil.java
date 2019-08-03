@@ -8,6 +8,7 @@ import org.myrobotlab.jme3.Jme3Msg;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.Spatial.CullHint;
 
 /**
  * @author calamity
@@ -67,5 +68,39 @@ public class MsgUtil {
 	      rootNode.updateGeometricState();
 	    }
 	}
-
+	
+	public void setVisible(String nodeName, boolean b){
+		Spatial node = jme.get(nodeName);
+		if (b){
+			node.setCullHint(CullHint.Never);
+		}
+		else{
+			node.setCullHint(CullHint.Always);
+		}
+	}
+	
+	public void setAxesVisible(boolean b){
+		CullHint visible = CullHint.Never;
+		if (!b) visible = CullHint.Always;
+		for (Spatial s : jme.getNodes().values()){
+			Spatial origin = ((Node)s).getChild("origin");
+			if (origin != null) origin.setCullHint(visible);
+		}
+	}
+	
+	public void setAxesVisible(String name, boolean b){
+		Node node = (Node)jme.get(name);
+		if (node == null){
+			JmeManager.log.error("No node named {} in setAxesVisible", name);
+			return;
+		}
+		Node origin = (Node)node.getChild("origin");
+		if (origin == null){
+			JmeManager.log.error("Node {} do not contain axes info in setAxesVisible", name);
+			return;
+		}
+		CullHint visible = CullHint.Never;
+		if (!b) visible = CullHint.Always;
+		origin.setCullHint(visible);
+	}
 }

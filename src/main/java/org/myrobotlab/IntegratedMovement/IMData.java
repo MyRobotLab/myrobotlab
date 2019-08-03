@@ -110,7 +110,7 @@ public class IMData {
 		while (part != null){
 			part.setOrigin(armMatrix);
 			DHLink link = part.getDHLink(engine.getName());
-			if (controls.containsKey(part.getName())){
+			if (controls.containsKey(part.getControl(engine.getName()))){
 				link.addPositionValue(getControl(part.getControl(engine.getName())).getPos());
 			}
 			Matrix s = link.resolveMatrix();
