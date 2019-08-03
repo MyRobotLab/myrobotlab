@@ -40,8 +40,8 @@ public class ProcessData implements Serializable {
   public stateType state = stateType.stopped;
 
   // is this really used for anything ?
-  @Deprecated
-  public String fromAgent = null;
+  // @Deprecated
+  //public String fromAgent = null; - is now in Options
 
   @Deprecated /* just temp */
   public ArrayList<String> in = null;
