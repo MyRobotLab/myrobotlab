@@ -166,16 +166,16 @@ public class IntegratedMovement extends Service
 		Romoplate.map(10.0, 70.0, 10.0, 70.0);
 		Romoplate.setSpeed(15.0);
 		HobbyServo shoulder = (HobbyServo) Runtime.start("shoulder", "HobbyServo");
-		shoulder.attach(arduino.getName(), 26, 30.0);
-		shoulder.map(0.0, 180.0, 0.0, 180.0);
+		shoulder.attach(arduino.getName(), 26, 0.0);
+		shoulder.map(-30.0, 150.0, 0.0, 180.0);
 		shoulder.setSpeed(14.0);
 		HobbyServo Rshoulder = (HobbyServo) Runtime.start("Rshoulder", "HobbyServo");
 		Rshoulder.attach(arduino.getName(), 6, 30.0);
 		Rshoulder.map(0.0, 180.0, 0.0, 180.0);
 		Rshoulder.setSpeed(14.0);
 		HobbyServo rotate = (HobbyServo) Runtime.start("rotate", "HobbyServo");
-		rotate.attach(arduino.getName(), 9, 90.0);
-		rotate.map(46.0, 160.0, 46.0, 160.0);
+		rotate.attach(arduino.getName(), 9, 0.0);
+		rotate.map(-44.0, 70.0, 46.0, 160.0);
 		rotate.setSpeed(18.0);
 		HobbyServo Rrotate = (HobbyServo) Runtime.start("Rrotate", "HobbyServo");
 		Rrotate.attach(arduino.getName(), 29, 90.0);
@@ -256,8 +256,26 @@ public class IntegratedMovement extends Service
 		IMPart partLeftOmoplate = ik.createPart("leftOmoplate", .010);
 		partLeftOmoplate.setDHParameters("leftArm", 0, -5.6, 0.045, 90);
 		ik.setControl("leftArm", partLeftOmoplate, omoplate);
+		partLeftOmoplate.linkTo("leftArm", "leftShoulder");
 		ik.attach(partLeftOmoplate);
+		
+		IMPart partLeftShoulder = ik.createPart("leftShoulder", .01);
+		ik.setControl("leftArm", partLeftShoulder, shoulder);
+		partLeftShoulder.setDHParameters("leftArm", -0.077, 90, 0, -90);
+		partLeftShoulder.linkTo("leftArm", "leftRotate");
+		ik.attach(partLeftShoulder);
+		
+		IMPart partLeftRotate = ik.createPart("leftRotate", 0.01);
+		ik.setControl("leftArm", partLeftRotate, rotate);
+		partLeftRotate.setDHParameters("leftArm", -0.284, 180, .040, -90);
+		partLeftRotate.linkTo("leftArm", "leftBicep");
+		ik.attach(partLeftRotate);
 
+		IMPart partLeftBicep = ik.createPart("leftBicep", 0.01);
+		ik.setControl("leftArm", partLeftBicep, bicep);
+		partLeftBicep.setDHParameters("leftArm", 0, -7 + 24.4 + 90, .3, 0);
+		ik.attach(partLeftBicep);
+		
 		// #define the DH parameters for the ik service
 		ik.addArm("torso");
 		ik.setInputMatrix("torso", ik.createInputMatrix(0, 0, 0, 0, 0, 0));
@@ -415,8 +433,8 @@ public class IntegratedMovement extends Service
 		Rrotate.moveTo(91.0);
 		Rbicep.moveTo(6.0);
 		omoplate.moveTo(11.0);
-		shoulder.moveTo(31.0);
-		rotate.moveTo(91.0);
+		shoulder.moveTo(1.0);
+		rotate.moveTo(1.0);
 		bicep.moveTo(6.0);
 		wrist.moveTo(91.0);
 		Rwrist.moveTo(91.0);
@@ -428,8 +446,8 @@ public class IntegratedMovement extends Service
 		Rrotate.moveTo(90.0);
 		Rbicep.moveTo(5.0);
 		omoplate.moveTo(10.0);
-		shoulder.moveTo(30.0);
-		rotate.moveTo(90.0);
+		shoulder.moveTo(0.0);
+		rotate.moveTo(0.0);
 		bicep.moveTo(5.0);
 		wrist.moveTo(90.0);
 		Rwrist.moveTo(90.0);
