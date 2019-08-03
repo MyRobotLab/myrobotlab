@@ -1206,9 +1206,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       }
 
       if (options.interactive || !options.spawnedFromAgent) {
+        log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
         clientLocal = new InProcessCli(System.in, System.out);
         clientLocal.start();
-      }
+      } 
 
     } catch (Exception e) {
       log.error("runtime exception", e);
