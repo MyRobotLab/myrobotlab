@@ -1205,7 +1205,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
         invokeCommands(options.invoke);
       }
 
-      if (options.interactive) {
+      if (options.interactive || !options.spawnedFromAgent) {
         clientLocal = new InProcessCli(System.in, System.out);
         clientLocal.start();
       }
@@ -1701,6 +1701,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
     @Option(names = { "--interactive" }, description = "starts in interactive mode - reading from stdin")
     public boolean interactive = false;
+
+    @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
+    public boolean spawnedFromAgent = false;
 
     @Option(names = { "--from-agent" }, description = "signals if the current process has been started by an Agent")
     public boolean fromAgent = false;
