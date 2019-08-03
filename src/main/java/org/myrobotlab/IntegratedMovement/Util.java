@@ -1,5 +1,6 @@
 package org.myrobotlab.IntegratedMovement;
 
+import org.apache.commons.math3.util.FastMath;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
@@ -105,19 +106,22 @@ public class Util {
 		return t;
 	}
 	public static Vector3f pointToVector3f(Point point){
-		return new Vector3f((float)point.getX(), (float)point.getZ(), -(float)point.getY());
+		return new Vector3f(-(float)point.getX(), (float)point.getZ(), (float)point.getY());
 	}
 	
 	public static Quaternion matrixToQuaternion(Matrix m){
 		Matrix3f mf = new Matrix3f((float)m.elements[0][0], (float)m.elements[0][1], (float)m.elements[0][2], 
 				(float)m.elements[1][0], (float)m.elements[1][1], (float)m.elements[1][2]
 				, (float)m.elements[2][0], (float)m.elements[2][1], (float)m.elements[2][2]);
-		Matrix3f tmf = new Matrix3f(1, 0, 0, 0, 0, -1, 0, 1, 0);
-		mf = tmf.invert().mult(mf);
+		Matrix3f tmf = new Matrix3f(1, 0, 0, 0, 0, -1, 0, -1, 0);
+		//mf = tmf.invert().mult(mf);
 		//mf = tmf.invert().mult(mf).mult(tmf);
 		Quaternion q = new Quaternion().fromRotationMatrix(mf);
+		float[] angles = new float[3];
+		q.toAngles(angles);
+		Quaternion r = new Quaternion().fromAngles(-angles[0], angles[2], angles[1]);
 		//Quaternion qf = new Quaternion().fromAngleAxis(-FastMath.PI/2, Vector3f.UNIT_X);
-		return q;
+		return r;
 	}
 	
 }

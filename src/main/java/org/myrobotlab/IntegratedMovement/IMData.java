@@ -115,7 +115,9 @@ public class IMData {
 			}
 			Matrix s = link.resolveMatrix();
 			part.setTheta(link.getTheta());
+			part.setInitialTheta(link.getInitialTheta());
 			part.setAlpha(nextAlpha);
+			part.setR(link.getA());
 			nextAlpha = link.getAlpha();
 			Matrix armMatrix1 = armMatrix.multiply(s);
 			part.setInternTransform(s);

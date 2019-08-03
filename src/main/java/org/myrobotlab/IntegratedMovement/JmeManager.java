@@ -31,10 +31,12 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.control.CameraControl.ControlDirection;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.debug.Grid;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.system.AppSettings;
@@ -226,17 +228,42 @@ public class JmeManager implements ActionListener {
 		        Node iniRot = new Node("iniRot");
 		        Node theta = new Node("theta");
 		        Node alpha = new Node("alpha");
+			    Node origin = createUnitAxis("origin");
+			    alpha.attachChild(origin);
+
 		        float length = (float)part.getLength();
+		        if (part.getR()!=0)
+		        	length *=-1;
+		        Point ori = part.getOriginPoint();
+		        Point end = part.getEndPoint();
 		        //if (it.getZ() < 0) length = -length;
-		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, length)));
+		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, -length)));
 		        //Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
-		        Matrix m = new Matrix(3,3).loadIdentity();
+		        Vector3f delta = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
+		        delta.normalizeLocal();
+		        float[] angles = new float[3];
+		        angles[0]=delta.angleBetween(Vector3f.UNIT_X);
+		        angles[1]=delta.angleBetween(Vector3f.UNIT_Y)+FastMath.PI;
+		        angles[2]=delta.angleBetween(Vector3f.UNIT_Z)-FastMath.PI/2;
+		        
+		        Quaternion d3 = new Quaternion().fromAngleAxis(angles[1], Vector3f.UNIT_Y);
+		        Quaternion d1 = new Quaternion().fromAngleAxis(angles[2], Vector3f.UNIT_Z);
+		        Quaternion d2 = new Quaternion().fromAngleAxis(angles[0], Vector3f.UNIT_Y);
+		        Quaternion d = d3.mult(d1).mult(d2);
+			    Matrix m = new Matrix(3,3).loadIdentity();
+		        //d.toAngles(angles);
+		        
 		        Quaternion q2 = Util.matrixToQuaternion(m);
 		        
 		        Quaternion q1 = new Quaternion().fromAngles(-FastMath.PI/2,0,0);
-		        iniRot.setLocalRotation(q1.mult(q2.inverse()));
+		        iniRot.rotate(-angles[0],0, 0);
+		        iniRot.rotate(0,angles[1],0);
+		        iniRot.rotate(0,0,angles[2]);
+		        iniRot.rotate(0,0,(float)part.getInitialTheta());
+		        //iniRot.setLocalRotation(d);
+		        //iniRot.setLocalRotation(q1.mult(q2.inverse()));
 		        //n.setLocalRotation(q.inverse());
-		        float[] angles = new float[3];
+		        //loat[] angles = new float[3];
 		        iniRot.getLocalRotation().toAngles(angles);
 		        iniRot.attachChild(geom);
 		        alpha.attachChild(iniRot);
@@ -298,17 +325,18 @@ public class JmeManager implements ActionListener {
 			q.toAngles(angles);
 			Quaternion q1 = new Quaternion().fromAngleAxis((float)part.getTheta()*-1, axis[2]);
 			Quaternion q2 = new Quaternion().fromAngleAxis((float)part.getTheta(), Vector3f.UNIT_Z.mult(-1));
-			Quaternion q3 = new Quaternion().fromAngles(0, 0, (float)part.getTheta());
+			Quaternion q3 = new Quaternion().fromAngles(0, (float)(part.getTheta()),0);
 			double alpha = part.getAlpha();
 			//if (part.getName() == "leftArmAttach") alpha = FastMath.DEG_TO_RAD * 180;
-			Quaternion q4 = new Quaternion().fromAngles(0,(float)alpha, 0);
+			Quaternion q4 = new Quaternion().fromAngles(0,0,-(float)alpha);
 			Spatial n1 = node.getChild("theta");
 			Spatial n2 = node.getChild("alpha");
 			n1.setLocalRotation(q3);
-			n2.setLocalRotation(q4);
-			Quaternion i = Util.matrixToQuaternion(end);
-			//node.setLocalRotation(i);
-			node.setLocalRotation(q);
+			//n2.setLocalRotation(q4);
+			Quaternion i = Util.matrixToQuaternion(origin);
+			node.setLocalRotation(i);
+			
+			//node.setLocalRotation(q);
 			if (part.isVisible()){
 				node.setCullHint(CullHint.Never);
 			}
@@ -352,7 +380,7 @@ public class JmeManager implements ActionListener {
 	    geom2.setMaterial(mat2);
 	    Node point2 = new Node("point");
 	    point2.attachChild(geom2);
-	    point2.setLocalTranslation(.3f, 0, 0);
+	    point2.setLocalTranslation(0.3f, 0,  0f);
 	    rootNode.attachChild(point2);
 	    DirectionalLight sun = new DirectionalLight();
 	    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
@@ -423,4 +451,31 @@ public class JmeManager implements ActionListener {
 	public Node getRootNode() {
 		return rootNode;
 	}
+	
+	  public Node createUnitAxis(String name) {
+
+		    Node n = new Node(name);
+		    Arrow arrow = new Arrow(Vector3f.UNIT_X);
+		    arrow.setLineWidth(4); // make arrow thicker
+		    n.attachChild(createAxis("x", arrow, ColorRGBA.Red));
+
+		    arrow = new Arrow(Vector3f.UNIT_Y);
+		    arrow.setLineWidth(4); // make arrow thicker
+		    n.attachChild(createAxis("y", arrow, ColorRGBA.Green));
+
+		    arrow = new Arrow(Vector3f.UNIT_Z);
+		    arrow.setLineWidth(4); // make arrow thicker
+		    n.attachChild(createAxis("z", arrow, ColorRGBA.Blue));
+		    return n;
+		  }
+
+	  public Geometry createAxis(String name, Mesh shape, ColorRGBA color) {
+		    Geometry g = new Geometry(name, shape);
+		    Material mat = new Material(jmeApp.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+		    mat.getAdditionalRenderState().setWireframe(true);
+		    mat.setColor("Color", color);
+		    g.setMaterial(mat);
+		    return g;
+		  }
+
 }
