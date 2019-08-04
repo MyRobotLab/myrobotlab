@@ -170,16 +170,16 @@ public class IntegratedMovement extends Service
 		shoulder.map(-30.0, 150.0, 0.0, 180.0);
 		shoulder.setSpeed(14.0);
 		HobbyServo Rshoulder = (HobbyServo) Runtime.start("Rshoulder", "HobbyServo");
-		Rshoulder.attach(arduino.getName(), 6, 30.0);
-		Rshoulder.map(0.0, 180.0, 0.0, 180.0);
+		Rshoulder.attach(arduino.getName(), 6, 0.0);
+		Rshoulder.map(-30.0, 150.0, 0.0, 180.0);
 		Rshoulder.setSpeed(14.0);
 		HobbyServo rotate = (HobbyServo) Runtime.start("rotate", "HobbyServo");
 		rotate.attach(arduino.getName(), 9, 0.0);
 		rotate.map(-44.0, 70.0, 46.0, 160.0);
 		rotate.setSpeed(18.0);
 		HobbyServo Rrotate = (HobbyServo) Runtime.start("Rrotate", "HobbyServo");
-		Rrotate.attach(arduino.getName(), 29, 90.0);
-		Rrotate.map(46.0, 160.0, 46.0, 160.0);
+		Rrotate.attach(arduino.getName(), 29, 0.0);
+		Rrotate.map(-44.0, 70.0, 46.0, 160.0);
 		Rrotate.setSpeed(18.0);
 		HobbyServo bicep = (HobbyServo) Runtime.start("bicep", "HobbyServo");
 		bicep.attach(arduino.getName(), 8, 10.0);
@@ -225,14 +225,13 @@ public class IntegratedMovement extends Service
 														// part, (String
 														// configuration, part,
 														// servo)
-		partMidStom.setDHParameters("torso", 0.113, 0, 0, 90, DHLinkType.REVOLUTE); // set
+		partMidStom.setDHParameters("torso", 0.108, 0, 0, 90, DHLinkType.REVOLUTE); // set
 																					// the
 																					// DH
 																					// parameters
 																					// for
 																					// kinematic
-		// partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(-0,0,0,
-		// 0, -90, 0)); //set the 3d model, scale, and offset)
+		partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(-0,0,0,0, 0, 0)); //set the 3d model, scale, and offset)
 		partMidStom.linkTo("torso", "topStom"); // set the next part in the
 												// configuration
 		ik.attach(partMidStom); // add the part to the IntegratedMovement
@@ -242,8 +241,7 @@ public class IntegratedMovement extends Service
 		ik.setControl("torso", partTopStom, topStom);
 		partTopStom.setDHParameters("torso", 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
-		// partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,
-		// -0.015f, 0f , -90 , 0, 180));
+		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
 		//partTopStom.linkTo("torso", "leftArmAttach");
 		ik.attach(partTopStom);
 
@@ -254,27 +252,69 @@ public class IntegratedMovement extends Service
 		ik.attach(partLeftArmAttach);
 
 		IMPart partLeftOmoplate = ik.createPart("leftOmoplate", .010);
-		partLeftOmoplate.setDHParameters("leftArm", 0, -5.6, 0.045, 90);
+		partLeftOmoplate.setDHParameters("leftArm", .004, -5.6, 0.04, 90);
 		ik.setControl("leftArm", partLeftOmoplate, omoplate);
 		partLeftOmoplate.linkTo("leftArm", "leftShoulder");
+		partLeftOmoplate.set3DModel("Models/Lomoplate1.j3o", 0.001f, new Point(0.001,0.004,0,-90,-90,0));
 		ik.attach(partLeftOmoplate);
 		
 		IMPart partLeftShoulder = ik.createPart("leftShoulder", .01);
 		ik.setControl("leftArm", partLeftShoulder, shoulder);
-		partLeftShoulder.setDHParameters("leftArm", -0.077, 90, 0, -90);
+		partLeftShoulder.set3DModel("Models/Lshoulder.j3o", 0.001f, new Point(0,0,0,-90,0,-90));
+		partLeftShoulder.setDHParameters("leftArm", -0.065, 90, 0, -90);
 		partLeftShoulder.linkTo("leftArm", "leftRotate");
 		ik.attach(partLeftShoulder);
 		
 		IMPart partLeftRotate = ik.createPart("leftRotate", 0.01);
 		ik.setControl("leftArm", partLeftRotate, rotate);
-		partLeftRotate.setDHParameters("leftArm", -0.284, 180, .040, -90);
-		partLeftRotate.linkTo("leftArm", "leftBicep");
+		partLeftRotate.setDHParameters("leftArm", -0.282, -90, 0, 90);
+		partLeftRotate.set3DModel("Models/rotate1.j3o", .001f, new Point(0, 0, -0.0582, 0, 0, 0));
+		partLeftRotate.linkTo("leftArm", "leftBicepAttach");
 		ik.attach(partLeftRotate);
+		
+		IMPart partLeftBicepAttach = ik.createPart("leftBicepAttach", 0.01);
+		partLeftBicepAttach.setDHParameters("leftArm", .03, 90, 0, 90);
+		partLeftBicepAttach.linkTo("leftArm", "leftBicep");
+		ik.attach(partLeftBicepAttach);
 
 		IMPart partLeftBicep = ik.createPart("leftBicep", 0.01);
 		ik.setControl("leftArm", partLeftBicep, bicep);
-		partLeftBicep.setDHParameters("leftArm", 0, -7 + 24.4 + 90, .3, 0);
+		partLeftBicep.setDHParameters("leftArm", 0, -7 + 24.4 + 180, .3, 0);
+		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
 		ik.attach(partLeftBicep);
+		
+		IMPart partRightArmAttach = ik.createPart("rightArmAttach", 0.01);
+		partRightArmAttach.setDHParameters("rightArm", -0.143, 0, 0, 90);
+		partRightArmAttach.linkTo("rightArm", "rightOmoplate");
+		ik.attach(partRightArmAttach);
+		
+		IMPart partRightOmoplate = ik.createPart("rightOmoplate", 0.01);
+		partRightOmoplate.setDHParameters("rightArm", 0, -5.6+180, 0.045, 90);
+		ik.setControl("rightArm", partRightOmoplate, Romoplate);
+		partRightOmoplate.linkTo("rightArm", "rightShoulder");
+		ik.attach(partRightOmoplate);
+		
+		IMPart partRightShoulder = ik.createPart("rightShoulder", 0.01);
+		partRightShoulder.setDHParameters("rightArm", -0.077, 90, 0, 90);
+		ik.setControl("rightArm", partRightShoulder, Rshoulder);
+		partRightShoulder.linkTo("rightArm", "rightRotate");
+		ik.attach(partRightShoulder);
+		
+		IMPart partRightRotate = ik.createPart("rightRotate", 0.01);
+		partRightRotate.setDHParameters("rightArm", 0.284, 90, 0, 90);
+		ik.setControl("rightArm", partRightRotate, Rrotate);
+		partRightRotate.linkTo("rightArm", "rightBicepAttach");
+		ik.attach(partRightRotate);
+		
+		IMPart partRightBicepAttach = ik.createPart("rightBicepAttach", 0.01);
+		partRightBicepAttach.setDHParameters("rightArm", .04, 90, 0, -90);
+		partRightBicepAttach.linkTo("rightArm", "rightBicep");
+		ik.attach(partRightBicepAttach);
+		
+		IMPart partRightBicep = ik.createPart("rightBicep", 0.01);
+		partRightBicep.setDHParameters("rightArm", 0, -7 + 24.4 , .3, 0);
+		ik.setControl("rightArm", partRightBicep, Rbicep);
+		ik.attach(partRightBicep);
 		
 		// #define the DH parameters for the ik service
 		ik.addArm("torso");
@@ -285,6 +325,9 @@ public class IntegratedMovement extends Service
 		ik.linkArmTo("leftArm", "torso");
 		ik.setFirstPart("leftArm", "leftArmAttach");
 
+		ik.addArm("rightArm");
+		ik.linkArmTo("rightArm", "torso");
+		ik.setFirstPart("rightArm", "rightArmAttach");
 		/*
 		 * ik.addArm("leftArm");
 		 * 
@@ -366,60 +409,28 @@ public class IntegratedMovement extends Service
 		 * 
 		 * // print "kinect Position" + str(ik.currentPosition("kinect"));
 		 * 
-		 * // ik.holdTarget("leftArm", true); ik.visualize(); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("ltorso", "Models/ltorso.j3o", 1, null, new
-		 * Vector3f(0, 0, 0), Vector3f.UNIT_X.mult(1), (float)
-		 * Math.toRadians(0)); ((TestJmeIMModel) ik.jmeApp).addPart("mtorso",
-		 * "Models/mtorso.j3o", 1f, null, new Vector3f(0, 0, 0),
-		 * Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(0));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("ttorso", "Models/ttorso1.j3o",
-		 * 1f, "mtorso", new Vector3f(0, 105f, 10), Vector3f.UNIT_Z, (float)
-		 * Math.toRadians(0)); ((TestJmeIMModel) ik.jmeApp).addPart("rightS",
-		 * null, 1f, "ttorso", new Vector3f(0, 300f, 0), Vector3f.UNIT_Z,
-		 * (float) Math.toRadians(0)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("Romoplate", "Models/Romoplate1.j3o", 1f,
-		 * "rightS", new Vector3f(-143f, 0, -17), Vector3f.UNIT_Z.mult(-1),
-		 * (float) Math.toRadians(-4)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f,
-		 * "Romoplate", new Vector3f(-23, -45f, 0), Vector3f.UNIT_X.mult(-1),
-		 * (float) Math.toRadians(-32)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder",
-		 * new Vector3f(-57, -55, 8), Vector3f.UNIT_Y.mult(-1), (float)
-		 * Math.toRadians(-90)); ((TestJmeIMModel) ik.jmeApp).addPart("Rbicep",
-		 * "Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5, -225, -32),
-		 * Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(20));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("leftS", null, 1f, "ttorso", new
-		 * Vector3f(0, 300f, 0), Vector3f.UNIT_Z, (float) Math.toRadians(0));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("omoplate",
-		 * "Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f, 0, -15),
-		 * Vector3f.UNIT_Z.mult(1), (float) Math.toRadians(-6));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("shoulder",
-		 * "Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(17, -45f, 5),
-		 * Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(-30));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("rotate", "Models/rotate1.j3o",
-		 * 1f, "shoulder", new Vector3f(65, -58, -3), Vector3f.UNIT_Y.mult(1),
-		 * (float) Math.toRadians(-90)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("bicep", "Models/Lbicep.j3o", 1f, "rotate", new
-		 * Vector3f(-14, -223, -28), Vector3f.UNIT_X.mult(-1), (float)
-		 * Math.toRadians(17)); ((TestJmeIMModel) ik.jmeApp).addPart("Rwrist",
-		 * "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15, -290, -10),
-		 * Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(180));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("wrist",
-		 * "Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0, -290, -20),
-		 * Vector3f.UNIT_Y.mult(1), (float) Math.toRadians(180));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("neck", "Models/neck.j3o", 1f,
-		 * "ttorso", new Vector3f(0, 452.5f, -45), Vector3f.UNIT_X.mult(-1),
-		 * (float) Math.toRadians(0)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("neckroll", null, 1f, "neck", new Vector3f(0, 0,
-		 * 0), Vector3f.UNIT_Z.mult(1), (float) Math.toRadians(2));
-		 * ((TestJmeIMModel) ik.jmeApp).addPart("head", "Models/head.j3o", 1f,
-		 * "neckroll", new Vector3f(0, 10, 20), Vector3f.UNIT_Y.mult(-1),
-		 * (float) Math.toRadians(0)); ((TestJmeIMModel)
-		 * ik.jmeApp).addPart("jaw", "Models/jaw.j3o", 1f, "head", new
-		 * Vector3f(-5, 63, -50), Vector3f.UNIT_X.mult(-1), (float)
-		 * Math.toRadians(0)); // ((TestJmeIMModel) ik.jmeApp).addPart("finger",
-		 * null, 10f, "wrist", new // Vector3f(0,205,0),
-		 * Vector3f.UNIT_X.mult(-1), // (float)Math.toRadians(0)); print
+		 * // ik.holdTarget("leftArm", true); ik.visualize(); 
+		 * ((TestJmeIMModel)ik.jmeApp).addPart("ltorso", "Models/ltorso.j3o", 1, null, new Vector3f(0, 0, 0), Vector3f.UNIT_X.mult(1), (float)Math.toRadians(0));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("mtorso", "Models/mtorso.j3o", 1f, null, new Vector3f(0, 0, 0), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(0));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("ttorso", "Models/ttorso1.j3o", 1f, "mtorso", new Vector3f(0, 105f, 10), Vector3f.UNIT_Z, (float) Math.toRadians(0));
+		 *  ((TestJmeIMModel) ik.jmeApp).addPart("rightS", null, 1f, "ttorso", new Vector3f(0, 300f, 0), Vector3f.UNIT_Z, (float) Math.toRadians(0));
+		 *  ((TestJmeIMModel)ik.jmeApp).addPart("Romoplate", "Models/Romoplate1.j3o", 1f,"rightS", new Vector3f(-143f, 0, -17), Vector3f.UNIT_Z.mult(-1),(float) Math.toRadians(-4));
+		 *  ((TestJmeIMModel)ik.jmeApp).addPart("Rshoulder", "Models/Rshoulder1.j3o", 1f,"Romoplate", new Vector3f(-23, -45f, 0), Vector3f.UNIT_X.mult(-1),(float) Math.toRadians(-32));
+		 *  ((TestJmeIMModel)ik.jmeApp).addPart("Rrotate", "Models/rotate1.j3o", 1f, "Rshoulder", new Vector3f(-57, -55, 8), Vector3f.UNIT_Y.mult(-1), (float)Math.toRadians(-90));
+		 *  ((TestJmeIMModel) ik.jmeApp).addPart("Rbicep","Models/Rbicep1.j3o", 1f, "Rrotate", new Vector3f(5, -225, -32), Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(20));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("leftS", null, 1f, "ttorso", new Vector3f(0, 300f, 0), Vector3f.UNIT_Z, (float) Math.toRadians(0));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("omoplate","Models/Lomoplate1.j3o", 1f, "leftS", new Vector3f(143f, 0, -15), Vector3f.UNIT_Z.mult(1), (float) Math.toRadians(-6));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("shoulder","Models/Lshoulder.j3o", 1f, "omoplate", new Vector3f(17, -45f, 5), Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(-30));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("rotate", "Models/rotate1.j3o", 1f, "shoulder", new Vector3f(65, -58, -3), Vector3f.UNIT_Y.mult(1),(float) Math.toRadians(-90)); 
+		 * ((TestJmeIMModel)ik.jmeApp).addPart("bicep", "Models/Lbicep.j3o", 1f, "rotate", new Vector3f(-14, -223, -28), Vector3f.UNIT_X.mult(-1), (float)Math.toRadians(17)); 
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("Rwrist", "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15, -290, -10), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(180));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("wrist","Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0, -290, -20), Vector3f.UNIT_Y.mult(1), (float) Math.toRadians(180));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("neck", "Models/neck.j3o", 1f,"ttorso", new Vector3f(0, 452.5f, -45), Vector3f.UNIT_X.mult(-1),(float) Math.toRadians(0));
+		 *  ((TestJmeIMModel)ik.jmeApp).addPart("neckroll", null, 1f, "neck", new Vector3f(0, 0, 0), Vector3f.UNIT_Z.mult(1), (float) Math.toRadians(2));
+		 * ((TestJmeIMModel) ik.jmeApp).addPart("head", "Models/head.j3o", 1f,"neckroll", new Vector3f(0, 10, 20), Vector3f.UNIT_Y.mult(-1),(float) Math.toRadians(0)); ((TestJmeIMModel)
+		 * ik.jmeApp).addPart("jaw", "Models/jaw.j3o", 1f, "head", new Vector3f(-5, 63, -50), Vector3f.UNIT_X.mult(-1), (float) Math.toRadians(0)); 
+		 * // ((TestJmeIMModel) ik.jmeApp).addPart("finger", null, 10f, "wrist", new // Vector3f(0,205,0), Vector3f.UNIT_X.mult(-1), // (float)Math.toRadians(0));
+		 *  print
 		 * ik.currentPosition("rightArm") print ik.currentPosition("leftArm")
 		 * 
 		 * // TODO add the object that can collide with the model //
@@ -429,8 +440,8 @@ public class IntegratedMovement extends Service
 		midStom.moveTo(1.0);
 		topStom.moveTo(1.0);
 		Romoplate.moveTo(11.0);
-		Rshoulder.moveTo(31.0);
-		Rrotate.moveTo(91.0);
+		Rshoulder.moveTo(1.0);
+		Rrotate.moveTo(1.0);
 		Rbicep.moveTo(6.0);
 		omoplate.moveTo(11.0);
 		shoulder.moveTo(1.0);
@@ -442,8 +453,8 @@ public class IntegratedMovement extends Service
 		midStom.moveTo(0.0);
 		topStom.moveTo(0.0);
 		Romoplate.moveTo(10.0);
-		Rshoulder.moveTo(30.0);
-		Rrotate.moveTo(90.0);
+		Rshoulder.moveTo(0.0);
+		Rrotate.moveTo(0.0);
 		Rbicep.moveTo(5.0);
 		omoplate.moveTo(10.0);
 		shoulder.moveTo(0.0);

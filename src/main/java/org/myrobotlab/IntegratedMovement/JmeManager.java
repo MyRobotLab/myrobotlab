@@ -206,18 +206,31 @@ public class JmeManager implements ActionListener {
 		        alpha.attachChild(iniRot);
 		        iniRot.attachChild(sp);
 		        sp.attachChild(spatial);
-		        
 		        node.attachChild(theta);
+			    Node origin = createUnitAxis("origin");
+			    alpha.attachChild(origin);
 			    Point ip = part.getInitialTranslateRotate();
 			    Quaternion i = new Quaternion();
 			    Quaternion q1 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getYaw(), Vector3f.UNIT_Y);
 			    Quaternion q2 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getRoll(), Vector3f.UNIT_Z);
-			    Quaternion q3 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getPitch(), Vector3f.UNIT_X);
+			    Quaternion q3 = new Quaternion().fromAngleAxis(FastMath.DEG_TO_RAD * (float)ip.getPitch(), Vector3f.UNIT_Y);
 				i = q1.multLocal(q2).multLocal(q3);
 				sp.setLocalRotation(i);
+				
+		        Vector3f delta = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
+		        delta.normalizeLocal();
+		        float[] angles = new float[3];
+		        angles[0]=delta.angleBetween(Vector3f.UNIT_X);
+		        angles[1]=delta.angleBetween(Vector3f.UNIT_Y)+FastMath.PI;
+		        angles[2]=delta.angleBetween(Vector3f.UNIT_Z)-FastMath.PI/2;
+		        //iniRot.rotate(-angles[0],0, 0);
+		        //iniRot.rotate(0,angles[1],0);
+		        //iniRot.rotate(0,0,angles[2]);
+		        //iniRot.rotate(0,0,(float)part.getInitialTheta());
+		        //iniRot.rotate(0, 0 , 0);
 				spatial.setLocalTranslation(Util.pointToVector3f(ip));
 				Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
-				iniRot.setLocalRotation(q.inverse());
+				//iniRot.setLocalRotation(q.inverse());
 		    }
 		    else {
 		        Cylinder c = new Cylinder(8, 20, (float) part.getRadius(), (float) part.getLength(), true, false);

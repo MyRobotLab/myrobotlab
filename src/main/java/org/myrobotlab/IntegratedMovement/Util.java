@@ -113,15 +113,15 @@ public class Util {
 		Matrix3f mf = new Matrix3f((float)m.elements[0][0], (float)m.elements[0][1], (float)m.elements[0][2], 
 				(float)m.elements[1][0], (float)m.elements[1][1], (float)m.elements[1][2]
 				, (float)m.elements[2][0], (float)m.elements[2][1], (float)m.elements[2][2]);
-		Matrix3f tmf = new Matrix3f(1, 0, 0, 0, 0, -1, 0, -1, 0);
+		Matrix3f tmf = new Matrix3f(-1, 0, 0, 0, 0, 1, 0, 1, 0);
 		//mf = tmf.invert().mult(mf);
-		//mf = tmf.invert().mult(mf).mult(tmf);
+		mf = tmf.invert().mult(mf).mult(tmf);
 		Quaternion q = new Quaternion().fromRotationMatrix(mf);
 		float[] angles = new float[3];
 		q.toAngles(angles);
 		Quaternion r = new Quaternion().fromAngles(-angles[0], angles[2], angles[1]);
 		//Quaternion qf = new Quaternion().fromAngleAxis(-FastMath.PI/2, Vector3f.UNIT_X);
-		return r;
+		return q;
 	}
 	
 }
