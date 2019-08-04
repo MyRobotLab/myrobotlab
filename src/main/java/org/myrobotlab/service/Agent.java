@@ -47,6 +47,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -1248,9 +1249,14 @@ public class Agent extends Service {
     // environment variables setup
     setEnv(pd, builder.environment());
 
+// new    
+//    builder.inheritIO();
+    
     Process process = builder.start();
     pd.process = process;
     pd.startTs = System.currentTimeMillis();
+    pd.stdout = new StreamGobbler(pd.options.id, process.getInputStream());
+    pd.stdout.start();
     pd.monitor = new ProcessData.Monitor(pd);
     pd.monitor.start();
 

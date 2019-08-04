@@ -7,12 +7,14 @@ import java.util.Map;
 
 import org.myrobotlab.codec.ApiCli;
 import org.myrobotlab.service.Runtime;
+import org.python.jline.internal.Log;
 
 public class InProcessCli implements Runnable {
   Thread myThread = null;
 
   InputStream in;
   OutputStream out;
+  boolean running = false;
 
   public InProcessCli(InputStream in, OutputStream out) {
     this.in = in;
@@ -23,6 +25,8 @@ public class InProcessCli implements Runnable {
     if (myThread == null) {
       myThread = new Thread(this, "client-stdin-worker");
       myThread.start();
+    } else {
+      Log.info("stdin already running");
     }
   }
 
@@ -30,6 +34,7 @@ public class InProcessCli implements Runnable {
   public void run() {
 
     try {
+      running = true;
       String uuid = "STDIN-5678-91011-121314";
       ApiCli cli = new ApiCli();// (ApiCli)ApiFactory.getApiProcessor("cli");
       // cli.addClient(null, "cli", null, uuid);
@@ -46,7 +51,7 @@ public class InProcessCli implements Runnable {
 
       int c = '\n';
       String readLine = "";
-      while ((c = in.read()) != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */) {
+      while (running && (c = in.read()) != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */) {
 
         // out.write((char) c);
         readLine += (char) c;
@@ -64,6 +69,7 @@ public class InProcessCli implements Runnable {
     } catch (Exception e) {
       e.printStackTrace();
     }
+    running = false;
     myThread = null;
   }
 
