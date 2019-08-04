@@ -21,7 +21,6 @@ import org.myrobotlab.logging.LoggingFactory;
 
 // @Ignore
 public class SolrTest extends AbstractServiceTest {
-  
   //@Test
   public void testImageStoreFetch() throws SolrServerException, IOException {
     Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
