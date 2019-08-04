@@ -221,7 +221,7 @@ public class IntegratedMovement extends Service
 																// collision &
 																// if no 3d
 																// model)
-		ik.setControl("torso", partMidStom, midStom); // set a servo to this
+		partMidStom.setControl("torso", midStom.getName()); // set a servo to this
 														// part, (String
 														// configuration, part,
 														// servo)
@@ -238,7 +238,7 @@ public class IntegratedMovement extends Service
 								// service.
 
 		IMPart partTopStom = ik.createPart("topStom", 0.010);
-		ik.setControl("torso", partTopStom, topStom);
+		partTopStom.setControl("torso", topStom.getName());
 		partTopStom.setDHParameters("torso", 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
@@ -253,20 +253,20 @@ public class IntegratedMovement extends Service
 
 		IMPart partLeftOmoplate = ik.createPart("leftOmoplate", .010);
 		partLeftOmoplate.setDHParameters("leftArm", .004, -5.6, 0.04, 90);
-		ik.setControl("leftArm", partLeftOmoplate, omoplate);
+		partLeftOmoplate.setControl("leftArm", omoplate.getName());
 		partLeftOmoplate.linkTo("leftArm", "leftShoulder");
 		partLeftOmoplate.set3DModel("Models/Lomoplate1.j3o", 0.001f, new Point(0.001,0.004,0,-90,-90,0));
 		ik.attach(partLeftOmoplate);
 		
 		IMPart partLeftShoulder = ik.createPart("leftShoulder", .01);
-		ik.setControl("leftArm", partLeftShoulder, shoulder);
+		partLeftShoulder.setControl("leftArm", shoulder.getName());
 		partLeftShoulder.set3DModel("Models/Lshoulder.j3o", 0.001f, new Point(0,0,0,-90,0,-90));
 		partLeftShoulder.setDHParameters("leftArm", -0.065, 90, 0, -90);
 		partLeftShoulder.linkTo("leftArm", "leftRotate");
 		ik.attach(partLeftShoulder);
 		
 		IMPart partLeftRotate = ik.createPart("leftRotate", 0.01);
-		ik.setControl("leftArm", partLeftRotate, rotate);
+		partLeftRotate.setControl("leftArm", rotate.getName());
 		partLeftRotate.setDHParameters("leftArm", -0.282, -90, 0, 90);
 		partLeftRotate.set3DModel("Models/rotate1.j3o", .001f, new Point(0, 0, -0.0582, 0, 0, 0));
 		partLeftRotate.linkTo("leftArm", "leftBicepAttach");
@@ -278,7 +278,7 @@ public class IntegratedMovement extends Service
 		ik.attach(partLeftBicepAttach);
 
 		IMPart partLeftBicep = ik.createPart("leftBicep", 0.01);
-		ik.setControl("leftArm", partLeftBicep, bicep);
+		partLeftBicep.setControl("leftArm", bicep.getName());
 		partLeftBicep.setDHParameters("leftArm", 0, -7 + 24.4 + 180, .3, 0);
 		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
 		ik.attach(partLeftBicep);
@@ -290,19 +290,19 @@ public class IntegratedMovement extends Service
 		
 		IMPart partRightOmoplate = ik.createPart("rightOmoplate", 0.01);
 		partRightOmoplate.setDHParameters("rightArm", 0, -5.6+180, 0.045, 90);
-		ik.setControl("rightArm", partRightOmoplate, Romoplate);
+		partRightOmoplate.setControl("rightArm", Romoplate.getName());
 		partRightOmoplate.linkTo("rightArm", "rightShoulder");
 		ik.attach(partRightOmoplate);
 		
 		IMPart partRightShoulder = ik.createPart("rightShoulder", 0.01);
 		partRightShoulder.setDHParameters("rightArm", -0.077, 90, 0, 90);
-		ik.setControl("rightArm", partRightShoulder, Rshoulder);
+		partRightShoulder.setControl("rightArm", Rshoulder.getName());
 		partRightShoulder.linkTo("rightArm", "rightRotate");
 		ik.attach(partRightShoulder);
 		
 		IMPart partRightRotate = ik.createPart("rightRotate", 0.01);
 		partRightRotate.setDHParameters("rightArm", 0.284, 90, 0, 90);
-		ik.setControl("rightArm", partRightRotate, Rrotate);
+		partRightRotate.setControl("rightArm", Rrotate.getName());
 		partRightRotate.linkTo("rightArm", "rightBicepAttach");
 		ik.attach(partRightRotate);
 		
@@ -313,7 +313,7 @@ public class IntegratedMovement extends Service
 		
 		IMPart partRightBicep = ik.createPart("rightBicep", 0.01);
 		partRightBicep.setDHParameters("rightArm", 0, -7 + 24.4 , .3, 0);
-		ik.setControl("rightArm", partRightBicep, Rbicep);
+		partRightBicep.setControl("rightArm", Rbicep.getName());
 		ik.attach(partRightBicep);
 		
 		// #define the DH parameters for the ik service
@@ -558,6 +558,11 @@ public class IntegratedMovement extends Service
 
 	public void attach(IMPart part) {
 		imData.addPart(part);
+		for (String srvName : part.getControls().values()){
+			if (imData.getControl(srvName) != null){
+				setControl(srvName);
+			}
+		}
 	}
 
 	public void clearObject() {
@@ -880,10 +885,11 @@ public class IntegratedMovement extends Service
 		}
 	}
 
-	public void setControl(String armName, IMPart part, ServoControl control) {
-		part.setControl(armName, control.getName());
-		subscribe(control.getName(), "publishMoveTo", getName(), "onMoveTo");
-		subscribe(control.getName(), "publishServoData", getName(), "onServoData");
+//	public void setControl(String armName, IMPart part, ServoControl control) {
+	public void setControl(String srvCtrlName){
+		//part.setControl(armName, control.getName());
+		subscribe(srvCtrlName, "publishMoveTo", getName(), "onMoveTo");
+		subscribe(srvCtrlName, "publishServoData", getName(), "onServoData");
 	}
 
 	public void setDHLink(String armName, String linkName, double d, double theta, double r, double alpha) {
