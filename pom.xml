@@ -1211,7 +1211,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.2.0</version>
+    <version>7.7.1</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1223,7 +1223,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.2.0</version>
+    <version>7.7.1</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
