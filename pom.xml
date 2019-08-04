@@ -1235,7 +1235,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.2.0</version>
+    <version>7.7.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
