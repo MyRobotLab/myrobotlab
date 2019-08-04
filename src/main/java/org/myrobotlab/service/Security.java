@@ -603,8 +603,6 @@ public class Security extends Service implements AuthorizationProvider {
       return;
     }
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
     System.out.println();
     System.out.println("Server sent " + chain.length + " certificate(s):");
     System.out.println();

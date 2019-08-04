@@ -1207,9 +1207,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
       if (options.interactive || !options.spawnedFromAgent) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
-        clientLocal = new InProcessCli(System.in, System.out);
-        clientLocal.start();
-      } 
+        // clientLocal = new InProcessCli(System.in, System.out);
+        // clientLocal.start();
+      }
 
     } catch (Exception e) {
       log.error("runtime exception", e);
@@ -1217,6 +1217,17 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       shutdown();
       log.error("main threw", e);
     }
+  }
+
+  public void startInteraciveMode() {
+    if (clientLocal == null) {
+      clientLocal = new InProcessCli(System.in, null);
+    }
+    clientLocal.start();
+  }
+  
+  public void stopInteraciveMode() {
+    clientLocal.stop();
   }
 
   /**
@@ -1602,11 +1613,11 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
   public void connect(String url) throws IOException {
-    
+
     UUID uuid = java.util.UUID.randomUUID();
     clientRemote.connect(uuid.toString(), url);
     Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
-    // put as many attribs as possible in 
+    // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
     attributes.put("id", getId());
@@ -1617,7 +1628,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     attributes.put("uri", url);
     attributes.put("user", "root");
     attributes.put("host", "local");
-    
+
     addClient(uuid.toString(), attributes);
     clientRemote.addResponseHandler(this);
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
@@ -1629,7 +1640,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   @Override // uuid
   public void onResponse(String uuid, String data) {
     log.info("here {}", data);
-    // get api - decode msg - process it  
+    // get api - decode msg - process it
   }
 
   public static void setRuntimeName(String inName) {
@@ -2795,7 +2806,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
     clients.put(uuid, attr);
   }
-  
+
   public Map<String, Object> publishNewClient(Map<String, Object> attributes) {
     return attributes;
   }

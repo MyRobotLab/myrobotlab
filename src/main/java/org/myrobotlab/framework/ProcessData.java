@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.myrobotlab.framework.interfaces.Invoker;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
@@ -39,17 +40,15 @@ public class ProcessData implements Serializable {
    */
   public stateType state = stateType.stopped;
 
-  // is this really used for anything ?
-  // @Deprecated
-  //public String fromAgent = null; - is now in Options
-
-  @Deprecated /* just temp */
-  public ArrayList<String> in = null;
-
   /**
    * actual java process
    */
   transient public Process process;
+  
+  /**
+   * must read std out of 
+   */
+  transient public StreamGobbler stdout;
 
   /**
    * monitor on the process - if it dies agent will know
@@ -109,11 +108,6 @@ public class ProcessData implements Serializable {
     this.javaExe = pd.javaExe;
     this.jarPath = pd.jarPath;
     this.jvm = pd.jvm;
-
-    if (pd.in != null) {
-      this.in = new ArrayList<String>();
-      in.addAll(pd.in);
-    }
   }
 
   public boolean isRunning() {
