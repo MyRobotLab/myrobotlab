@@ -1,22 +1,20 @@
 package org.myrobotlab.codec;
 
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
 import org.atmosphere.cpr.AtmosphereRequest;
+import org.atmosphere.cpr.AtmosphereRequestImpl.Body;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResponse;
+import org.atmosphere.cpr.Broadcaster;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.interfaces.MessageSender;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.WebGui;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 public abstract class Api {
@@ -86,7 +84,7 @@ public abstract class Api {
    *          - inbound uri
    * @return - returns message constructed from the uri
    */
-  static public Message uriToMsg(String uri) {
+  public Message uriToMsg(String uri) {
     Message msg = new Message();
     msg.uri = uri;
     msg.name = "runtime"; // default
@@ -129,9 +127,7 @@ public abstract class Api {
 
     if (parts.length < 4) {
       // /api/service OR /api/service/
-      msg.method = "getEnvironments"; // Big one - webgui client depends on ..
-      // msg.method = "getServiceNames";
-      // msg.method = "getPlatform";
+      msg.method = getDefaultMethod();
     } else if (parts.length == 4) {
       msg.name = "runtime";
       if (requestUri.endsWith("/")) {
@@ -158,8 +154,13 @@ public abstract class Api {
     return msg;
   }
 
+  protected String getDefaultMethod() {
+    return "getEnvironments";
+  }
+
   /**
    * needed to get the api key to select the appropriate api processor
+   * 
    * @param r
    * @return
    */
@@ -185,19 +186,62 @@ public abstract class Api {
   // Api Imp has opportunity to override
   protected void handleSession(WebGui webgui, String apiKey, AtmosphereResource r) {
     AtmosphereRequest request = r.getRequest();
-    HttpSession s = request.getSession(true);
-    if (s != null) {
-      // System.out.println("put session uuid {}", r.uuid());
-      webgui.getSessions().put(r.uuid(), request.getSession(true));
+    HttpSession s = request.getSession();
+    if (s == null) {
+      log.info("session is null");
+    } else {
+      log.info("session {}", s);
     }
   }
 
+  // FIXME - processBroacasts
   protected void setBroadcaster(WebGui webgui, String apiKey, AtmosphereResource r) {
-    // FIXME - maintain single broadcaster for each session ?    
-    r.setBroadcaster(webgui.getBroadcaster());
+    // FIXME - maintain single broadcaster for each session ?
+    String uuid = r.uuid();
+    
+    // set root gateway broadcaster
+    // r.broadcasters()
+    log.info("resource {}", r);
+    log.info("resource {}", StringUtil.toString(r.broadcasters()));
+    log.info("broadcaster {}", r.getBroadcaster());
+    // AtmosphereResourceEvent event = r.getAtmosphereResourceEvent();
+    /*
+    if (event.equals("xx")) {
+      r.setBroadcaster(webgui.getBroadcaster());
+    }
+    */
+
+    Broadcaster uuiBroadcaster = webgui.getBroadcasterFactory().lookup(uuid);
+    // create a unique broadcaster in the framework for this uuid
+    if ( uuiBroadcaster == null) {
+      uuiBroadcaster = webgui.getBroadcasterFactory().get(uuid);      
+    } 
+    uuiBroadcaster.addAtmosphereResource(r);
+    uuiBroadcaster.getAtmosphereResources();
+    r.addBroadcaster(uuiBroadcaster);
+    log.info("resource {}", r);
+    log.info("resource {}", StringUtil.toString(r.broadcasters()));
+    // log.info("broadcaster {}", r.getBroadcaster());
+    
+    // RELAYS HANDLED HERE !!
+    if (webgui.getRelays().containsKey(uuid)) {
+      List<String> list = webgui.getRelays().get(uuid);
+      for (String ruuid : list) {
+        Broadcaster rb = webgui.getBroadcasterFactory().lookup(ruuid);
+        if (rb != null) {
+          Body b = r.getRequest().body();
+          if (b != null) {
+            rb.broadcast(r.getRequest().body().asString());
+          } else {
+            log.warn("body null for {}", uuid);
+          }
+        } else {
+          log.error("no broadcaster for {}", ruuid);
+        }
+      }
+    }
   }
 
- 
   protected void setHeaderContentType(WebGui webgui, String apiKey, AtmosphereResource r) {
     r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
   }
@@ -209,7 +253,7 @@ public abstract class Api {
   }
 
   protected void handleError(WebGui webgui, String apiKey, AtmosphereResource r, Exception e) {
-    
+
     try {
 
       AtmosphereResponse response = r.getResponse();
@@ -218,7 +262,7 @@ public abstract class Api {
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
       Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
-      Status error = Status.error(e);   // name == null anonymous ?
+      Status error = Status.error(e); // name == null anonymous ?
       Message msg = Message.createMessage(webgui, null, CodecUtils.getCallbackTopicName("getStatus"), error);
       if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
         // for the purpose of only returning the data
@@ -240,131 +284,105 @@ public abstract class Api {
       }
 
     } catch (Exception e2) {
-      log.error("respond threw", e);
+      log.error("respond threw", e2, e);
     }
 
   }
 
   // FIXME - max complexity !!!!
-  // abstract public Object process(WebGui webgui, OutputStream out, Message msgFromUri, String data) throws Exception;
+  // abstract public Object process(WebGui webgui, OutputStream out, Message
+  // msgFromUri, String data) throws Exception;
 
   /**
-   * High level minimal parameter process for AtmosphereResource
-   * Many of the details of the flow control (suspend, broadcast, error handling) are dependent on the
-   * api being used
+   * High level minimal parameter process for AtmosphereResource Many of the
+   * details of the flow control (suspend, broadcast, error handling) are
+   * dependent on the api being used
+   * 
    * @param webgui
    * @param apiKey
    * @param r
    */
   public Object process(WebGui webgui, String apiKey, AtmosphereResource r) {
-    
+
     try {
-    
-    setBroadcaster(webgui, apiKey, r);
-    handleSession(webgui, apiKey, r);
-    suspend(webgui, apiKey, r);
-    setHeaderContentType(webgui, apiKey, r);
-    String data = r.getRequest().body().asString();
- 
-    // CALLING MAX COMPLEXITY
-    return process(webgui, apiKey, r.getRequest().getRequestURI(), r.getResponse().getOutputStream(), data);
-    
-    } catch(Exception e) {
+      String uuid = r.uuid();
+      suspend(webgui, apiKey, r);
+      setBroadcaster(webgui, apiKey, r);
+      handleSession(webgui, apiKey, r);      
+      setHeaderContentType(webgui, apiKey, r);
+      String data = r.getRequest().body().asString();
+      
+      // addClient(webgui, apiKey, r, null);
+
+      // CALLING MAX COMPLEXITY
+      return process(webgui, apiKey, r.getRequest().getRequestURI(), uuid, r.getResponse().getOutputStream(), data);
+
+    } catch (Exception e) {
       handleError(webgui, apiKey, r, e);
       return null;
     }
   }
-  
+
   // MAX COMPLEXITY WITH SIMPLEST DATA TYPES
-  protected Object process(MessageSender sender, String apiKey, String uri, OutputStream out, String json) throws Exception {
-    
+  protected Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+    log.error("==========================NORMALIZE ME !!!!!==============================");
     /*
-    Object retobj = null;
-    
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-
-    if (log.isDebugEnabled() && json != null) {
-      log.debug("data - [{}]", json);
-    }
-
-    Message msg = CodecUtils.fromJson(json, Message.class);
-
-    if (msg == null) {
-      log.error("msg is null {}", json);
-      return null;
-    }
-
-    if (sender == null) {
-      log.error("sender cannot be null for {}", ApiMessages.class.getSimpleName());
-      return null;
-    }
-
-    if (msg.sender == null) {
-      msg.sender = sender.getName();
-    }
-
-    ServiceInterface si = Runtime.getService(msg.name);
-    if (si == null) {
-      log.error("could not get service {} for msg {}", msg.name, msg);
-      return null;
-    }
-
-    Class<?> clazz = si.getClass();
-
-    Class<?>[] paramTypes = null;
-    Object[] params = null;
-    // decoded array of encoded parameters
-    Object[] encodedArray = null;
-
-    if (msg.data == null) {
-      params = new Object[0];
-      encodedArray = params;
-    } else {
-      params = new Object[msg.data.length];
-      encodedArray = msg.data;
-    }
-
-    paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
-
-    if (log.isDebugEnabled()) {
-      StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
-      for (int i = 0; i < paramTypes.length; ++i) {
-        if (i != 0) {
-          sb.append(",");
-        }
-        sb.append(paramTypes[i].getSimpleName());
-      }
-      sb.append(")");
-      log.debug(sb.toString());
-    }
-
-    // WE NOW HAVE ORDINAL AND TYPES
-    params = new Object[encodedArray.length];
-
-    // DECODE AND FILL THE PARAMS
-    for (int i = 0; i < params.length; ++i) {
-      params[i] = codec.decode(encodedArray[i], paramTypes[i]);
-    }
-
-    Method method = clazz.getMethod(msg.method, paramTypes);
-
-    if (si.isLocal()) {
-      log.debug("{} is local", si.getName());
-
-      log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
-      retobj = method.invoke(si, params);
-      
-      // propagate return data to subscribers
-      si.out(msg.method, retobj);
-    } else {
-      log.debug("{} is remote", si.getName());
-      // TODO - inspect if blocking ...
-      sender.send(msg.name, msg.method, params);
-    }
-
-    MethodCache.cache(clazz, method);
-    return retobj;
-    */
+     * Object retobj = null;
+     * 
+     * Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+     * 
+     * if (log.isDebugEnabled() && json != null) { log.debug("data - [{}]",
+     * json); }
+     * 
+     * Message msg = CodecUtils.fromJson(json, Message.class);
+     * 
+     * if (msg == null) { log.error("msg is null {}", json); return null; }
+     * 
+     * if (sender == null) { log.error("sender cannot be null for {}",
+     * ApiMessages.class.getSimpleName()); return null; }
+     * 
+     * if (msg.sender == null) { msg.sender = sender.getName(); }
+     * 
+     * ServiceInterface si = Runtime.getService(msg.name); if (si == null) {
+     * log.error("could not get service {} for msg {}", msg.name, msg); return
+     * null; }
+     * 
+     * Class<?> clazz = si.getClass();
+     * 
+     * Class<?>[] paramTypes = null; Object[] params = null; // decoded array of
+     * encoded parameters Object[] encodedArray = null;
+     * 
+     * if (msg.data == null) { params = new Object[0]; encodedArray = params; }
+     * else { params = new Object[msg.data.length]; encodedArray = msg.data; }
+     * 
+     * paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(),
+     * msg.method, encodedArray.length);
+     * 
+     * if (log.isDebugEnabled()) { StringBuffer sb = new
+     * StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name,
+     * msg.method)); for (int i = 0; i < paramTypes.length; ++i) { if (i != 0) {
+     * sb.append(","); } sb.append(paramTypes[i].getSimpleName()); }
+     * sb.append(")"); log.debug(sb.toString()); }
+     * 
+     * // WE NOW HAVE ORDINAL AND TYPES params = new
+     * Object[encodedArray.length];
+     * 
+     * // DECODE AND FILL THE PARAMS for (int i = 0; i < params.length; ++i) {
+     * params[i] = codec.decode(encodedArray[i], paramTypes[i]); }
+     * 
+     * Method method = clazz.getMethod(msg.method, paramTypes);
+     * 
+     * if (si.isLocal()) { log.debug("{} is local", si.getName());
+     * 
+     * log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
+     * retobj = method.invoke(si, params);
+     * 
+     * // propagate return data to subscribers si.out(msg.method, retobj); }
+     * else { log.debug("{} is remote", si.getName()); // TODO - inspect if
+     * blocking ... sender.send(msg.name, msg.method, params); }
+     * 
+     * MethodCache.cache(clazz, method); return retobj;
+     */
     return null;
   }
 

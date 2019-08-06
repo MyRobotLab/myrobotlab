@@ -96,6 +96,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("OpenNi");
     blacklist.add("LeapMotion");
     blacklist.add("Runtime");
+    blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
     blacklist.add("_TemplateService");
     blacklist.add("Lloyd");

@@ -101,7 +101,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   @Override
   public boolean preProcessHook(Message msg) {
-    log.error("msg - {}.{}", msg.name, msg.method);
+    log.info("msg - {}.{}", msg.name, msg.method);
     put(msg); 
     // TODO - determine if the callback method exists
     // if not warn return false - if so - return true;
@@ -236,22 +236,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   }
 
-  /*
-   * "unified"? way of testing direct callbacks. reconstruct the message that
-   * "would have" been created to make this direct callback
-   * 
-   */
-  public void addDatax(String method, Object... parms) {
-    try {
-      Message msg = new Message();
-      msg.method = method;
-      msg.data = parms;
-      msgs.put(msg);
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
   static public ServiceType meta = null;
 
   /*
@@ -380,6 +364,10 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public void onServoData(ServoData se) {
     log.info("onServoData {}", se);
+  }
+  
+  public void onPitch(Integer i) {
+    log.info("onPitch({})", i);
   }
 
 }

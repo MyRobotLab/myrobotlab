@@ -29,7 +29,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
-import java.util.Map;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -149,14 +149,20 @@ public class RemoteAdapterGui extends ServiceGui implements ActionListener {
           listen.setText("listen");
         }
         lastProtoKey = remote.lastProtocolKey;
-        if (remote.getClients() == null) {
+        if (remote.getClientIds() == null) {
           return;
         }
         list.model.clear();
-        for (Map.Entry<URI, Connection> o : remote.getClients().entrySet()) {
+        for(String uri : remote.getClientIds()) {
+          try {
           // URI uri = o.getKey();
-          Connection data = o.getValue();
+          List<Connection> connections = remote.getConnections(new URI(uri));
+          for (Connection data : connections)
+          //Connection data = o.getValue();
           list.model.add(0, data);
+          } catch(Exception e) {
+            
+          }
         }
       }
     });

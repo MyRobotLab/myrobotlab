@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Status;
@@ -40,12 +41,11 @@ public interface Gateway {
 
   public void connect(String uri) throws URISyntaxException;
 
-  /*
-   * retrieves endpoint data for which this gateway is responsible
-   * 
+  /**
+   * list of unique clients currently connected to this gateway
+   * @return
    */
-  // DEPRECATE?
-  public HashMap<URI, Connection> getClients();
+  public List<String> getClientIds();
 
   /*
    * important initial communication function related to discovery a broadcast

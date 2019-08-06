@@ -47,6 +47,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -65,7 +66,6 @@ import picocli.CommandLine;
  *         FIXME - test switching branches and remaining on the branch for multiple updates
  *         FIXME - tes multiple instances on different branches
  *         FIXME - ws client connectivity and communication !!! 
- *         FIXME - Cli client ws enabled !! 
  *         FIXME - capability to update Agent from child
  *         FIXME - move CmdLine defintion to Runtime 
  *         FIXME - convert Runtime's cmdline processing to CmdOptions Fixme - remove CmdLine
@@ -100,7 +100,9 @@ public class Agent extends Service {
   Platform platform = Platform.getLocalInstance();
 
   transient WebGui webgui = null;
+  
   int port = 8887;
+  
   String address = "127.0.0.1";
 
   String currentBranch;
@@ -147,7 +149,7 @@ public class Agent extends Service {
       + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
       + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
       + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
-      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            resistance is futile, we have cookies and robots ...";
+      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            " + Platform.getLocalInstance().getMotd();
 
   /**
    * singleton for security purposes
@@ -376,7 +378,7 @@ public class Agent extends Service {
           port = 8887;
         }
         webgui = (WebGui) Runtime.create("webgui", "WebGui");
-        // webgui.autoStartBrowser(false);
+        webgui.autoStartBrowser(false);
         webgui.setPort(port);
         webgui.setAddress(address);
         webgui.startService();
@@ -1032,6 +1034,8 @@ public class Agent extends Service {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
+    
+    pd.options.fromAgent = true;
 
     // user override
     if (options.jvm != null) {
@@ -1041,8 +1045,6 @@ public class Agent extends Service {
     if (options.services.size() == 0) {
       options.services.add("log");
       options.services.add("Log");
-      options.services.add("cli");
-      options.services.add("Cli");
       options.services.add("gui");
       options.services.add("SwingGui");
       options.services.add("python");
@@ -1247,9 +1249,14 @@ public class Agent extends Service {
     // environment variables setup
     setEnv(pd, builder.environment());
 
+// new    
+//    builder.inheritIO();
+    
     Process process = builder.start();
     pd.process = process;
     pd.startTs = System.currentTimeMillis();
+    pd.stdout = new StreamGobbler(pd.options.id, process.getInputStream());
+    pd.stdout.start();
     pd.monitor = new ProcessData.Monitor(pd);
     pd.monitor.start();
 
@@ -1359,8 +1366,6 @@ public class Agent extends Service {
         agentArgs.add("-s");
         agentArgs.add("agent");
         agentArgs.add("Agent");
-        agentArgs.add("cli");
-        agentArgs.add("Cli");
         agentArgs.add("security");
         agentArgs.add("Security");
 
@@ -1460,7 +1465,7 @@ public class Agent extends Service {
 
       // FIXME - use wsclient for remote access
       if (globalOptions.client != null) {
-        Runtime.start("cli", "Cli");
+        // Runtime.start("cli", "Cli");
         return;
       }
 

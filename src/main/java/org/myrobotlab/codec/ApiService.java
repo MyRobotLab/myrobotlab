@@ -7,12 +7,15 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 
+import javax.servlet.http.HttpSession;
+
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 /**
@@ -61,9 +64,10 @@ public class ApiService extends Api {
    */
 
   // API SERVICE
-  public Object process(MessageSender sender, String apiKey, String uri, OutputStream out, String json) throws Exception {
+  @Override
+  public Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
   // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
-    Message msgFromUri = Api.uriToMsg(uri);
+    Message msgFromUri = uriToMsg(uri);
     // FIXME change to CodecUtils.MIME_TYPE_JSON
     Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
@@ -139,7 +143,7 @@ public class ApiService extends Api {
       // FIXME MUST DO BLOCKING MSG !!!
       // FIXME - sendBlocking should throw and exception if it can't send !!!
       // NOT JUST RETURN NULL !!!
-      ret = sender.sendBlocking(msgFromUri.name, msgFromUri.method, params);
+      ret = webgui.sendBlocking(msgFromUri.name, msgFromUri.method, params);
     }
 
     if (out != null) {
@@ -165,6 +169,6 @@ public class ApiService extends Api {
   }
 
   public Object process(OutputStream out, String uri) throws Exception {
-    return process(null, "service", uri, out, null);
+    return process(null, "service", uri, null, out, null);
   }
 }

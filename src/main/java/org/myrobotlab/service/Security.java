@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
@@ -45,10 +46,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-//import org.myrobotlab.logging.Logging;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.slf4j.Logger;
 
@@ -432,7 +430,7 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   @Override
-  public boolean isAuthorized(HashMap<String, String> security, String serviceName, String method) {
+  public boolean isAuthorized(Map<String, Object> security, String serviceName, String method) {
 
     /*
      * check not needed if (security == null) { // internal messaging return
@@ -446,7 +444,7 @@ public class Security extends Service implements AuthorizationProvider {
     // user versus binary token
     if (security.containsKey("user")) // && password || token
     {
-      String fromUser = security.get("user");
+      String fromUser = (String)security.get("user");
 
       // user scheme found - get the group
       if (!users.containsKey(fromUser)) {
@@ -493,7 +491,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   @Override
   public boolean isAuthorized(Message msg) {
-    return isAuthorized(msg.security, msg.name, msg.method);
+    return isAuthorized(msg.annotations, msg.name, msg.method);
   }
 
   public boolean setDefaultNewGroupId(String userId, String groupId) {
@@ -604,8 +602,6 @@ public class Security extends Service implements AuthorizationProvider {
       System.out.println("Could not obtain server certificate chain");
       return;
     }
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
     System.out.println();
     System.out.println("Server sent " + chain.length + " certificate(s):");
