@@ -73,7 +73,7 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO"); please do not do this
     Solr solr = (Solr)service;
     String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
     solr.startEmbedded(solrHome);
