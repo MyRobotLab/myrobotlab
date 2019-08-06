@@ -12,10 +12,7 @@ import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.abstracts.AbstractServo;
 import org.slf4j.Logger;
-
-import com.sun.media.Log;
 
 ///////////// MrlComm.h ///////////////
 // forward defines to break circular dependency
@@ -35,7 +32,7 @@ import com.sun.media.Log;
  * 
  */
 public class MrlComm {
-  
+
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
   static public int getRandom(int min, int max) {
@@ -302,15 +299,15 @@ public class MrlComm {
   }
 
   private int digitalRead(int address) {
-    
+
     int value = getRandom(0, 1);
     if (!pinValue.containsKey(address)) {
       pinValue.put(address, value);
     }
-    
+
     if (loopCount % digitalChangeWidth == 0) {
       pinValue.put(address, value);
-    } 
+    }
     return pinValue.get(address);
   }
 
@@ -567,7 +564,6 @@ public class MrlComm {
     }
   }
 
- 
   public void publishError(java.lang.String f) {
     msg.publishMRLCommError(f);
   }
@@ -620,8 +616,9 @@ public class MrlComm {
   public void servoMoveToMicroseconds(int deviceId, int target) {
     MrlServo servo = (MrlServo) getDevice(deviceId);
     if (servo != null) {
-    servo.moveToMicroseconds(target);
-    } else { // FIXME - this should be fixed in the "real" mrlcomm - where it returns an error
+      servo.moveToMicroseconds(target);
+    } else { // FIXME - this should be fixed in the "real" mrlcomm - where it
+             // returns an error
       // if the device is not found !!!
       log.error("servo with device id of {} and target pos {} does not exist", deviceId, target);
     }
@@ -738,7 +735,6 @@ public class MrlComm {
     sensor.stopRanging();
   }
 
-
   /***********************************************************************
    * UPDATE DEVICES BEGIN updateDevices updates each type of device put on the
    * device list depending on their type. This method processes each loop.
@@ -768,22 +764,19 @@ public class MrlComm {
     // until it is reset after sending publishBoardInfo
     ++loopCount;
     long now = millis();
-    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) 
-    {
+    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
       onDisconnect();
       lastHeartbeatUpdate = now;
       heartbeatEnabled = false;
       return;
     }
 
-     if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled)
-	{
-		lastBoardInfoTs = now;
-		publishBoardInfo();
-	}
+    if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled) {
+      lastBoardInfoTs = now;
+      publishBoardInfo();
+    }
 
-    if (pinList.size() > 0) 
-    {
+    if (pinList.size() > 0) {
 
       // size of payload - 1 int for address + 2 bytes per pin read
       // this is an optimization in that we send back "all" the read pin
@@ -844,10 +837,15 @@ public class MrlComm {
 
     long now = micros();
     int load = (int) ((now - lastBoardInfoUs) / loopCount);
-    msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
+    if (virtual.isConnected()) {
+      // mrlcomm publishes regardless - even if disconnected it will fill the
+      // buffer - then stop
+      // with virtual arduino we don't want a gazillion error messages and won't
+      // publishBoardInfo unless connected
+      msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
+    }
     lastBoardInfoUs = now;
     loopCount = 0;
   }
-
 
 }
