@@ -74,6 +74,7 @@ public class JmeManager implements ActionListener {
 	transient private Node camera = new Node("camera");
 	public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
 	protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+	private float gridHeight = -1.049f;
 	
 	public JmeManager(IntegratedMovement im){
 		this.im = im;
@@ -142,7 +143,7 @@ public class JmeManager implements ActionListener {
 	}
 
 	private void addGrid(String name) {
-		addGrid(name, new Vector3f(0, -1, 0), 40, "CCCCCC");
+		addGrid(name, new Vector3f(0, gridHeight, 0), 40, "CCCCCC");
 	}
 
 	private void addGrid(String name, Vector3f pos, int size, String color) {
@@ -453,6 +454,10 @@ public class JmeManager implements ActionListener {
 	
 	public void setAxesVisible(String name, boolean b){
 		addMsg("setAxesVisible", name, b);
+	}
+	
+	public void setGridHeight(double height){
+		gridHeight = (float)height;
 	}
 
 }
