@@ -1225,7 +1225,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
     clientLocal.start();
   }
-  
+
   public void stopInteraciveMode() {
     clientLocal.stop();
   }
@@ -2825,9 +2825,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   /**
-   * separated by gateway
+   * separated by gateway - send gateway name and get filter results back for a
+   * specific gateways connected clients
    * 
-   * @param name
+   * @param gatwayName
    * @return
    */
   static public Map<String, Map<String, Object>> getClients(String gatwayName) {
