@@ -36,6 +36,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -138,8 +139,12 @@ public class RemoteAdapter extends Service implements Gateway {
   }
 
   @Override
-  public HashMap<URI, Connection> getClients() {
-    return connections;
+  public List<String> getClientIds(){
+    List<String> ret = new ArrayList<>();
+    for (URI uri : connections.keySet()) {
+      ret.add(uri.toString());
+    }
+    return ret;
   }
 
   /*

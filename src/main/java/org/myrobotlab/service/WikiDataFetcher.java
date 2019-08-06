@@ -440,7 +440,7 @@ public class WikiDataFetcher extends Service {
     meta.exclude("com.fasterxml.jackson.core", "jackson-annotations");
     */
     meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.9");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.9");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.9.2");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.9");
     /*
      * meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");

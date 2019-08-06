@@ -17,7 +17,7 @@ public class CodecJson extends Codec {
 
   public final static Logger log = LoggerFactory.getLogger(CodecJson.class);
 
-  private transient static Gson mapper = new GsonBuilder().create();// .setDateFormat("yyyy-MM-dd
+  private transient static Gson mapper = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").create();// .setDateFormat("yyyy-MM-dd
   // HH:mm:ss.SSS").disableHtmlEscaping().create();
   private transient static Gson prettyMapper = new GsonBuilder().setPrettyPrinting().create();
 

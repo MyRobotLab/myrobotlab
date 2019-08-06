@@ -599,7 +599,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    * 
    * @return ServiceType - returns all the data
    * 
-   */
+   */ 
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
