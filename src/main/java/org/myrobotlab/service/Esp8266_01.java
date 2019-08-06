@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -118,9 +119,7 @@ public class Esp8266_01 extends Service implements I2CController {
 
     Gson gson = new Gson();
 
-    // https://github.com/MyRobotLab/myrobotlab/issues/525
-    String stringBuffer = javax.xml.bind.DatatypeConverter.printHexBinary(buffer);
-
+    String stringBuffer = Hex.encodeHexString(buffer);
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
     senddata.setDevice(Integer.toString(deviceAddress));
@@ -283,8 +282,7 @@ public class Esp8266_01 extends Service implements I2CController {
 
     Gson gson = new Gson();
 
-    // https://github.com/MyRobotLab/myrobotlab/issues/525
-    String stringBuffer = javax.xml.bind.DatatypeConverter.printHexBinary(writeBuffer);
+    String stringBuffer = Hex.encodeHexString(writeBuffer);
 
     i2cParms senddata = new i2cParms();
     senddata.setBus(Integer.toString(busAddress));
@@ -414,10 +412,6 @@ public class Esp8266_01 extends Service implements I2CController {
     meta.addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    // Java11 support : TODO: get rid of this dependency
-    // https://github.com/MyRobotLab/myrobotlab/issues/525
-    meta.addDependency("javax.xml.bind", "jaxb-api", "2.3.1");
-    // meta.addDependency("org.apache.commons.httpclient", "4.5.2");
     // FIXME - add HttpClient as a peer .. and use its interface .. :)
     // then remove direct dependencies to httpcomponents ...
     // One HttpClient to Rule them all !!
