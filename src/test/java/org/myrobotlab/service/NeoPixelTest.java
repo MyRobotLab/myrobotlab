@@ -17,20 +17,15 @@ import org.myrobotlab.test.AbstractTest;
  */
 public class NeoPixelTest extends AbstractTest {
   private static final String V_PORT_1 = "test_port_1";
-  public Arduino ard;
+  public Arduino arduino;
   private NeoPixel neopixel;
 
   @Before
   public void setUp() throws Exception {
-    // setup the test environment , and create an arduino with a virtual backend
-    // for it.
-    // LoggingFactory.init("WARN");
-    VirtualArduino va1 = (VirtualArduino) Runtime.createAndStart("va1", "VirtualArduino");
-    va1.connect(V_PORT_1);
-    ard = (Arduino) Runtime.createAndStart("ard", "Arduino");
-    ard.connect(V_PORT_1);
-    neopixel = (NeoPixel) Runtime.createAndStart("neopixel", "NeoPixel");
-    neopixel.attach(ard, 28, 16);
+    arduino = (Arduino) Runtime.start("ard", "Arduino");
+    arduino.connect(V_PORT_1);
+    neopixel = (NeoPixel) Runtime.start("neopixel", "NeoPixel");
+    neopixel.attach(arduino, 28, 16);
 
   }
 
@@ -49,9 +44,9 @@ public class NeoPixelTest extends AbstractTest {
    */
   @Test
   public void testDetachNeoPixelController() {
-    neopixel.detach((NeoPixelController) ard);
+    neopixel.detach((NeoPixelController) arduino);
     assertFalse(neopixel.isAttached);
-    neopixel.attach(ard, 28, 16);
+    neopixel.attach(arduino, 28, 16);
 
   }
 
