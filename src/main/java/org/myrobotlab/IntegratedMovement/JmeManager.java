@@ -218,7 +218,7 @@ public class JmeManager implements ActionListener {
 				i = q1.multLocal(q2).multLocal(q3);
 				sp.setLocalRotation(i);
 				
-		        Vector3f delta = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
+		        Vector3f delta = IMUtil.pointToVector3f(IMUtil.matrixToPoint(part.getInternTransform()));
 		        delta.normalizeLocal();
 		        float[] angles = new float[3];
 		        angles[0]=delta.angleBetween(Vector3f.UNIT_X);
@@ -229,8 +229,8 @@ public class JmeManager implements ActionListener {
 		        //iniRot.rotate(0,0,angles[2]);
 		        //iniRot.rotate(0,0,(float)part.getInitialTheta());
 		        //iniRot.rotate(0, 0 , 0);
-				spatial.setLocalTranslation(Util.pointToVector3f(ip));
-				Quaternion q = Util.matrixToQuaternion(part.getInternTransform());
+				spatial.setLocalTranslation(IMUtil.pointToVector3f(ip));
+				Quaternion q = IMUtil.matrixToQuaternion(part.getInternTransform());
 				//iniRot.setLocalRotation(q.inverse());
 		    }
 		    else {
@@ -248,7 +248,7 @@ public class JmeManager implements ActionListener {
 		        if (part.getR()!=0)
 		        	length *=-1;
 		        geom.setLocalTranslation(FastMath.interpolateLinear(0.5f, new Vector3f(0,0,0), new Vector3f(0, 0, -length)));
-		        Vector3f delta = Util.pointToVector3f(Util.matrixToPoint(part.getInternTransform()));
+		        Vector3f delta = IMUtil.pointToVector3f(IMUtil.matrixToPoint(part.getInternTransform()));
 		        delta.normalizeLocal();
 		        float[] angles = new float[3];
 		        angles[0]=delta.angleBetween(Vector3f.UNIT_X);
@@ -282,6 +282,7 @@ public class JmeManager implements ActionListener {
 	          log.error("simpleUpdate failed for {} - targetName", msg, e);
 	        }
 	      }
+		updatePosition();
 		deltaMs = System.currentTimeMillis() - startUpdateTs;
 		sleepMs = 33 - deltaMs;
 
@@ -293,7 +294,6 @@ public class JmeManager implements ActionListener {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		updatePosition();
 	}
 
 	public void updatePosition() {
@@ -302,8 +302,8 @@ public class JmeManager implements ActionListener {
 			Node node = (Node)nodes.get(part.getName());
 			if (node == null) continue;
 			Matrix origin = part.getOrigin();
-			node.setLocalTranslation(Util.pointToVector3f(Util.matrixToPoint(origin)));
-			Quaternion q = Util.matrixToQuaternion(origin);
+			node.setLocalTranslation(IMUtil.pointToVector3f(IMUtil.matrixToPoint(origin)));
+			Quaternion q = IMUtil.matrixToQuaternion(origin);
 			Vector3f[] axis = new Vector3f[3];
 			q.toAxes(axis);
 			float[] angles = new float[3];
@@ -311,7 +311,7 @@ public class JmeManager implements ActionListener {
 			Quaternion q3 = new Quaternion().fromAngles(0, (float)(part.getTheta()),0);
 			Spatial n1 = node.getChild("theta");
 			n1.setLocalRotation(q3);
-			Quaternion i = Util.matrixToQuaternion(origin);
+			Quaternion i = IMUtil.matrixToQuaternion(origin);
 			node.setLocalRotation(i);
 		}
 	}

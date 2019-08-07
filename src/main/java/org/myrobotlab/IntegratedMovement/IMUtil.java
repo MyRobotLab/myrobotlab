@@ -10,8 +10,8 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
-public class Util {
-	Util(){
+public class IMUtil {
+	IMUtil(){
 		
 	}
 	public static Point getPosition(IMData data, String arm, String lastLink){
@@ -31,8 +31,8 @@ public class Util {
 	    	Matrix s = link.resolveMatrix();
 	    	m = m.multiply(s);
 	    	if (link.getName() == lastLink) break;
-	    	String nextPartName = part.getNextLink(arm);
-    		part = data.getPart(nextPartName);
+	    	//String nextPartName = part.getNextLink(arm);
+    		//part = data.getPart(nextPartName);
     		if (part != null) {
     			link = part.getDHLink(arm);
     		}
@@ -75,6 +75,7 @@ public class Util {
 	    Point position = new Point(x, y, z, roll * 180 / Math.PI, pitch * 180 / Math.PI, yaw * 180 / Math.PI);
 		return position;
 	}
+	
 	static public Matrix3f eulerToMatrix3f(Point p){
 		Matrix3f m = new Matrix3f();
 		float ch = (float)Math.cos(Math.toRadians(p.getYaw()));

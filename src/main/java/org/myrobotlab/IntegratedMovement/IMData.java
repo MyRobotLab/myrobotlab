@@ -19,6 +19,8 @@ public class IMData {
 	private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
 	private HashMap<String, Matrix> inputMatrixs = new HashMap<String, Matrix>();
 	private HashMap<String, String> armLinkTos = new HashMap<String, String>();
+	private HashMap<String, IMArm> arms = new HashMap<String, IMArm>();
+	private HashMap<String, IMBuild> builds = new HashMap<String, IMBuild>();
 	private long lastUpdatePositionTimeMs;
 	
 	
@@ -74,64 +76,8 @@ public class IMData {
 		if (control == null) return;
 		control.setState(data.state);
 		control.setPos(data.pos);
-		updatePartPosition();
 	}
 
-	private void updatePartPosition() {
-		//update no more than once/10 ms
-		//if (lastUpdatePositionTimeMs - System.currentTimeMillis() < 10) return;
-		Set<String> done = new HashSet<String>();
-		
-		for (IMEngine engine : engines.values()){
-			checkPreRequireUpdatePosition(engine, done);
-			if (!done.contains(engine.getName())) updateArmPosition(engine);
-			done.add(engine.getName());
-			String pre = armLinkTos.get(engine.getName());
-			if (pre != null){
-				parts.get(firstParts.get(engine.getName())).setAlpha(engines.get(pre).getNextAlpha());;
-			}
-		}
-	}
-	
-	private void checkPreRequireUpdatePosition(IMEngine engine, Set<String> done){
-		if (armLinkTos.containsKey(engine.getName()) && !done.contains(engine.getName())){
-			String pre = armLinkTos.get(engine.getName());
-			checkPreRequireUpdatePosition(getArm(armLinkTos.get(engine.getName())),done);
-			inputMatrixs.put(engine.getName(),updateArmPosition(getArm(pre)));
-			done.add(pre);
-		}
-		
-	}
-
-	private Matrix updateArmPosition(IMEngine engine) {
-		Matrix armMatrix = inputMatrixs.getOrDefault(engine.getName(), new Matrix(4,4).loadIdentity());
-		IMPart part = getPart(firstParts.get(engine.getName()));
-		double nextAlpha =0;
-		while (part != null){
-			part.setOrigin(armMatrix);
-			DHLink link = part.getDHLink(engine.getName());
-			if (controls.containsKey(part.getControl(engine.getName()))){
-				link.addPositionValue(getControl(part.getControl(engine.getName())).getPos());
-			}
-			Matrix s = link.resolveMatrix();
-			part.setTheta(link.getTheta());
-			part.setInitialTheta(link.getInitialTheta());
-			part.setAlpha(nextAlpha);
-			part.setR(link.getA());
-			nextAlpha = link.getAlpha();
-			Matrix armMatrix1 = armMatrix.multiply(s);
-			part.setInternTransform(s);
-			s = link.resolveMatrixZeroAlpha();
-			Matrix armMatrix2 = armMatrix.multiply(s);
-			part.setEnd(armMatrix1);
-			armMatrix = armMatrix1;
-			String nextPartName = part.getNextLink(engine.getName());
-			parts.put(part.getName(), part);
-			part = getPart(nextPartName);
-		}
-		engine.setNextAlpha(nextAlpha);
-		return armMatrix;
-	}
 
 	public String getFirstPart(String armName) {
 		return firstParts.get(armName);
@@ -154,9 +100,19 @@ public class IMData {
 	}
 
 	public Matrix getInputMatrix(String arm) {
-		return inputMatrixs.getOrDefault(arm, Util.getIdentityMatrix());
+		return inputMatrixs.getOrDefault(arm, IMUtil.getIdentityMatrix());
 	}
 
-	
+	public void addArm(IMArm arm) {
+		arms.put(arm.getName(), arm);
+	}
+
+	public void addBuild(IMBuild build) {
+		builds.put(build.getName(), build);
+	}
+
+	public HashMap<String, IMControl> getControls(){
+		return controls;
+	}
 	
 }

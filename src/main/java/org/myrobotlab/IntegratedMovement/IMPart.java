@@ -22,15 +22,14 @@ public class IMPart {
 	private String name;
 	private HashMap<String,String> controls = new HashMap<String, String>();
 	private HashMap<String,DHLink> DHLinks = new HashMap<String, DHLink>();
-	private HashMap<String,String> nextLinks = new HashMap<String, String>();
 	private Double radius = 0.1;
 	private String modelPath;
 	private float scale = 1;
 	private Point initialTranslateRotate = new Point(0,0,0,0,0,0);
-	private Matrix origin = Util.getIdentityMatrix();
-	private Matrix end = Util.getIdentityMatrix();
+	private Matrix origin = IMUtil.getIdentityMatrix();
+	private Matrix end = IMUtil.getIdentityMatrix();
 	private boolean visible = true;
-	private Matrix internTransform = Util.getIdentityMatrix();
+	private Matrix internTransform = IMUtil.getIdentityMatrix();
 	private double theta;
 	private double alpha;
 	private double initialTheta;
@@ -75,14 +74,6 @@ public class IMPart {
 	public DHLink getDHLink(String armName) {
 		return DHLinks.get(armName);
 	}
-
-
-
-	public String getNextLink(String armName) {
-		return nextLinks.get(armName);
-	}
-
-
 
 	public void setRadius(Double radius) {
 		this.radius = radius;
@@ -149,24 +140,18 @@ public class IMPart {
 
 
 
-	public void linkTo(String arm, String nextLink) {
-		nextLinks.put(arm, nextLink);
-	}
-
-
-
 	public double getRadius() {
 		return radius;
 	}
 	
 	public Point getOriginPoint(){
-		return Util.matrixToPoint(origin);
+		return IMUtil.matrixToPoint(origin);
 	}
 
 
 
 	public Point getEndPoint() {
-		return Util.matrixToPoint(end);
+		return IMUtil.matrixToPoint(end);
 	}
 	
 	public double getLength() {
@@ -253,5 +238,11 @@ public class IMPart {
 	public void setR(double r) {
 		this.r = r;
 		
+	}
+
+
+
+	public Matrix transform(String armName) {
+		return DHLinks.get(armName).resolveMatrix();
 	}
 }
