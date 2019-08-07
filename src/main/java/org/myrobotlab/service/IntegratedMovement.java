@@ -10,6 +10,7 @@ import org.myrobotlab.IntegratedMovement.CollisionDectection;
 import org.myrobotlab.IntegratedMovement.CollisionItem;
 import org.myrobotlab.IntegratedMovement.Util;
 import org.myrobotlab.IntegratedMovement.GravityCenter;
+import org.myrobotlab.IntegratedMovement.IMArm;
 import org.myrobotlab.IntegratedMovement.IMData;
 import org.myrobotlab.IntegratedMovement.IMEngine;
 import org.myrobotlab.IntegratedMovement.IMPart;
@@ -19,6 +20,7 @@ import org.myrobotlab.IntegratedMovement.Map3DPoint;
 import org.myrobotlab.IntegratedMovement.PositionData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.DHLink;
@@ -148,117 +150,123 @@ public class IntegratedMovement extends Service
 		// move by the input degree
 		HobbyServo midStom = (HobbyServo) Runtime.start("midStom", "HobbyServo");
 		midStom.map(-90.0, 90.0, 148.0, 38.0);
-		midStom.attach(arduino.getName(), 26, 0.0);
-		midStom.setSpeed(13.0);
+		midStom.attach(arduino.getName(), 26, 0.0, 13.0);
+		ik.attach(midStom);
 		
 		HobbyServo topStom = (HobbyServo) Runtime.start("topStom", "HobbyServo");
 		topStom.map(-10.0, 10.0, 92.0, 118.0);
-		topStom.attach(arduino.getName(), 7, 0.0);
-		topStom.setSpeed(13.0);
+		topStom.attach(arduino.getName(), 7, 0.0, 13.0);
+		ik.attach(topStom);
 		
 		HobbyServo omoplate = (HobbyServo) Runtime.start("omoplate", "HobbyServo");
-		omoplate.attach(arduino.getName(), 11, 10.0);
+		omoplate.attach(arduino.getName(), 11, 10.0, 15.0);
 		omoplate.map(10.0, 70.0, 10.0, 70.0);
-		omoplate.setSpeed(15.0)
-		;
+		ik.attach(omoplate);
+		
 		HobbyServo Romoplate = (HobbyServo) Runtime.start("Romoplate", "HobbyServo");
-		Romoplate.attach(arduino.getName(), 31, 10.0);
+		Romoplate.attach(arduino.getName(), 31, 10.0, 15.0);
 		Romoplate.map(10.0, 70.0, 10.0, 70.0);
-		Romoplate.setSpeed(15.0);
+		ik.attach(Romoplate);
 		
 		HobbyServo shoulder = (HobbyServo) Runtime.start("shoulder", "HobbyServo");
-		shoulder.attach(arduino.getName(), 26, 0.0);
+		shoulder.attach(arduino.getName(), 26, 0.0, 14.0);
 		shoulder.map(-30.0, 150.0, 0.0, 180.0);
-		shoulder.setSpeed(14.0);
+		ik.attach(shoulder);
 		
 		HobbyServo Rshoulder = (HobbyServo) Runtime.start("Rshoulder", "HobbyServo");
-		Rshoulder.attach(arduino.getName(), 6, 0.0);
+		Rshoulder.attach(arduino.getName(), 6, 0.0, 14.0);
 		Rshoulder.map(-30.0, 150.0, 0.0, 180.0);
-		Rshoulder.setSpeed(14.0);
+		ik.attach(Rshoulder);
 		
 		HobbyServo rotate = (HobbyServo) Runtime.start("rotate", "HobbyServo");
-		rotate.attach(arduino.getName(), 9, 0.0);
+		rotate.attach(arduino.getName(), 9, 0.0, 18.0);
 		rotate.map(-44.0, 70.0, 46.0, 160.0);
-		rotate.setSpeed(18.0);
+		ik.attach(rotate);
 		
 		HobbyServo Rrotate = (HobbyServo) Runtime.start("Rrotate", "HobbyServo");
-		Rrotate.attach(arduino.getName(), 29, 0.0);
+		Rrotate.attach(arduino.getName(), 29, 0.0, 18.0);
 		Rrotate.map(-44.0, 70.0, 46.0, 160.0);
-		Rrotate.setSpeed(18.0);
+		ik.attach(Rrotate);
 		
 		HobbyServo bicep = (HobbyServo) Runtime.start("bicep", "HobbyServo");
-		bicep.attach(arduino.getName(), 8, 10.0);
+		bicep.attach(arduino.getName(), 8, 10.0, 26.0);
 		bicep.map(5.0, 60.0, 5.0, 80.0);
-		bicep.setSpeed(26.0);
+		ik.attach(bicep);
 		
 		HobbyServo Rbicep = (HobbyServo) Runtime.start("Rbicep", "HobbyServo");
-		Rbicep.attach(arduino.getName(), 28, 10.0);
+		Rbicep.attach(arduino.getName(), 28, 10.0, 26.0);
 		Rbicep.map(5.0, 60.0, 5.0, 80.0);
-		Rbicep.setSpeed(26.0);
+		ik.attach(Rbicep);
 		
 		HobbyServo wrist = (HobbyServo) Runtime.start("wrist", "HobbyServo");
-		wrist.attach(arduino.getName(), 7, 90.0);
+		wrist.attach(arduino.getName(), 7, 90.0, 26.0);
 		wrist.map(0.0, 180.0, 0.0, 180.0);
-		wrist.setSpeed(26.0);
+		ik.attach(wrist);
 		
 		HobbyServo Rwrist = (HobbyServo) Runtime.start("Rwrist", "HobbyServo");
-		Rwrist.attach(arduino.getName(), 27, 90.0);
+		Rwrist.attach(arduino.getName(), 27, 90.0, 26.0);
 		Rwrist.map(0.0, 180.0, 0.0, 180.0);
-		Rwrist.setSpeed(26.0);
+		ik.attach(Rwrist);
 		
 		HobbyServo leftHipY = (HobbyServo) Runtime.start("leftHipY", "HobbyServo");
-		leftHipY.attach(arduino.getName(), 35, 0.0);
+		leftHipY.attach(arduino.getName(), 35, 0.0, 14.0);
 		leftHipY.map(-20.0, 20.0, 0.0, 40.0);
-		leftHipY.setSpeed(14.0);
+		ik.attach(leftHipY);
 		
 		HobbyServo leftHipR = (HobbyServo) Runtime.start("leftHipR", "HobbyServo");
-		leftHipR.attach(arduino.getName(), 36, 0.0);
+		leftHipR.attach(arduino.getName(), 36, 0.0, 14.0);
 		leftHipR.map(-10.0, 10.0, 0.0, 20.0);
-		leftHipR.setSpeed(14.0);
+		ik.attach(leftHipR);
 		
 		HobbyServo leftHipP = (HobbyServo) Runtime.start("leftHipP", "HobbyServo");
-		leftHipP.attach(arduino.getName(),37,0.0);
+		leftHipP.attach(arduino.getName(),37,0.0, 14.0);
 		leftHipP.map(-46.0, 46.0, 0.0, 92.0);
-		leftHipP.setSpeed(14.0);
+		ik.attach(leftHipP);
 		
 		HobbyServo leftKnee = (HobbyServo) Runtime.start("leftKnee", "HobbyServo");
-		leftKnee.attach(arduino.getName(), 38, 0.0);
+		leftKnee.attach(arduino.getName(), 38, 0.0, 14.0);
 		leftKnee.map(0.0, 40.0, 0.0, 40.0);
-		leftKnee.setSpeed(14.0);
+		ik.attach(leftKnee);
 		
 		HobbyServo leftAnkleP = (HobbyServo) Runtime.start("leftAnkleP", "HobbyServo");
-		leftAnkleP.attach(arduino.getName(), 39, 0.0);
+		leftAnkleP.attach(arduino.getName(), 39, 0.0, 14.0);
 		leftAnkleP.map(-25.0, 45.0, 0.0, 70.0);
-		leftAnkleP.setSpeed(14.0);
+		ik.attach(leftAnkleP);
 		
 		HobbyServo leftAnkleR = (HobbyServo) Runtime.start("leftAnkleR", "HobbyServo");
-		leftAnkleR.attach(arduino.getName(), 40, 0.0);
+		leftAnkleR.attach(arduino.getName(), 40, 0.0, 14.0);
 		leftAnkleR.map(-27.0, 27.0, 0.0, 54.0);
-		leftAnkleR.setSpeed(14.0);
+		ik.attach(leftAnkleR);
 		
 		HobbyServo rightHipY = (HobbyServo) Runtime.start("rightHipY", "HobbyServo");
 		rightHipY.attach(arduino.getName(), 41, 0.0, 14.0);
 		rightHipY.map(-20.0, 20.0, 0.0, 40.0);
+		ik.attach(rightHipY);
 		
 		HobbyServo rightHipR = (HobbyServo) Runtime.start("rightHipR", "HobbyServo");
 		rightHipR.attach(arduino.getName(), 42, 0.0, 14.0);
 		rightHipR.map(-10.0, 10.0, 0.0, 20.0);
+		ik.attach(rightHipR);
 		
 		HobbyServo rightHipP = (HobbyServo) Runtime.start("rightHipP", "HobbyServo");
 		rightHipP.attach(arduino.getName(), 43, 0.0, 14.0);
 		rightHipP.map(-46.0, 46.0, 0.0, 92.0);
+		ik.attach(rightHipP);
 		
 		HobbyServo rightKnee = (HobbyServo) Runtime.start("rightKnee", "HobbyServo");
 		rightKnee.attach(arduino.getName(), 44, 0.0, 14.0);
 		rightKnee.map(0.0, 40.0, 0.0, 40.0);
+		ik.attach(rightKnee);
 		
 		HobbyServo rightAnkleP = (HobbyServo) Runtime.start("rightAnkleP", "HobbyServo");
 		rightAnkleP.attach(arduino.getName(), 45, 0.0, 14.0);
 		rightAnkleP.map(-25.0, 45.0, 0.0, 70.0);
+		ik.attach(rightAnkleP);
 		
 		HobbyServo rightAnkleR = (HobbyServo) Runtime.start("rightAnkleR", "HobbyServo");
 		rightAnkleR.attach(arduino.getName(), 46, 0.0, 14.0);
 		rightAnkleR.map(-27.0, 27.0, 0.0, 54.0);
+		ik.attach(rightAnkleR);
 		
 		// Servo finger = (Servo) Runtime.start("finger","Servo");
 		// finger.attach(arduino,18,90);
@@ -306,7 +314,6 @@ public class IntegratedMovement extends Service
 		partTopStom.setDHParameters("torso", 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
-		//partTopStom.linkTo("torso", "leftArmAttach");
 		ik.attach(partTopStom);
 
 		IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .010);
@@ -498,6 +505,9 @@ public class IntegratedMovement extends Service
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
 		ik.attach(partHarlRAnkleR);
 		
+		IMArm armTorso = ik.createArm("torso");
+		armTorso.add(partMidStom);
+		
 		// #define the DH parameters for the ik service
 		ik.addArm("torso");
 		ik.setInputMatrix("torso", ik.createInputMatrix(0, 0, -0.1345, 0, 0, 0));
@@ -681,6 +691,7 @@ public class IntegratedMovement extends Service
 
 	}
 
+
 	public transient GravityCenter cog = new GravityCenter(this);
 
 	public transient CollisionDectection collisionItems = new CollisionDectection();
@@ -708,6 +719,34 @@ public class IntegratedMovement extends Service
 		IMEngine engine = new IMEngine(name, this);
 		engine.setInputMatrix(inputMatrix);
 		imData.addArm(engine);
+	}
+	
+	public void attach(Attachable service) {
+	    if (ServoControl.class.isAssignableFrom(service.getClass())) {
+	        attachServoControl((ServoControl) service);
+	        return;
+	    }
+	    error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
+	  }
+	
+	 public void attachServoControl(ServoControl service) {
+	       // guard
+        if (isAttached(service)){
+        	return;
+	    }
+        setControl(service.getName());
+	}
+	 
+	public boolean isAttached(ServoControl service){
+		if(imData.getControl(service.getName())!=null){
+			return true;
+		}
+		return false;
+	}
+	
+	public IMArm createArm(String name){
+		IMArm arm = new IMArm(name);
+		return arm;
 	}
 
 	public String addObject(double oX, double oY, double oZ, double eX, double eY, double eZ, String name,
@@ -745,11 +784,6 @@ public class IntegratedMovement extends Service
 
 	public void attach(IMPart part) {
 		imData.addPart(part);
-		for (String srvName : part.getControls().values()){
-			if (imData.getControl(srvName) != null){
-				setControl(srvName);
-			}
-		}
 	}
 
 	public void clearObject() {
@@ -1074,7 +1108,6 @@ public class IntegratedMovement extends Service
 
 //	public void setControl(String armName, IMPart part, ServoControl control) {
 	public void setControl(String srvCtrlName){
-		//part.setControl(armName, control.getName());
 		subscribe(srvCtrlName, "publishMoveTo", getName(), "onMoveTo");
 		subscribe(srvCtrlName, "publishServoData", getName(), "onServoData");
 	}
