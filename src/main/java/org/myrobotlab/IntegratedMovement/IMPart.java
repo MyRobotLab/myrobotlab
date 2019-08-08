@@ -22,18 +22,18 @@ public class IMPart {
 	private String name;
 	private HashMap<String,String> controls = new HashMap<String, String>();
 	private HashMap<String,DHLink> DHLinks = new HashMap<String, DHLink>();
-	private Double radius = 0.1;
+	private Double radius = 0.01;
 	private String modelPath;
 	private float scale = 1;
 	private Point initialTranslateRotate = new Point(0,0,0,0,0,0);
 	private Matrix origin = IMUtil.getIdentityMatrix();
-	private Matrix end = IMUtil.getIdentityMatrix();
+	private Matrix end = IMUtil.getIdentityMatrix().multiply(Matrix.translation(0.01, 0, 0));
 	private boolean visible = true;
 	private Matrix internTransform = IMUtil.getIdentityMatrix();
-	private double theta;
-	private double alpha;
-	private double initialTheta;
-	private double r;
+	private double theta=0;
+	private double alpha=0;
+	private double initialTheta=0;
+	private double r=0;
 
 	public IMPart(String partName){
 		name = partName;
@@ -244,5 +244,12 @@ public class IMPart {
 
 	public Matrix transform(String armName) {
 		return DHLinks.get(armName).resolveMatrix();
+	}
+
+
+
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 }

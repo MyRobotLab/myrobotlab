@@ -477,10 +477,22 @@ public class IntegratedMovement extends Service
 		ik.attach(partHarlRAnkleP);
 		
 		IMPart partHarlRAnkleR = ik.createPart("harlRAnkleR", 0.01);
-		partHarlRAnkleR.setDHParameters("rightLeg", 0, 0, 0.04, 0);
+		partHarlRAnkleR.setDHParameters("rightLeg", 0, 0, 0.04, 90);
+		partHarlRAnkleR.setDHParameters("Rev-rightLeg", 0, 0, -0.04, 90);
 		partHarlRAnkleR.setControl("rightLeg", "rightAnkleR");
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
 		ik.attach(partHarlRAnkleR);
+		
+		IMPart ankler = ik.createPart("ankler", 0.01);
+		ankler.setDHParameters("rrightLeg", 0, 0, -0.04, 90);
+		ik.attach(ankler);
+		
+		IMPart anklep = ik.createPart("anklep", 0.01);
+		anklep.setDHParameters("rrightLeg", 0, 0, -0.04, 0);
+		ik.attach(anklep);
+		
+		IMPart knee = ik.createPart("knee", 0.01);
+		
 		
 		ik.setOrigin(new Point(0, 0, -0.1345, 0, 0, 0));
 		
@@ -539,6 +551,17 @@ public class IntegratedMovement extends Service
 		inMoov.addArm(armRightArm, armTorso);
 		inMoov.addArm(armLeftArm, armTorso);
 		ik.attach(inMoov);
+
+		sleep(50);
+		Matrix im = new Matrix(4,4).loadIdentity().multiply(ik.getArm("rightLeg").parts.getLast().getEnd());
+		
+		IMArm armrrightleg = ik.createArm("rrightLeg");
+		armrrightleg.setInputMatrix(im);
+		armrrightleg.add(ankler);
+		armrrightleg.add(anklep);
+		ik.attach(armrrightleg);
+		
+		ik.getArm("rrightLeg").updatePosition(ik.getData().getControls());
 
 		/*
 		 * ik.addArm("leftArm");
@@ -715,6 +738,7 @@ public class IntegratedMovement extends Service
 
 	public void attach(IMArm arm) {
 		imData.addArm(arm);
+		arm.updatePosition(imData.getControls());
 	}
 
 	public Matrix getOriginMatrix() {
@@ -750,12 +774,6 @@ public class IntegratedMovement extends Service
 	private transient Point origin = new Point(0, 0, 0, 0, 0, 0);
 
 
-	public void addArm(String name) {
-		IMEngine engine = new IMEngine(name, this);
-		engine.setInputMatrix(inputMatrix);
-		imData.addArm(engine);
-	}
-	
 	public void attach(Attachable service) {
 	    if (ServoControl.class.isAssignableFrom(service.getClass())) {
 	        attachServoControl((ServoControl) service);
@@ -854,12 +872,12 @@ public class IntegratedMovement extends Service
 	}
 
 	public double[][] createJointPositionMap(String armName) {
-		IMEngine arm = imData.getArm(armName);
+/*		IMEngine arm = imData.getArm(armName);
 		if (arm != null) {
 			return arm.createJointPositionMap();
 		}
 		log.info("unknown arm {}", armName);
-		return new double[0][0];
+*/		return new double[0][0];
 	}
 
 	public IMPart createPart(String partName, double radius) {
@@ -867,9 +885,13 @@ public class IntegratedMovement extends Service
 		part.setRadius(radius);
 		return part;
 	}
-
-	public Point currentPosition(String arm) {
-		return IMUtil.getPosition(imData, arm, null);
+	
+	public IMBuild getBuild(String buildName){
+		return imData.getBuild(buildName);
+	}
+	
+	public IMArm getArm(String armName){
+		return imData.getArm(armName);
 	}
 
 	public Double getAngleWithAxis(String objectName, String axis) {
@@ -890,7 +912,7 @@ public class IntegratedMovement extends Service
 	}
 
 	public Double getAngleWithObject(String armName, String objectName) {
-		IMEngine arm = imData.getArm(armName);
+/*		IMEngine arm = imData.getArm(armName);
 		if (arm != null) {
 			CollisionItem ci = collisionItems.getItem(objectName);
 			Vector3f vo = new Vector3f((float) ci.getOrigin().getX(), (float) ci.getOrigin().getY(),
@@ -906,7 +928,7 @@ public class IntegratedMovement extends Service
 			return MathUtils.radToDeg(Math.acos(angle / div));
 		}
 		log.info("unknown arm {} for getAngleWithObject", armName);
-		return 0.0;
+*/		return 0.0;
 		// return (double) va.angleBetween(vci);
 	}
 
@@ -920,10 +942,6 @@ public class IntegratedMovement extends Service
 
 	public IMData getData() {
 		return imData;
-	}
-
-	public IMEngine getEngine(String armName) {
-		return imData.getArm(armName);
 	}
 
 	public ObjectPointLocation[] getEnumLocationValue() {
@@ -949,13 +967,13 @@ public class IntegratedMovement extends Service
 	}
 
 	public void holdTarget(String arm, boolean holdEnabled) {
-		IMEngine engine = imData.getArm(arm);
+/*		IMEngine engine = imData.getArm(arm);
 		if (engine != null) {
 			engine.holdTarget(holdEnabled);
 		} else {
 			log.info("unknown arm {} for hold target", arm);
 		}
-	}
+*/	}
 
 	public void linkArmTo(String armName, String linkTo) {
 		if (imData.getArm(armName) == null || imData.getArm(linkTo) == null) {
@@ -977,26 +995,26 @@ public class IntegratedMovement extends Service
 	}
 
 	public void moveTo(String name, Point point, String lastDHLink) {
-		IMEngine arm = imData.getArm(name);
+/*		IMEngine arm = imData.getArm(name);
 		if (arm != null) {
 			arm.moveTo(point, lastDHLink);
 			jmeApp.addPoint(point);
 		}
 		log.info("unknow arm {}", arm);
-	}
+*/	}
 
 	public void moveTo(String armName, String objectName, ObjectPointLocation location) {
 		moveTo(armName, objectName, location, null);
 	}
 
 	public void moveTo(String armName, String objectName, ObjectPointLocation location, String lastDHLink) {
-		IMEngine arm = imData.getArm(armName);
+/*		IMEngine arm = imData.getArm(armName);
 		if (arm != null) {
 			arm.moveTo(collisionItems.getItem(objectName), location, lastDHLink);
 		} else {
 			log.info("unknown arm {}", armName);
 		}
-	}
+*/	}
 
 	public void objectAddIgnore(String object1, String object2) {
 		collisionItems.addIgnore(object1, object2);
@@ -1007,7 +1025,7 @@ public class IntegratedMovement extends Service
 	}
 
 	public void onMoveTo(ServoControl data) {
-		for (IMEngine e : imData.getArms().values()) {
+/*		for (IMEngine e : imData.getArms().values()) {
 			e.updateLinksPosition(data);
 		}
 		if (openni != null) {
@@ -1015,7 +1033,7 @@ public class IntegratedMovement extends Service
 		}
 		if (jmeApp != null) {
 		}
-		imData.onMoveTo(data);
+*/		imData.onMoveTo(data);
 	}
 
 	public void onOpenNiData(OpenNiData data) throws InterruptedException {
@@ -1039,7 +1057,7 @@ public class IntegratedMovement extends Service
 	}
 
 	public void onServoData(ServoData data) {
-		for (IMEngine e : imData.getArms().values()) {
+/*		for (IMEngine e : imData.getArms().values()) {
 			e.updateLinksPosition(data);
 		}
 		if (openni != null) {
@@ -1048,7 +1066,7 @@ public class IntegratedMovement extends Service
 		if (jmeApp != null) {
 			// jmeApp.updatePosition(data);
 		}
-		imData.onServoData(data);
+*/		imData.onServoData(data);
 		// jmeManager.updatePosition(imData);
 	}
 
@@ -1076,7 +1094,7 @@ public class IntegratedMovement extends Service
 	}
 
 	public void publishPosition(String armName) {
-		invoke("publishPosition", new PositionData(armName, currentPosition(armName)));
+		//invoke("publishPosition", new PositionData(armName, currentPosition(armName)));
 	}
 
 	public void removeAi(Ai ai) {
@@ -1086,12 +1104,12 @@ public class IntegratedMovement extends Service
 	}
 
 	public void removeAi(String armName, Ai ai) {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			arm.removeAi(ai);
-		} else {
-			log.info("unknown arm {} for removeAi", armName);
-		}
+//		IMEngine arm = imData.getArm(armName);
+//		if (arm != null) {
+//			arm.removeAi(ai);
+//		} else {
+//			log.info("unknown arm {} for removeAi", armName);
+//		}
 	}
 
 	public void removeArm(String armName) {
@@ -1133,30 +1151,19 @@ public class IntegratedMovement extends Service
 	}
 
 	public void setAi(String armName, Ai ai) {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			arm.setAi(ai);
-		} else {
-			log.info("unknown arm {} for setAI", armName);
-		}
+//		IMEngine arm = imData.getArm(armName);
+//		if (arm != null) {
+//			arm.setAi(ai);
+//		} else {
+//			log.info("unknown arm {} for setAI", armName);
+//		}
 	}
 
 //	public void setControl(String armName, IMPart part, ServoControl control) {
 	public void setControl(String srvCtrlName){
 		subscribe(srvCtrlName, "publishMoveTo", getName(), "onMoveTo");
 		subscribe(srvCtrlName, "publishServoData", getName(), "onServoData");
-	}
-
-	public void setDHLink(String armName, String linkName, double d, double theta, double r, double alpha) {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			DHLink dhLink = new DHLink(linkName, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
-			DHRobotArm dhArm = arm.getDHRobotArm();
-			dhArm.addLink(dhLink);
-			arm.setDHRobotArm(dhArm);
-			imData.addArm(arm);
-		}
-		log.error("Unknow arm {}", armName);
+		imData.addControl(srvCtrlName);
 	}
 
 	public void setDHLinkType(String name, DHLinkType type) {
@@ -1167,19 +1174,6 @@ public class IntegratedMovement extends Service
 				}
 			}
 		}
-	}
-
-	public void setFirstPart(String armName, String partName) {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			IMPart part = imData.getPart(partName);
-			if (part != null) {
-				imData.setFirstPart(armName, partName);
-			} else
-				log.info("unknown part name {}", partName);
-		} else
-			log.info("unknown arm name {}", armName);
-
 	}
 
 	public void setInputMatrix(String armName, Matrix inputMatrix) {
@@ -1218,19 +1212,19 @@ public class IntegratedMovement extends Service
 	}
 
 	public void startEngine(String armName) {
-		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			arm.start();
-			addTask("publishPosition-" + armName, 1000, 0, "publishPosition", armName);
-		}
-		log.info("unknown arm {}", armName);
+//		IMEngine arm = imData.getArm(armName);
+//		if (arm != null) {
+//			arm.start();
+//			addTask("publishPosition-" + armName, 1000, 0, "publishPosition", armName);
+//		}
+//		log.info("unknown arm {}", armName);
 	}
 
 	public OpenNi startOpenNI() throws Exception {
 		if (openni == null) {
 			openni = (OpenNi) startPeer("openni");
 			openni.start3DData();
-			map3d.updateKinectPosition(currentPosition(kinectName));
+			//map3d.updateKinectPosition(currentPosition(kinectName));
 		}
 		return openni;
 	}

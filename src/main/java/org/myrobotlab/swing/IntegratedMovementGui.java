@@ -293,7 +293,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
       return;
     }
     if (!armPanels.containsKey(position.armName)) {
-      createArmPanel((IMEngine) boundService.getEngine(position.armName));
+      //createArmPanel((IMEngine) boundService.getEngine(position.armName));
     }
     if (!armText.get(position.armName + "-x").isEnabled()) {
       armText.get(position.armName + "-x").setText(String.format("%d", (int) position.position.getX()));

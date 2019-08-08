@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
+import org.myrobotlab.kinematics.Point;
 
 /**
  * @author calamity
@@ -17,7 +18,7 @@ import org.myrobotlab.kinematics.Matrix;
 public class IMArm {
 	
 	String name;
-	transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
+	public transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
 	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
 	private String linkTo;
 	
@@ -29,21 +30,8 @@ public class IMArm {
 		parts.add(part);
 	}
 	
-	public void addFirst(IMPart part){
-		parts.addFirst(part);
-	}
-
-	public void linkTo(Matrix matrix) {
-		inputMatrix  = matrix;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void linkTo(IMArm arm) {
-		linkTo = arm.getName();
-		inputMatrix = arm.getTransformMatrix();
 	}
 
 	public Matrix getTransformMatrix() {
@@ -82,6 +70,10 @@ public class IMArm {
 
 	public void setInputMatrix(Matrix m) {
 		inputMatrix = m;
+	}
+	
+	public Point currentPosition(){
+		return parts.getLast().getEndPoint();
 	}
 
 }

@@ -24,12 +24,8 @@ public class IMData {
 	private long lastUpdatePositionTimeMs;
 	
 	
-	public void addArm(IMEngine engine) {
-		engines.put(engine.getName(), engine);
-	}
-	
-	public IMEngine getArm(String name){
-		return engines.get(name);
+	public IMArm getArm(String name){
+		return arms.get(name);
 	}
 
 	public HashMap<String, IMEngine> getArms() {
@@ -51,11 +47,6 @@ public class IMData {
 
 	public void addPart(IMPart part) {
 		parts.put(part.getName(),part);
-		for (String control : part.getControls().values()){
-			if (!controls.containsKey(control)){
-				controls.put(control, new IMControl(control));
-			}
-		}
 	}
 
 	public void setFirstPart(String armName, String partName) {
@@ -113,6 +104,14 @@ public class IMData {
 
 	public HashMap<String, IMControl> getControls(){
 		return controls;
+	}
+
+	public IMBuild getBuild(String buildName) {
+		return builds.get(buildName);
+	}
+
+	public void addControl(String srvCtrlName) {
+		controls.put(srvCtrlName, new IMControl(srvCtrlName));
 	}
 	
 }

@@ -14,36 +14,6 @@ public class IMUtil {
 	IMUtil(){
 		
 	}
-	public static Point getPosition(IMData data, String arm, String lastLink){
-		Matrix m = getPositionMatrix(data, arm, lastLink);
-	    return matrixToPoint(m);
-
-	}
-	
-	static public Matrix getPositionMatrix(IMData data, String arm, String lastLink){
-	    Matrix m = data.getInputMatrix(arm);
-	    IMPart part = data.getPart(data.getFirstPart(arm));
-	    DHLink link = part.getDHLink(arm);
-	    while (link != null){
-	    	if (part.getControl(arm) != null){
-	    		link.addPositionValue(data.getControl(part.getControl(arm)).getPos());
-	    	}
-	    	Matrix s = link.resolveMatrix();
-	    	m = m.multiply(s);
-	    	if (link.getName() == lastLink) break;
-	    	//String nextPartName = part.getNextLink(arm);
-    		//part = data.getPart(nextPartName);
-    		if (part != null) {
-    			link = part.getDHLink(arm);
-    		}
-    		else{
-    			link = null;
-    		}
-	    }
-	    // now m should be the total translation for the arm
-	    // given the arms current position
-	    return m;
-	}
 	
 	static public Matrix getIdentityMatrix(){
 	    Matrix m = new Matrix(4, 4);
