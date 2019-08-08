@@ -259,6 +259,7 @@
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
     <version>1.5.1</version>
+    <scope>provided</scope>
 </dependency>
   
   <!-- https://mvnrepository.com/artifact/org.bytedeco.javacpp-presets/openblas -->
@@ -267,18 +268,21 @@
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas-platform</artifactId>
     <version>0.3.6-1.5.1</version>
+    <scope>provided</scope>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.bytedeco/hdf5 -->
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>hdf5</artifactId>
     <version>1.10.5-1.5.1</version>
+    <scope>provided</scope>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.bytedeco/hdf5-platform -->
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>hdf5-platform</artifactId>
     <version>1.10.5-1.5.1</version>
+    <scope>provided</scope>
 </dependency>
 
   
@@ -1328,12 +1332,14 @@
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
     <version>4.1.0-1.5.1</version>
+    <scope>provided</scope>
 </dependency>
 
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
     <version>4.1.0-1.5.1</version>
+    <scope>provided</scope>
 </dependency>
 
 <!--  TODO: fix me
