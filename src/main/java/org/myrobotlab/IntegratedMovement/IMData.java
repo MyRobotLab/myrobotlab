@@ -1,10 +1,7 @@
 package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
@@ -15,13 +12,11 @@ public class IMData {
 
 	private transient HashMap<String, IMEngine> engines = new HashMap<String, IMEngine>();
 	private ConcurrentHashMap<String, IMPart> parts = new ConcurrentHashMap<String, IMPart>();
-	private HashMap<String, String> firstParts = new HashMap<String, String>();
 	private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
 	private HashMap<String, Matrix> inputMatrixs = new HashMap<String, Matrix>();
 	private HashMap<String, String> armLinkTos = new HashMap<String, String>();
 	private HashMap<String, IMArm> arms = new HashMap<String, IMArm>();
 	private HashMap<String, IMBuild> builds = new HashMap<String, IMBuild>();
-	private long lastUpdatePositionTimeMs;
 	
 	
 	public IMArm getArm(String name){
@@ -49,11 +44,6 @@ public class IMData {
 		parts.put(part.getName(),part);
 	}
 
-	public void setFirstPart(String armName, String partName) {
-		firstParts.put(armName, partName);
-		
-	}
-
 	public void onMoveTo(ServoControl data) {
 		IMControl control = controls.get(data.getName());
 		if (control == null) return;
@@ -67,11 +57,6 @@ public class IMData {
 		if (control == null) return;
 		control.setState(data.state);
 		control.setPos(data.pos);
-	}
-
-
-	public String getFirstPart(String armName) {
-		return firstParts.get(armName);
 	}
 
 	public IMControl getControl(String controlName) {

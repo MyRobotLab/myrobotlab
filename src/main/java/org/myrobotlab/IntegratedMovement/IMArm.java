@@ -20,8 +20,6 @@ public class IMArm {
 	String name;
 	public transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
 	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
-	private String linkTo;
-	
 	public IMArm(String name){
 		this.name = name;
 	}
@@ -38,7 +36,7 @@ public class IMArm {
 		Matrix transformMatrix = inputMatrix;
 		Iterator<IMPart> it = parts.iterator();
 		while (it.hasNext()){
-			transformMatrix = transformMatrix.multiply((it.next()).transform(name));
+			transformMatrix = transformMatrix.multiply((it.next()).transform(ArmConfig.DEFAULT));
 		}
 		return transformMatrix;
 	}
@@ -53,9 +51,9 @@ public class IMArm {
 		while (it.hasNext()){
 			IMPart part = it.next();
 			part.setOrigin(m);
-			DHLink link = part.getDHLink(name);
-			if (controls.containsKey(part.getControl(name))){
-				link.addPositionValue(controls.get(part.getControl(name)).getPos());
+			DHLink link = part.getDHLink(ArmConfig.DEFAULT);
+			if (controls.containsKey(part.getControl(ArmConfig.DEFAULT))){
+				link.addPositionValue(controls.get(part.getControl(ArmConfig.DEFAULT)).getPos());
 			}
 			Matrix s = link.resolveMatrix();
 			part.setTheta(link.getTheta());

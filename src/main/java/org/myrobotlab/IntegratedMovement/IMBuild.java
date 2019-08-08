@@ -3,10 +3,6 @@
  */
 package org.myrobotlab.IntegratedMovement;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.service.IntegratedMovement;
@@ -60,8 +56,6 @@ public class IMBuild extends Thread  {
 	}
 
 	private void updatePartsPosition() {
-		HashMap<String, IMControl> controls = service.getData().getControls();
-		Matrix m = arms.getData().getInputMatrix();
 		updatePartsPosition(arms);
 	}
 	

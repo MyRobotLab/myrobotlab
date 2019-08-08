@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.myrobotlab.IntegratedMovement.ArmConfig;
 import org.myrobotlab.IntegratedMovement.CollisionDectection;
 import org.myrobotlab.IntegratedMovement.CollisionItem;
 import org.myrobotlab.IntegratedMovement.IMUtil;
@@ -298,11 +299,11 @@ public class IntegratedMovement extends Service
 																// collision &
 																// if no 3d
 																// model)
-		partMidStom.setControl("torso", midStom.getName()); // set a servo to this
+		partMidStom.setControl(ArmConfig.DEFAULT, midStom.getName()); // set a servo to this
 														// part, (String
 														// configuration, part,
 														// servo)
-		partMidStom.setDHParameters("torso", 0.108, 0, 0, 90, DHLinkType.REVOLUTE); // set
+		partMidStom.setDHParameters(ArmConfig.DEFAULT, 0.108, 0, 0, 90, DHLinkType.REVOLUTE); // set
 																					// the
 																					// DH
 																					// parameters
@@ -313,182 +314,182 @@ public class IntegratedMovement extends Service
 								// service.
 
 		IMPart partTopStom = ik.createPart("topStom", 0.010);
-		partTopStom.setControl("torso", topStom.getName());
-		partTopStom.setDHParameters("torso", 0, 90, 0.300, -90);
+		partTopStom.setControl(ArmConfig.DEFAULT, topStom.getName());
+		partTopStom.setDHParameters(ArmConfig.DEFAULT, 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
 		ik.attach(partTopStom);
 
 		IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .010);
-		partLeftArmAttach.setDHParameters("leftArm", 0.143, 180, 0, 90);
+		partLeftArmAttach.setDHParameters(ArmConfig.DEFAULT, 0.143, 180, 0, 90);
 		partLeftArmAttach.setVisible(true);
 		ik.attach(partLeftArmAttach);
 
 		IMPart partLeftOmoplate = ik.createPart("leftOmoplate", .010);
-		partLeftOmoplate.setDHParameters("leftArm", .004, -5.6, 0.04, 90);
-		partLeftOmoplate.setControl("leftArm", omoplate.getName());
+		partLeftOmoplate.setDHParameters(ArmConfig.DEFAULT, .004, -5.6, 0.04, 90);
+		partLeftOmoplate.setControl(ArmConfig.DEFAULT, omoplate.getName());
 		partLeftOmoplate.set3DModel("Models/Lomoplate1.j3o", 0.001f, new Point(0.001,0.004,0,-90,-90,0));
 		ik.attach(partLeftOmoplate);
 		
 		IMPart partLeftShoulder = ik.createPart("leftShoulder", .01);
-		partLeftShoulder.setControl("leftArm", shoulder.getName());
+		partLeftShoulder.setControl(ArmConfig.DEFAULT, shoulder.getName());
 		partLeftShoulder.set3DModel("Models/Lshoulder.j3o", 0.001f, new Point(-.0125,0,0,-90,0,-90));
-		partLeftShoulder.setDHParameters("leftArm", -0.077, 90, 0, -90);
+		partLeftShoulder.setDHParameters(ArmConfig.DEFAULT, -0.077, 90, 0, -90);
 		ik.attach(partLeftShoulder);
 		
 		IMPart partLeftRotate = ik.createPart("leftRotate", 0.01);
-		partLeftRotate.setControl("leftArm", rotate.getName());
-		partLeftRotate.setDHParameters("leftArm", -0.282, -90, 0, 90);
+		partLeftRotate.setControl(ArmConfig.DEFAULT, rotate.getName());
+		partLeftRotate.setDHParameters(ArmConfig.DEFAULT, -0.282, -90, 0, 90);
 		partLeftRotate.set3DModel("Models/rotate1.j3o", .001f, new Point(0, 0, -0.0582, 0, 0, 0));
 		ik.attach(partLeftRotate);
 		
 		IMPart partLeftBicepAttach = ik.createPart("leftBicepAttach", 0.01);
-		partLeftBicepAttach.setDHParameters("leftArm", .03, 90, 0, 90);
+		partLeftBicepAttach.setDHParameters(ArmConfig.DEFAULT, .03, 90, 0, 90);
 		ik.attach(partLeftBicepAttach);
 
 		IMPart partLeftBicep = ik.createPart("leftBicep", 0.01);
-		partLeftBicep.setControl("leftArm", bicep.getName());
-		partLeftBicep.setDHParameters("leftArm", 0, -7 + 24.4 + 180, .3, 0);
+		partLeftBicep.setControl(ArmConfig.DEFAULT, bicep.getName());
+		partLeftBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 + 180, .3, 0);
 		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
 		ik.attach(partLeftBicep);
 		
 		IMPart partRightArmAttach = ik.createPart("rightArmAttach", 0.01);
-		partRightArmAttach.setDHParameters("rightArm", -0.143, 0, 0, 90);
+		partRightArmAttach.setDHParameters(ArmConfig.DEFAULT, -0.143, 0, 0, 90);
 		ik.attach(partRightArmAttach);
 		
 		IMPart partRightOmoplate = ik.createPart("rightOmoplate", 0.01);
-		partRightOmoplate.setDHParameters("rightArm", -0.004, -5.6+180, 0.04, -90);
-		partRightOmoplate.setControl("rightArm", Romoplate.getName());
+		partRightOmoplate.setDHParameters(ArmConfig.DEFAULT, -0.004, -5.6+180, 0.04, -90);
+		partRightOmoplate.setControl(ArmConfig.DEFAULT, Romoplate.getName());
 		partRightOmoplate.set3DModel("Models/Romoplate1.j3o", scale, new Point(-0.001,-0.002,0,-90,90,0));
 		ik.attach(partRightOmoplate);
 		
 		IMPart partRightShoulder = ik.createPart("rightShoulder", 0.01);
-		partRightShoulder.setDHParameters("rightArm", 0.077, 90, .0, 90);
-		partRightShoulder.setControl("rightArm", Rshoulder.getName());
+		partRightShoulder.setDHParameters(ArmConfig.DEFAULT, 0.077, 90, .0, 90);
+		partRightShoulder.setControl(ArmConfig.DEFAULT, Rshoulder.getName());
 		partRightShoulder.set3DModel("Models/Rshoulder1.j3o", scale, new Point(0.0225,-0.01,0,-90,0,-90));
 		ik.attach(partRightShoulder);
 		
 		IMPart partRightRotate = ik.createPart("rightRotate", 0.01);
-		partRightRotate.setDHParameters("rightArm", 0.282, -90, 0, 90);
-		partRightRotate.setControl("rightArm", Rrotate.getName());
+		partRightRotate.setDHParameters(ArmConfig.DEFAULT, 0.282, -90, 0, 90);
+		partRightRotate.setControl(ArmConfig.DEFAULT, Rrotate.getName());
 		partRightRotate.set3DModel("Models/rotate1.j3o", scale, new Point(0,0,-0.056,180,0,0));
 		ik.attach(partRightRotate);
 		
 		IMPart partRightBicepAttach = ik.createPart("rightBicepAttach", 0.01);
-		partRightBicepAttach.setDHParameters("rightArm", .03, 90, 0, -90);
+		partRightBicepAttach.setDHParameters(ArmConfig.DEFAULT, .03, 90, 0, -90);
 		ik.attach(partRightBicepAttach);
 		
 		IMPart partRightBicep = ik.createPart("rightBicep", 0.01);
-		partRightBicep.setDHParameters("rightArm", 0, -7 + 24.4 , .3, 0);
-		partRightBicep.setControl("rightArm", Rbicep.getName());
+		partRightBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 , .3, 0);
+		partRightBicep.setControl(ArmConfig.DEFAULT, Rbicep.getName());
 		partRightBicep.set3DModel("Models/Rbicep1.j3o", scale, new Point(0.004,0,0,-90,0,0));
 		ik.attach(partRightBicep);
 		
 		IMPart partLowStom = ik.createPart("lowStom", 0.01);
-		partLowStom.setDHParameters("torso", 0.071, 0, 0, 0);
+		partLowStom.setDHParameters(ArmConfig.DEFAULT, 0.071, 0, 0, 0);
 		partLowStom.set3DModel("Models/ltorso.j3o", scale, new Point(0,-0.005,0.071,0,0,0));
 		ik.attach(partLowStom);
 		
 		IMPart partHarlHip = ik.createPart("harlHip", 0.01);
-		partHarlHip.setDHParameters("torso", 0.0635, 0, 0, 0);
+		partHarlHip.setDHParameters(ArmConfig.DEFAULT, 0.0635, 0, 0, 0);
 		partHarlHip.set3DModel("Models/harlLTorso1.j3o", 1, new Point(0,0,0,0,0,0));
 		ik.attach(partHarlHip);
 		
 		IMPart partHarlHipLeftAttach = ik.createPart("harlHipLeftAttach", 0.01);
-		partHarlHipLeftAttach.setDHParameters("leftLeg", 0, 180, 0.127, 180);
+		partHarlHipLeftAttach.setDHParameters(ArmConfig.DEFAULT, 0, 180, 0.127, 180);
 		ik.attach(partHarlHipLeftAttach);
 		
 		IMPart partHarlLeftHipY = ik.createPart("harlLeftHipY", 0.01);
-		partHarlLeftHipY.setDHParameters("leftLeg", .0415, 0, 0, 90);
+		partHarlLeftHipY.setDHParameters(ArmConfig.DEFAULT, .0415, 0, 0, 90);
 		partHarlLeftHipY.set3DModel("Models/harlLhipY.j3o", scale, new Point(0,0,0,0,0,0));
-		partHarlLeftHipY.setControl("leftLeg", "leftHipY");
+		partHarlLeftHipY.setControl(ArmConfig.DEFAULT, "leftHipY");
 		ik.attach(partHarlLeftHipY);
 		
 		IMPart partHarlLeftHipR = ik.createPart("harlLeftHipR", 0.01);
-		partHarlLeftHipR.setDHParameters("leftLeg", 0.01, 90, 0.0629, 90);
-		partHarlLeftHipR.setControl("leftLeg", "leftHipR");
+		partHarlLeftHipR.setDHParameters(ArmConfig.DEFAULT, 0.01, 90, 0.0629, 90);
+		partHarlLeftHipR.setControl(ArmConfig.DEFAULT, "leftHipR");
 		partHarlLeftHipR.set3DModel("Models/harlLhipR.j3o", scale, new Point(0.001,-0.011,0,-90,90,0));
 		ik.attach(partHarlLeftHipR);
 		
 		IMPart partHarlLeftHipPAttach = ik.createPart("harlLeftHipPAttach", 0.01);
-		partHarlLeftHipPAttach.setDHParameters("leftLeg", -0.006, 0, 0, 180);
+		partHarlLeftHipPAttach.setDHParameters(ArmConfig.DEFAULT, -0.006, 0, 0, 180);
 		ik.attach(partHarlLeftHipPAttach);
 		
 		IMPart partHarlLeftHipP = ik.createPart("harlLeftHipP", 0.01);
-		partHarlLeftHipP.setDHParameters("leftLeg", 0, 0, .3630, 180);
-		partHarlLeftHipP.setControl("leftLeg", "leftHipP");
+		partHarlLeftHipP.setDHParameters(ArmConfig.DEFAULT, 0, 0, .3630, 180);
+		partHarlLeftHipP.setControl(ArmConfig.DEFAULT, "leftHipP");
 		partHarlLeftHipP.set3DModel("Models/harlLhipP.j3o", scale, new Point(0,0,0,-90,0,0));
 		ik.attach(partHarlLeftHipP);
 		
 		IMPart partHarlLeftKnee = ik.createPart("harlLeftKnee", 0.01);
-		partHarlLeftKnee.setDHParameters("leftLeg", 0, 0, 0.3668, 180);
-		partHarlLeftKnee.setControl("leftLeg", "leftKnee");
+		partHarlLeftKnee.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.3668, 180);
+		partHarlLeftKnee.setControl(ArmConfig.DEFAULT, "leftKnee");
 		partHarlLeftKnee.set3DModel("Models/harlLKnee.j3o", scale, new Point(0,0.003,0,-90,180,0));
 		ik.attach(partHarlLeftKnee);
 		
 		IMPart partHarlLAnkleP = ik.createPart("harlLAnkleP", 0.01);
-		partHarlLAnkleP.setDHParameters("leftLeg", 0, 0, 0.04, 90);
-		partHarlLAnkleP.setControl("leftLeg", "leftAnkleP");
+		partHarlLAnkleP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 90);
+		partHarlLAnkleP.setControl(ArmConfig.DEFAULT, "leftAnkleP");
 		partHarlLAnkleP.set3DModel("Models/harlLAnkleP1.j3o", scale, new Point(0,0.003,0,90,0,0));
 		ik.attach(partHarlLAnkleP);
 		
 		IMPart partHarlLAnkleR = ik.createPart("harlLAnkleR", 0.01);
-		partHarlLAnkleR.setDHParameters("leftLeg", 0, 0, .04, 0);
-		partHarlLAnkleR.setControl("leftLeg", "leftAnkleR");
+		partHarlLAnkleR.setDHParameters(ArmConfig.DEFAULT, 0, 0, .04, 0);
+		partHarlLAnkleR.setControl(ArmConfig.DEFAULT, "leftAnkleR");
 		partHarlLAnkleR.set3DModel("Models/harlLankleR.j3o", scale, new Point(0,0,0,-90,90,0));
 		ik.attach(partHarlLAnkleR);
 		
 		IMPart partHarlHipRightAttach = ik.createPart("harlHipRightAttach", 0.01);
-		partHarlHipRightAttach.setDHParameters("rightLeg", 0, 0, .127, 180);
+		partHarlHipRightAttach.setDHParameters(ArmConfig.DEFAULT, 0, 0, .127, 180);
 		ik.attach(partHarlHipRightAttach);
 		
 		IMPart partHarlRightHipY = ik.createPart("harlRightHipY", 0.01);
-		partHarlRightHipY.setDHParameters("rightLeg", 0.0415, 0, 0, -90);
-		partHarlRightHipY.setControl("rightLeg", "rightHipY");
+		partHarlRightHipY.setDHParameters(ArmConfig.DEFAULT, 0.0415, 0, 0, -90);
+		partHarlRightHipY.setControl(ArmConfig.DEFAULT, "rightHipY");
 		partHarlRightHipY.set3DModel("Models/harlRHipY.j3o", scale, new Point(0,0,0,0,0,0));
 		ik.attach(partHarlRightHipY);
 		
 		IMPart partHarlRightHipR = ik.createPart("harlRightHipR", 0.01);
-		partHarlRightHipR.setDHParameters("rightLeg", 0.01, -90, 0.0629, 90);
-		partHarlRightHipR.setControl("rightLeg", "rightHipR");
+		partHarlRightHipR.setDHParameters(ArmConfig.DEFAULT, 0.01, -90, 0.0629, 90);
+		partHarlRightHipR.setControl(ArmConfig.DEFAULT, "rightHipR");
 		partHarlRightHipR.set3DModel("Models/harlRHipR.j3o", scale, new Point(0.001,-0.011,0,90,-90,180));
 		ik.attach(partHarlRightHipR);
 		
 		IMPart partHarlRightHipPAttach = ik.createPart("harlRightHipPAttach", 0.01);
-		partHarlRightHipPAttach.setDHParameters("rightLeg", -0.006, 0, 0, 180);
+		partHarlRightHipPAttach.setDHParameters(ArmConfig.DEFAULT, -0.006, 0, 0, 180);
 		ik.attach(partHarlRightHipPAttach);
 		
 		IMPart partHarlRightHipP = ik.createPart("harlRightHipP", 0.01);
-		partHarlRightHipP.setDHParameters("rightLeg", 0, 0, 0.3630, 180);
-		partHarlRightHipP.setControl("rightLeg", "rightHipP");
+		partHarlRightHipP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.3630, 180);
+		partHarlRightHipP.setControl(ArmConfig.DEFAULT, "rightHipP");
 		partHarlRightHipP.set3DModel("Models/harlRHip.j3o", scale, new Point(0,0,0,-90,0,0));
 		ik.attach(partHarlRightHipP);
 		
 		IMPart partHarlRightKnee = ik.createPart("harlRightKnee", 0.01);
-		partHarlRightKnee.setDHParameters("rightLeg", 0, 0, 0.3668, 180);
-		partHarlRightKnee.setControl("rightLeg", "rightKnee");
+		partHarlRightKnee.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.3668, 180);
+		partHarlRightKnee.setControl(ArmConfig.DEFAULT, "rightKnee");
 		partHarlRightKnee.set3DModel("Models/harlRKnee.j3o", scale, new Point(0.,0.003,0,-90,180,0));
 		ik.attach(partHarlRightKnee);
 		
 		IMPart partHarlRAnkleP = ik.createPart("harlRAnkleP", 0.01);
-		partHarlRAnkleP.setDHParameters("rightLeg", 0, 0, 0.04, 90);
-		partHarlRAnkleP.setControl("rightLeg", "rightAnkleP");
+		partHarlRAnkleP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 90);
+		partHarlRAnkleP.setControl(ArmConfig.DEFAULT, "rightAnkleP");
 		partHarlRAnkleP.set3DModel("Models/harlRankleP.j3o", scale, new Point(0,0.003,0,-90,0,0));
 		ik.attach(partHarlRAnkleP);
 		
 		IMPart partHarlRAnkleR = ik.createPart("harlRAnkleR", 0.01);
-		partHarlRAnkleR.setDHParameters("rightLeg", 0, 0, 0.04, 90);
-		partHarlRAnkleR.setDHParameters("Rev-rightLeg", 0, 0, -0.04, 90);
-		partHarlRAnkleR.setControl("rightLeg", "rightAnkleR");
+		partHarlRAnkleR.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 90);
+		partHarlRAnkleR.setDHParameters(ArmConfig.REVERSE, 0, 0, -0.04, 90);
+		partHarlRAnkleR.setControl(ArmConfig.DEFAULT, "rightAnkleR");
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
 		ik.attach(partHarlRAnkleR);
 		
 		IMPart ankler = ik.createPart("ankler", 0.01);
-		ankler.setDHParameters("rrightLeg", 0, 0, -0.04, 90);
+		ankler.setDHParameters(ArmConfig.DEFAULT, 0, 0, -0.04, 90);
 		ik.attach(ankler);
 		
 		IMPart anklep = ik.createPart("anklep", 0.01);
-		anklep.setDHParameters("rrightLeg", 0, 0, -0.04, 0);
+		anklep.setDHParameters(ArmConfig.DEFAULT, 0, 0, -0.04, 0);
 		ik.attach(anklep);
 		
 		IMPart knee = ik.createPart("knee", 0.01);
@@ -746,7 +747,6 @@ public class IntegratedMovement extends Service
 	}
 
 	public void setOrigin(Point point) {
-		origin = point;
 		originMatrix = createInputMatrix(point.getX(), point.getY(), point.getZ(), point.getRoll(), point.getPitch(), point.getYaw());
 	}
 
@@ -771,7 +771,6 @@ public class IntegratedMovement extends Service
 	private boolean ProcessKinectData = false;
 	
 	private transient Matrix originMatrix;
-	private transient Point origin = new Point(0, 0, 0, 0, 0, 0);
 
 
 	public void attach(Attachable service) {

@@ -20,8 +20,8 @@ public class IMPart {
 
 	
 	private String name;
-	private HashMap<String,String> controls = new HashMap<String, String>();
-	private HashMap<String,DHLink> DHLinks = new HashMap<String, DHLink>();
+	private HashMap<ArmConfig,String> controls = new HashMap<ArmConfig, String>();
+	private HashMap<ArmConfig,DHLink> DHLinks = new HashMap<ArmConfig, DHLink>();
 	private Double radius = 0.01;
 	private String modelPath;
 	private float scale = 1;
@@ -47,32 +47,32 @@ public class IMPart {
 
 
 
-	public void setControl(String armModel, String control) {
-		controls.put(armModel, control);
+	public void setControl(ArmConfig armConfig, String control) {
+		controls.put(armConfig, control);
 	}
 
 
 
-	public void setDHParameters(String armModel, double d, double theta, double r, double alpha) {
-		setDHParameters(armModel, d, theta, r, alpha, DHLinkType.REVOLUTE);
+	public void setDHParameters(ArmConfig armConfig, double d, double theta, double r, double alpha) {
+		setDHParameters(armConfig, d, theta, r, alpha, DHLinkType.REVOLUTE);
 	}
 
 
 
-	public String getControl(String armName) {
-		return controls.get(armName);
+	public String getControl(ArmConfig conf) {
+		return controls.get(conf);
 	}
 
 
 
-	public HashMap<String, String> getControls() {
+	public HashMap<ArmConfig, String> getControls() {
 		return controls;
 	}
 
 
 
-	public DHLink getDHLink(String armName) {
-		return DHLinks.get(armName);
+	public DHLink getDHLink(ArmConfig armConfig) {
+		return DHLinks.get(armConfig);
 	}
 
 	public void setRadius(Double radius) {
@@ -174,9 +174,9 @@ public class IMPart {
 
 
 
-	public void setDHParameters(String armName, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
+	public void setDHParameters(ArmConfig armConfig, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
 		DHLink link = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha), dhLinkType);
-		DHLinks.put(armName, link);
+		DHLinks.put(armConfig, link);
 	}
 
 
@@ -242,8 +242,8 @@ public class IMPart {
 
 
 
-	public Matrix transform(String armName) {
-		return DHLinks.get(armName).resolveMatrix();
+	public Matrix transform(ArmConfig armConfig) {
+		return DHLinks.get(armConfig).resolveMatrix();
 	}
 
 
