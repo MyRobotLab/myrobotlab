@@ -6,8 +6,8 @@ package org.myrobotlab.jme3;
  */
 public class Jme3Msg {
   
-  public String method;
-  public Object data[];
+  String method;
+  Object data[];
   
   public Jme3Msg(String method, Object[] params) {
     this.method = method;

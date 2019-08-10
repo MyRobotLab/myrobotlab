@@ -249,7 +249,5 @@ public class IMPart {
 
 
 	public void update() {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -3,8 +3,6 @@
  */
 package org.myrobotlab.IntegratedMovement;
 
-import org.myrobotlab.jme3.Jme3Msg;
-
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -28,7 +26,7 @@ public class MsgUtil {
 	    s.setLocalTranslation((float) x, (float) y, (float) z);
 	}
 	
-	public Object invoke(Jme3Msg msg) {
+	public Object invoke(IMMsg msg) {
 		return jme.im.invokeOn(this, msg.method, msg.data);
 	}
 	

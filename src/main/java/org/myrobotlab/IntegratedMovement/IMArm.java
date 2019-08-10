@@ -20,6 +20,8 @@ public class IMArm {
 	String name;
 	public transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
 	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
+	private ArmConfig armConfig = ArmConfig.DEFAULT;
+	
 	public IMArm(String name){
 		this.name = name;
 	}
@@ -31,12 +33,18 @@ public class IMArm {
 	public String getName() {
 		return name;
 	}
-
+	
 	public Matrix getTransformMatrix() {
+		return getTransformMatrix(ArmConfig.DEFAULT, null);
+	}
+
+	public Matrix getTransformMatrix(ArmConfig armConfig, Matrix m) {
 		Matrix transformMatrix = inputMatrix;
+		if (m!=null) transformMatrix = m;
 		Iterator<IMPart> it = parts.iterator();
+		if (armConfig == ArmConfig.REVERSE) it = parts.descendingIterator();
 		while (it.hasNext()){
-			transformMatrix = transformMatrix.multiply((it.next()).transform(ArmConfig.DEFAULT));
+			transformMatrix = transformMatrix.multiply((it.next()).transform(armConfig));
 		}
 		return transformMatrix;
 	}
@@ -48,6 +56,7 @@ public class IMArm {
 	public Matrix updatePosition(HashMap<String, IMControl> controls){
 		Matrix m = inputMatrix;
 		Iterator<IMPart> it = parts.iterator();
+		//if (armConfig == ArmConfig.REVERSE) it = parts.descendingIterator();
 		while (it.hasNext()){
 			IMPart part = it.next();
 			part.setOrigin(m);
@@ -63,6 +72,15 @@ public class IMArm {
 			part.setEnd(m);
 			
 		}
+		it = parts.descendingIterator();
+		while (it.hasNext()){
+			IMPart part = it.next();
+			DHLink link = part.getDHLink(ArmConfig.REVERSE);
+			if (link == null) continue;
+			if (controls.containsKey(part.getControl(ArmConfig.REVERSE))){
+				link.addPositionValue(-controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
+			}
+		}
 		return m;
 	}
 
@@ -72,6 +90,18 @@ public class IMArm {
 	
 	public Point currentPosition(){
 		return parts.getLast().getEndPoint();
+	}
+
+	public ArmConfig getArmConfig() {
+		return armConfig;
+	}
+
+	public void setArmConfig(ArmConfig armConfig) {
+		this.armConfig = armConfig;
+	}
+	
+	public IMPart getLastPart(){
+		return parts.getLast();
 	}
 
 }

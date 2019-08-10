@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
-import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
@@ -72,8 +71,8 @@ public class JmeManager implements ActionListener {
 	transient private Camera cameraSetting;
 	transient private CameraNode camNode;
 	transient private Node camera = new Node("camera");
-	public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
-	protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+	public final static Logger log = LoggerFactory.getLogger(JmeManager.class);
+	protected Queue<IMMsg> msgQueue = new ConcurrentLinkedQueue<IMMsg>();
 	private float gridHeight = -1.049f;
 	
 	public JmeManager(IntegratedMovement im){
@@ -184,8 +183,8 @@ public class JmeManager implements ActionListener {
 		addMsg("setTranslation", name, x, y, z);
 	}
 
-	private void addMsg(String method, Object... params) {
-		jme3MsgQueue.add(new Jme3Msg(method, params));
+	public void addMsg(String method, Object... params) {
+		msgQueue.add(new IMMsg(method, params));
 	}
 
 	public void loadParts(IMData data) {
@@ -230,7 +229,7 @@ public class JmeManager implements ActionListener {
 		        //iniRot.rotate(0,0,(float)part.getInitialTheta());
 		        //iniRot.rotate(0, 0 , 0);
 				spatial.setLocalTranslation(IMUtil.pointToVector3f(ip));
-				Quaternion q = IMUtil.matrixToQuaternion(part.getInternTransform());
+				//Quaternion q = IMUtil.matrixToQuaternion(part.getInternTransform());
 				//iniRot.setLocalRotation(q.inverse());
 		    }
 		    else {
@@ -273,10 +272,10 @@ public class JmeManager implements ActionListener {
 	public void simpleUpdate(float tpf) {
 	    // start the clock on how much time we will take
 		startUpdateTs = System.currentTimeMillis();
-	    while (jme3MsgQueue.size() > 0) {
-	        Jme3Msg msg = null;
+	    while (msgQueue.size() > 0) {
+	        IMMsg msg = null;
 	        try {
-	          msg = jme3MsgQueue.remove();
+	          msg = msgQueue.remove();
 	          msgUtil.invoke(msg);
 	        } catch (Exception e) {
 	          log.error("simpleUpdate failed for {} - targetName", msg, e);
