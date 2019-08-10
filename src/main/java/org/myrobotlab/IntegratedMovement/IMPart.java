@@ -4,6 +4,7 @@
 package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHLinkType;
@@ -34,6 +35,7 @@ public class IMPart {
 	private double alpha=0;
 	private double initialTheta=0;
 	private double r=0;
+	private HashSet<String> reverseControl = new HashSet<String>();
 
 	public IMPart(String partName){
 		name = partName;
@@ -249,5 +251,23 @@ public class IMPart {
 
 
 	public void update() {
+	}
+
+
+
+	public void setControl(ArmConfig armConfig, String controlName, boolean reverse) {
+		setControl(armConfig, controlName);
+		if (reverse){
+			reverseControl.add(controlName);
+		}
+	}
+
+
+
+	public void addPositionToLink(ArmConfig armConfig, double d) {
+		DHLink link = DHLinks.get(armConfig);
+		if (reverseControl.contains(getControl(armConfig))) d = -d;
+		link.addPositionValue(d);
+		
 	}
 }

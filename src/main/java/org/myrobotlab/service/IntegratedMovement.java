@@ -436,7 +436,7 @@ public class IntegratedMovement extends Service
 		partHarlLAnkleR.setControl(ArmConfig.DEFAULT, "leftAnkleR");
 		partHarlLAnkleR.set3DModel("Models/harlLankleR.j3o", scale, new Point(0,0,0,-90,90,0));
 		ik.attach(partHarlLAnkleR);
-		//TODO check reverse link
+
 		IMPart partHarlHipRightAttach = ik.createPart("harlHipRightAttach", 0.01); //o = x(0): right z(-.1345): up y(0): front
 		partHarlHipRightAttach.setDHParameters(ArmConfig.DEFAULT, 0, 0, .127, 180); // x(.127): right, z(-.1345): down, y(0): back
 		partHarlHipRightAttach.setDHParameters(ArmConfig.REVERSE, -0.0415, 180, -0.127, 180);
@@ -447,7 +447,7 @@ public class IntegratedMovement extends Service
 		partHarlRightHipY.setDHParameters(ArmConfig.DEFAULT, 0.0415, 0, 0, -90); // x(.127): right, z(-.176): back, y(0): up
 		partHarlRightHipY.setDHParameters(ArmConfig.REVERSE, 0, 0, 0., 90); 
 		partHarlRightHipY.setControl(ArmConfig.DEFAULT, "rightHipY");
-		partHarlRightHipY.setControl(ArmConfig.REVERSE, "rightHipR");
+		partHarlRightHipY.setControl(ArmConfig.REVERSE, "rightHipR", true);
 		partHarlRightHipY.set3DModel("Models/harlRHipY.j3o", scale, new Point(0,0,0,0,0,0));
 		ik.attach(partHarlRightHipY);
 		
@@ -466,7 +466,7 @@ public class IntegratedMovement extends Service
 		IMPart partHarlRightHipPAttach = ik.createPart("harlRightHipPAttach", 0.01);
 		partHarlRightHipPAttach.setDHParameters(ArmConfig.DEFAULT, -0.006, 0, 0, 180); //x(.133):down , z(-.2389):right , y(-.1):front
 		partHarlRightHipPAttach.setDHParameters(ArmConfig.REVERSE, -.006, 0, -0.0, 180);
-		partHarlRightHipR.setControl(ArmConfig.REVERSE, "rightHipP");
+		partHarlRightHipR.setControl(ArmConfig.REVERSE, "rightHipP", true);
 		ik.attach(partHarlRightHipPAttach);
 		
 		IMPart partHarlRightHipP = ik.createPart("harlRightHipP", 0.01);
@@ -687,7 +687,7 @@ public class IntegratedMovement extends Service
 		rightHipY.moveTo(1.0);
 		rightHipR.moveTo(1.0);
 		rightHipP.moveTo(1.0);
-		//rightKnee.moveTo(1.0);
+		rightKnee.moveTo(1.0);
 		rightAnkleP.moveTo(1.0);
 		rightAnkleR.moveTo(1.0);
 
@@ -706,7 +706,7 @@ public class IntegratedMovement extends Service
 		leftHipY.moveTo(0.0);
 		leftHipR.moveTo(0.0);
 		leftHipP.moveTo(0.0);
-		//leftKnee.moveTo(0.0);
+		leftKnee.moveTo(0.0);
 		leftAnkleP.moveTo(0.0);
 		leftAnkleR.moveTo(0.0);
 		rightHipY.moveTo(0.0);
@@ -745,7 +745,7 @@ public class IntegratedMovement extends Service
 		// ik.setAi("leftArm", Ai.KEEP_BALANCE);
 		ik.startSimulator();
 		// ik.getSimulatorManager().setAxesVisible(false);
-		inMoov.addMsg("reverseArm","rightLeg");
+		//inMoov.addMsg("reverseArm","rightLeg");
 
 	}
 
