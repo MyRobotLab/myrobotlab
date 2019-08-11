@@ -271,7 +271,7 @@ public class Matrix implements Serializable {
       if (!ak.equals(0.0)) {
         R_plus = ak.transpose().multiply(1.0 / (ak.dot(ak)));
       } else {
-        R_plus = new Matrix(1, numCols);
+        R_plus = new Matrix(1, numRows);
       }
 
       while (k < this.numCols) {

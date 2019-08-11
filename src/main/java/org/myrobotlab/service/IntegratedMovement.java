@@ -22,7 +22,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.genetic.GeneticParameters;
-import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
@@ -603,9 +602,9 @@ public class IntegratedMovement extends Service
 		ik.attach(armRightLeg);
 		
 		IMBuild inMoov = ik.createBuild("inMoov");
-		inMoov.addArm(armTorso);
-		inMoov.addArm(armRightLeg);
-		inMoov.addArm(armLeftLeg);
+		inMoov.addArm(armRightLeg, ArmConfig.REVERSE);
+		inMoov.addArm(armTorso, armRightLeg);
+		inMoov.addArm(armLeftLeg, armRightLeg);
 		inMoov.addArm(armRightArm, armTorso);
 		inMoov.addArm(armLeftArm, armTorso);
 		ik.attach(inMoov);
@@ -732,7 +731,7 @@ public class IntegratedMovement extends Service
 		ik.startSimulator();
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
-		ik.moveTo("inMoov", "leftArm", .3, .3, .3);
+		ik.moveTo("inMoov", "leftArm", -.3, .6, .3);
 	}
 
 

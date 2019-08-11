@@ -38,6 +38,7 @@ public class IMPart {
 	private double r=0;
 	private HashSet<String> reverseControl = new HashSet<String>();
 	private ServoStatus state = ServoStatus.SERVO_STOPPED;
+	private double targetPos = 0;
 
 	public IMPart(String partName){
 		name = partName;
@@ -283,5 +284,23 @@ public class IMPart {
 
 	public void setState(ServoStatus state) {
 		this.state = state;
+	}
+
+
+
+	/**
+	 * @return the targetPos
+	 */
+	public double getTargetPos() {
+		return targetPos;
+	}
+
+
+
+	/**
+	 * @param targetPos the targetPos to set
+	 */
+	public void setTargetPos(double targetPos) {
+		this.targetPos = targetPos;
 	}
 }
