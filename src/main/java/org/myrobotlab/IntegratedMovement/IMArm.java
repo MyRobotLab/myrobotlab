@@ -21,6 +21,10 @@ public class IMArm {
 	public transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
 	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
 	private ArmConfig armConfig = ArmConfig.DEFAULT;
+	private Point target = null;
+	private String lastPartToUse;
+	private Point previousTarget;
+	private int tryCount;
 	
 	public IMArm(String name){
 		this.name = name;
@@ -37,14 +41,20 @@ public class IMArm {
 	public Matrix getTransformMatrix() {
 		return getTransformMatrix(ArmConfig.DEFAULT, null);
 	}
-
+	
 	public Matrix getTransformMatrix(ArmConfig armConfig, Matrix m) {
+		return getTransformMatrix(armConfig, m, null);
+	}
+
+	public Matrix getTransformMatrix(ArmConfig armConfig, Matrix m, String lastPart) {
 		Matrix transformMatrix = inputMatrix;
 		if (m!=null) transformMatrix = m;
 		Iterator<IMPart> it = parts.iterator();
 		if (armConfig == ArmConfig.REVERSE) it = parts.descendingIterator();
 		while (it.hasNext()){
-			transformMatrix = transformMatrix.multiply((it.next()).transform(armConfig));
+			IMPart part = it.next();
+			transformMatrix = transformMatrix.multiply(part.transform(armConfig));
+			if (part.getName() == lastPart) break;
 		}
 		return transformMatrix;
 	}
@@ -103,6 +113,75 @@ public class IMArm {
 	
 	public IMPart getLastPart(){
 		return parts.getLast();
+	}
+
+	public void setTarget(Point point) {
+		target  = point;
+	}
+
+	public void setLastPartToUse(String partName) {
+		lastPartToUse = partName;
+	}
+
+	/**
+	 * @return the target
+	 */
+	public Point getTarget() {
+		return target;
+	}
+
+	/**
+	 * @return the lastPartToUse
+	 */
+	public String getLastPartToUse() {
+		return lastPartToUse;
+	}
+
+	public void setPreviousTarget(String partName) {
+		Iterator<IMPart> it = parts.iterator();
+		if (armConfig == ArmConfig.REVERSE) it = parts.descendingIterator();
+		while (it.hasNext()){
+			IMPart part = it.next();
+			previousTarget = part.getEndPoint();
+			if (part.getName() == partName) return;
+		}
+	}
+
+	public void setTryCount(int i) {
+		tryCount = i;
+	}
+
+	/**
+	 * @return the previousTarget
+	 */
+	public Point getPreviousTarget() {
+		return previousTarget;
+	}
+
+	/**
+	 * @param previousTarget the previousTarget to set
+	 */
+	public void setPreviousTarget(Point previousTarget) {
+		this.previousTarget = previousTarget;
+	}
+
+	/**
+	 * @return the tryCount
+	 */
+	public int getTryCount() {
+		return tryCount;
+	}
+
+	public Point getPosition(String lastPart) {
+		return IMUtil.matrixToPoint(getTransformMatrix(armConfig, null, lastPart));
+	}
+
+	public void increaseTryCount() {
+		tryCount++;
+	}
+
+	public LinkedList<IMPart> getParts() {
+		return parts;
 	}
 
 }

@@ -2,6 +2,8 @@ package org.myrobotlab.IntegratedMovement;
 
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
@@ -23,8 +25,8 @@ public class IMData {
 		return arms.get(name);
 	}
 
-	public HashMap<String, IMEngine> getArms() {
-		return engines;
+	public HashMap<String,IMArm> getArms() {
+		return arms;
 	}
 
 	public boolean removeArm(String armName) {
@@ -41,6 +43,15 @@ public class IMData {
 	}
 
 	public void addPart(IMPart part) {
+		for (ArmConfig armConfig : part.getControls().keySet()){
+			DHLink link = part.getDHLink(armConfig);
+			if (link == null) continue;
+			IMControl control= getControl(part.getControl(armConfig));
+			if (control!=null){
+				link.setMin(link.getInitialTheta() + Math.toRadians(control.getMin()));
+				link.setMax(link.getInitialTheta() + Math.toRadians(control.getMax()));
+			}
+		}
 		parts.put(part.getName(),part);
 	}
 
@@ -50,6 +61,7 @@ public class IMData {
 		control.setState(ServoStatus.SERVO_START);
 		control.setSpeed(data.getSpeed());
 		control.setTargetPos(data.getTargetPos());
+		control.setMinMax(data.getMin(), data.getMax());
 	}
 
 	public void onServoData(ServoData data) {

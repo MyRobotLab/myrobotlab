@@ -17,9 +17,19 @@ public class IMControl {
 	private Double targetPos = 0.0;
 	private Double pos = 0.0;
 	private ServoStatus state;
+	private Double min;
+	private Double max;
 
 	IMControl(String name){
 		this.setName(name);
+	}
+	
+	IMControl(IMControl copy){
+		name = copy.name;
+		speed = new Double(copy.speed);
+		targetPos = new Double(copy.targetPos);
+		pos = new Double(copy.pos);
+		state = copy.state;
 	}
 
 	public void setState(ServoStatus state) {
@@ -68,5 +78,38 @@ public class IMControl {
 	 */
 	public ServoStatus getState() {
 		return state;
+	}
+
+	public void setMinMax(Double min, Double max) {
+		this.setMin(min);
+		this.setMax(max);
+	}
+
+	/**
+	 * @return the min
+	 */
+	public Double getMin() {
+		return min;
+	}
+
+	/**
+	 * @param min the min to set
+	 */
+	public void setMin(Double min) {
+		this.min = min;
+	}
+
+	/**
+	 * @return the max
+	 */
+	public Double getMax() {
+		return max;
+	}
+
+	/**
+	 * @param max the max to set
+	 */
+	public void setMax(Double max) {
+		this.max = max;
 	}
 }

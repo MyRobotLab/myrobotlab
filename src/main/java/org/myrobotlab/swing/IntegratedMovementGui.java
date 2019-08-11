@@ -170,11 +170,11 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        for (IMEngine engine : im.getArms()) {
-          if (!armPanels.containsKey(engine.getName())) {
-            createArmPanel(engine);
-          }
-        }
+//        for (IMEngine engine : im.getArms()) {
+//          if (!armPanels.containsKey(engine.getName())) {
+//            createArmPanel(engine);
+//          }
+//        }
         objects = im.getCollisionObject();
         if (objects == null)
           return;

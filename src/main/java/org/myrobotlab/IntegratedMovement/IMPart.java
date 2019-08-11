@@ -11,6 +11,7 @@ import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
 /**
  * Contain Info about a part or object that can be used by IntegratedMovement
@@ -36,6 +37,7 @@ public class IMPart {
 	private double initialTheta=0;
 	private double r=0;
 	private HashSet<String> reverseControl = new HashSet<String>();
+	private ServoStatus state = ServoStatus.SERVO_STOPPED;
 
 	public IMPart(String partName){
 		name = partName;
@@ -269,5 +271,17 @@ public class IMPart {
 		if (reverseControl.contains(getControl(armConfig))) d = -d;
 		link.addPositionValue(d);
 		
+	}
+
+
+
+	public ServoStatus getState() {
+		return state ;
+	}
+
+
+
+	public void setState(ServoStatus state) {
+		this.state = state;
 	}
 }

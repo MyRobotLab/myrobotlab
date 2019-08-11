@@ -714,7 +714,7 @@ private double nextAlpha;
       return;
     }
     target = moveToObject();
-    service.getJmeApp().addPoint(target);
+    //service.getJmeApp().addPoint(target);
   }
 
   private Point moveToObject() {

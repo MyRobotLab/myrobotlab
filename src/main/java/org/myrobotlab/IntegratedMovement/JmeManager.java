@@ -341,6 +341,7 @@ public class JmeManager implements ActionListener {
 	    point = new Node("point");
 	    point.attachChild(geom);
 	    rootNode.attachChild(point);
+	    nodes.put("point", point);
 	    Cylinder c2 = new Cylinder(8, 50, .005f, .010f, true, false);
 	    Geometry geom2 = new Geometry("Cylinder", c2);
 	    geom2.setMaterial(mat2);
@@ -457,6 +458,10 @@ public class JmeManager implements ActionListener {
 	
 	public void setGridHeight(double height){
 		gridHeight = (float)height;
+	}
+
+	public void setTargetPoint(Point target) {
+		addMsg("setTranslation", "point", -target.getX(), target.getY(), target.getZ());
 	}
 
 }

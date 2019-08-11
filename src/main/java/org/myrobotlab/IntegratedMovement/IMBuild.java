@@ -3,12 +3,17 @@
  */
 package org.myrobotlab.IntegratedMovement;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.service.IntegratedMovement;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
 /**
  * @author Calamity
@@ -20,7 +25,8 @@ public class IMBuild extends Thread  {
 	transient Node<IMArm> arms = new Node<IMArm>(new IMArm("root"));
 	protected Queue<IMMsg> msgQueue = new ConcurrentLinkedQueue<IMMsg>();
 	private IMArm reversedArm = null;
-	transient private IMData data;
+	private HashMap<String, IMControl> controls;
+	private double maxDistance = 0.001;
 	
 	public IMBuild(String name, IntegratedMovement service, Matrix origin){
 		super(name);
@@ -43,11 +49,14 @@ public class IMBuild extends Thread  {
 		while(true){
 			long startUpdateTs = System.currentTimeMillis();
 
-			data = service.getData();
-			
+			copyControl();
 			updatePartsPosition();
 			
 			checkMsg();
+			
+			checkMove(arms);
+			
+			publishAngles(arms);
 			
 			long deltaMs = System.currentTimeMillis() - startUpdateTs;
 			long sleepMs = 33 - deltaMs;
@@ -65,6 +74,64 @@ public class IMBuild extends Thread  {
 		}
 	}
 	
+	
+	private void checkMove(Node<IMArm> arm) {
+		IMArm a = arm.getData();
+		if (a.getTarget() != null && a.getTarget().distanceTo(a.getPosition(a.getLastPartToUse())) > maxDistance){
+	        service.info("distance to target {}", a.getPosition(a.getLastPartToUse()).distanceTo(a.getTarget()));
+	        service.info(a.getPosition(a.getLastPartToUse()).toString());
+	        move(arm);
+	        //cogRetry = 0;
+		}
+		else if (a.getTarget() != null){
+			a.setTarget(null);
+			a.setLastPartToUse(null);
+		}
+		for (Node<IMArm> child : arm.getChildren()){
+			checkMove(child);
+		}
+	}
+
+	private void move(Node<IMArm> arm) {
+		IMArm a = arm.getData();
+		a.increaseTryCount();
+		if (a.getTryCount() > 500 && a.getPreviousTarget() != null){
+			a.setTarget(a.getPreviousTarget());
+		}
+		moveToGoal(arm);
+	}
+
+	private void publishAngles(Node<IMArm> arm) {
+		IMArm a = arm.getData();
+		LinkedList<IMPart> parts = a.getParts();
+		Iterator<IMPart> it = parts.iterator();
+		while (it.hasNext()){
+			IMPart part = it.next();
+			if (part.getState() != ServoStatus.SERVO_POSITION_UPDATE) continue;
+			String control = part.getControl(a.getArmConfig());
+			DHLink link = part.getDHLink(a.getArmConfig());
+			if (control == null || link == null) continue;
+			service.sendAngles(control, link.getPositionValueDeg());
+			part.setState(ServoStatus.SERVO_STOPPED);
+		}
+		for (Node<IMArm> child : arm.getChildren()){
+			publishAngles(child);
+		}
+		
+	}
+
+	private boolean moveToGoal(Node<IMArm> arm) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private void copyControl() {
+		controls = new HashMap<String, IMControl>();
+		for (IMControl c: service.getData().getControls().values()){
+			controls.put(c.getName(), new IMControl(c));
+		}
+	}
+
 	private void checkMsg() {
 	    while (msgQueue.size() > 0) {
 	        IMMsg msg = null;
@@ -150,5 +217,13 @@ public class IMBuild extends Thread  {
 	
 	public void addMsg(String method, Object... params) {
 		msgQueue.add(new IMMsg(method, params));
+	}
+	
+	public void moveTo(String armName, String partName, Point point){
+		IMArm arm = service.getArm(armName);
+		arm.setTarget(point);
+		arm.setLastPartToUse(partName);
+		arm.setPreviousTarget(partName);
+		arm.setTryCount(0);
 	}
 }

@@ -13,7 +13,6 @@ import org.myrobotlab.IntegratedMovement.GravityCenter;
 import org.myrobotlab.IntegratedMovement.IMArm;
 import org.myrobotlab.IntegratedMovement.IMBuild;
 import org.myrobotlab.IntegratedMovement.IMData;
-import org.myrobotlab.IntegratedMovement.IMEngine;
 import org.myrobotlab.IntegratedMovement.IMPart;
 import org.myrobotlab.IntegratedMovement.JmeManager;
 import org.myrobotlab.IntegratedMovement.Map3D;
@@ -24,7 +23,6 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
-import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
@@ -285,6 +283,58 @@ public class IntegratedMovement extends Service
 		// //#bicep.setMinMax(5,90)
 		// Rfinger.moveTo(90);
 
+		
+		// need to move a little so the position update
+		midStom.moveTo(1.0);
+		topStom.moveTo(1.0);
+		Romoplate.moveTo(11.0);
+		Rshoulder.moveTo(1.0);
+		Rrotate.moveTo(1.0);
+		Rbicep.moveTo(6.0);
+		omoplate.moveTo(11.0);
+		shoulder.moveTo(1.0);
+		rotate.moveTo(1.0);
+		bicep.moveTo(6.0);
+		wrist.moveTo(91.0);
+		Rwrist.moveTo(91.0);
+		leftHipY.moveTo(1.0);
+		leftHipR.moveTo(1.0);
+		leftHipP.moveTo(1.0);
+		leftKnee.moveTo(1.0);
+		leftAnkleP.moveTo(1.0);
+		leftAnkleR.moveTo(1.0);
+		rightHipY.moveTo(1.0);
+		rightHipR.moveTo(1.0);
+		rightHipP.moveTo(1.0);
+		rightKnee.moveTo(1.0);
+		rightAnkleP.moveTo(1.0);
+		rightAnkleR.moveTo(1.0);
+
+		midStom.moveTo(0.0);
+		topStom.moveTo(0.0);
+		Romoplate.moveTo(10.0);
+		Rshoulder.moveTo(0.0);
+		Rrotate.moveTo(0.0);
+		Rbicep.moveTo(5.0);
+		omoplate.moveTo(10.0);
+		shoulder.moveTo(0.0);
+		rotate.moveTo(0.0);
+		bicep.moveTo(5.0);
+		wrist.moveTo(90.0);
+		Rwrist.moveTo(90.0);
+		leftHipY.moveTo(0.0);
+		leftHipR.moveTo(0.0);
+		leftHipP.moveTo(0.0);
+		leftKnee.moveTo(0.0);
+		leftAnkleP.moveTo(0.0);
+		leftAnkleR.moveTo(0.0);
+		rightHipY.moveTo(0.0);
+		rightHipR.moveTo(0.0);
+		rightHipP.moveTo(0.0);
+		rightKnee.moveTo(0.0);
+		rightAnkleP.moveTo(0.0);
+		rightAnkleR.moveTo(0.0);
+
 		/*
 		 * defining each part of the robot TODO saved those setting to file
 		 */
@@ -500,23 +550,10 @@ public class IntegratedMovement extends Service
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
 		ik.attach(partHarlRAnkleR);
 		
-		IMPart partTest1 = ik.createPart("test1", 0.01);
-		partTest1.setDHParameters(ArmConfig.DEFAULT, 0, 90, .2, 00);
-		ik.attach(partTest1);
-		
-		IMPart partTest2 = ik.createPart("test2", 0.01);
-		partTest2.setDHParameters(ArmConfig.DEFAULT, .20, 0, 0, 0);
-		partTest2.setDHParameters(ArmConfig.REVERSE, -.2, 0, 0, 0);
-		partTest2.setControl(ArmConfig.DEFAULT, "wrist");
-		ik.attach(partTest2);
 		
 		ik.setOrigin(new Point(0, 0, -0.1345, 0, 0, 0));
 		
-		IMArm armTest = ik.createArm("test");
-		armTest.add(partTest1);
-		armTest.add(partTest2);
-		ik.attach(armTest);
-		
+	
 		IMArm armTorso = ik.createArm("torso");
 		armTorso.add(partHarlHip);
 		armTorso.add(partLowStom);
@@ -571,7 +608,6 @@ public class IntegratedMovement extends Service
 		inMoov.addArm(armLeftLeg);
 		inMoov.addArm(armRightArm, armTorso);
 		inMoov.addArm(armLeftArm, armTorso);
-		inMoov.addArm(armTest);
 		ik.attach(inMoov);
 
 		//rightKnee.moveTo(15.5);
@@ -665,56 +701,6 @@ public class IntegratedMovement extends Service
 		 * // TODO add the object that can collide with the model //
 		 * ik.jmeApp.addObject();
 		 */
-		// need to move a little so the position update
-		midStom.moveTo(1.0);
-		topStom.moveTo(1.0);
-		Romoplate.moveTo(11.0);
-		Rshoulder.moveTo(1.0);
-		Rrotate.moveTo(1.0);
-		Rbicep.moveTo(6.0);
-		omoplate.moveTo(11.0);
-		shoulder.moveTo(1.0);
-		rotate.moveTo(1.0);
-		bicep.moveTo(6.0);
-		wrist.moveTo(91.0);
-		Rwrist.moveTo(91.0);
-		leftHipY.moveTo(1.0);
-		leftHipR.moveTo(1.0);
-		leftHipP.moveTo(1.0);
-		leftKnee.moveTo(1.0);
-		leftAnkleP.moveTo(1.0);
-		leftAnkleR.moveTo(1.0);
-		rightHipY.moveTo(1.0);
-		rightHipR.moveTo(1.0);
-		rightHipP.moveTo(1.0);
-		rightKnee.moveTo(1.0);
-		rightAnkleP.moveTo(1.0);
-		rightAnkleR.moveTo(1.0);
-
-		midStom.moveTo(0.0);
-		topStom.moveTo(0.0);
-		Romoplate.moveTo(10.0);
-		Rshoulder.moveTo(0.0);
-		Rrotate.moveTo(0.0);
-		Rbicep.moveTo(5.0);
-		omoplate.moveTo(10.0);
-		shoulder.moveTo(0.0);
-		rotate.moveTo(0.0);
-		bicep.moveTo(5.0);
-		wrist.moveTo(90.0);
-		Rwrist.moveTo(90.0);
-		leftHipY.moveTo(0.0);
-		leftHipR.moveTo(0.0);
-		leftHipP.moveTo(0.0);
-		leftKnee.moveTo(0.0);
-		leftAnkleP.moveTo(0.0);
-		leftAnkleR.moveTo(0.0);
-		rightHipY.moveTo(0.0);
-		rightHipR.moveTo(0.0);
-		rightHipP.moveTo(0.0);
-		rightKnee.moveTo(0.0);
-		rightAnkleP.moveTo(0.0);
-		rightAnkleR.moveTo(0.0);
 		
 		// sleep(3000);
 		// double[][] jp = ik.createJointPositionMap("leftArm");
@@ -746,7 +732,7 @@ public class IntegratedMovement extends Service
 		ik.startSimulator();
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
-
+		ik.moveTo("inMoov", "leftArm", .3, .3, .3);
 	}
 
 
@@ -780,8 +766,6 @@ public class IntegratedMovement extends Service
 	transient GeneticParameters geneticParameters = new GeneticParameters();
 	transient private IMData imData = new IMData();
 	transient private Matrix inputMatrix = null;
-
-	private transient IntegratedMovementInterface jmeApp = null;
 
 	private transient JmeManager jmeManager = null;
 
@@ -841,9 +825,9 @@ public class IntegratedMovement extends Service
 	public String addObject(Point origin, Point end, String name, double radius, boolean render) {
 		CollisionItem item = new CollisionItem(origin, end, name, radius, render);
 		collisionItems.addItem(item);
-		if (jmeApp != null) {
-			jmeApp.addObject(item);
-		}
+//		if (jmeApp != null) {
+//			jmeApp.addObject(item);
+//		}
 		broadcastState();
 		return item.getName();
 	}
@@ -953,7 +937,7 @@ public class IntegratedMovement extends Service
 		// return (double) va.angleBetween(vci);
 	}
 
-	public Collection<IMEngine> getArms() {
+	public Collection<IMArm> getArms() {
 		return imData.getArms().values();
 	}
 
@@ -967,13 +951,6 @@ public class IntegratedMovement extends Service
 
 	public ObjectPointLocation[] getEnumLocationValue() {
 		return ObjectPointLocation.values();
-	}
-
-	/**
-	 * @return the jmeApp
-	 */
-	public IntegratedMovementInterface getJmeApp() {
-		return jmeApp;
 	}
 
 	/**
@@ -995,34 +972,23 @@ public class IntegratedMovement extends Service
 			log.info("unknown arm {} for hold target", arm);
 		}
 */	}
-
-	public void linkArmTo(String armName, String linkTo) {
-		if (imData.getArm(armName) == null || imData.getArm(linkTo) == null) {
-			log.info("no arm named {} or {} in linkArmTo)", armName, linkTo);
-		}
-		imData.linkArmTo(armName, linkTo);
+	
+	public void moveTo(String build, String arm, String part, double x, double y, double z){
+		moveTo(build, arm, part, new Point(x, y, z, 0, 0, 0));
+	}
+	
+	public void moveTo(String build, String arm, double x, double y, double z){
+		moveTo(build, arm, null, x, y, z);
+	}
+	
+	public void moveTo(String build, String arm, String part, Point point){
+		imData.getBuild(build).addMsg("moveTo", arm, part, point);
+		getSimulatorManager().setTargetPoint(point);
 	}
 
-	public void moveTo(String arm, double x, double y, double z) {
-		moveTo(arm, x, y, z, null);
+	public void moveTo(String build, String arm, Point point){
+		moveTo(build, arm, null, point);
 	}
-
-	public void moveTo(String arm, double x, double y, double z, String lastDHLink) {
-		moveTo(arm, new Point(x, y, z, 0, 0, 0), lastDHLink);
-	}
-
-	public void moveTo(String arm, Point point) {
-		moveTo(arm, point, null);
-	}
-
-	public void moveTo(String name, Point point, String lastDHLink) {
-/*		IMEngine arm = imData.getArm(name);
-		if (arm != null) {
-			arm.moveTo(point, lastDHLink);
-			jmeApp.addPoint(point);
-		}
-		log.info("unknow arm {}", arm);
-*/	}
 
 	public void moveTo(String armName, String objectName, ObjectPointLocation location) {
 		moveTo(armName, objectName, location, null);
@@ -1068,9 +1034,9 @@ public class IntegratedMovement extends Service
 			for (int i = 0; i < object.size(); i++) {
 				addObject(object.get(i));
 			}
-			if (jmeApp != null) {
-				jmeApp.addObject(getCollisionObject());
-			}
+//			if (jmeApp != null) {
+//				jmeApp.addObject(getCollisionObject());
+//			}
 			long b = System.currentTimeMillis();
 			log.info("end {} - {} - {}", b, b - a, this.inbox.size());
 			broadcastState();
@@ -1119,10 +1085,10 @@ public class IntegratedMovement extends Service
 	}
 
 	public void removeAi(Ai ai) {
-		for (IMEngine engine : imData.getArms().values()) {
+/*		for (IMEngine engine : imData.getArms().values()) {
 			engine.removeAi(ai);
 		}
-	}
+*/	}
 
 	public void removeAi(String armName, Ai ai) {
 //		IMEngine arm = imData.getArm(armName);
@@ -1156,9 +1122,9 @@ public class IntegratedMovement extends Service
 	}
 
 	public void setAi(Ai ai) {
-		for (IMEngine engine : imData.getArms().values()) {
-			engine.setAi(ai);
-		}
+//		for (IMEngine engine : imData.getArms().values()) {
+//			engine.setAi(ai);
+//		}
 	}
 
 	public void setAi(String ai) {
@@ -1187,16 +1153,6 @@ public class IntegratedMovement extends Service
 		imData.addControl(srvCtrlName);
 	}
 
-	public void setDHLinkType(String name, DHLinkType type) {
-		for (IMEngine engine : imData.getArms().values()) {
-			for (DHLink link : engine.getDHRobotArm().getLinks()) {
-				if (link.getName().equals(name)) {
-					link.setType(type);
-				}
-			}
-		}
-	}
-
 	public void setInputMatrix(String armName, Matrix inputMatrix) {
 		if (inputMatrix.getNumCols() != 4 || inputMatrix.getNumRows() != 4) {
 			log.info("wrong dimention for setInputMatrix (must be 4 x 4)");
@@ -1205,23 +1161,8 @@ public class IntegratedMovement extends Service
 		}
 	}
 
-	public void setJmeApp(IntegratedMovementInterface jmeApp) {
-		this.jmeApp = jmeApp;
-	}
-
 	public void setKinectName(String kinectName) {
 		this.kinectName = kinectName;
-	}
-
-	public void setMinMaxAngles(String partName, double min, double max) {
-		for (IMEngine engine : imData.getArms().values()) {
-			for (DHLink link : engine.getDHRobotArm().getLinks()) {
-				if (link.getName().equals(partName)) {
-					link.setMin(link.getInitialTheta() + Math.toRadians(min));
-					link.setMax(link.getInitialTheta() + Math.toRadians(max));
-				}
-			}
-		}
 	}
 
 	/**
@@ -1230,15 +1171,6 @@ public class IntegratedMovement extends Service
 	 */
 	public void setOpenni(OpenNi openni) {
 		this.openni = openni;
-	}
-
-	public void startEngine(String armName) {
-//		IMEngine arm = imData.getArm(armName);
-//		if (arm != null) {
-//			arm.start();
-//			addTask("publishPosition-" + armName, 1000, 0, "publishPosition", armName);
-//		}
-//		log.info("unknown arm {}", armName);
 	}
 
 	public OpenNi startOpenNI() throws Exception {
@@ -1262,9 +1194,9 @@ public class IntegratedMovement extends Service
 	}
 
 	public void stopMoving() {
-		for (IMEngine engine : imData.getArms().values()) {
-			engine.target = null;
-		}
+//		for (IMEngine engine : imData.getArms().values()) {
+//			engine.target = null;
+//		}
 	}
 
 }
