@@ -602,9 +602,9 @@ public class IntegratedMovement extends Service
 		ik.attach(armRightLeg);
 		
 		IMBuild inMoov = ik.createBuild("inMoov");
-		inMoov.addArm(armRightLeg, ArmConfig.REVERSE);
-		inMoov.addArm(armTorso, armRightLeg);
-		inMoov.addArm(armLeftLeg, armRightLeg);
+		inMoov.addArm(armRightLeg);
+		inMoov.addArm(armTorso);
+		inMoov.addArm(armLeftLeg);
 		inMoov.addArm(armRightArm, armTorso);
 		inMoov.addArm(armLeftArm, armTorso);
 		ik.attach(inMoov);
@@ -731,7 +731,7 @@ public class IntegratedMovement extends Service
 		ik.startSimulator();
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
-		ik.moveTo("inMoov", "leftArm", -.3, .6, .3);
+		//ik.moveTo("inMoov", "leftArm", -.3, .6, .3);
 	}
 
 

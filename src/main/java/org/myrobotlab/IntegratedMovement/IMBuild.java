@@ -65,6 +65,8 @@ public class IMBuild extends Thread implements Genetic {
 		Node<IMArm> parentNode = arms.find(parent);
 		if (parentNode == null) parentNode = arms;
 		parentNode.addchild(new Node<IMArm>(arm));
+		arm.setArmConfig(armConfig);
+		
 	}
 
 	public void run(){
