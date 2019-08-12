@@ -173,7 +173,9 @@ public class IMArm {
 	}
 
 	public Point getPosition(String lastPart) {
-		return IMUtil.matrixToPoint(getTransformMatrix(armConfig, null, lastPart));
+		Matrix m = null;
+		if (armConfig == ArmConfig.REVERSE) m = getTransformMatrix();
+		return IMUtil.matrixToPoint(getTransformMatrix(armConfig, m, lastPart));
 	}
 
 	public void increaseTryCount() {

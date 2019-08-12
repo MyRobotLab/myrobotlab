@@ -461,7 +461,7 @@ public class JmeManager implements ActionListener {
 	}
 
 	public void setTargetPoint(Point target) {
-		addMsg("setTranslation", "point", -target.getX(), target.getY(), target.getZ());
+		addMsg("setTranslation", "point", -target.getX(), target.getZ(), target.getY());
 	}
 
 }

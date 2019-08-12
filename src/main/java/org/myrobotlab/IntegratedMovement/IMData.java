@@ -58,7 +58,7 @@ public class IMData {
 	public void onMoveTo(ServoControl data) {
 		IMControl control = controls.get(data.getName());
 		if (control == null) return;
-		control.setState(ServoStatus.SERVO_START);
+		//control.setState(data.ge);
 		control.setSpeed(data.getSpeed());
 		control.setTargetPos(data.getTargetPos());
 		control.setMinMax(data.getMin(), data.getMax());

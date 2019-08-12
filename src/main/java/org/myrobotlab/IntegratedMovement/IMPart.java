@@ -267,11 +267,11 @@ public class IMPart {
 
 
 
-	public void addPositionToLink(ArmConfig armConfig, double d) {
+	public double addPositionToLink(ArmConfig armConfig, double d) {
 		DHLink link = DHLinks.get(armConfig);
 		if (reverseControl.contains(getControl(armConfig))) d = -d;
 		link.addPositionValue(d);
-		
+		return link.getTheta();
 	}
 
 
