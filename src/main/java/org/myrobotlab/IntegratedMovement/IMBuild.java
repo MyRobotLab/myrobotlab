@@ -38,7 +38,7 @@ public class IMBuild extends Thread implements Genetic {
 	private Point currentTarget;
 	private Matrix currentOrigin;
 	private long startUpdateTs;
-	private int maxTryCount = 100;
+	private int maxTryCount = 1;
 	
 	private enum CalcFitnessType {
 		POSITION, COG;
@@ -65,8 +65,13 @@ public class IMBuild extends Thread implements Genetic {
 	public void addArm(IMArm arm, IMArm parent, ArmConfig armConfig){
 		Node<IMArm> parentNode = arms.find(parent);
 		if (parentNode == null) parentNode = arms;
-		parentNode.addchild(new Node<IMArm>(arm));
+		Node<IMArm> newArm = new Node<IMArm>(arm);
+		parentNode.addchild(newArm);
 		arm.setArmConfig(armConfig);
+		if (armConfig == ArmConfig.REVERSE){
+			reversedArm = arm;
+		}
+		updatePartsPosition(newArm);
 		
 	}
 
@@ -149,11 +154,12 @@ public class IMBuild extends Thread implements Genetic {
 
 	private void publishAngles(Node<IMArm> arm) {
 		Iterator<IMPart> it = links.iterator();
+		Point p = getPosition(links, currentOrigin);
 		while(it.hasNext()){
 			IMPart part = it.next();
 			if (part.getState() != ServoStatus.SERVO_POSITION_UPDATE) continue;
-			String control = part.getControl(arm.getData().getArmConfig());
-			DHLink link = part.getDHLink(arm.getData().getArmConfig());
+			String control = part.getControl();
+			DHLink link = part.getDHLink();
 			if (control == null || link == null) continue;
 			service.sendAngles(control, link.getPositionValueDeg());
 			part.setState(ServoStatus.SERVO_STOPPED);
@@ -187,31 +193,33 @@ public class IMBuild extends Thread implements Genetic {
 	    int geneticPoolSize = 100;
 	    double geneticRecombinationRate = 0.7;
 	    double geneticMutationRate = 0.02;
-	    int geneticGeneration = 40;
+	    int geneticGeneration = 200;
 	    links = new LinkedList<IMPart>();
 	    getParts(arm, links);
 	    while (true){
 	    	numSteps++;
-	    	if (numSteps > maxIterations){
+            currentOrigin = links.getFirst().getOrigin();
+            if (links.getFirst().getCurrentArmConfig() == ArmConfig.REVERSE){
+            	currentOrigin = links.getFirst().getEnd();
+            }
+	    	if(arm.getData().getTryCount()%30==0){
 	    		//break;
 	    	}
 	    	//if (numSteps > maxIterations){
-	    	if(arm.getData().getTryCount()%30==0){
+	    	//if(arm.getData().getTryCount()%30==0){
+	    	if(true){
 	            calcFitnessType = CalcFitnessType.POSITION;
 	            currentArmConfig = arm.getData().getArmConfig();
 	            currentTarget = arm.getData().getTarget();
-	            currentOrigin = links.getFirst().getOrigin();
-	            if (currentArmConfig == ArmConfig.REVERSE){
-	            	currentOrigin = links.getFirst().getEnd();
-	            }
 	            GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, links.size(), 12, geneticRecombinationRate, geneticMutationRate);
 	            Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the
 	            Iterator<IMPart> it = links.iterator();
 	            int i = 0;
+                Point p1 = getPosition(links, currentOrigin);
 	            while (it.hasNext()){
 	            	IMPart part = it.next();
 	                if (bestFit.getDecodedGenome().get(i) != null) {
-	                  DHLink link = links.get(i).getDHLink(arm.getData().getArmConfig());
+	                  DHLink link = links.get(i).getDHLink();
 	                  double degrees = link.getPositionValueDeg();
 	                  double deltaDegree = java.lang.Math.abs(degrees - (double) bestFit.getDecodedGenome().get(i));
 	                  if (degrees > ((double) bestFit.getDecodedGenome().get(i))) {
@@ -219,7 +227,8 @@ public class IMBuild extends Thread implements Genetic {
 	                  } else if (degrees < ((double) bestFit.getDecodedGenome().get(i))) {
 	                    degrees += deltaDegree;
 	                  }
-	                  part.addPositionToLink(currentArmConfig, degrees);
+	                  //part.addPositionToLink(degrees);
+	                  part.addPositionToLink((double)bestFit.getDecodedGenome().get(i));
 	                  part.setState(ServoStatus.SERVO_POSITION_UPDATE);
 	                }
 	                if (part.getName().equals(arm.getData().getLastPartToUse())){
@@ -227,9 +236,13 @@ public class IMBuild extends Thread implements Genetic {
 	                }
                     i++;
 	            }
+                Point p = getPosition(links, currentOrigin);
+                ArrayList<Chromosome> ch = new ArrayList<Chromosome>();
+                ch.add(bestFit);
+                calcFitness(ch);
 	            return true;
 	    	}
-	    	Point currentPos = getPosition(links, arm.getData().getArmConfig());
+	    	Point currentPos = getPosition(links, currentOrigin);
 	        // vector to destination
 	    	Point deltaPoint = arm.getData().getTarget().subtract(currentPos);
 	        Matrix dP = new Matrix(3, 1);
@@ -248,18 +261,18 @@ public class IMBuild extends Thread implements Genetic {
 	            }
 	        }
 	        for (int i = 0; i < dTheta.getNumRows(); i++) {
-	            DHLink link = links.get(i).getDHLink(arm.getData().getArmConfig());
-	            ArmConfig armConfig = arm.getData().getArmConfig();
-	            if (links.get(i).getControl(armConfig) != null) {
-	            	if (controls.get(links.get(i).getControl(armConfig)).getState() == ServoStatus.SERVO_STOPPED){
+	            DHLink link = links.get(i).getDHLink();
+	            if (links.get(i).getControl() != null) {
+	            	if (controls.get(links.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
 	            		// update joint positions! move towards the goal!
 	            		double d = dTheta.elements[i][0];
 	            		// incr rotate needs to be min/max aware here!
-	            		link.incrRotate(d);
+	            		links.get(i).incrRotate(d);
+	            		//link.incrRotate(d);
 	            		links.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
 	            	}
 	            	else {
-	            		link.addPositionValue(controls.get(links.get(i).getControl(armConfig)).getTargetPos());
+	            		link.addPositionValue(controls.get(links.get(i).getControl()).getTargetPos());
 	            		links.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
 	            	}
 	            }
@@ -305,17 +318,17 @@ public class IMBuild extends Thread implements Genetic {
 	    int j = 0;
 	    while (it.hasNext()){
 	    	IMPart part = it.next();
-	    	if (part.getControl(arm.getData().getArmConfig()) == null){
+	    	if (part.getControl() == null){
 	    		//that link is not moving
 	    		j++;
 	    		continue;
 	    	}
-	    	DHLink link = part.getDHLink(arm.getData().getArmConfig());
+	    	DHLink link = part.getDHLink();
 	    	//TODO: fix link != part.getlink
-	    	link.incrRotate(delta);
-	    	Point curPos = getPosition(links, arm.getData().getArmConfig());//arm.getData().getPosition(arm.getData().getLastPartToUse());
+	    	part.incrRotate(delta);
+	    	Point curPos = getPosition(links, currentOrigin);//arm.getData().getPosition(arm.getData().getLastPartToUse());
 	    	Point deltaPoint = curPos.subtract(basePosition);
-	    	link.incrRotate(-delta);
+	    	part.incrRotate(-delta);
 	        // delta position / base position gives us the slope / rate of
 	        // change
 	        // this is an approx of the gradient of P
@@ -337,14 +350,13 @@ public class IMBuild extends Thread implements Genetic {
 	      return jInverse;
 	}
 
-	private Point getPosition(LinkedList<IMPart> parts, ArmConfig armConfig) {
+	private Point getPosition(LinkedList<IMPart> parts, Matrix inputMatrix) {
 		// TODO Auto-generated method stub
-		Matrix m = parts.getFirst().getOrigin();
-		if (armConfig == ArmConfig.REVERSE) m = parts.getFirst().getEnd();
+		Matrix m=inputMatrix;
 		Iterator<IMPart> it = parts.iterator();
 		while (it.hasNext()){
 			IMPart part = it.next();
-			DHLink link = part.getDHLink(armConfig);
+			DHLink link = part.getDHLink();
 			m = m.multiply(link.resolveMatrix());
 		}
 		return IMUtil.matrixToPoint(m);
@@ -356,13 +368,21 @@ public class IMBuild extends Thread implements Genetic {
 				getParts(arm.getParent(), links);
 			}
 			else return;
-			links.addAll(arm.getData().getParts());
+			Iterator<IMPart> it = arm.getData().getParts().iterator();
+			while (it.hasNext()){
+				IMPart part = it.next();
+				part.setCurrentArmConfig(arm.getData().getArmConfig());
+				links.add(part);
+			}
+			//links.addAll(arm.getData().getParts());
 			return;
 		}
 		if (arm.getParent() != null){
 			Iterator<IMPart> it = arm.getData().getParts().descendingIterator();
 			while (it.hasNext()){
-				links.add(it.next());
+				IMPart part = it.next();
+				part.setCurrentArmConfig(arm.getData().getArmConfig());
+				links.add(part);
 			}
 			getParts(arm.getParent(), links);
 		}
@@ -433,7 +453,12 @@ public class IMBuild extends Thread implements Genetic {
 	private void updatePartsPosition(Node<IMArm> armNode){
 		Matrix m = armNode.getData().updatePosition(service.getData().getControls());
 		for (Node<IMArm> arm : armNode.getChildren()){
-			arm.getData().setInputMatrix(m);
+			if (armNode.getData().getArmConfig() == ArmConfig.REVERSE){
+				arm.getData().setInputMatrix(armNode.getData().getInputMatrix());
+			}
+			else{
+				arm.getData().setInputMatrix(m);
+			}
 			updatePartsPosition(arm);
 		}
 	}
@@ -481,10 +506,16 @@ public class IMBuild extends Thread implements Genetic {
 	        Matrix tm = currentOrigin;
 	        while (it.hasNext()){
 	        	IMPart part = it.next();
-	        	DHLink link = new DHLink(part.getDHLink(currentArmConfig));
+	        	DHLink link = new DHLink(part.getDHLink());
 	        	if (chromosome.getDecodedGenome().get(i) != null){
-	        		double theta = part.addPositionToLink(currentArmConfig, (double)chromosome.getDecodedGenome().get(i));
-	        		link.setTheta(theta);
+	        		//double theta = part.addPositionToLink((double)chromosome.getDecodedGenome().get(i));
+	        		if (part.isReversedControled()){
+	        			link.addPositionValue(-(double)chromosome.getDecodedGenome().get(i));
+	        		}
+	        		else {
+	        			link.addPositionValue((double)chromosome.getDecodedGenome().get(i));
+	        		}
+	        		//link.setTheta(theta);
 	        		//link.addPositionValue((double)chromosome.getDecodedGenome().get(i));
 	        	}
 	        	newLinks.add(link);
@@ -515,15 +546,15 @@ public class IMBuild extends Thread implements Genetic {
 			Iterator<IMPart> it = links.iterator();
 			while (it.hasNext()){
 				IMPart part = it.next();
-				if (part.getControl(currentArmConfig) == null){
+				if (part.getControl() == null){
 					decodedGenome.add(null);
 					continue;
 				}
-				if (controls.get(part.getControl(currentArmConfig)).getState() != ServoStatus.SERVO_STOPPED){
-					decodedGenome.add(controls.get(part.getControl(currentArmConfig)).getTargetPos());
+				if (controls.get(part.getControl()).getState() != ServoStatus.SERVO_STOPPED){
+					decodedGenome.add(controls.get(part.getControl()).getTargetPos());
 					continue;
 				}
-				DHLink link = part.getDHLink(currentArmConfig);
+				DHLink link = part.getDHLink();
 				if (link.getMin() == link.getMax()){
 					decodedGenome.add(link.getMin());
 					continue;
@@ -539,6 +570,7 @@ public class IMBuild extends Thread implements Genetic {
 		        if (value.isNaN()) {
 		          value = link.getPositionValueDeg();
 		        }
+		        //if (part.getCurrentArmConfig()==ArmConfig.REVERSE) value = -value;
 		        decodedGenome.add(value);
 			}
 			chromosome.setDecodedGenome(decodedGenome);

@@ -39,6 +39,7 @@ public class IMPart {
 	private HashSet<String> reverseControl = new HashSet<String>();
 	private ServoStatus state = ServoStatus.SERVO_STOPPED;
 	private double targetPos = 0;
+	private ArmConfig currentArmConfig = ArmConfig.DEFAULT;
 
 	public IMPart(String partName){
 		name = partName;
@@ -267,9 +268,9 @@ public class IMPart {
 
 
 
-	public double addPositionToLink(ArmConfig armConfig, double d) {
-		DHLink link = DHLinks.get(armConfig);
-		if (reverseControl.contains(getControl(armConfig))) d = -d;
+	public double addPositionToLink(double d) {
+		DHLink link = DHLinks.get(currentArmConfig);
+		if (reverseControl.contains(getControl())) d = -d;
 		link.addPositionValue(d);
 		return link.getTheta();
 	}
@@ -302,5 +303,51 @@ public class IMPart {
 	 */
 	public void setTargetPos(double targetPos) {
 		this.targetPos = targetPos;
+	}
+
+
+
+	public void incrRotate(double d) {
+		DHLink link = DHLinks.get(currentArmConfig);
+		if (currentArmConfig == ArmConfig.REVERSE) d = -d;
+		if (!reverseControl.contains(getControl(currentArmConfig))) d = -d;
+		link.incrRotate(d);
+	}
+
+
+
+	/**
+	 * @return the currentArmConfig
+	 */
+	public ArmConfig getCurrentArmConfig() {
+		return currentArmConfig;
+	}
+
+
+
+	/**
+	 * @param currentArmConfig the currentArmConfig to set
+	 */
+	public void setCurrentArmConfig(ArmConfig currentArmConfig) {
+		this.currentArmConfig = currentArmConfig;
+	}
+
+
+
+	public DHLink getDHLink() {
+		return DHLinks.get(currentArmConfig);
+	}
+
+
+
+	public String getControl() {
+		return controls.get(currentArmConfig);
+	}
+
+
+
+	public boolean isReversedControled() {
+		if (reverseControl.contains(getControl())) return true;
+		return false;
 	}
 }
