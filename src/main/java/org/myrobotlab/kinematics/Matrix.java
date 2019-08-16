@@ -143,7 +143,7 @@ public class Matrix implements Serializable {
   /**
    * Copy constructor
    */
-  Matrix(Matrix m) {
+  public Matrix(Matrix m) {
     numRows = m.numRows;
     numCols = m.numCols;
     elements = new double[numRows][numCols];

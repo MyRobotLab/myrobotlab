@@ -334,6 +334,7 @@ public class IntegratedMovement extends Service
 		rightAnkleP.moveTo(0.0);
 		rightAnkleR.moveTo(0.0);
 
+		sleep(100);
 		/*
 		 * defining each part of the robot TODO saved those setting to file
 		 */
@@ -488,39 +489,39 @@ public class IntegratedMovement extends Service
 
 		IMPart partHarlHipRightAttach = ik.createPart("harlHipRightAttach", 0.01); //o = x(0): right z(-.1345): up y(0): front
 		partHarlHipRightAttach.setDHParameters(ArmConfig.DEFAULT, 0, 0, .127, 180); // x(.127): right, z(-.1345): down, y(0): back
-		partHarlHipRightAttach.setDHParameters(ArmConfig.REVERSE, 0.0415, 0, -0.127, 0);
+		partHarlHipRightAttach.setDHParameters(ArmConfig.REVERSE, 0.0415, 180, -0.127, 0); //x(0)right, z(-.1345: up, y(0): front//something wrong from here
 		partHarlHipRightAttach.setControl(ArmConfig.REVERSE, "rightHipY");
 		ik.attach(partHarlHipRightAttach);
 		
 		IMPart partHarlRightHipY = ik.createPart("harlRightHipY", 0.01);
 		partHarlRightHipY.setDHParameters(ArmConfig.DEFAULT, 0.0415, 0, 0, -90); // x(.127): right, z(-.176): back, y(0): up
-		partHarlRightHipY.setDHParameters(ArmConfig.REVERSE, 0, 0, 0., 90); //x(.127)left, z(-.176)up, y(0)front
+		partHarlRightHipY.setDHParameters(ArmConfig.REVERSE, 0, 0, 0., 90); //x(.127)left, z(-.176)up, y(0)back
 		partHarlRightHipY.setControl(ArmConfig.DEFAULT, "rightHipY");
-		partHarlRightHipY.setControl(ArmConfig.REVERSE, "rightHipR");
 		partHarlRightHipY.set3DModel("Models/harlRHipY.j3o", scale, new Point(0,0,0,0,0,0));
 		ik.attach(partHarlRightHipY);
 		
 		IMPart partHarlRightHipRAttach = ik.createPart("harlRightHipRAttach", 0.01);
 		partHarlRightHipRAttach.setDHParameters(ArmConfig.DEFAULT, 0.01, -90, 0, 0); // x(.127):DOWN  , Z(-.176):back  y(-.01):right
-		partHarlRightHipRAttach.setDHParameters(ArmConfig.REVERSE, 0.01, 90, 0, 0);  //x(.127)left, z(-.176)front, y(0)down
+		partHarlRightHipRAttach.setDHParameters(ArmConfig.REVERSE, 0.01, -90, 0, 180);  //x(.127)left, z(-.176)back, y(0)down
+		partHarlRightHipRAttach.setControl(ArmConfig.REVERSE, "rightHipR");
 		ik.attach(partHarlRightHipRAttach);
 		
 		IMPart partHarlRightHipR = ik.createPart("harlRightHipR", 0.01);
 		partHarlRightHipR.setDHParameters(ArmConfig.DEFAULT, 0., 0, 0.0629, 90); //x(.127):down z(-.2389):left, y(-0.1):back
-		partHarlRightHipR.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.0629, -90); //x(.127)up, z(-.176)front, y(-.1)left 
+		partHarlRightHipR.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.0629, 90); //x(.127)up, z(-.176)front, y(-.1)right 
 		partHarlRightHipR.setControl(ArmConfig.DEFAULT, "rightHipR");
 		partHarlRightHipR.set3DModel("Models/harlRHipR.j3o", scale, new Point(0.001,-0.011,0,90,-90,180));
 		ik.attach(partHarlRightHipR);
 		
 		IMPart partHarlRightHipPAttach = ik.createPart("harlRightHipPAttach", 0.01);
 		partHarlRightHipPAttach.setDHParameters(ArmConfig.DEFAULT, -0.006, 0, 0, 180); //x(.133):down , z(-.2389):right , y(-.1):front
-		partHarlRightHipPAttach.setDHParameters(ArmConfig.REVERSE, -0.006, 0, 0.0, 180); //(x.127):up, z(-.2389):left, y(-.1)back
-		partHarlRightHipR.setControl(ArmConfig.REVERSE, "rightHipP");
+		partHarlRightHipPAttach.setDHParameters(ArmConfig.REVERSE, 0.006, 0, 0.0, 180); //(x.127):up, z(-.2389):right, y(-.1)back   
+		partHarlRightHipPAttach.setControl(ArmConfig.REVERSE, "rightHipP");
 		ik.attach(partHarlRightHipPAttach);
 		
 		IMPart partHarlRightHipP = ik.createPart("harlRightHipP", 0.01);
 		partHarlRightHipP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.3630, 180); //x(.133):down , z(-.6009):left , y(-.1):back
-		partHarlRightHipP.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.3630, 180); //x(.133):up, z(-.2389):right , y(-.1):front
+		partHarlRightHipP.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.3630, 180); //x(.133):up, z(-.2389):left , y(-.1):front
 		partHarlRightHipP.setControl(ArmConfig.DEFAULT, "rightHipP");
 		partHarlRightHipP.setControl(ArmConfig.REVERSE, "rightKnee");
 		partHarlRightHipP.set3DModel("Models/harlRHip.j3o", scale, new Point(0,0,0,-90,0,0));
@@ -528,24 +529,24 @@ public class IntegratedMovement extends Service
 		
 		IMPart partHarlRightKnee = ik.createPart("harlRightKnee", 0.01);
 		partHarlRightKnee.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.3668, 180); //x(.133):down z(-.9677):right , y(-.1):front
-		partHarlRightKnee.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.3668, 180); //x(.133):up, z(-.6009):left , y(-.1)::back 
+		partHarlRightKnee.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.3668, 180); //x(.133):up, z(-.6009):right , y(-.1)::back 
 		partHarlRightKnee.setControl(ArmConfig.DEFAULT, "rightKnee");
 		partHarlRightKnee.setControl(ArmConfig.REVERSE, "rightAnkleP");
 		partHarlRightKnee.set3DModel("Models/harlRKnee.j3o", scale, new Point(0.,0.003,0,-90,180,0));
 		ik.attach(partHarlRightKnee);
 		
 		IMPart partHarlRAnkleP = ik.createPart("harlRAnkleP", 0.01);
-		partHarlRAnkleP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 90); //x(.133): down, z(-1.0077): back, y(-.1):left
-		partHarlRAnkleP.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.04, 90); //x(.133):up, z(-.9677) right, y(-.1)front 
+		partHarlRAnkleP.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 90); //x(.133): down, z(-1.0077): back, y(-.1):right
+		partHarlRAnkleP.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.04, 90); //x(.133):up, z(-.9677) left, y(-.1)front 
 		partHarlRAnkleP.setControl(ArmConfig.DEFAULT, "rightAnkleP");
 		partHarlRAnkleP.setControl(ArmConfig.REVERSE, "rightAnkleR");
 		partHarlRAnkleP.set3DModel("Models/harlRankleP.j3o", scale, new Point(0,0.003,0,-90,0,0));
 		ik.attach(partHarlRAnkleP);
 		
 		IMPart partHarlRAnkleR = ik.createPart("harlRAnkleR", 0.01);
-		partHarlRAnkleR.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 0); //x(.133): down, z(-1.0477):back, y(-.1):left 
-		partHarlRAnkleR.setDHParameters(ArmConfig.REVERSE, 0, 180, 0.04, 0); //x(.133)up, z(-1.0077)back, y(-0.1)right
-		partHarlRAnkleR.setControl(ArmConfig.DEFAULT, "rightAnkleR");//o= x(.133): down, z(-1.0479) back, y(-.1):left
+		partHarlRAnkleR.setDHParameters(ArmConfig.DEFAULT, 0, 0, 0.04, 0); //x(.133): down, z(-1.0477):back, y(-.1):righy 
+		partHarlRAnkleR.setDHParameters(ArmConfig.REVERSE, 0, 180, 0.04, 180); //x(.133)up, z(-1.0077)front, y(-0.1)right
+		partHarlRAnkleR.setControl(ArmConfig.DEFAULT, "rightAnkleR");//o= x(.133): down, z(-1.0479) back, y(-.1):right
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
 		ik.attach(partHarlRAnkleR);
 		

@@ -20,11 +20,11 @@ public class IMArm {
 	String name;
 	public transient LinkedList<IMPart> parts = new LinkedList<IMPart>();
 	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
-	private ArmConfig armConfig = ArmConfig.DEFAULT;
-	private Point target = null;
-	private String lastPartToUse;
-	private Point previousTarget;
-	private int tryCount;
+	transient private ArmConfig armConfig = ArmConfig.DEFAULT;
+	transient private Point target = null;
+	private String lastPartToUse = null;
+	transient private Point previousTarget = null;
+	private int tryCount = 0;
 	
 	public IMArm(String name){
 		this.name = name;
@@ -80,18 +80,22 @@ public class IMArm {
 			part.setR(link.getA());
 			m = m.multiply(s);
 			part.setEnd(m);
-			
-		}
-		it = parts.descendingIterator();
-		while (it.hasNext()){
-			IMPart part = it.next();
-			DHLink link = part.getDHLink(ArmConfig.REVERSE);
-			if (link == null) continue;
+			link = part.getDHLink(ArmConfig.REVERSE);
 			if (controls.containsKey(part.getControl(ArmConfig.REVERSE))){
-				part.addPositionToLink(controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
-				//link.addPositionValue(-controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
+				link.addPositionValue(controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
 			}
+			//s = link.resolveMatrix();
 		}
+//		it = parts.descendingIterator();
+//		while (it.hasNext()){
+//			IMPart part = it.next();
+//			DHLink link = part.getDHLink(ArmConfig.REVERSE);
+//			if (link == null) continue;
+//			if (controls.containsKey(part.getControl(ArmConfig.REVERSE))){
+//				part.addPositionToLink(controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
+//				//link.addPositionValue(-controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
+//			}
+//		}
 		if (getArmConfig() == ArmConfig.REVERSE) return parts.getLast().getEnd();
 		return m;
 	}

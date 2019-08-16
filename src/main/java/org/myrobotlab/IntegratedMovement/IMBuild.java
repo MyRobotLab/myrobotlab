@@ -26,17 +26,17 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
  */
 public class IMBuild extends Thread implements Genetic {
 	
-	transient private IntegratedMovement service;
+	transient private IntegratedMovement service = null;
 	transient Node<IMArm> arms = new Node<IMArm>(new IMArm("root"));
-	protected Queue<IMMsg> msgQueue = new ConcurrentLinkedQueue<IMMsg>();
-	private IMArm reversedArm = null;
-	private HashMap<String, IMControl> controls;
+	transient protected Queue<IMMsg> msgQueue = new ConcurrentLinkedQueue<IMMsg>();
+	transient private IMArm reversedArm = null;
+	transient private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
 	private double maxDistance = 0.001;
-	private CalcFitnessType calcFitnessType = CalcFitnessType.POSITION;
-	private LinkedList<IMPart> links;
-	private ArmConfig currentArmConfig;
-	private Point currentTarget;
-	private Matrix currentOrigin;
+	transient private CalcFitnessType calcFitnessType = CalcFitnessType.POSITION;
+	transient private LinkedList<IMPart> links;
+	transient private ArmConfig currentArmConfig = ArmConfig.DEFAULT;
+	transient private Point currentTarget = new Point(0,0,0,0,0,0);
+	transient private Matrix currentOrigin = new Matrix(4,4).loadIdentity();
 	private long startUpdateTs;
 	private int maxTryCount = 1;
 	
@@ -442,8 +442,8 @@ public class IMBuild extends Thread implements Genetic {
 		if (reversedArm != null){
 			Node<IMArm> arm = arms.find(reversedArm);
 			while (arm.getParent() != null) {
-				Matrix im = arm.getData().getLastPart().getEnd();
-				arm.getData().updatePosition(service.getData().getControls());
+				Matrix im = new Matrix(arm.getData().getLastPart().getEnd());
+ 				arm.getData().updatePosition(service.getData().getControls());
 				((IMArm)(arm.getParent().getData())).setInputMatrix(arm.getData().getTransformMatrix(ArmConfig.REVERSE, im));
 				arm = arm.getParent();
 			}
