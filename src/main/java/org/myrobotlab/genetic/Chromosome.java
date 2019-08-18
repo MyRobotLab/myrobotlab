@@ -19,7 +19,6 @@ public class Chromosome {
   }
 
   public Chromosome(Chromosome chromosome) {
-    // TODO Auto-generated constructor stub
     this.decodedGenome = new ArrayList<Object>(chromosome.decodedGenome);
     this.genome = new String(chromosome.genome);
   }

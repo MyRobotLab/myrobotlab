@@ -733,7 +733,10 @@ public class IntegratedMovement extends Service
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
 		//ik.moveTo("inMoov", "rightLeg", -0, -0.0, -.144);
-		//ik.moveTo("inMoov", "leftArm", -0.3,.4,0.3);
+		//ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
+		ik.moveTo("inMoov", "leftLeg", -.133, .5, -.91);
+		sleep(5000);
+		ik.moveTo("inMoov", "leftLeg", -.133, 0, -.91);
 	}
 
 

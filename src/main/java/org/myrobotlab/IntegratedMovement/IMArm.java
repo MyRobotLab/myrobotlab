@@ -25,6 +25,7 @@ public class IMArm {
 	private String lastPartToUse = null;
 	transient private Point previousTarget = null;
 	private int tryCount = 0;
+	private long waitTime;
 	
 	public IMArm(String name){
 		this.name = name;
@@ -190,5 +191,24 @@ public class IMArm {
 	public LinkedList<IMPart> getParts() {
 		return parts;
 	}
+
+	public void waitTime(long d) {
+		if (d > waitTime){
+			waitTime = d;
+		}
+	}
+
+	public void resetWaitTime() {
+		waitTime = 0;
+	}
+
+	public boolean armReady() {
+		if (System.currentTimeMillis() > waitTime){
+			waitTime = 0;
+			return true;
+		}
+		return false;
+	}
+
 
 }
