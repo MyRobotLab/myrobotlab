@@ -37,7 +37,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * data class to hold method description
+ * This is a data class to hold method description. Its constructed from java.reflect.Method and quickly
+ * moves the relevant data to serializable types on construction.
  * 
  * @author GroG
  *
@@ -48,19 +49,19 @@ public class MethodEntry implements Serializable {
   public final static Logger log = LoggerFactory.getLogger(MethodEntry.class);
 
   /**
-   * reflected info if available
+   * the reflect method
    */
-  transient public Class<?> returnType;
-  transient public Class<?>[] parameterTypes;
-
   transient Method method;
 
   /**
    * string information for serialization
    */
-  String[] parameterTypeNames;
+  String objectName;
   String name;
+  String[] parameterNames;
+  String[] parameterTypeNames;
   String returnTypeName;
+  String simpleReturnTypeName;
 
   /**
    * from doclet
@@ -80,34 +81,48 @@ public class MethodEntry implements Serializable {
   public MethodEntry(Method m) {
     this.method = m;
     this.name = m.getName();
+    
     Class<?>[] paramTypes = m.getParameterTypes();
+    Parameter[] parameters = method.getParameters();
+    
+    objectName = m.getDeclaringClass().getCanonicalName();
+    
+    parameterNames = new String[paramTypes.length];
+
+    for (int i = 0; i < paramTypes.length; ++i) {
+      Parameter parameter = parameters[i];
+      if (!parameter.isNamePresent()) {
+        // log.warn("{}.{} parameter names are not present!", m.getDeclaringClass().getSimpleName(), m.getName());
+        continue;
+      }
+
+      String parameterName = parameter.getName();
+      parameterNames[i] = parameterName;
+    }
+        
     this.parameterTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
       parameterTypeNames[i] = paramTypes[i].getCanonicalName();
     }
 
-    this.parameterTypes = m.getParameterTypes();
-    this.returnType = m.getReturnType();
-    this.returnTypeName = returnType.getCanonicalName();
-
+    this.returnTypeName = method.getReturnType().getCanonicalName();
+    this.simpleReturnTypeName = method.getReturnType().getSimpleName();
+  }
+  
+  public String [] getSimpleParameterNames() {
+    String[] ret = new String[parameterTypeNames.length];
+    for (int i = 0; i < parameterTypeNames.length; ++i) {
+      String s = parameterTypeNames[i].substring(parameterTypeNames[i].lastIndexOf(".")+1);      
+      ret[i] = s;
+    }  
+    return ret;
   }
 
-  public List<String> getParameterNames() {
-    Parameter[] parameters = method.getParameters();
-    List<String> parameterNames = new ArrayList<>();
-
-    for (Parameter parameter : parameters) {
-      if (!parameter.isNamePresent()) {
-        throw new IllegalArgumentException("Parameter names are not present!");
-      }
-
-      String parameterName = parameter.getName();
-      parameterNames.add(parameterName);
-    }
-
+  public String[] getParameterNames() {
     return parameterNames;
   }
 
+  // FIXME - rename getSignature(boolean simple) - with getSignature(true) default - don't make static
   final static public String getPrettySignature(String methodName, Class<?>[] parameterTypes, Class<?> returnType) {
 
     StringBuffer sb = new StringBuffer();
@@ -143,6 +158,7 @@ public class MethodEntry implements Serializable {
    */
   final public String getSignature() {
 
+    Class<?>[] parameterTypes = method.getParameterTypes();
     StringBuffer sb = new StringBuffer();
     sb.append(name);
     sb.append("(");
@@ -155,28 +171,37 @@ public class MethodEntry implements Serializable {
       }
     }
     sb.append(") ");
-    sb.append(returnType.getName());
+    sb.append(method.getReturnType().getCanonicalName());
 
     return sb.toString();
   }
 
-  public String getReturnType() {
+  public Class<?> getReturnType() {
+    return method.getReturnType();
+  }
+  
+  public String getReturnTypeName() {
     return returnTypeName;
   }
 
   public String getSimpleReturnTypeName() {
-    return returnType.getSimpleName();
+    return simpleReturnTypeName;
   }
-
-  /*
-   * public String getSimpleParameterNames(){ StringBuilder sb = new
-   * StringBuilder(); for (Class<?> param: parameterTypes){ param.get
-   * sb.append(param.getSimpleName()); } return sb.toString(); }
-   */
 
   @Override
   public String toString() {
-    return getSignature();
+    // recently changed 2019.08.17 GroG
+    // return getSignature();
+    
+    StringBuilder sb = new StringBuilder();
+    String[] p = getSimpleParameterNames();
+    for (int i = 0; i < p.length; ++i) {
+      sb.append(p[i]);
+      if (i < p.length - 1) {
+        sb.append(",");
+      }
+    }
+    return String.format("%s.%s(%s)", objectName, name, sb.toString());
   }
 
   public List<Map<String, Object>> getParameters() {
@@ -198,26 +223,8 @@ public class MethodEntry implements Serializable {
     return params;
   }
 
-  public String getSimpleParameterTypesAndNames() {
-    if (method.getName().equals("map")) {
-      log.info("here");
-    }
-    List<Map<String, Object>> params = getParameters();
-    StringBuilder sb = new StringBuilder();
-    sb.append("(");
-    for (int i = 0; i < params.size(); ++i) {
-
-      if (i != 0) {
-        sb.append(" ");
-      }
-      Map<String, Object> parm = params.get(i);
-      sb.append(String.format("%s %s", parm.get("simpleName"), parm.get("name")));
-      if (i != params.size() - 1) {
-        sb.append(",");
-      }
-    }
-    sb.append(")");
-    return sb.toString();
+  public Class<?>[] getParameterTypes() {
+    return method.getParameterTypes();
   }
 
 }

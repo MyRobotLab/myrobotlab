@@ -56,7 +56,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   transient Keyboard keyboard;
   transient WebGui webgui;
   transient Joystick joystick;
-  transient RemoteAdapter remote;
+  // transient RemoteAdapter remote;
 
   transient Python python;
   transient SpeechSynthesis mouth;
@@ -386,11 +386,6 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
      * joystick.addAxisListener(getName(), "onY");
      * joystick.addAxisListener(getName(), "onRY");
      */
-  }
-
-  public void startRemoteAdapter() throws Exception {
-    remote = (RemoteAdapter) startPeer("remote");
-    remote.startListening();
   }
 
   public boolean startSensors() {
