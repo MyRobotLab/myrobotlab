@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.myrobotlab.codec.ApiCli;
 import org.myrobotlab.service.Runtime;
@@ -35,7 +36,9 @@ public class InProcessCli implements Runnable {
 
     try {
       running = true;
-      String uuid = "STDIN-5678-91011-121314";
+      Random random = new Random();
+      
+      String uuid = String.format("stdin-%s-%d", Runtime.getId(), random.nextInt(10000));
       ApiCli cli = new ApiCli();// (ApiCli)ApiFactory.getApiProcessor("cli");
       // cli.addClient(null, "cli", null, uuid);
       Map<String, Object> attributes = new HashMap<>();
@@ -47,10 +50,11 @@ public class InProcessCli implements Runnable {
       attributes.put("uri", "/api/cli");
       attributes.put("user", "root");
       attributes.put("host", "local");
-      Runtime.getInstance().addClient(uuid, attributes);
+      Runtime.getInstance().addConnection(uuid, attributes);
 
       int c = '\n';
       String readLine = "";
+      // FIXME - check .available() every 300ms so we don't block forever !
       while (running && (c = in.read()) != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */) {
 
         // out.write((char) c);

@@ -79,7 +79,7 @@ public class Client {
     public void onResponse(String uuid, String data);
   }
 
-  public class Resource implements Decoder<String, Reader> {
+  public class Endpoint implements Decoder<String, Reader> {
     public String uuid;
     public String uri;
     transient public Socket socket;
@@ -146,23 +146,23 @@ public class Client {
     }
   }
 
-  Map<String, Resource> sockets = new HashMap<>();
+  Map<String, Endpoint> endpoints = new HashMap<>();
 
-  public Socket connect(String url) {
+  public Endpoint connect(String url) {
     return connect(null, url);
   }
 
-  public Socket connect(String uuid, String url) {
+  public Endpoint connect(String uuid, String url) {
     try {
 
-      Resource resource = new Resource();
+      Endpoint endpoint = new Endpoint();
 
       if (uuid == null) {
         UUID u = java.util.UUID.randomUUID();
         uuid = u.toString();
       }
 
-      resource.uuid = uuid;
+      endpoint.uuid = uuid;
 
       org.atmosphere.wasync.Client client = ClientFactory.getDefault().newClient();
       // what benefits are there with the atmosphere client ?
@@ -179,7 +179,7 @@ public class Client {
           // System.out.println("encoding [{}]", s);
           return new StringReader(s);
         }
-      }).decoder(resource
+      }).decoder(endpoint
           
           /*new Decoder<String, Reader>() {
         @Override
@@ -277,11 +277,11 @@ public class Client {
        * 
        * socket.fire("/runtime/getUptime");
        */
-
-      sockets.put(uuid, resource);
+      endpoint.socket = socket;
+      endpoints.put(uuid, endpoint);
       currentUrl = url;
 
-      return socket;
+      return endpoint;
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -313,7 +313,7 @@ public class Client {
           System.out.print((char) c);
           readLine += (char) c;
           if (c == '\n') {
-            Resource resource = sockets.get(currentUrl);
+            Endpoint resource = endpoints.get(currentUrl);
             resource.socket.fire(readLine);
             readLine = "";
           }
@@ -334,7 +334,7 @@ public class Client {
 
   public void send(String uuid, String raw) {
     try {
-      Resource resource = sockets.get(uuid);
+      Endpoint resource = endpoints.get(uuid);
       resource.socket.fire(raw);
     } catch (Exception e) {
       e.printStackTrace();
@@ -352,6 +352,16 @@ public class Client {
 
   public void stopInteractiveMode() {
     worker.stop();
+  }
+  
+  public void broadcast(String raw) {
+    for (Endpoint endpoint : endpoints.values()) {
+      try {
+        endpoint.socket.fire(raw);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
 }

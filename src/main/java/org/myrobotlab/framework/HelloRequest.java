@@ -10,4 +10,8 @@ public class HelloRequest {
     this.uuid = uuid;
     this.platform = Platform.getLocalInstance();
   }
+  
+  public String toString() {
+    return String.format("%s - %s - %s", uuid, id, platform);
+  }
 }

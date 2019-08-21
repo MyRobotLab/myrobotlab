@@ -63,9 +63,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * data to hold the incoming messages
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
-  
-  // List<Message> msgs = new ArrayList<>();
 
+  // List<Message> msgs = new ArrayList<>();
 
   boolean isLocal = true;
 
@@ -87,7 +86,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * is one of those methods
    */
   @Override
-  public Integer onByte(Integer b) {    
+  public Integer onByte(Integer b) {
     return b;
   }
 
@@ -102,7 +101,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   @Override
   public boolean preProcessHook(Message msg) {
     log.info("msg - {}.{}", msg.name, msg.method);
-    put(msg); 
+    put(msg);
     // TODO - determine if the callback method exists
     // if not warn return false - if so - return true;
     return true;
@@ -110,12 +109,12 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   private void put(Message msg) {
     try {
-    if (log.isDebugEnabled()) {
-      log.debug("{} msg {}", msgs.size(), msg);
-    }
-    msgs.put(msg);
-    } catch(Exception e) {
-      
+      if (log.isDebugEnabled()) {
+        log.debug("{} msg {}", msgs.size(), msg);
+      }
+      msgs.put(msg);
+    } catch (Exception e) {
+
     }
   }
 
@@ -127,7 +126,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     Message msg = msgs.poll(timeout, TimeUnit.MILLISECONDS);
     return msg;
   }
-
 
   public BlockingQueue<Message> waitForMsgs(int count) throws InterruptedException, IOException {
     return waitForMsgs(count, 1000);
@@ -199,8 +197,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     checkMsg(1000, method, checkParms);
   }
 
-  // FIXME - good idea 
-  public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {   
+  // FIXME - good idea
+  public void checkMsg(long timeout, String method, Object... checkParms) throws InterruptedException, IOException {
     Message msg = getMsg(timeout);
     if (msg == null) {
       log.error("{}", msg);
@@ -254,27 +252,25 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public double[] testDoubleArray(double[] data) {
     return data;
   }
-  
-  
+
   public void onTime(Date d) {
     log.info("onDate {}", d);
   }
-  
+
   public void onInteger(Integer data) {
     log.info("onInteger {}", data);
   }
-  
+
   public void onDouble(Integer data) {
     log.info("onInteger {}", data);
   }
-  
+
   // @Override
   public void onReady(Integer t01, Double t02, Date d) {
     log.info("onReady {} {} {}", t01, t02, d);
   }
-  
 
-  public void waitFor(String ... pubs) {
+  public void waitFor(String... pubs) {
     for (String publish : pubs) {
       String[] pubParts = publish.split("\\.");
       if (pubParts.length != 2) {
@@ -283,48 +279,45 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
       }
       String topicName = pubParts[0];
       String topicMethod = pubParts[1];
-      // subscribe is A SERVICE METHOD - not useful for non-services however other "things" could have attach or addListener
+      // subscribe is A SERVICE METHOD - not useful for non-services however
+      // other "things" could have attach or addListener
       subscribe(topicName, topicMethod);
-    }    
+    }
   }
-
 
   public static void main(String[] args) {
     try {
       LoggingFactory.init(Level.DEBUG);
 
-    
-      TestCatcher catcher01 = (TestCatcher)Runtime.start("catcher01", "TestCatcher");
-      TestThrower thrower01 = (TestThrower)Runtime.start("thrower01", "TestThrower");
-      TestThrower thrower02 = (TestThrower)Runtime.start("thrower02", "TestThrower");
-      Clock clock01 = (Clock)Runtime.start("clock01", "Clock");
+      TestCatcher catcher01 = (TestCatcher) Runtime.start("catcher01", "TestCatcher");
+      TestThrower thrower01 = (TestThrower) Runtime.start("thrower01", "TestThrower");
+      TestThrower thrower02 = (TestThrower) Runtime.start("thrower02", "TestThrower");
+      Clock clock01 = (Clock) Runtime.start("clock01", "Clock");
       Runtime.start("gui", "SwingGui");
-      
-      
-      
-      
-      
-      // core implementation with strings subscriptions - works over remote 
+
+      // core implementation with strings subscriptions - works over remote
       // waitFor(String...subscribers)
-      // if a default publish exists ... 
-//      catcher01.waitForDefaults("thrower01","thrower02");
-      // 
+      // if a default publish exists ...
+      // catcher01.waitForDefaults("thrower01","thrower02");
+      //
       // waitForEach waitforAll waitForAny
-//      catcher01.waitFor("thrower01", "publishInteger", "thrower02", "publishDouble");
+      // catcher01.waitFor("thrower01", "publishInteger", "thrower02",
+      // "publishDouble");
       catcher01.waitFor("thrower01.publishInteger", "thrower02.publishDouble", "clock01.publishTime");
-      // scan for key callbacks (sources & methods) and resolve in framework - to be delivered
-      
+      // scan for key callbacks (sources & methods) and resolve in framework -
+      // to be delivered
+
       clock01.startClock();
       thrower01.invoke("publishInteger", 7);
       thrower02.invoke("publishInteger", 5.0);
-      
-      
-      // optimized implementation with local reference - and possibly direct callbacks (perhaps not)
+
+      // optimized implementation with local reference - and possibly direct
+      // callbacks (perhaps not)
       // waitFor(Subscriber...subscribers)
-//      catcher01.waitFor(thrower01, thrower02);
-      
-//      catcher01.waitForAny(thrower01, thrower02);
-      
+      // catcher01.waitFor(thrower01, thrower02);
+
+      // catcher01.waitForAny(thrower01, thrower02);
+
       /*
        * TestThrower thrower = new TestThrower("thrower");
        * thrower.startService();
@@ -355,6 +348,65 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return meta;
   }
 
+  public String getPin(String label, String label2) {
+    return null;
+  }
+
+  // ordinal collision test
+  public String getPin(String label) {
+    return null;
+  }
+
+  public Integer getPin(Integer address) {
+    return address;
+  }
+
+  public Integer[] getPin(Integer[] address) {
+    return address;
+  }
+
+  public int[] getPin(int[] address) {
+    return address;
+  }
+
+  public int getPin(int address) {
+    return address;
+  }
+
+  public int primitiveOnlyMethod(int x) {
+    return x;
+  }
+
+  public void invokeTest(int p0) {
+    log.info("invokeTest(int)");
+  }
+
+  public String invokeTest(String p0) {
+    log.info("invokeTest(String)");
+    return p0;
+  }
+
+  public void invokeTest(Boolean p0) {
+    log.info("invokeTest(Boolean)");
+  }
+  
+
+  public ServoDataListener invokeTest(ServoDataListener p0) {
+    log.info("invokeTest(ServoDataListener)");
+    return p0;
+  }
+  
+  
+  public SerialDataListener invokeTest(SerialDataListener p0) {
+    log.info("invokeTest(SerialDataListener)");
+    return p0;
+  }
+  
+  public HttpDataListener invokeTest(HttpDataListener p0) {
+    log.info("invokeTest(HttpDataListener)");
+    return p0;
+  }
+
   @Override
   public void onHttpData(HttpData data) {
     // TODO Auto-generated method stub
@@ -365,7 +417,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public void onServoData(ServoData se) {
     log.info("onServoData {}", se);
   }
-  
+
   public void onPitch(Integer i) {
     log.info("onPitch({})", i);
   }

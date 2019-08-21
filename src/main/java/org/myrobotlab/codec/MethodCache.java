@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+@Deprecated /* use new framework MethodCache */
 public class MethodCache {
 
   static final private HashMap<String, Method> cache = new HashMap<String, Method>();

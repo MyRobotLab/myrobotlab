@@ -147,53 +147,39 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // <-- native STILL DOES NOT ENCODE QUOTES :P !
         this.sendRaw(json);
     }
-    ;
+
     this.sendRaw = function(msg) {
         socket.push(msg);
         // console.log('sendRaw: ' + msg);
     }
-    ;
     // since framework does not have a hello() onHello() defined
     // protocol - we are using Runtime.onLocalServices to do
     // initial processing of data after a connect
     this.onLocalServices = function(msg) {
-        console.log('getEnvironments:');
-        // find the gateway we are talking too
-        // TODO make full service?
-        // _self.gateway = msg.sender;
+        console.log('getRegistry:');
         var gatewayName = msg.sender;
         _self.environments = msg.data[0];
-        _self.myEnv = _self.environments["null"];
-        _self.platform = _self.myEnv.platform;
-        // environments update
-        // find the name of the runtime
-        // not sure if this is "right" - but this is how
-        // it is in Java .. the instance map with a null protokey
-        // is the "local" instance - dunno even if javascript supports a null/undefined
-        // object member name :P - perhaps it should be the protokey of the gateway instead
-        // of null
-        var sd = _self.myEnv.serviceDirectory;
-        // registry update
-        for (var uri in _self.environments) {
-            if (_self.environments.hasOwnProperty(uri)) {
-                sd = _self.environments[uri].serviceDirectory;
-                for (var key in sd) {
-                    if (sd.hasOwnProperty(key)) {
-                        var service = sd[key];
-                        //console.log("found " + key + " of type " + service.simpleName);
-                        registry[key] = {};
-                        registry[key] = service;
-                        console.log("registry found", key);
-                        if (service.simpleName == "Runtime" && uri == "null") {
-                            // the one and only local runtime
-                            _self.runtime = service;
-                            _self.subscribeToService(_self.onRuntimeMsg, service.name);
-                        }
-                    }
+        _self.registry = msg.data[0];
+        // _self.myEnv = _self.environments["null"];
+        _self.platform = "FIXME-PLATFORM";
+        // _self.myEnv.platform;
+
+        for (var key in _self.registry) {
+            if (_self.registry.hasOwnProperty(key)) {
+                var service = _self.registry[key];
+                //console.log("found " + key + " of type " + service.simpleName);
+                registry[key] = {};
+                registry[key] = service;
+                console.log("registry found", key);
+                if (service.name == "runtime") {
+                    // the one and only local runtime
+                    _self.runtime = service;
+                    _self.platform = _self.runtime.platform;
+                    _self.subscribeToService(_self.onRuntimeMsg, service.name);
                 }
             }
         }
-        _self.gateway = _self.myEnv.serviceDirectory[gatewayName];
+        _self.gateway = _self.registry[gatewayName];
         // ok now we are connected
         connected = true;
         angular.forEach(connectedCallbacks, function(value, key) {
@@ -429,7 +415,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
     ;
     var getSimpleName = function(fullname) {
-        return ( fullname.substring(fullname.lastIndexOf(".") + 1)) ;
+        return (fullname.substring(fullname.lastIndexOf(".") + 1));
     };
     this.subscribeOnOpen = function(callback) {
         onOpenCallbacks.push(callback);

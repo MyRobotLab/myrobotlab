@@ -9,5 +9,4 @@ public class NameAndType {
     this.name = name;
     this.type = type;
   }
-
 }
