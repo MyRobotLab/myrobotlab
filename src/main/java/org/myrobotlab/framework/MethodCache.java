@@ -324,6 +324,11 @@ public class MethodCache {
       // if this is the case we will look based on methods and ordinals
       String ordinalKey = getMethodOrdinalKey(fullType, methodName, paramTypeNames.length);
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
+      if (possibleMatches == null) {
+        // log.error("there were no possible matches for ordinal key {} - does the method exist?", ordinalKey);
+        // log.error("{}.{}.{}", fullType, methodName, paramTypeNames);
+        return null;
+      }
       if (possibleMatches.size() == 1) {
         // woohoo ! we're done - if there is a single match it makes the choice
         // easy ;)
@@ -591,6 +596,19 @@ public class MethodCache {
     // if successful return new msg
 
     return null;
+  }
+
+  public static String formatParams(Object[] params) {
+    StringBuilder sb = new StringBuilder();
+    if (params != null) {
+      for (int i = 0; i < params.length; ++i) {
+        sb.append(params[i].getClass().getSimpleName());
+        if (i < params.length - 1) {
+          sb.append(", ");
+        }
+      }
+    }
+    return sb.toString();
   }
 
 }
