@@ -1429,20 +1429,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * @param obj
    *          - the object
-   * @param method
+   * @param methodName
    *          - the method to invoke on that object
    * @param params
    *          - the list of args to pass to the method
    * @return return object
    */
   @Override
-  final public Object invokeOn(Object obj, String method, Object... params) {
+  final public Object invokeOn(Object obj, String methodName, Object... params) {
     Object retobj = null;
     try {
       MethodCache cache = MethodCache.getInstance();
-      Method mthd = cache.getMethod(obj.getClass(), method, params);
-      retobj = mthd.invoke(obj, params);
-      out(method, retobj);
+      Method method = cache.getMethod(obj.getClass(), methodName, params);
+      if (method == null) {
+        error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
+        return null; // should this be allowed to throw to a higher level ?
+      }
+      retobj = method.invoke(obj, params);
+      out(methodName, retobj);
     } catch (Exception e) {
       error(e);
     }

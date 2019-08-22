@@ -1,6 +1,8 @@
 package org.myrobotlab.service.abstracts;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
@@ -1019,5 +1021,20 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
     broadcastState();
   }
-
+  
+  public List<String> refreshControllers() {
+    List<String> cs = Runtime.getServiceNamesFromInterface(ServoController.class);
+    controllers = new HashSet<String>();
+    for (String c : cs) {
+      controllers.add(c);
+    }
+    // controllers.addAll(Runtime.getServiceNamesFromInterface(Simulator.class));
+    return cs;
+  }
+  
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    broadcastState();
+  }
+  
 }
