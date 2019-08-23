@@ -207,7 +207,9 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     // ok now we just need to update the image that the current thread is
     // processing (if the current thread is idle i guess?)
     lastImage = image;
-    pending = true;
+    if (enabled) {
+      pending = true;
+    }
     return image;
   }
 
