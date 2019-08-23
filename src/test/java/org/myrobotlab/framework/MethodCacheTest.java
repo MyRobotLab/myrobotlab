@@ -1,6 +1,8 @@
 package org.myrobotlab.framework;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,6 +16,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
+import org.myrobotlab.service.TestCatcher.Ball;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.test.AbstractTest;
 
@@ -161,29 +164,43 @@ public class MethodCacheTest extends AbstractTest {
    * @throws ClassNotFoundException 
    */
   @Test
-  @Ignore
   public void lossyJsonMethodTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException {
 
-    Object ret = null;
-    Method method = null;
+    String[] encodedParams = new String[] {CodecUtils.toJson("blah")};
     
-    // create json lossy encoded parameters
-    String methodName = "invokeTest";
-    Class<?> clazz = TestCatcher.class;
-    
-    Object[] encodedParams = new Object[] {CodecUtils.toJson(5)};
-    
-    /*
-    
-    Object[] params = cache.getDecodedParameters(encodedParams, codec);
-    if (params != null) {
-      
-    }
-    */
-    
+    Object[] params = cache.getDecodedJsonParameters(TestCatcher.class, "invokeTest", encodedParams);
+    Method method = cache.getMethod(TestCatcher.class, "invokeTest", params);
+    Object ret = method.invoke(tester, params);
+    log.info("ret is {}", ret);
+    log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
+    assertNotNull(ret); // arbitrary that i resolves to string
 
-   
+    encodedParams = new String[] {CodecUtils.toJson(5.0)};
+    params = cache.getDecodedJsonParameters(TestCatcher.class, "onDouble", encodedParams);
+    method = cache.getMethod(TestCatcher.class, "onDouble", params);
+    ret = method.invoke(tester, params);
+    log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
+    assertEquals(5.0, ret); // arbitrary float vs int/double
 
+    encodedParams = new String[] {CodecUtils.toJson(5)};
+    params = cache.getDecodedJsonParameters(TestCatcher.class, "onInt", encodedParams);
+    method = cache.getMethod(TestCatcher.class, "onInt", params);
+    ret = method.invoke(tester, params);
+    log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
+    assertEquals(5, ret); // arbitrary float vs int/double
+
+    // complex object throw
+    Ball ball = new Ball();
+    ball.name = "my ball";
+    ball.type = "football";
+    ball.rating = 5;
+    encodedParams = new String[] {CodecUtils.toJson(ball)};
+    params = cache.getDecodedJsonParameters(TestCatcher.class, "catchBall", encodedParams);
+    method = cache.getMethod(TestCatcher.class, "catchBall", params);
+    ret = method.invoke(tester, params);
+    log.info("ret returned {} of type {}", ret, ret.getClass().getSimpleName());
+    assertEquals("my ball", ball.name); 
+    assertTrue(5 == ball.rating); 
   }
 
   public static void main(String[] args) {

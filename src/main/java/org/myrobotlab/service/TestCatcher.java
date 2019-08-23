@@ -37,7 +37,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
@@ -64,7 +63,14 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   transient public BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
-  // List<Message> msgs = new ArrayList<>();
+  public static class Ball {
+    public String name;
+    public String type;
+    public Integer rating;
+    
+    public Ball() {      
+    }
+  }
 
   boolean isLocal = true;
 
@@ -257,12 +263,19 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     log.info("onDate {}", d);
   }
 
-  public void onInteger(Integer data) {
+  public Integer onInteger(Integer data) {
     log.info("onInteger {}", data);
+    return data;
+  }
+  
+  public int onInt(int data) {
+    log.info("onInteger {}", data);
+    return data;
   }
 
-  public void onDouble(Integer data) {
-    log.info("onInteger {}", data);
+  public double onDouble(double data) {
+    log.info("onDouble {}", data);
+    return data;
   }
 
   // @Override
@@ -377,8 +390,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return x;
   }
 
-  public void invokeTest(int p0) {
+  public int invokeTest(int p0) {
     log.info("invokeTest(int)");
+    return p0;
   }
 
   public String invokeTest(String p0) {
@@ -386,8 +400,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return p0;
   }
 
-  public void invokeTest(Boolean p0) {
+  public Boolean invokeTest(Boolean p0) {
     log.info("invokeTest(Boolean)");
+    return p0;
   }
   
 
@@ -406,6 +421,10 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     log.info("invokeTest(HttpDataListener)");
     return p0;
   }
+  
+  public TestCatcher invokeTestCatcher(TestCatcher p0) {
+    return p0;
+  }
 
   @Override
   public void onHttpData(HttpData data) {
@@ -421,5 +440,26 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public void onPitch(Integer i) {
     log.info("onPitch({})", i);
   }
+  
+  public Ball catchBall(Ball ball) {
+    return ball;
+  }
+  
+  public String catchBall(String ball) {
+    return ball;
+  }
+  
+  public int catchBall(int ball) {
+    return ball;
+  }
+  
+  public Integer catchBall(Integer ball) {
+    return ball;
+  }
+  
+  public Double catchBall(Double ball) {
+    return ball;
+  }
+
 
 }
