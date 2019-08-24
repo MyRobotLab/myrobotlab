@@ -51,7 +51,6 @@ import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
@@ -1293,30 +1292,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return lastError != null;
   }
 
-  // TODO Clock example - roles
-  // no - security (internal) Role - default access - ALLOW
-  // WebGui - public - no security header - default access DISALLOW +
-  // exception
-  // WebGui (remote in genera) - user / group ALLOW
-
-  /*
-   * private boolean hasAccess(Message msg) { // turn into single key ??? //
-   * type.name.method
-   * 
-   * // check this type <-- not sure i want to support this
-   * 
-   * // check this name &amp; method // if any access limitations exist which
-   * might be applicable if (accessRules.containsKey(msg.name) ||
-   * accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { //
-   * restricted service - check for authorization // Security service only
-   * provides authorization ? if (security == null) { return false; } else {
-   * return security.isAuthorized(msg); }
-   * 
-   * }
-   * 
-   * // invoke - SecurityException - log error return false; }
-   */
-
   @Override
   public boolean hasPeers() {
     try {
@@ -1364,8 +1339,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     inbox.add(msg);
   }
 
-  // BOXING - BEGIN --------------------------------------
-
   /**
    * This is where all messages are routed to and processed
    */
@@ -1389,28 +1362,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return Runtime.getService(msg.name).invoke(msg);
     }
 
-    // SECURITY -
-    // 0. allowing export - whether or not we'll allow services to be
-    // exported - based on Type or Name
-    // 1. we have firewall like rules where we can add inclusion and
-    // exclusion rules - based on Type or Name - Service Level - Method
-    // Level
-    // 2. authentication & authorization
-    // 3. transport mechanism (needs implementation on each type of remote
-    // Communicator e.g. Xmpp RemoteAdapter WebGui etc...)
-
-    // check for access
-    // if access FAILS ! - check for authenticated access
-    // not needed "centrally" - instead will impement in Communicators
-    // which hand foriegn connections
-    // if (security == null || security.isAuthorized(msg)) {
-
-    // "local" invoke - you have a "real" reference
     retobj = invokeOn(this, msg.method, msg.data);
-    // }
-
-    // retobject will be returned as another
-    // message
+ 
     return retobj;
   }
 

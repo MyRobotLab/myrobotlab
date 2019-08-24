@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
@@ -147,10 +146,6 @@ public class MethodCacheTest extends AbstractTest {
 
   }
 
-  @Test
-  public void keyTest() {
-
-  }
 
   /**
    * Testing json
