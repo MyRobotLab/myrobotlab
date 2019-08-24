@@ -62,6 +62,7 @@ import javax.swing.event.DocumentListener;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -252,8 +253,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     // intercept and mask them
     // new service --go--> addTab
     // remove service --go--> removeTab
-    subscribe(Runtime.getRuntimeName(), "released", getName(), "removeTab");
-    subscribe(Runtime.getRuntimeName(), "registered", getName(), "addTab");
+    subscribe("runtime", "released", getName(), "removeTab");
+    subscribe("runtime", "registered", getName(), "addTab");
   }
 
   public void about() {
@@ -404,14 +405,6 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
           newGui = (ServiceGui) Instantiator.getNewInstance("org.myrobotlab.swing.NoGui", name, self);
         }
 
-        // serviceGuiMap.put(name, newGui);
-        // subscribeToServiceMethod(name, newGui); - not needed as the key
-        // is "more" unique and called each time a subscribe
-        // is used by a ServiceGui
-        if (newGui == null) {
-          log.error("newGui is null");
-          return;
-        }
         newGui.subscribeGui();
 
         // state and status are both subscribed for the service here

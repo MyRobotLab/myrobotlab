@@ -430,7 +430,7 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   @Override
-  public boolean isAuthorized(Map<String, Object> security, String serviceName, String method) {
+  public boolean isAuthorized(Map<String, Object> annotation, String serviceName, String method) {
 
     /*
      * check not needed if (security == null) { // internal messaging return
@@ -442,9 +442,9 @@ public class Security extends Service implements AuthorizationProvider {
     // DENIED
 
     // user versus binary token
-    if (security.containsKey("user")) // && password || token
+    if (annotation.containsKey("user")) // && password || token
     {
-      String fromUser = (String)security.get("user");
+      String fromUser = (String)annotation.get("user");
 
       // user scheme found - get the group
       if (!users.containsKey(fromUser)) {
@@ -491,7 +491,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   @Override
   public boolean isAuthorized(Message msg) {
-    return isAuthorized(msg.annotations, msg.name, msg.method);
+    return isAuthorized(msg.getProperties(), msg.name, msg.method);
   }
 
   public boolean setDefaultNewGroupId(String userId, String groupId) {

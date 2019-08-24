@@ -191,6 +191,8 @@ public class HobbyServoTest extends AbstractTest {
 
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
+    
+    Runtime.start("gui", "SwingGui");
 
     HobbyServo s = (HobbyServo) Runtime.start("ser1", "HobbyServo");
 

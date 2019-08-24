@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -42,12 +41,9 @@ import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
-import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -260,8 +256,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } else {
       panels = desktops.get(currentDesktop);
     }
-    String name = Runtime.getRuntimeName();
-    subscribe(name, "registered");
+    
+    subscribe("runtime", "registered");
     // FIXME - "unregistered" / "released"
 
     onDisconnect = new AtmosphereResourceEventListenerAdapter() {
@@ -270,8 +266,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       public void onDisconnect(AtmosphereResourceEvent event) {
         String uuid = event.getResource().uuid();
         log.info("onDisconnect - {} {}", event, uuid);
-        Runtime runtime = Runtime.getInstance();
-        runtime.removeClient(uuid);
+        Runtime.removeConnection(uuid);
         // sessions.remove(uuid);
         if (event.isCancelled()) {
           log.info("{} is cancled", uuid);
@@ -341,11 +336,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        codec.encode(bos, msg);
-        bos.close();
-        broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+        broadcaster.broadcast(CodecUtils.toJson(msg));
       }
     } catch (Exception e) {
       StringBuilder sb = new StringBuilder();
@@ -426,16 +417,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   private Map<String, Object> getClient(String uuid) {
-    return Runtime.getClient(uuid);
+    return Runtime.getConnection(uuid);
   }
 
   @Override
   public List<String> getClientIds() {
-    return Runtime.getClientIds(getName());
+    return Runtime.getConnectionIds(getName());
   }
 
   public Map<String, Map<String, Object>> getClients() {
-    return Runtime.getClients(getName());
+    return Runtime.getConnections(getName());
   }
 
   public Config.Builder getConfig() {
@@ -583,7 +574,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     Map<String, Object> attributes = new HashMap<>();
     String uuid = r.uuid();
-    if (!Runtime.clientExists(r.uuid())) {
+    if (!Runtime.connectionExists(r.uuid())) {
       r.addEventListener(onDisconnect);
       AtmosphereRequest request = r.getRequest();
       Enumeration<String> headerNames = request.getHeaderNames();      
@@ -604,10 +595,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
               attributes.put(headerName, headerValue);              
           }
       } 
-      Runtime.getInstance().addClient(uuid, attributes);
+      Runtime.getInstance().addConnection(uuid, attributes);
     } else {
       // keeping it "fresh" - the resource changes every request ..
-      Runtime.getClient(uuid).put("r", r);
+      Runtime.getConnection(uuid).put("r", r);
     }
 
     AtmosphereRequest request = r.getRequest();
@@ -769,11 +760,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void onLogEvent(Message msg) {
     try {
       if (broadcaster != null) {
-        Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        codec.encode(bos, msg);
-        bos.close();
-        broadcaster.broadcast(new String(bos.toByteArray())); // wtf
+        broadcaster.broadcast(CodecUtils.toJson(msg));
       }
     } catch (Exception e) {
       System.out.print(e.getMessage());
@@ -1003,9 +990,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // get all instances
 
       // we want all onState & onStatus events from all services
-      ServiceEnvironment se = Runtime.getLocalServices();
-      for (String name : se.serviceDirectory.keySet()) {
-        ServiceInterface si = se.serviceDirectory.get(name);
+      for (ServiceInterface si : Runtime.getLocalServices().values()) {
         onRegistered(si);
       }
 
@@ -1083,22 +1068,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     LoggingFactory.init(Level.INFO);
 
     try {
-
-      // Double level = Runtime.getBatteryLevel();
-      // log.info("" + level);
-
-      /*
-       * VirtualArduino virtual = (VirtualArduino)Runtime.start("virtual",
-       * "VirtualArduino"); virtual.connect("COM5");
-       * 
-       * Runtime.start("python", "Python");
-       */
-      // Runtime.start("arduino", "Arduino");
-      // Runtime.start("srf05", "UltrasonicSensor");
-      // Runtime.setRuntimeName("george");
-      // Runtime.start("python", "Python");
-      // Runtime.start("gui", "SwingGui");
-      // Runtime.getNetInfo();
+      
       Runtime.main(new String[] {"--interactive"});
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -1106,12 +1076,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8887);
       webgui.startService();
       Runtime.start("gui", "SwingGui");
-
-      // Runtime.start("cli", "Cli2");
-      // Runtime.start("webgui", "WebGui");
-
-      // webgui.releaseService();
-      // Runtime.start("mary", "MarySpeech");
 
       log.info("leaving main");
 

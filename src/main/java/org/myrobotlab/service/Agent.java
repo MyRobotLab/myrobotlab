@@ -39,7 +39,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.myrobotlab.codec.CodecJson;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
@@ -281,6 +281,9 @@ public class Agent extends Service {
     if (autoUpdate || checkRemoteVersions) {
       invoke("getVersions", currentBranch);
     }
+    
+    Runtime runtime = Runtime.getInstance();
+    runtime.startInteractiveMode();
   }
 
   public String getDir(String branch, String version) {
@@ -666,8 +669,7 @@ public class Agent extends Service {
       byte[] r = Http.get(REMOTE_BUILDS_URL_HOME + REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
         String json = new String(r);
-        CodecJson decoder = new CodecJson();
-        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) decoder.decode(json, WorkflowMultiBranchProject.class);
+        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) CodecUtils.fromJson(json, WorkflowMultiBranchProject.class);
         for (WorkflowJob job : project.jobs) {
           possibleBranches.add(job.name);
         }
@@ -754,9 +756,8 @@ public class Agent extends Service {
 
       byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
       if (data != null) {
-        CodecJson decoder = new CodecJson();
         String json = new String(data);
-        WorkflowJob job = (WorkflowJob) decoder.decode(json, WorkflowJob.class);
+        WorkflowJob job = (WorkflowJob) CodecUtils.fromJson(json, WorkflowJob.class);
         if (job.builds != null) {
           for (WorkflowRun build : job.builds) {
             if ("SUCCESS".equals(build.result)) {

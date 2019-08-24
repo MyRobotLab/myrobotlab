@@ -8,10 +8,10 @@ import java.util.Map;
 
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 public class ApiCli extends Api {
@@ -19,9 +19,9 @@ public class ApiCli extends Api {
   public final static Logger log = LoggerFactory.getLogger(ApiCli.class);
 
   public String getPrompt(String uuid) {
-    Map<String, Object> client = Runtime.getClient(uuid);
-    String prompt = "root".equals(client.get("user")) ? "#" : "$";
-    return String.format("[%s@%s %s]%s", client.get("user"), client.get("host"), client.get("cwd"), prompt);
+    Map<String, Object> gateway = Runtime.getConnection(uuid);
+    String prompt = "root".equals(gateway.get("user")) ? "#" : "$";
+    return String.format("[%s@%s %s]%s", gateway.get("user"), gateway.get("host"), gateway.get("cwd"), prompt);
   }
 
   protected String getDefaultMethod() {
@@ -29,11 +29,10 @@ public class ApiCli extends Api {
   }
 
   // FIXME - change to client data instead of httpsession
-  public Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String data) throws Exception {
+  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String data) throws Exception {
     // FIXME what if data & msgFromUri are both present ?
     Object ret = null;
     boolean returnObject = false;
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
     if (data != null) {
       data = data.trim();
@@ -52,23 +51,23 @@ public class ApiCli extends Api {
         }
         // absolute or relative ! ..
         // FIXME - must check on validity
-        Map<String, Object> c = Runtime.getClient(uuid);
+        Map<String, Object> c = Runtime.getConnection(uuid);
         c.put("cwd", path);
       } else if ("pwd".equals(data)) {
-        Map<String, Object> c = Runtime.getClient(uuid);
+        Map<String, Object> c = Runtime.getConnection(uuid);
         out.write(c.get("cwd").toString().getBytes());
       } else if ("lc".equals(data)) {
-        ret = Runtime.getClientNames();
-        ret = Runtime.getClients();
+        ret = Runtime.getConnectionNames();
+        // ret = Runtime.getClients();
         out.write(CodecUtils.toJson(ret).getBytes()); // FIXME - normalize
 
       } else if ("whoami".equals(data)) {
-        ret = Runtime.getClientName(uuid);
+        ret = Runtime.getConnectionName(uuid);
         out.write(CodecUtils.toJson(ret).getBytes()); // FIXME - normalize
 
       } else if (data.startsWith("ls")) {
         Runtime runtime = Runtime.getInstance();
-        Map<String, Object> c = Runtime.getClient(uuid);
+        Map<String, Object> c = Runtime.getConnection(uuid);
         ret = runtime.ls(c.get("cwd").toString(), data.substring("ls".length()).trim());
         out.write(CodecUtils.toJson(ret).getBytes()); // FIXME - normalize
 
@@ -79,7 +78,7 @@ public class ApiCli extends Api {
         }
 
         // webgui.attach(me, client, uri-api/cli)
-        webgui.attach(uuid, toUuid, "/api/cli");
+        // webgui.attach(uuid, toUuid, "/api/cli"); -- FIXME !!! implement
         // FIXME - what to attach - change of prompt ???
       } else {
         // ========= HANDLE URI SERVICE CALLS ====================
@@ -92,11 +91,11 @@ public class ApiCli extends Api {
         Class<?> clazz = si.getClass();
         Class<?>[] paramTypes = null;
         Object[] params = new Object[0];
-        Object[] encodedArray = new Object[0];
+        String[] encodedArray = new String[0];
 
         if (msgFromUri.data != null) {
 
-          encodedArray = new Object[msgFromUri.data.length];
+          encodedArray = new String[msgFromUri.data.length];
 
           for (int i = 0; i < encodedArray.length; ++i) {
             String result = URLDecoder.decode((String) msgFromUri.data[i], "UTF-8");
@@ -108,7 +107,9 @@ public class ApiCli extends Api {
 
           // DECODE AND FILL THE PARAMS
           for (int i = 0; i < params.length; ++i) {
-            params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+ //            params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+            
+            params[i] = CodecUtils.fromJson(encodedArray[i], paramTypes[i]);
           }
         }
         // FIXME - ONE INVOKER !!! ONE METHOD CACHE !!!
@@ -139,7 +140,7 @@ public class ApiCli extends Api {
         if (ret == null) {
           out.write("null".getBytes());
         } else {
-          out.write(CodecJson.encodePretty(ret).getBytes());
+          out.write(CodecUtils.encodePretty(ret).getBytes());
         }
       }
       out.write("\n".getBytes());

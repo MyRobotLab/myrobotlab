@@ -51,7 +51,6 @@ import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.myrobotlab.cache.LRUMethodCache;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
@@ -60,11 +59,9 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.net.CommunicationManager;
 import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
-import org.myrobotlab.service.interfaces.CommunicationInterface;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
@@ -83,7 +80,7 @@ import com.google.gson.JsonPrimitive;
  * messages.
  * 
  */
-public abstract class Service extends MessageService implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -143,14 +140,15 @@ public abstract class Service extends MessageService implements Runnable, Serial
   transient protected Thread thisThread = null;
 
   transient protected Inbox inbox = null;
-  
+  transient protected Outbox outbox = null;
+
   /**
-   * for promoting portability and good pathing 
+   * for promoting portability and good pathing
    */
   transient protected String fs = File.separator;
-  
+
   /**
-   * for promoting portability and good pathing 
+   * for promoting portability and good pathing
    */
   transient protected String ps = File.pathSeparator;
 
@@ -232,14 +230,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     }
     return set;
   }
-
-  /*
-   * public static Set<String> getPeerNames (String myKey){ // goes to dnaPool
-   * TreeSet<String> set = new TreeSet<String>(); return set; }
-   * 
-   * public static Set<String> getPeerKeys (String myKey){ // goes to template
-   * TreeSet<String> set = new TreeSet<String>(); return set; }
-   */
 
   public String getPeerName(String fullKey) {
     // String fullKey = String.format("%s.%s", getName(), peerKey);
@@ -830,23 +820,16 @@ public abstract class Service extends MessageService implements Runnable, Serial
   // FIXME - make a static initialization part !!!
 
   public Service(String reservedKey) {
-    super(reservedKey);
-
+    // necessary for serialized transport
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
+    MethodCache cache = MethodCache.getInstance();
+    cache.cacheMethodEntries(this.getClass());
 
-    /**
-     * <pre>
-     * necessary ?
-     *
-     * File dir = new File(getDataDir()); dir.mkdirs(); dir = new
-     * File(getResourceDir()); dir.mkdirs();
-     */
-
-    try {// FIXME !!! AFTER MERGE !!!
+    try {
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("could not extract meta data for {}", this.getClass().getCanonicalName());
     }
 
     // FIXME - this is 'sort-of' static :P
@@ -881,9 +864,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
     this.inbox = new Inbox(name);
     this.outbox = new Outbox(this);
-    cm = new CommunicationManager(name);
-    this.outbox.setCommunicationManager(cm);
-    Runtime.register(this, null);
+    Runtime.register(this);
   }
 
   /**
@@ -1139,10 +1120,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return pulse;
   }
 
-  public CommunicationInterface getComm() {
-    return cm;
-  }
-
   @Override
   public String[] getDeclaredMethodNames() {
     Method[] methods = getDeclaredMethods();
@@ -1315,30 +1292,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return lastError != null;
   }
 
-  // TODO Clock example - roles
-  // no - security (internal) Role - default access - ALLOW
-  // WebGui - public - no security header - default access DISALLOW +
-  // exception
-  // WebGui (remote in genera) - user / group ALLOW
-
-  /*
-   * private boolean hasAccess(Message msg) { // turn into single key ??? //
-   * type.name.method
-   * 
-   * // check this type <-- not sure i want to support this
-   * 
-   * // check this name &amp; method // if any access limitations exist which
-   * might be applicable if (accessRules.containsKey(msg.name) ||
-   * accessRules.containsKey(String.format("%s.%s", msg.name, msg.method))) { //
-   * restricted service - check for authorization // Security service only
-   * provides authorization ? if (security == null) { return false; } else {
-   * return security.isAuthorized(msg); }
-   * 
-   * }
-   * 
-   * // invoke - SecurityException - log error return false; }
-   */
-
   @Override
   public boolean hasPeers() {
     try {
@@ -1386,8 +1339,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     inbox.add(msg);
   }
 
-  // BOXING - BEGIN --------------------------------------
-
   /**
    * This is where all messages are routed to and processed
    */
@@ -1411,28 +1362,8 @@ public abstract class Service extends MessageService implements Runnable, Serial
       return Runtime.getService(msg.name).invoke(msg);
     }
 
-    // SECURITY -
-    // 0. allowing export - whether or not we'll allow services to be
-    // exported - based on Type or Name
-    // 1. we have firewall like rules where we can add inclusion and
-    // exclusion rules - based on Type or Name - Service Level - Method
-    // Level
-    // 2. authentication & authorization
-    // 3. transport mechanism (needs implementation on each type of remote
-    // Communicator e.g. Xmpp RemoteAdapter WebGui etc...)
-
-    // check for access
-    // if access FAILS ! - check for authenticated access
-    // not needed "centrally" - instead will impement in Communicators
-    // which hand foriegn connections
-    // if (security == null || security.isAuthorized(msg)) {
-
-    // "local" invoke - you have a "real" reference
     retobj = invokeOn(this, msg.method, msg.data);
-    // }
-
-    // retobject will be returned as another
-    // message
+ 
     return retobj;
   }
 
@@ -1451,119 +1382,27 @@ public abstract class Service extends MessageService implements Runnable, Serial
    * 
    * @param obj
    *          - the object
-   * @param method
+   * @param methodName
    *          - the method to invoke on that object
    * @param params
    *          - the list of args to pass to the method
    * @return return object
    */
   @Override
-  final public Object invokeOn(Object obj, String method, Object... params) {
-
-    if (obj == null) {
-      log.error("invokeOn object is null");
-      return null;
-    }
-
+  final public Object invokeOn(Object obj, String methodName, Object... params) {
     Object retobj = null;
-    Class<?> c = null;
-    Class<?>[] paramTypes = null;
-
     try {
-      c = obj.getClass();
-
-      if (params != null) {
-        paramTypes = new Class[params.length];
-        for (int i = 0; i < params.length; ++i) {
-          if (params[i] != null) {
-            paramTypes[i] = params[i].getClass();
-          } else {
-            paramTypes[i] = null;
-          }
-        }
+      MethodCache cache = MethodCache.getInstance();
+      Method method = cache.getMethod(obj.getClass(), methodName, params);
+      if (method == null) {
+        error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
+        return null; // should this be allowed to throw to a higher level ?
       }
-      Method meth = null;
-
-      // TODO - method cache map
-      // can not auto-box or downcast with this method - getMethod will
-      // return a "specific & exact" match based
-      // on parameter types - the thing is we may have a typed signature
-      // which will allow execution - but
-      // if so we need to search
-
-      // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
-
-      // SECURITY - ??? can't be implemented here - need a full message
-      meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
-      retobj = meth.invoke(obj, params);
-
-      // put return object onEvent
-      out(method, retobj);
-    } catch (NoSuchMethodException e) {
-
-      // cache key compute
-
-      // TODO: validate what "params.toString()" returns.
-      StringBuilder keyBuilder = new StringBuilder();
-      if (paramTypes != null) {
-        for (Object o : paramTypes) {
-          keyBuilder.append(o);
-        }
-      }
-
-      Method mC = LRUMethodCache.getInstance().getCacheEntry(obj, method, paramTypes);
-      if (mC != null) {
-        // We found a cached hit! lets invoke on that.
-        try {
-          retobj = mC.invoke(obj, params);
-          // put return object onEvent
-          out(method, retobj);
-          // return
-          return retobj;
-        } catch (Exception e1) {
-          log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
-        }
-      }
-
-      // TODO - build method cache map from errors
-      log.debug("no such method {}.{} - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null));
-
-      // TODO - optimize with a paramter TypeConverter & Map
-      // c.getMethod - returns on EXACT match - not "Working" match
-      Method[] allMethods = c.getMethods(); // ouch
-      log.debug("searching through {} methods", allMethods.length);
-
-      for (Method m : allMethods) {
-        String mname = m.getName();
-        if (!mname.equals(method)) {
-          continue;
-        }
-
-        Type[] pType = m.getGenericParameterTypes();
-        // checking parameter lengths
-        if (params == null && pType.length != 0 || pType.length != params.length) {
-          continue;
-        }
-        try {
-          log.debug("found appropriate method");
-          retobj = m.invoke(obj, params);
-          // put return object onEvent
-          out(method, retobj);
-          // we've found a match. put that in the cache.
-          log.debug("caching method cache key");
-          LRUMethodCache.getInstance().addCacheEntry(obj, method, paramTypes, m);
-          return retobj;
-        } catch (Exception e1) {
-          log.error("boom goes method {}", m.getName());
-          // Logging.logError(e1);
-        }
-      }
-
-      log.error("did not find method - {}.{}({}) {}", obj, method, CodecUtils.getParameterSignature(params), paramTypes);
+      retobj = method.invoke(obj, params);
+      out(methodName, retobj);
     } catch (Exception e) {
-      log.error("{}", e.getClass().getSimpleName(), e);
+      error(e);
     }
-
     return retobj;
   }
 
@@ -1973,9 +1812,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
     return true;
   }
 
-  /**
-   * 0?
-   */
   public void send(String name, String method) {
     send(name, method, (Object[]) null);
   }
@@ -1993,23 +1829,6 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public void send(Message msg) {
     outbox.add(msg);
-  }
-
-  /**
-   * this send forces remote connect - for registering services
-   * 
-   * @param url
-   *          u
-   * @param method
-   *          m
-   * @param param1
-   *          the param
-   */
-  public void send(URI url, String method, Object param1) {
-    Object[] params = new Object[1];
-    params[0] = param1;
-    Message msg = Message.createMessage(this, name, method, params);
-    outbox.getCommunicationManager().send(url, msg);
   }
 
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
@@ -2126,7 +1945,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
     ServiceInterface si = Runtime.getService(name);
     // if not registered - register
     if (si == null) {
-      Runtime.register(this, null);
+      Runtime.register(this);
     }
 
     // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
@@ -2259,24 +2078,24 @@ public abstract class Service extends MessageService implements Runnable, Serial
       List<String> tnames = Runtime.getServiceNames(topicName);
       for (String serviceName : tnames) {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        cm.send(Message.createMessage(this, serviceName, "addListener", listener));
+        send(Message.createMessage(this, serviceName, "addListener", listener));
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
         Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
-          cm.send(Message.createMessage(this, topicName, "addListener", listener));
+          send(Message.createMessage(this, topicName, "addListener", listener));
         }
       } else {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        cm.send(Message.createMessage(this, topicName, "addListener", listener));
+        send(Message.createMessage(this, topicName, "addListener", listener));
       }
     }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
-    cm.send(Message.createMessage(this, getPeerName(peerKey), method, params));
+    send(Message.createMessage(this, getPeerName(peerKey), method, params));
   }
 
   public void unsubscribe(NameProvider topicName, String topicMethod) {
@@ -2291,7 +2110,7 @@ public abstract class Service extends MessageService implements Runnable, Serial
 
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    cm.send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------
