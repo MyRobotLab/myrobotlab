@@ -1,16 +1,11 @@
 package org.myrobotlab.framework;
+import java.util.Map;
 
 // FIXME - send back list of nameTypes ???
 public class HelloResponse {
-  String id;
-  String uuid;
-  HelloRequest request;
-  Platform platform;
-
-  public HelloResponse(String id, HelloRequest request) {
-    this.id = id;
-    // this.uuid = uuid;
-    this.request = request;
-    platform = Platform.getLocalInstance();
-  }
+  public String id;
+  public String uuid;
+  public HelloRequest request;
+  public Platform platform;
+  public Map<String,String> services;
 }

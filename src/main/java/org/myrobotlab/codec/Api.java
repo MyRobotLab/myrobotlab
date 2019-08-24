@@ -12,6 +12,7 @@ import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.WebGui;
 import org.myrobotlab.string.StringUtil;
@@ -86,7 +87,6 @@ public abstract class Api {
    */
   public Message uriToMsg(String uri) {
     Message msg = new Message();
-    msg.uri = uri;
     msg.name = "runtime"; // default
     msg.method = "getApis"; // default
     msg.apiKey = ApiFactory.API_TYPE_SERVICE; // default
@@ -155,7 +155,7 @@ public abstract class Api {
   }
 
   protected String getDefaultMethod() {
-    return "getEnvironments";
+    return "getRegistry";
   }
 
   /**
@@ -184,6 +184,7 @@ public abstract class Api {
   }
 
   // Api Imp has opportunity to override
+  @Deprecated /* does nothing - we handle session - but we don't handle aging (if necessary) */
   protected void handleSession(WebGui webgui, String apiKey, AtmosphereResource r) {
     AtmosphereRequest request = r.getRequest();
     HttpSession s = request.getSession();
@@ -223,6 +224,7 @@ public abstract class Api {
     log.info("resource {}", StringUtil.toString(r.broadcasters()));
     // log.info("broadcaster {}", r.getBroadcaster());
     
+    // FIXME - should not handle 
     // RELAYS HANDLED HERE !!
     if (webgui.getRelays().containsKey(uuid)) {
       List<String> list = webgui.getRelays().get(uuid);
@@ -260,7 +262,6 @@ public abstract class Api {
       OutputStream out = response.getOutputStream();
 
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
       Status error = Status.error(e); // name == null anonymous ?
       Message msg = Message.createMessage(webgui, null, CodecUtils.getCallbackTopicName("getStatus"), error);
@@ -269,18 +270,18 @@ public abstract class Api {
         // e.g. http://api/services/runtime/getUptime -> return the uptime
         // only not the message
         if (msg.data == null) {
-          log.warn("<< {}", CodecJson.encode(null));
-          codec.encode(out, null);
+          log.warn("<< {}", CodecUtils.toJson(null));
+          CodecUtils.toJson(out, (Object)null);
         } else {
           // return the return type
-          log.warn("<< {}", CodecJson.encode(msg.data[0]));
-          codec.encode(out, msg.data[0]);
+          log.warn("<< {}", CodecUtils.toJson(msg.data[0]));
+          CodecUtils.toJson(out, msg.data[0]);
         }
       } else {
         // API_TYPE_MESSAGES
         // DEPRECATE - FOR LOGGING ONLY REMOVE
-        log.warn("<< {}", CodecJson.encode(msg)); // FIXME if logTraffic
-        codec.encode(out, msg);
+        log.warn("<< {}", CodecUtils.toJson(msg)); // FIXME if logTraffic
+        CodecUtils.toJson(out, msg);
       }
 
     } catch (Exception e2) {
@@ -324,66 +325,27 @@ public abstract class Api {
   }
 
   // MAX COMPLEXITY WITH SIMPLEST DATA TYPES
-  protected Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
-    log.error("==========================NORMALIZE ME !!!!!==============================");
-    /*
-     * Object retobj = null;
-     * 
-     * Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-     * 
-     * if (log.isDebugEnabled() && json != null) { log.debug("data - [{}]",
-     * json); }
-     * 
-     * Message msg = CodecUtils.fromJson(json, Message.class);
-     * 
-     * if (msg == null) { log.error("msg is null {}", json); return null; }
-     * 
-     * if (sender == null) { log.error("sender cannot be null for {}",
-     * ApiMessages.class.getSimpleName()); return null; }
-     * 
-     * if (msg.sender == null) { msg.sender = sender.getName(); }
-     * 
-     * ServiceInterface si = Runtime.getService(msg.name); if (si == null) {
-     * log.error("could not get service {} for msg {}", msg.name, msg); return
-     * null; }
-     * 
-     * Class<?> clazz = si.getClass();
-     * 
-     * Class<?>[] paramTypes = null; Object[] params = null; // decoded array of
-     * encoded parameters Object[] encodedArray = null;
-     * 
-     * if (msg.data == null) { params = new Object[0]; encodedArray = params; }
-     * else { params = new Object[msg.data.length]; encodedArray = msg.data; }
-     * 
-     * paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(),
-     * msg.method, encodedArray.length);
-     * 
-     * if (log.isDebugEnabled()) { StringBuffer sb = new
-     * StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name,
-     * msg.method)); for (int i = 0; i < paramTypes.length; ++i) { if (i != 0) {
-     * sb.append(","); } sb.append(paramTypes[i].getSimpleName()); }
-     * sb.append(")"); log.debug(sb.toString()); }
-     * 
-     * // WE NOW HAVE ORDINAL AND TYPES params = new
-     * Object[encodedArray.length];
-     * 
-     * // DECODE AND FILL THE PARAMS for (int i = 0; i < params.length; ++i) {
-     * params[i] = codec.decode(encodedArray[i], paramTypes[i]); }
-     * 
-     * Method method = clazz.getMethod(msg.method, paramTypes);
-     * 
-     * if (si.isLocal()) { log.debug("{} is local", si.getName());
-     * 
-     * log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
-     * retobj = method.invoke(si, params);
-     * 
-     * // propagate return data to subscribers si.out(msg.method, retobj); }
-     * else { log.debug("{} is remote", si.getName()); // TODO - inspect if
-     * blocking ... sender.send(msg.name, msg.method, params); }
-     * 
-     * MethodCache.cache(clazz, method); return retobj;
-     */
-    return null;
-  }
+  public abstract Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception; // {
+ /* FIXME - temporarily disabled ... 
+  public void process(Runtime runtime, String apiKey, String uuid, Endpoint endpoint, String data) {
+    try {
 
+      // suspend(webgui, apiKey, r); is auto-suspended from the listening end
+      // setBroadcaster(webgui, apiKey, r); // FIXME - relays are handled here
+      // handleSession(webgui, apiKey, r); // FIXME - does nothing      
+      setHeaderContentType(webgui, apiKey, r);
+      // String data = r.getRequest().body().asString();
+      
+      // addClient(webgui, apiKey, r, null);
+
+      // CALLING MAX COMPLEXITY
+      return process(webgui, apiKey, endpoint.uri, uuid, r.getResponse().getOutputStream(), data);
+
+    } catch (Exception e) {
+      handleError(webgui, apiKey, r, e);
+      return null;
+    }
+    
+  }
+*/
 }

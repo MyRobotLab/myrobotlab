@@ -70,11 +70,11 @@ public class SwingOutMethodDialog extends JDialog implements ActionListener {
             MethodData md = data.get(index);
             Class c = Class.forName(String.format("org.myrobotlab.service.%s", md.canonicalName));
             Method m = null;
-            if (md.methodEntry.parameterTypes == null) {
+            if (md.methodEntry.getParameterTypes() == null) {
               log.info("paramterType is null");
               m = c.getMethod(md.methodEntry.getName());
             } else {
-              m = c.getMethod(md.methodEntry.getName(), md.methodEntry.parameterTypes);
+              m = c.getMethod(md.methodEntry.getName(), md.methodEntry.getParameterTypes());
             }
             ToolTip anno = m.getAnnotation(ToolTip.class);
             if (anno != null) {
@@ -182,10 +182,10 @@ public class SwingOutMethodDialog extends JDialog implements ActionListener {
   }
 
   public String formatOutMethod(MethodEntry me) {
-    if (me.returnType == null || me.returnType == void.class) {
+    if (me.getReturnType() == null || me.getReturnType() == void.class) {
       return me.getName();
     } else {
-      String p = me.returnType.getCanonicalName();
+      String p = me.getReturnType().getCanonicalName();
       String t[] = p.split("\\.");
       return (me.getName() + " -> " + t[t.length - 1]);
     }

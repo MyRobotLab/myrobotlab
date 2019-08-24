@@ -1,13 +1,10 @@
 package org.myrobotlab.codec;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-
-import javax.servlet.http.HttpSession;
 
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.Message;
@@ -15,7 +12,6 @@ import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 /**
@@ -65,11 +61,11 @@ public class ApiService extends Api {
 
   // API SERVICE
   @Override
-  public Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
   // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
     Message msgFromUri = uriToMsg(uri);
     // FIXME change to CodecUtils.MIME_TYPE_JSON
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+    // Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
     // FIXME - MUST DECIDE IF BOTH msgFromUri data is preset and input String
     // data - what should happen ???
@@ -124,7 +120,7 @@ public class ApiService extends Api {
 
       // DECODE AND FILL THE PARAMS
       for (int i = 0; i < params.length; ++i) {
-        params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+        params[i] = CodecUtils.fromJson((String)encodedArray[i], paramTypes[i]);
       }
     }
     // FIXME - ONE INVOKER !!! ONE METHOD CACHE !!!
@@ -148,9 +144,9 @@ public class ApiService extends Api {
 
     if (out != null) {
       if (ret == null) {
-        codec.encode(out, ret);
+        CodecUtils.toJson(out, ret);
       } else if (Serializable.class.isAssignableFrom(ret.getClass())) {
-        codec.encode(out, ret);
+        CodecUtils.toJson(out, ret);
       } else {
         log.error("could not serialize return from {} class {}", method, ret.getClass());
       }

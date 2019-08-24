@@ -16,8 +16,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.myrobotlab.codec.Codec;
-import org.myrobotlab.codec.CodecFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
@@ -109,7 +107,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   /**
    * json msg codec
    */
-  transient Codec codec;
 
   boolean autoSubscribe = true;
   String userName = null;
@@ -118,8 +115,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   public Mqtt(String n) {
     super(n);
-    try {
-      codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+    try {      
       inTopic = String.format("myrobotlab/%s/in", getName());
       outTopic = String.format("myrobotlab/%s/out", getName());
       conOpt.setCleanSession(true);
@@ -272,7 +268,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     // serialization needs to be a logical layer - so we can change it to
     // protobuf or native Java
     try {
-      Message msg = (Message) codec.decode(payload, Message.class);
+      Message msg = (Message) CodecUtils.fromJson(payload, Message.class);
 
       // COMMON GATEWAY REGISTERATION AND X-FORWARDED BEGIN --------------
 

@@ -26,6 +26,7 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,8 +35,9 @@ import java.util.List;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.CommunicationInterface;
+import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /*
@@ -65,7 +67,7 @@ public class Outbox implements Runnable, Serializable {
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
   public HashMap<String, ArrayList<MRLListener>> notifyList = new HashMap<String, ArrayList<MRLListener>>();
-  CommunicationInterface comm = null;
+  // CommunicationInterface comm = null;
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
   public Outbox(NameProvider myService) {
@@ -113,9 +115,11 @@ public class Outbox implements Runnable, Serializable {
 
   }
 
+  /*
   public CommunicationInterface getCommunicationManager() {
     return comm;
   }
+  */
 
   // FIXME - consider using a blocking queue now that we are using Java 5.0
   @Override
@@ -151,10 +155,9 @@ public class Outbox implements Runnable, Serializable {
       // WARNING - broadcast apparently means name == ""
       // why would a message with my name be in my outbox ??? - FIXME
       // deprecate that logic
-      if (msg.name != null) { // commented out recently -> &&
-        // !myService.getName().equals(msg.name)
+      if (msg.name != null) { 
         log.debug("{} configured to RELAY ", msg.getName());
-        comm.send(msg);
+        send(msg);
         // recently added -
         // if I'm relaying I'm not broadcasting...(i think)
         continue;
@@ -174,7 +177,7 @@ public class Outbox implements Runnable, Serializable {
           MRLListener listener = subList.get(i);
           msg.name = listener.callbackName;
           msg.method = listener.callbackMethod;
-          comm.send(msg);
+          send(msg);
 
           // must make new for internal queues
           // otherwise you'll change the name on
@@ -191,9 +194,11 @@ public class Outbox implements Runnable, Serializable {
     } // while (isRunning)
   }
 
+  /*
   public void setCommunicationManager(CommunicationInterface c) {
     this.comm = c;
   }
+  */
 
   public int size() {
     return msgBox.size();
@@ -246,5 +251,29 @@ public class Outbox implements Runnable, Serializable {
     if (listeners.contains(ml))
       return;
     listeners.add(ml);
+  }
+  
+  final public void send(final Message msg) {
+
+    ServiceInterface sw = Runtime.getService(msg.getName());
+    if (sw == null) {
+      log.info("could not find service {} to process {} from sender {} - tearing down route", msg.name, msg.method, msg.sender);
+      ServiceInterface sender = Runtime.getService(msg.sender);
+      if (sender != null) {
+        sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
+      }
+      return;
+    }
+
+    // if service is local - give it to that service's inbox
+    URI host = sw.getInstanceId();
+    if (host == null) {
+      sw.in(msg);
+    }/* else {
+      // remote message
+      URI protocolKey = mrlToProtocolKey.get(host);
+      getComm(host).sendRemote(protocolKey, msg);
+    }
+    */
   }
 }

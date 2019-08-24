@@ -211,10 +211,17 @@ public class ApiSwagger extends Api {
       
       
       ApiSwagger swagger = new ApiSwagger();
-      log.info("{}", CodecJson.encode(swagger.getSwagger()));
+      
+      log.info("{}", CodecUtils.toJson(swagger.getSwagger()));
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

@@ -33,17 +33,16 @@ public class ApiFactoryTest extends AbstractTest {
 
       // =============== api messages begin =========================
       // FIXME change to CodecUtils.MIME_TYPE_JSON
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
       String retJson = null;
 
       // FIXME !!! - double encoded data for messages api
       Message msg = Message.createMessage(runtime, "runtime", "getUptime", null);
       ByteArrayOutputStream encoded = new ByteArrayOutputStream();
-      codec.encode(encoded, msg);
+      CodecUtils.toJson(encoded, msg);
 
       Message msg2 = Message.createMessage(runtime, "runtime", "getD", null);
       ByteArrayOutputStream encoded2 = new ByteArrayOutputStream();
-      codec.encode(encoded2, msg2);
+      CodecUtils.toJson(encoded2, msg2);
 
       URI uri = new URI("http://localhost:8888/api/messages");
       uri.getPath();

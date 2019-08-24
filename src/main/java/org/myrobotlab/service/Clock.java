@@ -110,21 +110,21 @@ public class Clock extends Service {
     events.add(event);
   }
 
+  // FIXME - to spec would be "publishClockStarted()"
   // clock started event
-  public void clockStarted() {
+  public void publishClockStarted() {
     isClockRunning = true;
     log.info("clock started");
     broadcastState();
   }
 
-  public void clockStopped() {
+  public void publishClockStopped() {
     isClockRunning = false;
     broadcastState();
     if (restartMe) {
       sleep(10);
       startClock(NoExecutionAtFirstClockStarted);
     }
-
   }
 
   public Date pulse(Date time) {
@@ -145,7 +145,7 @@ public class Clock extends Service {
       this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
       // info("starting clock");
       myClock = new ClockThread();
-      invoke("clockStarted");
+      invoke("publishClockStarted");
     } else {
       log.info("clock already started");
     }
@@ -183,7 +183,7 @@ public class Clock extends Service {
       myClock = null;
       // have requestors broadcast state !
       // broadcastState();
-      invoke("clockStopped");
+      invoke("publishClockStopped");
     } else {
       log.info("clock already stopped");
     }
@@ -191,8 +191,8 @@ public class Clock extends Service {
 
   @Override
   public void stopService() {
-    stopClock();
     super.stopService();
+    stopClock();    
   }
 
   public static void main(String[] args) throws Exception {

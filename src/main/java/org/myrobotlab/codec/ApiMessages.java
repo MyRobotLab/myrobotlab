@@ -6,10 +6,10 @@ import java.util.Arrays;
 
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.WebGui;
 import org.slf4j.Logger;
 
 public class ApiMessages extends Api {
@@ -18,14 +18,13 @@ public class ApiMessages extends Api {
 
   // API MESSAGES
   @Override
-  public Object process(WebGui webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
 
     Object retobj = null;
 
     if (json != null) {
       // json = json.trim();
       // json message has precedence
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
       if (log.isDebugEnabled() && json != null) {
         log.debug("data - [{}]", json);
@@ -87,7 +86,7 @@ public class ApiMessages extends Api {
 
       // DECODE AND FILL THE PARAMS
       for (int i = 0; i < params.length; ++i) {
-        params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+        params[i] = CodecUtils.fromJson((String)encodedArray[i], paramTypes[i]);
       }
 
       Method method = clazz.getMethod(msg.method, paramTypes);
@@ -136,8 +135,8 @@ public class ApiMessages extends Api {
       // - is this correct ? should it be double encoded ?
       Message msg = Message.createMessage(webgui, webgui.getName(), "onLocalServices", new Object[] { retobj });
       // apiKey == messages api uses JSON
-      Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
-      codec.encode(out, msg);
+      
+      CodecUtils.toJson(out, msg);
 
     }
     return retobj;

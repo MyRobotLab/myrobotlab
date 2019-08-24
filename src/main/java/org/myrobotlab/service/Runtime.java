@@ -14,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -40,11 +39,12 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import org.myrobotlab.client.Client;
+import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.ResponseHandler;
 import org.myrobotlab.client.InProcessCli;
+import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
-import org.myrobotlab.codec.CodecJson;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.HelloResponse;
@@ -55,7 +55,6 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.NameAndType;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceEnvironment;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
@@ -70,7 +69,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
@@ -107,22 +105,15 @@ import picocli.CommandLine.Option;
 public class Runtime extends Service implements MessageListener, ResponseHandler {
   final static private long serialVersionUID = 1L;
 
-  static public boolean is64bit() {
-    return Platform.getLocalInstance().getBitness() == 64;
-  }
-
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
-
-  /**
-   * instances of MRL - keyed with an instance key URI format is
-   * mrl://gateway/(protocol key)
-   */
 
   /**
    * environments of running mrl instances - the null environment is the current
    * local
    */
-  static private final Map<URI, ServiceEnvironment> environments = new HashMap<>();
+  // @Deprecated
+  // static private final Map<URI, ServiceEnvironment> environments = new
+  // HashMap<>();
 
   /**
    * a registry of all services regardless of which environment they came from -
@@ -135,17 +126,17 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * The set of client connections to this mrl instance Some of the connections
    * are outbound to other webguis, others may be inbound if a webgui is
    * listening in this instance. These details and many others (such as from
-   * which gateway a client is from) is in the Map<String, Object> information.
-   * Since different gateways have different requirements, and details regarding
+   * which connection a client is from) is in the Map<String, Object> information.
+   * Since different connections have different requirements, and details regarding
    * clients the only "fixed" required info to add a client is :
    * 
    * uuid - key unique identifier for the client
-   * gateway - name of the gateway currently managing the clients connection
+   * connection - name of the connection currently managing the clients connection
    * state - state of the client and/or connection
    * (lots more attributes with the Map<String, Object> to provide necessary data for the connection)
    * </pre>
    */
-  static private final Map<String, Map<String, Object>> clients = new HashMap<>();
+  static private final Map<String, Map<String, Object>> connections = new HashMap<>();
 
   /**
    * map to hide methods we are not interested in
@@ -185,6 +176,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * repos will come in with other Runtimes from other machines.
    */
   private Repo repo = null;
+
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
@@ -248,8 +240,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   // FIXME - remove static !!!
   static String[] globalArgs;
 
-  private static String gateway;
-
   static Set<String> networkPeers = null;
 
   Locale locale;
@@ -277,7 +267,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       int status = con.getResponseCode();
       log.info("status " + status);
 
-      gateway = FileIO.toString(con.getInputStream());
+      String gateway = FileIO.toString(con.getInputStream());
       return gateway;
 
     } catch (Exception e) {
@@ -431,8 +421,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   static public Map<String, Map<String, List<MRLListener>>> getNotifyEntries() {
     Map<String, Map<String, List<MRLListener>>> ret = new TreeMap<String, Map<String, List<MRLListener>>>();
-    ServiceEnvironment se = getLocalServices();
-    Map<String, ServiceInterface> sorted = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
+    Map<String, ServiceInterface> sorted = getLocalServices();
     for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet()) {
       log.info(entry.getKey() + "/" + entry.getValue());
       ArrayList<String> flks = entry.getValue().getNotifyListKeySet();
@@ -448,58 +437,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   public static String dump() {
     try {
-
-      FileOutputStream dump = new FileOutputStream("environments.json");
-      dump.write(CodecUtils.toJson(environments).getBytes());
+      FileOutputStream dump = new FileOutputStream("registry.json");
+      String reg = CodecUtils.toJson(registry);
+      dump.write(reg.getBytes());
       dump.close();
-
-      dump = new FileOutputStream("registry.json");
-      dump.write(CodecUtils.toJson(registry).getBytes());
-      dump.close();
-
-      StringBuffer sb = new StringBuffer().append("\ninstances:\n");
-      Map<URI, ServiceEnvironment> sorted = environments;
-      Iterator<URI> hkeys = sorted.keySet().iterator();
-      URI url;
-      ServiceEnvironment se;
-      Iterator<String> it2;
-      String serviceName;
-      ServiceInterface sw;
-      while (hkeys.hasNext()) {
-        url = hkeys.next();
-        se = environments.get(url);
-        sb.append("\t").append(url);
-
-        // Service Environment
-        Map<String, ServiceInterface> sorted2 = new TreeMap<String, ServiceInterface>(se.serviceDirectory);
-        it2 = sorted2.keySet().iterator();
-        while (it2.hasNext()) {
-          serviceName = it2.next();
-          sw = sorted2.get(serviceName);
-          sb.append("\t\t").append(serviceName);
-          sb.append("\n");
-        }
-      }
-
-      sb.append("\nregistry:");
-
-      Map<String, ServiceInterface> sorted3 = new TreeMap<String, ServiceInterface>(registry);
-      Iterator<String> rkeys = sorted3.keySet().iterator();
-      while (rkeys.hasNext()) {
-        serviceName = rkeys.next();
-        sw = sorted3.get(serviceName);
-        sb.append("\n").append(serviceName).append(" ").append(sw.getInstanceId());
-      }
-
-      sb.toString();
-
-      FileIO.toFile(String.format("serviceRegistry.%s.txt", runtime.getName()), sb.toString());
-
-      return sb.toString();
+      return reg;
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("dump threw", e);
     }
-
     return null;
   }
 
@@ -734,61 +679,23 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return ret;
   }
 
-  public static ServiceEnvironment getLocalServices() {
-    if (!environments.containsKey(null)) {
-      runtime.error("local (null) ServiceEnvironment does not exist");
-      return null;
-    }
-
-    return environments.get(null);
-  }
-
-  /*
-   * getLocalServicesForExport returns a filtered map of Service references to
-   * export to another instance of MRL. The objective of filtering may help
-   * resolve functionality, security, or technical issues. For example, the
-   * Dalvik JVM can only run certain Services. It would be error prone to export
-   * a SwingGui to a jvm which does not support swing.
-   *
-   * Since the map of Services is made for export - it is NOT a copy but
-   * references
-   *
-   * The filtering is done by Service Type.. although in the future it could be
-   * extended to Service.getName()
-   *
-   */
-  public static ServiceEnvironment getLocalServicesForExport() {
-    if (!environments.containsKey(null)) {
-      runtime.error("local (null) ServiceEnvironment does not exist");
-      return null;
-    }
-
-    ServiceEnvironment local = environments.get(null);
-
-    // URI is null but the "acceptor" will fill in the correct URI/ID
-    ServiceEnvironment export = new ServiceEnvironment(null);
-
-    Iterator<String> it = local.serviceDirectory.keySet().iterator();
-    String name;
-    ServiceInterface sw;
-    while (it.hasNext()) {
-      name = it.next();
-      sw = local.serviceDirectory.get(name);
-      if (security == null || security.allowExport(name)) {
-        // log.info(String.format("exporting service: %s of type %s",
-        // name, sw.getServiceType()));
-        export.serviceDirectory.put(name, sw); // FIXME !! make note
-        // when Xmpp or Remote
-        // Adapter pull it -
-        // they have to reset
-        // this !!
-      } else {
-        log.info("security prevents export of {}", name);
-        continue;
+  public static Map<String, ServiceInterface> getLocalServices() {
+    Map<String, ServiceInterface> local = new HashMap<>();
+    for (String serviceName : registry.keySet()) {
+      if (!serviceName.contains("@")) {
+        local.put(serviceName, registry.get(serviceName));
       }
     }
+    return local;
+  }
 
-    return export;
+  /**
+   * FIXME - return filtering/query requests
+   * 
+   * @return
+   */
+  public static Map<String, ServiceInterface> getLocalServicesForExport() {
+    return registry;
   }
 
   /*
@@ -816,9 +723,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       if (hideMethods.contains(m.getName())) {
         continue;
       }
-      me = new MethodEntry(m);
-      me.parameterTypes = m.getParameterTypes();
-      me.returnType = m.getReturnType();
+      me = new MethodEntry(m);      
       s = me.getSignature();
       ret.put(s, me);
     }
@@ -838,14 +743,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return registry;// FIXME should return copy
   }
 
-  /*
-   * Return the named service - - if name is not null, but service is not found
-   * - return null (for re-entrant Service creation) - if the name IS null,
-   * return Runtime - to support api/getServiceNames - if the is not null, and
-   * service is found - return the Service
-   */
   public static ServiceInterface getService(String name) {
 
+    // FIXME - don't do this by default - an API will get the "default" service
+    // if that is desired
     if (name == null || name.length() == 0) {
       return Runtime.getInstance();
     }
@@ -856,25 +757,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
   }
 
-  public static ServiceEnvironment getEnvironment(URI url) {
-    if (environments.containsKey(url)) {
-      return environments.get(url); // FIXME should return copy
-    }
-    return null;
-  }
-
-  /*
-   * get all environments
-   */
-  public static HashMap<URI, ServiceEnvironment> getEnvironments() {
-    return new HashMap<URI, ServiceEnvironment>(environments);
-  }
-
-  // Reference - cpu utilization
-  // http://www.javaworld.com/javaworld/javaqa/2002-11/01-qa-1108-cpu.html
-
-  /*
-   * list of currently created services
+  /**
+   * return all service names in a list form
+   * 
+   * @return
    */
   static public String[] getServiceNames() {
     List<ServiceInterface> si = getServices();
@@ -925,7 +811,24 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   public static List<ServiceInterface> getServices() {
-    List<ServiceInterface> list = new ArrayList<ServiceInterface>(registry.values());
+    return getServices(null);
+  }
+
+  public static List<ServiceInterface> getServices(String id) {
+    if (id == null) {
+      return new ArrayList<ServiceInterface>(registry.values());
+    }
+
+    List<ServiceInterface> list = new ArrayList<>();
+    // otherwise we are getting services of an instance
+    for (String serviceName : registry.keySet()) {
+      if (serviceName.indexOf("@") != -1) {
+        String sid = serviceName.substring(serviceName.indexOf("@") + 1);
+        if (id.equals(sid)) {
+          list.add(registry.get(serviceName));
+        }
+      }
+    }
     return list;
   }
 
@@ -1073,15 +976,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    */
   static public boolean loadAll() {
     boolean ret = true;
-    ServiceEnvironment se = getLocalServices();
-    Iterator<String> it = se.serviceDirectory.keySet().iterator();
-    String serviceName;
-    while (it.hasNext()) {
-      serviceName = it.next();
-      ServiceInterface sw = se.serviceDirectory.get(serviceName);
-      ret &= sw.load();
+    Map<String, ServiceInterface> local = getLocalServices();
+    for (ServiceInterface si : local.values()) {
+      ret &= si.load();
     }
-
     return ret;
   }
 
@@ -1125,16 +1023,15 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
          * codec.decode(FileIO.toString(options.cfg), CmdOptions.class); new
          * CommandLine(fileOptions).parseArgs(args);
          */
-        try {
-          CodecJson codec = new CodecJson();
-          options = (CmdOptions) codec.decode(FileIO.toString(options.cfg), CmdOptions.class);
+        try {          
+          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
         } catch (Exception e) {
           log.error("config file {} was specified but could not be read", options.cfg);
         }
       }
 
       try {
-        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecJson.encodePretty(options).getBytes());
+        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.encodePretty(options).getBytes());
       } catch (Exception e) {
         log.error("writing lastOption.json failed", e);
       }
@@ -1219,14 +1116,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
   }
 
-  public void startInteraciveMode() {
+  public void startInteractiveMode() {
     if (clientLocal == null) {
-      clientLocal = new InProcessCli(System.in, null);
+      clientLocal = new InProcessCli(System.in, System.out); // ????
     }
     clientLocal.start();
   }
 
-  public void stopInteraciveMode() {
+  public void stopInteractiveMode() {
     clientLocal.stop();
   }
 
@@ -1256,93 +1153,23 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public void onState(ServiceInterface updatedService) {
     log.info("runtime updating registry info for remote service {}", updatedService.getName());
     registry.put(updatedService.getName(), updatedService);
-    ServiceEnvironment se = environments.get(updatedService.getInstanceId());
-    if (se != null) {
-      se.serviceDirectory.put(updatedService.getName(), updatedService);
-    } else {
-      error("onState ServiceEnvironment null");
-    }
   }
 
-  /*
-   * register - this method enters the service into the registery of services
-   *
+  /**
+   * registers a service
+   * 
+   * @param service
+   * @return
    */
-  public final static synchronized ServiceInterface register(ServiceInterface s, URI url) {
-    ServiceEnvironment se = null;
-    if (!environments.containsKey(url)) {
-      se = new ServiceEnvironment(url);
-      environments.put(url, se);
-    } else {
-      se = environments.get(url);
-    }
-
-    /**
-     * register with null data is how initial communication starts between 2 mrl
-     * instances (1st msg)
-     */
-    if (s == null) {
-      return null;
-    }
-
-    String name = s.getName();
-
-    // REMOTE BROADCAST to all foreign environments
-    // FIXME - Security determines what to export
-    // for each gateway
-
-    // RELAY - xforwarder name grows remote1.remote2.remote3 ....
-
-    List<String> remoteGateways = getServiceNamesFromInterface(Gateway.class);
-    for (int ri = 0; ri < remoteGateways.size(); ++ri) {
-      String n = remoteGateways.get(ri);
-      // Communicator gateway = (Communicator)registry.get(n);
-      ServiceInterface gateway = registry.get(n);
-
-      // for each JVM this gateway is attached too
-      for (Map.Entry<URI, ServiceEnvironment> o : environments.entrySet()) {
-        URI uri = o.getKey();
-        // if its a foreign JVM & the gateway responsible for the
-        // remote
-        // connection and
-        // the foreign JVM is not the host which this service
-        // originated
-        // from - send it....
-        if (uri != null && gateway.getName().equals(uri.getHost()) && !uri.equals(s.getInstanceId())) {
-          log.info("gateway {} sending registration of {} remote to {}", gateway.getName(), name, uri);
-          // FIXME - Security determines what to export
-          Message msg = Message.createMessage(runtime, null, "register", s);
-          // ((Communicator) gateway).sendRemote(uri, msg);
-          // //mrl://remote2/tcp://127.0.0.1:50488 <-- wrong
-          // sendingRemote is wrong
-          // FIXME - optimize gateway.send(msg) && URI TO URI MAP
-          // IN
-          // RUNTIME !!!
-          gateway.in(msg);
-        }
-      }
-    }
-
-    // ServiceInterface sw = new ServiceInterface(s, se.accessURL);
-    se.serviceDirectory.put(name, s);
-    // WARNING - SHOULDN'T THIS BE DONE FIRST AVOID DEADLOCK / RACE
-    // CONDITION ????
-    registry.put(name, s); // FIXME FIXME FIXME FIXME !!!!!!
-    // pre-pend
-    // URI if not NULL !!!
+  public final static synchronized ServiceInterface register(ServiceInterface service) {
+    registry.put(service.getName(), service);
     if (runtime != null) {
-      runtime.invoke("registered", s);
+      runtime.invoke("registered", service);
     }
-
-    // new --------
-    // we want to subscribe to state changes
-    if (!s.isLocal()) {
-      runtime.subscribe(name, "publishState");
+    if (!service.isLocal()) {
+      runtime.subscribe(service.getName(), "publishState");
     }
-    // end new ----
-
-    return s;
-
+    return service;
   }
 
   /**
@@ -1402,40 +1229,24 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     // remove from registry
     registry.remove(name);
 
-    // remove from environments
-    ServiceEnvironment se = environments.get(sw.getInstanceId());
-    se.serviceDirectory.remove(name);
-
     log.info("released {}", name);
   }
 
-  public static boolean release(URI url) /* release process environment */
-  {
-    boolean ret = true;
-    ServiceEnvironment se = environments.get(url);
-    if (se == null) {
-      log.warn("attempt to release {} not successful - it does not exist", url);
-      return false;
-    }
-    log.info(String.format("releasing url %1$s", url));
-    String[] services = se.serviceDirectory.keySet().toArray(new String[se.serviceDirectory.keySet().size()]);
-    String runtimeName = null;
-    ServiceInterface service;
-    for (int i = 0; i < services.length; ++i) {
-      service = registry.get(services[i]);
-      if (service != null && "Runtime".equals(service.getSimpleName())) {
-        runtimeName = service.getName();
-        log.info(String.format("delaying release of Runtime %1$s", runtimeName));
-        continue;
+  public List<ServiceInterface> getRemoteServices() {
+    return getRemoteServices(null);
+  }
+
+  public List<ServiceInterface> getRemoteServices(String id) {
+    List<ServiceInterface> list = new ArrayList<>();
+    for (String serviceName : registry.keySet()) {
+      if (serviceName.contains("@")) {
+        String sid = serviceName.substring(serviceName.indexOf("@") + 1);
+        if (id == null || sid.equals(id)) {
+          list.add(registry.get(serviceName));
+        }
       }
-      ret &= release(services[i]);
     }
-
-    if (runtimeName != null) {
-      ret &= release(runtimeName);
-    }
-
-    return ret;
+    return list;
   }
 
   /**
@@ -1457,19 +1268,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   {
     log.debug("releaseAll");
 
-    ServiceEnvironment se = environments.get(null); // local services only
-    if (se == null) {
-      log.info("releaseAll called when everything is released, all done here");
-      return;
-    }
-    Iterator<String> seit = se.serviceDirectory.keySet().iterator();
-    String serviceName;
-    ServiceInterface sw;
+    Map<String, ServiceInterface> local = getLocalServices();
 
-    seit = se.serviceDirectory.keySet().iterator();
-    while (seit.hasNext()) {
-      serviceName = seit.next();
-      sw = se.serviceDirectory.get(serviceName);
+    for (String serviceName : local.keySet()) {
+      ServiceInterface sw = local.get(serviceName);
 
       if (sw == Runtime.getInstance()) {
         // skipping runtime
@@ -1496,14 +1298,8 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
 
     runtime.stopService();
-
-    log.info("clearing hosts environments");
-    environments.clear();
-
     log.info("clearing registry");
     registry.clear();
-
-    // exit () ?
   }
 
   /**
@@ -1583,20 +1379,15 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     Runtime.release(name);
   }
 
-  /*
+  /**
    * save all configuration from all local services
    */
   static public boolean saveAll() {
     boolean ret = true;
-    ServiceEnvironment se = getLocalServices();
-    Iterator<String> it = se.serviceDirectory.keySet().iterator();
-    String serviceName;
-    while (it.hasNext()) {
-      serviceName = it.next();
-      ServiceInterface sw = se.serviceDirectory.get(serviceName);
+    Map<String, ServiceInterface> local = getLocalServices();
+    for (ServiceInterface sw : local.values()) {
       ret &= sw.save();
     }
-
     return ret;
   }
 
@@ -1604,43 +1395,75 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   static Client clientRemote = new Client();
   static InProcessCli clientLocal = null;
 
-  public void connect() throws IOException {
+  public Endpoint connect() throws IOException {
     // FIXME - connect("myName",
-    connect("ws://localhost:8887/api/messages2");
+    // return connect("ws://localhost:8887/api/messages2"); // vs routing
+    // through System.in ->
+    return connect("ws://localhost:8887/api/messages2");
   }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
-  public void connect(String url) throws IOException {
+  public Endpoint connect(String url) throws IOException {
+
+    clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
+                                           // on client creation?
 
     UUID uuid = java.util.UUID.randomUUID();
-    clientRemote.connect(uuid.toString(), url);
+    Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
     Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
     // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
     attributes.put("id", getId());
-    attributes.put("gateway", "runtime");
+    attributes.put("gateway", "runtime");// connecting out - the gateway will be
+                                         // runtime ...
     attributes.put("uuid", uuid);
     attributes.put("User-Agent", "runtime-client");
     attributes.put("cwd", "/");
     attributes.put("uri", url);
     attributes.put("user", "root");
     attributes.put("host", "local");
+    attributes.put("endpoint", endpoint);
 
-    addClient(uuid.toString(), attributes);
-    clientRemote.addResponseHandler(this);
+    addConnection(uuid.toString(), attributes);
+
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
+    return endpoint;
   }
 
   /**
    * callback - from clientRemote - all client connections will recieve here
+   * TODO - get clients directional api - an api per direction incoming and
+   * outgoing
    */
   @Override // uuid
   public void onResponse(String uuid, String data) {
-    log.info("here {}", data);
+    log.info("connection {} responded with {}", uuid, data);
     // get api - decode msg - process it
+    Map<String, Object> connection = getConnection(uuid);
+    if (connection == null) {
+      log.error("no connection with uuid {}", uuid);
+      return;
+    }
+    String uri = (String) connection.get("uri");
+    String apiKey = Api.getApiKey(uri);
+    // client requesting api ???
+    log.info("connection {} requesting endpoint {}", connection.get("id"), connection.get("uri"));
+    Api api = ApiFactory.getApiProcessor(apiKey);
+    Endpoint endpoint = (Endpoint) connection.get("endpoint");
+    // api.process(this, apiKey, endpoint);
+    // api.process(this, apiKey, uuid, endpoint, data);
+    // OutputStream out = null because no point ...
+    try {
+      // return blocking ???
+      Object ret = api.process(this, apiKey, uri, uuid, null, data);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } // this, apiKey, uuid, endpoint, data);
+    log.info("here");
   }
 
   public static void setRuntimeName(String inName) {
@@ -1984,13 +1807,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return dep;
   }
 
-  /*
-   * returns version string of MyRobotLab
-   */
-  public String getLocalVersion() {
-    return getVersion(null);
-  }
-
   // FIXME - you don't need that many "typed" messages - resolve,
   // resolveError, ... etc
   // just use & parse "message"
@@ -1999,58 +1815,12 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return getInstance().platform;
   }
 
-  /**
-   * returns the platform type of a remote system
-   *
-   * @param uri
-   *          - the access uri of the remote system
-   * @return Platform description
-   */
-  public Platform getPlatform(URI uri) {
-    ServiceEnvironment local = environments.get(uri);
-    if (local != null) {
-      return local.platform;
-    }
-
-    error("can't get local platform in service environment");
-
-    return null;
-  }
-
   public Repo getRepo() {
     return repo;
   }
 
-  /**
-   * Gets the current total number of services registered services. This is the
-   * number of services in all Service Environments
-   *
-   * @return total number of services
-   */
-  public int getServiceCount() {
-    int cnt = 0;
-    Iterator<URI> it = environments.keySet().iterator();
-    ServiceEnvironment se;
-    Iterator<String> it2;
-    while (it.hasNext()) {
-      se = environments.get(it.next());
-      it2 = se.serviceDirectory.keySet().iterator();
-      while (it2.hasNext()) {
-        ++cnt;
-        it2.next();
-      }
-    }
-    return cnt;
-  }
-
-  // ============== configuration begin ==============
-
   static public String getId() {
     return Platform.getLocalInstance().getId();
-  }
-
-  public int getEnvironmentCount() {
-    return environments.size();
   }
 
   /*
@@ -2077,32 +1847,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    */
   public String[] getServiceTypeNames(String filter) {
     return serviceData.getServiceTypeNames(filter);
-  }
-
-  /**
-   * returns version string of MyRobotLab instance based on uri e.g : uri
-   * mrl://10.5.3.1:7777 may be a remote instance null uri is local
-   *
-   * @param uri
-   *          - key of ServiceEnvironment
-   * @return version string
-   */
-  public String getVersion(URI uri) {
-    ServiceEnvironment local = environments.get(uri);
-    if (local != null) {
-      return local.platform.getVersion();
-    }
-
-    error("can't get local version in service environment");
-
-    return null;
-  }
-
-  /*
-   * event fired when a new artifact is download
-   */
-  public String newArtifactsDownloaded(String module) {
-    return module;
   }
 
   // FIXME THIS IS NOT NORMALIZED !!!
@@ -2153,8 +1897,10 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   // FIXME - this is important in the future
   @Override
+  @Deprecated /* use onResponse ??? */
   public void onMessage(Message msg) {
     // TODO: what do we do when we get a message?
+    log.info("onMessage()");
   }
 
   // ---------------- callback events begin -------------
@@ -2296,18 +2042,16 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     runtime = null;
   }
 
-  public static void clearErrors() {
-    ServiceEnvironment se = getLocalServices();
-    for (String name : se.serviceDirectory.keySet()) {
-      se.serviceDirectory.get(name).clearLastError();
+  // FYI - the way to call "all" service methods !
+  public void clearErrors() {
+    for (String serviceName : registry.keySet()) {
+      send(serviceName, "clearLastError");
     }
   }
 
   public static boolean hasErrors() {
-    ServiceEnvironment se = getLocalServices();
-
-    for (String name : se.serviceDirectory.keySet()) {
-      if (se.serviceDirectory.get(name).hasError()) {
+    for (ServiceInterface si : registry.values()) {
+      if (si.hasError()) {
         return true;
       }
     }
@@ -2318,10 +2062,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * remove all subscriptions from all local Services
    */
   static public void removeAllSubscriptions() {
-    ServiceEnvironment se = getEnvironment(null);
-    Set<String> keys = se.serviceDirectory.keySet();
-    for (String name : keys) {
-      ServiceInterface si = getService(name);
+    for (ServiceInterface si : getLocalServices().values()) {
       ArrayList<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
         si.getOutbox().notifyList.clear();
@@ -2331,9 +2072,8 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   public static ArrayList<Status> getErrors() {
     ArrayList<Status> stati = new ArrayList<Status>();
-    ServiceEnvironment se = getLocalServices();
-    for (String name : se.serviceDirectory.keySet()) {
-      Status status = se.serviceDirectory.get(name).getLastError();
+    for (ServiceInterface si : getLocalServices().values()) {
+      Status status = si.getLastError();
       if (status != null && status.isError()) {
         log.info(status.toString());
         stati.add(status);
@@ -2343,19 +2083,13 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   public static void broadcastStates() {
-    ServiceEnvironment se = getLocalServices();
-
-    for (String name : se.serviceDirectory.keySet()) {
-      se.serviceDirectory.get(name).broadcastState();
+    for (ServiceInterface si : getLocalServices().values()) {
+      si.broadcastState();
     }
   }
 
   public static Runtime get() {
     return Runtime.getInstance();
-  }
-
-  public static String getRuntimeName() {
-    return Runtime.getInstance().getName();
   }
 
   static public String execute(String... args) {
@@ -2555,7 +2289,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public Platform login(Platform platform) {
     info("runtime %s says \"hello\" %s", platform.getId(), platform);
 
-    // from which gateway ?
+    // from which connection ?
     // runtime "mqtt" --mqtt01--> --mqtt02--> runtime"watchdog"
 
     // return to its runtime a register ..
@@ -2787,32 +2521,49 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return ret;
   }
 
+  // FIXME - a way to reach in a messages meta-data ?? is this a reference
+  // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
   // its "meta-data"
-  public HelloResponse getHelloResponse(HelloRequest request) {
-    HelloResponse response = new HelloResponse(getId(), request);
+  public HelloResponse getHelloResponse(String uuid, HelloRequest request) {
+    HelloResponse response = new HelloResponse();
+    Map<String, Object> connection = getConnection(uuid);
+    response.id = getId();
+    // this.uuid = uuid;
+    response.request = request;
+    response.platform = Platform.getLocalInstance();
+    response.services = Runtime.getServiceTypes();
+    connection.put("request", request);
     // addClientAttribute(uuid, "request", request);
     return response;
   }
 
-  public void addClient(String uuid, Map<String, Object> attributes) {
-    Map<String, Object> attr = null;
-    if (!clients.containsKey(uuid)) {
-      attr = attributes;
-      invoke("publishNewClient", attributes);
-    } else {
-      attr = clients.get(uuid);
-      attr.putAll(attributes);
+  public static Map<String, String> getServiceTypes() {
+    Map<String, String> ret = new HashMap<>();
+    for (String name : registry.keySet()) {
+      ret.put(name, registry.get(name).getClass().getCanonicalName());
     }
-    clients.put(uuid, attr);
+    return ret;
   }
 
-  public Map<String, Object> publishNewClient(Map<String, Object> attributes) {
+  public void addConnection(String uuid, Map<String, Object> attributes) {
+    Map<String, Object> attr = null;
+    if (!connections.containsKey(uuid)) {
+      attr = attributes;
+      invoke("pubishNewConnection", attributes);
+    } else {
+      attr = connections.get(uuid);
+      attr.putAll(attributes);
+    }
+    connections.put(uuid, attr);
+  }
+
+  public Map<String, Object> pubishNewConnection(Map<String, Object> attributes) {
     return attributes;
   }
 
-  static public void removeClient(String uuid) {
-    clients.remove(uuid);
+  static public void removeConnection(String uuid) {
+    connections.remove(uuid);
   }
 
   /**
@@ -2820,21 +2571,21 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * 
    * @return
    */
-  static public Map<String, Map<String, Object>> getClients() {
-    return clients;
+  static public Map<String, Map<String, Object>> getConnections() {
+    return connections;
   }
 
   /**
-   * separated by gateway - send gateway name and get filter results back for a
-   * specific gateways connected clients
+   * separated by connection - send connection name and get filter results back
+   * for a specific connections connected clients
    * 
    * @param gatwayName
    * @return
    */
-  static public Map<String, Map<String, Object>> getClients(String gatwayName) {
+  static public Map<String, Map<String, Object>> getConnections(String gatwayName) {
     Map<String, Map<String, Object>> ret = new HashMap<>();
-    for (String uuid : clients.keySet()) {
-      Map<String, Object> c = clients.get(uuid);
+    for (String uuid : connections.keySet()) {
+      Map<String, Object> c = connections.get(uuid);
       String gateway = (String) c.get("gateway");
       if (gatwayName == null || gateway.equals(gatwayName)) {
         ret.put(uuid, c);
@@ -2843,26 +2594,27 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return ret;
   }
 
-  static String formatClient(Map<String, Object> c) {
-    return String.format("%s@%s%s - %s", c.get("user"), c.get("host"), c.get("uri"), c.get("uuid"));
+  static String formatConnection(Map<String, Object> c) {
+    return String.format("%s@%s%s - %s - %s", c.get("user"), c.get("host"), c.get("uri"), c.get("uuid"), c.get("request"));
   }
 
-  static public String getClientName(String uuid) {
-    Map<String, Object> c = Runtime.getClient(uuid);
+  static public String getConnectionName(String uuid) {
+    Map<String, Object> c = Runtime.getConnection(uuid);
     if (c != null)
-      return formatClient(c);
+      return formatConnection(c);
     else
       return null;
   }
 
-  // FIXME - if Gateway was an abstract this could be promoted or abstracted for
+  // FIXME - if Connection was an abstract this could be promoted or abstracted
+  // for
   // every service display properties
-  static public List<String> getClientNames() {
+  static public List<String> getConnectionNames() {
     List<String> ret = new ArrayList<>();
-    Map<String, Map<String, Object>> clients = Runtime.getClients();
-    for (String uuid : clients.keySet()) {
-      Map<String, Object> c = clients.get(uuid);
-      ret.add(formatClient(c));
+    Map<String, Map<String, Object>> connections = Runtime.getConnections();
+    for (String uuid : connections.keySet()) {
+      Map<String, Object> c = connections.get(uuid);
+      ret.add(formatConnection(c));
     }
     return ret;
   }
@@ -2873,33 +2625,33 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * @param uuid
    * @return
    */
-  static public Map<String, Object> getClient(String uuid) {
-    return clients.get(uuid);
+  static public Map<String, Object> getConnection(String uuid) {
+    return connections.get(uuid);
   }
 
   /**
-   * Globally get all client ids
+   * Globally get all connection ids
    * 
    * @return
    */
-  static public List<String> getClientIds() {
-    return getClientIds(null);
+  static public List<String> getConnectionIds() {
+    return getConnectionIds(null);
   }
 
-  static public boolean clientExists(String uuid) {
-    return clients.containsKey(uuid);
+  static public boolean connectionExists(String uuid) {
+    return connections.containsKey(uuid);
   }
 
   /**
-   * Get client ids that belong to a specific gateway
+   * Get connection ids that belong to a specific connection
    * 
    * @param name
    * @return
    */
-  static public List<String> getClientIds(String name) {
+  static public List<String> getConnectionIds(String name) {
     List<String> ret = new ArrayList<>();
-    for (String uuid : clients.keySet()) {
-      Map<String, Object> c = clients.get(uuid);
+    for (String uuid : connections.keySet()) {
+      Map<String, Object> c = connections.get(uuid);
       String gateway = (String) c.get("gateway");
       if (name == null || gateway.equals(name)) {
         ret.add(uuid);

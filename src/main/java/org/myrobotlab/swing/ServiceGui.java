@@ -43,6 +43,7 @@ import javax.swing.border.TitledBorder;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -86,6 +87,11 @@ public abstract class ServiceGui implements WindowListener {
   transient GridBagConstraints gcSouth = new GridBagConstraints();
 
   public ServiceGui(final String boundServiceName, final SwingGui myService) {
+
+    // cache methods
+    MethodCache cache = MethodCache.getInstance();
+    cache.cacheMethodEntries(this.getClass());
+    
     self = this;
     this.boundServiceName = boundServiceName;
     this.swingGui = myService;
