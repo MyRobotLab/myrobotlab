@@ -67,7 +67,6 @@ public class JmeManager implements ActionListener {
 	long frameCount =0;
 	transient private MsgUtil msgUtil;
 	transient private ViewPort viewPort;
-	transient private Node point;
 	transient private Camera cameraSetting;
 	transient private CameraNode camNode;
 	transient private Node camera = new Node("camera");
@@ -255,6 +254,18 @@ public class JmeManager implements ActionListener {
 		    nodes.put(part.getName(), node);
 		    addMsg("addNode", node.getName());
 		}
+		for (IMArm arm : im.getData().getArms().values()){
+			Node node = new Node(arm.getName()+"-target");
+		    Cylinder c = new Cylinder(8, 50, .005f, .010f, true, false);
+		    Geometry geom = new Geometry("Cylinder", c);
+			Material m = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+			m.setColor("Color", ColorRGBA.Green);
+		    geom.setMaterial(m);
+		    node.attachChild(geom);
+		    rootNode.attachChild(node);
+		    nodes.put(node.getName(), node);
+		    node.setCullHint(CullHint.Always);
+		}
 	}
 
 	public void simpleUpdate(float tpf) {
@@ -301,6 +312,16 @@ public class JmeManager implements ActionListener {
 			Quaternion i = IMUtil.matrixToQuaternion(origin);
 			node.setLocalRotation(i);
 		}
+		for (IMArm arm : data.getArms().values()){
+			Node node = (Node) nodes.get(arm.getName()+"-target");
+			if (arm.getTarget() == null){
+				node.setCullHint(CullHint.Always);
+			}
+			else{
+				node.setLocalTranslation(IMUtil.pointToVector3f(arm.getTarget()));
+				node.setCullHint(CullHint.Never);
+			}
+		}
 	}
 
 	@Override
@@ -323,20 +344,6 @@ public class JmeManager implements ActionListener {
 		jmeApp.getFlyByCamera().setEnabled(false);
 		rootNode = jmeApp.getRootNode();
 		loadParts(im.getData());
-	    Cylinder c = new Cylinder(8, 50, .005f, .010f, true, false);
-	    Geometry geom = new Geometry("Cylinder", c);
-	    geom.setMaterial(mat);
-	    point = new Node("point");
-	    point.attachChild(geom);
-	    rootNode.attachChild(point);
-	    nodes.put("point", point);
-	    Cylinder c2 = new Cylinder(8, 50, .005f, .010f, true, false);
-	    Geometry geom2 = new Geometry("Cylinder", c2);
-	    geom2.setMaterial(mat2);
-	    Node point2 = new Node("point");
-	    point2.attachChild(geom2);
-	    point2.setLocalTranslation(0.3f, 0,  0f);
-	    rootNode.attachChild(point2);
 	    DirectionalLight sun = new DirectionalLight();
 	    sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f));
 	    rootNode.addLight(sun);
@@ -446,10 +453,6 @@ public class JmeManager implements ActionListener {
 	
 	public void setGridHeight(double height){
 		gridHeight = (float)height;
-	}
-
-	public void setTargetPoint(Point target) {
-		addMsg("setTranslation", "point", -target.getX(), target.getZ(), target.getY());
 	}
 
 }

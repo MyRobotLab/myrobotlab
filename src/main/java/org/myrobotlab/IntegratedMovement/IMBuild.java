@@ -36,7 +36,7 @@ public class IMBuild extends Thread implements Genetic {
 	transient private HashMap<String, LinkedList<IMPart>> links;
 	transient private Matrix currentOrigin = new Matrix(4,4).loadIdentity();
 	private long startUpdateTs;
-	private int maxTryCount = 100;
+	private int maxTryCount = 500;
 	
 	private enum CalcFitnessType {
 		POSITION, COG;
@@ -368,8 +368,6 @@ public class IMBuild extends Thread implements Genetic {
 	    		j++;
 	    		continue;
 	    	}
-	    	DHLink link = part.getDHLink();
-	    	//TODO: fix link != part.getlink
 	    	part.incrRotate(delta);
 	    	Point curPos = resolveMatrix(parts, currentOrigin);
 	    	Point deltaPoint = curPos.subtract(basePosition);
@@ -393,20 +391,6 @@ public class IMBuild extends Thread implements Genetic {
 	        jInverse = new Matrix(3, parts.size());
 	      }
 	      return jInverse;
-	}
-
-	private Point getPosition(LinkedList<IMPart> parts, Matrix inputMatrix) {
-		Matrix m=parts.getFirst().getOrigin();
-		if (parts.getFirst().getCurrentArmConfig() == ArmConfig.REVERSE){
-			m = parts.getLast().getEnd();
-		}
-		Iterator<IMPart> it = parts.iterator();
-		while (it.hasNext()){
-			IMPart part = it.next();
-			DHLink link = part.getDHLink();
-			m = m.multiply(link.resolveMatrix());
-		}
-		return IMUtil.matrixToPoint(m);
 	}
 
 	private void getParts(Node<IMArm> arm, HashMap<String, LinkedList<IMPart>> links) {
