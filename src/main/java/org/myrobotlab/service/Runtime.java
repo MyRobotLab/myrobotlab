@@ -108,14 +108,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
 
   /**
-   * environments of running mrl instances - the null environment is the current
-   * local
-   */
-  // @Deprecated
-  // static private final Map<URI, ServiceEnvironment> environments = new
-  // HashMap<>();
-
-  /**
    * a registry of all services regardless of which environment they came from -
    * each must have a unique name
    */
@@ -723,7 +715,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       if (hideMethods.contains(m.getName())) {
         continue;
       }
-      me = new MethodEntry(m);      
+      me = new MethodEntry(m);
       s = me.getSignature();
       ret.put(s, me);
     }
@@ -1023,7 +1015,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
          * codec.decode(FileIO.toString(options.cfg), CmdOptions.class); new
          * CommandLine(fileOptions).parseArgs(args);
          */
-        try {          
+        try {
           options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
         } catch (Exception e) {
           log.error("config file {} was specified but could not be read", options.cfg);
@@ -1031,7 +1023,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       }
 
       try {
-        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.encodePretty(options).getBytes());
+        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.toPrettyJson(options).getBytes());
       } catch (Exception e) {
         log.error("writing lastOption.json failed", e);
       }
@@ -1412,21 +1404,30 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
     UUID uuid = java.util.UUID.randomUUID();
     Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
-    Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] {"blank-uuid", CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
     // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
+    // required data
     attributes.put("id", getId());
-    attributes.put("gateway", "runtime");// connecting out - the gateway will be
-                                         // runtime ...
+    attributes.put("gateway", "runtime");
     attributes.put("uuid", uuid);
-    attributes.put("User-Agent", "runtime-client");
+    
+    // connection specific
+    attributes.put("c-type", "wasync");
+    attributes.put("c-endpoint", endpoint);
+    
+    // cli specific
     attributes.put("cwd", "/");
-    attributes.put("uri", url);
+    attributes.put("url", url); 
+    attributes.put("uri", url); // not really correct
     attributes.put("user", "root");
     attributes.put("host", "local");
-    attributes.put("endpoint", endpoint);
-
+    
+    // addendum
+    attributes.put("User-Agent", "runtime-client");
+    
+    
     addConnection(uuid.toString(), attributes);
 
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
@@ -1440,30 +1441,30 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    */
   @Override // uuid
   public void onResponse(String uuid, String data) {
-    log.info("connection {} responded with {}", uuid, data);
-    // get api - decode msg - process it
-    Map<String, Object> connection = getConnection(uuid);
-    if (connection == null) {
-      log.error("no connection with uuid {}", uuid);
-      return;
-    }
-    String uri = (String) connection.get("uri");
-    String apiKey = Api.getApiKey(uri);
-    // client requesting api ???
-    log.info("connection {} requesting endpoint {}", connection.get("id"), connection.get("uri"));
-    Api api = ApiFactory.getApiProcessor(apiKey);
-    Endpoint endpoint = (Endpoint) connection.get("endpoint");
-    // api.process(this, apiKey, endpoint);
-    // api.process(this, apiKey, uuid, endpoint, data);
-    // OutputStream out = null because no point ...
     try {
+
+      log.info("connection {} responded with {}", uuid, data);
+      // get api - decode msg - process it
+      Map<String, Object> connection = getConnection(uuid);
+      if (connection == null) {
+        error("no connection with uuid %s", uuid);
+        return;
+      }
+
+      String uri = (String) connection.get("uri");
+
+      String apiKey = ApiFactory.getApiKey(uri);
+      // client requesting api ???
+      log.info("connection {} requesting endpoint {}", connection.get("id"), connection.get("uri"));
+      Api api = ApiFactory.getApiProcessor(apiKey);
+
+      Endpoint endpoint = (Endpoint) connection.get("c-endpoint");
+
       // return blocking ???
       Object ret = api.process(this, apiKey, uri, uuid, null, data);
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("processing msg threw", e);
     } // this, apiKey, uuid, endpoint, data);
-    log.info("here");
   }
 
   public static void setRuntimeName(String inName) {
@@ -2658,6 +2659,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       }
     }
     return ret;
+  }
+
+  public static Class<?> getClass(String name) {
+    ServiceInterface si = registry.get(name);
+    if (si == null) {
+      return null;
+    }
+    return si.getClass();
   }
 
 }

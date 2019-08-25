@@ -158,31 +158,6 @@ public abstract class Api {
     return "getRegistry";
   }
 
-  /**
-   * needed to get the api key to select the appropriate api processor
-   * 
-   * @param r
-   * @return
-   */
-  static public String getApiKey(AtmosphereResource r) {
-    String requestUri = r.getRequest().getRequestURI();
-    return getApiKey(requestUri);
-  }
-
-  static public String getApiKey(String uri) {
-    int pos = uri.indexOf(Api.PARAMETER_API);
-    if (pos > -1) {
-      pos += Api.PARAMETER_API.length();
-      int pos2 = uri.indexOf("/", pos);
-      if (pos2 > -1) {
-        return uri.substring(pos, pos2);
-      } else {
-        return uri.substring(pos);
-      }
-    }
-    return null;
-  }
-
   // Api Imp has opportunity to override
   @Deprecated /* does nothing - we handle session - but we don't handle aging (if necessary) */
   protected void handleSession(WebGui webgui, String apiKey, AtmosphereResource r) {
@@ -319,6 +294,7 @@ public abstract class Api {
       return process(webgui, apiKey, r.getRequest().getRequestURI(), uuid, r.getResponse().getOutputStream(), data);
 
     } catch (Exception e) {
+      log.error("process threw", e);
       handleError(webgui, apiKey, r, e);
       return null;
     }

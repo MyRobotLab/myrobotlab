@@ -276,19 +276,6 @@ public class MethodCache {
     return getMethod(objectType, methodName, paramTypes);
   }
 
-  public Method getMethod(String jsonMsg) { // vs getMethod(String object,
-                                            // String method, String[]
-                                            // paramsToDecode
-    // decode container
-
-    // find ordinal signature match
-    // if found & !collision
-    // return method
-    // if found and collision on ordinal - FIXME resolve somehow (test cases)
-    // return method
-    return null;
-  }
-
   /**
    * A full string interface to get a method - although this is potentially a
    * easy method to use, the most common use case would be used by the framework
@@ -394,6 +381,7 @@ public class MethodCache {
     return null;
   }
 
+  @Deprecated
   final public Object invokeOn(Object obj, String method, Object... params) {
 
     if (obj == null)
@@ -550,6 +538,7 @@ public class MethodCache {
     return key;
   }
 
+  @Deprecated
   public void out(String method, Object o) {
     /*
      * Message m = Message.createMessage(this, null, method, o); // create a //
@@ -578,6 +567,12 @@ public class MethodCache {
     // get templates
     List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
     Object[] params = new Object[encodedParams.length];
+    
+    if (possible == null) {
+      log.error("no possible ordinal methods for %s", getMethodOrdinalKey(clazz.getCanonicalName(), methodName, encodedParams.length));
+      return null;
+    }
+    
     // iterate through templates - attempt to decode
     for (int p = 0; p < possible.size(); ++p) {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
@@ -609,6 +604,17 @@ public class MethodCache {
       }
     }
     return sb.toString();
+  }
+
+  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] data) {
+    if (data == null) {
+      return new String[0];
+    }
+    String[] params = new String[data.length];
+    for (int i = 0; i < data.length; ++i) {
+      params[i] = (String)data[i];
+    }
+    return getDecodedJsonParameters(clazz, methodName, params);
   }
 
 }

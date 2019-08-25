@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.Runtime;
@@ -18,8 +19,11 @@ import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestCatcher.Ball;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.test.AbstractTest;
+import org.slf4j.Logger;
 
 public class MethodCacheTest extends AbstractTest {
+  
+  public final static Logger log = LoggerFactory.getLogger(MethodCacheTest.class);
 
   static MethodCache cache;
   static TestCatcher tester;

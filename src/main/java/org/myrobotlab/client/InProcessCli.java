@@ -68,7 +68,6 @@ public class InProcessCli implements Runnable {
           }
           readLine = "";
         }
-
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -77,6 +76,7 @@ public class InProcessCli implements Runnable {
     myThread = null;
   }
 
+  // FIXME - interrupt does not work on a infinite blocked read
   public void stop() {
     if (myThread != null) {
       myThread.interrupt();

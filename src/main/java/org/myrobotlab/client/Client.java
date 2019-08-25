@@ -31,6 +31,17 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+/**
+ * This class is a minimal Java websocket client which can attach to a MyRobotLab running instance.
+ * From the command line it should be capable of sending any command using the Cli Api notation.
+ * There are system commands such as ls, lp, cd, etc - but most invoking of service methods will be of the
+ * form
+ * 
+ *  /{service}/{method}/{param0}/{param1}....
+ *  
+ * @author GroG
+ *
+ */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
 public class Client {
 

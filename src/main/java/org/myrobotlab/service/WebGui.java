@@ -402,22 +402,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return broadcaster;
   }
 
-  /**
-   * <pre>
-   * // FIXME IMPLEMENT !!!
-   * public Broadcaster getBroadcaster(String uuid) {
-   *   // ((AtmosphereResource)sessions.get(uuid).getAttribute("r")).get;
-   *   return null;
-   * }
-   * </pre>
-   */
-
   public BroadcasterFactory getBroadcasterFactory() {
     return broadcasterFactory;
-  }
-
-  private Map<String, Object> getClient(String uuid) {
-    return Runtime.getConnection(uuid);
   }
 
   @Override
@@ -570,7 +556,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void handle(AtmosphereResource r) {
  
-    String apiKey = Api.getApiKey(r);
+    String uri = r.getRequest().getRequestURI();
+    String apiKey = ApiFactory.getApiKey(uri);
 
     Map<String, Object> attributes = new HashMap<>();
     String uuid = r.uuid();
@@ -578,15 +565,24 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       r.addEventListener(onDisconnect);
       AtmosphereRequest request = r.getRequest();
       Enumeration<String> headerNames = request.getHeaderNames();      
-      
-      attributes.put("r", r);
+
+      // required attributes - id ???/
       attributes.put("uuid", r.uuid());
-      attributes.put("cwd", "/");
-      attributes.put("uri", r.getRequest().getRequestURI());
-      attributes.put("user", "root");
+      attributes.put("uri", uri);
+      attributes.put("url", r.getRequest().getRequestURL());
       attributes.put("host", r.getRequest().getRemoteAddr());
-      // attributes.put("session", session);
       attributes.put("gateway", getName());
+
+      // connection specific
+      attributes.put("c-r", r);
+      attributes.put("c-type", "nettosphere");
+                 
+      // cli specific
+      attributes.put("cwd", "/");
+
+      // addendum
+      attributes.put("user", "root");
+
       while (headerNames.hasMoreElements()) {
           String headerName = headerNames.nextElement();          
           Enumeration<String> headers = request.getHeaders(headerName);
@@ -598,7 +594,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Runtime.getInstance().addConnection(uuid, attributes);
     } else {
       // keeping it "fresh" - the resource changes every request ..
-      Runtime.getConnection(uuid).put("r", r);
+      // it switches on 
+      Runtime.getConnection(uuid).put("c-r", r);
     }
 
     AtmosphereRequest request = r.getRequest();

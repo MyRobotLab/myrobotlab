@@ -478,7 +478,7 @@ public class CodecUtils {
     return name.replaceAll("[/ .-]", "_");
   }
 
-  public static String encodePretty(Object ret) {
+  public static String toPrettyJson(Object ret) {
     return prettyGson.toJson(ret);
   }
 
