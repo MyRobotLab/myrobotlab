@@ -48,7 +48,7 @@ public class ApiFactoryTest extends AbstractTest {
       uri.getPath();
 
       // check key
-      String key = Api.getApiKey("http://userid:passwd@localhost:8888/api/messages/runtime/getService/runtime");
+      String key = ApiFactory.getApiKey("http://userid:passwd@localhost:8888/api/messages/runtime/getService/runtime");
       assertEquals(ApiFactory.API_TYPE_MESSAGES, key);
 
       // return object
