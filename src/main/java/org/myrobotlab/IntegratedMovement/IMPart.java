@@ -44,6 +44,27 @@ public class IMPart {
 	public IMPart(String partName){
 		name = partName;
 	}
+	
+	public IMPart(IMPart copy){
+		controls = copy.controls;
+		DHLinks = new HashMap<ArmConfig, DHLink>(copy.DHLinks);
+		radius = copy.radius;
+		modelPath = copy.modelPath;
+		scale = copy.scale;
+		initialTranslateRotate = copy.initialTranslateRotate;
+		origin = copy.origin;
+		end = copy.end;
+		visible = copy.visible;
+		internTransform = copy.internTransform;
+		theta = copy.theta;
+		alpha = copy.alpha;
+		initialTheta = copy.initialTheta;
+		r = copy.r;
+		reverseControl = copy.reverseControl;
+		state = copy.state;
+		targetPos = copy.targetPos;
+		currentArmConfig = copy.currentArmConfig;
+	}
 
 	
 

@@ -14,8 +14,10 @@ public class Node<T> {
 	transient private T data = null;
 	transient private List<Node<T>> children = new ArrayList<>();
 	transient private Node<T> parent = null;
-	public Node(T data){
+	private String name = "";
+	public Node(String name, T data){
 		this.data = data;
+		this.name = name;
 	}
 	public Node<T> addchild(Node<T> child){
 		child.setParent(this);
@@ -55,5 +57,14 @@ public class Node<T> {
 			}
 		}
 		return retVal;
+	}
+	
+	public Node<T> find(String nodeName){
+		if (name == nodeName) return this;
+		for (Node<T> children : getChildren()){
+			Node<T> retval = children.find(nodeName);
+			if ( retval!= null) return retval; 
+		}
+		return null;
 	}
 }

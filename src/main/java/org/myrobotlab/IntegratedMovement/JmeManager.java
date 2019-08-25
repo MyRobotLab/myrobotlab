@@ -114,19 +114,7 @@ public class JmeManager implements ActionListener {
 	        log.warn("future threw", e);
 	    }
 	    info("already started app %s", appType);
-/*	    jmeApp.start();
-	    // need to wait for jmeApp to be ready or the models won't load
-	    synchronized (this) {
-	        try {
-				wait(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	     }
-	     assetManager = jmeApp.getAssetManager();
-	      // add the existing objects
-	      //jmeApp.addObject(collisionItems.getItems());
-*/	}
+	}
 
 	public void enableGrid(boolean b) {
 	    Spatial s = nodes.get("floor-grid");

@@ -142,7 +142,7 @@ public class IntegratedMovement extends Service
 		// Setup controller and servo
 		Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
 		arduino.setBoardMega();
-		// arduino.setVirtual(true);
+		 arduino.setVirtual(true);
 		arduino.connect("COM3");
 		arduino.setDebug(false);
 		// define and attach servo
@@ -210,62 +210,62 @@ public class IntegratedMovement extends Service
 		ik.attach(Rwrist);
 		
 		HobbyServo leftHipY = (HobbyServo) Runtime.start("leftHipY", "HobbyServo");
-		leftHipY.attach(arduino.getName(), 35, 0.0, 14.0);
+		leftHipY.attach(arduino.getName(), 35, 0.0, 5.0);
 		leftHipY.map(-20.0, 20.0, 0.0, 40.0);
 		ik.attach(leftHipY);
 		
 		HobbyServo leftHipR = (HobbyServo) Runtime.start("leftHipR", "HobbyServo");
-		leftHipR.attach(arduino.getName(), 36, 0.0, 14.0);
+		leftHipR.attach(arduino.getName(), 36, 0.0, 5.0);
 		leftHipR.map(-10.0, 10.0, 0.0, 20.0);
 		ik.attach(leftHipR);
 		
 		HobbyServo leftHipP = (HobbyServo) Runtime.start("leftHipP", "HobbyServo");
-		leftHipP.attach(arduino.getName(),37,0.0, 14.0);
+		leftHipP.attach(arduino.getName(),37,0.0, 5.0);
 		leftHipP.map(-46.0, 46.0, 0.0, 92.0);
 		ik.attach(leftHipP);
 		
 		HobbyServo leftKnee = (HobbyServo) Runtime.start("leftKnee", "HobbyServo");
-		leftKnee.attach(arduino.getName(), 38, 0.0, 14.0);
+		leftKnee.attach(arduino.getName(), 38, 0.0, 5.0);
 		leftKnee.map(0.0, 40.0, 0.0, 40.0);
 		ik.attach(leftKnee);
 		
 		HobbyServo leftAnkleP = (HobbyServo) Runtime.start("leftAnkleP", "HobbyServo");
-		leftAnkleP.attach(arduino.getName(), 39, 0.0, 14.0);
+		leftAnkleP.attach(arduino.getName(), 39, 0.0, 5.0);
 		leftAnkleP.map(-25.0, 45.0, 0.0, 70.0);
 		ik.attach(leftAnkleP);
 		
 		HobbyServo leftAnkleR = (HobbyServo) Runtime.start("leftAnkleR", "HobbyServo");
-		leftAnkleR.attach(arduino.getName(), 40, 0.0, 14.0);
+		leftAnkleR.attach(arduino.getName(), 40, 0.0, 5.0);
 		leftAnkleR.map(-27.0, 27.0, 0.0, 54.0);
 		ik.attach(leftAnkleR);
 		
 		HobbyServo rightHipY = (HobbyServo) Runtime.start("rightHipY", "HobbyServo");
-		rightHipY.attach(arduino.getName(), 41, 0.0, 14.0);
+		rightHipY.attach(arduino.getName(), 41, 0.0, 5.0);
 		rightHipY.map(-20.0, 20.0, 0.0, 40.0);
 		ik.attach(rightHipY);
 		
 		HobbyServo rightHipR = (HobbyServo) Runtime.start("rightHipR", "HobbyServo");
-		rightHipR.attach(arduino.getName(), 42, 0.0, 14.0);
+		rightHipR.attach(arduino.getName(), 42, 0.0, 5.0);
 		rightHipR.map(-10.0, 10.0, 0.0, 20.0);
 		ik.attach(rightHipR);
 		
 		HobbyServo rightHipP = (HobbyServo) Runtime.start("rightHipP", "HobbyServo");
-		rightHipP.attach(arduino.getName(), 43, 0.0, 14.0);
+		rightHipP.attach(arduino.getName(), 43, 0.0, 5.0);
 		rightHipP.map(-46.0, 46.0, 0.0, 92.0);
 		ik.attach(rightHipP);
 		
 		HobbyServo rightKnee = (HobbyServo) Runtime.start("rightKnee", "HobbyServo");
-		rightKnee.attach(arduino.getName(), 44, 0.0, 14.0);
+		rightKnee.attach(arduino.getName(), 44, 0.0, 5.0);
 		rightKnee.map(0.0, 40.0, 0.0, 40.0);
 		ik.attach(rightKnee);
 		
 		HobbyServo rightAnkleP = (HobbyServo) Runtime.start("rightAnkleP", "HobbyServo");
-		rightAnkleP.attach(arduino.getName(), 45, 0.0, 14.0);
+		rightAnkleP.attach(arduino.getName(), 45, 0.0, 5.0);
 		rightAnkleP.map(-25.0, 45.0, 0.0, 70.0);
 		ik.attach(rightAnkleP);
 		
 		HobbyServo rightAnkleR = (HobbyServo) Runtime.start("rightAnkleR", "HobbyServo");
-		rightAnkleR.attach(arduino.getName(), 46, 0.0, 14.0);
+		rightAnkleR.attach(arduino.getName(), 46, 0.0, 5.0);
 		rightAnkleR.map(-27.0, 27.0, 0.0, 54.0);
 		ik.attach(rightAnkleR);
 		
@@ -334,7 +334,7 @@ public class IntegratedMovement extends Service
 		rightAnkleP.moveTo(0.0);
 		rightAnkleR.moveTo(0.0);
 
-		sleep(100);
+		sleep(1000);
 		/*
 		 * defining each part of the robot TODO saved those setting to file
 		 */
@@ -730,12 +730,14 @@ public class IntegratedMovement extends Service
 		// ik.setAi("rightArm", Ai.KEEP_BALANCE);
 		// ik.setAi("leftArm", Ai.KEEP_BALANCE);
 		ik.startSimulator();
+		sleep(1000);
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
 		//ik.moveTo("inMoov", "rightLeg", -0, -0.0, -.144);
-		//ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
+		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
+		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
 		ik.moveTo("inMoov", "leftLeg", -.133, .5, -.91);
-		sleep(5000);
+		sleep(10000);
 		ik.moveTo("inMoov", "leftLeg", -.133, 0, -.91);
 	}
 
