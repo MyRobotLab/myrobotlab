@@ -32,14 +32,16 @@ public class IMPart {
 	transient private Matrix end = IMUtil.getIdentityMatrix().multiply(Matrix.translation(0.01, 0, 0));
 	private boolean visible = true;
 	private Matrix internTransform = IMUtil.getIdentityMatrix();
-	private double theta=0;
-	private double alpha=0;
+	private double theta = 0;
+	private double alpha = 0;
 	private double initialTheta=0;
-	private double r=0;
+	private double r = 0;
 	transient private HashSet<String> reverseControl = new HashSet<String>();
 	private ServoStatus state = ServoStatus.SERVO_STOPPED;
 	private double targetPos = 0;
 	private ArmConfig currentArmConfig = ArmConfig.DEFAULT;
+	private double mass = 0;
+	private double centerOfMass = 0.5;
 
 	public IMPart(String partName){
 		name = partName;
@@ -370,5 +372,26 @@ public class IMPart {
 	public boolean isReversedControled() {
 		if (reverseControl.contains(getControl())) return true;
 		return false;
+	}
+
+	public void setMass(double mass, double centerOfMass) {
+		this.mass = mass;
+		this.setCenterOfMass(centerOfMass);
+	}
+
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+	public double getCenterOfMass() {
+		return centerOfMass;
+	}
+
+	public void setCenterOfMass(double centerOfMass) {
+		this.centerOfMass = centerOfMass;
 	}
 }

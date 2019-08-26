@@ -42,12 +42,7 @@ public class DHLink implements Serializable {
 
   public transient final static Logger log = LoggerFactory.getLogger(DHLink.class);
 
-  private double speed; // FIXME - is this set by IK being dp/dt ? .. it
-  // should be
-  private ServoStatus state = ServoStatus.SERVO_STOPPED; // FIXME - no servo info
-  public double targetPos;
   public boolean hasActuator = false; // FIXME - no servo info
-  public double currentPos = 0.0;
   public double offset = 0.0;
 
   // private Matrix m;
@@ -86,11 +81,7 @@ public class DHLink implements Serializable {
     this.max = copy.max;
     this.name = copy.name;
     this.initialTheta = copy.initialTheta;
-    this.state = copy.state;
-    this.targetPos = copy.targetPos;
-    this.speed = copy.speed;
     this.hasActuator = copy.hasActuator;
-    this.currentPos = copy.currentPos;
   }
 
   public DHLink(String name, double d, double theta, double r, double alpha, DHLinkType dhLinkType) {
@@ -388,18 +379,17 @@ public class DHLink implements Serializable {
   }
 
   public double getSpeed() {
-    return speed;
+    return 0;
   }
 
   public void setSpeed(double speed) {
-    this.speed = speed;
   }
 
   /**
    * @return the targetPos
    */
   public Double getTargetPos() {
-    return targetPos;
+    return 0.0;
   }
 
   /**
@@ -407,16 +397,13 @@ public class DHLink implements Serializable {
    *          the targetPos to set
    */
   public void setTargetPos(Double targetPos2) {
-    this.targetPos = targetPos2;
   }
 
   public void setCurrentPos(double pos) {
-    currentPos = pos;
-
   }
 
   public Double getCurrentPos() {
-    return currentPos;
+    return null;
   }
 
   public DHLinkType getType() {
@@ -452,11 +439,10 @@ public class DHLink implements Serializable {
   }
 
 public void setState(ServoStatus state) {
-	this.state = state;	
 }
 
 public ServoStatus getState() {
-	return state;
+	return null;
 }
 
 }

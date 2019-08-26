@@ -78,7 +78,6 @@ public class IMBuild extends Thread implements Genetic {
 	}
 
 	public void run(){
-		//service.error("test");
 		while(true){
 			update();
 			copyControl();
@@ -147,8 +146,6 @@ public class IMBuild extends Thread implements Genetic {
 			a.resetWaitTime();
 			return;
 		}
-		//moveToGoal(arm);
-		//publishAngles(arm);
 	}
 
 	private void publishAngles(Node<IMArm> arm) {
@@ -192,14 +189,11 @@ public class IMBuild extends Thread implements Genetic {
 		    if(links.isEmpty()) return false;
 	    	numSteps++;
             currentOrigin = arms.getData().getInputMatrix();
-//	    	Point currentPos = getPosition(links, currentOrigin);
 	    	//if (arm.getData().getTarget().distanceTo(currentPos) > 0.2) {
 	    	//if(arm.getData().getTryCount()%30==0){
 	    		//break;
 	    	//}
 	    	if (numSteps > maxIterations){
-	    	//if(arm.getData().getTryCount()%200==0){
-	    	//if(true){
 	            calcFitnessType = CalcFitnessType.POSITION;
 	            //currentArmConfig = arm.getData().getArmConfig();
 	            //currentTarget = arm.getData().getTarget();
@@ -281,9 +275,7 @@ public class IMBuild extends Thread implements Genetic {
 	            	if (controls.get(l.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
 	            		// update joint positions! move towards the goal!
 	            		double d = dTheta.elements[i][0];
-	            		// incr rotate needs to be min/max aware here!
 	            		l.get(i).incrRotate(d);
-	            		//link.incrRotate(d);
 	            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
 	            	}
 	            	else {
@@ -398,9 +390,7 @@ public class IMBuild extends Thread implements Genetic {
 			Node<IMArm> parent = arm;
 			while (parent.getParent() != null){
 				if (!links.containsKey(parent.getData().getName())){
-					//if (parent.getData().armReady()){
-						links.put(parent.getData().getName(), parent.getData().getParts());
-					//}
+					links.put(parent.getData().getName(), parent.getData().getParts());
 				}
 				parent = parent.getParent();
 			}

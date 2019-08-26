@@ -11,7 +11,7 @@ import org.myrobotlab.service.IntegratedMovement;
  * @author chris
  *
  */
-public class GravityCenter extends Thread {
+public class GravityCenter {
 
   private HashMap<String, Double> masses = new HashMap<String, Double>();
   private HashMap<String, Double> cogs = new HashMap<String, Double>();
@@ -21,7 +21,6 @@ public class GravityCenter extends Thread {
   private int maxDistanceToCog = 25;
 
   public GravityCenter(IntegratedMovement im) {
-    super("GravityCenter");
     service = im;
   }
 

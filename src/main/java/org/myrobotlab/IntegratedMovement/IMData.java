@@ -7,7 +7,6 @@ import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
 
 public class IMData {
@@ -16,7 +15,6 @@ public class IMData {
 	private ConcurrentHashMap<String, IMPart> parts = new ConcurrentHashMap<String, IMPart>();
 	private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
 	private HashMap<String, Matrix> inputMatrixs = new HashMap<String, Matrix>();
-	private HashMap<String, String> armLinkTos = new HashMap<String, String>();
 	private HashMap<String, IMArm> arms = new HashMap<String, IMArm>();
 	private HashMap<String, IMBuild> builds = new HashMap<String, IMBuild>();
 	
@@ -58,7 +56,6 @@ public class IMData {
 	public void onMoveTo(ServoControl data) {
 		IMControl control = controls.get(data.getName());
 		if (control == null) return;
-		//control.setState(data.ge);
 		control.setSpeed(data.getSpeed());
 		control.setTargetPos(data.getTargetPos());
 		control.setMinMax(data.getMin(), data.getMax());
@@ -81,10 +78,6 @@ public class IMData {
 
 	public void addInputMatrix(String armName, Matrix inputMatrix) {
 		inputMatrixs.put(armName, inputMatrix);
-	}
-
-	public void linkArmTo(String armName, String linkTo) {
-		armLinkTos.put(armName, linkTo);
 	}
 
 	public Matrix getInputMatrix(String arm) {

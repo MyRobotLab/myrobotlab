@@ -85,18 +85,7 @@ public class IMArm {
 			if (controls.containsKey(part.getControl(ArmConfig.REVERSE))){
 				link.addPositionValue(controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
 			}
-			//s = link.resolveMatrix();
 		}
-//		it = parts.descendingIterator();
-//		while (it.hasNext()){
-//			IMPart part = it.next();
-//			DHLink link = part.getDHLink(ArmConfig.REVERSE);
-//			if (link == null) continue;
-//			if (controls.containsKey(part.getControl(ArmConfig.REVERSE))){
-//				part.addPositionToLink(controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
-//				//link.addPositionValue(-controls.get(part.getControl(ArmConfig.REVERSE)).getPos());
-//			}
-//		}
 		if (getArmConfig() == ArmConfig.REVERSE) return parts.getLast().getEnd();
 		return m;
 	}

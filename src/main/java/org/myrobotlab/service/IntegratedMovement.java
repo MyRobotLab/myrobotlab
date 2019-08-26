@@ -50,7 +50,7 @@ import com.jme3.math.Vector3f;
  * 
  */
 public class IntegratedMovement extends Service
-		implements IKJointAnglePublisher, ServoDataListener, ServoControlListener {
+		implements ServoDataListener, ServoControlListener {
 
 	public IntegratedMovement(String reservedKey) {
 		super(reservedKey);
@@ -358,6 +358,7 @@ public class IntegratedMovement extends Service
 																					// for
 																					// kinematic
 		partMidStom.set3DModel("Models/mtorso.j3o", 0.001f, new Point(-0,0,0,0, 0, 0)); //set the 3d model, scale, and offset)
+		partMidStom.setMass(2.832, 0.5);
 		ik.attach(partMidStom); // add the part to the IntegratedMovement
 								// service.
 
@@ -366,6 +367,7 @@ public class IntegratedMovement extends Service
 		partTopStom.setDHParameters(ArmConfig.DEFAULT, 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
+		partTopStom.setMass(5.774, 0.5);
 		ik.attach(partTopStom);
 
 		IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .010);
@@ -377,18 +379,21 @@ public class IntegratedMovement extends Service
 		partLeftOmoplate.setDHParameters(ArmConfig.DEFAULT, .004, -5.6, 0.04, 90);
 		partLeftOmoplate.setControl(ArmConfig.DEFAULT, omoplate.getName());
 		partLeftOmoplate.set3DModel("Models/Lomoplate1.j3o", 0.001f, new Point(0.001,0.004,0,-90,-90,0));
+		partLeftOmoplate.setMass(0.739, 0.5);
 		ik.attach(partLeftOmoplate);
 		
 		IMPart partLeftShoulder = ik.createPart("leftShoulder", .01);
 		partLeftShoulder.setControl(ArmConfig.DEFAULT, shoulder.getName());
 		partLeftShoulder.set3DModel("Models/Lshoulder.j3o", 0.001f, new Point(-.0125,0,0,-90,0,-90));
 		partLeftShoulder.setDHParameters(ArmConfig.DEFAULT, -0.077, 90, 0, -90);
+		partLeftShoulder.setMass(0.513, 0.5);
 		ik.attach(partLeftShoulder);
 		
 		IMPart partLeftRotate = ik.createPart("leftRotate", 0.01);
 		partLeftRotate.setControl(ArmConfig.DEFAULT, rotate.getName());
 		partLeftRotate.setDHParameters(ArmConfig.DEFAULT, -0.282, -90, 0, 90);
 		partLeftRotate.set3DModel("Models/rotate1.j3o", .001f, new Point(0, 0, -0.0582, 0, 0, 0));
+		partLeftRotate.setMass(0.715, 0.5754);
 		ik.attach(partLeftRotate);
 		
 		IMPart partLeftBicepAttach = ik.createPart("leftBicepAttach", 0.01);
@@ -399,6 +404,7 @@ public class IntegratedMovement extends Service
 		partLeftBicep.setControl(ArmConfig.DEFAULT, bicep.getName());
 		partLeftBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 + 180, .3, 0);
 		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
+		partLeftBicep.setMass(0.940, 0.4559);
 		ik.attach(partLeftBicep);
 		
 		IMPart partRightArmAttach = ik.createPart("rightArmAttach", 0.01);
@@ -409,18 +415,21 @@ public class IntegratedMovement extends Service
 		partRightOmoplate.setDHParameters(ArmConfig.DEFAULT, -0.004, -5.6+180, 0.04, -90);
 		partRightOmoplate.setControl(ArmConfig.DEFAULT, Romoplate.getName());
 		partRightOmoplate.set3DModel("Models/Romoplate1.j3o", scale, new Point(-0.001,-0.002,0,-90,90,0));
+		partRightOmoplate.setMass(0.739, 0.5);
 		ik.attach(partRightOmoplate);
 		
 		IMPart partRightShoulder = ik.createPart("rightShoulder", 0.01);
 		partRightShoulder.setDHParameters(ArmConfig.DEFAULT, 0.077, 90, .0, 90);
 		partRightShoulder.setControl(ArmConfig.DEFAULT, Rshoulder.getName());
 		partRightShoulder.set3DModel("Models/Rshoulder1.j3o", scale, new Point(0.0225,-0.01,0,-90,0,-90));
+		partRightShoulder.setMass(0.513, 0.5);
 		ik.attach(partRightShoulder);
 		
 		IMPart partRightRotate = ik.createPart("rightRotate", 0.01);
 		partRightRotate.setDHParameters(ArmConfig.DEFAULT, 0.282, -90, 0, 90);
 		partRightRotate.setControl(ArmConfig.DEFAULT, Rrotate.getName());
 		partRightRotate.set3DModel("Models/rotate1.j3o", scale, new Point(0,0,-0.056,180,0,0));
+		partRightRotate.setMass(0.715, 0.5754);
 		ik.attach(partRightRotate);
 		
 		IMPart partRightBicepAttach = ik.createPart("rightBicepAttach", 0.01);
@@ -431,16 +440,19 @@ public class IntegratedMovement extends Service
 		partRightBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 , .3, 0);
 		partRightBicep.setControl(ArmConfig.DEFAULT, Rbicep.getName());
 		partRightBicep.set3DModel("Models/Rbicep1.j3o", scale, new Point(0.004,0,0,-90,0,0));
+		partRightBicep.setMass(0.940, 0.4559);
 		ik.attach(partRightBicep);
 		
 		IMPart partLowStom = ik.createPart("lowStom", 0.01);
 		partLowStom.setDHParameters(ArmConfig.DEFAULT, 0.071, 0, 0, 0);
 		partLowStom.set3DModel("Models/ltorso.j3o", scale, new Point(0,-0.005,0.071,0,0,0));
+		partLowStom.setMass(2.832, 0.5);
 		ik.attach(partLowStom);
 		
 		IMPart partHarlHip = ik.createPart("harlHip", 0.01);
 		partHarlHip.setDHParameters(ArmConfig.DEFAULT, 0.0635, 0, 0, 0);
 		partHarlHip.set3DModel("Models/harlLTorso1.j3o", 1, new Point(0,0,0,0,0,0));
+		partHarlHip.setMass(1.814, 0.5);
 		ik.attach(partHarlHip);
 		
 		IMPart partHarlHipLeftAttach = ik.createPart("harlHipLeftAttach", 0.01); //o= 0,0,0 right, up front
@@ -454,6 +466,7 @@ public class IntegratedMovement extends Service
 		partHarlLeftHipY.setDHParameters(ArmConfig.REVERSE, 0, 0, 0, -90); //.127, -0.0415, 0 right up front
 		partHarlLeftHipY.set3DModel("Models/harlLhipY.j3o", scale, new Point(0,0,0,0,0,0));
 		partHarlLeftHipY.setControl(ArmConfig.DEFAULT, "leftHipY");
+		partHarlLeftHipY.setMass(0.3);
 		ik.attach(partHarlLeftHipY);
 		
 		IMPart partHarlLeftHipRAttach = ik.createPart("harlLeftHipRAttach", 0.01);
@@ -467,6 +480,7 @@ public class IntegratedMovement extends Service
 		partHarlLeftHipR.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.0629, 90); //0.127, -0.0415, -0.01 up front right
 		partHarlLeftHipR.setControl(ArmConfig.DEFAULT, "leftHipR");
 		partHarlLeftHipR.set3DModel("Models/harlLhipR.j3o", scale, new Point(0.001,-0.011,0,-90,90,0));
+		partHarlLeftHipR.setMass(0.3);
 		ik.attach(partHarlLeftHipR);
 		
 		IMPart partHarlLeftHipPAttach = ik.createPart("harlLeftHipPAttach", 0.01);
@@ -481,6 +495,7 @@ public class IntegratedMovement extends Service
 		partHarlLeftHipP.setControl(ArmConfig.DEFAULT, "leftHipP");
 		partHarlLeftHipP.setControl(ArmConfig.REVERSE, "leftKnee");
 		partHarlLeftHipP.set3DModel("Models/harlLhipP.j3o", scale, new Point(0,0,0,-90,0,0));
+		partHarlLeftHipP.setMass(1.980);
 		ik.attach(partHarlLeftHipP);
 		
 		IMPart partHarlLeftKnee = ik.createPart("harlLeftKnee", 0.01);
@@ -489,6 +504,7 @@ public class IntegratedMovement extends Service
 		partHarlLeftKnee.setControl(ArmConfig.DEFAULT, "leftKnee");
 		partHarlLeftKnee.setControl(ArmConfig.REVERSE, "leftAnkleP");
 		partHarlLeftKnee.set3DModel("Models/harlLKnee.j3o", scale, new Point(0,0.003,0,-90,180,0));
+		partHarlLeftKnee.setMass(2.195);
 		ik.attach(partHarlLeftKnee);
 		
 		IMPart partHarlLAnkleP = ik.createPart("harlLAnkleP", 0.01);
@@ -497,6 +513,7 @@ public class IntegratedMovement extends Service
 		partHarlLAnkleP.setControl(ArmConfig.DEFAULT, "leftAnkleP");
 		partHarlLAnkleP.setControl(ArmConfig.REVERSE, "leftAnkleR");
 		partHarlLAnkleP.set3DModel("Models/harlLAnkleP1.j3o", scale, new Point(0,0.003,0,90,0,0));
+		partHarlLAnkleP.setMass(0.3);
 		ik.attach(partHarlLAnkleP);
 		
 		IMPart partHarlLAnkleR = ik.createPart("harlLAnkleR", 0.01);
@@ -504,6 +521,7 @@ public class IntegratedMovement extends Service
 		partHarlLAnkleR.setDHParameters(ArmConfig.REVERSE, 0, 180, 0.04, 180); //0.121, -0.9128, 0.01, up front right
 		partHarlLAnkleR.setControl(ArmConfig.DEFAULT, "leftAnkleR");
 		partHarlLAnkleR.set3DModel("Models/harlLankleR.j3o", scale, new Point(0,0,0,-90,90,0));
+		partHarlLAnkleR.setMass(1.402);
 		ik.attach(partHarlLAnkleR);
 
 		IMPart partHarlHipRightAttach = ik.createPart("harlHipRightAttach", 0.01); //o = x(0): right z(-.1345): up y(0): front
@@ -517,6 +535,7 @@ public class IntegratedMovement extends Service
 		partHarlRightHipY.setDHParameters(ArmConfig.REVERSE, 0, 0, 0., 90); //x(.127)left, z(-.176)up, y(0)back
 		partHarlRightHipY.setControl(ArmConfig.DEFAULT, "rightHipY");
 		partHarlRightHipY.set3DModel("Models/harlRHipY.j3o", scale, new Point(0,0,0,0,0,0));
+		partHarlRightHipY.setMass(0.3);
 		ik.attach(partHarlRightHipY);
 		
 		IMPart partHarlRightHipRAttach = ik.createPart("harlRightHipRAttach", 0.01);
@@ -530,6 +549,7 @@ public class IntegratedMovement extends Service
 		partHarlRightHipR.setDHParameters(ArmConfig.REVERSE, 0, 0, 0.0629, 90); //x(.127)up, z(-.176)front, y(-.1)right 
 		partHarlRightHipR.setControl(ArmConfig.DEFAULT, "rightHipR");
 		partHarlRightHipR.set3DModel("Models/harlRHipR.j3o", scale, new Point(0.001,-0.011,0,90,-90,180));
+		partHarlRightHipR.setMass(0.3);
 		ik.attach(partHarlRightHipR);
 		
 		IMPart partHarlRightHipPAttach = ik.createPart("harlRightHipPAttach", 0.01);
@@ -544,6 +564,7 @@ public class IntegratedMovement extends Service
 		partHarlRightHipP.setControl(ArmConfig.DEFAULT, "rightHipP");
 		partHarlRightHipP.setControl(ArmConfig.REVERSE, "rightKnee");
 		partHarlRightHipP.set3DModel("Models/harlRHip.j3o", scale, new Point(0,0,0,-90,0,0));
+		partHarlRightHipP.setMass(1.980);
 		ik.attach(partHarlRightHipP);
 		
 		IMPart partHarlRightKnee = ik.createPart("harlRightKnee", 0.01);
@@ -552,6 +573,7 @@ public class IntegratedMovement extends Service
 		partHarlRightKnee.setControl(ArmConfig.DEFAULT, "rightKnee");
 		partHarlRightKnee.setControl(ArmConfig.REVERSE, "rightAnkleP");
 		partHarlRightKnee.set3DModel("Models/harlRKnee.j3o", scale, new Point(0.,0.003,0,-90,180,0));
+		partHarlRightKnee.setMass(2.195);
 		ik.attach(partHarlRightKnee);
 		
 		IMPart partHarlRAnkleP = ik.createPart("harlRAnkleP", 0.01);
@@ -560,6 +582,7 @@ public class IntegratedMovement extends Service
 		partHarlRAnkleP.setControl(ArmConfig.DEFAULT, "rightAnkleP");
 		partHarlRAnkleP.setControl(ArmConfig.REVERSE, "rightAnkleR");
 		partHarlRAnkleP.set3DModel("Models/harlRankleP.j3o", scale, new Point(0,0.003,0,-90,0,0));
+		partHarlRAnkleP.setMass(0.3);
 		ik.attach(partHarlRAnkleP);
 		
 		IMPart partHarlRAnkleR = ik.createPart("harlRAnkleR", 0.01);
@@ -567,6 +590,7 @@ public class IntegratedMovement extends Service
 		partHarlRAnkleR.setDHParameters(ArmConfig.REVERSE, 0, 180, 0.04, 180); //x(.133)up, z(-1.0077)front, y(-0.1)right
 		partHarlRAnkleR.setControl(ArmConfig.DEFAULT, "rightAnkleR");//o= x(.133): down, z(-1.0479) back, y(-.1):right
 		partHarlRAnkleR.set3DModel("Models/harlRankleR.j3o", scale, new Point(0, 0, 0, -90, 90, 0));
+		partHarlRAnkleR.setMass(1.402);
 		ik.attach(partHarlRAnkleR);
 		
 		
@@ -630,21 +654,21 @@ public class IntegratedMovement extends Service
 //		inMoov.addArm(armLeftArm, armTorso);
 //		ik.attach(inMoov);
 
-//		IMBuild inMoov = ik.createBuild("inMoov");
-//		inMoov.addArm(armRightLeg);
-//		inMoov.addArm(armTorso);
-//		inMoov.addArm(armLeftLeg);
-//		inMoov.addArm(armRightArm, armTorso);
-//		inMoov.addArm(armLeftArm, armTorso);
-//		ik.attach(inMoov);
-
 		IMBuild inMoov = ik.createBuild("inMoov");
-		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
-		inMoov.addArm(armTorso, armLeftLeg);
-		inMoov.addArm(armRightLeg, armLeftLeg);
+		inMoov.addArm(armRightLeg);
+		inMoov.addArm(armTorso);
+		inMoov.addArm(armLeftLeg);
 		inMoov.addArm(armRightArm, armTorso);
 		inMoov.addArm(armLeftArm, armTorso);
 		ik.attach(inMoov);
+
+//		IMBuild inMoov = ik.createBuild("inMoov");
+//		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
+//		inMoov.addArm(armTorso, armLeftLeg);
+//		inMoov.addArm(armRightLeg, armLeftLeg);
+//		inMoov.addArm(armRightArm, armTorso);
+//		inMoov.addArm(armLeftArm, armTorso);
+//		ik.attach(inMoov);
 
 		
 		//rightKnee.moveTo(15.5);
@@ -751,16 +775,6 @@ public class IntegratedMovement extends Service
 		// ik.processKinectData();
 
 		/*
-		 * ik.cog = new GravityCenter(ik); ik.cog.setLinkMass("mtorso", 2.832,
-		 * 0.5); ik.cog.setLinkMass("ttorso", 5.774, 0.5);
-		 * ik.cog.setLinkMass("omoplate", 0.739, 0.5);
-		 * ik.cog.setLinkMass("Romoplate", 0.739, 0.5);
-		 * ik.cog.setLinkMass("rotate", 0.715, 0.5754);
-		 * ik.cog.setLinkMass("Rrotate", 0.715, 0.5754);
-		 * ik.cog.setLinkMass("shoulder", 0.513, 0.5);
-		 * ik.cog.setLinkMass("Rshoulder", 0.513, 0.5);
-		 * ik.cog.setLinkMass("bicep", 0.940, 0.4559);
-		 * ik.cog.setLinkMass("Rbicep", 0.940, 0.4559);
 		 * ik.cog.setLinkMass("wrist", 0.176, 0.7474);
 		 * ik.cog.setLinkMass("Rwrist", 0.176, 0.7474);
 		 */
@@ -773,13 +787,13 @@ public class IntegratedMovement extends Service
 		//ik.moveTo("inMoov", "rightLeg", -0, -0.0, -.144);
 //		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
 //		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
-//		ik.moveTo("inMoov", "leftLeg", -.133, .5, -.91);
+//		ik.moveTo("inMoov", "rightLeg", .133, .5, -.91);
 //		sleep(10000);
-//		ik.moveTo("inMoov", "leftLeg", -.133, 0, -.91);
+//		ik.moveTo("inMoov", "rightLeg", .133, 0, -.91);
 //		sleep(5000);
 //		ik.moveTo("inMoov", "leftArm", -0.6,.0,0.3);
 //		ik.moveTo("inMoov", "rightArm", 0.120,.0,.7);
-//		ik.moveTo("inMoov", "leftLeg", -.5, .0, -.700);
+//		ik.moveTo("inMoov", "rightLeg", .5, .0, -.700);
 		
 	}
 
@@ -811,7 +825,6 @@ public class IntegratedMovement extends Service
 
 	public transient CollisionDectection collisionItems = new CollisionDectection();
 
-	transient GeneticParameters geneticParameters = new GeneticParameters();
 	transient private IMData imData = new IMData();
 	transient private Matrix inputMatrix = null;
 
@@ -924,15 +937,6 @@ public class IntegratedMovement extends Service
 		return inputMatrix;
 	}
 
-	public double[][] createJointPositionMap(String armName) {
-/*		IMEngine arm = imData.getArm(armName);
-		if (arm != null) {
-			return arm.createJointPositionMap();
-		}
-		log.info("unknown arm {}", armName);
-*/		return new double[0][0];
-	}
-
 	public IMPart createPart(String partName, double radius) {
 		IMPart part = new IMPart(partName);
 		part.setRadius(radius);
@@ -1012,15 +1016,7 @@ public class IntegratedMovement extends Service
 		return jmeManager;
 	}
 
-	public void holdTarget(String arm, boolean holdEnabled) {
-/*		IMEngine engine = imData.getArm(arm);
-		if (engine != null) {
-			engine.holdTarget(holdEnabled);
-		} else {
-			log.info("unknown arm {} for hold target", arm);
-		}
-*/	}
-	
+
 	public void moveTo(String build, String arm, String part, double x, double y, double z){
 		moveTo(build, arm, part, new Point(x, y, z, 0, 0, 0));
 	}
@@ -1059,15 +1055,10 @@ public class IntegratedMovement extends Service
 	}
 
 	public void onMoveTo(ServoControl data) {
-/*		for (IMEngine e : imData.getArms().values()) {
-			e.updateLinksPosition(data);
-		}
-		if (openni != null) {
-			map3d.updateKinectPosition(currentPosition(kinectName));
-		}
-		if (jmeApp != null) {
-		}
-*/		imData.onMoveTo(data);
+//		if (openni != null) {
+//			map3d.updateKinectPosition(currentPosition(kinectName));
+//		}
+		imData.onMoveTo(data);
 	}
 
 	public void onOpenNiData(OpenNiData data) throws InterruptedException {
@@ -1091,44 +1082,15 @@ public class IntegratedMovement extends Service
 	}
 
 	public void onServoData(ServoData data) {
-/*		for (IMEngine e : imData.getArms().values()) {
-			e.updateLinksPosition(data);
-		}
-		if (openni != null) {
-			map3d.updateKinectPosition(currentPosition(kinectName));
-		}
-		if (jmeApp != null) {
-			// jmeApp.updatePosition(data);
-		}
-*/		imData.onServoData(data);
-		// jmeManager.updatePosition(imData);
+//		if (openni != null) {
+//			map3d.updateKinectPosition(currentPosition(kinectName));
+//		}
+		imData.onServoData(data);
 	}
 
 	public void processKinectData() throws InterruptedException {
 		ProcessKinectData = true;
 		onOpenNiData(openni.get3DData());
-	}
-
-	public Object[] publishAngles(String name, double positionValueDeg) {
-		Object[] retval = new Object[] { (Object) name, (Object) positionValueDeg };
-		return retval;
-	}
-
-	@Override
-	public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
-		return angleMap;
-	}
-
-	public double[][] publishJointPositions(double[][] jointPositionMap) {
-		return jointPositionMap;
-	}
-
-	public PositionData publishPosition(PositionData position) {
-		return position;
-	}
-
-	public void publishPosition(String armName) {
-		//invoke("publishPosition", new PositionData(armName, currentPosition(armName)));
 	}
 
 	public void removeAi(Ai ai) {
@@ -1193,7 +1155,6 @@ public class IntegratedMovement extends Service
 //		}
 	}
 
-//	public void setControl(String armName, IMPart part, ServoControl control) {
 	public void setControl(String srvCtrlName){
 		subscribe(srvCtrlName, "publishMoveTo", getName(), "onMoveTo");
 		subscribe(srvCtrlName, "publishServoData", getName(), "onServoData");
@@ -1238,12 +1199,6 @@ public class IntegratedMovement extends Service
 		jmeManager.start("JmeIMModel", "Jme3App");
 		// jmeManager.loadParts(imData);
 
-	}
-
-	public void stopMoving() {
-//		for (IMEngine engine : imData.getArms().values()) {
-//			engine.target = null;
-//		}
 	}
 
 }
