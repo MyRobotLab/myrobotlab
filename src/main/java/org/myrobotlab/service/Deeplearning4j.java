@@ -858,7 +858,17 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
     // TODO: which scala version?! for now 2.11
     meta.addDependency("org.deeplearning4j", "deeplearning4j-ui_2.11", dl4jVersion);
-
+    // pull in a newer one from opencv / tesseract.
+    //meta.exclude("org.bytedeco", "javacpp");
+    // force a newer version of javacpp for this.
+    // we need to force some newer versions of various javacpp packages to newer versions to avoid
+    // conflicts with opencv 1.5.1 ...
+    meta.addDependency("org.bytedeco", "javacpp", "1.5.1");
+    meta.addDependency("org.bytedeco", "openblas", "0.3.6-1.5.1");
+    meta.addDependency("org.bytedeco", "openblas-platform", "0.3.6-1.5.1");
+    meta.addDependency("org.bytedeco", "hdf5", "1.10.5-1.5.1");
+    meta.addDependency("org.bytedeco", "hdf5-platform", "1.10.5-1.5.1");
+    
     if (!cudaEnabled) {
       // By default support native CPU execution.
       meta.addDependency("org.nd4j", "nd4j-native-platform", dl4jVersion);

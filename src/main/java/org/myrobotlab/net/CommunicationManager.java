@@ -117,19 +117,6 @@ public class CommunicationManager implements Serializable, CommunicationInterfac
     return name;
   }
 
-  static public int count(String data, char toCount) {
-    int charCount = 0;
-
-    for (int i = 0; i < data.length(); i++) {
-      char tmp = data.charAt(i);
-
-      if (toCount == tmp)
-        ++charCount;
-    }
-
-    return charCount;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
 

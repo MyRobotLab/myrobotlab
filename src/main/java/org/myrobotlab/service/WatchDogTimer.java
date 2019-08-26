@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.codec.CodecJson;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -45,10 +45,10 @@ public class WatchDogTimer extends Service {
      * < defaultIntervalMs
      */
     int sleepIntervalMs = 200;
-    private boolean autoDeactivate = false;
+    private boolean autoDeactivate = false;    
 
     public String toString() {
-      return CodecJson.encode(this);
+      return CodecUtils.toJson(this);
     }
 
     public Timer(WatchDogTimer parent, String checkPointName, String serviceName, String method, Object... data) {
@@ -152,7 +152,7 @@ public class WatchDogTimer extends Service {
     boolean active = false;
 
     public String toString() {
-      return CodecJson.encode(this);
+      return CodecUtils.toJson(this);
     }
 
     public CheckPointWorker(WatchDogTimer parent, Integer checkPointIntervalMs, String watchDogTimerName, String checkPointName) {

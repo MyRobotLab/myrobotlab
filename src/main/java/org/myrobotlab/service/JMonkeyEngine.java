@@ -2127,7 +2127,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
         return;
       }
       // notify me if new services are created
-      subscribe(Runtime.getRuntimeName(), "registered");
+      subscribe("runtime", "registered");
 
       if (autoAttach) {
         List<ServiceInterface> services = Runtime.getServices();

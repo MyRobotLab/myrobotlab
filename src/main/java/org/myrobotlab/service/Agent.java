@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +39,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.myrobotlab.codec.CodecJson;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
@@ -46,6 +47,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
@@ -64,7 +66,6 @@ import picocli.CommandLine;
  *         FIXME - test switching branches and remaining on the branch for multiple updates
  *         FIXME - tes multiple instances on different branches
  *         FIXME - ws client connectivity and communication !!! 
- *         FIXME - Cli client ws enabled !! 
  *         FIXME - capability to update Agent from child
  *         FIXME - move CmdLine defintion to Runtime 
  *         FIXME - convert Runtime's cmdline processing to CmdOptions Fixme - remove CmdLine
@@ -99,7 +100,9 @@ public class Agent extends Service {
   Platform platform = Platform.getLocalInstance();
 
   transient WebGui webgui = null;
+  
   int port = 8887;
+  
   String address = "127.0.0.1";
 
   String currentBranch;
@@ -146,7 +149,7 @@ public class Agent extends Service {
       + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
       + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
       + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
-      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            resistance is futile, we have cookies and robots ...";
+      + "        \\/\\/             \\/           \\/                    \\/    \\/    \\/ \n            " + Platform.getLocalInstance().getMotd();
 
   /**
    * singleton for security purposes
@@ -278,12 +281,14 @@ public class Agent extends Service {
     if (autoUpdate || checkRemoteVersions) {
       invoke("getVersions", currentBranch);
     }
+    
+    Runtime runtime = Runtime.getInstance();
+    runtime.startInteractiveMode();
   }
 
   public String getDir(String branch, String version) {
     return System.getProperty("user.dir");
   }
-
 
   public String getJarName(String branch, String version) {
     return "myrobotlab-" + branch + "-" + version + ".jar";
@@ -376,7 +381,7 @@ public class Agent extends Service {
           port = 8887;
         }
         webgui = (WebGui) Runtime.create("webgui", "WebGui");
-        // webgui.autoStartBrowser(false);
+        webgui.autoStartBrowser(false);
         webgui.setPort(port);
         webgui.setAddress(address);
         webgui.startService();
@@ -664,8 +669,7 @@ public class Agent extends Service {
       byte[] r = Http.get(REMOTE_BUILDS_URL_HOME + REMOTE_MULTI_BRANCH_JOBS);
       if (r != null) {
         String json = new String(r);
-        CodecJson decoder = new CodecJson();
-        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) decoder.decode(json, WorkflowMultiBranchProject.class);
+        WorkflowMultiBranchProject project = (WorkflowMultiBranchProject) CodecUtils.fromJson(json, WorkflowMultiBranchProject.class);
         for (WorkflowJob job : project.jobs) {
           possibleBranches.add(job.name);
         }
@@ -752,9 +756,8 @@ public class Agent extends Service {
 
       byte[] data = Http.get(String.format(REMOTE_BUILDS_URL_HOME + REMOTE_BUILDS_URL, branch));
       if (data != null) {
-        CodecJson decoder = new CodecJson();
         String json = new String(data);
-        WorkflowJob job = (WorkflowJob) decoder.decode(json, WorkflowJob.class);
+        WorkflowJob job = (WorkflowJob) CodecUtils.fromJson(json, WorkflowJob.class);
         if (job.builds != null) {
           for (WorkflowRun build : job.builds) {
             if ("SUCCESS".equals(build.result)) {
@@ -1020,10 +1023,20 @@ public class Agent extends Service {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
+    
+    if (pd.options.proxy != null) {
+      URI uri = new URI(pd.options.proxy); 
+      String host = uri.getHost();
+      Integer port = uri.getPort();
+      jvmArgs += " -Dhttp.proxyHost=" + host + " -Dhttp.proxyPort=" + port + " " + "-Dhttps.proxyHost=" + host + " -Dhttps.proxyPort=" + port;
+    }
+
     if (pd.options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
+    
+    pd.options.fromAgent = true;
 
     // user override
     if (options.jvm != null) {
@@ -1033,8 +1046,6 @@ public class Agent extends Service {
     if (options.services.size() == 0) {
       options.services.add("log");
       options.services.add("Log");
-      options.services.add("cli");
-      options.services.add("Cli");
       options.services.add("gui");
       options.services.add("SwingGui");
       options.services.add("python");
@@ -1142,6 +1153,10 @@ public class Agent extends Service {
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (pd.options.services.size() > 0) {
+      if (pd.options.services.size()%2 != 0) {
+        error("--service requires {name} {Type} {name} {Type} even number of entries - you have %d", pd.options.services.size());
+        Runtime.shutdown();
+      }
       cmd.add("--service");
       for (int i = 0; i < pd.options.services.size(); i += 2) {
         cmd.add(pd.options.services.get(i));
@@ -1192,8 +1207,8 @@ public class Agent extends Service {
       }
     }
 
-    cmd.add("--libraries");
-    cmd.add(pd.options.libraries);
+    // cmd.add("--libraries");
+    // cmd.add(pd.options.libraries);
 
     if (pd.options.virtual) {
       cmd.add("--virtual");
@@ -1235,9 +1250,14 @@ public class Agent extends Service {
     // environment variables setup
     setEnv(pd, builder.environment());
 
+// new    
+//    builder.inheritIO();
+    
     Process process = builder.start();
     pd.process = process;
     pd.startTs = System.currentTimeMillis();
+    pd.stdout = new StreamGobbler(pd.options.id, process.getInputStream());
+    pd.stdout.start();
     pd.monitor = new ProcessData.Monitor(pd);
     pd.monitor.start();
 
@@ -1259,10 +1279,12 @@ public class Agent extends Service {
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
+      /** FIXME - integrate with cli api
       Cli cli = Runtime.getCli();
       cli.add(pd.options.id, process.getInputStream(), process.getOutputStream());
       cli.attach(pd.options.id);
       agent.broadcastState();
+      */
     }
     return process;
   }
@@ -1345,8 +1367,6 @@ public class Agent extends Service {
         agentArgs.add("-s");
         agentArgs.add("agent");
         agentArgs.add("Agent");
-        agentArgs.add("cli");
-        agentArgs.add("Cli");
         agentArgs.add("security");
         agentArgs.add("Security");
 
@@ -1446,7 +1466,7 @@ public class Agent extends Service {
 
       // FIXME - use wsclient for remote access
       if (globalOptions.client != null) {
-        Runtime.start("cli", "Cli");
+        // Runtime.start("cli", "Cli");
         return;
       }
 
@@ -1518,7 +1538,7 @@ public class Agent extends Service {
 
   public String mvn(String src, String branch, Long buildNumber) {
     try {
-      
+
       if (src == null) {
         src = "data" + File.separator + branch + ".src";
       }
@@ -1531,7 +1551,7 @@ public class Agent extends Service {
       if (snapshot.exists()) {
         snapshot.delete();
       }
-      
+
       if (buildNumber == null) {
         // epoch minute build time number
         buildNumber = System.currentTimeMillis() / 1000;
@@ -1541,7 +1561,7 @@ public class Agent extends Service {
 
       Platform platform = Platform.getLocalInstance();
       List<String> cmd = new ArrayList<>();
-      
+
       cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
       cmd.add((platform.isWindows()) ? "/c" : "-c");
 

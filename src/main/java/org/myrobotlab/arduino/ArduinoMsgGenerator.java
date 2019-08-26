@@ -25,7 +25,9 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 61;
+  static final Integer MRLCOMM_VERSION = 62;
+
+  private String ackEnabled = "true";
 
   public void generateDefinitions() throws IOException {
     generateDefinitions(new File("src/main/resources/resource/Arduino/generate/arduinoMsgs.schema"));
@@ -223,8 +225,9 @@ public class ArduinoMsgGenerator {
     virtualJava = virtualJava.replace("%arduino%", "virtual");
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
+    virtualJava = virtualJava.replace("%ackEnabled%", "false");
 
-    fileSnr.put("%ackEnabled%", "false");
+    fileSnr.put("%ackEnabled%", ackEnabled );
     // process substitutions
     for (String searchKey : fileSnr.keySet()) {
       idlToHpp = idlToHpp.replace(searchKey, fileSnr.get(searchKey));
@@ -241,7 +244,7 @@ public class ArduinoMsgGenerator {
     fileSnr.put("%javaGeneratedCallBacks%", vJavaGeneratedCallBacks.toString());
 
     // process virtual msgs
-    fileSnr.put("%ackEnabled%", "false");
+    fileSnr.put("%ackEnabled%", ackEnabled);
     for (String searchKey : fileSnr.keySet()) {
       virtualJava = virtualJava.replace(searchKey, fileSnr.get(searchKey));
     }

@@ -174,6 +174,19 @@ public class StringUtil {
     return chunks;
 
   }
+  
+  public static String toString(List<?> l) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    for (int i = 0; i < l.size(); ++i) {
+      sb.append(l.get(i));
+      if (i + 1 < l.size()) {
+        sb.append(", ");
+      }
+    }
+    sb.append("]");
+    return sb.toString();
+  }
 
   public static String removeAccents(String text) {
     if (text == null) {

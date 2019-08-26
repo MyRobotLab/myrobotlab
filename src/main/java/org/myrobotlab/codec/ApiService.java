@@ -59,11 +59,13 @@ public class ApiService extends Api {
    * 
    */
 
-  //
-  public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
-
+  // API SERVICE
+  @Override
+  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+  // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
+    Message msgFromUri = uriToMsg(uri);
     // FIXME change to CodecUtils.MIME_TYPE_JSON
-    Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
+    // Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
     // FIXME - MUST DECIDE IF BOTH msgFromUri data is preset and input String
     // data - what should happen ???
@@ -118,7 +120,7 @@ public class ApiService extends Api {
 
       // DECODE AND FILL THE PARAMS
       for (int i = 0; i < params.length; ++i) {
-        params[i] = codec.decode(encodedArray[i], paramTypes[i]);
+        params[i] = CodecUtils.fromJson((String)encodedArray[i], paramTypes[i]);
       }
     }
     // FIXME - ONE INVOKER !!! ONE METHOD CACHE !!!
@@ -137,14 +139,14 @@ public class ApiService extends Api {
       // FIXME MUST DO BLOCKING MSG !!!
       // FIXME - sendBlocking should throw and exception if it can't send !!!
       // NOT JUST RETURN NULL !!!
-      ret = sender.sendBlocking(msgFromUri.name, msgFromUri.method, params);
+      ret = webgui.sendBlocking(msgFromUri.name, msgFromUri.method, params);
     }
 
     if (out != null) {
       if (ret == null) {
-        codec.encode(out, ret);
+        CodecUtils.toJson(out, ret);
       } else if (Serializable.class.isAssignableFrom(ret.getClass())) {
-        codec.encode(out, ret);
+        CodecUtils.toJson(out, ret);
       } else {
         log.error("could not serialize return from {} class {}", method, ret.getClass());
       }
@@ -160,5 +162,9 @@ public class ApiService extends Api {
     ApiDescription desc = new ApiDescription("message", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
         "An synchronous api useful for simple REST responses");
     return desc;
+  }
+
+  public Object process(OutputStream out, String uri) throws Exception {
+    return process(null, "service", uri, null, out, null);
   }
 }
