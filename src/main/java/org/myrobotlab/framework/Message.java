@@ -28,6 +28,8 @@ package org.myrobotlab.framework;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -55,11 +57,6 @@ public class Message implements Serializable {
   public long msgId;
 
   /**
-   * the originating uri
-   */
-  public String uri;
-
-  /**
    * apiKey related to data encoding
    */
   public String apiKey;
@@ -68,11 +65,12 @@ public class Message implements Serializable {
    * destination name of the message
    */
   public String name;
+  
   /**
    * name of the sending Service which sent this Message
    */
-
   public String sender;
+  
   /**
    * originating source method which generated this Message
    */
@@ -85,8 +83,14 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  public HashSet<String> historyList;
-  public HashMap<String, String> security;
+  public Set<String> historyList;
+
+  /**
+   * Meta data regarding the message - security, origin, and other information
+   * not part of the message body Typically set at the gateway for remote origin
+   * messages
+   */
+  protected HashMap<String, Object> properties;
 
   /**
    * status is currently used for BLOCKING message calls the current valid state
@@ -202,6 +206,28 @@ public class Message implements Serializable {
      * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
      * Logging.logError(e); }
      */
+  }
+
+  public Object getProperty(String key) {
+    if (properties == null || !properties.containsKey(key)) {
+      return null;
+    }
+    return properties.get(key);
+  }
+
+  public void setProperty(String key, Object value) {
+    if (properties == null) {
+      properties = new HashMap<>();
+    }
+    properties.put(key, value);
+  }
+
+  public void putAll(Map<String, Object> props) {
+    props.putAll(props);
+  }
+  
+  public Map<String, Object> getProperties(){
+    return properties;
   }
 
 }

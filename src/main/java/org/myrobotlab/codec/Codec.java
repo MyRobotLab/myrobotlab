@@ -16,11 +16,6 @@ import org.myrobotlab.framework.interfaces.NameProvider;
  */
 public abstract class Codec {
 
-  /*
-   * OutputStream recorder = null;
-   * 
-   * public void setRecorder(OutputStream recorder){ this.recorder = recorder; }
-   */
 
   public byte[] encode(NameProvider sender, String name, String method, Object... data) throws Exception {
     Message msg = Message.createMessage(sender, name, method, data);
@@ -30,6 +25,8 @@ public abstract class Codec {
   }
 
   abstract public void encode(OutputStream out, Object obj) throws Exception;
+  
+  abstract public Object encode(Object obj) throws Exception;
 
   /**
    * Very important for message decoding where a parameters need decoding. Our

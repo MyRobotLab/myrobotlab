@@ -1,12 +1,10 @@
 package org.myrobotlab.codec;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -18,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.LoggerFactory;
@@ -58,15 +55,14 @@ public class CodecUtils {
   public final static String TYPE_URI = "uri";
 
   // mime-types
-  // public final static String MIME_TYPE_JSON = "application/json";
-  // public final static String MIME_TYPE_MRL_JSON = "application/mrl-json";
   public final static String MIME_TYPE_JSON = "application/json";
 
   // disableHtmlEscaping to prevent encoding or "=" -
   // private transient static Gson gson = new
   // GsonBuilder().setDateFormat("yyyy-MM-dd
   // HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
+  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
+  private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
   private transient static JsonParser parser = new JsonParser();
 
@@ -89,6 +85,7 @@ public class CodecUtils {
       Arrays.asList(Boolean.class.getCanonicalName(), Character.class.getCanonicalName(), Byte.class.getCanonicalName(), Short.class.getCanonicalName(),
           Integer.class.getCanonicalName(), Long.class.getCanonicalName(), Float.class.getCanonicalName(), Double.class.getCanonicalName(), Void.class.getCanonicalName()));
 
+  @Deprecated /* use MethodCache */
   final static HashMap<String, Method> methodCache = new HashMap<String, Method>();
 
   /**
@@ -104,26 +101,15 @@ public class CodecUtils {
 
   final static HashMap<String, String> keyToMimeType = new HashMap<String, String>();
 
-  public static final Message base64ToMsg(String base64) {
-    String data = base64;
-    if (base64.startsWith(String.format("%s://", SCHEME_BASE64))) {
-      data = base64.substring(SCHEME_BASE64.length() + 3);
-    }
-    final ByteArrayInputStream dataStream = new ByteArrayInputStream(Base64.decodeBase64(data));
-    try {
-      final ObjectInputStream objectStream = new ObjectInputStream(dataStream);
-      Message msg = (Message) objectStream.readObject();
-      return msg;
-    } catch (Exception e) {
-      Logging.logError(e);
-      return null;
-    }
-  }
-
   public static final String capitalize(final String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
   }
 
+  /*
+  public final static Object fromJson(String json, Class<?> clazz) {
+    return gson.fromJson(json, clazz);
+  }
+*/
   public final static <T extends Object> T fromJson(String json, Class<T> clazz) {
     return gson.fromJson(json, clazz);
   }
@@ -330,28 +316,6 @@ public class CodecUtils {
     return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
   }
 
-  // LOSSY Encoding (e.g. xml &amp; gson - which do not encode type information)
-  // can possibly
-  // give us the parameter count - from the parameter count we can grab method
-  // candidates
-  // @return is a arraylist of keys !!!
-
-  public static final String msgToBase64(Message msg) {
-    final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-    try {
-      final ObjectOutputStream objectStream = new ObjectOutputStream(dataStream);
-      objectStream.writeObject(msg);
-      objectStream.close();
-      dataStream.close();
-      String base64 = String.format("%s://%s", SCHEME_BASE64, new String(Base64.encodeBase64(dataStream.toByteArray())));
-      return base64;
-    } catch (Exception e) {
-      log.error("couldnt seralize {}", msg);
-      Logging.logError(e);
-      return null;
-    }
-  }
-
   public static String msgToGson(Message msg) {
     return gson.toJson(msg, Message.class);
   }
@@ -385,6 +349,13 @@ public class CodecUtils {
 
   public final static String toJson(Object o) {
     return gson.toJson(o);
+  }
+
+  static public void toJson(OutputStream out, Object obj) throws IOException {
+    String json = null;
+    json = gson.toJson(obj);
+    if (json != null)
+      out.write(json.getBytes());
   }
 
   public final static JsonElement toJsonTree(String json) {
@@ -502,9 +473,29 @@ public class CodecUtils {
     }
     return serviceType;
   }
-  
+
   public static final String getSafeReferenceName(String name) {
     return name.replaceAll("[/ .-]", "_");
+  }
+
+  public static String encodePretty(Object ret) {
+    return prettyGson.toJson(ret);
+  }
+
+  static public Object[] decodeArray(Object data) throws Exception {
+    // ITS GOT TO BE STRING - it just has to be !!! :)
+    String instr = (String) data;
+    // array of Strings ? - don't want to double encode !
+    Object[] ret = null;
+    synchronized (data) {
+      ret = gson.fromJson(instr, Object[].class);
+    }
+    return ret;
+  }
+
+  public static Object[] decodeArray(String string) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   // === method signatures end ===

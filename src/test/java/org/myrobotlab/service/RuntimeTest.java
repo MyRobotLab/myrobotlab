@@ -6,11 +6,12 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.myrobotlab.framework.ServiceEnvironment;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class RuntimeTest extends AbstractTest {
 
   @Test
   public void testGetLocalServices() {
-    ServiceEnvironment se = Runtime.getLocalServices();
+    Map<String, ServiceInterface> se = Runtime.getLocalServices();
     Assert.assertNotNull(se);
   }
 

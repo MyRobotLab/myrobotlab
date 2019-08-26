@@ -172,7 +172,7 @@ public class Platform implements Serializable {
       }
 
       // motd
-      platform.motd = "You Know, for Creative Machine Control !";
+      platform.motd = "resistance is futile, we have cookies and robots ...";
 
       // hostname
       try {

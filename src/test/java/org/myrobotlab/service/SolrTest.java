@@ -21,7 +21,6 @@ import org.myrobotlab.logging.LoggingFactory;
 
 // @Ignore
 public class SolrTest extends AbstractServiceTest {
-  
   //@Test
   public void testImageStoreFetch() throws SolrServerException, IOException {
     Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
@@ -74,7 +73,7 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
-    LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO"); please do not do this
     Solr solr = (Solr)service;
     String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
     solr.startEmbedded(solrHome);

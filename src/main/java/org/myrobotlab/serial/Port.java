@@ -147,8 +147,10 @@ public abstract class Port implements Runnable, SerialControl {
         }
       }
       log.info("{} no longer listening - last byte {} ", portName, newByte);
-    } catch (Exception e) {
-      log.error("port reading thread threw", e);
+    } catch (InterruptedException e) {
+      log.info("port {} interrupted - stopping listener", portName);
+    } catch (Exception e1) {
+      log.error("port reading thread threw", e1);
     } finally {      
       log.info("stopped listening on {}", portName);
     }
