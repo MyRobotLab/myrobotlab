@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.IntegratedMovement.ArmConfig;
@@ -17,11 +16,9 @@ import org.myrobotlab.IntegratedMovement.IMPart;
 import org.myrobotlab.IntegratedMovement.JmeManager;
 import org.myrobotlab.IntegratedMovement.Map3D;
 import org.myrobotlab.IntegratedMovement.Map3DPoint;
-import org.myrobotlab.IntegratedMovement.PositionData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
@@ -30,7 +27,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;
-import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlListener;
 import org.myrobotlab.service.interfaces.ServoData;
@@ -654,21 +650,21 @@ public class IntegratedMovement extends Service
 //		inMoov.addArm(armLeftArm, armTorso);
 //		ik.attach(inMoov);
 
-		IMBuild inMoov = ik.createBuild("inMoov");
-		inMoov.addArm(armRightLeg);
-		inMoov.addArm(armTorso);
-		inMoov.addArm(armLeftLeg);
-		inMoov.addArm(armRightArm, armTorso);
-		inMoov.addArm(armLeftArm, armTorso);
-		ik.attach(inMoov);
-
 //		IMBuild inMoov = ik.createBuild("inMoov");
-//		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
-//		inMoov.addArm(armTorso, armLeftLeg);
-//		inMoov.addArm(armRightLeg, armLeftLeg);
+//		inMoov.addArm(armRightLeg);
+//		inMoov.addArm(armTorso);
+//		inMoov.addArm(armLeftLeg);
 //		inMoov.addArm(armRightArm, armTorso);
 //		inMoov.addArm(armLeftArm, armTorso);
 //		ik.attach(inMoov);
+
+		IMBuild inMoov = ik.createBuild("inMoov");
+		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
+		inMoov.addArm(armTorso, armLeftLeg);
+		inMoov.addArm(armRightLeg, armLeftLeg);
+		inMoov.addArm(armRightArm, armTorso);
+		inMoov.addArm(armLeftArm, armTorso);
+		ik.attach(inMoov);
 
 		
 		//rightKnee.moveTo(15.5);
@@ -733,21 +729,6 @@ public class IntegratedMovement extends Service
 		 * ik.addObject(170,640,-70,170,720,-250,"tom",150,true);
 		 * ik.addObject(0, 700, 300, 0, 700, 150, "beer", 30, true);
 		 * 
-		 * // print ik.currentPosition();
-		 * 
-		 * // #setting ik parameters for the computing
-		 * 
-		 * // #move to a position // ik.moveTo("leftArm",260,410,-120); //
-		 * ik.moveTo(280,190,-345); //
-		 * #ik.moveTo("cymbal",ik.ObjectPointLocation.ORIGIN_SIDE, 0,0,5) //
-		 * #mtorso.moveTo(45)
-		 * log.info(ik.currentPosition("leftArm").toString());
-		 * log.info(ik.currentPosition("rightArm").toString()); //
-		 * shoulder.moveTo(90); // sleep(1000); //
-		 * log.info(ik.currentPosition("leftArm").toString());
-		 * 
-		 * // print "kinect Position" + str(ik.currentPosition("kinect"));
-		 * 
 		 * // ik.holdTarget("leftArm", true); ik.visualize(); 
 		 * ((TestJmeIMModel) ik.jmeApp).addPart("Rwrist", "Models/RWristFinger.j3o", 1f, "Rbicep", new Vector3f(15, -290, -10), Vector3f.UNIT_Y.mult(-1), (float) Math.toRadians(180));
 		 * ((TestJmeIMModel) ik.jmeApp).addPart("wrist","Models/LWristFinger.j3o", 1f, "bicep", new Vector3f(0, -290, -20), Vector3f.UNIT_Y.mult(1), (float) Math.toRadians(180));
@@ -785,15 +766,15 @@ public class IntegratedMovement extends Service
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
 		//ik.moveTo("inMoov", "rightLeg", -0, -0.0, -.144);
-//		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
-//		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
-//		ik.moveTo("inMoov", "rightLeg", .133, .5, -.91);
-//		sleep(10000);
-//		ik.moveTo("inMoov", "rightLeg", .133, 0, -.91);
-//		sleep(5000);
-//		ik.moveTo("inMoov", "leftArm", -0.6,.0,0.3);
-//		ik.moveTo("inMoov", "rightArm", 0.120,.0,.7);
-//		ik.moveTo("inMoov", "rightLeg", .5, .0, -.700);
+		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
+		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
+		ik.moveTo("inMoov", "rightLeg", .133, .5, -.91);
+		sleep(10000);
+		ik.moveTo("inMoov", "rightLeg", .133, 0, -.91);
+		sleep(5000);
+		ik.moveTo("inMoov", "leftArm", -0.6,.0,0.3);
+		ik.moveTo("inMoov", "rightArm", 0.120,.0,.7);
+		ik.moveTo("inMoov", "rightLeg", .5, .0, -.700);
 		
 	}
 

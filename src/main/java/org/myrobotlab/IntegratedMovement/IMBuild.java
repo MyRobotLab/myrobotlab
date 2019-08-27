@@ -3,20 +3,15 @@
  */
 package org.myrobotlab.IntegratedMovement;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.myrobotlab.genetic.Chromosome;
-import org.myrobotlab.genetic.Genetic;
-import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.Matrix;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
@@ -24,7 +19,7 @@ import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
  * @author Calamity
  *
  */
-public class IMBuild extends Thread implements Genetic {
+public class IMBuild extends Thread {
 	
 	transient private IntegratedMovement service = null;
 	transient Node<IMArm> arms = new Node<IMArm>("root", new IMArm("root"));
@@ -32,14 +27,14 @@ public class IMBuild extends Thread implements Genetic {
 	transient private IMArm reversedArm = null;
 	transient private HashMap<String, IMControl> controls = new HashMap<String, IMControl>();
 	private double maxDistance = 0.005;
-	transient private CalcFitnessType calcFitnessType = CalcFitnessType.POSITION;
 	transient private HashMap<String, LinkedList<IMPart>> links;
 	transient private Matrix currentOrigin = new Matrix(4,4).loadIdentity();
 	private long startUpdateTs;
 	private int maxTryCount = 500;
+	private long loopTime = 25;
 	
-	private enum CalcFitnessType {
-		POSITION, COG;
+	private enum MoveType {
+		NO_MOVE, POSITION, COG;
 	}
 	  
 	public IMBuild(String name, IntegratedMovement service, Matrix origin){
@@ -83,12 +78,12 @@ public class IMBuild extends Thread implements Genetic {
 			copyControl();
 			checkMsg();
 			checkMove(arms);
-			if (moveToGoal()){
-				publishAngles(arms);
+			while (moveToGoal(arms)){
+				if (breakLoopTime()) break;
 			}
+			publishAngles(arms);
 			long deltaMs = System.currentTimeMillis() - startUpdateTs;
 			long sleepMs = 33 - deltaMs;
-
 			if (sleepMs < 0) {
 				sleepMs = 0;
 			}
@@ -103,6 +98,12 @@ public class IMBuild extends Thread implements Genetic {
 	}
 	
 	
+	private boolean breakLoopTime() {
+		long deltaMs = System.currentTimeMillis() - startUpdateTs;
+		if (deltaMs > loopTime ) return true;
+		return false;
+	}
+
 	private void checkMove(Node<IMArm> arm) {
 		IMArm a = arm.getData();
 		if (a.getTarget() != null && a.getTarget().distanceTo(a.getPosition(a.getLastPartToUse())) > maxDistance ){
@@ -149,14 +150,14 @@ public class IMBuild extends Thread implements Genetic {
 	}
 
 	private void publishAngles(Node<IMArm> arm) {
-		LinkedList<IMPart> link1 =links.get(arm.getData().getName());
+		LinkedList<IMPart> link1 = arm.getData().getParts();
 		if (link1 != null){
 			Iterator<IMPart> it = link1.iterator();//arm.getData().getParts().iterator();
 			while(it.hasNext()){
-		    	long deltaMs = System.currentTimeMillis() - startUpdateTs;
-		    	if (deltaMs > 30){
-		    		//update();
-		    	}
+//		    	long deltaMs = System.currentTimeMillis() - startUpdateTs;
+//		    	if (deltaMs > 30){
+//		    		//update();
+//		    	}
 				IMPart part = it.next();
 				if (part.getState() != ServoStatus.SERVO_POSITION_UPDATE) continue;
 				String control = part.getControl();
@@ -173,85 +174,41 @@ public class IMBuild extends Thread implements Genetic {
 			publishAngles(node);
 		}
 	}
-
-	private boolean moveToGoal() {
-		int numSteps = 0;
-	    double iterStep = 0.01;
-	    double errorThreshold = 0.00001;
-	    int maxIterations = 1000;
-	    int geneticPoolSize = 100;
-	    double geneticRecombinationRate = 0.7;
-	    double geneticMutationRate = 0.02;
-	    int geneticGeneration = 200;
-	    while (true){
-		    links = new HashMap<String,LinkedList<IMPart>>();
-		    getParts(arms, links);
-		    if(links.isEmpty()) return false;
-	    	numSteps++;
-            currentOrigin = arms.getData().getInputMatrix();
-	    	//if (arm.getData().getTarget().distanceTo(currentPos) > 0.2) {
-	    	//if(arm.getData().getTryCount()%30==0){
-	    		//break;
-	    	//}
-	    	if (numSteps > maxIterations){
-	            calcFitnessType = CalcFitnessType.POSITION;
-	            //currentArmConfig = arm.getData().getArmConfig();
-	            //currentTarget = arm.getData().getTarget();
-	            int linkSize = 0;
-	            for (LinkedList<IMPart> link : links.values()){
-	            	linkSize += link.size();
-	            }
-	            GeneticAlgorithm GA = new GeneticAlgorithm(this, geneticPoolSize, linkSize, 12, geneticRecombinationRate, geneticMutationRate);
-	            Chromosome bestFit = GA.doGeneration(geneticGeneration); // this is the
-	            int i = 0;
-	            HashMap<String, LinkedList<IMPart>> newLinks = new HashMap<String, LinkedList<IMPart>>();
-	            for (String armName : links.keySet()){
-	            	Iterator<IMPart> it = links.get(armName).iterator();
-	            	LinkedList<IMPart> newParts = new LinkedList<IMPart>();
-	            	while (it.hasNext()){
-	            		IMPart part = it.next();
-	            		if (bestFit.getDecodedGenome().get(i) != null){
-	            			part.addPositionToLink((double)bestFit.getDecodedGenome().get(i));
-	            			part.setState(ServoStatus.SERVO_POSITION_UPDATE);
-	            			newParts.add(new IMPart(part));
-	            		}
-	            		//if (part.getName().equals(armName)) break;
-	            		i++;
-	            	}
-            		newLinks.put(armName, newParts);
-	            }
-	            links = newLinks;
-	            ArrayList<Chromosome> ch = new ArrayList<Chromosome>();
-	            ch.add(bestFit);
-	            calcFitness(ch);
-	            return true;
-	    	}
-	    	for (String armName : links.keySet()){
-	    		Node<IMArm> arm = arms.find(armName);
-	    		Point target = arm.getData().getTarget();
-	    		if (target == null) continue; //nothing to do
-	    		LinkedList<IMPart> l = new LinkedList<IMPart>();
-	    		Node<IMArm> parent = arm;
-	    		while (parent.getData().getName() != "root"){
-	    			LinkedList<IMPart> lt = new LinkedList<IMPart>();
-	    			if (parent.getData().getArmConfig() == ArmConfig.REVERSE){
-	    				lt = links.get(parent.getData().getName());
-	    				currentOrigin = lt.getLast().getEnd();
-	    			}
-	    			else{
-	    				Iterator<IMPart> it = links.get(parent.getData().getName()).iterator();
-	    				while (it.hasNext()){
-	    					lt.addFirst(it.next());
-	    				}
-	    				currentOrigin = lt.getLast().getOrigin();
-	    			}
-	    			Iterator<IMPart> it = lt.iterator();
-	    			while (it.hasNext()){
-	    				l.addFirst(it.next());
-	    			}
-	    			parent = parent.getParent();
-	    		}
-	    		
+	
+	private boolean moveToGoal(Node<IMArm> arm){
+        if (breakLoopTime()) return false;
+		double iterStep = 0.01;
+	    boolean retval = false;
+	    MoveType moveType = MoveType.POSITION;
+	    currentOrigin = arms.getData().getInputMatrix();
+		Point target = arm.getData().getTarget();
+		if (target == null){
+			if (arm.getChildren().size() > 0) moveType = MoveType.NO_MOVE; //nothing to do
+			else moveType = MoveType.COG;
+		}
+	    if (moveType != MoveType.NO_MOVE){
+    		LinkedList<IMPart> l = new LinkedList<IMPart>();
+    		Node<IMArm> parent = arm;
+    		while (parent.getData().getName() != "root"){
+    			LinkedList<IMPart> lt = new LinkedList<IMPart>();
+    			if (parent.getData().getArmConfig() == ArmConfig.REVERSE){
+    				lt = parent.getData().getParts();
+    				currentOrigin = lt.getLast().getEnd();
+    			}
+    			else{
+    				Iterator<IMPart> it = parent.getData().getParts().iterator();
+    				while (it.hasNext()){
+    					lt.addFirst(it.next());
+    				}
+    				//currentOrigin = lt.getLast().getOrigin();
+    			}
+    			Iterator<IMPart> it = lt.iterator();
+    			while (it.hasNext()){
+    				l.addFirst(it.next());
+    			}
+    			parent = parent.getParent();
+    		}
+	    	if (moveType == MoveType.POSITION){
 		        // vector to destination
 	    		Point deltaPoint = target.subtract(resolveMatrix(l, currentOrigin));
 		        Matrix dP = new Matrix(3, 1);
@@ -270,58 +227,34 @@ public class IMBuild extends Thread implements Genetic {
 		            }
 		        }
 		        for (int i = 0; i < dTheta.getNumRows(); i++) {
-	            DHLink link = l.get(i).getDHLink();
-	            if (l.get(i).getControl() != null) {
-	            	if (controls.get(l.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
-	            		// update joint positions! move towards the goal!
-	            		double d = dTheta.elements[i][0];
-	            		l.get(i).incrRotate(d);
-	            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
-	            	}
-	            	else {
-	            		link.addPositionValue(controls.get(l.get(i).getControl()).getTargetPos());
-	            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
-	            	}
-	            }
-	            if (l.get(i).getName().equals(arm.getData().getLastPartToUse())) {
-	            	publishAngles(l);
-	            	break;
-	            }
-		        // delta point represents the direction we need to move in order to
-		        // get there.
-		        // we should figure out how to scale the steps.
-	
-		        if (deltaPoint.magnitude() < errorThreshold) {
-		        	publishAngles(l);
-		        	break;
+		            DHLink link = l.get(i).getDHLink();
+		            if (l.get(i).getControl() != null) {
+		            	if (controls.get(l.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
+		            		// update joint positions! move towards the goal!
+		            		double d = dTheta.elements[i][0];
+		            		l.get(i).incrRotate(d);
+		            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
+		            	}
+		            	else {
+		            		// servo already moving to a position, let it go to it's target
+		            		link.addPositionValue(controls.get(l.get(i).getControl()).getTargetPos());
+		            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
+		            	}
+		            }
+		            if (l.get(i).getName().equals(arm.getData().getLastPartToUse())) {
+		            	break;
+		            }
 		        }
-		    	long deltaMs = System.currentTimeMillis() - startUpdateTs;
-		    	if (deltaMs > 33){
-		    		publishAngles(l);
-		    		return true;
-		    	}
-	
-	          }
+		        retval = true;
+	    	}
+	    	else{ //MoveType.COG
+	    		
 	    	}
 	    }
-		//return true;
-	}
-	
-	private void publishAngles(LinkedList<IMPart> l) {
-		Iterator<IMPart> it = l.iterator();
-		while(it.hasNext()){
-	    	long deltaMs = System.currentTimeMillis() - startUpdateTs;
-	    	if (deltaMs > 30){
-	    		//update();
-	    	}
-			IMPart part = it.next();
-			if (part.getState() != ServoStatus.SERVO_POSITION_UPDATE) continue;
-			String control = part.getControl();
-			DHLink link = part.getDHLink();
-			if (control == null || link == null) continue;
-			service.sendAngles(control, link.getPositionValueDeg());
-			part.setState(ServoStatus.SERVO_STOPPED);
-		}
+	    for (Node<IMArm> child : arm.getChildren()){
+	    	retval |= moveToGoal(child);
+	    }
+		return retval;
 	}
 
 	private Point resolveMatrix(LinkedList<IMPart> l, Matrix inputMatrix) {
@@ -383,21 +316,6 @@ public class IMBuild extends Thread implements Genetic {
 	        jInverse = new Matrix(3, parts.size());
 	      }
 	      return jInverse;
-	}
-
-	private void getParts(Node<IMArm> arm, HashMap<String, LinkedList<IMPart>> links) {
-		if (arm.getData().getTarget() != null){
-			Node<IMArm> parent = arm;
-			while (parent.getParent() != null){
-				if (!links.containsKey(parent.getData().getName())){
-					links.put(parent.getData().getName(), parent.getData().getParts());
-				}
-				parent = parent.getParent();
-			}
-		}
-		for (Node<IMArm> a : arm.getChildren()){
-			getParts(a, links);
-		}
 	}
 
 	private void copyControl() {
@@ -507,140 +425,6 @@ public class IMBuild extends Thread implements Genetic {
 		arm.setTryCount(0);
 	}
 
-	@Override
-	public void calcFitness(ArrayList<Chromosome> chromosomes) {
-	    for (Chromosome chromosome : chromosomes) {
-	    	if (System.currentTimeMillis() - startUpdateTs > 33){
-	    		update();
-	    	}
-	    	double maxTime = 0.2;
-	        double fitnessMult = 1;
-	        double timeMult = 1;
-	        int i = 0;
-	        HashMap<String, Matrix> transformMatrixes = new HashMap<String, Matrix>();
-        	double numberPartMovingPenalty = 0;
-	        for (String armName : links.keySet()){
-	        	LinkedList<IMPart> list = links.get(armName);
-	        	LinkedList<DHLink> newLinks = new LinkedList<DHLink>();
-	        	Matrix tm = new Matrix(4,4).loadIdentity();
-	        	Iterator<IMPart> it = list.iterator();
-	        	while (it.hasNext()){
-		        	IMPart part = it.next();
-		        	DHLink link = new DHLink(part.getDHLink());
-		        	double curPos = link.getPositionValueDeg();
-		        	if (chromosome.getDecodedGenome().get(i) != null){
-		        		if (part.isReversedControled()){
-		        			link.addPositionValue(-(double)chromosome.getDecodedGenome().get(i));
-		        		}
-		        		else {
-		        			link.addPositionValue((double)chromosome.getDecodedGenome().get(i));
-		        		}
-		        	}
-		        	double delta = Math.abs(curPos - link.getPositionValueDeg());
-		        	IMControl control = controls.get(part.getControl());
-		        	double speed;
-		        	if (control == null) speed = 1000;
-		        	else speed = control.getSpeed();
-		        	if (part.getCurrentArmConfig() == ArmConfig.REVERSE){
-		        		newLinks.addFirst(link);
-		        	}
-		        	else {
-		        		newLinks.addLast(link);
-		        	}
-		        	double timeToMove = delta / speed;
-		        	if (timeToMove > maxTime) maxTime = timeToMove;
-		        	i++;
-	        	}
-	        	Iterator<DHLink> it1 = newLinks.iterator();
-	        	while(it1.hasNext()){
-	        		tm = tm.multiply(it1.next().resolveMatrix());
-	        	}
-	        	transformMatrixes.put(armName, tm);
-	        }
-	        int numTarget = 0;
-	        double distanceScore = 0;
-	        for (String armName : transformMatrixes.keySet()){
-	        	Node<IMArm> arm = arms.find(armName);
-	        	Point target = arm.getData().getTarget();
-	        	if(target == null) continue;
-	        	Point potLocation = IMUtil.matrixToPoint(resolveMatrix(arm, transformMatrixes));
-	        	double distance = potLocation.distanceTo(target);
-	        	distanceScore = (distanceScore * numTarget++ + (fitnessMult / distance * 1000))/numTarget;
-	        }
-	        if (calcFitnessType == CalcFitnessType.POSITION){
-	        	double timed = 1-(((maxTime-0.2)/.2)/100);
-	        	double partPenalty = 1- (numberPartMovingPenalty/links.size()/25);
-	        	double fitness = distanceScore * timed*timeMult * partPenalty;
-	        	chromosome.setFitness(fitness);
-	        }
-	        //TODO: do calcFitnessType == COG
-	    }
-	    
-	}
-
-	private Matrix resolveMatrix(Node<IMArm> arm, HashMap<String, Matrix> transformMatrixes) {
-		Matrix m = new Matrix(4,4).loadIdentity();
-		if (arm.getParent().getParent() != null){
-			m = m.multiply(resolveMatrix(arm.getParent(), transformMatrixes));
-		}
-		else{
-			if (arm.getData().getArmConfig() == ArmConfig.REVERSE){
-				m= arm.getData().getLastPart().getEnd();
-			}
-			else{
-				m = arm.getData().getInputMatrix();
-			}
-		}
-		if (!transformMatrixes.containsKey(arm.getData().getName())){
-			m = arm.getData().getTransformMatrix();
-		}
-		else m = m.multiply(transformMatrixes.get(arm.getData().getName()));
-		return m;
-	}
-
-	@Override
-	public void decode(ArrayList<Chromosome> chromosomes) {
-		for (Chromosome chromosome : chromosomes){
-			if (System.currentTimeMillis() - startUpdateTs > 33){
-				update();
-			}
-			int pos = 0;
-			ArrayList<Object> decodedGenome = new ArrayList<Object>();
-			for (LinkedList<IMPart> list : links.values()){
-				Iterator<IMPart> it = list.iterator();
-				while (it.hasNext()){
-					IMPart part = it.next();
-					if (part.getControl() == null){
-						decodedGenome.add(null);
-						continue;
-					}
-					if (controls.get(part.getControl()).getState() != ServoStatus.SERVO_STOPPED){
-						decodedGenome.add(controls.get(part.getControl()).getTargetPos());
-						continue;
-					}
-					DHLink link = part.getDHLink();
-					if (link.getMin() == link.getMax()){
-						decodedGenome.add(link.getMin());
-						continue;
-					}
-					Mapper map = new Mapper(0,8191, link.getMinDegree(), link.getMaxDegree());
-			        Double value = 0.0;
-			        for (int i = pos; i < chromosome.getGenome().length() && i < pos + 13; i++) {
-			          if (chromosome.getGenome().charAt(i) == '1')
-			            value += 1 << i - pos;
-			        }
-			        pos += 13;
-			        value = map.calcOutput(value);
-			        if (value.isNaN()) {
-			          value = link.getPositionValueDeg();
-			        }
-			        //if (part.getCurrentArmConfig()==ArmConfig.REVERSE) value = -value;
-			        decodedGenome.add(value);
-				}
-				chromosome.setDecodedGenome(decodedGenome);
-			}
-		}
-	}
 
 	public IMArm getRoot() {
 		return arms.getData();

@@ -58,11 +58,6 @@ public class GravityCenter {
         cog = c;
       }
     }
-    // Log.info(cog.toString()+"gc");
-    if (cog.getZ() <= 0.1) {
-      int x = 0;
-
-    }
     return cog;
 
   }

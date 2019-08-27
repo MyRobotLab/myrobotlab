@@ -67,4 +67,17 @@ public class Node<T> {
 		}
 		return null;
 	}
+	
+	public ArrayList<Node<T>> getArmsArray(){
+		ArrayList<Node<T>> ret = new ArrayList<Node<T>>();
+		addArmToArray(this, ret);
+		return ret;
+	}
+	private void addArmToArray(Node<T> node, ArrayList<Node<T>> ret) {
+		ret.add(node);
+		for (Node<T> child : node.getChildren()){
+			addArmToArray(child, ret);
+		}
+		
+	}
 }
