@@ -266,7 +266,7 @@ public class IntegratedMovementGui extends ServiceGui implements ActionListener 
     armText.put(engine.getName() + "-x", textx);
     armText.put(engine.getName() + "-y", texty);
     armText.put(engine.getName() + "-z", textz);
-    Point point = engine.getDHRobotArm().getPalmPosition();
+    Point point = new Point(0,0,0,0,0,0);//engine.getDHRobotArm().getPalmPosition();
     armText.get(engine.getName() + "-x").setText(String.format("%d", (int) point.getX()));
     armText.get(engine.getName() + "-y").setText(String.valueOf((int) point.getY()));
     armText.get(engine.getName() + "-z").setText(String.valueOf((int) point.getZ()));

@@ -18,8 +18,6 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
-import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.slf4j.Logger;
 
@@ -35,8 +33,6 @@ public class IMEngine extends Thread implements Genetic {
   private double maxDistance = 5.0;
   private Matrix inputMatrix = null;
   private transient IntegratedMovement service = null;
-  private boolean noUpdatePosition = false;
-  private boolean holdTargetEnabled = false;
   private int tryCount = 0;;
   private Point oldTarget = null;
   private double timeToWait;
@@ -57,7 +53,6 @@ public class IMEngine extends Thread implements Genetic {
   private int cogRetry;
   private String lastDHLink;
 
-private double nextAlpha;
 
 
   private enum CalcFitnessType {
@@ -65,21 +60,11 @@ private double nextAlpha;
   }
 
   public IMEngine(String name, IntegratedMovement IM) {
-    super(name);
-    arm = new DHRobotArm();
-    arm.name = name;
-    service = IM;
   }
 
   public IMEngine(String name, DHRobotArm arm, IntegratedMovement integratedMovement) {
-    super(name);
-    this.arm = arm;
-    service = integratedMovement;
   }
 
-  public DHRobotArm getDHRobotArm() {
-    return arm;
-  }
 
   public void setDHRobotArm(DHRobotArm dhArm) {
     arm = dhArm;
@@ -105,17 +90,8 @@ private double nextAlpha;
           target = null;
         }
       }
-      if (target != null && currentPosition
-          .distanceTo(target) > maxDistance /** && !isWaitingForServo() **/
-      ) {
-        log.info("distance to target {}", currentPosition.distanceTo(target));
-        log.info(currentPosition.toString());
-        move(lastDHLink);
-        cogRetry = 0;
-        continue;
-      }
       if (target != null && currentPosition.distanceTo(target) < maxDistance && !AiActive(IntegratedMovement.Ai.HOLD_POSITION) && !isWaitingForServo()) {
-        Point cog = service.cog.computeCoG(null);
+        Point cog = null;//service.cog.computeCoG(null);
         if (AiActive(IntegratedMovement.Ai.KEEP_BALANCE) && cog.distanceTo(service.cog.getCoGTarget()) > service.cog.getMaxDistanceToCog()) {
 
         } else {
@@ -127,7 +103,7 @@ private double nextAlpha;
   }
 
   private Point checkCoG() {
-    Point cog = service.cog.computeCoG(null);
+    Point cog = null;//service.cog.computeCoG(null);
     double deltaDegree = 0.1;
     if (cogRetry > 10) {
       return null;
@@ -485,36 +461,6 @@ private double nextAlpha;
     }
   }
 
-  public void moveTo(Point point) {
-    moveTo(point, null);
-  }
-
-  public void moveTo(Point point, String lastDHLink) {
-    target = point;
-    this.lastDHLink = lastDHLink;
-    oldTarget = arm.getPalmPosition(lastDHLink);
-    tryCount = 0;
-  }
-
-  /**
-   * @return the maxDistance
-   */
-  public double getMaxDistance() {
-    return maxDistance;
-  }
-
-  /**
-   * @param maxDistance
-   *          the maxDistance to set
-   */
-  public void setMaxDistance(double maxDistance) {
-    this.maxDistance = maxDistance;
-  }
-
-  public void setInputMatrix(Matrix inputMatrix) {
-    this.inputMatrix = inputMatrix;
-
-  }
 
   public Point rotateAndTranslate(Point pIn) {
 
@@ -534,41 +480,8 @@ private double nextAlpha;
     return pOut;
   }
 
-  public void updateLinksPosition(ServoData data) {
-    if (noUpdatePosition)
-      return;
-    for (DHLink l : arm.getLinks()) {
-      if (l.getName().equals(data.name)) {
-        l.addPositionValue(data.pos);
-        l.setState(data.state);
-        // l.setVelocity(data.speed);
-        // l.setTargetPos(data.targetPos);
-        l.setCurrentPos(data.pos);
-      }
-    }
 
-  }
-
-  public void updateLinksPosition(ServoControl data) {
-	    if (noUpdatePosition)
-	      return;
-	    for (DHLink l : arm.getLinks()) {
-	      if (l.getName().equals(data.getName())) {
-	        //l.addPositionValue(data.pos);
-	         l.setState(ServoStatus.SERVO_START);
-	         l.setSpeed(data.getSpeed());
-	         l.setTargetPos(data.getTargetPos());
-	        //l.setCurrentPos(data.pos);
-	      }
-	    }
-
-	  }
   
-  public void holdTarget(boolean holdEnabled) {
-    this.holdTargetEnabled = holdEnabled;
-
-  }
-
   @Override
   public void calcFitness(ArrayList<Chromosome> chromosomes) {
     for (Chromosome chromosome : chromosomes) {
@@ -698,9 +611,6 @@ private double nextAlpha;
     }
   }
 
-  public double[][] createJointPositionMap() {
-    return arm.createJointPositionMap();
-  }
 
   public void moveTo(CollisionItem item, ObjectPointLocation location, String lastDHLink) {
     moveInfo = new MoveInfo();
@@ -839,31 +749,7 @@ private double nextAlpha;
     return moveToPoint;
   }
 
-  public void setAi(IntegratedMovement.Ai ai) {
-    this.Ai |= ai.value;
-  }
 
-  public void removeAi(IntegratedMovement.Ai ai) {
-    if ((Ai & ai.value) > 0) {
-      Ai -= ai.value;
-    }
-  }
-
-  public Point getPosition(){
-	  return getDHRobotArm().getPalmPosition();
-  }
-
-  public Matrix getInputMatrix() {
-	  return inputMatrix;
-  }
-
-  public void setNextAlpha(double alpha) {
-	  nextAlpha = alpha;
-  }
-
-  public double getNextAlpha() {
-	  return nextAlpha;
-  }
 
 
 }

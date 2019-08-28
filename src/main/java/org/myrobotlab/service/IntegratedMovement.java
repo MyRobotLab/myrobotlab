@@ -400,7 +400,7 @@ public class IntegratedMovement extends Service
 		partLeftBicep.setControl(ArmConfig.DEFAULT, bicep.getName());
 		partLeftBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 + 180, .3, 0);
 		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
-		partLeftBicep.setMass(0.940, 0.4559);
+		partLeftBicep.setMass(2.940, 0.4559);
 		ik.attach(partLeftBicep);
 		
 		IMPart partRightArmAttach = ik.createPart("rightArmAttach", 0.01);
@@ -436,7 +436,7 @@ public class IntegratedMovement extends Service
 		partRightBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 , .3, 0);
 		partRightBicep.setControl(ArmConfig.DEFAULT, Rbicep.getName());
 		partRightBicep.set3DModel("Models/Rbicep1.j3o", scale, new Point(0.004,0,0,-90,0,0));
-		partRightBicep.setMass(0.940, 0.4559);
+		partRightBicep.setMass(2.940, 0.4559);
 		ik.attach(partRightBicep);
 		
 		IMPart partLowStom = ik.createPart("lowStom", 0.01);
@@ -589,10 +589,6 @@ public class IntegratedMovement extends Service
 		partHarlRAnkleR.setMass(1.402);
 		ik.attach(partHarlRAnkleR);
 		
-		
-		ik.setOrigin(new Point(0, 0, -0.1345, 0, 0, 0));
-		
-	
 		IMArm armTorso = ik.createArm("torso");
 		armTorso.add(partHarlHip);
 		armTorso.add(partLowStom);
@@ -659,6 +655,7 @@ public class IntegratedMovement extends Service
 //		ik.attach(inMoov);
 
 		IMBuild inMoov = ik.createBuild("inMoov");
+		inMoov.setInputMatrix(ik.createInputMatrix(0, 0, -0.1345, 0, 0, 0));
 		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
 		inMoov.addArm(armTorso, armLeftLeg);
 		inMoov.addArm(armRightLeg, armLeftLeg);
@@ -766,15 +763,15 @@ public class IntegratedMovement extends Service
 		// ik.getSimulatorManager().setAxesVisible(false);
 		//inMoov.addMsg("reverseArm","rightLeg");
 		//ik.moveTo("inMoov", "rightLeg", -0, -0.0, -.144);
-		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
-		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
-		ik.moveTo("inMoov", "rightLeg", .133, .5, -.91);
-		sleep(10000);
-		ik.moveTo("inMoov", "rightLeg", .133, 0, -.91);
-		sleep(5000);
-		ik.moveTo("inMoov", "leftArm", -0.6,.0,0.3);
-		ik.moveTo("inMoov", "rightArm", 0.120,.0,.7);
-		ik.moveTo("inMoov", "rightLeg", .5, .0, -.700);
+//		ik.moveTo("inMoov", "leftArm", -0.1,.7,0.3);
+//		ik.moveTo("inMoov", "rightArm", 0.6,.0,0.3);
+//		ik.moveTo("inMoov", "rightLeg", .133, .5, -.91);
+//		sleep(10000);
+//		ik.moveTo("inMoov", "rightLeg", .133, 0, -.91);
+//		sleep(5000);
+//		ik.moveTo("inMoov", "leftArm", -0.6,.0,0.3);
+//		ik.moveTo("inMoov", "rightArm", 0.120,.0,.7);
+//		ik.moveTo("inMoov", "rightLeg", .5, .0, -.700);
 		
 	}
 
@@ -802,7 +799,7 @@ public class IntegratedMovement extends Service
 	}
 
 
-	public transient GravityCenter cog = new GravityCenter(this);
+	public transient GravityCenter cog = new GravityCenter();
 
 	public transient CollisionDectection collisionItems = new CollisionDectection();
 
