@@ -1,7 +1,7 @@
 package org.myrobotlab.framework;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.myrobotlab.cache.LRUMethodCache;
-import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -102,7 +100,7 @@ public class MethodCache {
     } else if (clazz == void.class) {
       return Void.class;
     } else {
-      log.error("unexpected type class conversion for class {}", clazz.getCanonicalName());
+      log.error("unexpected type class conversion for class {}", clazz.getTypeName());
     }
     return null;
   }
@@ -152,7 +150,7 @@ public class MethodCache {
   // Set<String> excludeMethods) {
   public void cacheMethodEntries(Class<?> object, Set<Class<?>> excludeFromDeclared) {
 
-    if (objectCache.containsKey(object.getCanonicalName())) {
+    if (objectCache.containsKey(object.getTypeName())) {
       log.info("already cached {} methods", object.getSimpleName());
       return;
     }
@@ -220,7 +218,7 @@ public class MethodCache {
     // log.debug("cached {}'s {} methods and {} declared methods",
     // object.getSimpleName(), methods.length,
     // mi.remoteMethods.keySet().size());
-    objectCache.put(object.getCanonicalName(), mi);
+    objectCache.put(object.getTypeName(), mi);
     log.info("cached {} {} methods with {} ordinal signatures in {} ms", object.getSimpleName(), mi.methodsIndex.size(), mi.methodOrdinalIndex.size(),
         System.currentTimeMillis() - start);
   }
@@ -244,12 +242,12 @@ public class MethodCache {
     return size;
   }
 
-  public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) {
+  public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) throws ClassNotFoundException {
     String[] paramTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
-      paramTypeNames[i] = paramTypes[i].getCanonicalName();
+      paramTypeNames[i] = paramTypes[i].getTypeName();
     }
-    return getMethod(object.getCanonicalName(), methodName, paramTypeNames);
+    return getMethod(object.getTypeName(), methodName, paramTypeNames);
   }
 
   /**
@@ -262,8 +260,9 @@ public class MethodCache {
    * @param params
    *          - actual parameter
    * @return - the method to invoke
+   * @throws ClassNotFoundException 
    */
-  public Method getMethod(Class<?> objectType, String methodName, Object... params) {
+  public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
     Class<?>[] paramTypes = null;
     if (params != null) {
       paramTypes = new Class<?>[params.length];
@@ -276,6 +275,19 @@ public class MethodCache {
     return getMethod(objectType, methodName, paramTypes);
   }
 
+  public Method getMethod(String jsonMsg) { // vs getMethod(String object,
+                                            // String method, String[]
+                                            // paramsToDecode
+    // decode container
+
+    // find ordinal signature match
+    // if found & !collision
+    // return method
+    // if found and collision on ordinal - FIXME resolve somehow (test cases)
+    // return method
+    return null;
+  }
+
   /**
    * A full string interface to get a method - although this is potentially a
    * easy method to use, the most common use case would be used by the framework
@@ -285,16 +297,13 @@ public class MethodCache {
    * @param methodName
    * @param paramTypeNames
    * @return
+   * @throws ClassNotFoundException 
    */
-  public Method getMethod(String fullType, String methodName, String[] paramTypeNames) {
-    /*
-     * expected fully type names if (!fullType.contains(".")) { fullType =
-     * "org.myrobotlab.service." + fullType; }
-     */
+  public Method getMethod(String fullType, String methodName, String[] paramTypeNames) throws ClassNotFoundException {
 
     if (!objectCache.containsKey(fullType)) {
-      log.error("{} not found in objectCache", fullType);
-      return null;
+      // attempt to load it
+      cacheMethodEntries(Class.forName(fullType));      
     }
 
     MethodIndex mi = objectCache.get(fullType);
@@ -312,7 +321,8 @@ public class MethodCache {
       String ordinalKey = getMethodOrdinalKey(fullType, methodName, paramTypeNames.length);
       List<MethodEntry> possibleMatches = mi.methodOrdinalIndex.get(ordinalKey);
       if (possibleMatches == null) {
-        // log.error("there were no possible matches for ordinal key {} - does the method exist?", ordinalKey);
+        // log.error("there were no possible matches for ordinal key {} - does
+        // the method exist?", ordinalKey);
         // log.error("{}.{}.{}", fullType, methodName, paramTypeNames);
         return null;
       }
@@ -381,114 +391,18 @@ public class MethodCache {
     return null;
   }
 
-  @Deprecated
-  final public Object invokeOn(Object obj, String method, Object... params) {
+  final public Object invokeOn(Object obj, String methodName, Object... params) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
-    if (obj == null)
-
-    {
+    if (obj == null) {
       log.error("invokeOn object is null");
       return null;
     }
-
+    
     Object retobj = null;
-    Class<?> c = null;
-    Class<?>[] paramTypes = null;
-
-    try {
-      c = obj.getClass();
-
-      if (params != null) {
-        paramTypes = new Class[params.length];
-        for (int i = 0; i < params.length; ++i) {
-          if (params[i] != null) {
-            paramTypes[i] = params[i].getClass();
-          } else {
-            paramTypes[i] = null;
-          }
-        }
-      }
-      Method meth = null;
-
-      // TODO - method cache map
-      // can not auto-box or downcast with this method - getMethod will
-      // return a "specific & exact" match based
-      // on parameter types - the thing is we may have a typed signature
-      // which will allow execution - but
-      // if so we need to search
-
-      // FIXME - WHY ISN'T METHOD CACHING USED HERE !!!
-
-      // SECURITY - ??? can't be implemented here - need a full message
-      meth = c.getMethod(method, paramTypes); // getDeclaredMethod zod !!!
-      retobj = meth.invoke(obj, params);
-
-      // put return object onEvent
-      out(method, retobj);
-    } catch (NoSuchMethodException e) {
-
-      // cache key compute
-
-      // TODO: validate what "params.toString()" returns.
-      StringBuilder keyBuilder = new StringBuilder();
-      if (paramTypes != null) {
-        for (Object o : paramTypes) {
-          keyBuilder.append(o);
-        }
-      }
-
-      Method mC = LRUMethodCache.getInstance().getCacheEntry(obj, method, paramTypes);
-      if (mC != null) {
-        // We found a cached hit! lets invoke on that.
-        try {
-          retobj = mC.invoke(obj, params);
-          // put return object onEvent
-          out(method, retobj);
-          // return
-          return retobj;
-        } catch (Exception e1) {
-          log.error("boom goes method - could not find method in cache {}", mC.getName(), e1);
-        }
-      }
-
-      // TODO - build method cache map from errors
-      log.debug("no such method {}.{} - attempting upcasting", c.getSimpleName(), MethodEntry.getPrettySignature(method, paramTypes, null));
-
-      // TODO - optimize with a paramter TypeConverter & Map
-      // c.getMethod - returns on EXACT match - not "Working" match
-      Method[] allMethods = c.getMethods(); // ouch
-      log.debug("searching through {} methods", allMethods.length);
-
-      for (Method m : allMethods) {
-        String mname = m.getName();
-        if (!mname.equals(method)) {
-          continue;
-        }
-
-        Type[] pType = m.getGenericParameterTypes();
-        // checking parameter lengths
-        if (params == null && pType.length != 0 || pType.length != params.length) {
-          continue;
-        }
-        try {
-          log.debug("found appropriate method");
-          retobj = m.invoke(obj, params);
-          // put return object onEvent
-          out(method, retobj);
-          // we've found a match. put that in the cache.
-          log.debug("caching method cache key");
-          LRUMethodCache.getInstance().addCacheEntry(obj, method, paramTypes, m);
-          return retobj;
-        } catch (Exception e1) {
-          log.error("boom goes method {}", m.getName());
-          // Logging.logError(e1);
-        }
-      }
-
-      log.error("did not find method - {}.{}({}) {}", obj, method, CodecUtils.getParameterSignature(params), paramTypes);
-    } catch (Exception e) {
-      log.error("{}", e.getClass().getSimpleName(), e);
-    }
+    MethodCache cache = MethodCache.getInstance();
+    Method method = cache.getMethod(obj.getClass(), methodName, params); 
+    retobj = method.invoke(obj, params);
+    out(methodName, retobj); // <-- FIXME clean this up !!!
 
     return retobj;
   }
@@ -502,20 +416,20 @@ public class MethodCache {
     for (int i = 0; i < params.length; ++i) {
       Class<?> param = params[i];
       if (param.isPrimitive()) {
-        paramTypes[i] = boxPrimitive(param).getCanonicalName();
+        paramTypes[i] = boxPrimitive(param).getTypeName();
       } else {
-        paramTypes[i] = params[i].getCanonicalName();
+        paramTypes[i] = params[i].getTypeName();
       }
     }
-    return makeKey(object.getCanonicalName(), method.getName(), paramTypes);
+    return makeKey(object.getTypeName(), method.getName(), paramTypes);
   }
 
   public String makeKey(Class<?> object, String methodName, Class<?>... paramTypes) {
     String[] paramTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
-      paramTypeNames[i] = paramTypes[i].getCanonicalName();
+      paramTypeNames[i] = paramTypes[i].getTypeName();
     }
-    return makeKey(object.getCanonicalName(), methodName, paramTypeNames);
+    return makeKey(object.getTypeName(), methodName, paramTypeNames);
   }
 
   public String makeKey(String fullType, String methodName, String[] paramTypes) {
@@ -530,7 +444,7 @@ public class MethodCache {
   }
 
   private String getMethodOrdinalKey(Class<?> object, Method method) {
-    return getMethodOrdinalKey(object.getCanonicalName(), method.getName(), method.getParameterTypes().length);
+    return getMethodOrdinalKey(object.getTypeName(), method.getName(), method.getParameterTypes().length);
   }
 
   private String getMethodOrdinalKey(String fullType, String methodName, int parameterSize) {
@@ -538,7 +452,6 @@ public class MethodCache {
     return key;
   }
 
-  @Deprecated
   public void out(String method, Object o) {
     /*
      * Message m = Message.createMessage(this, null, method, o); // create a //
@@ -553,7 +466,7 @@ public class MethodCache {
   }
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
-    String objectKey = object.getCanonicalName();
+    String objectKey = object.getTypeName();
     String ordinalKey = getMethodOrdinalKey(objectKey, methodName, parameterSize);
     MethodIndex methodIndex = objectCache.get(objectKey);
     if (methodIndex == null) {
@@ -567,12 +480,6 @@ public class MethodCache {
     // get templates
     List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
     Object[] params = new Object[encodedParams.length];
-    
-    if (possible == null) {
-      log.error("no possible ordinal methods for %s", getMethodOrdinalKey(clazz.getCanonicalName(), methodName, encodedParams.length));
-      return null;
-    }
-    
     // iterate through templates - attempt to decode
     for (int p = 0; p < possible.size(); ++p) {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
@@ -584,7 +491,7 @@ public class MethodCache {
         return params;
       } catch (Exception e) {
         // not logged, because this is one of the only ways to search :P
-        // log.error("getDecodedParameters threw", e);        
+        // log.error("getDecodedParameters threw", e);
       }
     }
 
@@ -604,17 +511,6 @@ public class MethodCache {
       }
     }
     return sb.toString();
-  }
-
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] data) {
-    if (data == null) {
-      return new String[0];
-    }
-    String[] params = new String[data.length];
-    for (int i = 0; i < data.length; ++i) {
-      params[i] = (String)data[i];
-    }
-    return getDecodedJsonParameters(clazz, methodName, params);
   }
 
 }
