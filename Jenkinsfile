@@ -51,14 +51,15 @@ node ('ubuntu') { // use any node
       echo "git_commit=$git_commit"
       // Run the maven build
       if (isUnix()) {
-         sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
+      // -o == offline      
+         sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -o -q clean compile "
       } else {
          bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
       }
    }
    stage('verify'){
 	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn' verify"
+	     sh "'${mvnHome}/bin/mvn' -o verify"
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
