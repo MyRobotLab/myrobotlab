@@ -59,7 +59,7 @@ node ('ubuntu') { // use any node
    }
    stage('verify'){
 	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn' verify"
+	     sh "'${mvnHome}/bin/mvn' -o verify"
 	   } else {
 	     bat(/"${mvnHome}\bin\mvn" verify/)
 	   }
