@@ -48,9 +48,10 @@ public class MethodCacheTest extends AbstractTest {
    * @throws IllegalAccessException
    * @throws IllegalArgumentException
    * @throws InvocationTargetException
+   * @throws ClassNotFoundException 
    */
   @Test
-  public void findTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+  public void findTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
     // FIXME FIXME - CodecUtils.decode("",
     // FIXME FIXME - verify cache entry exist after being resolved through isAssignable !!!
@@ -86,7 +87,7 @@ public class MethodCacheTest extends AbstractTest {
   }
 
   @Test
-  public void strongTypeTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+  public void strongTypeTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
     Object ret = null;
     Method method = null;
@@ -114,7 +115,7 @@ public class MethodCacheTest extends AbstractTest {
   }
 
   @Test
-  public void ancestorTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+  public void ancestorTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
     Object ret = null;
     Method method = null;
@@ -197,6 +198,22 @@ public class MethodCacheTest extends AbstractTest {
     assertEquals("my ball", ball.name); 
     assertTrue(5 == ball.rating); 
   }
+  
+  public static class TestClass {
+    public int getInt(int i) {
+      return i;
+    }
+  }
+  
+  @Test
+  public void unknownClassInvokeOnTest () throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+    MethodCache cache = MethodCache.getInstance();
+    TestClass test = new TestClass();
+    Integer r = (Integer)cache.invokeOn(test, "getInt", 7);
+    assertTrue(7 == r);
+  }
+  
+  
 
   public static void main(String[] args) {
     try {
