@@ -3,6 +3,7 @@
  */
 package org.myrobotlab.IntegratedMovement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -42,6 +43,8 @@ public class IMPart {
 	private ArmConfig currentArmConfig = ArmConfig.DEFAULT;
 	private double mass = 0;
 	private double centerOfMass = 0.5;
+	private boolean checkCollision;
+	private transient ArrayList<String> noCollisionWith = new ArrayList<String>();
 
 	public IMPart(String partName){
 		name = partName;
@@ -394,4 +397,19 @@ public class IMPart {
 	public void setCenterOfMass(double centerOfMass) {
 		this.centerOfMass = centerOfMass;
 	}
+
+	public void noCollisionCheck(boolean b) {
+		checkCollision = b;
+	}
+
+	public boolean isNoCheckCollision() {
+		return checkCollision;
+	}
+
+	public void noCollisionCheckWith(String... parts) {
+		for (int i = 0; i < parts.length; i++){
+			noCollisionWith.add(parts[i]);
+		}
+	}
+
 }

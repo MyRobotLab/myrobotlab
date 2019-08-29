@@ -32,6 +32,11 @@ public class IMArm {
 	}
 
 	public void add(IMPart part) {
+		IMPart lastPart = parts.getLast();
+		if (lastPart != null && !lastPart.isNoCheckCollision() && !part.isNoCheckCollision()){
+			lastPart.noCollisionCheckWith(part.getName());
+			part.noCollisionCheckWith(lastPart.getName());
+		}
 		parts.add(part);
 	}
 	
