@@ -2,7 +2,6 @@ package org.myrobotlab.framework;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,8 +10,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.myrobotlab.cache.LRUMethodCache;
-import org.myrobotlab.codec.Codec;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -478,8 +475,11 @@ public class MethodCache {
     }
     return methodIndex.methodOrdinalIndex.get(ordinalKey);
   }
-
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, String[] encodedParams) {
+  
+  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+    if (encodedParams == null) {
+      encodedParams = new Object[0];
+    }
     // get templates
     List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
     Object[] params = new Object[encodedParams.length];
@@ -488,7 +488,7 @@ public class MethodCache {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          params[i] = CodecUtils.fromJson(encodedParams[i], paramTypes[i]);
+          params[i] = CodecUtils.fromJson((String)encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
         return params;
