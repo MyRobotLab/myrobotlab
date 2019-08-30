@@ -1213,6 +1213,8 @@ public class Agent extends Service {
     if (pd.options.virtual) {
       cmd.add("--virtual");
     }
+    
+    cmd.add("--spawned-from-agent");
 
     return cmd.toArray(new String[cmd.size()]);
   }

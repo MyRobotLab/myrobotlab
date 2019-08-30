@@ -133,7 +133,7 @@ public class ApiMessages extends Api {
 
       // Create msg from the return - and send it back
       // - is this correct ? should it be double encoded ?
-      Message msg = Message.createMessage(webgui, webgui.getName(), "onLocalServices", new Object[] { retobj });
+      Message msg = Message.createMessage(webgui.getName(), webgui.getName(), "onLocalServices", new Object[] { retobj });
       // apiKey == messages api uses JSON
       
       CodecUtils.toJson(out, msg);

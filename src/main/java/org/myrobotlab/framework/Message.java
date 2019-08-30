@@ -47,6 +47,7 @@ import org.myrobotlab.logging.LoggingFactory;
 public class Message implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  // FIXME - change to enumeration and make it work !
   public final static String BLOCKING = "B";
   public final static String RETURN = "R";
 
@@ -57,9 +58,10 @@ public class Message implements Serializable {
   public long msgId;
 
   /**
-   * apiKey related to data encoding
+   * src the connection id (and service name ?) of the sending process
+   * null when the msg was generated in the same process
    */
-  public String apiKey;
+  public String src;
 
   /**
    * destination name of the message
@@ -164,16 +166,6 @@ public class Message implements Serializable {
     return CodecUtils.getMsgKey(this);
   }
 
-  public static Message createMessage(NameProvider sender, String name, String method, Object[] data) {
-    Message msg = new Message();
-    msg.name = name; // destination instance name
-    msg.sender = sender.getName();// this.getName();
-    msg.data = data;
-    msg.method = method;
-
-    return msg;
-  }
-
   public static Message createMessage(String sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
@@ -183,7 +175,15 @@ public class Message implements Serializable {
 
     return msg;
   }
+  
+  static public Message createMessage(String sender, String name, String method, Object data) {
+    if (data == null) {
+      return createMessage(sender, name, method, null);
+    }
+    return createMessage(sender, name, method, new Object[] {data});
+  }
 
+  /*
   static public Message createMessage(NameProvider sender, String name, String method, Object data) {
     if (data == null) {
       return createMessage(sender, name, method, null);
@@ -192,6 +192,7 @@ public class Message implements Serializable {
     d[0] = data;
     return createMessage(sender, name, method, d);
   }
+  */
 
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.init(Level.DEBUG);

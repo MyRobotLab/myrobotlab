@@ -475,8 +475,11 @@ public class MethodCache {
     }
     return methodIndex.methodOrdinalIndex.get(ordinalKey);
   }
-
-  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, String[] encodedParams) {
+  
+  public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
+    if (encodedParams == null) {
+      encodedParams = new Object[0];
+    }
     // get templates
     List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
     Object[] params = new Object[encodedParams.length];
@@ -485,7 +488,7 @@ public class MethodCache {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          params[i] = CodecUtils.fromJson(encodedParams[i], paramTypes[i]);
+          params[i] = CodecUtils.fromJson((String)encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
         return params;

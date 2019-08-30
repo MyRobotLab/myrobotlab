@@ -297,6 +297,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     attach(from, to, null);
   }
 
+  // FIXME - relays to be done at a system level of Runtime.connections - not here
+  @Deprecated
   public void attach(String from, String to, String uri) throws IOException {
 
     // from --to--> to
@@ -336,7 +338,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        broadcaster.broadcast(CodecUtils.toJson(msg));
+        broadcaster.broadcast(CodecUtils.toJson(msg)); // <-- WAH ??? single encoding ??? shouldn't it be double?
       }
     } catch (Exception e) {
       StringBuilder sb = new StringBuilder();
@@ -588,7 +590,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           Enumeration<String> headers = request.getHeaders(headerName);
           while (headers.hasMoreElements()) {
               String headerValue = headers.nextElement();
-              attributes.put(headerName, headerValue);              
+              attributes.put(String.format("header-%s", headerName), headerValue);              
           }
       } 
       Runtime.getInstance().addConnection(uuid, attributes);

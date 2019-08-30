@@ -129,6 +129,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * </pre>
    */
   static private final Map<String, Map<String, Object>> connections = new HashMap<>();
+  
+  // idToconnections ?? - FIXME - make default route !
+  // id to Connection .. where id is like ip..  might need priority
+  // like routeTable <String, List<RouteEntry>>
+  // currently its <id, list<uuid>>
+  static private final Map<String, Set<String>> routeTable = new HashMap<>();
+  
+  static private String defaultRoute = null;
 
   /**
    * map to hide methods we are not interested in
@@ -138,11 +146,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   static private boolean needsRestart = false;
 
   static private String runtimeName;
-
-  /**
-   * the id of the agent which spawned us
-   */
-  // static String fromAgent = null;
 
   /**
    * Pid file of this process
@@ -880,7 +883,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public static String getUptime() {
     Date now = new Date();
     Platform platform = Platform.getLocalInstance();
-    return getDiffTime(now.getTime() - platform.getStartTime().getTime());
+    String uptime = getDiffTime(now.getTime() - platform.getStartTime().getTime());
+    log.info("up for {}", uptime);
+    return uptime;
   }
 
   public static String getDiffTime(long diff) {
@@ -1096,8 +1101,8 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
       if (options.interactive || !options.spawnedFromAgent) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
-        // clientLocal = new InProcessCli(System.in, System.out);
-        // clientLocal.start();
+        Runtime runtime = Runtime.getInstance();
+        runtime.startInteractiveMode();
       }
 
     } catch (Exception e) {
@@ -1110,7 +1115,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   public void startInteractiveMode() {
     if (clientLocal == null) {
-      clientLocal = new InProcessCli(System.in, System.out); // ????
+      clientLocal = new InProcessCli(getName(), System.in, System.out); // ????
     }
     clientLocal.start();
   }
@@ -1148,12 +1153,25 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   /**
-   * registers a service
+   * registers a service - internal to this mrl process
    * 
    * @param service
    * @return
    */
   public final static synchronized ServiceInterface register(ServiceInterface service) {
+    return register(null, service);
+  }
+  
+  /**
+   * registers a service - if a {id} is supplied its registered from a gateway's connection
+   * 
+   * @param service
+   * @return
+   */
+  public final static synchronized ServiceInterface register(String id, ServiceInterface service) {
+    if (id != null) {
+      service.setName(String.format("%s@%s", id, service.getName()));
+    }
     registry.put(service.getName(), service);
     if (runtime != null) {
       runtime.invoke("registered", service);
@@ -1163,6 +1181,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
     return service;
   }
+
 
   /**
    * releases a service - stops the service, its threads, releases its
@@ -1391,13 +1410,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     // FIXME - connect("myName",
     // return connect("ws://localhost:8887/api/messages2"); // vs routing
     // through System.in ->
-    return connect("ws://localhost:8887/api/messages2");
+    // let the 
+    return connect(null, "ws://localhost:8887/api/messages2");
   }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
-  public Endpoint connect(String url) throws IOException {
+  public Endpoint connect(String id, String url) throws IOException {
 
     clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
                                            // on client creation?
@@ -1426,10 +1446,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     
     // addendum
     attributes.put("User-Agent", "runtime-client");
-    
-    
-    addConnection(uuid.toString(), attributes);
+    addConnection(id, uuid.toString(), attributes);    
 
+    // send getHelloResponse
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
     return endpoint;
   }
@@ -1969,7 +1988,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       // in this case however - the spawned process does not know the agents id
       // agent.1500211865673.json
 
-      Message msg = Message.createMessage(this, "agent", "restart", platform.getId());
+      Message msg = Message.createMessage(getName(), "agent", "restart", platform.getId());
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
       File json = new File(String.format("msgs/agent.%d.json", msg.msgId));
@@ -2536,7 +2555,12 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     response.services = Runtime.getServiceTypes();
     connection.put("request", request);
     // addClientAttribute(uuid, "request", request);
+    updateRoute(request.id, uuid);
     return response;
+  }
+
+  static public Map<String,Set<String>> getRouteTable() {
+    return routeTable;
   }
 
   public static Map<String, String> getServiceTypes() {
@@ -2546,20 +2570,86 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
     return ret;
   }
-
+  
+  public void updateRoute(String id, String uuid) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  public void addRoute(String id, String uuid) {
+    Set<String> connections = null;
+    if (routeTable.containsKey(id)) {
+      connections = routeTable.get(id);
+    } else {
+      connections = new HashSet<>();
+    }
+    
+    connections.add(uuid);
+    routeTable.put(id, connections);
+    /* MVP does not include 
+    for (String key : routeTable.keySet()) {
+      Set<String> sets = routeTable.get(key);
+      for(String u : sets) {
+        if (u.equals(uuid)) {
+          
+        }
+      }
+    }
+    */
+  }
+  
+  public void deleteRoute(String id) {
+    routeTable.remove(id);
+  }
+  
   public void addConnection(String uuid, Map<String, Object> attributes) {
+    addConnection(null, uuid, attributes);
+  }
+
+  public void addConnection(String id, String uuid, Map<String, Object> attributes) {
     Map<String, Object> attr = null;
     if (!connections.containsKey(uuid)) {
       attr = attributes;
-      invoke("pubishNewConnection", attributes);
+      invoke("publishConnect", attributes);
     } else {
       attr = connections.get(uuid);
       attr.putAll(attributes);
     }
     connections.put(uuid, attr);
+    
+    // FIXME - ! id might be null !!
+    // route table changes 
+    // adding route
+    Set<String> route = null;
+    if (routeTable.containsKey(id)) {
+      route = routeTable.get(id);
+    } else {
+      route = new HashSet<>();      
+      routeTable.put(id, route);
+    }
+    
+    route.add(uuid);
+    defaultRoute = uuid;
+  }
+  
+  public void removeConection(String uuid) {
+    if (connections.remove(uuid) != null){
+      invoke("publishDisconnect", uuid);
+    }
+    for (String id : routeTable.keySet()) {
+      Set<String> conn = routeTable.get(id);
+      if (conn != null) {
+        conn.remove(uuid);
+      }
+    }
+  }
+  
+  public String publishDisconnect(String uuid) {
+    return uuid;
   }
 
-  public Map<String, Object> pubishNewConnection(Map<String, Object> attributes) {
+  // FIXME - filter only serializable objects ?
+  public Map<String, Object> publishConnect(Map<String, Object> attributes) {
     return attributes;
   }
 

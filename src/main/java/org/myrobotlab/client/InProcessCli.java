@@ -13,11 +13,13 @@ import org.python.jline.internal.Log;
 public class InProcessCli implements Runnable {
   Thread myThread = null;
 
+  String name;
   InputStream in;
   OutputStream out;
   boolean running = false;
 
-  public InProcessCli(InputStream in, OutputStream out) {
+  public InProcessCli(String senderName, InputStream in, OutputStream out) {
+    this.name = senderName;
     this.in = in;
     this.out = out;
   }
@@ -38,19 +40,20 @@ public class InProcessCli implements Runnable {
       running = true;
       Random random = new Random();
       
+      String id = "cli";
       String uuid = String.format("stdin-%s-%d", Runtime.getId(), random.nextInt(10000));
       ApiCli cli = new ApiCli();// (ApiCli)ApiFactory.getApiProcessor("cli");
       // cli.addClient(null, "cli", null, uuid);
       Map<String, Object> attributes = new HashMap<>();
       attributes.put("gateway", "runtime");
       attributes.put("uuid", uuid);
-      attributes.put("id", "cli");
+      attributes.put("id", id);
       attributes.put("User-Agent", "stdin-client");
       attributes.put("cwd", "/");
       attributes.put("uri", "/api/cli");
       attributes.put("user", "root");
       attributes.put("host", "local");
-      Runtime.getInstance().addConnection(uuid, attributes);
+      Runtime.getInstance().addConnection(id, uuid, attributes);
 
       int c = '\n';
       String readLine = "";
@@ -93,7 +96,7 @@ public class InProcessCli implements Runnable {
 
       Runtime.getInstance();
 
-      InProcessCli client = new InProcessCli(System.in, System.out);
+      InProcessCli client = new InProcessCli("test", System.in, System.out);
       client.start();
 
       // if interactive vs non-interactive which will pretty much be curl ;P BUT

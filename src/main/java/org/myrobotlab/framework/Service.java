@@ -967,7 +967,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
-    Message msg = Message.createMessage(this, getName(), method, params);
+    Message msg = Message.createMessage(getName(), getName(), method, params);
     Task task = new Task(this, taskName, intervalMs, msg);
     timer.schedule(task, delay);
     tasks.put(taskName, timer);
@@ -1534,7 +1534,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
-    Message m = Message.createMessage(this, null, method, o); // create a
+    Message m = Message.createMessage(getName(), null, method, o); // create a
                                                               // un-named
                                                               // message
                                                               // as output
@@ -1742,7 +1742,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // TODO should this declaration be outside the while loop?
           // create new message reverse sender and name set to same
           // msg id
-          Message msg = Message.createMessage(this, m.sender, m.method, ret);
+          Message msg = Message.createMessage(getName(), m.sender, m.method, ret);
           msg.sender = this.getName();
           msg.msgId = m.msgId;
           // msg.status = Message.BLOCKING;
@@ -1817,7 +1817,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
-    Message msg = Message.createMessage(this, name, method, data);
+    Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getName();
     // All methods which are invoked will
     // get the correct sendingMethod
@@ -1832,7 +1832,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
-    Message msg = Message.createMessage(this, name, method, data);
+    Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
@@ -2078,24 +2078,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       List<String> tnames = Runtime.getServiceNames(topicName);
       for (String serviceName : tnames) {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(this, serviceName, "addListener", listener));
+        send(Message.createMessage(getName(), serviceName, "addListener", listener));
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
         Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
-          send(Message.createMessage(this, topicName, "addListener", listener));
+          send(Message.createMessage(getName(), topicName, "addListener", listener));
         }
       } else {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(this, topicName, "addListener", listener));
+        send(Message.createMessage(getName(), topicName, "addListener", listener));
       }
     }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
-    send(Message.createMessage(this, getPeerName(peerKey), method, params));
+    send(Message.createMessage(getName(), getPeerName(peerKey), method, params));
   }
 
   public void unsubscribe(NameProvider topicName, String topicMethod) {
@@ -2110,7 +2110,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(getName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------

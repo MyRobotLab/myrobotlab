@@ -7,7 +7,6 @@ import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
-import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -19,8 +18,8 @@ public class ApiMessages2 extends Api {
   public final static Logger log = LoggerFactory.getLogger(ApiMessages2.class);
 
   // API MESSAGES
-  @Override
-  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
+  @Override /*FIXME - message gateway and sender potentially are different */
+  public Object process(MessageSender gateway, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
 
     Object retobj = null;
 
@@ -68,7 +67,7 @@ public class ApiMessages2 extends Api {
         // remote msg - should route
         // TODO - inspect if blocking ...
         // FIXME - TODO - default route !!
-        webgui.send(msg);
+        gateway.send(msg);
       }
 
     } else {
@@ -81,7 +80,7 @@ public class ApiMessages2 extends Api {
       // FIXME double encode !!!
       // FIXME - should this be clientRemote.fire ???
       // encode parameters - encode msg container !!
-      Message msg = Message.createMessage(webgui, "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
+      Message msg = Message.createMessage(gateway.getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
       out.write(CodecUtils.toJson(msg).getBytes());
     }
     return retobj;

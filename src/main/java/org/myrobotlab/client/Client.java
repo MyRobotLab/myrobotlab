@@ -82,7 +82,7 @@ public class Client {
   @Option(names = { "-v", "--verbose" }, description = "Be verbose.")
   boolean verbose = false;
 
-  String currentUrl = null;
+  String currentUuid = null;
 
   final transient Worker worker = new Worker();
 
@@ -290,7 +290,7 @@ public class Client {
        */
       endpoint.socket = socket;
       endpoints.put(uuid, endpoint);
-      currentUrl = url;
+      currentUuid = uuid;
 
       return endpoint;
 
@@ -324,7 +324,7 @@ public class Client {
           System.out.print((char) c);
           readLine += (char) c;
           if (c == '\n') {
-            Endpoint resource = endpoints.get(currentUrl);
+            Endpoint resource = endpoints.get(currentUuid);
             resource.socket.fire(readLine);
             readLine = "";
           }
