@@ -36,11 +36,11 @@ public class ApiFactoryTest extends AbstractTest {
       String retJson = null;
 
       // FIXME !!! - double encoded data for messages api
-      Message msg = Message.createMessage(runtime, "runtime", "getUptime", null);
+      Message msg = Message.createMessage("runtime", "runtime", "getUptime", null);
       ByteArrayOutputStream encoded = new ByteArrayOutputStream();
       CodecUtils.toJson(encoded, msg);
 
-      Message msg2 = Message.createMessage(runtime, "runtime", "getD", null);
+      Message msg2 = Message.createMessage("runtime", "runtime", "getD", null);
       ByteArrayOutputStream encoded2 = new ByteArrayOutputStream();
       CodecUtils.toJson(encoded2, msg2);
 

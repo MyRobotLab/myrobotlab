@@ -89,7 +89,7 @@ public abstract class Api {
     Message msg = new Message();
     msg.name = "runtime"; // default
     msg.method = "getApis"; // default
-    msg.apiKey = ApiFactory.API_TYPE_SERVICE; // default
+    msg.src = ApiFactory.API_TYPE_SERVICE; // default
 
     int pos = uri.indexOf("/api/");
 
@@ -116,7 +116,7 @@ public abstract class Api {
     // available
 
     if (parts.length > 2) {
-      msg.apiKey = parts[2];
+      msg.src = parts[2];
     } else {
       return msg;
     }
@@ -239,7 +239,7 @@ public abstract class Api {
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
 
       Status error = Status.error(e); // name == null anonymous ?
-      Message msg = Message.createMessage(webgui, null, CodecUtils.getCallbackTopicName("getStatus"), error);
+      Message msg = Message.createMessage(webgui.getName(), null, CodecUtils.getCallbackTopicName("getStatus"), error);
       if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
         // for the purpose of only returning the data
         // e.g. http://api/services/runtime/getUptime -> return the uptime

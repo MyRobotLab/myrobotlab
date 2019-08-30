@@ -5,7 +5,10 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.Broadcaster;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
+import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.interfaces.MessageSender;
@@ -29,7 +32,8 @@ public class ApiCli extends Api {
   }
 
   // FIXME - change to client data instead of httpsession
-  public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String data) throws Exception {
+  @Deprecated /* make better process(uuid) - with maintaining the data points in a keyed hashmap */
+  public Object process(MessageSender gateway, String apiKey, String uri, String uuid, OutputStream out, String data) throws Exception {
     // FIXME what if data & msgFromUri are both present ?
     Object ret = null;
 
@@ -79,6 +83,25 @@ public class ApiCli extends Api {
         if (data.length() > "attach".length()) {
           toUuid = data.substring("attach".length()).trim();
         }
+        
+        // get remote connection
+        Map<String,Object> conn = Runtime.getConnection(toUuid);
+        if (conn == null) {
+          log.error("could not find {}", toUuid);
+          return null;
+        }
+        
+        // inspect type of connection and api
+        HelloRequest remoteInfo = (HelloRequest)conn.get("request");
+        String remoteApiKey = (String)conn.get("c-type");
+        AtmosphereResource r = (AtmosphereResource)conn.get("c-r");
+        
+        Broadcaster b = r.getBroadcaster();
+        Message msg = Message.createMessage((String)null, "runtime", "getUptime", new Object[0]);
+        // FIXME FIXME FIXME - don't we double encode parameters - (maybe not required for typless languages - only for strong typed ?)
+        b.broadcast(CodecUtils.toJson(msg)); // FIXME make messages2 api handle         
+        // stash relay and conversion - interfaces would protect against exotic types (xmpp, etc)
+        
 
         // webgui.attach(me, client, uri-api/cli)
         // webgui.attach(uuid, toUuid, "/api/cli"); -- FIXME !!! implement
@@ -86,7 +109,9 @@ public class ApiCli extends Api {
       } else {
         // ========= HANDLE URI SERVICE CALLS ====================
 
-        if (!msgFromUri.name.contains("@")) {
+        // FIXME - if Runtime.getService(msgFromUri.name) == null && no connections - then is error send <- should expect remote 
+        if (!msgFromUri.name.contains("@") && Runtime.getService(msgFromUri.name) != null) {
+          // local service
           MethodCache cache = MethodCache.getInstance();
 
           Class<?> clazz = Runtime.getClass(msgFromUri.name);
@@ -104,7 +129,7 @@ public class ApiCli extends Api {
             out.write(CodecUtils.toPrettyJson(ret).getBytes());
           }
         } else {
-          // remote
+          // fire it remotely 
           Runtime.getInstance().send(msgFromUri);
         }
       }
