@@ -1655,6 +1655,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     languages.put("hi-IN", "Hindi - India");
     languages.put("it-IT", "Italian - Italia");
     languages.put("fi-FI", "Finnish - Finland");
+    languages.put("pt-PT", "Portuguese - Portugal");
     languagesIndex = new ArrayList<String>(languages.keySet());
     this.language = getLanguage();
     python = getPython();
