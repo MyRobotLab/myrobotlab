@@ -715,8 +715,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         if (guiServiceGui != null) {
           guiServiceGui.rebuildGraph();
         }
+        if (frame != null) {
         frame.pack();
         frame.repaint();
+        }
       }
     });
   }

@@ -62,6 +62,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
@@ -1840,24 +1841,29 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return sendBlocking(msg, timeout);
   }
 
+  /**
+   * In theory the only reason this should need to use synchronized wait/notify is when the msg destination
+   * is in another remote process. sendBlocking should either invoke directly or use a gateway's sendBlockingRemote.
+   * To use a gateways sendBlockingRemote - the msg must have a remote src
+   * <pre>
+   * after attach:
+   * stdin (remote) --> gateway sendBlockingRemote --> invoke
+   *                <--                            <--
+   * </pre>
+   */
   public Object sendBlocking(Message msg, Integer timeout) {
-    Object[] returnContainer = new Object[1];
-    /*
-     * if (inbox.blockingList.contains(msg.msgID)) { log.error("DUPLICATE"); }
-     */
-    inbox.blockingList.put(msg.msgId, returnContainer);
-
-    try {
-      // block until message comes back
-      synchronized (returnContainer) {
-        outbox.add(msg);
-        returnContainer.wait(timeout); // NEW !!! TIMEOUT !!!!
-      }
-    } catch (InterruptedException e) {
-      log.error("interrupted", e);
+    if (msg.isLocal()) {
+      return invoke(msg);
+    } else {
+      // get gateway for remote address
+      Gateway gateway = Runtime.getGatway(msg.getRemoteId());
+      try {
+        return gateway.sendBlockingRemote(msg, timeout);
+      } catch (Exception e) {
+        log.error("gateway.sendBlockingRemote threw");
+      }      
     }
-
-    return returnContainer[0];
+    return null;
   }
 
   // BOXING - End --------------------------------------

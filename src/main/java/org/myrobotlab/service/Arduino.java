@@ -24,6 +24,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -2272,7 +2273,7 @@ public class Arduino extends AbstractMicrocontroller
     try {
 
       LoggingFactory.init(Level.ERROR);
-      // Platform.setVirtual(true);
+      Platform.setVirtual(true);
       Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 

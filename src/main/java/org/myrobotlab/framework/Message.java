@@ -33,7 +33,6 @@ import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 
@@ -58,10 +57,10 @@ public class Message implements Serializable {
   public long msgId;
 
   /**
-   * src the connection id (and service name ?) of the sending process
-   * null when the msg was generated in the same process
+   * src the connection id of the sending process
+   * null when the msg was generated and delivered in the same process
    */
-  public String src;
+  public String srcId;
 
   /**
    * destination name of the message
@@ -229,6 +228,30 @@ public class Message implements Serializable {
   
   public Map<String, Object> getProperties(){
     return properties;
+  }
+
+  public boolean isLocal() {
+    return !name.contains("@");
+  }
+
+  public String getRemoteId() {
+    int p = name.indexOf("@");
+    if (p > 0) {
+      return name.substring(p+1);
+    }
+    return null;
+  }
+
+  public boolean isBlocking() {
+    return BLOCKING.equals(msgType);
+  }
+
+  public String getReturnId() {
+    int pos = sender.indexOf("@");
+    if (pos > 0) {
+      return sender.substring(pos + 1);
+    }
+    return null;
   }
 
 }

@@ -32,9 +32,14 @@ public class ApiMessages2 extends Api {
       // decoding 1st pass - decodes the containers
       Message msg = CodecUtils.fromJson(json, Message.class);
       msg.setProperty("uuid", uuid);
+      // if id is ours - peel it off
+      String suffix = String.format("@%s", Runtime.getId());
+      if (msg.name.endsWith(suffix)) {
+        msg.name = msg.name.substring(0, msg.name.length() - suffix.length());
+      }
 
       // its local if name does not have an "@" in it
-      if (!msg.name.contains("@")) {
+      if (msg.isLocal()) {
 
         // to decode fully we need class name, method name, and an array of json
         // encoded parameters
