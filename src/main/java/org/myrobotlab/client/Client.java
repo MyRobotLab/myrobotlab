@@ -86,8 +86,9 @@ public class Client {
 
   final transient Worker worker = new Worker();
 
-  public static interface ResponseHandler {
-    public void onResponse(String uuid, String data);
+  // FIXME - this should be promoted to Gateway !!!
+  public static interface RemoteMessageHandler {
+    public void onRemoteMessage(String uuid, String data);
   }
 
   public class Endpoint implements Decoder<String, Reader> {
@@ -111,8 +112,8 @@ public class Client {
 
         // main response
         System.out.println(data);
-        for (ResponseHandler handler : handlers) {
-          handler.onResponse(uuid, data);
+        for (RemoteMessageHandler handler : handlers) {
+          handler.onRemoteMessage(uuid, data);
         }
 
         // response
@@ -123,9 +124,9 @@ public class Client {
       }
   }
 
-  Set<ResponseHandler> handlers = new HashSet<>();
+  Set<RemoteMessageHandler> handlers = new HashSet<>();
 
-  public void addResponseHandler(ResponseHandler handler) {
+  public void addResponseHandler(RemoteMessageHandler handler) {
     handlers.add(handler);
   }
 

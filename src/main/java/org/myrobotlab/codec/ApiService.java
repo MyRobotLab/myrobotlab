@@ -63,7 +63,7 @@ public class ApiService extends Api {
   @Override
   public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
   // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
-    Message msgFromUri = uriToMsg(uri);
+    Message msgFromUri = uriToMsg(uri, getDefaultMethod());
     // FIXME change to CodecUtils.MIME_TYPE_JSON
     // Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 

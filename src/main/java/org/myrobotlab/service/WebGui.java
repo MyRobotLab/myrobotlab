@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
@@ -42,10 +43,11 @@ import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
@@ -54,7 +56,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
-import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
@@ -281,11 +282,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     };
   }
 
-  @Override // FIXME - remove or implement addConnectionStateListener
-  public void addConnectionListener(String name) {
-    // TODO Auto-generated method stub
-
-  }
 
   @Override // FIXME - implement
   public boolean allowExport(String serviceName) {
@@ -413,6 +409,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return Runtime.getConnectionIds(getName());
   }
 
+  @Override
   public Map<String, Map<String, Object>> getClients() {
     return Runtime.getConnections(getName());
   }
@@ -493,12 +490,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return configBuilder;
   }
 
-  @Override /* DEPRECATE */
-  public List<Connection> getConnections(URI clientKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   public Map<String, String> getHeadersInfo(HttpServletRequest request) {
 
     Map<String, String> map = new HashMap<String, String>();
@@ -532,12 +523,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public Integer getPort() {
     return port;
-  }
-
-  @Override
-  public String getPrefix(URI protocolKey) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public Map<String, List<String>> getRelays() {
@@ -604,45 +589,78 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
 
-    // try {
+    Object retobj = null;
+    String data = request.body().asString();
 
-    Api api = ApiFactory.getApiProcessor(apiKey);
-    api.process(this, apiKey, r);
+    if (data != null) {
 
-    // FIXME - header SAS token for authentication ???
-    // Map<String, String> headers = getHeadersInfo(request);
+      if (log.isDebugEnabled()) {
+        log.debug("data - [{}]", data);
+      }
 
-    // GET vs POST - post assumes low-level messaging
-    // GET is high level synchronous
-    // String httpMethod = request.getMethod();
+      // decoding 1st pass - decodes the containers
+      Message msg = CodecUtils.fromJson(data, Message.class);
+      msg.setProperty("uuid", uuid);
+      // if id is ours - peel it off
+      String suffix = String.format("@%s", Runtime.getId());
+      if (msg.name.endsWith(suffix)) {
+        msg.name = msg.name.substring(0, msg.name.length() - suffix.length());
+      }
+    
+      // ================= begin messages2 api =======================
+      // its local if name does not have an "@" in it
+      if (msg.isLocal()) {
 
-    // get default encoder
-    // FIXME FIXME FIXME - this IS A CODEC !!! NOT AN API-TYPE !!! -
-    // CHANGE to MIME_TYPE_APPLICATION_JSON !!!
+        // to decode fully we need class name, method name, and an array of json
+        // encoded parameters
+        MethodCache cache = MethodCache.getInstance();
+        Class<?> clazz = Runtime.getClass(msg.name);
+        Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+        
+        // ties client response with uuid/connection - only other way 
+        // would be to get local thread storage
+        if ("getHelloResponse".equals(msg.method)) {
+          params[0] = uuid;
+        }
+        
+        Method method = cache.getMethod(clazz, msg.method, params);
+        ServiceInterface si = Runtime.getService(msg.name);
+        method.invoke(si, params);
 
-    // ========================================
-    // POST || GET http://{host}:{port}/api/messages
-    // POST || GET http://{host}:{port}/api/services
-    // ========================================
+        // propagate return data to subscribers
+        si.out(msg.method, retobj);
 
-    // TODO - add handleSwaggerApi
-    /*
-     * switch (apiKey) {
-     * 
-     * case ApiFactory.API_TYPE_MESSAGES: { handleMessagesApi(r); break; }
-     * 
-     * case ApiFactory.API_TYPE_MESSAGES_BLOCKING: { // decode to service api //
-     * call service api handleMessagesBlockingApi(r); break; }
-     * 
-     * case ApiFactory.API_TYPE_SERVICE: { handleServiceApi(r); break; }
-     * 
-     * default: { // handleInvalidApi(r); // TODO - swagger list of apis ? throw
-     * new IOException("invalid api: " + apiKey); } }
-     * 
-     * } catch (Exception e) { // TODO - handle in process
-     * 
-     * }
-     */
+        // 2019.07.30 new feature - echoing back on "message" protocol if a
+        // valid outstream exists and is local
+        // anything remote will be async message and will require a blocking
+        // subscriber if blocking is required
+        /**
+         * NOT IN MSG FORMAT !!! if (out != null) {
+         * out.write(CodecUtils.toJson(retobj).getBytes()); }
+         */
+      } else {
+        // remote msg - should route
+        // TODO - inspect if blocking ...
+        // FIXME - TODO - default route !!
+        gateway.send(msg);
+      }
+
+    } else {
+      // WE ARE IN THE INITIAL "GET" - no payload should be with /api/messages2
+      // -
+      // it "could" be possible to send /api/messages2/getHelloResponse/(bunch
+      // of data) - but not worth is
+      // So, a remote system has initiated contact, we will initiate "our"
+      // HelloResponse(HelloRequest)
+      // FIXME double encode !!!
+      // FIXME - should this be clientRemote.fire ???
+      // encode parameters - encode msg container !!
+      Message msg = Message.createMessage(gateway.getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
+      out.write(CodecUtils.toJson(msg).getBytes());
+    }
+   
+    
+    
   }
 
   /**
@@ -806,30 +824,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // otherwise send the message to the dialog with the senders name
     // broadcast(m);
     return false;
-  }
-
-  @Override
-  public String publishConnect() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Connection publishConnect(Connection keys) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public String publishDisconnect() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Status publishError() {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public String publishHide(String name) {
@@ -1081,6 +1075,35 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  @Override
+  public Object sendBlockingRemote(Message msg, Integer timeout) {
+    String remoteId = msg.getRemoteId();
+    Gateway gateway = Runtime.getGatway(remoteId);
+    if (!gateway.equals(this)) {
+      log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
+      return null;
+    }
+    
+    // getRoute
+    String toUuid = Runtime.getRoute(msg.getRemoteId());
+    
+    // get remote connection
+    Map<String,Object> conn = Runtime.getConnection(toUuid);
+    
+    // get broadcaster
+    // inspect type of connection and api
+    HelloRequest remoteInfo = (HelloRequest)conn.get("request");
+    String remoteApiKey = (String)conn.get("c-type");
+    AtmosphereResource r = (AtmosphereResource)conn.get("c-r");
+    
+    Broadcaster b = r.getBroadcaster();
+    // FIXME FIXME FIXME - don't we double encode parameters - (maybe not required for typless languages - only for strong typed ?)
+    b.broadcast(CodecUtils.toJson(msg)); // double encoded ?
+    
+    // FIXME !!! implement !!
+    return null;
   }
 
 }

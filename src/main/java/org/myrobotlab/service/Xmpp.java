@@ -158,12 +158,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     roster.createEntry("grog@myrobotlab.org", "grog", null);
   }
 
-  @Override
-  public void addConnectionListener(String name) {
-    // TODO Auto-generated method stub
-
-  }
-
   public void addXmppMsgListener(Service service) {
     // FIXME - implement direct callback or pub sub support ??
   }
@@ -255,18 +249,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   }
 
-  @Override
-  public List<String> getClientIds() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<Connection> getConnections(URI clientKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   public Contact getContact(RosterEntry r) {
     Contact contact = new Contact();
     contact.name = r.getName();
@@ -306,12 +288,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     }
     broadcastState();
     return contacts;
-  }
-
-  @Override
-  public String getPrefix(URI protocolKey) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   @Override
@@ -377,12 +353,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   @Override
   public void processMessage(Message msg) {
     log.info("here");
-  }
-
-  @Override
-  public Connection publishConnect(Connection keys) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public Contact publishPresenceChanged(Contact contact) {
@@ -576,21 +546,21 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public String publishConnect() {
-    // TODO Auto-generated method stub
-    return null;
+  public List<String> getClientIds() {
+    return Runtime.getConnectionIds(getName());
   }
 
   @Override
-  public String publishDisconnect() {
-    // TODO Auto-generated method stub
-    return null;
+  public Map<String, Map<String, Object>> getClients() {
+    return Runtime.getConnections(getName());
   }
 
   @Override
-  public Status publishError() {
+  public Object sendBlockingRemote(org.myrobotlab.framework.Message msg, Integer timeout) {
     // TODO Auto-generated method stub
+    // FIXME implement !!
     return null;
   }
+
 
 }

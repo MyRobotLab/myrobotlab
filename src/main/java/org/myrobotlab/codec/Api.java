@@ -85,11 +85,10 @@ public abstract class Api {
    *          - inbound uri
    * @return - returns message constructed from the uri
    */
-  public Message uriToMsg(String uri) {
+  static public Message uriToMsg(String uri, String defaultMethodName) {
     Message msg = new Message();
     msg.name = "runtime"; // default
-    msg.method = "getApis"; // default
-    msg.src = ApiFactory.API_TYPE_SERVICE; // default
+    msg.method = "getApis"; // default    
 
     int pos = uri.indexOf("/api/");
 
@@ -116,7 +115,7 @@ public abstract class Api {
     // available
 
     if (parts.length > 2) {
-      msg.src = parts[2];
+      msg.srcId = parts[2];
     } else {
       return msg;
     }
@@ -127,7 +126,7 @@ public abstract class Api {
 
     if (parts.length < 4) {
       // /api/service OR /api/service/
-      msg.method = getDefaultMethod();
+      msg.method = defaultMethodName;//getDefaultMethod();
     } else if (parts.length == 4) {
       msg.name = "runtime";
       if (requestUri.endsWith("/")) {

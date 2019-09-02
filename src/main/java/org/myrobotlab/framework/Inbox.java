@@ -49,7 +49,7 @@ public class Inbox implements Serializable {
   int maxQueue = 1024; // will need to adjust unit test if you change this
   // value
 
-  HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
+  public HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 

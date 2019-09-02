@@ -42,7 +42,7 @@ public class ApiCli extends Api {
       uri += data;
     }
 
-    Message msgFromUri = uriToMsg(uri);
+    Message msgFromUri = uriToMsg(uri, getDefaultMethod());
 
     // no point in having output if no out pipe exists
     if (out != null && data != null) {
@@ -75,14 +75,16 @@ public class ApiCli extends Api {
       } else if (data.startsWith("ls")) {
         Runtime runtime = Runtime.getInstance();
         Map<String, Object> c = Runtime.getConnection(uuid);
-        ret = runtime.ls(c.get("cwd").toString(), data.substring("ls".length()).trim());
+        ret = runtime.ls(data.substring("ls".length()).trim());
         out.write(CodecUtils.toPrettyJson(ret).getBytes()); // FIXME - normalize
 
       } else if (data.startsWith("attach")) {
-        String toUuid = null;
+        String id = null;
         if (data.length() > "attach".length()) {
-          toUuid = data.substring("attach".length()).trim();
+          id = data.substring("attach".length()).trim();
         }
+        
+        String toUuid = Runtime.getRoute(id);
         
         // get remote connection
         Map<String,Object> conn = Runtime.getConnection(toUuid);
@@ -110,7 +112,7 @@ public class ApiCli extends Api {
         // ========= HANDLE URI SERVICE CALLS ====================
 
         // FIXME - if Runtime.getService(msgFromUri.name) == null && no connections - then is error send <- should expect remote 
-        if (!msgFromUri.name.contains("@") && Runtime.getService(msgFromUri.name) != null) {
+        if (!msgFromUri.isLocal() && Runtime.getService(msgFromUri.name) != null) {
           // local service
           MethodCache cache = MethodCache.getInstance();
 
