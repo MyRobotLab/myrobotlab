@@ -2324,6 +2324,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.head.neck", "x");
     jme.setRotation("i01.head.rollNeck", "z");
     jme.setRotation("i01.head.eyeY", "x");
+    jme.setRotation("i01.head.eyeX", "y");
     jme.setRotation("i01.torso.topStom", "z");
     jme.setRotation("i01.torso.lowStom", "x");
     jme.setRotation("i01.rightArm.bicep", "x");
@@ -2334,8 +2335,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.leftArm.rotate", "y");
     jme.setRotation("i01.rightArm.omoplate", "z");
     jme.setRotation("i01.leftArm.omoplate", "z");
-    jme.setRotation("i01.rightHand.wrist", "x");
-    jme.setRotation("i01.leftHand.wrist", "x");
+    jme.setRotation("i01.rightHand.wrist", "y");
+    jme.setRotation("i01.leftHand.wrist", "y");
 
     // jme.setRotation("i01.rightHand.index", "x");
     // jme.setRotation("i01.rightHand.majeure", "x");
@@ -2347,6 +2348,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.head.neck", 0, 180, 20, -20);
     jme.setMapper("i01.head.rollNeck", 0, 180, 30, -30);
     jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
+    jme.setMapper("i01.head.eyeX", 0, 180, 30, 175); //TODO need to check that
     jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
 
