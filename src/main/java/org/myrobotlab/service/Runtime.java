@@ -44,7 +44,6 @@ import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
-import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecUtils;
@@ -1489,6 +1488,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         return;
       }
 
+      // ================= begin messages2 api =======================
+
+      if (log.isDebugEnabled()) {
+        log.debug("data - [{}]", data);
+      }
+
       // decoding 1st pass - decodes the containers
       Message msg = CodecUtils.fromJson(data, Message.class);
       msg.setProperty("uuid", uuid);
@@ -1557,7 +1562,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         // FIXME - double encode parameters ?
         endpoint.socket.fire(CodecUtils.toJson(retMsg));
       }
-
     } catch (Exception e) {
       log.error("processing msg threw", e);
     } // this, apiKey, uuid, endpoint, data);
