@@ -80,4 +80,12 @@ public class Node<T> {
 		}
 		
 	}
+	
+	public void removeChildren(Node<T> arm){
+		children.remove(arm);
+	}
+	
+	public void removeAllChildren(){
+		children.clear();
+	}
 }

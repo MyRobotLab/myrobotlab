@@ -332,6 +332,8 @@ public class IntegratedMovement extends Service
 		rightAnkleR.moveTo(0.0);
 
 		sleep(1000);
+		
+		ik.setOrigin(new Point(0, 0, -0.1345, 0, 0, 0));
 		/*
 		 * defining each part of the robot TODO saved those setting to file
 		 */
@@ -364,7 +366,7 @@ public class IntegratedMovement extends Service
 		partTopStom.setDHParameters(ArmConfig.DEFAULT, 0, 90, 0.300, -90);
 		partTopStom.setVisible(true);
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
-		partTopStom.setMass(5.774, 0.5);
+		partTopStom.setMass(5.774, 0.95);
 		ik.attach(partTopStom);
 
 		IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .001);
@@ -405,7 +407,7 @@ public class IntegratedMovement extends Service
 		partLeftBicep.setControl(ArmConfig.DEFAULT, bicep.getName());
 		partLeftBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 + 180, .3, 0);
 		partLeftBicep.set3DModel("Models/Lbicep.j3o", 0.001f, new Point(0.013,0.001,0,-90,0,0));
-		partLeftBicep.setMass(2.940, 0.4559);
+		partLeftBicep.setMass(0.940, 0.4559);
 		partLeftBicep.noCollisionCheckWith("leftRotate");
 		ik.attach(partLeftBicep);
 		
@@ -446,7 +448,7 @@ public class IntegratedMovement extends Service
 		partRightBicep.setDHParameters(ArmConfig.DEFAULT, 0, -7 + 24.4 , .3, 0);
 		partRightBicep.setControl(ArmConfig.DEFAULT, Rbicep.getName());
 		partRightBicep.set3DModel("Models/Rbicep1.j3o", scale, new Point(0.004,0,0,-90,0,0));
-		partRightBicep.setMass(2.940, 0.4559);
+		partRightBicep.setMass(0.940, 0.4559);
 		partRightBicep.noCollisionCheckWith("rightRotate");
 		ik.attach(partRightBicep);
 		
@@ -661,13 +663,13 @@ public class IntegratedMovement extends Service
 		armRightLeg.add(partHarlRAnkleR);
 		ik.attach(armRightLeg);
 		
-//		IMBuild inMoov = ik.createBuild("inMoov");
-//		inMoov.addArm(armRightLeg, ArmConfig.REVERSE);
-//		inMoov.addArm(armTorso, armRightLeg);
-//		inMoov.addArm(armLeftLeg, armRightLeg);
-//		inMoov.addArm(armRightArm, armTorso);
-//		inMoov.addArm(armLeftArm, armTorso);
-//		ik.attach(inMoov);
+		IMBuild inMoov = ik.createBuild("inMoov");
+		inMoov.addArm(armRightLeg, ArmConfig.REVERSE);
+		inMoov.addArm(armTorso, armRightLeg);
+		inMoov.addArm(armLeftLeg, armRightLeg);
+		inMoov.addArm(armRightArm, armTorso);
+		inMoov.addArm(armLeftArm, armTorso);
+		ik.attach(inMoov);
 
 //		IMBuild inMoov = ik.createBuild("inMoov");
 //		inMoov.addArm(armRightLeg);
@@ -677,14 +679,14 @@ public class IntegratedMovement extends Service
 //		inMoov.addArm(armLeftArm, armTorso);
 //		ik.attach(inMoov);
 
-		IMBuild inMoov = ik.createBuild("inMoov");
-		inMoov.setInputMatrix(ik.createInputMatrix(0, 0, -0.1345, 0, 0, 0));
-		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
-		inMoov.addArm(armTorso, armLeftLeg);
-		inMoov.addArm(armRightLeg, armLeftLeg);
-		inMoov.addArm(armRightArm, armTorso);
-		inMoov.addArm(armLeftArm, armTorso);
-		ik.attach(inMoov);
+//		IMBuild inMoov = ik.createBuild("inMoov");
+//		inMoov.setInputMatrix(ik.createInputMatrix(0, 0, -0.1345, 0, 0, 0));
+//		inMoov.addArm(armLeftLeg, ArmConfig.REVERSE);
+//		inMoov.addArm(armTorso, armLeftLeg);
+//		inMoov.addArm(armRightLeg, armLeftLeg);
+//		inMoov.addArm(armRightArm, armTorso);
+//		inMoov.addArm(armLeftArm, armTorso);
+//		ik.attach(inMoov);
 
 		
 		//rightKnee.moveTo(15.5);
@@ -827,7 +829,7 @@ public class IntegratedMovement extends Service
 	public transient CollisionDectection collisionItems = new CollisionDectection();
 
 	transient private IMData imData = new IMData();
-	transient private Matrix inputMatrix = null;
+	transient private Matrix inputMatrix = new Matrix(4,4).loadIdentity();
 
 	private transient JmeManager jmeManager = null;
 
@@ -838,7 +840,7 @@ public class IntegratedMovement extends Service
 
 	private boolean ProcessKinectData = false;
 	
-	private transient Matrix originMatrix;
+	private transient Matrix originMatrix = new Matrix(4,4).loadIdentity();
 
 
 	public void attach(Attachable service) {
@@ -1026,6 +1028,10 @@ public class IntegratedMovement extends Service
 		moveTo(build, arm, part, new Point(x, y, z, 0, 0, 0));
 	}
 	
+	public void moveTo(String build, String arm, double x, double y, double z, double roll, double pitch, double yaw){
+		moveTo(build, arm, null, new Point(x, y, z, roll, pitch, yaw));
+	}
+	
 	public void moveTo(String build, String arm, double x, double y, double z){
 		moveTo(build, arm, null, x, y, z);
 	}
@@ -1204,6 +1210,20 @@ public class IntegratedMovement extends Service
 		jmeManager.start("JmeIMModel", "Jme3App");
 		// jmeManager.loadParts(imData);
 
+	}
+	
+	public void setAnchorArm(IMBuild build, IMArm arm){
+		build.addMsg("setAnchorArm", arm.getName());
+	}
+	
+	public void setAnchorArm(String buildName, String armName){
+		IMBuild build = getData().getBuild(buildName);
+		build.addMsg("setAnchorArm", armName);
+	}
+	
+	public void stopMoving(String buildName, String armName){
+		IMBuild build = getData().getBuild(buildName);
+		build.addMsg("stopMoving", armName);
 	}
 
 }

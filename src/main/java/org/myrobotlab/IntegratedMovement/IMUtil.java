@@ -27,20 +27,29 @@ public class IMUtil {
 	    double x = m.elements[0][3];
 	    double y = m.elements[1][3];
 	    double z = m.elements[2][3];
-	    double pitch = Math.atan2(-1.0*(m.elements[2][0]), Math.sqrt(m.elements[2][1]*m.elements[2][1] + m.elements[2][2]*m.elements[2][2]));
-	    double roll = 0;
-	    double yaw = 0;
-	    if (pitch == Math.PI/2) {
-	      yaw =  Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) - Math.PI/2;
-	    }
-	    else if (pitch == -1 * Math.PI/2) {
-	      yaw = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) *-1 + Math.PI/2;
-	    }
-	    else {
-	      yaw = Math.atan2(m.elements[2][1]/Math.cos(pitch), m.elements[2][2]) + Math.PI/2;
-	      roll = Math.atan2(m.elements[1][0]/Math.cos(pitch), m.elements[0][0]) + Math.PI/2;
-	    }
+	    double pitch = Math.atan2(m.elements[1][2], m.elements[2][2]);
+	    double c2 = Math.sqrt(Math.pow(m.elements[0][0], 2) + Math.pow(m.elements[0][1], 2));
+	    double yaw = Math.atan2(-1 * m.elements[0][2], c2);
+	    double s1 = Math.sin(pitch);
+	    double c1 = Math.cos(pitch);
+	    double roll = Math.atan2((s1*m.elements[2][0]) - (c1 * m.elements[1][0]), (c1 * m.elements[1][1]) - (s1 * m.elements[2][1]));
 	    Point position = new Point(x, y, z, roll * 180 / Math.PI, pitch * 180 / Math.PI, yaw * 180 / Math.PI);
+//	    double cp = Math.cos(pitch);
+//	    double cy = Math.cos(yaw);
+//	    double cr = Math.cos(roll);
+//	    double sp = Math.sin(pitch);
+//	    double sy = Math.sin(yaw);
+//	    double sr = Math.sin(roll);
+//	    Matrix m1 = new Matrix(4,4);
+//	    m1.elements[0][0] = cy * cr;
+//	    m1.elements[0][1] = cy * sr;
+//	    m1.elements[0][2] = -1 * sy;
+//	    m1.elements[1][0] = (sp * sy * cr) - (cp * sr);
+//	    m1.elements[1][1] = (sp * sy * sr) + (cp * cr);
+//	    m1.elements[1][2] = sp * cy;
+//	    m1.elements[2][0] = (cp * sy * cr) + (sp * sr);
+//	    m1.elements[2][1] = (cp * sy * sr) - (sp * cr);
+//	    m1.elements[2][2] = cp * cy;
 		return position;
 	}
 	

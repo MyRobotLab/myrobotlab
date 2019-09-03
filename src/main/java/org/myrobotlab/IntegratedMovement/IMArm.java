@@ -32,7 +32,8 @@ public class IMArm {
 	}
 
 	public void add(IMPart part) {
-		IMPart lastPart = parts.getLast();
+		IMPart lastPart = null;
+		if (!parts.isEmpty()) lastPart = parts.getLast();
 		if (lastPart != null && !lastPart.isNoCheckCollision() && !part.isNoCheckCollision()){
 			lastPart.noCollisionCheckWith(part.getName());
 			part.noCollisionCheckWith(lastPart.getName());
@@ -109,6 +110,10 @@ public class IMArm {
 
 	public void setArmConfig(ArmConfig armConfig) {
 		this.armConfig = armConfig;
+		Iterator<IMPart> it = parts.iterator();
+		while (it.hasNext()){
+			it.next().setCurrentArmConfig(armConfig);
+		}
 	}
 	
 	public IMPart getLastPart(){

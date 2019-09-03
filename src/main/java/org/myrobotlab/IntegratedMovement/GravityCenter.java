@@ -42,7 +42,7 @@ public class GravityCenter {
 			Point o = IMUtil.matrixToPoint(m);
 			m = m.multiply(part.transform(part.getCurrentArmConfig()));
 			Point e = IMUtil.matrixToPoint(m);
-			Point icog = e.subtract(o).unitVector(1).multiplyXYZ(part.getCenterOfMass()).multiplyXYZ(part.getLength()).add(o);
+			Point icog = e.subtract(o).unitVector(1).multiplyXYZ(part.getCenterOfMass()).multiplyXYZ(part.getLength());//.add(o);
 			double mass = part.getMass() / totalMass;
 			Point ic = icog.multiplyXYZ(mass);
 			cog = cog.add(ic);
@@ -75,6 +75,9 @@ public class GravityCenter {
 		Point cog = IMUtil.matrixToPoint(arm.getData().getInputMatrix());
 		Matrix m = arm.getData().getInputMatrix();
 		cog = computeCoG(arm, cog, m);
+		cog.setPitch(0);
+		cog.setRoll(0);
+		cog.setYaw(0);
 		return cog;
 	}
 

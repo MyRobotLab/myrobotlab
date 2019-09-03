@@ -34,7 +34,7 @@ public class IMBuild extends Thread {
 	transient private GravityCenter gravityCenter = new GravityCenter();
 	
 	private enum MoveType {
-		NO_MOVE, POSITION, COG;
+		NO_MOVE, POSITION, COG, ANGLE;
 	}
 	  
 	public IMBuild(String name, IntegratedMovement service, Matrix origin){
@@ -184,7 +184,7 @@ public class IMBuild extends Thread {
 			if (arm.getChildren().size() > 0) moveType = MoveType.NO_MOVE; //nothing to do
 			else {
 				moveType = MoveType.COG;
-				target = gravityCenter.getCoGTarget();
+				//target = gravityCenter.getCoGTarget();
 			}
 		}
 	    if (moveType != MoveType.NO_MOVE){
@@ -210,42 +210,59 @@ public class IMBuild extends Thread {
     			parent = parent.getParent();
     		}
 	        // vector to destination
-    		Point deltaPoint = getDeltaPoint(target, l, currentOrigin, moveType);
-	        Matrix dP = new Matrix(3, 1);
-	        dP.elements[0][0] = deltaPoint.getX();
-	        dP.elements[1][0] = deltaPoint.getY();
-	        dP.elements[2][0] = deltaPoint.getZ();
-	        // scale a vector towards the goal by the increment step.
-	        dP = dP.multiply(iterStep);
-	        Matrix dTheta = null;
-	        Matrix jInverse = getJInverse(l, moveType);
-	        dTheta = jInverse.multiply(dP);
-	        if (dTheta == null) {
-	            dTheta = new Matrix(l.size(), 1);
-	            for (int i = 0; i < l.size(); i++) {
-	            	dTheta.elements[i][0] = 0.000001;
-	            }
-	        }
-	        for (int i = 0; i < dTheta.getNumRows(); i++) {
-	            DHLink link = l.get(i).getDHLink();
-	            if (l.get(i).getControl() != null) {
-	            	if (controls.get(l.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
-	            		// update joint positions! move towards the goal!
-	            		double d = dTheta.elements[i][0];
-	            		l.get(i).incrRotate(d);
-	            		if (d != 0.0) l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
-	            	}
-	            	else {
-	            		// servo already moving to a position, let it go to it's target
-	            		link.addPositionValue(controls.get(l.get(i).getControl()).getTargetPos());
-	            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
-	            	}
-	            }
-	            if (l.get(i).getName().equals(arm.getData().getLastPartToUse())) {
-	            	break;
-	            }
-	        }
-	        retval = true;
+    		for (MoveType mt : MoveType.values()){
+    			if (mt == MoveType.NO_MOVE) continue;
+				target = arm.getData().getTarget();
+    			if (mt == MoveType.POSITION || mt == MoveType.ANGLE){
+    				if (target == null) continue;
+    				iterStep = 0.01;
+    			}
+    			if (mt == MoveType.COG){
+    				//if (target != null) continue;
+    				target = gravityCenter.getCoGTarget();
+    				iterStep = 0.0001;
+    			}
+    			if (mt == MoveType.ANGLE){
+    				if (target.getPitch() == 0 & target.getRoll() == 0 && target.getYaw() == 0) continue;
+    				iterStep = 0.1;
+    			}
+	    		Point deltaPoint = getDeltaPoint(target, l, currentOrigin, mt);
+		        Matrix dP = new Matrix(3, 1);
+		        dP.elements[0][0] = deltaPoint.getX();
+		        dP.elements[1][0] = deltaPoint.getY();
+		        dP.elements[2][0] = deltaPoint.getZ();
+		        // scale a vector towards the goal by the increment step.
+		        dP = dP.multiply(iterStep);
+		        Matrix dTheta = null;
+		        Matrix jInverse = getJInverse(l, mt);
+		        dTheta = jInverse.multiply(dP);
+		        if (dTheta == null) {
+		            dTheta = new Matrix(l.size(), 1);
+		            for (int i = 0; i < l.size(); i++) {
+		            	dTheta.elements[i][0] = 0.000001;
+		            }
+		        }
+		        for (int i = 0; i < dTheta.getNumRows(); i++) {
+		            DHLink link = l.get(i).getDHLink();
+		            if (l.get(i).getControl() != null) {
+		            	if (controls.get(l.get(i).getControl()).getState() == ServoStatus.SERVO_STOPPED){
+		            		// update joint positions! move towards the goal!
+		            		double d = dTheta.elements[i][0];
+		            		l.get(i).incrRotate(d);
+		            		if (d != 0.0) l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
+		            	}
+		            	else {
+		            		// servo already moving to a position, let it go to it's target
+		            		link.addPositionValue(controls.get(l.get(i).getControl()).getTargetPos());
+		            		l.get(i).setState(ServoStatus.SERVO_POSITION_UPDATE);
+		            	}
+		            }
+		            if (l.get(i).getName().equals(arm.getData().getLastPartToUse())) {
+		            	break;
+		            }
+		        }
+		        retval = true;
+		    }
 	    }
 	    for (Node<IMArm> child : arm.getChildren()){
 	    	retval |= moveToGoal(child);
@@ -256,6 +273,13 @@ public class IMBuild extends Thread {
 	private Point getDeltaPoint(Point target, LinkedList<IMPart> l, Matrix inputMatrix, MoveType moveType) {
 		if (moveType == MoveType.POSITION) return target.subtract(resolveMatrix(l, inputMatrix));
 		else if (moveType == MoveType.COG) return target.subtract(gravityCenter.computeCoG(arms));
+		else if (moveType == MoveType.ANGLE){
+			Point retval = target.subtract(resolveMatrix(l,inputMatrix));
+			retval.setX(retval.getRoll());
+			retval.setY(retval.getPitch());
+			retval.setZ(retval.getYaw());
+			return retval;
+		}
 		return null;
 	}
 
@@ -291,6 +315,12 @@ public class IMBuild extends Thread {
 	    	basePosition = gravityCenter.computeCoG(arms);
 	    	basePosition.setZ(0.0);
 	    }
+	    else if (moveType == MoveType.ANGLE){
+	    	basePosition = resolveMatrix(parts, currentOrigin);
+	    	basePosition.setX(basePosition.getRoll());
+	    	basePosition.setY(basePosition.getPitch());
+	    	basePosition.setZ(basePosition.getYaw());
+	    }
 	    else basePosition = new Point (0,0,0,0,0,0);
 	    // for each servo, we'll rotate it forward by delta (and back), and get
 	    // the new positions
@@ -311,6 +341,12 @@ public class IMBuild extends Thread {
 		    else if (moveType == MoveType.COG){
 		    	curPos = gravityCenter.computeCoG(arms);
 		    	curPos.setZ(0.0);
+		    }
+		    else if (moveType == MoveType.ANGLE){
+		    	curPos = resolveMatrix(parts, currentOrigin);
+		    	curPos.setX(curPos.getRoll());
+		    	curPos.setY(curPos.getPitch());
+		    	curPos.setZ(curPos.getYaw());
 		    }
 		    else curPos = new Point (0,0,0,0,0,0);
 	    	Point deltaPoint = curPos.subtract(basePosition);
@@ -454,5 +490,42 @@ public class IMBuild extends Thread {
 	public void setInputMatrix(Matrix inputMatrix) {
 		arms.getData().setInputMatrix(inputMatrix);
 		gravityCenter.setCoGTarget(inputMatrix.elements[0][3], inputMatrix.elements[1][3], inputMatrix.elements[2][3]);
+	}
+	
+	public void setAnchorArm(String armName){
+		setAnchorArm(arms.find(armName));
+	}
+	
+	public void setAnchorArm(IMArm arm){
+		setAnchorArm(arms.find(arm));
+	}
+	
+	public void setAnchorArm(Node<IMArm> armNode){
+		if (reversedArm != null){
+			Node<IMArm> reversedNode = arms.find(reversedArm);
+			for (Node<IMArm> child : reversedNode.getChildren()){
+				reversedNode.getParent().addchild(child);
+				child.setParent(reversedNode.getParent());
+			}
+			reversedNode.removeAllChildren();
+			reversedArm.setArmConfig(ArmConfig.DEFAULT);
+			reversedArm = null;
+			gravityCenter.setCoGTarget(IMUtil.matrixToPoint(arms.getData().getInputMatrix()));
+		}
+		for (Node<IMArm> child : armNode.getParent().getChildren()){
+			if (child != armNode){
+				armNode.addchild(child);
+				child.setParent(armNode);
+			}
+		}
+		armNode.getParent().removeAllChildren();
+		armNode.getParent().addchild(armNode);
+		armNode.getData().setArmConfig(ArmConfig.REVERSE);
+		reversedArm = armNode.getData();
+		gravityCenter.setCoGTarget(IMUtil.matrixToPoint(reversedArm.getLastPart().getEnd()));
+	}
+	
+	public void stopMoving(String armName){
+		arms.find(armName).getData().setTarget(null);
 	}
 }
