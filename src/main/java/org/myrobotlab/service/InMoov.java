@@ -1655,6 +1655,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     languages.put("hi-IN", "Hindi - India");
     languages.put("it-IT", "Italian - Italia");
     languages.put("fi-FI", "Finnish - Finland");
+    languages.put("pt-PT", "Portuguese - Portugal");
     languagesIndex = new ArrayList<String>(languages.keySet());
     this.language = getLanguage();
     python = getPython();
@@ -2323,6 +2324,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.head.neck", "x");
     jme.setRotation("i01.head.rollNeck", "z");
     jme.setRotation("i01.head.eyeY", "x");
+    jme.setRotation("i01.head.eyeX", "y");
     jme.setRotation("i01.torso.topStom", "z");
     jme.setRotation("i01.torso.lowStom", "x");
     jme.setRotation("i01.rightArm.bicep", "x");
@@ -2333,17 +2335,20 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.leftArm.rotate", "y");
     jme.setRotation("i01.rightArm.omoplate", "z");
     jme.setRotation("i01.leftArm.omoplate", "z");
+    jme.setRotation("i01.rightHand.wrist", "y");
+    jme.setRotation("i01.leftHand.wrist", "y");
 
-    jme.setRotation("i01.rightHand.index", "x");
-    jme.setRotation("i01.rightHand.majeure", "x");
-
-    jme.setRotation("i01.leftHand.index", "x");
-    jme.setRotation("i01.leftHand.majeure", "x");
+    // jme.setRotation("i01.rightHand.index", "x");
+    // jme.setRotation("i01.rightHand.majeure", "x");
+    
+    // jme.setRotation("i01.leftHand.index", "x");
+    // jme.setRotation("i01.leftHand.majeure", "x");
 
     jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
     jme.setMapper("i01.head.neck", 0, 180, 20, -20);
     jme.setMapper("i01.head.rollNeck", 0, 180, 30, -30);
     jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
+    jme.setMapper("i01.head.eyeX", 0, 180, 30, 175); //TODO need to check that
     jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
 
@@ -2419,7 +2424,12 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.leftHand.thumb", 0, 180, -90, -270);
     
     // right hand
-
+    
+    jme.attach("i01.rightHand.thumb", "i01.rightHand.thumb1", "i01.rightHand.thumb3");
+    jme.setRotation("i01.rightHand.thumb", "x");
+    jme.setRotation("i01.rightHand.thumb1", "x");
+    jme.setRotation("i01.rightHand.thumb3", "x");
+    
     jme.attach("i01.rightHand.index", "i01.rightHand.index", "i01.rightHand.index2", "i01.rightHand.index3");
     jme.setRotation("i01.rightHand.index", "x");
     jme.setRotation("i01.rightHand.index2", "x");
