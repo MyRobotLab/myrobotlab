@@ -40,7 +40,7 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
-import org.myrobotlab.codec.Api;
+import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.HelloRequest;
@@ -257,7 +257,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } else {
       panels = desktops.get(currentDesktop);
     }
-    
+
     subscribe("runtime", "registered");
     // FIXME - "unregistered" / "released"
 
@@ -282,7 +282,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     };
   }
 
-
   @Override // FIXME - implement
   public boolean allowExport(String serviceName) {
     // TODO Auto-generated method stub
@@ -293,7 +292,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     attach(from, to, null);
   }
 
-  // FIXME - relays to be done at a system level of Runtime.connections - not here
+  // FIXME - relays to be done at a system level of Runtime.connections - not
+  // here
   @Deprecated
   public void attach(String from, String to, String uri) throws IOException {
 
@@ -334,7 +334,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        broadcaster.broadcast(CodecUtils.toJson(msg)); // <-- WAH ??? single encoding ??? shouldn't it be double?
+        broadcaster.broadcast(CodecUtils.toJson(msg)); // <-- WAH ??? single
+                                                       // encoding ??? shouldn't
+                                                       // it be double?
       }
     } catch (Exception e) {
       StringBuilder sb = new StringBuilder();
@@ -542,72 +544,87 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   @Override
   public void handle(AtmosphereResource r) {
- 
-    String uri = r.getRequest().getRequestURI();
-    String apiKey = ApiFactory.getApiKey(uri);
 
-    Map<String, Object> attributes = new HashMap<>();
-    String uuid = r.uuid();
-    if (!Runtime.connectionExists(r.uuid())) {
-      r.addEventListener(onDisconnect);
-      AtmosphereRequest request = r.getRequest();
-      Enumeration<String> headerNames = request.getHeaderNames();      
+    try {
+      // Runtime runtime = Runtime.get
+      String uri = r.getRequest().getRequestURI();
 
-      // required attributes - id ???/
-      attributes.put("uuid", r.uuid());
-      attributes.put("uri", uri);
-      attributes.put("url", r.getRequest().getRequestURL());
-      attributes.put("host", r.getRequest().getRemoteAddr());
-      attributes.put("gateway", getName());
+      Map<String, Object> attributes = new HashMap<>();
+      String uuid = r.uuid();
+      if (!Runtime.connectionExists(r.uuid())) {
+        r.addEventListener(onDisconnect);
+        AtmosphereRequest request = r.getRequest();
+        Enumeration<String> headerNames = request.getHeaderNames();
 
-      // connection specific
-      attributes.put("c-r", r);
-      attributes.put("c-type", "nettosphere");
-                 
-      // cli specific
-      attributes.put("cwd", "/");
+        // required attributes - id ???/
+        attributes.put("uuid", r.uuid());
+        attributes.put("uri", uri);
+        attributes.put("url", r.getRequest().getRequestURL());
+        attributes.put("host", r.getRequest().getRemoteAddr());
+        attributes.put("gateway", getName());
 
-      // addendum
-      attributes.put("user", "root");
+        // connection specific
+        attributes.put("c-r", r);
+        attributes.put("c-type", "nettosphere");
 
-      while (headerNames.hasMoreElements()) {
-          String headerName = headerNames.nextElement();          
+        // cli specific
+        attributes.put("cwd", "/");
+
+        // addendum
+        attributes.put("user", "root");
+
+        while (headerNames.hasMoreElements()) {
+          String headerName = headerNames.nextElement();
           Enumeration<String> headers = request.getHeaders(headerName);
           while (headers.hasMoreElements()) {
-              String headerValue = headers.nextElement();
-              attributes.put(String.format("header-%s", headerName), headerValue);              
+            String headerValue = headers.nextElement();
+            attributes.put(String.format("header-%s", headerName), headerValue);
           }
-      } 
-      Runtime.getInstance().addConnection(uuid, attributes);
-    } else {
-      // keeping it "fresh" - the resource changes every request ..
-      // it switches on 
-      Runtime.getConnection(uuid).put("c-r", r);
-    }
+        }
+        Runtime.getInstance().addConnection(uuid, attributes);
+      } else {
+        // keeping it "fresh" - the resource changes every request ..
+        // it switches on
+        Runtime.getConnection(uuid).put("c-r", r);
+      }
 
-    AtmosphereRequest request = r.getRequest();
+      AtmosphereRequest request = r.getRequest();
 
-    log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+      log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
 
-    Object retobj = null;
-    String data = request.body().asString();
+      Object retobj = null;
+      String data = request.body().asString();
 
-    if (data != null) {
+      log.info("connection {} responded with {}", uuid, data);
+      // get api - decode msg - process it
+      Map<String, Object> connection = Runtime.getConnection(uuid);
+      if (connection == null) {
+        error("no connection with uuid %s", uuid);
+        return;
+      }
+
+      // ================= begin messages2 api =======================
 
       if (log.isDebugEnabled()) {
         log.debug("data - [{}]", data);
       }
+      
+      if (data != null) {
 
       // decoding 1st pass - decodes the containers
       Message msg = CodecUtils.fromJson(data, Message.class);
       msg.setProperty("uuid", uuid);
-      // if id is ours - peel it off
+
+      // if id is ours - peel it off !
       String suffix = String.format("@%s", Runtime.getId());
       if (msg.name.endsWith(suffix)) {
         msg.name = msg.name.substring(0, msg.name.length() - suffix.length());
       }
-    
-      // ================= begin messages2 api =======================
+
+      // if were blocking -
+      Message retMsg = null;
+      Object ret = null;
+
       // its local if name does not have an "@" in it
       if (msg.isLocal()) {
 
@@ -616,35 +633,55 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         MethodCache cache = MethodCache.getInstance();
         Class<?> clazz = Runtime.getClass(msg.name);
         Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-        
-        // ties client response with uuid/connection - only other way 
-        // would be to get local thread storage
-        if ("getHelloResponse".equals(msg.method)) {
-          params[0] = uuid;
-        }
-        
+
         Method method = cache.getMethod(clazz, msg.method, params);
         ServiceInterface si = Runtime.getService(msg.name);
-        method.invoke(si, params);
+        // higher level protocol - ordered steps to establish routing
+        // must add meta data of connection to system
+        if ("runtime".equals(msg.name) && "getHelloResponse".equals(msg.method)) {
+          params[0] = uuid;
+        }
+        ret = method.invoke(si, params);
 
         // propagate return data to subscribers
-        si.out(msg.method, retobj);
+        si.out(msg.method, ret);
 
-        // 2019.07.30 new feature - echoing back on "message" protocol if a
-        // valid outstream exists and is local
-        // anything remote will be async message and will require a blocking
-        // subscriber if blocking is required
-        /**
-         * NOT IN MSG FORMAT !!! if (out != null) {
-         * out.write(CodecUtils.toJson(retobj).getBytes()); }
-         */
+        // sender is important - this "might" be right ;)
+        String sender = String.format("%s@%s", si.getName(), Runtime.getId());
+
+        // Tri-Input broadcast
+        // if it was a blocking call return a serialized message back - must
+        // switch return address original sender
+        // with name
+        retMsg = Message.createMessage(sender, msg.sender + "@" + msg.srcId, CodecUtils.getCallbackTopicName(method.getName()), ret);
+
       } else {
-        // remote msg - should route
-        // TODO - inspect if blocking ...
-        // FIXME - TODO - default route !!
-        gateway.send(msg);
+        // RELAYING !! in and out of process - don't decode !
+        // FIXME GET GATEWAY
+        // FIXME - send or sendBlocking
+
+        if (msg.isBlocking()) {
+          ret = sendBlockingRemote(msg, 3000);
+          // FIXME !!! Implement - we probably want the "whole" msg back from
+          // the inbox !
+          retMsg = null;
+        } else {
+          send(msg);
+        }
       }
 
+      // handle the response back
+      if (msg.isBlocking()) {
+        retMsg.msgId = msg.msgId;
+        String retUuid = Runtime.getRoute(msg.getReturnId()); //
+        Map<String, Object> retCon = Runtime.getConnection(retUuid);
+        // verify I'm the appropriate gateway
+        // FIXME - probably need to be a broadcaster ...
+        Endpoint endpoint = (Endpoint) retCon.get("c-endpoint"); 
+        // FIXME - double encode parameters ?
+        endpoint.socket.fire(CodecUtils.toJson(retMsg));
+      }
+      
     } else {
       // WE ARE IN THE INITIAL "GET" - no payload should be with /api/messages2
       // -
@@ -655,12 +692,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // FIXME double encode !!!
       // FIXME - should this be clientRemote.fire ???
       // encode parameters - encode msg container !!
-      Message msg = Message.createMessage(gateway.getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
+      OutputStream out = r.getResponse().getOutputStream();
+      Message msg = Message.createMessage(getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
       out.write(CodecUtils.toJson(msg).getBytes());
     }
-   
-    
-    
+
+    } catch (Exception e) {
+      log.error("handle threw", e);
+    }
   }
 
   /**
@@ -1061,8 +1100,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     LoggingFactory.init(Level.INFO);
 
     try {
-      
-      Runtime.main(new String[] {"--interactive"});
+
+      Runtime.main(new String[] { "--interactive" });
       Runtime.start("python", "Python");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -1085,23 +1124,24 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
       return null;
     }
-    
+
     // getRoute
     String toUuid = Runtime.getRoute(msg.getRemoteId());
-    
+
     // get remote connection
-    Map<String,Object> conn = Runtime.getConnection(toUuid);
-    
+    Map<String, Object> conn = Runtime.getConnection(toUuid);
+
     // get broadcaster
     // inspect type of connection and api
-    HelloRequest remoteInfo = (HelloRequest)conn.get("request");
-    String remoteApiKey = (String)conn.get("c-type");
-    AtmosphereResource r = (AtmosphereResource)conn.get("c-r");
-    
+    HelloRequest remoteInfo = (HelloRequest) conn.get("request");
+    String remoteApiKey = (String) conn.get("c-type");
+    AtmosphereResource r = (AtmosphereResource) conn.get("c-r");
+
     Broadcaster b = r.getBroadcaster();
-    // FIXME FIXME FIXME - don't we double encode parameters - (maybe not required for typless languages - only for strong typed ?)
+    // FIXME FIXME FIXME - don't we double encode parameters - (maybe not
+    // required for typless languages - only for strong typed ?)
     b.broadcast(CodecUtils.toJson(msg)); // double encoded ?
-    
+
     // FIXME !!! implement !!
     return null;
   }
