@@ -52,6 +52,7 @@ public class ApiFactory {
   // per instance
   // MessageSender sender = null;
 
+  @Deprecated /*not normalized with webgui */
   static public String getApiKey(String uri) {
     int pos = uri.indexOf(Api.PARAMETER_API);
     if (pos > -1) {
