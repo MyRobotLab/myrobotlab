@@ -26,6 +26,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.gateway;
     this.runtime;
     this.platform;
+    this.srcId = "";
+
     var connected = false;
     var environments = {};
     var myEnv = {};
@@ -40,6 +42,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var connectedCallbacks = [];
     var deferred = null;
     var msgInterfaces = {};
+
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
     // See the following link for all websocket configuration
     // https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js
@@ -152,6 +155,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         socket.push(msg);
         // console.log('sendRaw: ' + msg);
     }
+
+    this.getHelloResponse = function(uuid, request) {
+        console.log('getHelloResponse:');
+        console.log(request);
+
+        _self.sendTo('runtime', 'getLocalServices');
+        //_self.sendTo('runtime','getRegistry');
+        console.log('sent getRegistry:');
+    }
+
+    this.generateSrcId = function() {
+        return 'webgui-client-' + ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
+    }
+
     // since framework does not have a hello() onHello() defined
     // protocol - we are using Runtime.onLocalServices to do
     // initial processing of data after a connect
@@ -294,7 +311,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var msg = {
                 msgID: new Date().getTime(),
                 name: inName,
-                method: inMethod
+                method: inMethod,
+                srcId: _self.srcId,
+                sender: "runtime"
             };
             return msg;
         } else {
@@ -302,7 +321,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 msgID: new Date().getTime(),
                 name: inName,
                 method: inMethod,
-                data: inParams
+                data: inParams,
+                srcId: _self.srcId,
+                sender: "runtime"
             };
             return msg;
         }
@@ -471,6 +492,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             // when the framework creates a "hello()" method
             // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
             this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
+            this.subscribeToMethod(this.getHelloResponse, 'getHelloResponse');
             socket = atmosphere.subscribe(this.request);
             deferred = $q.defer();
             deferred.promise.then(function(result) {
@@ -723,5 +745,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onMessage = this.onMessage;
     this.request.onOpen = this.onOpen;
     this.request.onError = this.onError;
+    this.srcId = this.generateSrcId();
 }
 ]);

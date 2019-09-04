@@ -41,6 +41,7 @@ import org.atmosphere.nettosphere.Nettosphere;
 import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.client.Client.Endpoint;
+import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.HelloRequest;
@@ -58,6 +59,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -145,6 +147,40 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   private static final long serialVersionUID = 1L;
 
   transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  
+  /**
+   * needed to get the api key to select the appropriate api processor
+   * 
+   * @param r
+   * @return
+   */
+  static public String getApiKey(String uri) {
+    int pos = uri.indexOf(Api.PARAMETER_API);
+    if (pos > -1) {
+      pos += Api.PARAMETER_API.length();
+      int pos2 = uri.indexOf("/", pos);
+      if (pos2 > -1) {
+        return uri.substring(pos, pos2);
+      } else {
+        return uri.substring(pos);
+      }
+    }
+    return null;
+  }
+
+  public static class ApiDescription {
+    String key;
+    String path; // {scheme}://{host}:{port}/api/messages
+    String exampleUri;
+    String description;
+
+    public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
+      this.key = key;
+      this.path = uriDescription;
+      this.exampleUri = exampleUri;
+      this.description = description;
+    }
+  }
 
   // FIXME - move to security
   private static SSLContext createSSLContext2() {
@@ -188,6 +224,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("org.atmosphere", "nettosphere", "3.0.13");
+    meta.addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
 
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !
@@ -233,6 +270,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public Integer port;
 
+  @Deprecated
   Map<String, List<String>> relays = new HashMap<>();
 
   public String root = "root";
@@ -527,9 +565,27 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return port;
   }
 
+  @Deprecated
   public Map<String, List<String>> getRelays() {
     return relays;
   }
+  
+  protected void setBroadcaster(String apiKey, AtmosphereResource r) {
+    // FIXME - maintain single broadcaster for each session ?
+    String uuid = r.uuid();
+    
+    Broadcaster uuiBroadcaster = getBroadcasterFactory().lookup(uuid);
+    // create a unique broadcaster in the framework for this uuid
+    if ( uuiBroadcaster == null) {
+      uuiBroadcaster = getBroadcasterFactory().get(uuid);      
+    } 
+    uuiBroadcaster.addAtmosphereResource(r);
+    uuiBroadcaster.getAtmosphereResources();
+    r.addBroadcaster(uuiBroadcaster);
+    log.info("resource {}", r);
+    log.info("resource {}", StringUtil.toString(r.broadcasters()));
+  }
+
 
   /**
    * With a single method Atmosphere does so much !!! It sets up the connection,
@@ -546,53 +602,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void handle(AtmosphereResource r) {
 
     try {
-      // Runtime runtime = Runtime.get
-      String uri = r.getRequest().getRequestURI();
-
-      Map<String, Object> attributes = new HashMap<>();
-      String uuid = r.uuid();
-      if (!Runtime.connectionExists(r.uuid())) {
-        r.addEventListener(onDisconnect);
-        AtmosphereRequest request = r.getRequest();
-        Enumeration<String> headerNames = request.getHeaderNames();
-
-        // required attributes - id ???/
-        attributes.put("uuid", r.uuid());
-        attributes.put("uri", uri);
-        attributes.put("url", r.getRequest().getRequestURL());
-        attributes.put("host", r.getRequest().getRemoteAddr());
-        attributes.put("gateway", getName());
-
-        // connection specific
-        attributes.put("c-r", r);
-        attributes.put("c-type", "nettosphere");
-
-        // cli specific
-        attributes.put("cwd", "/");
-
-        // addendum
-        attributes.put("user", "root");
-
-        while (headerNames.hasMoreElements()) {
-          String headerName = headerNames.nextElement();
-          Enumeration<String> headers = request.getHeaders(headerName);
-          while (headers.hasMoreElements()) {
-            String headerValue = headers.nextElement();
-            attributes.put(String.format("header-%s", headerName), headerValue);
-          }
-        }
-        Runtime.getInstance().addConnection(uuid, attributes);
-      } else {
-        // keeping it "fresh" - the resource changes every request ..
-        // it switches on
-        Runtime.getConnection(uuid).put("c-r", r);
+      
+      String apiKey = getApiKey(r.getRequest().getRequestURI());
+      upsertConnection(r);
+      if (!apiKey.equals(ApiFactory.API_TYPE_SERVICE) && !r.isSuspended()) {
+        r.suspend();
       }
+      setBroadcaster(apiKey, r);
+      r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
 
+      String uuid = r.uuid();
       AtmosphereRequest request = r.getRequest();
 
       log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
 
-      Object retobj = null;
       String data = request.body().asString();
 
       log.info("connection {} responded with {}", uuid, data);
@@ -699,6 +722,47 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     } catch (Exception e) {
       log.error("handle threw", e);
+    }
+  }
+
+  private void upsertConnection(AtmosphereResource r) {
+    Map<String, Object> attributes = new HashMap<>();
+    String uuid = r.uuid();
+    if (!Runtime.connectionExists(r.uuid())) {
+      r.addEventListener(onDisconnect);
+      AtmosphereRequest request = r.getRequest();
+      Enumeration<String> headerNames = request.getHeaderNames();
+
+      // required attributes - id ???/
+      attributes.put("uuid", r.uuid());
+      attributes.put("uri", r.getRequest().getRequestURI());
+      attributes.put("url", r.getRequest().getRequestURL());
+      attributes.put("host", r.getRequest().getRemoteAddr());
+      attributes.put("gateway", getName());
+
+      // connection specific
+      attributes.put("c-r", r);
+      attributes.put("c-type", "nettosphere");
+
+      // cli specific
+      attributes.put("cwd", "/");
+
+      // addendum
+      attributes.put("user", "root");
+
+      while (headerNames.hasMoreElements()) {
+        String headerName = headerNames.nextElement();
+        Enumeration<String> headers = request.getHeaders(headerName);
+        while (headers.hasMoreElements()) {
+          String headerValue = headers.nextElement();
+          attributes.put(String.format("header-%s", headerName), headerValue);
+        }
+      }
+      Runtime.getInstance().addConnection(uuid, attributes);
+    } else {
+      // keeping it "fresh" - the resource changes every request ..
+      // it switches on
+      Runtime.getConnection(uuid).put("c-r", r);
     }
   }
 
@@ -1108,13 +1172,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8887);
       webgui.startService();
       Runtime.start("gui", "SwingGui");
+      webgui.start();
 
       log.info("leaving main");
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
+  } 
 
   @Override
   public Object sendBlockingRemote(Message msg, Integer timeout) {
