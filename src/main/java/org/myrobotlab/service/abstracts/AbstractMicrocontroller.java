@@ -88,6 +88,20 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
   @Override
   public void attach(PinArrayListener listener) {
     pinArrayListeners.put(listener.getName(), listener);
+    // TODO: re-implement this.. it seemed unstable when i was testing before.
+    // attaching a pin listener should enable the pins (if they're not already enabled.)
+    // if the pin array listener is listening for a specific set of pins, we should enable those.
+    // if (listener.getActivePins()!= null && listener.getActivePins().length >0) {
+    //          for (String pin : listener.getActivePins()) {
+    //            // TODO: what rate?
+    //            // TODO: maybe expose rate as a parameter for the listener to supply
+    //            log.info("Enable pin {}", pin);
+    //            int rate = 0;
+    //            this.enablePin(pin, rate);
+    //    
+    // }
+    // }
+
   }
 
   /**
