@@ -15,6 +15,7 @@ import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.PinArrayPublisher;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -55,7 +56,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   private String side;
   
   // The pins for the finger tip sensors
-  public List<String> sensorPins = Arrays.asList("A0","A1","A2","A3","A4");
+  public String[] sensorPins = new String[]{"A0","A1","A2","A3","A4"};
   public int[] sensorThresholds = new int[] {500,500,500,500,500}; 
   // public int[] sensorLastValues = new int[] {0,0,0,0,0};
   public boolean sensorsEnabled = false;
@@ -697,55 +698,67 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   @Override
   public void onPinArray(PinData[] pindata) {
     
+    log.info("On Pin Data: {}", pindata.length);
     if (!sensorsEnabled)
       return;
       // just return ?  TOOD: maybe still track the last read values...
     // TODO : change the interface to get a map of pin data, keyed off the name. ?
     for (PinData pin : pindata) {
+      log.info("Pin Data: {}", pin);
       // p
-      if (sensorPins.contains(pin.pin)) {
-        // it's one of our finger pins.. let's operate on it.
-        log.info("Pin Data : {} value {}", pin.pin, pin.value );
-        if (sensorPins.get(0).equalsIgnoreCase(pin.pin)) {
-          // thumb / A0
-          // here we want to test the pin state.. and potentially take an action 
-          // based on the updated sensor pin state
-          if (pin.value > sensorThresholds[0])
-            thumb.stop();
-        } else if (sensorPins.get(1).equalsIgnoreCase(pin.pin)) {
-          // index / A1
-          if (pin.value > sensorThresholds[1])
-            index.stop();
-
-        } else if (sensorPins.get(2).equalsIgnoreCase(pin.pin)) {
-          // middle / A2
-          if (pin.value > sensorThresholds[2])
-            majeure.stop();
-
-        } else if (sensorPins.get(3).equalsIgnoreCase(pin.pin)) {
-          // ring / A3
-          if (pin.value > sensorThresholds[3])
-            ringFinger.stop();
-
-        } else if (sensorPins.get(4).equalsIgnoreCase(pin.pin)) {
-          // pinky / A4
-          if (pin.value > sensorThresholds[4])
-            pinky.stop();
-        }
-      }
+      //      if (sensorPins.contains(pin.pin)) {
+      //        // it's one of our finger pins.. let's operate on it.
+      //        log.info("Pin Data : {} value {}", pin.pin, pin.value );
+      //        if (sensorPins[0].equalsIgnoreCase(pin.pin)) {
+      //          // thumb / A0
+      //          // here we want to test the pin state.. and potentially take an action 
+      //          // based on the updated sensor pin state
+      //          if (pin.value > sensorThresholds[0])
+      //            thumb.stop();
+      //        } else if (sensorPins[1].equalsIgnoreCase(pin.pin)) {
+      //          // index / A1
+      //          if (pin.value > sensorThresholds[1])
+      //            index.stop();
+      //
+      //        } else if (sensorPins[2].equalsIgnoreCase(pin.pin)) {
+      //          // middle / A2
+      //          if (pin.value > sensorThresholds[2])
+      //            majeure.stop();
+      //
+      //        } else if (sensorPins[3].equalsIgnoreCase(pin.pin)) {
+      //          // ring / A3
+      //          if (pin.value > sensorThresholds[3])
+      //            ringFinger.stop();
+      //
+      //        } else if (sensorPins[4].equalsIgnoreCase(pin.pin)) {
+      //          // pinky / A4
+      //          if (pin.value > sensorThresholds[4])
+      //            pinky.stop();
+      //        }
+      //      }
     }
   }
 
 
-  public List<String> getSensorPins() {
+  /**
+   * this method returns the analog pins that the hand is listening to.
+   * The InMoovHand listens on analog pins A0-A4 for the finger tip sensors.
+   * 
+   */
+  @Override
+  public String[] getActivePins() {
     // TODO Auto-generated method stub
     // for the InMoov hand, we're just going to say A0 - A4 ... for now..
     return sensorPins;
   }
 
-  public void setSensorPins(List<String> pins) {
-    // TODO Auto-generated method stub
-    // TODO: NoOp for now.. not configurable yet.
+  /**
+   * Set the array of pins that should be listened to. 
+   * 
+   * @param pins
+   */
+  public void setSensorPins(String[] pins) {
+    // TODO, this should probably be a sorted set.. and sensorPins itself should probably be a map to keep the mapping of pin to finger 
     this.sensorPins = pins;
   }
 
