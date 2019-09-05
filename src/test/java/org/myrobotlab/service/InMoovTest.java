@@ -215,4 +215,10 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
 
   }
 
+  @Override
+  public String[] getActivePins() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }
