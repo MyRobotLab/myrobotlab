@@ -541,4 +541,10 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     pinData.put(pindata.pin, pindata);
   }
 
+  @Override
+  public String[] getActivePins() {
+    // TODO Auto-generated method stub
+    return new String[]{"A0","A1"};
+  }
+
 }

@@ -10,10 +10,8 @@ import org.myrobotlab.service.data.PinData;
  * @author GroG
  *
  */
-public interface PinArrayControl extends NameProvider {
+public interface PinArrayControl extends PinArrayPublisher {
 
-  public void attach(PinArrayListener listener);
-  
   public void attach(PinListener listener, int address);
   
   public void attach(PinListener listener, String pin);
@@ -44,8 +42,6 @@ public interface PinArrayControl extends NameProvider {
 
   public PinData publishPin(PinData pinData);
 
-  public PinData[] publishPinArray(PinData[] pinData);
-  
   public PinDefinition publishPinDefinition(PinDefinition pinDef);
 
   public int read(String pin);

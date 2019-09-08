@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -52,6 +53,7 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
+import org.myrobotlab.service.interfaces.PinArrayPublisher;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.PortConnector;
@@ -68,7 +70,7 @@ import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
-    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController {
+    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -1758,9 +1760,34 @@ public class Arduino extends AbstractMicrocontroller
       }
     }
 
+    // TODO: improve this logic so it doesn't something more effecient.
+    HashMap<String, PinData> pinDataMap = new HashMap<String, PinData>();
+    for (int i = 0; i < pinArray.length; i++) {
+      if (pinArray[i] != null && pinArray[i].pin != null) {
+        pinDataMap.put(pinArray[i].pin, pinArray[i]);
+      }
+    }
+    
     for (String name : pinArrayListeners.keySet()) {
+      // put the pin data into a map for quick lookup
       PinArrayListener pal = pinArrayListeners.get(name);
-      pal.onPinArray(pinArray);
+      if (pal.getActivePins() != null && pal.getActivePins().length > 0) {
+        int numActive = pal.getActivePins().length;
+        PinData[] subArray = new PinData[numActive];
+        for (int i = 0 ; i < numActive; i++) {
+          String key = pal.getActivePins()[i];
+          if (pinDataMap.containsKey(key)) {
+            subArray[i] = pinDataMap.get(key);
+          } else {
+            subArray[i] = null;
+          }
+        }
+        // only the values that the listener is asking for.
+        pal.onPinArray(subArray);
+      } else {
+        // the full array
+        pal.onPinArray(pinArray);
+      }
     }
     return pinArray;
   }
@@ -2295,7 +2322,7 @@ public class Arduino extends AbstractMicrocontroller
       log.info("here");
       // hub.connect("COM6"); // uno
 
-      hub.connect("COM8");
+      hub.connect("COM3");
 
       // hub.startTcpServer();
 
