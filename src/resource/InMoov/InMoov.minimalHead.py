@@ -104,7 +104,9 @@ ear.addNegations("no","wrong","nope","nah")
 
 ear.startListening()
 
-
+def fullspeed():
+  i01.setHeadVelocity(-1, -1, -1, -1, -1, -1)
+  
 def lookrightside():
   i01.setHeadSpeed(0.70, 0.70)
   i01.moveHead(90,40)
