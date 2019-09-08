@@ -101,19 +101,20 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     servoOrder.put("majeure", 2);
     servoOrder.put("ringFinger", 3);
     servoOrder.put("pinky", 4);
-    servoOrder.put("bicep", 5);
-    servoOrder.put("rotate", 6);
-    servoOrder.put("shoulder", 7);
-    servoOrder.put("omoplate", 8);
-    servoOrder.put("neck", 9);
-    servoOrder.put("rothead", 10);
-    servoOrder.put("rollNeck", 11);
-    servoOrder.put("eyeX", 12);
-    servoOrder.put("eyeY", 13);
-    servoOrder.put("jaw", 14);
-    servoOrder.put("topStom", 15);
-    servoOrder.put("midStom", 16);
-    servoOrder.put("lowStom", 17);
+    servoOrder.put("wrist",5)
+    servoOrder.put("bicep", 6);
+    servoOrder.put("rotate", 7);
+    servoOrder.put("shoulder", 8);
+    servoOrder.put("omoplate", 9);
+    servoOrder.put("neck", 10);
+    servoOrder.put("rothead", 11);
+    servoOrder.put("rollNeck", 12);
+    servoOrder.put("eyeX", 13);
+    servoOrder.put("eyeY", 14);
+    servoOrder.put("jaw", 15);
+    servoOrder.put("topStom", 16);
+    servoOrder.put("midStom", 17);
+    servoOrder.put("lowStom", 18);
   }
 
   public void attach(Attachable attachable) {
