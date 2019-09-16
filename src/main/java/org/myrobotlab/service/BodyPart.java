@@ -101,7 +101,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     servoOrder.put("majeure", 2);
     servoOrder.put("ringFinger", 3);
     servoOrder.put("pinky", 4);
-    servoOrder.put("wrist",5)
+    servoOrder.put("wrist",5);
     servoOrder.put("bicep", 6);
     servoOrder.put("rotate", 7);
     servoOrder.put("shoulder", 8);
