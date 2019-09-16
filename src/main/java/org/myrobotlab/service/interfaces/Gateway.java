@@ -25,8 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,29 +33,18 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface Gateway extends NameProvider {
 
-  // public void addConnectionListener(String name);
-
-  public void connect(String uri) throws Exception;
+  public void connect(String uri) throws Exception; // <-- FIXME invalid I assume ?
 
   public List<String> getClientIds();
   
   public Map<String, Map<String, Object>> getClients();
 
-  // public List<Connection> getConnections(URI clientKey);
-
-  // public String getPrefix(URI protocolKey);
-
-  // public Connection publishConnect(Connection keys);
-
-  public void sendRemote(final String key, final Message msg) throws URISyntaxException;
-
-  public void sendRemote(final URI key, final Message msg);
+  public void sendRemote(final Message msg) throws Exception;
   
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception;
+  public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
+  
+  public boolean isLocal(Message msg);
+  
+  public Message getDefaultMsg(String connId);
 
-  // public String publishConnect();
-
-  // public String publishDisconnect();
-
-  // public Status publishError();
 }

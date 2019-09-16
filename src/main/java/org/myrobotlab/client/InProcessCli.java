@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
-import org.myrobotlab.codec.ApiCli;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -29,6 +29,7 @@ public class InProcessCli implements Runnable {
 
   public final static Logger log = LoggerFactory.getLogger(InProcessCli.class);
 
+  String id;
   String uuid;
   Thread myThread = null;
   String name;
@@ -37,7 +38,22 @@ public class InProcessCli implements Runnable {
   boolean running = false;
   String prefix = "/";
 
-  public InProcessCli(String senderName, InputStream in, OutputStream out) {
+  private String remoteId;
+
+  /**
+   * The inProcessCli behave like a remote id - although it is in the same
+   * process as the mrl instances. Its a general good model to follow, because
+   * stdin/stdout is a pipe into and out of the instance, so just like
+   * websockets, mqtt or xmpp it should behave the same
+   * 
+   * @param id
+   * @param senderName
+   * @param in
+   * @param out
+   */
+  public InProcessCli(String id, String senderName, InputStream in, OutputStream out) {
+    this.id = "cli-" + id; // this becomes a local/remote id with prepended cli-
+    this.remoteId = id; // remote id is the mrl instance
     this.name = senderName;
     this.in = in;
     this.out = out;
@@ -57,22 +73,19 @@ public class InProcessCli implements Runnable {
 
     try {
       running = true;
-      Random random = new Random();
-
-      String id = "cli";
-      String uuid = String.format("stdin-%s-%d", Runtime.getId(), random.nextInt(10000));
-      ApiCli cli = new ApiCli();// (ApiCli)ApiFactory.getApiProcessor("cli");
-      // cli.addClient(null, "cli", null, uuid);
+      String uuid = java.util.UUID.randomUUID().toString();
       Map<String, Object> attributes = new HashMap<>();
       attributes.put("gateway", "runtime");
       attributes.put("uuid", uuid);
       attributes.put("id", id);
-      attributes.put("User-Agent", "stdin-client");
+      attributes.put("header-User-Agent", "stdin-client");
       attributes.put("cwd", "/");
       attributes.put("uri", "/api/cli");
       attributes.put("user", "root");
       attributes.put("host", "local");
-      Runtime.getInstance().addConnection(id, uuid, attributes);
+      Runtime runtime = Runtime.getInstance();
+      runtime.addConnection(uuid, attributes);
+      runtime.getHelloResponse(uuid, new HelloRequest(id, uuid));
 
       int c = '\n';
       String readLine = "";
@@ -105,11 +118,6 @@ public class InProcessCli implements Runnable {
   public void process(String data) {
     try {
 
-      /* what the hell is the prefix ?
-      if (prefix != null) {
-        data = prefix + data;
-      }
-      */
       data = data.trim();
 
       if ("".equals(data)) {
@@ -123,27 +131,38 @@ public class InProcessCli implements Runnable {
       // "create" cli specific msgs
       Message cliMsg = msgFromCli(data);
 
+      // FIXME - probably not the way to implement exit
+      // should be sending id to remote and exiting their ???
+      if ("exit".equals(cliMsg.method)) {
+        String ret = "exiting " + remoteId + "...";
+        setRemote(Runtime.getInstance().getId());
+        System.out.println(ret);
+        return;
+      }
+
       Object ret = null;
 
-      if (cliMsg.isLocal()) {
+      if (Runtime.getInstance().isLocal(cliMsg)) {
         // invoke locally
-        ServiceInterface si = Runtime.getService(cliMsg.name);
+        ServiceInterface si = Runtime.getService(cliMsg.getName());
         ret = si.invoke(cliMsg);
       } else {
         // send remotely
         // get gateway
         // send blocking remote
         // return result
-        Gateway gateway = Runtime.getGatway(cliMsg.getRemoteId());
-        ret = gateway.sendBlockingRemote(cliMsg, 3000); // I ASSUME THIS RETURNS DATA AND NOT THE RETURNING MSG ?
+        Gateway gateway = Runtime.getGatway(cliMsg.getId());
+        ret = gateway.sendBlockingRemote(cliMsg, 3000); // I ASSUME THIS RETURNS
+                                                        // DATA AND NOT THE
+                                                        // RETURNING MSG ?
       }
 
       if (ret == null || ret.getClass().equals(String.class)) {
-        write((String)ret);
+        write((String) ret);
       } else if (ret != null) {
         writeToJson(ret);
       }
-      
+
       writePrompt(out, data);
 
     } catch (Exception e) {
@@ -161,64 +180,95 @@ public class InProcessCli implements Runnable {
    */
   public Message msgFromCli(String data) {
 
-    // default msg
-    Message msg = Message.createMessage("runtime", "runtime", "pwd", null);
-    String[] parts = data.split(" ");
+    Message msg = Message.createMessage("runtime@" + id, "runtime@" + remoteId, "pwd", null);
 
-    if (parts.length > 1) {
-      // at least 1 space in command meaning at least 1 parameter
-      if (data.startsWith("cd")) {
-        msg.method = "cd";
-        msg.data = new Object[] { parts[1] };
+    // because we always want a "Blocking/Return" from the cmd line - without a
+    // subscription
+    msg.setBlocking();
 
-      } else if (data.startsWith("ls")) {
-        msg.method = "ls";
-        msg.data = new Object[] { parts[1] };
+    if (!data.startsWith("/")) {
+      // quick form
 
-      } else if (data.startsWith("attach")) {
-        msg.method = "attach";
-        msg.data = new Object[] { parts[1] };
+      String[] parts = data.split(" ");
+
+      msg.method = parts[0];
+
+      // TO ENCODE OR NOT TO ENCODE THAT IS THE QUESTION
+      // if local(same process) don't encode
+
+      // check in set of commands if necessary ...
+      if (parts.length > 1) {
+        Object[] params = new Object[parts.length - 1];
+        for (int i = 1; i < parts.length; ++i) {
+          // params[i - 1] = CodecUtils.toJson(parts[i]);
+          // if (inProcess(msg)) me or my process - then don't encode
+          params[i - 1] = parts[i];
+        }
+
+        msg.data = params;
       }
     } else {
-      // 0 spaces in command
-      if ("pwd".equals(data)) {
-        msg.method = "pwd";
-      } else if ("lc".equals(data)) {
-        msg.method = "lc";
-      } else if ("whoami".equals(data)) {
-        msg.method = "whoami";
-      } else if ("route".equals(data)) {
-        msg.method = "getRouteTable";
-      } else if ("ls".equals(data)) {
+      /**
+       * <pre>
+      
+      "/"  -  list services
+      "/{serviceName}" - list data of service
+      "/{serviceName}/" - list methods of service
+      "/{serviceName}/{method}" - invoke method
+      "/{serviceName}/{method}/" - list parameters of method
+      "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
+      "/{serviceName}/{method}/p0/p1/p2/"
+       * 
+       * </pre>
+       */
+
+      String[] parts = data.split("/");
+
+      // "/" - list services
+      if (parts.length == 0) {
+        msg.name = "runtime@" + remoteId;
         msg.method = "ls";
-      } else {
-        // we try to do a service call ?
-        String cmd = null;
-        if (!data.startsWith("/")){
-          cmd = Runtime.getInstance().pwd() + parts[0];
+        msg.data = new Object[] { "/" };
+      }
+
+      // "/python" - list data of service
+      if (parts.length == 2 && !data.endsWith("/")) {
+        msg.name = "runtime@" + remoteId;
+        msg.method = "ls";
+        msg.data = new Object[] { "/" + parts[1] };
+      }
+      
+      if (parts.length == 2 && data.endsWith("/")) {
+        msg.name = "runtime@" + remoteId;
+        msg.method = "ls";
+        msg.data = new Object[] { "/" + parts[1] + "/" };
+      }
+
+
+      // fix me diff from 2 & 3 "/"
+      if (parts.length > 2) {
+        // address the msg
+        String address = parts[1];
+        if (!address.contains("@")) {
+          msg.name = address + "@" + remoteId;
         } else {
-          cmd = parts[0];
+          msg.name = address;
         }
-        String[] cmdParts = cmd.split("/");
-        if (cmdParts.length > 2) {
-          msg.name = cmdParts[1];
-          msg.method = cmdParts[2];
-          // add the parameters
-          if (cmdParts.length > 3) {
-            String[] params = new String[cmdParts.length - 3];
-            for (int i = 3; i < cmdParts.length; ++i) {
-              params[i - 3] = cmdParts[i];  
-            }
-            msg.data = params;
-          }
+
+        // prepare the method
+        msg.method = parts[2];
+
+        // FIXME - to encode or not to encode that is the question ...
+        Object[] payload = new Object[parts.length - 3];
+        for (int i = 3; i < parts.length; ++i) {
+          payload[i - 3] = parts[i];
         }
+        msg.data = payload;
       }
     }
-
     return msg;
   }
-  
-  
+
   public void write(String o) throws IOException {
     if (o == null) {
       out.write("null".getBytes());
@@ -237,12 +287,14 @@ public class InProcessCli implements Runnable {
     out.write(" ".getBytes());
   }
 
+  /**
+   * FIXME - fix name and path !!!
+   * 
+   * @param uuid
+   * @return
+   */
   public String getPrompt(String uuid) {
-    // Map<String, Object> gateway = Runtime.getConnection(uuid);
-    // String prompt = "root".equals(gateway.get("user")) ? "#" : "$";
-    // return String.format("[%s@%s %s]%s", gateway.get("user"), gateway.get("host"), gateway.get("cwd"), prompt);
-    Runtime runtime = Runtime.getInstance();
-    return String.format("[%s@%s %s]%s", name, Runtime.getId(), runtime.pwd(), "#");
+    return String.format("[%s@%s %s]%s", name, remoteId, "/fixpath", "#");
   }
 
   // FIXME - interrupt does not work on a infinite blocked read
@@ -254,15 +306,12 @@ public class InProcessCli implements Runnable {
 
   public static void main(String[] args) {
     try {
-      // Logger logger = (Logger)
-      // LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-      // logger.setLevel(Level.INFO);
 
       // Logger.getRootLogger().setLevel(Level.INFO);
 
       Runtime.getInstance();
 
-      InProcessCli client = new InProcessCli("test", System.in, System.out);
+      InProcessCli client = new InProcessCli(NameGenerator.getName(), "test", System.in, System.out);
       client.start();
 
       // if interactive vs non-interactive which will pretty much be curl ;P BUT
@@ -273,9 +322,24 @@ public class InProcessCli implements Runnable {
       // System.out.println("password {}", password);
 
     } catch (Exception e) {
-      // log.error("main threw", e);
       e.printStackTrace();
     }
+  }
+
+  public void setRemote(String remoteId) {
+    this.remoteId = remoteId;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public boolean isLocal(Message msg) {
+    String msgId = msg.getId();
+    if (msgId == null) {
+      log.error("msg cannot be tested for local cli - needs to be not null {}", msg);
+    }
+    return msgId.endsWith(id);
   }
 
 }

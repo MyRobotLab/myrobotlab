@@ -26,7 +26,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.gateway;
     this.runtime;
     this.platform;
-    this.srcId = "";
+    this.id = null;
+    this.remoteId = null;
 
     var connected = false;
     var environments = {};
@@ -156,17 +157,38 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // console.log('sendRaw: ' + msg);
     }
 
-    this.getHelloResponse = function(uuid, request) {
+    this.onHelloResponse = function(request) {
+        console.log('onHelloResponse:');
+        console.log(request);
+    }
+
+    this.getHelloResponse = function(request) {
         console.log('getHelloResponse:');
+        let hello = JSON.parse(request.data[1])
+        _self.remoteId = hello.id;
         console.log(request);
 
-        _self.sendTo('runtime', 'getLocalServices');
+        // once we have our mrl instance's id - we are
+        // ready to ask more questions
+
+        _self.sendToBlocking('runtime', 'getLocalServices');
         //_self.sendTo('runtime','getRegistry');
         console.log('sent getRegistry:');
     }
 
-    this.generateSrcId = function() {
-        return 'webgui-client-' + ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
+    this.generateId = function() {
+        let var1 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
+        let var2 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
+        return 'webgui-client-' + var1 + '-' + var2;
+    }
+
+    this.getLocalName = function(fullname) {
+        let str = fullname;
+        var n = str.indexOf("@");
+        if (n > 0) {
+            str = str.substring(0, n)
+        }
+        return str;
     }
 
     // since framework does not have a hello() onHello() defined
@@ -174,12 +196,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // initial processing of data after a connect
     this.onLocalServices = function(msg) {
         console.log('getRegistry:');
-        var gatewayName = msg.sender;
+        var gatewayName = _self.getLocalName(msg.sender);
         _self.environments = msg.data[0];
         _self.registry = msg.data[0];
-        // _self.myEnv = _self.environments["null"];
-        _self.platform = "FIXME-PLATFORM";
-        // _self.myEnv.platform;
 
         for (var key in _self.registry) {
             if (_self.registry.hasOwnProperty(key)) {
@@ -307,23 +326,22 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.createMessage = function(inName, inMethod, inParams) {
         // TODO: consider a different way to pass inParams for a no arg method.
         // rather than an array with a single null element.
+        let rSuffix = (_self.remoteId == null) ? "" : "@" + _self.remoteId;
         if (inParams.length == 1 && inParams[0] === null) {
             var msg = {
                 msgID: new Date().getTime(),
-                name: inName,
+                name: inName + rSuffix,
                 method: inMethod,
-                srcId: _self.srcId,
-                sender: "runtime"
+                sender: "runtime" + "@" + _self.id
             };
             return msg;
         } else {
             var msg = {
                 msgID: new Date().getTime(),
-                name: inName,
+                name: inName + rSuffix,
                 method: inMethod,
                 data: inParams,
-                srcId: _self.srcId,
-                sender: "runtime"
+                sender: "runtime" + "@" + _self.id
             };
             return msg;
         }
@@ -380,6 +398,17 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.sendMessage(msg);
     }
     ;
+
+    this.sendToBlocking = function(name, method, data) {
+        //console.log(arguments[0]);
+        var args = Array.prototype.slice.call(arguments, 2);
+        var msg = _self.createMessage(name, method, args);
+        msg.msgType = "B";
+        msg.sendingMethod = 'sendTo';
+        // console.log('SendTo:', msg);
+        _self.sendMessage(msg);
+    }
+    ;
     /*
         The "real" subscribe - this creates a subscription
         from the Java topicName service, such that every time the
@@ -431,8 +460,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         for (var i = 0; i < onOpenCallbacks.length; i++) {
             onOpenCallbacks[i]();
         }
-        // TODO - chain the onLocalServices / hello with defer.resolve
-        // at the end
+        let platform = {
+            os: "chrome",
+            lang: "javascript",
+            bitness: 64,
+            mrlVersion: "version!"
+        }
+
+        let hello = {
+            id: _self.id,
+            uuid: _self.uuid,
+            platform: platform
+        }
+        _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello);
     }
     ;
     var getSimpleName = function(fullname) {
@@ -493,6 +533,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
             this.subscribeToMethod(this.onLocalServices, 'onLocalServices');
             this.subscribeToMethod(this.getHelloResponse, 'getHelloResponse');
+            this.subscribeToMethod(this.onHelloResponse, 'onHelloResponse');
             socket = atmosphere.subscribe(this.request);
             deferred = $q.defer();
             deferred.promise.then(function(result) {
@@ -533,6 +574,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             var args = Array.prototype.slice.call(arguments, 1);
                             var msg = _self.createMessage(name, method, args);
                             msg.sendingMethod = 'sendTo';
+                            // FIXME - not very useful
                             _self.sendMessage(msg);
                         },
                         /**
@@ -547,6 +589,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                             var msg = _self.createMessage(name, method, data);
                             msg.sendingMethod = 'sendTo';
+                            // FIXME - not very useful
                             _self.sendMessage(msg);
                         },
                         // framework routed callbacks come here
@@ -666,6 +709,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getPlatform: function() {
                 return _self.platform;
             },
+            getRemoteId: function() {
+                return _self.remoteId;
+            },
+            getId: function() {
+                return _self.id;
+            },
             getPossibleServices: function() {
                 var possibleServices = [];
                 for (var property in _self.runtime.serviceData.serviceTypes) {
@@ -745,6 +794,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onMessage = this.onMessage;
     this.request.onOpen = this.onOpen;
     this.request.onError = this.onError;
-    this.srcId = this.generateSrcId();
+    this.id = this.generateId();
 }
 ]);

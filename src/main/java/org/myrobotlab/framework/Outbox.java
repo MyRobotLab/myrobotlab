@@ -38,6 +38,7 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
 /*
@@ -116,10 +117,8 @@ public class Outbox implements Runnable, Serializable {
   }
 
   /*
-  public CommunicationInterface getCommunicationManager() {
-    return comm;
-  }
-  */
+   * public CommunicationInterface getCommunicationManager() { return comm; }
+   */
 
   // FIXME - consider using a blocking queue now that we are using Java 5.0
   @Override
@@ -155,7 +154,7 @@ public class Outbox implements Runnable, Serializable {
       // WARNING - broadcast apparently means name == ""
       // why would a message with my name be in my outbox ??? - FIXME
       // deprecate that logic
-      if (msg.name != null) { 
+      if (msg.getName() != null) {
         log.debug("{} configured to RELAY ", msg.getName());
         send(msg);
         // recently added -
@@ -175,7 +174,7 @@ public class Outbox implements Runnable, Serializable {
 
         for (int i = 0; i < subList.size(); ++i) {
           MRLListener listener = subList.get(i);
-          msg.name = listener.callbackName;
+          msg.setName(listener.callbackName);
           msg.method = listener.callbackMethod;
           send(msg);
 
@@ -195,10 +194,9 @@ public class Outbox implements Runnable, Serializable {
   }
 
   /*
-  public void setCommunicationManager(CommunicationInterface c) {
-    this.comm = c;
-  }
-  */
+   * public void setCommunicationManager(CommunicationInterface c) { this.comm =
+   * c; }
+   */
 
   public int size() {
     return msgBox.size();
@@ -252,28 +250,40 @@ public class Outbox implements Runnable, Serializable {
       return;
     listeners.add(ml);
   }
-  
+
   final public void send(final Message msg) {
 
-    ServiceInterface sw = Runtime.getService(msg.getName());
-    if (sw == null) {
-      log.info("could not find service {} to process {} from sender {} - tearing down route", msg.name, msg.method, msg.sender);
-      ServiceInterface sender = Runtime.getService(msg.sender);
-      if (sender != null) {
-        sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
-      }
-      return;
-    }
+    try {
 
-    // if service is local - give it to that service's inbox
-    URI host = sw.getInstanceId();
-    if (host == null) {
-      sw.in(msg);
-    }/* else {
-      // remote message
-      URI protocolKey = mrlToProtocolKey.get(host);
-      getComm(host).sendRemote(protocolKey, msg);
+      Runtime runtime = Runtime.getInstance();
+
+      if (runtime.isLocal(msg)) {
+        // should it invoke(potentially block) or conventionally input on in
+        // queue
+        // ?
+        ServiceInterface sw = Runtime.getService(msg.getName());
+        if (sw == null) {
+          log.info("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+          ServiceInterface sender = Runtime.getService(msg.sender);
+          if (sender != null) {
+            sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
+          }
+          return;
+        }
+
+        // if service is local - give it to that service's inbox
+        URI host = sw.getInstanceId();
+        if (host == null) {
+          sw.in(msg);
+        }
+      } else {
+        // get gateway
+        Gateway gateway = (Gateway) Runtime.getGatway(msg.getId());
+        gateway.sendRemote(msg);
+      }
+
+    } catch (Exception e) {
+      log.error("outbox threw", e);
     }
-    */
   }
 }

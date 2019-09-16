@@ -57,21 +57,15 @@ public class Message implements Serializable {
   public long msgId;
 
   /**
-   * src the connection id of the sending process
-   * null when the msg was generated and delivered in the same process
-   */
-  public String srcId;
-
-  /**
    * destination name of the message
    */
   public String name;
-  
+
   /**
    * name of the sending Service which sent this Message
    */
   public String sender;
-  
+
   /**
    * originating source method which generated this Message
    */
@@ -133,7 +127,15 @@ public class Message implements Serializable {
   }
 
   public String getName() {
-    return name;
+    if (name == null) {
+      return null;
+    }
+    int pos = name.indexOf("@");
+    if (pos < 0) {
+      return name;
+    } else {
+      return name.substring(0, pos);
+    }
   }
 
   final public void set(final Message other) {
@@ -174,24 +176,13 @@ public class Message implements Serializable {
 
     return msg;
   }
-  
+
   static public Message createMessage(String sender, String name, String method, Object data) {
     if (data == null) {
       return createMessage(sender, name, method, null);
     }
-    return createMessage(sender, name, method, new Object[] {data});
+    return createMessage(sender, name, method, new Object[] { data });
   }
-
-  /*
-  static public Message createMessage(NameProvider sender, String name, String method, Object data) {
-    if (data == null) {
-      return createMessage(sender, name, method, null);
-    }
-    Object[] d = new Object[1];
-    d[0] = data;
-    return createMessage(sender, name, method, d);
-  }
-  */
 
   public static void main(String[] args) throws InterruptedException {
     LoggingFactory.init(Level.DEBUG);
@@ -202,10 +193,6 @@ public class Message implements Serializable {
     msg.msgId = System.currentTimeMillis();
     msg.data = new Object[] { "hello" };
 
-    /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
-     * Logging.logError(e); }
-     */
   }
 
   public Object getProperty(String key) {
@@ -225,19 +212,15 @@ public class Message implements Serializable {
   public void putAll(Map<String, Object> props) {
     props.putAll(props);
   }
-  
-  public Map<String, Object> getProperties(){
+
+  public Map<String, Object> getProperties() {
     return properties;
   }
 
-  public boolean isLocal() {
-    return !name.contains("@");
-  }
-
-  public String getRemoteId() {
+  public String getId() {
     int p = name.indexOf("@");
     if (p > 0) {
-      return name.substring(p+1);
+      return name.substring(p + 1);
     }
     return null;
   }
@@ -246,12 +229,20 @@ public class Message implements Serializable {
     return BLOCKING.equals(msgType);
   }
 
-  public String getReturnId() {
+  public String getSrcId() {
     int pos = sender.indexOf("@");
     if (pos > 0) {
       return sender.substring(pos + 1);
     }
     return null;
+  }
+
+  public String getFullName() {
+    return name;
+  }
+
+  public void setBlocking() {
+    msgType = BLOCKING;
   }
 
 }

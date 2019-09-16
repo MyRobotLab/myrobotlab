@@ -7,6 +7,7 @@ import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
@@ -32,19 +33,14 @@ public class ApiMessages2 extends Api {
       // decoding 1st pass - decodes the containers
       Message msg = CodecUtils.fromJson(json, Message.class);
       msg.setProperty("uuid", uuid);
-      // if id is ours - peel it off
-      String suffix = String.format("@%s", Runtime.getId());
-      if (msg.name.endsWith(suffix)) {
-        msg.name = msg.name.substring(0, msg.name.length() - suffix.length());
-      }
 
       // its local if name does not have an "@" in it
-      if (msg.isLocal()) {
-
+      if (Runtime.getInstance().isLocal(msg)) {
+        String serviceName = msg.getName();
         // to decode fully we need class name, method name, and an array of json
         // encoded parameters
         MethodCache cache = MethodCache.getInstance();
-        Class<?> clazz = Runtime.getClass(msg.name);
+        Class<?> clazz = Runtime.getClass(serviceName);
         Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
         
         // ties client response with uuid/connection - only other way 
@@ -54,7 +50,7 @@ public class ApiMessages2 extends Api {
         }
         
         Method method = cache.getMethod(clazz, msg.method, params);
-        ServiceInterface si = Runtime.getService(msg.name);
+        ServiceInterface si = Runtime.getService(serviceName);
         method.invoke(si, params);
 
         // propagate return data to subscribers
@@ -85,7 +81,7 @@ public class ApiMessages2 extends Api {
       // FIXME double encode !!!
       // FIXME - should this be clientRemote.fire ???
       // encode parameters - encode msg container !!
-      Message msg = Message.createMessage(gateway.getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Runtime.getId(), uuid)) });
+      Message msg = Message.createMessage(gateway.getName(), "runtime", "getHelloResponse", new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Platform.getLocalInstance().getId(), uuid)) });
       out.write(CodecUtils.toJson(msg).getBytes());
     }
     return retobj;

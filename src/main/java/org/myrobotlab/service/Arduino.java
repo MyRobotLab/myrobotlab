@@ -2269,6 +2269,7 @@ public class Arduino extends AbstractMicrocontroller
     ++mrlCommBegin;
   }
 
+
   public static void main(String[] args) {
     try {
 
@@ -2278,106 +2279,11 @@ public class Arduino extends AbstractMicrocontroller
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
-
-      // hub.enableAck(false);
-      ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
-      sc.setPin(7);
-      hub.attach(sc);
-      sc = (ServoControl) Runtime.start("s2", "HobbyServo");
-      sc.setPin(9);
-      hub.attach(sc);
-
-      // hub.enableAck(true);
-      /*
-       * sc = (ServoControl) Runtime.start("s3", "HobbyServo"); sc.setPin(12);
-       * hub.attach(sc);
-       */
-
-      log.info("here");
-      // hub.connect("COM6"); // uno
-
-      hub.connect("COM8");
+      hub.connect("COM4");
 
       // hub.startTcpServer();
 
-      boolean isDone = true;
-
-      if (isDone) {
-        return;
-      }
-
-      VirtualArduino vmega = null;
-
-      vmega = (VirtualArduino) Runtime.start("vmega", "VirtualArduino");
-      vmega.connect("COM7");
-      Serial sd = (Serial) vmega.getSerial();
-      sd.startTcpServer();
-
-      // Runtime.start("webgui", "WebGui");
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-
-      if (mega.isVirtual()) {
-        vmega = mega.getVirtual();
-        vmega.setBoardMega();
-      }
-
-      // mega.getBoardTypes();
-      // mega.setBoardMega();
-      // mega.setBoardUno();
-      mega.connect("COM7");
-
-      /*
-       * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
-       * uno.connect("COM6");
-       */
-
-      // log.info("port names {}", mega.getPortNames());
-
-      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
-      // servo.load();
-      log.info("rest is {}", servo.getRest());
-      servo.save();
-      // servo.setPin(8);
-      servo.attach(mega, 13);
-
-      servo.moveTo(90.0);
-
-      /*
-       * servo.moveTo(3); sleep(300); servo.moveTo(130); sleep(300);
-       * servo.moveTo(90); sleep(300);
-       * 
-       * 
-       * // minmax checking
-       * 
-       * servo.invoke("moveTo", 120);
-       */
-
-      /*
-       * mega.attach(servo);
-       * 
-       * servo.moveTo(3);
-       * 
-       * servo.moveTo(30);
-       * 
-       * mega.enablePin("A4");
-       * 
-       * // arduino.setBoardMega();
-       * 
-       * Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)
-       * Runtime.start("adafruit", "Adafruit16CServoDriver");
-       * adafruit.attach(mega); mega.attach(adafruit);
-       */
-
-      // servo.attach(arduino, 8, 90);
-
-      // Runtime.start("webgui", "WebGui");
-      // Service.sleep(3000);
-
-      // remote.startListening();
-
-      // Runtime.start("cli", "Cli");
-      // Runtime.start("webgui", "WebGui");
+   
 
     } catch (Exception e) {
       log.error("main threw", e);

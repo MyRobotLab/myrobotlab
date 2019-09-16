@@ -15,6 +15,7 @@ import org.junit.BeforeClass;
 import org.myrobotlab.service.Runtime;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
@@ -71,7 +72,7 @@ public class InProcessCliTest extends AbstractTest {
   @Test
   public void testProcess() throws IOException {
  
-    InProcessCli cli = new InProcessCli("runtime", in, bos);
+    InProcessCli cli = new InProcessCli(NameGenerator.getName(), "runtime", in, bos);
     cli.start();
     
     clear();
@@ -85,7 +86,7 @@ public class InProcessCliTest extends AbstractTest {
     
     clear();
     write("route");
-    assertEquals(toJson(Runtime.getRouteTable()), getResponse());
+    assertEquals(toJson(Runtime.route()), getResponse());
     
     // cd to different directory with and without /
     

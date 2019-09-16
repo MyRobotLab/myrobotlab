@@ -128,9 +128,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   private URI instanceId = null;
 
   /**
-   * unique name of the service
+   * unique name of the service (eqv. hostname)
    */
   private String name;
+
+  /**
+   * unique id - (eqv. domain suffix)
+   */
+  private String id;
 
   private String simpleName; // used in gson encoding for getSimpleName()
 
@@ -822,6 +827,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public Service(String reservedKey) {
     // necessary for serialized transport
+    id = Platform.getLocalInstance().getId();
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
@@ -863,7 +869,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       name = reservedKey;
     }
 
-    this.inbox = new Inbox(name);
+    this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
     Runtime.register(this);
   }
@@ -1358,13 +1364,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // this is to support nameless Runtime messages but theoretically it
     // could
     // happen in other situations...
-    if (!name.equals(msg.name)) {
+    if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
-      return Runtime.getService(msg.name).invoke(msg);
+      return Runtime.getService(msg.getName()).invoke(msg);
     }
 
     retobj = invokeOn(this, msg.method, msg.data);
- 
+
     return retobj;
   }
 
@@ -1535,10 +1541,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
-    Message m = Message.createMessage(getName(), null, method, o); // create a
-                                                              // un-named
-                                                              // message
-                                                              // as output
+    Message m = Message.createMessage(getName(), null, method, o);
 
     if (m.sender.length() == 0) {
       m.sender = this.getName();
@@ -1716,12 +1719,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         }
 
         // nameless Runtime messages
-        if (m.name == null) {
+        if (m.getName() == null) {
           // don't know if this is "correct"
           // but we are substituting the Runtime name as soon as we
           // see that its a null
           // name message
-          m.name = Runtime.getInstance().getName();
+          m.setName(Runtime.getInstance().getFullName());
         }
 
         // route if necessary
@@ -1842,9 +1845,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * In theory the only reason this should need to use synchronized wait/notify is when the msg destination
-   * is in another remote process. sendBlocking should either invoke directly or use a gateway's sendBlockingRemote.
-   * To use a gateways sendBlockingRemote - the msg must have a remote src
+   * In theory the only reason this should need to use synchronized wait/notify
+   * is when the msg destination is in another remote process. sendBlocking
+   * should either invoke directly or use a gateway's sendBlockingRemote. To use
+   * a gateways sendBlockingRemote - the msg must have a remote src
+   * 
    * <pre>
    * after attach:
    * stdin (remote) --> gateway sendBlockingRemote --> invoke
@@ -1852,16 +1857,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * </pre>
    */
   public Object sendBlocking(Message msg, Integer timeout) {
-    if (msg.isLocal()) {
+    if (Runtime.getInstance().isLocal(msg)) {
       return invoke(msg);
     } else {
       // get gateway for remote address
-      Gateway gateway = Runtime.getGatway(msg.getRemoteId());
+      Gateway gateway = Runtime.getGatway(msg.getId());
       try {
         return gateway.sendBlockingRemote(msg, timeout);
       } catch (Exception e) {
         log.error("gateway.sendBlockingRemote threw");
-      }      
+      }
     }
     return null;
   }
@@ -2495,8 +2500,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.creationOrder = creationCount;
   }
 
+  @Deprecated
   public String getSwagger() {
     return null;
+  }
+  
+  public String getId() {
+    return id;
+  }
+  
+  public String getFullName() {
+    return String.format("%s@%s", name, id);
   }
 
 }
