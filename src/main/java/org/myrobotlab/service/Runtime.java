@@ -14,8 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -168,6 +166,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * number of services created by this runtime
    */
   Integer creationCount = 0;
+  
+  /**
+   * current list of cli sessions and where they are from
+   */
+  List<String> cliSessions = new ArrayList<String>();
 
   /**
    * the local repo of this machine - it should not be static as other foreign
@@ -687,7 +690,18 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static Map<String, ServiceInterface> getLocalServices() {
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
-      if (!serviceName.contains("@")) {
+      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { // FIXME
+                                                                                                                           // -
+                                                                                                                           // @
+                                                                                                                           // should
+                                                                                                                           // be
+                                                                                                                           // a
+                                                                                                                           // requirement
+                                                                                                                           // of
+                                                                                                                           // "all"
+                                                                                                                           // entries
+                                                                                                                           // for
+                                                                                                                           // consistency
         local.put(serviceName, registry.get(serviceName));
       }
     }
@@ -1124,14 +1138,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   public void startInteractiveMode() {
-    if (clientLocal == null) {
-      clientLocal = new InProcessCli(getName(), System.in, System.out); // ????
+    if (stdInClient == null) {
+      stdInClient = new InProcessCli(getId(), getName(), System.in, System.out); // ????
     }
-    clientLocal.start();
+    stdInClient.start();
   }
 
   public void stopInteractiveMode() {
-    clientLocal.stop();
+    stdInClient.stop();
   }
 
   /**
@@ -1169,20 +1183,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   public final static synchronized ServiceInterface register(ServiceInterface service) {
-    return register(null, service);
-  }
-
-  /**
-   * registers a service - if a {id} is supplied its registered from a gateway's
-   * connection
-   * 
-   * @param service
-   * @return
-   */
-  public final static synchronized ServiceInterface register(String id, ServiceInterface service) {
-    if (id != null) {
-      service.setName(String.format("%s@%s", id, service.getName()));
-    }
     registry.put(service.getName(), service);
     if (runtime != null) {
       runtime.invoke("registered", service);
@@ -1414,14 +1414,30 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   // FIXME - should be a map of remotes ?
   static Client clientRemote = new Client();
-  static InProcessCli clientLocal = null;
+  static InProcessCli stdInClient = null;
 
   public void connect() throws IOException {
-    // FIXME - connect("myName",
-    // return connect("ws://localhost:8887/api/messages2"); // vs routing
-    // through System.in ->
-    // let the
-    connect("admin", "ws://localhost:8887/api/messages2");
+    connect("admin", "ws://localhost:8887/api/messages");
+  }
+  
+  /**
+   * jump to another process using the cli
+   * @param id
+   * @return
+   */
+  public String jump(String id) {
+    String route = getRoute(id);
+    if (route == null) {
+      // log.error("cannot attach - no routing information for {}", id);
+      return "cannot attach - no routing information for " + id;
+    }    
+    stdInClient.setRemote(id);
+    return id;
+  }
+  
+  public String exit() {    
+    stdInClient.setRemote(getId());
+    return getId();
   }
 
   @Override
@@ -1439,12 +1455,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     UUID uuid = java.util.UUID.randomUUID();
     Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
-    Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { "blank-uuid", CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    // Message msg = Message.createMessage("runtime", "runtime",
+    // "getHelloResponse", new Object[] { "runtime-client-uuid",
+    // CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    Message msg = getDefaultMsg(uuid.toString());
     // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
     // required data
-    attributes.put("id", getId());
+    // attributes.put("id", getId());
     attributes.put("gateway", "runtime");
     attributes.put("uuid", uuid);
 
@@ -1461,7 +1480,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     // addendum
     attributes.put("User-Agent", "runtime-client");
-    addConnection(id, uuid.toString(), attributes);
+    // addConnection(id, uuid.toString(), attributes);
+    Runtime.getInstance().addConnection(uuid.toString(), attributes);
 
     // send getHelloResponse
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
@@ -1494,48 +1514,57 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         log.debug("data - [{}]", data);
       }
 
-      // decoding 1st pass - decodes the containers
+      // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
       msg.setProperty("uuid", uuid);
-
-      // if id is ours - peel it off !
-      String suffix = String.format("@%s", Runtime.getId());
-      if (msg.name.endsWith(suffix)) {
-        msg.name = msg.name.substring(0, msg.name.length() - suffix.length());
-      }
 
       // if were blocking -
       Message retMsg = null;
       Object ret = null;
 
-      // its local if name does not have an "@" in it
-      if (msg.isLocal()) {
+      if (isLocal(msg)) {
 
+        String serviceName = msg.getName();
         // to decode fully we need class name, method name, and an array of json
         // encoded parameters
         MethodCache cache = MethodCache.getInstance();
-        Class<?> clazz = Runtime.getClass(msg.name);
+        Class<?> clazz = Runtime.getClass(serviceName);
+        if (clazz == null) {
+          log.error("local msg but no Class for requested service {}", serviceName);
+          return;
+        }
         Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
 
         Method method = cache.getMethod(clazz, msg.method, params);
-        ServiceInterface si = Runtime.getService(msg.name);
+        ServiceInterface si = Runtime.getService(serviceName);
+        if (method == null) {
+          log.error("cannot find {}", cache.makeKey(clazz, msg.method, cache.getParamTypes(params)));
+          return;
+        }
+        if (si == null) {
+          log.error("si null for serviceName {}", serviceName);
+          return;
+        }
         // higher level protocol - ordered steps to establish routing
         // must add meta data of connection to system
-        if ("runtime".equals(msg.name) && "getHelloResponse".equals(msg.method)) {
+        if ("runtime".equals(serviceName) && "getHelloResponse".equals(msg.method)) {
           params[0] = uuid;
         }
         ret = method.invoke(si, params);
 
         // propagate return data to subscribers
         si.out(msg.method, ret);
-        
+
         // sender is important - this "might" be right ;)
         String sender = String.format("%s@%s", si.getName(), getId());
 
         // Tri-Input broadcast
-        // if it was a blocking call return a serialized message back - must switch return address original sender
+        // if it was a blocking call return a serialized message back - must
+        // switch return address original sender
         // with name
-        retMsg = Message.createMessage(sender, msg.sender+"@"+msg.srcId, CodecUtils.getCallbackTopicName(method.getName()), ret);
+        // TODO - at some point we want the option of "not trusting the sender's
+        // return address"
+        retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
 
       } else {
         // RELAYING !! in and out of process - don't decode !
@@ -1555,7 +1584,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // handle the response back
       if (msg.isBlocking()) {
         retMsg.msgId = msg.msgId;
-        String retUuid = Runtime.getRoute(msg.getReturnId()); //
+        String retUuid = Runtime.getRoute(msg.getId()); //
         Map<String, Object> retCon = Runtime.getConnection(retUuid);
         // verify I'm the appropriate gateway
         Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
@@ -2001,7 +2030,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return repo;
   }
 
-  static public String getId() {
+  public String getId() {
     return Platform.getLocalInstance().getId();
   }
 
@@ -2680,21 +2709,26 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
   // its "meta-data"
-  public HelloResponse getHelloResponse(String uuid, HelloRequest request) {
+  public HelloResponse getHelloResponse(String uuid, HelloRequest hello) {
     HelloResponse response = new HelloResponse();
     Map<String, Object> connection = getConnection(uuid);
     response.id = getId();
     // this.uuid = uuid;
-    response.request = request;
+    response.request = hello;
     response.platform = Platform.getLocalInstance();
     response.services = Runtime.getServiceTypes();
-    connection.put("request", request);
+    connection.put("request", hello);
     // addClientAttribute(uuid, "request", request);
-    updateRoute(request.id, uuid);
+    updateRoute(hello.id, uuid);
+    Runtime.getConnection(uuid).put("id", hello.id);
     return response;
   }
 
-  static public Map<String, Set<String>> getRouteTable() {
+  public void onHelloResponse(HelloResponse response) {
+    log.info("onHelloResponse {}", response);
+  }
+
+  static public Map<String, Set<String>> route() {
     return routeTable;
   }
 
@@ -2720,7 +2754,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @param id
    * @param uuid
    */
-  public void updateRoute(String id, String uuid) {
+  static public void updateRoute(String id, String uuid) {
 
     if (id == null) {
       id = uuid;
@@ -2737,15 +2771,42 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     defaultRoute = uuid;
   }
 
+  static public void removeRoute(String uuid) {
+    if (routeTable.containsKey(uuid)) {
+      routeTable.remove(uuid);
+    }
+
+    Set<String> removeIds = new HashSet<String>();
+    for (String id : routeTable.keySet()) {
+      Set<String> routes = routeTable.get(id);
+      if (routes.contains(uuid)) {
+        routes.remove(uuid);
+      }
+      if (routes.size() == 0) {
+        // adding for delayed removal
+        removeIds.add(id);
+      }
+    }
+
+    for (String clean : removeIds) {
+      routeTable.remove(clean);
+    }
+
+    if (uuid.equals(defaultRoute)) {
+      if (routeTable.size() > 0) {
+        // if it was our default route - change it to next available
+        defaultRoute = routeTable.keySet().iterator().next();
+      } else {
+        defaultRoute = null;
+      }
+    }
+  }
+
   public void deleteRoute(String id) {
     routeTable.remove(id);
   }
 
   public void addConnection(String uuid, Map<String, Object> attributes) {
-    addConnection(null, uuid, attributes);
-  }
-
-  public void addConnection(String id, String uuid, Map<String, Object> attributes) {
     Map<String, Object> attr = null;
     if (!connections.containsKey(uuid)) {
       attr = attributes;
@@ -2756,17 +2817,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     connections.put(uuid, attr);
 
-    updateRoute(null, uuid);
-    // FIXME - ! id might be null !!
-    // route table changes
-    // adding route
-    /*
-     * Set<String> route = null; if (routeTable.containsKey(id)) { route =
-     * routeTable.get(id); } else { route = new HashSet<>(); routeTable.put(id,
-     * route); }
-     * 
-     * route.add(uuid); defaultRoute = uuid;
-     */
+    // recently removed - no connections in route table
+    // updateRoute(null, uuid);
+  }
+
+  @Override
+  public Message getDefaultMsg(String connId) {
+    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "getHelloResponse",
+        new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Platform.getLocalInstance().getId(), connId)) });
+    msg.setBlocking();
+    return msg;
   }
 
   public void removeConection(String uuid) {
@@ -2823,7 +2883,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   static String formatConnection(Map<String, Object> c) {
-    return String.format("%s@%s%s - %s - %s", c.get("user"), c.get("host"), c.get("uri"), c.get("uuid"), c.get("request"));
+    return String.format("%s %s %s", c.get("id"), c.get("uri"), c.get("uuid"));
   }
 
   static public String getConnectionName(String uuid) {
@@ -2929,14 +2989,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   // TODO - sendRemote
   public Object sendBlockingRemote(Message msg, Integer timeout) throws IOException {
-    if (msg.isLocal()) {
+    if (isLocal(msg)) {
       log.error("msg NOT REMOTE yet sendBlockingRemote is called {}", msg);
       return null;
-    }
-    // if this msg has a return src - then its being routed through this process
-    // otherwise we assign it one here
-    if (msg.srcId == null) {
-      msg.srcId = Runtime.getId();
     }
 
     if (msg.sender == null) {
@@ -2947,14 +3002,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     // get the appropriate connection - Runtime has a r ? wasync connection
     // get a route from the remote id
-    String uuid = getRoute(msg.getRemoteId());
+    String uuid = getRoute(msg.getId());
 
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
 
     // make sure msg is blocking
     // FIXME - should be enum !!!
-    msg.msgType = Message.BLOCKING;
+    msg.setBlocking();
 
     // block the thread and wait for the return -
     // if you have an msgId it should be stored a new one generated - and wait
@@ -2993,16 +3048,64 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return Runtime.getConnections(getName());
   }
 
+  // FIXME - remove if not using ...
   @Override
-  public void sendRemote(String key, Message msg) throws URISyntaxException {
-    // TODO Auto-generated method stub
+  public void sendRemote(Message msg) throws IOException {
+    if (isLocal(msg)) {
+      log.error("msg NOT REMOTE yet sendBlockingRemote is called {}", msg);
+      return;
+    }
 
+    if (msg.sender == null) {
+      // msg.sender = getName();
+      log.error("blocking remote msg must have a return sender address");
+      return;
+    }
+
+    // get the appropriate connection - Runtime has a r ? wasync connection
+    // get a route from the remote id
+    String uuid = getRoute(msg.getId());
+
+    // get a connection from the route
+    Map<String, Object> conn = getConnection(uuid);
+
+    if (stdInClient.isLocal(msg)) {
+      if (msg.data == null) {
+        System.out.println("null");
+        return;
+      }
+      // should really "always" be a single item in the array since its a return
+      // msg
+      // but just in case ...
+      for (Object o : msg.data) {
+        System.out.println(CodecUtils.toPrettyJson(o));
+      }
+      
+      System.out.println(stdInClient.getPrompt(uuid));
+      
+    } else {
+      Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
+      endpoint.socket.fire(CodecUtils.toJson(msg));
+    }
   }
 
-  @Override
-  public void sendRemote(URI key, Message msg) {
-    // TODO Auto-generated method stub
+  /**
+   * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it
+   * 
+   * if the incoming Message's remote Id is the (same as ours) OR (it can't be
+   * found it our route table) - peel it off and treat it as local.
+   * 
+   * if we have an @{id/connection} but do not have the connection - we'll peel
+   * off the @{id/connection} and treat it as local if id is ours - peel it off
+   * !
+   */
+  public boolean isLocal(Message msg) {
 
+    if (msg.getId() == null || getId().equals(msg.getId())) {
+      return true;
+    }
+
+    return false;
   }
 
 }

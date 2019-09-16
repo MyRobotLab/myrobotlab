@@ -105,11 +105,6 @@ public class CodecUtils {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
   }
 
-  /*
-  public final static Object fromJson(String json, Class<?> clazz) {
-    return gson.fromJson(json, clazz);
-  }
-*/
   public final static <T extends Object> T fromJson(String json, Class<T> clazz) {
     return gson.fromJson(json, clazz);
   }
@@ -196,10 +191,6 @@ public class CodecUtils {
 
   static final public String getMsgKey(Message msg) {
     return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
-  }
-
-  static final public String getMsgTypeKey(Message msg) {
-    return String.format("msg %s.%s --> %s.%s(%s)", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data));
   }
 
   static final public String getParameterSignature(final Object[] data) {

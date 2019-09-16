@@ -11,9 +11,9 @@
 	 -->	
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.myrobotlab</groupId>
-	<artifactId>mrl</artifactId>
+	<artifactId>mrl</artifactId> 
 	<version>0.0.1-SNAPSHOT</version>
-	<name>MyRobotLab</name>
+	<name>MyRobotLab</name>  
 	<description>Open Source Creative Machine Control</description>
 	<properties>
 	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->

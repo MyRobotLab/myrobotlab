@@ -63,6 +63,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -455,7 +456,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
 
     if (!fullscreen) {
       frame.addWindowListener(this);
-      frame.setTitle("myrobotlab - " + Runtime.getId() + " " + Runtime.getBranch() + " " + Runtime.getVersion().trim());
+      frame.setTitle("myrobotlab - " + Platform.getLocalInstance().getId() + " " + Runtime.getBranch() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
       String logoFile = Util.getResourceDir() + File.separator + "mrl_logo_36_36.png";

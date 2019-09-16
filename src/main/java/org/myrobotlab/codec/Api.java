@@ -86,8 +86,13 @@ public abstract class Api {
    * @return - returns message constructed from the uri
    */
   static public Message uriToMsg(String uri, String defaultMethodName) {
+    String id = null;// :(
     Message msg = new Message();
-    msg.name = "runtime"; // default
+    if (id != null) {
+      msg.setName(String.format("runtime@%s", id)); // default
+    } else {
+      msg.setName("runtime");
+    }
     msg.method = "getApis"; // default    
 
     int pos = uri.indexOf("/api/");
@@ -114,21 +119,23 @@ public abstract class Api {
     // to return 'default' instructions on what apis are
     // available
 
+    /*
     if (parts.length > 2) {
       msg.srcId = parts[2];
     } else {
       return msg;
     }
+    */
 
     if (parts.length > 3) {
-      msg.name = parts[3];
+      msg.setName(parts[3]);
     }
 
     if (parts.length < 4) {
       // /api/service OR /api/service/
       msg.method = defaultMethodName;//getDefaultMethod();
     } else if (parts.length == 4) {
-      msg.name = "runtime";
+      msg.setName("runtime");
       if (requestUri.endsWith("/")) {
         msg.method = "getMethodMap";
       } else {

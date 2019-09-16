@@ -112,15 +112,16 @@ public class ApiCli extends Api {
         // ========= HANDLE URI SERVICE CALLS ====================
 
         // FIXME - if Runtime.getService(msgFromUri.name) == null && no connections - then is error send <- should expect remote 
-        if (!msgFromUri.isLocal() && Runtime.getService(msgFromUri.name) != null) {
+        if (Runtime.getInstance().isLocal(msgFromUri)) {
           // local service
           MethodCache cache = MethodCache.getInstance();
 
-          Class<?> clazz = Runtime.getClass(msgFromUri.name);
+          String serviceName = msgFromUri.getName();
+          Class<?> clazz = Runtime.getClass(serviceName);
           Object[] params = cache.getDecodedJsonParameters(clazz, msgFromUri.method, msgFromUri.data);
 
           Method method = cache.getMethod(clazz, msgFromUri.method, params);
-          ServiceInterface si = Runtime.getService(msgFromUri.name);
+          ServiceInterface si = Runtime.getService(serviceName);
           if (method == null) {
             log.error("{} not found", msgFromUri);
             writePrompt(out, uuid);

@@ -14,6 +14,8 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+import com.google.gson.internal.LinkedTreeMap;
+
 /**
  * 
  * @author GroG
@@ -263,6 +265,11 @@ public class MethodCache {
    * @throws ClassNotFoundException 
    */
   public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
+    Class<?>[] paramTypes = getParamTypes(params);    
+    return getMethod(objectType, methodName, paramTypes);
+  }
+  
+  public Class<?>[] getParamTypes(Object... params) {
     Class<?>[] paramTypes = null;
     if (params != null) {
       paramTypes = new Class<?>[params.length];
@@ -272,20 +279,7 @@ public class MethodCache {
     } else {
       paramTypes = new Class<?>[0];
     }
-    return getMethod(objectType, methodName, paramTypes);
-  }
-
-  public Method getMethod(String jsonMsg) { // vs getMethod(String object,
-                                            // String method, String[]
-                                            // paramsToDecode
-    // decode container
-
-    // find ordinal signature match
-    // if found & !collision
-    // return method
-    // if found and collision on ordinal - FIXME resolve somehow (test cases)
-    // return method
-    return null;
+    return paramTypes;
   }
 
   /**
@@ -466,7 +460,11 @@ public class MethodCache {
   }
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
+    if (object == null) {
+      log.error("here");
+    }
     String objectKey = object.getTypeName();
+    
     String ordinalKey = getMethodOrdinalKey(objectKey, methodName, parameterSize);
     MethodIndex methodIndex = objectCache.get(objectKey);
     if (methodIndex == null) {
@@ -482,12 +480,24 @@ public class MethodCache {
     }
     // get templates
     List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
+    if (possible == null) {
+      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz.getSimpleName(), methodName, encodedParams.length);
+      return null;
+    }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
     for (int p = 0; p < possible.size(); ++p) {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
+          if (encodedParams[i].getClass() == LinkedTreeMap.class) {
+            // specific gson implementation
+            // rather than double encode everything - i have chosen
+            // to re-encode objects back to string since gson will decode them
+            // all ot linked tree maps - if the json decoder changes from gson
+            // this will probably need to change too
+            encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
+          }
           params[i] = CodecUtils.fromJson((String)encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
@@ -495,6 +505,7 @@ public class MethodCache {
       } catch (Exception e) {
         // not logged, because this is one of the only ways to search :P
         // log.error("getDecodedParameters threw", e);
+        log.error("getDecodedParameters threw", e);
       }
     }
 

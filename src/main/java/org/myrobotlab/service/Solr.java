@@ -929,7 +929,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     // TODO: this is actually the timestamp of the message.. not an id.
     doc.setField("message_id", message.msgId);
     doc.setField("message_type", message.msgType);
-    doc.setField("message_name", message.name);
+    doc.setField("message_name", message.getName());
     doc.setField("sender_method", message.sendingMethod);
     doc.setField("message_status", message.status);
     if (message.historyList != null) {

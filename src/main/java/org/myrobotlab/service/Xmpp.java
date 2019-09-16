@@ -321,9 +321,9 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         try {
           org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
           Object ret = null;
-          ServiceInterface si = Runtime.getService(msg.name);
+          ServiceInterface si = Runtime.getService(msg.getName());
           if (si == null) {
-            ret = Status.error("could not find service %s", msg.name);
+            ret = Status.error("could not find service %s", msg.getName());
           } else {
             ret = si.invoke(msg.method, msg.data);
           }
@@ -397,15 +397,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public void sendRemote(String key, org.myrobotlab.framework.Message msg) throws URISyntaxException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void sendRemote(URI key, org.myrobotlab.framework.Message msg) {
-    // TODO Auto-generated method stub
-
+  public void sendRemote(org.myrobotlab.framework.Message msg) throws URISyntaxException {
+    log.error("implement me");
   }
 
   public void setStatus(boolean available, String status) {
@@ -562,5 +555,14 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     return null;
   }
 
+  @Override
+  public boolean isLocal(org.myrobotlab.framework.Message msg) {
+    return Runtime.getInstance().isLocal(msg);
+  }
+
+  @Override
+  public org.myrobotlab.framework.Message getDefaultMsg(String connId) {
+    return Runtime.getInstance().getDefaultMsg(connId);
+  }
 
 }
