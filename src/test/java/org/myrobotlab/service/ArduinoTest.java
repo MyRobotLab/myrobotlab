@@ -56,6 +56,8 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
   String servoPin01 = "7";
 
+  String[] activePins = null;
+  
   private void assertVirtualPinValue(VirtualArduino virtual, int address, int value) {
     if (virtual != null) {
       assertTrue(virtual.readBlocking(address, 50) == value);
@@ -78,14 +80,15 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     pinArray = pindata;
     log.debug("onPinArray size {}", pindata.length);
     for (int i = 0; i < pindata.length; ++i) {
-      pinData.put(pindata[i].pin, pindata[i]);
+      if (pindata[i] != null) {
+        pinData.put(pindata[i].pin, pindata[i]);
+      }
     }
   }
 
   @Before
   public void setUp() throws Exception {
     // Runtime.setLogLevel("debug");
-    
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     
     Runtime.start("gui", "SwingGui");
@@ -267,6 +270,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     pinData.clear();
     pinArray = null;
     
+    activePins = new String[]{"D10","D12","D13"};
     arduino01.attach((PinArrayListener) this);
     arduino01.enablePin(10);
     arduino01.enablePin(12);
@@ -544,7 +548,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
   @Override
   public String[] getActivePins() {
     // TODO Auto-generated method stub
-    return new String[]{"A0","A1"};
+    return activePins;
   }
-
+  
 }
