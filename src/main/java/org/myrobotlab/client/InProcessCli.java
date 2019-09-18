@@ -146,24 +146,27 @@ public class InProcessCli implements Runnable {
         // invoke locally
         ServiceInterface si = Runtime.getService(cliMsg.getName());
         ret = si.invoke(cliMsg);
+
+        // FIXME the ret could be set by sendBlockingRemote too "if it worked"
+        // instead we handle it asynchronously
+        writeToJson(ret);
+
+        writePrompt(out, data);
+
       } else {
         // send remotely
         // get gateway
         // send blocking remote
         // return result
         Gateway gateway = Runtime.getGatway(cliMsg.getId());
-        ret = gateway.sendBlockingRemote(cliMsg, 3000); // I ASSUME THIS RETURNS
-                                                        // DATA AND NOT THE
-                                                        // RETURNING MSG ?
+        // FIXME send"Blocking" is not currently working - send "R"eturn is ..
+        // so we aren't going to write it out - instead it will come in and
+        // stdInClient will
+        // intercept it - as it "correctly" marks all messages from it - so
+        // return msg
+        // goes to stdInClient - it "pretends" to be another instance/id
+        ret = gateway.sendBlockingRemote(cliMsg, 3000);
       }
-
-      if (ret == null || ret.getClass().equals(String.class)) {
-        write((String) ret);
-      } else if (ret != null) {
-        writeToJson(ret);
-      }
-
-      writePrompt(out, data);
 
     } catch (Exception e) {
       log.error("cli threw", e);
@@ -237,13 +240,12 @@ public class InProcessCli implements Runnable {
         msg.method = "ls";
         msg.data = new Object[] { "/" + parts[1] };
       }
-      
+
       if (parts.length == 2 && data.endsWith("/")) {
         msg.name = "runtime@" + remoteId;
         msg.method = "ls";
         msg.data = new Object[] { "/" + parts[1] + "/" };
       }
-
 
       // fix me diff from 2 & 3 "/"
       if (parts.length > 2) {

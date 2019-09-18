@@ -41,7 +41,6 @@ import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Service;
@@ -305,7 +304,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Runtime.removeRoute(uuid);
         // sessions.remove(uuid);
         if (event.isCancelled()) {
-          log.info("{} is cancled", uuid);
+          log.info("{} is canceled", uuid);
           // Unexpected closing. The client didn't send the close message when
           // request.enableProtocol
         } else if (event.isClosedByClient()) {
@@ -369,9 +368,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void broadcast(Message msg) {
     try {
       if (broadcaster != null) {
-        broadcaster.broadcast(CodecUtils.toJson(msg)); // <-- WAH ??? single
-                                                       // encoding ??? shouldn't
-                                                       // it be double?
+        // single encoding ? should be double ?
+        broadcaster.broadcast(CodecUtils.toJson(msg)); 
       }
     } catch (Exception e) {
       StringBuilder sb = new StringBuilder();
@@ -607,6 +605,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         r.suspend();
       }
       
+      // FIXME - needed ?? - we use BroadcastFactory now !
       setBroadcaster(apiKey, r);
       
       // default return encoding 
@@ -656,8 +655,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // decoding 1st pass - decodes the containers
         Message msg = CodecUtils.fromJson(bodyData, Message.class);
         msg.setProperty("uuid", uuid);
-        
-        
 
         // if were blocking -
         Message retMsg = null;
@@ -720,7 +717,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           send(msg);
         }
       }
-
     } catch (Exception e) {
       log.error("handle threw", e);
     }
@@ -1200,20 +1196,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     // getRoute
     String toUuid = Runtime.getRoute(msg.getId());
+    if (toUuid == null) {
+      log.error("could not get uuid from this msg id {}", msg.getId());
+      return null;
+    }
 
     // get remote connection
     Map<String, Object> conn = Runtime.getConnection(toUuid);
+    if (conn == null) {
+      log.error("could not get connection for this uuid {}", toUuid);
+      return null;
+    }
 
-    // get broadcaster
-    // inspect type of connection and api
-    HelloRequest remoteInfo = (HelloRequest) conn.get("request");
-    String remoteApiKey = (String) conn.get("c-type");
-    AtmosphereResource r = (AtmosphereResource) conn.get("c-r");
-
-    Broadcaster b = r.getBroadcaster();
-    // FIXME FIXME FIXME - don't we double encode parameters - (maybe not
-    // required for typless languages - only for strong typed ?)
-    b.broadcast(CodecUtils.toJson(msg)); // double encoded ?
+    broadcast(toUuid, CodecUtils.toJson(msg));
 
     // FIXME !!! implement !!
     return null;
