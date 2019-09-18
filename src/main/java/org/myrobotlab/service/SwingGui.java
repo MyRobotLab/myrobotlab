@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -62,7 +63,6 @@ import javax.swing.event.DocumentListener;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -74,6 +74,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
 import org.myrobotlab.swing.Welcome;
@@ -111,7 +112,7 @@ import com.mxgraph.view.mxGraph;
  * Tabs-On-JTabbedPaneI-Now-A-breeze
  * 
  */
-public class SwingGui extends Service implements WindowListener, ActionListener, Serializable, DocumentListener {
+public class SwingGui extends Service implements Gateway, WindowListener, ActionListener, Serializable, DocumentListener {
 
   private static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(SwingGui.class);
@@ -168,6 +169,7 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   transient private JMenu export;
   transient private JMenu import_;
   transient private JMenu refresh;
+  private String guiId;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -233,11 +235,19 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
   public SwingGui(String n) {
     super(n);
     this.self = this;
+    guiId = "gui-" + getId();
+
     status.setEditable(false);
     if (tabs == null) {
       tabs = new DockableTabPane(this);
     } else {
       tabs.setStateSaver(this);
+    }
+
+    // setup the virtual reflection
+    try {
+      connect("gui://local/messages");
+    } catch (Exception e) {
     }
 
     log.info("tabs size {}", tabs.size());
@@ -717,8 +727,8 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
           guiServiceGui.rebuildGraph();
         }
         if (frame != null) {
-        frame.pack();
-        frame.repaint();
+          frame.pack();
+          frame.repaint();
         }
       }
     });
@@ -914,9 +924,10 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
+      Runtime.main(new String[] {"--interactive"});
       Runtime.start("gui", "SwingGui");
       Runtime.start("client", "Arduino");
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -930,15 +941,13 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
       // remote.setDefaultPrefix("raspi");
       // remote.connect("tcp://127.0.0.1:6767");
 
-
       // Runtime.start("python", "Python");
-      Arduino arduino = (Arduino)Runtime.start("client", "Arduino");
+      Arduino arduino = (Arduino) Runtime.start("client", "Arduino");
       Serial serial = arduino.getSerial();
       /*
-      for (int i = 0; i < 40; ++i) {
-        Runtime.start(String.format("servo%d", i), "Servo");
-      }
-      */
+       * for (int i = 0; i < 40; ++i) { Runtime.start(String.format("servo%d",
+       * i), "Servo"); }
+       */
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -1014,6 +1023,61 @@ public class SwingGui extends Service implements WindowListener, ActionListener,
         t.unhideTab();
       }
     }
+  }
+
+  // WOW ! GATEWAY FUNCTION !!
+  public boolean isVirtualLocal(Message msg) {
+    String msgId = msg.getId();
+    if (msgId == null) {
+      log.error("msg cannot be tested for local cli - needs to be not null {}", msg);
+    }
+    return msgId.endsWith(guiId);
+  }
+
+  @Override
+  public void connect(String uri) throws Exception {
+    // easy single client support
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("gateway", getName());
+    attributes.put("type", "swing");
+    String uuid = java.util.UUID.randomUUID().toString();
+    Runtime.getInstance().addConnection(uuid, attributes);
+    Runtime.updateRoute(guiId, uuid);
+  }
+
+  @Override
+  public List<String> getClientIds() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Map<String, Map<String, Object>> getClients() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void sendRemote(Message msg) throws Exception {
+    // TODO Auto-generated method stub
+    log.info("sendRemote");
+  }
+
+  @Override
+  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
+    log.info("sendBlockingRemote");
+    return null;
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    log.info("isLocal");
+    return false;
+  }
+
+  @Override
+  public Message getDefaultMsg(String connId) {
+    return Runtime.getInstance().getDefaultMsg(connId);
   }
 
 }

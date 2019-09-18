@@ -1,0 +1,1075 @@
+<!--
+	Dependencies: git 
+	
+	proxy
+	-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+	curl -i  https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
+	curl -i  -x http://webproxy:80 https://api.github.com/repos/MyRobotLab/myrobotlab/releases -H "Accept:application/vnd.github.manifold-preview+json"
+	
+	The goal is always to make the build more simple :)
+	
+	master's branch's build version is to be generated on a tag - will be 1.1.0
+	develop's build version is generated from the travis build number - would be nice to reset Travis' build number on release - but we can't do this
+	develop's build version is 1.0.(build version)
+	
+	Currently the only dependencies come with the git clone are in the build directory.
+	
+	Build Type - Goals
+	min - local build - min distribution
+	test - junit and Incubator
+	
+	TODO - generate junit reports
+	http://stackoverflow.com/questions/12445582/generating-junit-reports-from-the-command-line
+	
+	TODO
+	Push notification from repository
+	curl http://yourserver/jenkins/git/notifyCommit?url=<URL of the Git repository>[&branches=branch1[,branch2]*][&sha1=<commit ID>]
+	
+	TODO test on multiple platforms Linux etc
+	TODO build native code with virtual vms - put in CI system
+	
+	TODO - list use cases - all need tags - v1.0.bn - testing - (incremental fast build)
+			use cases - (local only - no connectivity | post bleeding edge jar | post release.zip)
+			connectivity - dependencies (none all local | myrobotlab.org/buildnumber.php | github | proxy)
+			build types - [clean | simple | incremental]
+			uploads - push release - [ none | release myrobotlab.tag.jar | myrobotlab.tag.zip | both? | (local only)]
+			build location - [local | jenkins | travis]
+			tests [multi platform]
+	
+	TODO - dependencies
+			build - java 1.8
+			dist - git token environment variable
+	
+	
+	Jenkins Notes - 
+	Jenkins->Manage Jenkins->Manage Plugins->Advanced tab to set proxy - git client 
+	The git client will not follow global .gitconfig directives
+	Jenkins->Node->(master)->configure - configure ANT_HOME JAVA_HOME and PATH
+		
+	tasks
+	
+	FIXME - incremental build (no temp)
+	FIXME - need proxy support
+	FIXME - git hub release SHOULD NOT be created before compilation/distribution
+		
+	init
+	compile
+	dist
+	clean
+        test
+	report
+	mail
+	javadoc
+	
+	definitions
+	${version} 	= if master branch then ${version} = travis tag e.g. 1.1.39  
+	              if develop branch then ${version} = 1.0. + travis build number
+	
+	publishBleedingEdge
+	publishRelease
+	
+	JSON Urls
+	https://api.github.com/repos/MyRobotLab/myrobotlab
+	https://api.github.com/repos/MyRobotLab/myrobotlab/releases
+	https://api.github.com/repos/MyRobotLab/myrobotlab/contents/
+	https://api.github.com/repos/MyRobotLab/myrobotlab/git/trees/:sha
+	
+	repo
+	https://api.github.com/repos/MyRobotLab/repo
+	https://api.github.com/repos/MyRobotLab/repo/contents/:org/:module/:version
+	https://api.github.com/repos/MyRobotLab/repo/contents/com.google.gson/gson
+	
+	References:
+	-Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80 -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80
+-->
+
+<!-- The MyRobotLab ant build.xml  -->
+<project name="myrobotlab" default="jar" basedir="."  xmlns:jacoco="antlib:org.jacoco.ant">
+
+	<description>http://myrobotlab.org myrobotlab build file</description>
+    <!-- below has been commented out because its better NOT to add complexity 
+         with more configuration & exceptions, anyway they were not used -->
+	<!-- First thing is load the local properties -->
+	<!-- property file="local.properties" / -->
+	<!-- load default build properties  -->
+	<!-- property file="build.properties" / -->
+	<!-- backfill with the environment variables -->
+	<property environment="env" />
+	
+	<!-- default local build will be "develop" branch -->
+	<condition property="branch" value="${branch}" else="master">
+	  <isset property="branch" />
+	</condition>
+	
+	<condition property="commit" value="${env.GIT_COMMIT}" else="localCommit">
+	  <isset property="env.GIT_COMMIT" />
+	</condition>
+	
+	<condition property="build.number" value="${env.BUILD_NUMBER}" else="localBuild">
+	   <isset property="env.BUILD_NUMBER" />
+	</condition>
+	
+    <property name="version" value="1.0.${build.number}" />
+	
+	<!-- echo critical vars -->
+	<echo message="TRAVIS_COMMIT=${env.TRAVIS_COMMIT}" />
+	<echo message="TRAVIS_TAG=${env.TRAVIS_TAG}" />
+	<echo message="TRAVIS_BUILD_NUMBER=${env.TRAVIS_BUILD_NUMBER}" />
+	<echo message="branch=${branch}" />
+	<echo message="build.number=${build.number}" />
+	<echo message="version=${version}" />
+
+	<!-- set global properties for this build -->
+
+	<property name="fs" location="${file.separator}" />
+	<!-- the source code for release -->
+	<property name="src" location="src" />
+	<!-- unit test source code -->
+	<property name="test" location="test" />
+	<!-- directory for the build to go into -->
+	<property name="build" location="build" />
+	<!-- location for the unit test reports to go into -->
+    <property name="report" location="dist/current/${branch}/report" />
+
+	<!-- location for the jacoco reports -->
+	<property name="result.jacoco.file" location="${build}/jacoco.exec" />
+	<property name="result.report.dir" location="${build}/jacoco" />
+	<!-- directory for the distrbituion to go into -->
+	<property name="dist" location="dist/current/${branch}" />
+	<property name="deploy" location="/var/www/html/deploy/${branch}" />
+	
+	<available file="${build}/classes/resource/license" property="license.present" />
+	<property name="repo" location="../repo" />
+	<tstamp />
+
+	<!-- TODO: is this right? eek.. move contrib somewhere -->
+	<!-- Include the ant contrib task defs -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="build-lib/ant-contrib-0.6.jar" />
+		</classpath>
+	</taskdef>
+
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+        	<classpath path="build-lib/jacocoant.jar"/>
+	</taskdef>
+
+	<path id="myrobotlab.jar.classpath">
+		<pathelement location="${build}/lib/myrobotlab.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar"/>
+	</path>
+
+	<!-- FIXME - fixme with ivy -->
+	<path id="compile.classpath">
+		<pathelement location="bin" />
+		<pathelement location="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar"/>
+		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dcore.jar"/>
+		<pathelement location="${repo}/com.sun.java3d/1.5.1/j3dutils.jar"/>
+		<pathelement location="${repo}/com.sun.java3d/1.5.1/vecmath.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/batch.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/jsapi-1.0-base.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/sphinx4.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/tags.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar"/>
+		<pathelement location="${repo}/edu.cmu.sphinx/4-1.0beta6/WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz.jar"/>
+		<pathelement location="${repo}/javaFlacEncoder.FLAC_FileEncoder/0.1/javaFlacEncoder-0.1.jar"/>
+		<pathelement location="${repo}/javax.speech.recognition/1.0/jsapi.jar"/>
+		<pathelement location="${repo}/javax.vecmath/1.5.1/vecmath.jar"/>
+		<pathelement location="${repo}/javazoom.jl.player/1.0.1/jl1.0.1.jar"/>
+		<pathelement location="${repo}/net.sourceforge.simbad/1.4/simbad-1.4.jar"/>
+		<pathelement location="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar"/>
+		<pathelement location="${repo}/org.op.chess/1.0.0/ChessBoard.jar"/>
+		<pathelement location="${repo}/org.python.core/2.7.0/jython-2.7.0.jar"/>
+		<pathelement location="${repo}/org.tritonus.share.sampled.floatsamplebuffer/0.3.6/tritonus_share-0.3.6.jar"/>
+		<pathelement location="${repo}/simbad.gui/1.4/simbad-1.4.jar"/>
+		<pathelement location="${repo}/wiiuse.wiimote/0.12b/wiiusej.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/dsn.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/imap.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/mail.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/mailapi.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/pop3.jar"/>
+		<pathelement location="${repo}/com.sun.mail/1.4.5/smtp.jar"/>
+    <pathelement location="${repo}/com.jidesoft/3.6.18/jide-oss.jar"/>
+		<pathelement location="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar"/>
+		<pathelement location="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar"/>
+		<pathelement location="${repo}/com.googlecode.chatterbot/1.2.1/chatter-bot-api.jar"/>
+		<pathelement location="${repo}/it.sauronsoftware.cron4j/2.2.5/cron4j-2.2.5.jar"/>
+		<pathelement location="${repo}/org.drjava.java/20120818/asm-3.1.jar"/>
+		<pathelement location="${repo}/org.drjava.java/20120818/dynamicjava-base.jar"/>
+		<pathelement location="${repo}/org.drjava.java/20120818/plt.jar"/>
+		<pathelement location="${repo}/net.sourceforge.tess4j/1.1/tess4j.jar"/>
+		<pathelement location="${repo}/com.wolfram.alpha/1.1/WolframAlpha-1.1.jar"/>
+		<pathelement location="${repo}/com.strobel.decompiler/0.3.2/procyon-decompiler-0.3.2.jar"/>
+		<pathelement location="${repo}/edu.northwestern.topcodes/1.0/topcodes.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-core-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-tcp-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-im-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/xpp3-1.1.4c.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-core-0.4.2.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/jxmpp-util-cache-0.4.2.jar"/>
+		<pathelement location="${repo}/org.jivesoftware.smack/4.1.6/smack-java7-4.1.6.jar"/>
+		<pathelement location="${repo}/org.jnativehook/2.0.3/jnativehook-2.0.3.jar"/>
+		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-async-3.0.5.jar"/>
+		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-core-3.0.5.jar"/>
+		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-examples-3.0.5.jar"/>
+		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-media-support-3.0.5.jar"/>
+		<pathelement location="${repo}/org.twitter4j.twitter/3.0.5/twitter4j-stream-3.0.5.jar"/>
+		<pathelement location="${repo}/com.googlecode.simpleopenni/1.96/SimpleOpenNI.jar"/>
+		<pathelement location="${repo}/com.leapmotion/2.1.3/LeapJava.jar"/>
+		<pathelement location="${repo}/se.comhem.chess/1.1.2/cuckoo112.jar"/>
+		<pathelement location="${repo}/javazoom.spi/1.9.5/mp3spi1.9.5.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar"/>
+		<pathelement location="${repo}/org.apache.solr/4.10.2/noggit-0.5.jar"/>
+		<pathelement location="${repo}/com.github.recognito/0.1.0/recognito-0.1.0-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar"/>
+		<pathelement location="${repo}/org.apache.solr/4.10.2/commons-io-2.3.jar"/>
+		<pathelement location="${repo}/org.eclipse.paho/1.0/org.eclipse.paho.client.mqttv3_1.0.0.jar"/>
+		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar"/>
+		<pathelement location="${repo}/com.google.gson/2.8.0/gson-2.8.0.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jinput-2.0.5.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jinput-platform-2.0.5-natives-windows.jar"/>
+		<pathelement location="${repo}/io.netty/3.10.0/netty-3.10.0.Final.jar"/>
+		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar"/>
+		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar"/>
+		<pathelement location="${repo}/org.atmosphere.nettosphere/2.3.0/wasync-2.1.3-20150917-all.jar"/>
+		<pathelement location="${repo}/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-1.0-20150502.231737-1-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.bytedeco.ffmpeg/2.6.1/ffmpeg-2.6.1-0.11.jar"/>
+		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-server-7.6.13.v20130916.jar"/>
+		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-servlet-7.6.13.v20130916.jar"/>
+		<pathelement location="${repo}/org.eclipse.jetty/7.6.13/jetty-util-7.6.13.v20130916.jar"/>
+		<pathelement location="${repo}/org.jfugue.music/5.0/jfugue-5.0.7.jar"/>
+		<pathelement location="${repo}/com.googlecode.jssc/2.8.0/jssc-2.8.0.jar"/>
+		<pathelement location="${repo}/gnu.io.rxtx/2.1-7r2/RXTXcomm.jar"/>
+		<pathelement location="${repo}/org.jsoup/1.8.3/jsoup-1.8.3.jar"/>
+		<pathelement location="${repo}/net.java.games.jinput/2.0.5/jutils-1.0.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/glamour-lwjgl-1.0.8.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jna-4.2.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jovr-0.7.0.0.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/jscience-4.3.1.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl_util-2.9.3.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-2.9.3.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/lwjgl-platform-2.9.3-natives-windows.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/oria-resources-1.0.4.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/slick-util.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/xres-1.0.3.jar"/>
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-classic-1.1.3.jar"/>
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar"/>
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar"/>
+		<pathelement location="${repo}/org.saintandreas.jovr/0.7/math-1.0.4.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/javacpp.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/javacv.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-x86_64.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-macosx-x86_64.jar"/>
+  		<pathelement location="${repo}/org.bytedeco.javacv/1.3/opencv-linux-armhf.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg.jar"/>
+		<pathelement location="${repo}/org.bytedeco.javacv/1.3/ffmpeg-windows-x86_64.jar"/>
+		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/webcam-capture-0.3.10.jar"/>
+		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/bridj-0.6.2.jar"/>
+		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-arch-x86_64-w64-mingw32.jar"/>
+		<pathelement location="${repo}/com.xuggle.xuggler/5.4/xuggle-xuggler-noarch-5.4.jar"/>
+		<pathelement location="${repo}/com.coobird.thumbnail/0.4.2/thumbnailator-0.4.2-all.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/feed4j.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/dom4j-1.6.1.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/nekohtml.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/xercesImpl.jar"/>
+		<pathelement location="${repo}/feed4j/1.0/xml-apis.jar"/>
+		<pathelement location="${repo}/com.thalmic.myo/0.9.0/myo-java-0.9.1-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/com.thoughtworks.xstream/1.4.7/xstream-1.4.7.jar"/>
+		<pathelement location="${repo}/org.apache.tika/1.11/tika-core-1.11.jar"/>
+		<pathelement location="${repo}/net.sf.opencsv/2.3/opencsv-2.3.jar"/>
+		<pathelement location="${repo}/opennlp/1.6/opennlp-tools-1.6.0.jar"/>
+		<pathelement location="${repo}/opennlp/1.6/opennlp-uima-1.6.0.jar"/>
+		<pathelement location="${repo}/com.sun.speech.freetts/1.2/freetts.jar"/>
+		<pathelement location="${repo}/com.azure.translator/0.8.3/microsoft-translator-java-api-with-dependencies-0.8.3.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-core.jar"/>
+		<pathelement location="${repo}/com.pi4j.pi4j/1.1-SNAPSHOT/pi4j-gpio-extension.jar"/>
+		<pathelement location="${repo}/org.node/0.1.1/nodyn-0.1.1-20141121.193443-283.jar"/>
+		<pathelement location="${repo}/org.json/20090211/json-20090211.jar"/>
+		<pathelement location="${repo}/org.alicebot.ab/0.0.4-kw/program-ab-kw-0.0.4.jar"/>
+		<pathelement location="${repo}/pl.sarxos.webcam/0.3.10/sosia.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-android-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-calibration-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-feature-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-geo-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-io-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-ip-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-jcodec-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-learning-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-openkinect-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-recognition-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-sfm-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-visualize-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-WebcamCapture-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/BoofCV-xuggler-0.23.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/core-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/ddogleg-0.9.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/dense64-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/equation-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/georegression-0.10.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/simple-0.29.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xmlpull-1.1.3.1.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xpp3_min-1.1.4c.jar"/>
+		<pathelement location="${repo}/net.sourceforge.boofcv/0.23/xstream-1.4.7.jar"/>
+		<pathelement location="${repo}/net.objecthunter.exp4j/0.4.7/exp4j-0.4.7.jar"/>
+		<pathelement location="${repo}/com.google.vision/1.22.0/google-api-services-vision-v1-rev16-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-api-client-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-oauth-client-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-gson-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jackson2-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/google-http-client-jdo-1.22.0.jar"/>
+		<pathelement location="${repo}/com.google.client/1.22.0/jdo2-api-2.3-eb.jar"/>
+		<pathelement location="${repo}/net.sf.jipcam/0.9.1/jipcam-0.9.1.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/elasticsearch-2.4.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/lucene-core-5.5.2.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/guava-18.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/jsr166e-1.1.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/joda-time-2.9.4.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/t-digest-3.0.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/hppc-0.7.1.jar"/>
+		<pathelement location="${repo}/org.elasticsearch.elasticsearch/2.4.0/jackson-core-2.8.1.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-wikibaseapi-0.8.0-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-datamodel-0.8.0-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-codec-1.9.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/commons-logging-1.2.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpclient-4.5.2.jar"/>
+		<pathelement location="${repo}/org.apache.commons.httpclient/4.5.2/httpcore-4.4.4.jar"/>
+		<pathelement location="${repo}/org.apache.commons.commons-lang3/3.3.2/commons-lang3-3.3.2.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-annotations-2.5.0.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-core-2.5.0.jar"/>
+		<pathelement location="${repo}/com.fasterxml.jackson.core/2.5.0/jackson-databind-2.5.0.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-dumpfiles-0.8.0-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-storage-0.8.0-SNAPSHOT.jar"/>
+		<pathelement location="${repo}/org.wikidata.wdtk/0.8.0-SNAPSHOT/wdtk-util-0.8.0-SNAPSHOT.jar"/>
+		<!--MaryTTS-->
+		<pathelement location="${repo}/marytts/5.2/marytts-builder-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-client-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-common-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-de-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-en-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-fr-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-it-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-lb-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-ru-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-sv-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-te-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-lang-tr-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-redstart-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-runtime-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-signalproc-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/marytts-transcription-5.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/voice-cmu-slt-hsmm-5.2.jar"/>
+        <pathelement location="${repo}/marytts/5.2/voice-cmu-bdl-hsmm-5.2.jar"/>
+		<!--MaryTTS-dependencies-->
+		<pathelement location="${repo}/marytts/5.2/emotionml-checker-java-1.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/commons-collections-3.2.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/commons-lang-2.6.jar"/>
+		<pathelement location="${repo}/marytts/5.2/commons-io-2.5.jar"/>
+		<pathelement location="${repo}/marytts/5.2/log4j-1.2.16.jar"/>
+		<pathelement location="${repo}/marytts/5.2/junit-4.12.jar"/>
+		<pathelement location="${repo}/marytts/5.2/mysql-connector-java-5.1.16.jar"/>
+		<pathelement location="${repo}/marytts/5.2/oro-2.0.8.jar"/>
+		<pathelement location="${repo}/marytts/5.2/groovy-all-2.4.5.jar"/>
+		<pathelement location="${repo}/marytts/5.2/diff4j-1.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/guava-14.0.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/icu4j-54.1.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/fast-md5-2.7.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/jtok-core-1.9.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/jama-1.0.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/Jampack-1.0.jar"/>
+		<pathelement location="${repo}/marytts/5.2/trove4j-2.0.2.jar"/>
+		<pathelement location="${repo}/marytts/5.2/weka-dev-3.7.6.jar"/>
+		<pathelement location="${repo}/marytts/5.2/httpcore-4.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/httpcore-nio-4.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/opennlp-maxent-3.0.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/opennlp-tools-1.5.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/fest-assert-1.4.jar"/>
+		<pathelement location="${repo}/marytts/5.2/hamcrest-all-1.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/hsqldb-2.0.0.jar"/>
+		<pathelement location="${repo}/marytts/5.2/java-diff-1.1.jar"/>
+		<pathelement location="${repo}/marytts/5.2/swing-layout-1.0.3.jar"/>
+		<pathelement location="${repo}/marytts/5.2/testng-6.9.11.jar"/>
+		<pathelement location="${repo}/marytts/5.2/xmlunit-1.6.jar"/>
+		<pathelement location="${repo}/marytts/5.2/sgt-3.0.jar"/>
+		<pathelement location="${repo}/marytts/5.2/mwdumper-1.16.jar"/>
+		
+		<!-- jmonkey begin -->
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-core.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-jogl.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-lwjgl-natives.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-lwjgl.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jinput.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jbullet.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-jbullet.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-desktop.jar"/>
+		<pathelement location="${repo}/org.jme3.sdk/3.0.0/jME3-testdata.jar"/>
+		<!-- jmonkey end -->
+		
+		<pathelement location="${repo}/com.voicerss.tts/1.0/tts.jar"/>
+		<pathelement location="${repo}/com.amazonaws.services/1.11.118/aws-java-sdk-1.11.118.jar"/>
+        <pathelement location="${repo}/org.joda/2.9.4/joda-time.jar"/>
+		
+	        <!-- KW slack bot dependencies start -->	
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/atlassian-util-concurrent-2.4.2.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-beans-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-context-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-core-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-web-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/spring-websocket-4.3.2.RELEASE.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-core-8.5.4.jar"/>
+		<pathelement location="${repo}/org.springframework.spring-websocket/4.3.2.RELEASE/tomcat-embed-websocket-8.5.4.jar"/>
+		
+		
+		<!-- KW : dl4j integratoin starts here!  let's refactor this with some ivy or some maven mojo... this is bonkers. -->
+		<pathelement location="${repo}/org.deeplearning4j/0.8/annotations-2.0.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/common-image-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/common-io-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/common-lang-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/commons-compress-1.8.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/commons-math3-3.4.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/datavec-api-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/datavec-data-image-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/datavec-nd4j-common-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-core-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-modelimport-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-nn-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-ui-components-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/fastutil-6.5.7.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/freemarker-2.3.23.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-ppc64le.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-linux-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-macosx-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-windows-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-1.10.0-patch1-1.3-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/hdf5-platform-1.10.0-patch1-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-bmp-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-core-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-jpeg-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-metadata-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-psd-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/imageio-tiff-3.1.1.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/jackson-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/jai-imageio-core-1.3.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/javassist-3.19.0-GA.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/joda-time-2.2.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/json-20131018.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/jsr305-1.3.9.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-android-arm.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-android-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-armhf.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-ppc64le.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-linux-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-macosx-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-windows-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-1.73-1.3-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/leptonica-platform-1.73-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/libfreenect2-0.2.0-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/lombok-1.16.10.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-api-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-buffer-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-common-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-context-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-android-arm.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-android-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-linux-ppc64le.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-linux-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-macosx-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-0.8.0-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-api-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/nd4j-native-platform-0.8.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/neoitertools-1.0.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-android-arm.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-android-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-armhf.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-ppc64le.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-linux-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-macosx-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-windows-x86.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-0.2.19-1.3-windows-x86_64.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/openblas-platform-0.2.19-1.3.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/reflections-0.9.10.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/snakeyaml-1.12.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/stax2-api-3.1.4.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/stream-2.7.0.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/xz-1.5.jar"/>
+		<pathelement location="${repo}/org.deeplearning4j/0.8/deeplearning4j-zoo-0.8.1-SNAPSHOT.jar"/>
+		<!-- holy crapola, that's a lot of jar files... ok..  let's move on... -->
+		
+		<pathelement location="${repo}/com.illposed.osc/0.4/javaosc-core-0.4.jar"/>
+		
+		<pathelement location="build-lib/tools.jar"/>
+	</path>
+
+	<!-- additional jars required to compile unit tests -->
+	<path id="test.classpath">
+		<!--
+		<pathelement location="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" />
+		<pathelement location="${repo}/org.junit/4.11/junit-4.11.jar" />
+		-->
+		
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-classic-1.1.3.jar"/>
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar"/>
+		<pathelement location="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar"/>
+
+		<pathelement location="${repo}/org.junit/4.11/hamcrest-core-1.3.jar" />
+                <!-- TODO: why is the normal compile classpath omitted? -->
+		<pathelement location="${repo}/org.apache.solr/4.10.2/solr-solrj-4.10.2.jar" />
+		<!-- remove <path refid="compile.classpath" /> -->
+		<!-- remove <pathelement location="${build}/classes" /> -->
+	</path>
+
+
+	<condition property="foo.path" value="C:\Foo\Dir">
+		<os family="windows" />
+	</condition>
+	<condition property="foo.path" value="/home/foo/dir">
+		<os family="unix" />
+	</condition>
+
+	<fail unless="foo.path">No foo.path set for this OS!</fail>
+
+	<target name="help">
+                <echo message="" />
+                <echo message="-----------------------------" />
+                <echo message="My RobotLab Build System Help" />
+                <echo message="-----------------------------" />
+                <echo message="" />
+		<java fork="false" classname="org.apache.tools.ant.Main" taskname="-">
+			<arg value="-projecthelp"/>
+			<arg value="-f"/>
+			<arg value="${ant.file}"/>
+		</java>
+	</target>
+
+	<!-- ================ init begin ================= -->
+    <target name="init" depends="clean,repoClone" description="initialize things for the build">
+		<echo message="compiling with java ${ant.java.version}" />
+		<echo message="ant version ${ant.version}" />
+				
+		<property name="XMLConstants.FEATURE_SECURE_PROCESSING" value="false" />
+
+		<echo message="date time ${DSTAMP}.${TSTAMP}" />
+
+		<!-- git log -1 - -pretty=%B -->
+		<!-- FIXME - OOPS forgot about mrl pull ! only have repo !!! -->
+		<exec executable="git" dir="./" outputproperty="gitcomment">
+			<arg value="log" />
+			<arg value="-1" />
+			<arg value="--pretty=%B" />
+		</exec>
+
+		<!-- TODO you need to filter out brackets []{} -->
+		<propertyregex property="comment" input="${gitcomment}" regexp="\r|\n" replace=" " global="true" />
+		<echo message="Last commit comment [${comment}]" />
+		<!-- property name="comment" value="${DSTAMP}.${TSTAMP}" /-->
+
+		<!-- http://larrycai.wordpress.com/2013/02/22/publish-the-artifacts-inside-travis-ci-to-github/ -->
+		<property name="github.token" value="${env.GITHUB_TOKEN}" />
+		<!-- echo message="github.token ${env.GITHUB_TOKEN}" / -->
+
+		<!-- after_success:
+  		- git commit -a -m "Committed by Travis-CI build number: $TRAVIS_JOB_ID" 
+		-->
+
+		<!-- TODO set all subsequent directories or resources with appended tag -->
+		<!-- TODO branch on the tag in release -->
+		<property name="temp" location="${dist}/temp/${version}" />
+
+		<!-- Create the build directory structure used by compile -->
+		<!-- create all necessary directories -->
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+		<mkdir dir="${dist}/report" />
+		<!-- the build directory -->
+		<mkdir dir="${build}" />
+		<mkdir dir="${build}/classes" />
+		<mkdir dir="${build}/lib" />
+		<mkdir dir="${build}/test" />
+		<mkdir dir="${build}/report" />
+
+		<!-- echoproperties is good for debugging -->
+		<echoproperties />
+	</target>
+	<!-- ================ init end ================= -->
+
+
+	<!-- FIXME !!!- use ivy correctly ! -->
+	<!-- FIXME !!!- manage proxy for ivy -->
+	<!-- =============== repo begin  =============== -->
+	<!-- repo added if not already cloned - does update to head -->
+	<target name="repoCheck" description="Check the repo if network is available, and pull if so">
+		<available file="${repo}" property="repo.present" />
+
+		<!-- http://stackoverflow.com/questions/18097555/execute-ant-task-if-two-conditions-are-met -->
+		<condition property="git.pull">
+			<and>
+				<available file="${repo}" />
+				<istrue value="${network.available}" />
+			</and>
+		</condition>
+
+		<condition property="git.clone">
+			<and>
+				<not>
+					<available file="${repo}" />
+				</not>
+			</and>
+		</condition>
+
+	</target>
+    <target name="repoExists" depends="repoCheck" if="git.pull">
+		<echo message="git pull ${repo}" />
+		<echo message="${git.pull}" />
+		<exec executable="git" dir="${repo}">
+			<!-- <arg value="fetch"/> -->
+			<arg value="pull" />
+		</exec>
+	</target>
+	<target name="repoDoesNotExists" depends="repoCheck" if="git.clone">
+		<echo message="git clone --branch=${branch} https://github.com/MyRobotLab/repo.git ${repo}" />
+		<exec executable="git">
+			<arg value="clone" />
+			<arg value="https://github.com/MyRobotLab/repo.git" />
+			<arg value="${repo}" />
+		</exec>
+	</target>
+
+	<!-- TODO: Consider moving this ... and get rid of it , but it will require dep management -->
+	<target name="repoClone">
+		<echo message="git clone --depth=1 --branch=${branch} https://github.com/MyRobotLab/repo.git ${repo}" />
+		<exec executable="git">
+			<arg value="clone" />
+			<arg value="--depth=1" />
+			<arg value="--branch=${branch}" />
+			<arg value="https://github.com/MyRobotLab/repo.git" />
+			<arg value="${repo}" />
+		</exec>
+	</target>
+	<!-- =============== repo end  =============== -->
+	<!-- 
+		The following are "initial" myrobotlab dependencies - they get incorporated into myrobotlab.jar
+		The 'getMetaData()' methods of these services have their dependencies removed, because
+		they are satisfied here.
+	 -->
+	<target name="unzip" description="unzip various jar files to be included into the myrobotlab.jar">
+		<echo>unzipping dependencies</echo>
+		<echo message="${license.present}" />
+
+		<!-- SYNCH WITH AGENT TO DEBUG!!!! -->
+		
+		<!-- repo -->
+		<unzip src="${repo}/com.google.gson/2.8.0/gson-2.8.0.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.apache.ivy/2.4.0-rc1/ivy-2.4.0-rc1.jar" dest="${build}/classes" />
+		
+		<!-- swing gui -->
+		<unzip src="${repo}/org.fife.rsyntaxtextarea/2.0.4.1/rsyntaxtextarea.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.fife.autocomplete/2.0.4/autocomplete.jar" dest="${build}/classes" />
+		<unzip src="${repo}/com.mxgraph.jgraph/1.6.1.2/jgraphx.jar" dest="${build}/classes" />
+    <unzip src="${repo}/com.jidesoft/3.6.18/jide-oss.jar" dest="${build}/classes" />
+		<!-- <unzip src="${repo}/org.apache.log4j/1.2.14/log4j-1.2.14.jar" dest="${build}/classes" /> -->
+		
+		<!-- webgui -->
+		<unzip src="${repo}/org.atmosphere.nettosphere/2.3.0/nettosphere-assembly-2.3.0.jar" dest="${build}/classes" />		
+		<unzip src="${repo}/org.atmosphere.nettosphere/2.3.0/geronimo-servlet_3.0_spec-1.0.jar" dest="${build}/classes" />
+		<unzip src="${repo}/io.netty/3.10.0/netty-3.10.0.Final.jar" dest="${build}/classes" />
+		
+		<!-- logging -->
+		<unzip src="${repo}/org.slf4j.logback/1.1.3/logback-classic-1.1.3.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.slf4j.logback/1.1.3/logback-core-1.1.3.jar" dest="${build}/classes" />
+		<unzip src="${repo}/org.slf4j.logback/1.1.3/slf4j-api-1.7.12.jar" dest="${build}/classes" />
+		
+		<!-- python -->
+		<unzip src="${repo}/org.python.core/2.7.0/jython-2.7.0.jar" dest="${build}/classes" />
+				
+		<!-- for client -->
+
+	</target>
+
+	<!-- Compile target, compile all myrobotlab src files -->
+	<target name="compile" depends="init" description="compile the source ">
+
+		<echo>compile start</echo>
+		<!-- compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}/classes" debug="true" includeantruntime="false" encoding="UTF-8">
+			<!-- exclude name="org/myrobotlab/service/ExcludeBrokenFile.java" / --> 
+			<compilerarg value="-parameters" />
+			<exclude name="org/myrobotlab/opencv/OpenCVFilterMotionTemplate.java"/> 	
+			<exclude name="resource/**"/> 
+			<classpath refid="compile.classpath" />
+		</javac>
+		<echo>compile end</echo>
+	</target>
+
+	<!-- create myrobotlab.jar -->
+	<target name="jar" depends="compile, unzip" description="create the myrobotlab.jar file">
+		<!-- FIXME - use Ivy to get the files there ! filebase or url resolver -->
+		<!-- copy resource.root -->
+		<java classname="org.myrobotlab.framework.repo.ServiceData">
+	         <arg value="${build}/classes/resource/framework"/>
+	         <classpath>
+	         	<path refid="compile.classpath"/>
+	         	<path path="${build}/classes"/>	          
+	         </classpath>
+		</java>
+		
+		<copy todir="${build}/classes/resource">
+			<fileset dir="${src}/resource" />
+		</copy>
+		<echo file="${build}/classes/resource/version.txt">${version}</echo>
+		<echo file="${build}/classes/resource/branch.txt">${branch}</echo>
+		<!-- copy the latest serviceData.xml into package -->
+		<!-- TODO deprecate the xml -->
+		<!-- copy file="${repo}/serviceData.xml" todir="${build}/classes/resource/framework" / -->
+		<!-- copy file="${repo}/serviceData.json" todir="${build}/classes/resource/framework" / -->
+		
+		
+		<jar jarfile="${build}/lib/myrobotlab.jar" basedir="${build}/classes">
+			<!-- excludes="org/myrobotlab/boot/" -->
+			<manifest>
+				<attribute name="Main-Class" value="org.myrobotlab.service.Agent" />
+				<attribute name="Built-By" value="${user.name}" />
+				<!--attribute name="Implementation-Version" value="${version}" /-->
+				<!-- section name="myrobotlab" -->
+				<!-- section name="org/myrobotlab"-->
+					<attribute name="Specification-Title" value="You Know, for Creative Machine Control !" />
+					<attribute name="Specification-Version" value="1.0" />
+					<attribute name="Specification-Vendor" value="myrobotlab" />
+					<attribute name="Implementation-Title" value="myrobotlab" />
+					<attribute name="Implementation-Version" value="${version}" />
+					<attribute name="Implementation-Vendor" value="http://myrobotlab.org" />
+					<attribute name="Branch" value="${branch}" />					
+					<attribute name="Commit" value="${commit}" />					
+				<!-- /section -->
+			</manifest>
+		</jar>
+	</target>
+
+	
+	<!-- create myrobotlab-client.jar -->
+	<target name="myrobotlab-client" depends="compile" description="create the myrobotlab-client.jar file">
+
+		<echo file="${build}/classes/resource/version.txt">${version}</echo>
+
+		<jar jarfile="${build}/lib/myrobotlab-client.jar">
+			
+			 <fileset dir="${build}/classes" 
+			               includes="org/myrobotlab/client/**/*.class"
+			               />
+
+			 <fileset dir="${build}/classes" 
+			               includes="org/myrobotlab/framework/**/*.class"
+			               />
+
+			 <fileset dir="${build}/classes" 
+			               includes="org/myrobotlab/service/interfaces/**/*.class"
+			               />
+			
+			 <fileset dir="${build}/classes" 
+			               includes="ch/qos/**/*.class"
+			               />			
+			
+			 <fileset dir="${build}/classes" 
+			               includes="org/slf4j/**/*.class"
+			               />
+
+			 <fileset dir="${build}/classes" 
+			               includes="org/myrobotlab/logging/**/*.class"
+			               />
+			
+			<!-- excludes="**/UnitTest*.class"/> -->
+						
+			<manifest>
+				<attribute name="Main-Class" value="org.myrobotlab.client.Client" />
+				<attribute name="Built-By" value="${user.name}" />
+				<!-- section name="myrobotlab" -->
+				<section name="compile">
+					<attribute name="Specification-Title" value="myrobotlab" />
+					<attribute name="Specification-Version" value="${version}" />
+					<attribute name="Specification-Vendor" value="myrobotlab" />
+					<attribute name="Implementation-Title" value="myrobotlab" />
+					<attribute name="Implementation-Version" value="${version}" />
+					<attribute name="Implementation-Vendor" value="myrobotlab.org" />
+				</section>
+			</manifest>
+		</jar>
+	</target>	
+	
+	<!-- compile the unit tests prior to running them. -->
+	<target name="compiletests" depends="jar" description="test myrobotlab.jar">
+		<echo>compile tests start</echo>
+		<javac srcdir="test" destdir="build/test" debug="true" includeantruntime="false" encoding="UTF-8">
+			<classpath>
+				<path refid="test.classpath" />
+				<path refid="compile.classpath" />
+				<pathelement location="${build}/classes" />
+			</classpath>
+		</javac>
+		<echo>compile tests end</echo>
+	</target>
+
+	<!-- FYI - HTTP STATUS 422 - MEANS YOU ALREADY HAVE THAT RELEASE MADE !!! -->
+	<target name="createGitHubRelease" depends="init">
+		<echo message="token = ${github.token}" />
+		<echo message="{&quot;tag_name&quot;: &quot;${tag}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${version}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}" />
+
+		<http method="POST" url="https://api.github.com/repos/MyRobotLab/myrobotlab/releases" expected="201" printresponseheaders="true" printrequestheaders="true" printresponse="true" entityProperty="release.response">
+			<headers>
+				<header name="Authorization" value="token ${github.token}" />
+			</headers>
+			<entity value="{&quot;tag_name&quot;: &quot;${version}&quot;,&quot;target_commitish&quot;: &quot;master&quot;,&quot;name&quot;: &quot;${version}&quot;,&quot;body&quot;: &quot;${comment}&quot;,&quot;draft&quot;: false,&quot;prerelease&quot;: false}">
+			</entity>
+		</http>
+		<echo message="${release.response}" />
+	</target>
+
+	<target name="getAssetsURL" depends="createGitHubRelease">
+		<propertyregex property="upload_url" input="${release.response}" regexp="(?&lt;=upload_url&quot;:&quot;)(.*)(?=\{\?name\})" select="\1" />
+		<echo message="${upload_url}" />
+	</target>
+
+	<!-- release to github -->
+	<target name="release" depends="compile, getAssetsURL">
+		<echo message="creating version" />
+		<http method="POST" url="${upload_url}" printresponseheaders="false" printrequestheaders="false" printresponse="false" expected="201">
+			<!-- http method="POST" url="http://localhost:7979/repos/MyRobotLab/myrobotlab/releases" -->
+			<headers>
+				<header name="Authorization" value="token ${github.token}" />
+				<header name="Accept" value="application/vnd.github.manifold-preview" />
+				<header name="Content-Type" value="application/java-archive" />
+			</headers>
+			<query>
+				<parameter name="name" value="myrobotlab.jar" />
+			</query>
+			<entity file="${dist}/myrobotlab.jar" binary="true" />
+		</http>
+	</target>
+	<!-- TODO: make this depend on test , gotta figure out why travis ci is failing on this now. -->
+	<target name="dist" depends="jar, javadoc, report" description="generate the distribution">
+		<!-- copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab.${version}.jar" / -->
+		<!-- backwards compat .. TODO: review this.. -->
+		<mkdir dir="${dist}" />
+		<mkdir dir="${dist}/archive" />
+			
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/myrobotlab.jar" />
+		<copy file="${build}/lib/myrobotlab.jar" tofile="${dist}/archive/myrobotlab-${version}.jar" />		
+		<copy file="${build}/classes/resource/version.txt" tofile="${dist}/version.txt"/>
+		<!-- for convienence of debugging spawn -->
+		<copy file="${build}/lib/myrobotlab.jar" tofile="myrobotlab.jar" />
+
+
+        <!-- Lets zip up the javadocs and the jacoco reports so they can be part of the distribution! -->
+        <zip destfile="${dist}/myrobotlab-javadoc.zip">
+          <zipfileset dir="${build}/javadoc" />
+        </zip>
+
+        <!-- Lets zip up the jacoco code coverage reports! people can see what is / isn't tested -->
+        <zip destfile="${dist}/myrobotlab-jacoco.zip">
+          <zipfileset dir="${build}/javadoc" />
+        </zip>
+		
+		<mkdir dir="${deploy}" />
+		<copy todir="${deploy}">
+			<fileset dir="${dist}"/>
+		</copy>
+		<!-- copy 1 directory of unzipped javadocs to deploy location -->
+		<copy todir="${deploy}/javadoc">
+			<fileset dir="${build}/javadoc"/>
+		</copy>
+		<!-- copy serviceData for matrix data -->
+		<copy file="${build}/classes/resource/framework/serviceData.json" tofile="${deploy}/serviceData.json" />			
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${temp} directory trees-->
+		<delete dir="${build}" />
+		<delete dir="${temp}" />
+		<delete dir="${dist}" />
+		<delete file="myrobotlab.jar" />
+	</target>
+	
+	<target name="cleanRepo" description="clean up">
+		<!-- Delete the ${build} and ${temp} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${temp}" />
+	</target>
+	
+
+	<target name="report" description="generate the junit and jacoco reports on the build." depends="test">
+		<!-- junit reports -->
+		<junitreport todir="${report}">
+			<fileset dir="${build}/report" includes="TEST-*.xml" />
+			<report todir="${report}" format="noframes">
+			</report>
+		</junitreport>
+		<!-- jacoco report stuff -->
+               <!-- echo message="JACOCO RESULTS FILE ${result.jacoco.file}" -->
+	       <!-- temporarily disabling jacoco -->
+		<jacoco:report>
+			<executiondata>
+				<file file="${result.jacoco.file}" />
+			</executiondata>
+			<structure name="JaCoCo MyRobotLab Report">
+				<classfiles>
+					<fileset dir="${build}/classes/org/myrobotlab" />
+				</classfiles>
+				<sourcefiles encoding="UTF-8">
+					<fileset dir="${src}" />
+				</sourcefiles>
+			</structure>
+			<html destdir="${result.report.dir}" />
+			<csv destfile="${result.report.dir}/report.csv" />
+			<xml destfile="${result.report.dir}/report.xml" />
+		</jacoco:report>
+		
+               	 <!-- helper task to facilitate moving the jacoco report to s3 because
+                      hidden directories aren't copied with the local_dir task in travis s3 task --> 
+		<!-- replace and rename the .resources directory to resources -->
+<!-- TEMPORARY DISABLE JACOCO		
+		<replace dir="${result.report.dir}" value="resources">
+			<include name="**/*.html"/>
+  			<replacetoken>.resources</replacetoken>
+		</replace>
+                <move todir="${result.report.dir}/resources">
+    			<fileset dir="${result.report.dir}/.resources"/>
+  		</move>
+-->  		
+		<!-- we only care about code coverage from org.myrobotlab ... not sure how to easily make sure
+                     the report only contains that stuff.. so time to delete everything we don't care about.. -->
+<!--
+		<delete>
+			<fileset dir="${result.report.dir}">
+-->			
+                                <!-- delete everything from the resources , index.html and the stuff from org.myrobotlab -->
+<!--		
+				<patternset id="mrlonly">
+    					<exclude name="**/resources/**"/>
+    					<exclude name="**/index.html"/>
+    					<exclude name="**/org.myrobotlab*/**"/>
+				</patternset>
+			</fileset>
+		</delete>
+-->
+        </target>
+
+	<target name="mail" depends="report">
+		<mail mailhost="${mail.host}" mailport="${mail.port}" subject="${mail.subjectalert}" ssl="${mail.ssl}" user="${mail.username}" password="${mail.password}" tolist="${mail.tolist}">
+			<from address="${mail.from}" />
+			<!--  <to address="${mail.to}"/> -->
+			<message>The nightly build has completed</message>
+			<attachments>
+				<fileset dir="${report}">
+					<include name="**/*.html" />
+				</fileset>
+			</attachments>
+		</mail>
+	</target>
+
+	<target name="javadoc" depends="compile" description="Create the javadocs from the source code" >
+		<javadoc access="public" packagenames="org.myrobotlab.*" author="true" destdir="${build}/javadoc" 
+			encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" doctitle="myrobotlab" nodeprecated="false" nodeprecatedlist="false" 
+			noindex="false" nonavbar="false" notree="false" source="1.8" sourcepath="src" splitindex="true" use="true" version="true">
+			<arg value="-notimestamp" />
+			<classpath refid="compile.classpath" />
+		</javadoc>
+	</target>
+
+	<!-- TODO - upload/publish javadoc -->
+
+	<target name="test" depends="jar, compiletests" description="Run the unit tests">
+		<!-- junit options description="Main  Integration/Unit Tests"
+		               showoutput="true"
+		               printsummary="true"
+		               printsummary="withOutAndErr"
+		               outputtoformatters="true" -->
+		<!-- temporarily disabling jacoco -->
+		<jacoco:coverage destfile="${result.jacoco.file}">
+		    <junit printsummary="on" fork="true" haltonfailure="true" showoutput="false" maxmemory="1g">
+			<!--
+			<jvmarg value="-Djava.library.path=${dist}/libraries/native"/>
+			<env key="LD_LIBRARY_PATH" path="${dist}/libraries/native"/>			
+			-->
+                        <jvmarg value="-Xmx1g"/>
+			<sysproperty key="java.awt.headless" value="true" />
+			<!-- any junit tests would fail running on jenkins with gui components -->
+			<classpath>
+				<!-- pathelement location="${build}/classes" /-->
+				<pathelement location="${build}/test" />
+				<path refid="test.classpath" />
+				<path refid="myrobotlab.jar.classpath" />
+				<path refid="compile.classpath" />
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="true" todir="${build}/report" >
+				<fileset dir="${test}">					
+				</fileset>
+			</batchtest>
+
+		    </junit>
+		</jacoco:coverage>
+	</target>
+
+	<target name="quickTest" > <!-- not correct depends="compiletests" -->
+		<junit printsummary="on" fork="true" haltonfailure="no">
+			<classpath>
+				<pathelement location="${bin}" />
+				<path refid="test.classpath" />
+				<path refid="compile.classpath" />
+			</classpath>
+			<formatter type="xml" />
+
+			<batchtest fork="true" todir="${build}/report" >
+				<fileset dir="${test}">
+					<include name="**/*Test.java" />
+					<exclude name="**/JFugueTest.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<!-- Incubator -->
+	<!-- In order to simulate a working deployment
+		the repo should be clean
+		dist/libraries/jar should only contain the minimal amount of jars
+		the load from the repo needs to occur BEFORE the test !!! - this means 2 execs are need
+		first one to clean and then deploy the Service's dependencies
+		second one to preform the test
+		
+		* clean repo - (includes serviceData.xml | .myrobotlab)
+		* clean libraries/* - with the exception of Bootstrap jars (copy over after full delete)
+		* request repo pull of dependencies for the service in question
+	-->
+
+	<target name="exec" depends="dist">
+		<!-- depends="dist"-->
+		<java classname="org.myrobotlab.service.Incubator" fork="true" failonerror="true">
+			<!-- it should be jar="${dist}/myrobotlab.jar" in all its complexity -->
+			<!-- <arg value="-h" /> -->
+			<jvmarg value="-Djava.library.path=${build}${fs}libraries${fs}native" />
+			<!-- <jvmarg value="-cp ${dist}/myrobotlab.jar;${dist}/libraries/jar/*;"/> -->
+			<env key="LD_LIBRARY_PATH" path="${build}${fs}libraries${fs}native" />
+			<classpath>
+				<fileset dir="${dist}/libraries/jar">
+					<include name="**/*.jar" />
+				</fileset>
+				<pathelement location="${dist}/myrobotlab.jar" />
+				<!-- FIXME - the jar should be executed - problem with 205 INFO terminating - good luck new bootstrap :) -->
+				<path refid="test.classpath" />
+				<!-- remove <path refid="compile.classpath" /> -->
+				<!-- remove <pathelement location="${build}/classes" /> -->
+			</classpath>
+		</java>
+	</target>
+
+</project>

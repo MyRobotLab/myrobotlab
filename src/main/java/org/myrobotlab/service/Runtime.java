@@ -2712,6 +2712,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public HelloResponse getHelloResponse(String uuid, HelloRequest hello) {
     HelloResponse response = new HelloResponse();
     Map<String, Object> connection = getConnection(uuid);
+    if (uuid == null) {
+      log.error("uuid could not be found in known connections {}", uuid);
+      // return null;
+    }
     response.id = getId();
     // this.uuid = uuid;
     response.request = hello;
