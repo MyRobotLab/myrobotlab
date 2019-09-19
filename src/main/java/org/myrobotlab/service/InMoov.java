@@ -2299,8 +2299,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.execGesture("BREAKITdaVinci()");
   }
 
-  public void startVinMoov() {
-    
+  public void startVinMoov() throws Exception {
+    startSimulator();
   }
 
   @Override
