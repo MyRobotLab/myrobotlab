@@ -368,6 +368,7 @@ public class IntegratedMovement extends Service
 		partTopStom.set3DModel("Models/ttorso1.j3o", .001f, new Point(0,0.015f, 0f , 90 , -90, 0));
 		partTopStom.setMass(5.774, 0.95);
 		ik.attach(partTopStom);
+		
 
 		IMPart partLeftArmAttach = ik.createPart("leftArmAttach", .001);
 		partLeftArmAttach.setDHParameters(ArmConfig.DEFAULT, 0.143, 180, 0, 90);
