@@ -2365,6 +2365,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     // ========== gael's calibrations end ======================
 
     // ========== 3 joint finger mapping and attaching begin ===
+    
+    // ========== Requires VinMoov5.j3o ========================
 
     jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb1", "i01.leftHand.thumb2", "i01.leftHand.thumb3");
     jme.setRotation("i01.leftHand.thumb1", "y");
@@ -2405,7 +2407,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.leftHand.ringFinger3", 0, 180, -110, -179);
 
     jme.setMapper("i01.leftHand.pinky", 0, 180, -110, -179);
-    jme.setMapper("i01.leftHand.pinky2", 0, 180, -110, 179);
+    jme.setMapper("i01.leftHand.pinky2", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.pinky3", 0, 180, -110, -179);
 
     jme.setMapper("i01.leftHand.thumb1", 0, 180, -30, -100);
@@ -2439,19 +2441,19 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.rightHand.pinky2", "x");
     jme.setRotation("i01.rightHand.pinky3", "x");
     
-    i01.jme.setMapper("i01.rightHand.index", 0, 180, 80, 10);
+    i01.jme.setMapper("i01.rightHand.index", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.index2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.index3", 0, 180, 70, -10);
       
-    jme.setMapper("i01.rightHand.majeure", 0, 180, 80, 10);
+    jme.setMapper("i01.rightHand.majeure", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.majeure2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.majeure3", 0, 180, 70, -10);
 
-    jme.setMapper("i01.rightHand.ringFinger", 0, 180, 80, 10);
+    jme.setMapper("i01.rightHand.ringFinger", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.ringFinger2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.ringFinger3", 0, 180, 70, -10);
 
-    jme.setMapper("i01.rightHand.pinky", 0, 180, 80, 10);
+    jme.setMapper("i01.rightHand.pinky", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.pinky2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.pinky3", 0, 180, 60, -10);
 
