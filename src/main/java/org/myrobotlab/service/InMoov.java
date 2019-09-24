@@ -2441,7 +2441,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.rightHand.pinky2", "x");
     jme.setRotation("i01.rightHand.pinky3", "x");
     
-    i01.jme.setMapper("i01.rightHand.index", 0, 180, 65, -10);
+    jme.setMapper("i01.rightHand.index", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.index2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.index3", 0, 180, 70, -10);
       
