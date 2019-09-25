@@ -27,10 +27,18 @@ public class ServoLang extends LangUtils {
     // save the servo map
     sb.append(name + ".map(" + s.getMin() + "," + s.getMax() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
     // if there's a controller reattach it at rest
+    // FIXME - there is the initial position vs rest - they potentially are very different
+    /*
     if (s.getControllerName() != null) {
       String controller = s.getControllerName();
       sb.append(name + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
+    }*/
+    /*  the dependencies on the controller are higher - so let it attach to this servo 
+    if (s.getControllerName() != null) {
+      String controller = s.getControllerName();
+      sb.append(name + ".attach(\"" + controller + "\")\n");
     }
+    */
     if (s.getAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
     }

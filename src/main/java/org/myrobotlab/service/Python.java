@@ -163,7 +163,7 @@ public class Python extends Service {
           if (interp != null) {
             interp.exec(String.format("print '%s'", filtered));
           }
-          Logging.logError(e);
+          log.error("interp.exec threw", e);
           if (filtered.length() > 40) {
             filtered = filtered.substring(0, 40);
           }
@@ -370,7 +370,7 @@ public class Python extends Service {
     }
     log.info("Python System Path: {}", sys.path);
 
-    String selfReferenceScript = "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
+    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("myService = Runtime.getService(\"%s\")\n", getName());
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);

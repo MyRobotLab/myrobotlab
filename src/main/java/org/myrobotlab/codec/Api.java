@@ -191,7 +191,7 @@ public abstract class Api {
     if (s == null) {
       log.info("session is null");
     } else {
-      log.info("session {}", s);
+      // log.info("session {}", s);
     }
   }
 
@@ -202,9 +202,9 @@ public abstract class Api {
     
     // set root gateway broadcaster
     // r.broadcasters()
-    log.info("resource {}", r);
-    log.info("resource {}", StringUtil.toString(r.broadcasters()));
-    log.info("broadcaster {}", r.getBroadcaster());
+    // log.info("resource {}", r);
+    // log.info("resource {}", StringUtil.toString(r.broadcasters()));
+    // log.info("broadcaster {}", r.getBroadcaster());
     // AtmosphereResourceEvent event = r.getAtmosphereResourceEvent();
     /*
     if (event.equals("xx")) {
@@ -220,8 +220,8 @@ public abstract class Api {
     uuiBroadcaster.addAtmosphereResource(r);
     uuiBroadcaster.getAtmosphereResources();
     r.addBroadcaster(uuiBroadcaster);
-    log.info("resource {}", r);
-    log.info("resource {}", StringUtil.toString(r.broadcasters()));
+    // log.info("resource {}", r);
+    // log.info("resource {}", StringUtil.toString(r.broadcasters()));
     // log.info("broadcaster {}", r.getBroadcaster());
     
     // FIXME - should not handle 

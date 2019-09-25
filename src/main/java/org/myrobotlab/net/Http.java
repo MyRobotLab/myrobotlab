@@ -2,6 +2,7 @@ package org.myrobotlab.net;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,6 +14,9 @@ import org.slf4j.Logger;
 
 public class Http {
   /**
+   * FIXME = there should be no statics - and when a file is downloaded or errors occur
+   * there should be published statuses
+   * 
    * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT IN FACT
    * HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
    * http://stackoverflow.com/questions/15927079/how-to-use-httpsurlconnection-
@@ -46,6 +50,9 @@ public class Http {
       out.flush();
       return out.toByteArray();
 
+    } catch (FileNotFoundException e) {
+      log.error("404 - {} not found", theUrl);
+      return null;
     } catch (Exception e) {
       log.error("get threw", e);
       return null;
@@ -117,5 +124,17 @@ public class Http {
       in.close(); // call this in a finally block
       out.close();
   }
+  
+  public static void getFile(String url) throws IOException {
+    getFile(url, null);
+  }
+
+  public static void getFile(String url, String outFile) throws IOException {
+    if (outFile == null) {
+      outFile = url.substring(url.lastIndexOf("/") + 1);
+    }
+    get(url, outFile);
+  }
+
 
 }

@@ -276,7 +276,7 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
-    log.info("mds - {}", Arrays.toString(deviceSummary));
+    log.debug("mds - {}", Arrays.toString(deviceSummary));
     DeviceSummary[] ds = new DeviceSummary[deviceSummary.length];
     for (int i = 0; i < deviceSummary.length; i++) {
       int id = deviceSummary[i];
@@ -495,8 +495,8 @@ public class Arduino extends AbstractMicrocontroller
         msg.servoAttachPin(dm.getId(), pin);
       }
     }
-    if (attachable instanceof HobbyServo) {
-      HobbyServo servo = (HobbyServo) attachable;
+    if (attachable instanceof Servo) {
+      Servo servo = (Servo) attachable;
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
@@ -1808,15 +1808,14 @@ public class Arduino extends AbstractMicrocontroller
     return serialData;
   }
 
-  @Deprecated /*
+  @Deprecated /**
                * Controllers should publish EncoderData - Servos can change that
                * into ServoData and publish
+               * REMOVED BY GROG - use TimeEncoder !
                */
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      ((ServoControl) getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE, (double) targetPos);// (eventType,
-                                                                                                                   // currentPos,
-                                                                                                                   // targetPos);
+      // REMOVED BY GROG  - use time encoder !((ServoControl) getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE, (double) currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -1939,7 +1938,12 @@ public class Arduino extends AbstractMicrocontroller
       speed = servo.getSpeed().intValue();
     }
     log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
-    msg.servoSetVelocity(getDeviceId(servo), speed);
+    Integer i = getDeviceId(servo);
+    if (i == null) {
+      log.error("{} has null deviceId", servo);
+      return;
+    }
+    msg.servoSetVelocity(i, speed);
   }
 
   // FIXME - this needs fixing .. should be microseconds - but interface still
@@ -2306,16 +2310,16 @@ public class Arduino extends AbstractMicrocontroller
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
 
       // hub.enableAck(false);
-      ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
+      ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
       sc.setPin(7);
       hub.attach(sc);
-      sc = (ServoControl) Runtime.start("s2", "HobbyServo");
+      sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
 
       // hub.enableAck(true);
       /*
-       * sc = (ServoControl) Runtime.start("s3", "HobbyServo"); sc.setPin(12);
+       * sc = (ServoControl) Runtime.start("s3", "Servo"); sc.setPin(12);
        * hub.attach(sc);
        */
 
@@ -2360,7 +2364,7 @@ public class Arduino extends AbstractMicrocontroller
 
       // log.info("port names {}", mega.getPortNames());
 
-      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.load();
       log.info("rest is {}", servo.getRest());
       servo.save();

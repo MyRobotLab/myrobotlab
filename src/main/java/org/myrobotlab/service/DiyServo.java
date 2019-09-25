@@ -83,48 +83,6 @@ import org.slf4j.Logger;
 public class DiyServo extends AbstractServo implements ServoControl, PinListener {
 
   /**
-   * Sweeper - thread used to sweep motor back and forth
-   * 
-   */
-  public class Sweeper extends Thread {
-
-    public Sweeper(String name) {
-      super(String.format("%s.sweeper", name));
-    }
-
-    @Override
-    public void run() {
-
-      double sweepMin = 0.0;
-      double sweepMax = 0.0;
-      // start in the middle
-      double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX()) / 2;
-      isSweeping = true;
-
-      try {
-        while (isSweeping) {
-
-          // set our range to be inside 'real' min & max input
-          sweepMin = mapper.getMinX() + 1;
-          sweepMax = mapper.getMaxX() - 1;
-
-          // if pos is too small or too big flip direction
-          if (sweepPos >= sweepMax || sweepPos <= sweepMin) {
-            sweepStep = sweepStep * -1;
-          }
-
-          sweepPos += sweepStep;
-          moveTo(sweepPos);
-          Thread.sleep(sweepDelay);
-        }
-      } catch (Exception e) {
-        isSweeping = false;
-      }
-    }
-
-  }
-
-  /**
    * MotorUpdater The control loop to update the MotorControl with new values
    * based on the PID calculations
    * 
@@ -276,9 +234,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * &gt; pos
    */
   int roundPos = 0;
-
-  double sweepMin = 0.0;
-  double sweepMax = 180.0;
 
   /**
    * feedback of both incremental position and stops. would allow blocking
@@ -560,9 +515,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.rest = rest;
   }
 
-  public void setSweepDelay(int delay) {
-    sweepDelay = delay;
-  }
 
   /*
    * (non-Javadoc)
@@ -571,10 +523,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   @Override
   public void stop() {
-    isSweeping = false;
-    sweeper = null;
-    // TODO Replace with internal logic for motor and PID
-    // getController().servoSweepStop(this);
+    isSweeping = false;    
     broadcastState();
   }
 
@@ -598,16 +547,10 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     this.sweepMin = min;
     this.sweepMax = max;
-    this.sweepDelay = delay;
-    this.sweepStep = step;
-    this.sweepOneWay = oneWay;
-
+   
     if (isSweeping) {
       stop();
     }
-
-    sweeper = new Sweeper(getName());
-    sweeper.start();
 
     isSweeping = true;
     broadcastState();
