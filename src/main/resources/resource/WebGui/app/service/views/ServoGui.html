@@ -1,19 +1,19 @@
-<div class="col-lg-12">
-   
+<div class="col-md-6">   
+   <h2>{{service.targetPos}}</h2>
+</div>
+<div class="col-md-6">
+    <h2>{{service.currentPos.toFixed(2)}}</h2>
+</div>
+<div class="col-md-12">
     <rzslider class="custom-slider" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
-    <rzslider class="custom-slider" rz-slider-model="posStatus.value" style="rz-pointer-disabled" ng-show="service.isEventsEnabled" rz-slider-options="posStatus.options"/>
-    
+   
     <!-- simple dropdown -->
     <div class="input-group">
-        <!-- TODO rename to 'attach' -->
-        <!--
-        <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController" select="setSelectedController(name)" >
-        </attach>
-        -->
-        <attach ng-model="possibleController" ng-disabled="controllerName != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
+        
+        <attach ng-model="possibleController" ng-disabled="service.controller != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
         <span class="input-group-btn">
             <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">attach</button>
-            <button class="btn btn-default" ng-show="isAttached()" ng-click="msg.detach(controllerName)">detach</button>
+            <button class="btn btn-default" ng-show="isAttached()" ng-click="msg.detach(service.controller)">detach</button>
         </span>
         <input type="text" class="form-control" placeholder="pin" ng-model="pin">
         <span class="input-group-btn">
