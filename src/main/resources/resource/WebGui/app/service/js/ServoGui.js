@@ -26,33 +26,17 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             onEnd: function() {}
         }
     };
-    //status 
-    //Slider config with callbacks
-    $scope.posStatus = {
-        value: 0,
-        options: {
-            floor: 0,
-            ceil: 180,
-            // getSelectionBarColor: "black",
-            readOnly: true,
-            onStart: function() {},
-            onChange: function() {// msg.send('moveTo', $scope.pos.value);
-            },
-            onEnd: function() {}
-        }
-    };
+  
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service;
         if (service.targetPos == null ) {
-            $scope.pos.value = service.rest;
-            $scope.posStatus.value = service.rest;
+            // $scope.pos.value = service.rest;
         } else {
-            $scope.pos.value = service.targetPos;
-            $scope.posStatus.value = service.targetPos;
+            // $scope.pos.value = service.targetPos;            
         }
-        $scope.possibleController = service.controllerName;
-        $scope.controllerName = service.controllerName;
+        $scope.possibleController = service.controller;
+        $scope.controllerName = service.controller;
         $scope.velocity = service.velocity;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
@@ -74,8 +58,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             // meant feedback from MRLComm.c
             // but perhaps its come to mean
             // feedback from the service.moveTo
-        case 'onServoEvent':
-            $scope.posStatus.value = data;
+        case 'onServoData':
+            $scope.service.currentPos = data.pos;
             $scope.$apply();
             break;
         case 'onStatus':
@@ -130,8 +114,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest);
         // msg.attach($scope.controllerName, $scope.pin, 90);
     }
-    msg.subscribe("publishServoEvent");
+    
+    msg.subscribe("publishMoveTo")
+    msg.subscribe("publishServoData")
     msg.subscribe(this);
+
     // no longer needed - interfaces now travel with a service
     // var runtimeName = mrl.getRuntime().name;
     // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
