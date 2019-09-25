@@ -603,7 +603,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     AtmosphereRequest request = r.getRequest();
 
-    log.info(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+    if (log.isDebugEnabled()) {
+      log.debug(">> {} - {} - [{}]", request.getMethod(), request.getRequestURI(), request.body().asString());
+    }
 
     // try {
 

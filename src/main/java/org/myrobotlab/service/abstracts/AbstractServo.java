@@ -1,20 +1,24 @@
 package org.myrobotlab.service.abstracts;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.TimeEncoder;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -49,51 +53,6 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractServo extends Service implements ServoControl {
 
-  @Deprecated // create a TimeEncoder to support this functionality
-  public class Sweeper extends Thread {
-
-    public Sweeper(String name) {
-      super(String.format("%s.sweeper", name));
-    }
-
-    /**
-     * Sweeping works on input, a thread is used as the "controller" (this is
-     * input) and input sweeps back and forth - the servo parameters know what
-     * to do for output
-     */
-
-    @Override
-    public void run() {
-
-      double sweepMin = 0.0;
-      double sweepMax = 0.0;
-      // start in the middle
-      double sweepPos = mapper.getMinX() + (mapper.getMaxX() - mapper.getMinX()) / 2;
-      isSweeping = true;
-
-      try {
-        while (isSweeping) {
-
-          // set our range to be inside 'real' min & max input
-          sweepMin = mapper.getMinX() + 1;
-          sweepMax = mapper.getMaxX() - 1;
-
-          // if pos is too small or too big flip direction
-          if (sweepPos >= sweepMax || sweepPos <= sweepMin) {
-            sweepStep = sweepStep * -1;
-          }
-
-          sweepPos += sweepStep;
-          moveTo(sweepPos);
-          Thread.sleep(sweepDelay);
-        }
-      } catch (Exception e) {
-        isSweeping = false;
-      }
-    }
-
-  }
-
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
   private static final long serialVersionUID = 1L;
@@ -109,9 +68,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected Boolean autoDisable = false;
 
   /**
-   * list of controller names this control is attached to
+   * controller name this control is attached to
    */
-  protected Set<String> controllers = new LinkedHashSet<>();
+  protected String controller = null;
 
   /**
    * the current input position (pre-mapper)
@@ -140,8 +99,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   protected transient EncoderControl encoder; // this does not need to be
                                               // transient in the future
-
-  protected boolean isSweeping = false;
 
   /**
    * last time the servo has moved
@@ -202,14 +159,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   protected Double speed = null;
 
-  protected int sweepDelay = 100;
-
-  protected transient Thread sweeper = null;
-
-  protected boolean sweepOneWay = false;
-
-  protected Double sweepStep = 1.0;
-
   /**
    * synchronized servos - when this one moves, it sends move commands to these
    * servos
@@ -236,6 +185,26 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * controller or calling moveTo when blocking is in process
    */
   boolean validMoveRequest = false;
+
+  /**
+   * controls if the servo is sweeping
+   */
+  protected boolean isSweeping = false;
+
+  /**
+   * min sweep value
+   */
+  protected Double sweepMin = null;
+
+  /**
+   * max sweep value
+   */
+  protected Double sweepMax = null;
+
+  /**
+   * direction of sweep
+   */
+  protected boolean sweepingToMax = true;
 
   /**
    * if autoDisable is true - then after any move a timer is set to disable the
@@ -274,6 +243,18 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   /**
+   * formula for calculating the position from microseconds to degrees
+   * 
+   * @param microseconds
+   * @return
+   */
+  public double microsecondsToDegree(double microseconds) {
+    if (microseconds <= 180)
+      return microseconds;
+    return (double) (microseconds - 544) * 180 / (2400 - 544);
+  }
+
+  /**
    * overloaded routing attach
    */
   public void attach(Attachable service) throws Exception {
@@ -288,35 +269,34 @@ public abstract class AbstractServo extends Service implements ServoControl {
     }
   }
 
-  public void attach(ServoController controller) throws Exception {
-    attach(controller, null, null, null);
+  public void attach(ServoController sc) throws Exception {
+    attach(sc, null, null, null);
   }
 
-  public void attach(ServoController controller, Integer pin) throws Exception {
-    attach(controller, pin, null, null, null);
+  public void attach(ServoController sc, Integer pin) throws Exception {
+    attach(sc, pin, null, null, null);
   }
 
-  public void attach(ServoController controller, Integer pin, Double pos) throws Exception {
-    attach(controller, pin, pos, null, null);
+  public void attach(ServoController sc, Integer pin, Double pos) throws Exception {
+    attach(sc, pin, pos, null, null);
   }
 
-  public void attach(ServoController controller, Integer pin, Double pos, Double speed) throws Exception {
-    attach(controller, pin, pos, speed, null);
+  public void attach(ServoController sc, Integer pin, Double pos, Double speed) throws Exception {
+    attach(sc, pin, pos, speed, null);
   }
 
   /**
    * maximum complexity attach with reference to controller
    */
-  public void attach(ServoController controller, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
-
-    if (controller == null) {
-      log.error("{}.attach(null)", getName());
+  public void attach(ServoController sc, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
+    
+    if (isAttached(sc)) {
       return;
     }
 
     // check if already attached
-    if (controllers.contains(controller.getName())) {
-      log.info("{}.attach({}) controller already attached", getName(), controller.getName());
+    if (controller != null && controller.equals(sc.getName())) {
+      log.info("{}.attach({}) controller already attached", getName(), sc.getName());
       return;
     }
 
@@ -339,10 +319,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
       setAcceleration(acceleration);
     }
 
-    controllers.add(controller.getName());
-    controller.attach(this);
+    controller = sc.getName();
+    sc.attach(this);
     enabled = true;
-    
+
     broadcastState();
   }
 
@@ -410,26 +390,16 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   public void detach() {
     disable();
-    for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
-      /*
-       * let the comm manager figure this out if (si.isLocal()) {
-       * ((ServoController) Runtime.getService(controller)).detach(this); } else
-       * {
-       */
-      send(controller, "detach", this);
-      // }
-    }
-    controllers.clear();
+    invokeOn(controller, "detach", this);
+    controller = null;
     broadcastState();
   }
 
   // @Override
-  public void detach(ServoController controller) {
-    if (controller == null) {
-      return;
+  public void detach(ServoController sc) {
+    if (sc != null && sc.getName().equals(controller)) {
+      controller = null;
     }
-    controllers.remove(controller.getName());
   }
 
   @Override
@@ -439,32 +409,20 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void disable() {
-    for (String controller : controllers) {
-      // ServiceInterface si = Runtime.getService(controller);
-      /*
-       * let the com manager figure this out if (si.isLocal()) {
-       * ((ServoController) Runtime.getService(controller)).servoDisable(this);
-       * } else {
-       */
-      send(controller, "servoDisable", this);
-      // }
+    if (controller != null) {
+      invokeOn(controller, "servoDisable", this);
+      enabled = false;
+      broadcastState();
     }
-    enabled = false;
-    broadcastState();
   }
 
   @Override
   public void enable() {
-    for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoEnable(this);
-      } else {
-        send(controller, "servoEnable", this);
-      }
+    if (controller != null) {
+      invokeOn(controller, "servoEnable", this);
+      enabled = true;
+      broadcastState();
     }
-    enabled = true;
-    broadcastState();
   }
 
   @Override
@@ -477,18 +435,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
     return autoDisable;
   }
 
-  @Deprecated /* its a set now */
   @Override
   public String getControllerName() {
-    if (controllers.size() > 0) {
-      return controllers.iterator().next();
-    }
-    return null;
-  }
-
-  @Override
-  public Set<String> getControllers() {
-    return controllers;
+    return controller;
   }
 
   @Override
@@ -545,7 +494,23 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public Boolean isAttached() {
-    return (controllers.size() > 0);
+    return (controller != null);
+  }
+
+  @Override
+  public boolean isAttached(Attachable instance) {
+    return instance.getName().equals(controller);
+  }
+
+  @Override
+  public void detach(Attachable service) {
+    if (isAttached(service)) {
+      if (service.getName().equals(service.getName())) {
+        String name = controller;
+        controller = null;
+        invokeOn(name, "detach", getName());
+      }
+    }
   }
 
   @Override
@@ -620,7 +585,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
       return;
     }
 
-    if (controllers.size() == 0) {
+    if (controller == null) {
       error(String.format("%s's controller is not set", getName()));
       validMoveRequest = false;
       return;
@@ -692,19 +657,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
     lastActivityTimeTs = System.currentTimeMillis();
 
     if (currentPos != targetPos) {
-      for (String controller : controllers) {
-        ServiceInterface si = Runtime.getService(controller);
-        if (si.isLocal()) { // FIXME - this "optimization" probably should not
-                            // be done ...
-          ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
-        } else {
-          send(controller, "servoMoveTo", this);
-        }
+      if (controller != null) {
+        invokeOn(controller, "servoMoveTo", this);
+        // in theory - we're moving now ...
+        isMoving = true;
+        validMoveRequest = true;
       }
-
-      // in theory - we're moving now ...
-      isMoving = true;
-      validMoveRequest = true;
     }
 
     // "real" encoders are electrically hooked up to the servo and get their
@@ -753,9 +711,23 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
-  public ServoData publishServoData(ServoStatus status, Double pos) {
+  public ServoData publishServoData(ServoStatus status, Double currentPosUs) {
+    double pos = microsecondsToDegree(currentPosUs);
     ServoData sd = new ServoData(status, getName(), pos);
     lastActivityTimeTs = System.currentTimeMillis();
+    // log.debug("status {} pos {}", status, pos);
+
+    if (isSweeping) {
+      if (sweepingToMax && pos >= sweepMax - 1) { // handle overshoot ?
+        sweepingToMax = false;
+        moveTo(sweepMin);
+      }
+      if (!sweepingToMax && pos <= sweepMin + 1) { // handle overshoot ?
+        sweepingToMax = true;
+        moveTo(sweepMax);
+      }
+    }
+
     return sd;
   }
 
@@ -769,15 +741,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   @Override
   public void rest() {
+    log.info("here");
     targetPos = rest;
-    for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoMoveTo(this);
-      } else {
-        send(controller, "rest", this);
-      }
-    }
+    moveTo(rest);
   }
 
   @Override
@@ -848,15 +814,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void stop() {
     isSweeping = false;
-    sweeper = null;
-    for (String controller : controllers) {
-      ServiceInterface si = Runtime.getService(controller);
-      if (si.isLocal()) {
-        ((ServoController) Runtime.getService(controller)).servoSweepStop(this);
-      } else {
-        send(controller, "servoSweepStop", this);
-      }
-    }
     broadcastState();
   }
 
@@ -976,6 +933,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
     this.maxSpeed = maxSpeed;
   }
 
+  /* decide on one deprecate the other ! */
+  public void setMaxVelocity(Double maxSpeed) {
+    this.maxSpeed = maxSpeed;
+  }
+
   @Override
   public Double getMaxSpeed() {
     return maxSpeed;
@@ -1009,32 +971,127 @@ public abstract class AbstractServo extends Service implements ServoControl {
       log.info("Trying to set speed to a value greater than max speed");
     }
     this.speed = degreesPerSecond;
-    for (String controller : controllers) {
-      // ServiceInterface si = Runtime.getService(controller);
-      /*
-       * this should be done by the communication manager !!! if (si.isLocal())
-       * { ((ServoController)
-       * Runtime.getService(controller)).servoSetVelocity(this); } else {
-       */
-      send(controller, "servoSetVelocity", this);
-      // }
+    if (controller != null) {
+      invokeOn(controller, "servoSetVelocity", this);
     }
     broadcastState();
   }
-  
+
   public List<String> refreshControllers() {
     List<String> cs = Runtime.getServiceNamesFromInterface(ServoController.class);
-    controllers = new HashSet<String>();
-    for (String c : cs) {
-      controllers.add(c);
-    }
-    // controllers.addAll(Runtime.getServiceNamesFromInterface(Simulator.class));
     return cs;
   }
-  
+
   public void onRegistered(ServiceInterface s) {
     refreshControllers();
     broadcastState();
   }
-  
+
+  public void sweep() {
+    sweep(null, null);
+  }
+
+  public void sweep(Double min, Double max) {
+    sweep(min, max, null);
+  }
+
+  public void sweep(Double min, Double max, Double speed) {
+    if (min == null) {
+      sweepMin = mapper.getMinInput();
+    } else {
+      sweepMin = min;
+    }
+
+    if (max == null) {
+      sweepMax = mapper.getMaxInput();
+    } else {
+      sweepMax = max;
+    }
+
+    if (speed != null) {
+      setSpeed(speed);
+    }
+
+    isSweeping = true;
+    sweepingToMax = false;
+    moveTo(sweepMin);
+  }
+
+  public boolean isSweeping() {
+    return isSweeping;
+  }
+
+  public static void main(String[] args) throws InterruptedException {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(true);
+
+      Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("COM7");
+      // mega.setBoardMega();
+
+      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
+
+      double pos = 78;
+      servo03.setPosition(pos);
+
+      double min = 3;
+      double max = 170;
+      double speed = 5; // degree/s
+
+      servo03.attach(mega, 8, 38.0);
+
+      // servo03.sweep(min, max, speed);
+
+      /*
+       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
+       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
+       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
+       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
+       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
+       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
+       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
+       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
+       * Runtime.start("servo12", "Servo");
+       */
+      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
+
+      /*
+       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
+       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
+       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
+       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
+       * servo12.attach(mega, 12, 38.0);
+       */
+
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
+      // "TestCatcher");
+      // servo03.attach((ServoDataListener)catcher);
+
+      // servo.setPin(12);
+
+      /*
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       */
+
+      // servo.sweepDelay = 3;
+      // servo.save();
+      // servo.load();
+      // servo.save();
+      // log.info("sweepDely {}", servo.sweepDelay);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
 }

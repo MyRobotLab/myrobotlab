@@ -27,496 +27,391 @@ package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.TestCatcher;
+import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.swing.widget.ComponentResizer;
+import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoDataListener;
+import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
 import com.jidesoft.swing.RangeSlider;
 
 /**
- * Servo SwingGui - displays details of Servo state Lesson learned ! Servos to
- * properly function need to be attached to a controller This gui previously
- * sent messages to the controller. To simplify things its important to send
- * messages only to the bound Servo - and let it attach to the controller versus
- * sending messages directly to the controller. 1 display - 1 service - keep it
- * simple
+ * <pre>
+ * Servo SwingGui - displays details of Servo state Lesson learned !
+ * Servos to properly function need to be attached to a controller This gui
+ * previously sent messages to the controller. To simplify things its important
+ * to send messages only to the bound Servo - and let it attach to the
+ * controller versus sending messages directly to the controller. 1 display - 1
+ * service - keep it simple
+ * 
+ * Operating Speed - is often calculated in time in 60 degrees
+ * Avg speed seems to be about 0.12 seconds to rotate 60 degrees
+ * 60 degrees/second
+ * 0.5 degrees / ms
+ * 1 degree per 2 ms
+ * 
+ * FIXME - iterate through controller types
+ * FIXME - test "inverted" and changing max/min input/output
+ * FIXME - stay true (especially to position) of position desired vs position reported (depending on encoder)
+ * 
+ * FIXME - too slow ... logging ??
+ * FIXME - if integer resolution then if (Math.round(x) == currentPos) - don't send "new" pos
+ * FIXME - global speed
+ * FIXME - set all timer's values in one shot that is ServoControl agnostic
  *
+ * </pre>
  */
-public class ServoGui extends ServiceGui implements ActionListener {
-
-  boolean mousePressed;
-
-  private class SliderListener implements ChangeListener, MouseListener {
-
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-      if (mousePressed) {
-        if (swingGui != null) {
-          moving.setVisible(true);
-          log.debug("Gui sending moveTo command {} {}", boundServiceName, slider.getValue());
-          swingGui.send(boundServiceName, "moveTo", Double.valueOf(slider.getValue()));
-        } else {
-          log.error("can not send message myService is null");
-        }
-      }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      mousePressed = true;
-      send("setOverrideAutoDisable", true);
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      mousePressed = false;
-      send("setOverrideAutoDisable", false);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-  }
-
-  private class MapInputSliderListener implements ChangeListener, MouseListener {
-
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-
-      minInput.setText(String.format("%d", mapInputSlider.getLowValue()));
-      maxInput.setText(String.format("%d", mapInputSlider.getHighValue()));
-
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-      if (swingGui != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
-      } else {
-        log.error("can not send message myService is null");
-      }
-
-    }
-  }
-
-  private class MapOutputSliderListener implements ChangeListener, MouseListener {
-
-    @Override
-    public void stateChanged(javax.swing.event.ChangeEvent e) {
-      if (mousePressed) {
-        if (mapOutputSlider.getInverted()) {
-          minOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-        } else {
-          minOutput.setText(String.format("%d", mapOutputSlider.getLowValue()));
-          maxOutput.setText(String.format("%d", mapOutputSlider.getHighValue()));
-        }
-      }
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-      // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-      mousePressed = true;
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-      mousePressed = false;
-      if (swingGui != null) {
-        send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-            Double.parseDouble(maxOutput.getText()));
-      } else {
-        log.error("can not send message myService is null");
-      }
-
-    }
-  }
-
-  public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
-  private String lastControllerUsed;
+public class ServoGui extends ServiceGui implements ActionListener, ChangeListener {
   static final long serialVersionUID = 1L;
 
-  JLabel boundPos = new JLabel("90");
-  JButton attachButton = new JButton("attach");
-  JButton export = new JButton("Export");
-  JButton restButton = new JButton("Rest :");
-  JTextField velocity = new JTextField("-1");
-  JTextField rest = new JTextField("");
-  JLabel disableDelayIfVelocityL = new JLabel("Extra delay ( ms ): ");
-  JLabel defaultDisableDelayNoVelocityL = new JLabel("Max velocity delay ( ms ) : ");
+  public final static Logger log = LoggerFactory.getLogger(ServoGui.class);
 
-  JTextField disableDelayIfVelocity = new JTextField("1000");
-  JTextField defaultDisableDelayNoVelocity = new JTextField("10000");
+  String lastController;
+
+  Double lastSpeed = 60.0; // a ui "guess"
+
+  JLabel targetPos = new JLabel();
+  JLabel currentPos = new JLabel("90.0");
+
+  JButton attach = new JButton("attach");
+  JButton attachEncoder = new JButton("attach");
+  // JButton export = new JButton("export"); - restore() ?
+  JButton restButton = new JButton("rest");
+  JTextField speed = new JTextField("         ");
+  JTextField rest = new JTextField("");
 
   ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif");
-  ImageIcon movingIconNoVelocityControl = Util.getImageIcon("Servo/gifRed.gif");
 
   JLabel moving = new JLabel(movingIcon);
 
-  JButton SaveButton = new JButton("Save");
-  JButton enableButton = new JButton("enable");
-  JCheckBox autoDisable = new JCheckBox("autoDisable");
-  JCheckBox setInverted = new JCheckBox("setInverted");
-  JSlider slider = new JSlider(0, 180, 90);
-  RangeSlider mapInputSlider = new RangeSlider();
-  JLabel InputL = new JLabel("Input MAP :");
-  JLabel OutputL = new JLabel("Output MAP : ");
-  Integer mapInputSliderMinValue = 0;
-  Integer mapInputSliderMaxValue = 180;
-  Integer mapOutputSliderMinValue = 0;
-  Integer mapOutputSliderMaxValue = 180;
-  RangeSlider mapOutputSlider = new RangeSlider();
+  JButton save = new JButton("save");
+  JButton enable = new JButton("enable");
+  CheckBoxTitledBorder speedControlTitle = new CheckBoxTitledBorder("speed control", false);
+  CheckBoxTitledBorder blockingTitle = new CheckBoxTitledBorder("blocking", false);
+
+  JCheckBox speedControl = null;
+  JCheckBox autoDisable = new JCheckBox("auto disable");
+  JCheckBox setInverted = new JCheckBox("set inverted");
+  JSlider moveTo = new JSlider(0, 180, 90);
+
+  RangeSlider mapInput = new RangeSlider();
+  RangeSlider mapOutput = new RangeSlider();
 
   BasicArrowButton right = new BasicArrowButton(BasicArrowButton.EAST);
   BasicArrowButton left = new BasicArrowButton(BasicArrowButton.WEST);
 
-  JComboBox<String> controller = new JComboBox<String>();
-  JComboBox<String> pinList = new JComboBox<String>();
+  JComboBox<String> controller = new JComboBox<>();
+  JComboBox<String> encoder = new JComboBox<>();
+  JComboBox<String> pinList = new JComboBox<>();
 
-  JTextField posMin = new JTextField("0");
-  JTextField posMax = new JTextField("180");
-  JTextField minInput = new JTextField("0");
-  JTextField maxInput = new JTextField("180");
+  JTextField minPos = new JTextField("0");
+  JTextField maxPos = new JTextField("180");
   JTextField minOutput = new JTextField("0");
   JTextField maxOutput = new JTextField("180");
 
   JButton sweepButton = new JButton("sweep");
-  JButton eventsButton = new JButton("events");
 
-  JLabel imageenabled = new JLabel();
-  JLabel velocityPic = new JLabel();
-  ImageIcon enabled = Util.getImageIcon("enabled.png");
-  ImageIcon velocityPng = Util.getImageIcon("velocity.png");
+  JLabel enabledIcon = new JLabel();
 
-  // Servo myServox = null;
+  JLabel speedLabel = new JLabel("speed");
 
-  SliderListener sliderListener = new SliderListener();
-  MapInputSliderListener mapInputSliderListener = new MapInputSliderListener();
-  MapOutputSliderListener mapOutputSliderListener = new MapOutputSliderListener();
+  // JSlider powerSlider = new JSlider(JSlider.VERTICAL, 0, 20, 4);
+  JSlider speedSlider = new JSlider(0, 60, 60);
 
-  boolean eventsEnabled;
+  JPanel controllerPanel;
+  JPanel encoderPanel;
+  JPanel enablePanel;
+  JPanel speedPanel;
 
-  public ServoGui(final String boundServiceName, final SwingGui myService) {
+  JLabel speedUnits = new JLabel("degrees/s");
+
+  JTextField maxSpeed = new JTextField("   ");
+  JButton setMaxSpeed = new JButton("set");
+  JLabel maxSpeedLabel = new JLabel("max speed");
+
+  // FIXME - this should be read default form servo !!!
+  JTextField idleTime = new JTextField("3000");
+
+  JLabel idleUnits = new JLabel(" ms");
+
+  JLabel idleTimeLabel = new JLabel("idle time ");
+
+  private JCheckBox blocking;
+
+  public ServoGui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
-    // myServo = (Servo) Runtime.getService(boundServiceName);
 
+    // FIXME - even though its a pain - this should come from the
+    // ServoController
     for (int i = 0; i < 54; i++) {
       pinList.addItem(i + "");
     }
 
-    posMin.setPreferredSize(new Dimension(50, 24));
-    posMax.setPreferredSize(new Dimension(50, 24));
-    minInput.setPreferredSize(new Dimension(50, 24));
-    maxInput.setPreferredSize(new Dimension(50, 24));
-    minOutput.setPreferredSize(new Dimension(50, 24));
-    maxOutput.setPreferredSize(new Dimension(50, 24));
+    mapInput.setMinimum(0);
+    mapInput.setMaximum(180);
 
-    minInput.setBackground(new Color(188, 208, 244));
-    maxInput.setBackground(new Color(188, 208, 244));
-    minOutput.setBackground(new Color(200, 238, 206));
-    maxOutput.setBackground(new Color(200, 238, 206));
+    mapOutput.setMinimum(0);
+    mapOutput.setMaximum(180);
 
-    mapInputSlider.setMinimum(0);
-    mapInputSlider.setMaximum(180);
+    targetPos.setFont(targetPos.getFont().deriveFont(32.0f));
+    targetPos.setHorizontalAlignment(JLabel.RIGHT);
 
-    mapOutputSlider.setMinimum(0);
-    mapOutputSlider.setMaximum(180);
+    enabledIcon.setIcon(Util.getImageIcon("enabled.png"));
+    currentPos.setFont(targetPos.getFont().deriveFont(32.0f));
+    currentPos.setForeground(Color.LIGHT_GRAY);
 
-    velocity.setPreferredSize(new Dimension(50, 24));
-    velocity.setSize(new Dimension(50, 24));
-    defaultDisableDelayNoVelocity.setPreferredSize(new Dimension(40, 24));
-    disableDelayIfVelocity.setPreferredSize(new Dimension(40, 24));
-    boundPos.setFont(boundPos.getFont().deriveFont(32.0f));
-    boundPos.setHorizontalAlignment(JLabel.RIGHT);
-    imageenabled.setIcon(enabled);
-    velocityPic.setIcon(velocityPng);
     autoDisable.setSelected(false);
     setInverted.setSelected(false);
-    defaultDisableDelayNoVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
-    disableDelayIfVelocityL.setFont(new Font("Arial", Font.BOLD, 10));
 
-    slider.setForeground(Color.white);
-    slider.setBackground(Color.DARK_GRAY);
+    moveTo.setForeground(Color.white);
+    moveTo.setBackground(Color.DARK_GRAY);
     left.setForeground(Color.white);
     left.setBackground(Color.DARK_GRAY);
     right.setForeground(Color.white);
     right.setBackground(Color.DARK_GRAY);
-    slider.setMajorTickSpacing(30);
-    slider.setPaintTicks(true);
-    slider.setPaintTicks(true);
-    slider.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-    slider.setPaintLabels(true);
+    moveTo.setMajorTickSpacing(30);
+    moveTo.setPaintTicks(true);
+    moveTo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+    moveTo.setPaintLabels(true);
 
-    mapInputSlider.setBackground(new Color(188, 208, 244));
-    mapOutputSlider.setBackground(new Color(200, 238, 206));
+    speedControl = speedControlTitle.getCheckBox();
+    blocking = blockingTitle.getCheckBox();
 
-    export.addActionListener(this);
-    SaveButton.addActionListener(this);
-    left.addActionListener(this);
-    right.addActionListener(this);
-    controller.addActionListener(this);
-    attachButton.addActionListener(this);
-    enableButton.addActionListener(this);
-    autoDisable.addActionListener(this);
-    setInverted.addActionListener(this);
-    sweepButton.addActionListener(this);
-    eventsButton.addActionListener(this);
-    pinList.addActionListener(this);
-    restButton.addActionListener(this);
+    // JPanel north = new JPanel(new GridLayout(0, 3));
+    // north.setLayout(new FlowLayout(FlowLayout., 0, 0));
+    // JPanel controllerPanel = new JPanel(new GridLayout(0, 4));
 
-    // addTopLeft(2, boundPos, 3, s,velocity,setVelocity );
+    north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
 
-    JPanel controllerP = new JPanel();
-    Border borderController = BorderFactory.createTitledBorder("Controller");
-    controllerP.setBorder(borderController);
-    JLabel pinlabel = new JLabel("< pin");
+    JPanel controllerMainPanel = new JPanel(new GridLayout(0, 1));
 
-    controllerP.add(attachButton);
-    controllerP.add(controller);
-    controllerP.add(pinList);
-    controllerP.add(pinlabel);
+    controllerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    controllerPanel.setBorder(BorderFactory.createTitledBorder("controller"));
+    controllerPanel.add(attach);
+    controllerPanel.add(controller);
+    controllerPanel.add(new JLabel(" pin"));
+    controllerPanel.add(pinList);
+    controllerMainPanel.add(controllerPanel);
 
-    JPanel map = new JPanel(new GridLayout(5, 2));
-    Border bordermap = BorderFactory.createTitledBorder("Servo limits :");
-    map.setBorder(bordermap);
-    map.add(mapInputSlider);
-    map.add(mapOutputSlider);
-    map.add(InputL);
-    map.add(OutputL);
-    map.add(minInput);
-    map.add(minOutput);
-    map.add(maxInput);
-    map.add(maxOutput);
-    SaveButton.setBackground(Color.RED);
-    map.add(SaveButton);
-    map.add(export);
-    // map.add(updateMapButton);
+    encoderPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    encoderPanel.setBorder(BorderFactory.createTitledBorder("encoder"));
+    encoderPanel.add(attachEncoder);
+    encoderPanel.add(encoder);
+    controllerMainPanel.add(encoderPanel);
 
-    // powerSettings.add(disableDelayIfVelocityL);
+    JPanel blockingPanel = new JPanel();
+    // blockingPanel.setBorder(BorderFactory.createTitledBorder("blocking"));
+    blockingPanel.setBorder(blockingTitle);
+    ImageIcon icon = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "green.png")));
+    JLabel isBlocking = new JLabel();
+    isBlocking.setIcon(icon);
+    blockingPanel.add(new JLabel("is blocking"));
+    blockingPanel.add(isBlocking);
 
-    // powerSettings.add(defaultDisableDelayNoVelocityL);
-    // powerSettings.add(defaultDisableDelayNoVelocity);
+    enablePanel = new JPanel(new GridLayout(0, 2));
+    enablePanel.setBorder(BorderFactory.createTitledBorder("enable"));
 
-    JPanel powerMain = new JPanel();
-    powerMain.add(enableButton);
-    powerMain.add(autoDisable);
-    powerMain.add(disableDelayIfVelocity);
-        
+    enablePanel.add(enable);
+    enablePanel.add(autoDisable);
 
-    JPanel extra = new JPanel(new GridLayout(1, 1));
-    Border settingsborder = BorderFactory.createTitledBorder("Extra :");
-    extra.setBorder(settingsborder);
-    JPanel sweep = new JPanel(new GridLayout(3, 2));
-    sweep.add(setInverted);
-    sweep.add(sweepButton);
-    sweep.add(eventsButton);
-    sweep.add(new JSeparator(), BorderLayout.PAGE_END);
-    sweep.add(restButton);
-    sweep.add(rest);
-    sweep.setBackground(Color.WHITE);
+    JPanel flow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    flow.add(idleTimeLabel);
+    flow.add(idleTime);
+    flow.add(idleUnits);
+    enablePanel.add(new JLabel(" "));
+    enablePanel.add(flow);
 
-    JPanel velocityP = new JPanel();
-    Border borderVelocityP = BorderFactory.createTitledBorder("Velocity :");
-    velocityP.setBorder(borderVelocityP);
-    velocityP.setBackground(Color.WHITE);
+    setIdleTimeEnabled(false);
 
-    JPanel velocityPicP = new JPanel();
-    velocityPicP.add(velocityPic);
-    velocityPicP.setBackground(Color.WHITE);
+    speedPanel = new JPanel(new BorderLayout());
+    speedPanel.setBorder(speedControlTitle);
+    JPanel top = new JPanel(new GridLayout(0, 6));
 
-    JPanel velocitySetings = new JPanel();
-    velocitySetings.add(velocity);
+    // top.add(powerControl);
+    top.add(speedLabel);
+    top.add(speed);
+    top.add(maxSpeedLabel);
+    top.add(maxSpeed);
+    top.add(speedUnits);
+    top.add(setMaxSpeed);
 
-    velocitySetings.setBackground(Color.WHITE);
-    velocityP.add(velocitySetings);
-    velocityP.add(velocityPicP);
+    // top.add(autoDisable);
+    // JPanel flow = new JPanel();
 
-    extra.add(sweep);
+    speedPanel.add(top, BorderLayout.NORTH);
+    speedPanel.add(speedSlider, BorderLayout.CENTER);
+    speedPanel.add(new JLabel("     "), BorderLayout.SOUTH);
 
-    extra.setBackground(Color.WHITE);
+    setSpeedControlEnabled(false);
 
-    JPanel power = new JPanel(new GridLayout(1, 1));
-    Border extraborder = BorderFactory.createTitledBorder("Power");
-    power.setBorder(extraborder);
-    power.add(powerMain);
+    north.add(controllerMainPanel);
+    north.add(blockingPanel);
+    north.add(enablePanel);
+    north.add(speedPanel);
 
-    JPanel northPanel = new JPanel(new GridLayout());
-    northPanel.add(controllerP);
-    northPanel.add(power);
+    //////////////////////////
 
-    display.add(northPanel, BorderLayout.NORTH);
-    display.add(right, BorderLayout.EAST);
+    south.setLayout(new GridLayout(0, 2));
+    Border bordermap = BorderFactory.createTitledBorder("limits");
+    south.setBorder(bordermap);
+    south.add(mapInput);
+    south.add(mapOutput);
+    south.add(new JLabel("input map"));
+    south.add(new JLabel("output map"));
+    south.add(minPos);
+    south.add(minOutput);
+    south.add(maxPos);
+    south.add(maxOutput);
+    south.add(save);
+    // south.add(export);
 
-    JPanel centerPanel = new JPanel(new GridLayout(2, 1));
-
-    JPanel centerPanelStatus = new JPanel(new GridLayout(1, 4));
-    centerPanelStatus.setBackground(Color.white);
-    centerPanelStatus.add(boundPos);
-    centerPanelStatus.add(imageenabled);
+    JPanel centerPanelStatus = new JPanel(new GridLayout(0, 5));
+    centerPanelStatus.setBackground(Color.WHITE);
+    centerPanelStatus.add(targetPos);
+    centerPanelStatus.add(enabledIcon);
     centerPanelStatus.add(moving);
+    centerPanelStatus.add(currentPos);
+    // centerPanelStatus.add(powerSlider);
 
-    centerPanelStatus.add(velocityP);
-    centerPanelStatus.add(extra);
+    center.setLayout(new GridLayout(0, 1));
+    center.add(centerPanelStatus);
+    center.add(moveTo);
 
-    centerPanel.add(centerPanelStatus);
-    centerPanel.add(slider);
-    centerPanel.setMinimumSize(new Dimension(50, 200));
-    centerPanel.setSize(new Dimension(50, 200));
-    display.add(centerPanel, BorderLayout.CENTER);
+    // FIXUP -----------------
+    south.add(setInverted);
+    south.add(sweepButton);
+    south.add(new JSeparator(), BorderLayout.PAGE_END);
+    south.add(restButton);
+    south.add(rest);
+
+    // FIXUP -----------------
+
+    display.add(right, BorderLayout.EAST);
     display.add(left, BorderLayout.WEST);
 
-    display.add(map, BorderLayout.SOUTH);
+    speedSlider.setEnabled(false);
+    speedLabel.setEnabled(false);
 
     refreshControllers();
+    refreshEncoders();
+    addListeners();
+  }
+
+  private void setIdleTimeEnabled(boolean b) {
+    idleTime.setEnabled(b);
+    idleUnits.setEnabled(b);
+    idleTimeLabel.setEnabled(b);
+  }
+
+  public void setSpeedControlEnabled(boolean b) {
+    speedControl.setSelected(b);
+    speed.setEnabled(b);
+    maxSpeed.setEnabled(b);
+    setMaxSpeed.setEnabled(b);
+    maxSpeedLabel.setEnabled(b);
+    speedSlider.setEnabled(b);
+    speedLabel.setEnabled(b);
+    speedUnits.setEnabled(b);
   }
 
   // SwingGui's action processing section - data from user
   @Override
   public void actionPerformed(final ActionEvent event) {
     SwingUtilities.invokeLater(new Runnable() {
+
       @Override
       public void run() {
         Object o = event.getSource();
-        // log.error(o.toString());
-        if (o == controller) {
-          String controllerName = (String) controller.getSelectedItem();
-          log.debug("controller event {}", controllerName);
-          if (controllerName != null && controllerName.length() > 0) {
 
-            // NOT WORTH IT - JUST BUILD 48 PINS !!!
-            // ServoController sc = (ServoController)
-            // Runtime.getService(controllerName);
-
-            // NOT WORTH THE TROUBLE !!!!
-            // @SuppressWarnings("unchecked")
-            // ArrayList<Pin> pinList = (ArrayList<Pin>)
-            // myService.sendBlocking(controllerName, "getPinList");
-            // log.info("{}", pinList.size());
-
-            // FIXME - get Local services relative to the servo
-            // pinModel.removeAllElements();
-            // pinModel.addElement(null);
-
-            // for (int i = 0; i < pinList.size(); ++i) {
-            // pinModel.addElement(pinList.get(i).pin);
-            // }
-
-            // pin.invalidate();
-
+        if (o == speedControl) {
+          if (speedControl.isSelected()) {
+            setSpeedControlEnabled(true);
+            if (lastSpeed != null) {
+              speed.setText(String.format("%.1f", lastSpeed));
+              send("setSpeed", Double.parseDouble(String.format("%.1f", lastSpeed)));
+            }
+          } else {
+            setSpeedControlEnabled(false);
+            // disabling speed control
+            send("setSpeed", (Double) null);
           }
+          send("broadcastState");
         }
 
-        if (o == attachButton) {
-          log.info("Servo Attach Button Pressed.");
-          if (attachButton.getText().equals("attach")) {
-            log.info("Attaching Servo from Gui");
-            send("attach", controller.getSelectedItem(), (String) pinList.getSelectedItem(), (double)slider.getValue());
+        if (o == setMaxSpeed) {
+          send("setMaxSpeed", Double.parseDouble(maxSpeed.getText()));
+          send("setSpeed", Double.parseDouble(speed.getText()));
+        }
+
+        if (o == attach) {
+          if (attach.getText().equals("attach")) {
+            // send("attach", controller.getSelectedItem(), (int)
+            // pinList.getSelectedItem() + "", new Double(moveTo.getValue()));
+            send("setPin", pinList.getSelectedItem()); // FIXME - get pinList
+                                                       // from pinArrayControl
+            send("attach", controller.getSelectedItem());
           } else {
-            log.info("Detaching Servo from Gui");
-            send("detach", controller.getSelectedItem());
+            send("detach");
           }
+          send("broadcastState");
           return;
         }
 
-        if (o == enableButton) {
-          if (enableButton.getText().equals("enable")) {
-            if (!attachButton.getText().equals("attach")) {
-              send("enable");
-              imageenabled.setVisible(true);
-            } else {
-              log.error("Servo is not attached");
-            }
+        // The correct way to do "command" msgs
+        // these never set gui attributes like .setText("x")
+        // because all those functions are in onState ... instead
+        // we send a command - then send a broadcast request - and onState
+        // will do the appropriate display
+        if (o == enable) {
+          if (enable.getText().equals("enable")) {
+            send("enable");
           } else {
             send("disable");
-            imageenabled.setVisible(false);
           }
+          send("broadcastState");
           return;
         }
 
@@ -526,6 +421,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
           } else {
             send("setAutoDisable", false);
           }
+          send("broadcastState");
           return;
         }
 
@@ -535,40 +431,31 @@ public class ServoGui extends ServiceGui implements ActionListener {
           } else {
             send("setInverted", false);
           }
+          send("broadcastState");
           return;
         }
 
-        if (o == export) {
-          send("saveCalibration");
-          JOptionPane.showMessageDialog(null, "Servo file generated");
-          return;
-        }
+        /**
+         * <pre>
+         * if (o == export) {
+         *   send("saveCalibration");
+         *   JOptionPane.showMessageDialog(null, "Servo file generated");
+         *   return;
+         * }
+         * </pre>
+         */
 
-        if (o == SaveButton) {
-          send("map", Double.parseDouble(minInput.getText()), Double.parseDouble(maxInput.getText()), Double.parseDouble(minOutput.getText()),
-              Double.parseDouble(maxOutput.getText()));
-          send("setVelocity", Double.parseDouble(velocity.getText()));
+        if (o == save) {
+          send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+          send("setVelocity", Double.parseDouble(speed.getText()));
           send("save");
-          Integer delayIfV = 1000;
-          Integer delayNoV = 10000;
-
-          try {
-            delayIfV = Integer.parseInt(disableDelayIfVelocity.getText());
-            delayNoV = Integer.parseInt(defaultDisableDelayNoVelocity.getText());
-          } catch (Exception e) {
-            warn("Bad value for disableDelay !");
-            return;
-          }
-
-          send("setDisableDelayIfVelocity", delayIfV);
-          send("setDefaultDisableDelayNoVelocity", delayNoV);
           send("setRest", Double.parseDouble(rest.getText()));
           info("Servo config saved !");
           return;
         }
 
         if (o == right) {
-          slider.setValue(slider.getValue() + 1);
+          moveTo.setValue(moveTo.getValue() + 1);
           return;
         }
 
@@ -579,7 +466,7 @@ public class ServoGui extends ServiceGui implements ActionListener {
         }
 
         if (o == left) {
-          slider.setValue(slider.getValue() - 1);
+          moveTo.setValue(moveTo.getValue() - 1);
           return;
         }
 
@@ -591,25 +478,48 @@ public class ServoGui extends ServiceGui implements ActionListener {
           }
           return;
         }
-
-        if (o == eventsButton) {
-          send("eventsEnabled", !eventsEnabled);
-          return;
-        }
-
       }
     });
   }
 
   @Override
   public void subscribeGui() {
-    subscribe("refreshControllers");
+    subscribe("publishMoveTo");
+    subscribe("publishServoData");
   }
 
-  // FIXME - runtime should handle all unsubscribe of teardown
   @Override
   public void unsubscribeGui() {
-    unsubscribe("refreshControllers");
+    unsubscribe("publishMoveTo");
+    unsubscribe("publishServoData");
+  }
+
+  /**
+   * publish of the "moveTo" from servo
+   * 
+   * @param servo
+   */
+  public void onMoveTo(final Servo servo) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        targetPos.setText(String.format("%.1f", servo.getTargetPos()));
+      }
+    });
+  }
+
+  public void onServoData(final ServoData data) {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        currentPos.setText(String.format("%.1f", data.pos));
+        if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
+          moving.setVisible(true);
+        } else {
+          moving.setVisible(false);
+        }
+      }
+    });
   }
 
   synchronized public void onState(final Servo servo) {
@@ -619,54 +529,87 @@ public class ServoGui extends ServiceGui implements ActionListener {
       public void run() {
 
         removeListeners();
-        lastControllerUsed = servo.getControllerName();
 
-        refreshControllers();
+        currentPos.setText(String.format("%.1f", servo.getPos()));
 
-        ServoController sc = servo.getController();
+        // FIXME - Servo supports multiple controllers - the UI needs a
+        // multi-select perhaps
+        String controllerName = servo.getControllerName();
+        lastController = controllerName;
 
-        if (sc != null) {
-          controller.setSelectedItem(sc.getName());          
+        moving.setVisible(servo.isMoving());
+
+        enabledIcon.setVisible(servo.isEnabled());
+
+        double maxSpd = (servo.getMaxSpeed() == null) ? 500.0 : servo.getMaxSpeed();
+        maxSpeed.setText(String.format("%.1f", maxSpd));
+        speedSlider.setMaximum((int) maxSpd);
+
+        Double currentSpeed = servo.getSpeed();
+        if (currentSpeed == null) {
+          speed.setText("");
+        } else {
+          speed.setText(String.format("%.1f", currentSpeed));
+          speedSlider.setValue(currentSpeed.intValue());
+          lastSpeed = currentSpeed;
         }
+
+        if (controllerName != null) {
+          controller.setSelectedItem(controllerName);
+        } else {
+
+        }
+
+        EncoderControl inEncoder = servo.getEncoder();
+        if (inEncoder != null) {
+          String encoderName = inEncoder.getName();
+          if (encoderName != null) {
+            encoder.setSelectedItem(encoderName);
+            encoder.setEnabled(false);
+            attachEncoder.setText("detach");
+          }
+        } else {
+          encoder.setSelectedItem("");
+          encoder.setEnabled(false);
+          attachEncoder.setText("attach");
+        }
+
         String servoPin = servo.getPin();
 
         if (servoPin != null)
           pinList.setSelectedItem(servoPin);
         if (servo.isAttached()) {
-          attachButton.setText("detach");
+          attach.setText("detach");
           controller.setEnabled(false);
           pinList.setEnabled(false);
-          slider.setEnabled(true);
+          moveTo.setEnabled(true);
         } else {
-          attachButton.setText("attach");
+          attach.setText("attach");
           controller.setEnabled(true);
           pinList.setEnabled(true);
-          slider.setEnabled(false);
+          moveTo.setEnabled(false);
         }
 
         if (servo.isEnabled()) {
-          enableButton.setText("disable");
-          imageenabled.setVisible(true);
+          enable.setText("disable");
+          enabledIcon.setVisible(true);
         } else {
-          enableButton.setText("enable");
-          imageenabled.setVisible(false);
-        }
-
-        if (servo.isMoving() && servo.getVelocity() > -0) {
-          moving.setIcon(movingIcon);
-          moving.setVisible(true);
-          // no velocity control==no magic
-        } else if (servo.isEnabled() && servo.getVelocity() <= 0) {
-          moving.setIcon(movingIconNoVelocityControl);
-          moving.setVisible(true);
-        } else {
-          moving.setVisible(false);
+          enable.setText("enable");
+          enabledIcon.setVisible(false);
         }
 
         if (servo.getAutoDisable()) {
           autoDisable.setSelected(true);
+          setIdleTimeEnabled(true);
         } else {
           autoDisable.setSelected(false);
+          setIdleTimeEnabled(false);
+        }
+        
+        if (servo.isSweeping()) {
+          sweepButton.setText("stop");
+        } else {
+          sweepButton.setText("sweep");
         }
 
         if (servo.isInverted()) {
@@ -675,32 +618,37 @@ public class ServoGui extends ServiceGui implements ActionListener {
           setInverted.setSelected(false);
         }
 
-        rest.setText(servo.getRest() + "");
-        Double pos = servo.getPos();
-        if (pos != null) {
-          boundPos.setText(Double.toString(pos));
-          slider.setValue(pos.intValue());
+        rest.setText(String.format("%.1f", servo.getRest()));
+
+        // TARGET POSITION
+        // target position - is a "command" where I "want" to go - not to be
+        // confused with "where I am"
+        Double inTargetPos = servo.getTargetPos();
+        if (inTargetPos != null) {
+          targetPos.setText(Double.toString(inTargetPos));
+          moveTo.setValue(inTargetPos.intValue());
         }
 
+        // SPEED CONTROL
+        Double servoSpeed = servo.getSpeed();
+        if (servoSpeed == null) {
+          setSpeedControlEnabled(false);
+        } else {
+          speed.setText(String.format("%.1f", servoSpeed));
+          setSpeedControlEnabled(true);
+        }
+
+        // MAP MIN/MAX INPUT/OUTPUT
         // In the inverted case, these are reversed
-        slider.setMinimum((int) Math.round(servo.getMin()));
-        slider.setMaximum((int) Math.round(servo.getMax()));
+        moveTo.setMinimum(servo.getMin().intValue());
+        moveTo.setMaximum(servo.getMax().intValue());
 
-        posMin.setText(servo.getMin() + "");
-        posMax.setText(servo.getMax() + "");
-        velocity.setText(servo.getVelocity() + "");
-
-        disableDelayIfVelocity.setText(servo.disableDelay + "");
-        defaultDisableDelayNoVelocity.setText(servo.disableDelayNoVelocity + "");
-
-        if (servo.getMinInput() < mapInputSliderMinValue) {
-          mapInputSliderMinValue = (int) Math.round(servo.getMinInput());
-          mapInputSlider.setMinimum(mapInputSliderMinValue);
+        if (mapInput.getLowValue() != servo.getMin().intValue()) {
+          mapInput.setLowValue(servo.getMin().intValue());
         }
 
-        if (servo.getMaxInput() > mapInputSliderMaxValue) {
-          mapInputSliderMaxValue = (int) Math.round(servo.getMaxInput());
-          mapInputSlider.setMaximum(mapInputSliderMaxValue);
+        if (mapInput.getHighValue() != servo.getMax().intValue()) {
+          mapInput.setHighValue(servo.getMax().intValue());
         }
 
         double minOutputTmp = servo.getMinOutput();
@@ -711,82 +659,229 @@ public class ServoGui extends ServiceGui implements ActionListener {
           maxOutputTmp = servo.getMinOutput();
         }
 
-        if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = (int) Math.round(servo.getMinOutput());
-          mapOutputSlider.setMinimum(mapOutputSliderMinValue);
+        // FIXME - invert gui components so the next moveTo will not go crazy
+        // !!!
+        if (servo.isInverted() != mapOutput.getInverted()) {
+          mapOutput.setInverted(servo.isInverted());
         }
 
-        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = (int) Math.round(servo.getMaxOutput());
-          mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
+        if (mapOutput.getLowValue() != servo.getMinOutput().intValue()) {
+          mapOutput.setLowValue(servo.getMinOutput().intValue());
         }
 
-        mapOutputSlider.setInverted(servo.isInverted());
-
-        minInput.setText(servo.getMinInput() + "");
-        maxInput.setText(servo.getMaxInput() + "");
-        minOutput.setText(minOutputTmp + "");
-        maxOutput.setText(maxOutputTmp + "");
-
-        mapInputSlider.setLowValue((int) Math.round(servo.getMinInput()));
-        mapInputSlider.setHighValue((int) Math.round(servo.getMaxInput()));
-        mapOutputSlider.setLowValue((int) Math.round(servo.getMinOutput()));
-        mapOutputSlider.setHighValue((int) Math.round(servo.getMaxOutput()));
-
-        if (servo.isSweeping()) {
-          sweepButton.setText("stop");
-        } else {
-          sweepButton.setText("sweep");
+        if (mapOutput.getHighValue() != servo.getMaxOutput().intValue()) {
+          mapOutput.setHighValue(servo.getMaxOutput().intValue());
         }
 
-        eventsEnabled = servo.isEventsEnabled();
+        minPos.setText(String.format("%.1f", servo.getMin()));
+        maxPos.setText(String.format("%.1f", servo.getMax()));
+        minOutput.setText(String.format("%.1f", minOutputTmp));
+        maxOutput.setText(String.format("%.1f", maxOutputTmp));
 
-        restoreListeners();
+        mapInput.setLowValue(servo.getMin().intValue());
+        mapInput.setHighValue(servo.getMax().intValue());
+        mapOutput.setLowValue(servo.getMinOutput().intValue());
+        mapOutput.setHighValue(servo.getMaxOutput().intValue());
+
+        addListeners();
       }
     });
-
   }
 
-  public void onRefreshControllers(final ArrayList<String> c) {
+  public void refreshControllers() {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+        List<String> c = Runtime.getServiceNamesFromInterface(ServoController.class);
         controller.removeActionListener((ServoGui) self);
         String currentControllerName = (String) controller.getSelectedItem();
         controller.removeAllItems();
         for (int i = 0; i < c.size(); ++i) {
           controller.addItem(c.get(i));
         }
-        String controllerName = (currentControllerName != null) ? currentControllerName : lastControllerUsed;
+        String controllerName = (currentControllerName != null) ? currentControllerName : lastController;
         controller.setSelectedItem(controllerName);
         controller.addActionListener((ServoGui) self);
       }
     });
   }
 
-  public void refreshControllers() {
-    send("refreshControllers");
+  public void refreshEncoders() {
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        encoder.removeActionListener((ServoGui) self);
+        String currentEncoderName = (String) encoder.getSelectedItem();
+        encoder.removeAllItems();
+        List<String> c = Runtime.getServiceNamesFromInterface(EncoderControl.class);
+        for (int i = 0; i < c.size(); ++i) {
+          encoder.addItem(c.get(i));
+        }
+        // add self for the default time encoder (even though its not a
+        // "service")
+        encoder.addItem(boundServiceName);
+        String encoderName = (currentEncoderName != null) ? currentEncoderName : lastController;
+        encoder.setSelectedItem(encoderName);
+        encoder.addActionListener((ServoGui) self);
+      }
+    });
   }
 
   public void removeListeners() {
+    attach.removeActionListener(this);
+    autoDisable.removeActionListener(this);
     controller.removeActionListener(this);
+    enable.removeActionListener(this);
+    left.removeActionListener(this);
+    mapInput.removeChangeListener(this);
+    mapOutput.removeChangeListener(this);
+    moveTo.removeChangeListener(this);
     pinList.removeActionListener(this);
-    slider.removeChangeListener(sliderListener);
-    slider.removeMouseListener(sliderListener);
-    mapInputSlider.removeChangeListener(mapInputSliderListener);
-    mapOutputSlider.removeChangeListener(mapOutputSliderListener);
-    mapInputSlider.removeMouseListener(mapInputSliderListener);
-    mapOutputSlider.removeMouseListener(mapOutputSliderListener);
+    speedControlTitle.removeActionListener(this);
+    right.removeActionListener(this);
+    save.removeActionListener(this);
+    setInverted.removeActionListener(this);
+    speedSlider.removeChangeListener(this);
+    sweepButton.removeActionListener(this);
+    restButton.removeActionListener(this);
+    setMaxSpeed.removeActionListener(this);
   }
 
-  public void restoreListeners() {
+  public void addListeners() {
+    attach.addActionListener(this);
+    autoDisable.addActionListener(this);
     controller.addActionListener(this);
+    enable.addActionListener(this);
+    left.addActionListener(this);
+    mapInput.addChangeListener(this);
+    mapOutput.addChangeListener(this);
+    moveTo.addChangeListener(this);
     pinList.addActionListener(this);
-    slider.addChangeListener(sliderListener);
-    slider.addMouseListener(sliderListener);
-    mapInputSlider.addChangeListener(mapInputSliderListener);
-    mapOutputSlider.addChangeListener(mapOutputSliderListener);
-    mapInputSlider.addMouseListener(mapInputSliderListener);
-    mapOutputSlider.addMouseListener(mapOutputSliderListener);
+    speedControlTitle.addActionListener(this);
+    right.addActionListener(this);
+    save.addActionListener(this);
+    setInverted.addActionListener(this);
+    speedSlider.addChangeListener(this);
+    sweepButton.addActionListener(this);
+    restButton.addActionListener(this);
+    setMaxSpeed.addActionListener(this);
   }
+
+  @Override
+  public void stateChanged(ChangeEvent e) {
+    Object o = e.getSource();
+    /* if (!((JSlider) o).getValueIsAdjusting()) */
+
+    if (speedSlider.equals(o)) {
+      // speedSlider.setVisible(true);
+      send("setVelocity", (double) speedSlider.getValue());
+      speed.setText(String.format("%.1f", (double) speedSlider.getValue()));
+    }
+
+    if (moveTo.equals(o)) {
+      // moving.setVisible(true);
+      send("moveTo", (double) moveTo.getValue());
+    }
+
+    // isAdjusting prevent incremental values coming from the slider
+    if (!((JSlider) o).getValueIsAdjusting()) {
+
+      if (mapInput.equals(o)) {
+        minPos.setText(String.format("%d", mapInput.getLowValue()));
+        maxPos.setText(String.format("%d", mapInput.getHighValue()));
+        send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+      }
+
+      if (mapOutput.equals(o)) {
+        if (mapOutput.getInverted()) {
+          minOutput.setText(String.format("%d", mapOutput.getHighValue()));
+          maxOutput.setText(String.format("%d", mapOutput.getLowValue()));
+        } else {
+          minOutput.setText(String.format("%d", mapOutput.getLowValue()));
+          maxOutput.setText(String.format("%d", mapOutput.getHighValue()));
+        }
+
+        send("map", Double.parseDouble(minPos.getText()), Double.parseDouble(maxPos.getText()), Double.parseDouble(minOutput.getText()), Double.parseDouble(maxOutput.getText()));
+      }
+    } // if adjusting
+  }
+
+  /**
+   * call back to hand new services registered we want to update our list of
+   * possible controllers and encoders
+   * 
+   * @param s
+   */
+  public void onRegistered(ServiceInterface s) {
+    refreshControllers();
+    refreshEncoders();
+  }
+
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      log.info("{}", Serial.getPorts());
+      Platform.setVirtual(false);
+      String port = "COM7";
+      int pin = 22;
+      boolean useHobbyServo = true;
+
+      // Runtime.start("webgui", "WebGui");
+      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
+      // EncoderControl encoder = (EncoderControl) Runtime.start("encoder",
+      // "TimeEncoderFactory");
+      // FIXME - perhaps InMoov should just override the framework to provided
+      // the exception needed to work
+      // Runtime.getInstance().startPeers();
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      ServoControl servo = null;
+
+      servo = (ServoControl) Runtime.start("servo", "Servo");
+      Service.sleep(500);
+      gui.setActiveTab("servo");
+
+      // FIXME - check mixing and matching speed autoDisable enable/disable
+      if (mega.isVirtual()) {
+        VirtualArduino vmega = mega.getVirtual();
+        vmega.setBoardMega();
+      }
+      // mega.getBoardTypes();
+      // mega.setBoardMega();
+      // mega.setBoardUno();
+      mega.connect(port);
+
+      // servo.load();
+      servo.setPin(pin);
+      // servo.setPosition(90.0);
+      log.info("rest is {}", servo.getRest());
+      // servo.save();
+
+      // servo.setPin(8);
+      servo.attach(mega);
+      // servo.attach(encoder);
+      servo.moveTo(10.3);
+      servo.moveTo(110.3);
+      servo.moveToBlocking(113.0);
+      servo.setSpeed(2.0);
+      servo.moveTo(140.0);
+      // Service.sleep(500);
+      // servo.moveTo(90.0);
+      // Service.sleep(1000);
+      // String python = LangUtils.toPython();
+      // Files.write(Paths.get("export.py"), python.toString().getBytes());
+      TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
+      servo.attach((ServoDataListener) catcher);
+
+      Runtime.exportAll("export.py");
+
+      // FIXME - junit for testing return values of moveTo when a blocking call
+      // is in progress
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
 }

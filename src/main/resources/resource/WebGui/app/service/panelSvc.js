@@ -237,9 +237,9 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             _self.panels[newPanel.name].zIndex = newPanel.zIndex;
             _self.panels[newPanel.name].hide = newPanel.hide;
             // data has been updated - now proccess the changes
-            _self.panels[newPanel.name].notifyPositionChanged();
-            _self.panels[newPanel.name].notifyZIndexChanged();
-            _self.panels[newPanel.name].notifySizeChanged();
+//            _self.panels[newPanel.name].notifyPositionChanged();  // tabs breaks panels
+//            _self.panels[newPanel.name].notifyZIndexChanged(); // tabs breaks panels
+//            _self.panels[newPanel.name].notifySizeChanged(); // tabs breaks panels
             notifyAllOfUpdate();
             // <-- WTF is this?
         }

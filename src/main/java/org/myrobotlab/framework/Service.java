@@ -996,7 +996,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         }
       }
     } else {
-      log.info("purgeTask - task {} does not exist", taskName);
+      log.debug("purgeTask - task {} does not exist", taskName);
     }
   }
 
@@ -1375,6 +1375,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   final public Object invoke(String method, Object... params) {
     return invokeOn(this, method, params);
+  }
+  
+  
+  /**
+   * thread blocking invoke call on different service in the same process
+   * @param serviceName
+   * @param methodName
+   * @param params
+   * @return
+   */
+  final public Object invokeOn(String serviceName, String methodName, Object... params) {
+    return invokeOn(Runtime.getService(serviceName), methodName, params);
   }
 
   /**

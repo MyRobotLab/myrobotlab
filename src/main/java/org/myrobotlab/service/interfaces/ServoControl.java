@@ -72,12 +72,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   String getControllerName();
 
-  /**
-   * set of controller names
-   * 
-   * @return
-   */
-  public Set<String> getControllers();
 
   /**
    * gets the Max X of the mapper (input)

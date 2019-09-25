@@ -217,6 +217,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var msg;
             try {
                 msg = jQuery.parseJSON(body);
+
+                if (msg == null){
+                    console.log('msg null');
+                    return;
+                }
+
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap');
@@ -315,7 +321,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         for (var name in registry) {
             var service = registry[name];
             // see if a service has the same input interface
-            if (!angular.isUndefined(service.interfaceSet[interface])) {
+            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interface])) {
                 ret.push(registry[name]);
             }
         }

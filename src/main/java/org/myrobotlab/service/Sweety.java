@@ -880,7 +880,7 @@ public class Sweety extends Service {
     adaFruit16cRight = (Adafruit16CServoDriver) Runtime.start("I2cServoControlRight", "Adafruit16CServoDriver");
     chatBot = (ProgramAB) Runtime.start("chatBot", "ProgramAB");
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    mouth = (MarySpeech) Runtime.start("mouth", "MarySpeech");
+    mouth = (AbstractSpeechSynthesis) Runtime.start("mouth", "MarySpeech");
     ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
     webgui = (WebGui) Runtime.start("webgui", "WebGui");
     pir = (Pir) Runtime.start("pir", "Pir");

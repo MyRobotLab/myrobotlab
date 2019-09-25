@@ -32,9 +32,6 @@ public class Jme3Servo extends UserData implements VirtualServo {
   // FIXME - probably not needed
   int posUs;
 
-  // FIXME - probably not needed
-  private int lastPosUs;
-
   // uber parent of all - moved up
   // transient SimpleApplication app;
   // FIXME - should allow input of Servo & 3D Info + ref to Jme3App

@@ -29,7 +29,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js');
-    $urlRouterProvider.otherwise("/main");
+    $urlRouterProvider.otherwise("/tabs");
     $stateProvider.state('loading', {
         url: "/loading",
         templateUrl: "main/loading.html",

@@ -32,8 +32,13 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         $scope.arduinoPath = service.arduinoIdePath;
         $scope.image = "service/arduino/" + service.boardType + ".png";
         var serial = $scope.service.serial;
+
+        $scope.serialName = null;
         // === service.serial begin ===
-        $scope.serialName = service.serial.name;
+        if (service.serial != null){
+            $scope.serialName = service.serial.name;
+        } 
+        
         $scope.isConnected = (serial.portName != null );
         $scope.isConnectedImage = (serial.portName != null ) ? "connected" : "disconnected";
         if ($scope.isConnected) {
