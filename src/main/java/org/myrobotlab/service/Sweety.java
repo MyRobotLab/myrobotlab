@@ -10,7 +10,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 // TODO set pir sensor
@@ -31,7 +31,7 @@ public class Sweety extends Service {
   transient public Adafruit16CServoDriver adaFruit16cLeft;
   transient public WebkitSpeechRecognition ear;
   transient public WebGui webgui;
-  transient public AbstractSpeechSynthesis mouth;
+  transient public SpeechSynthesis mouth;
   transient public static Tracking tracker;
   transient public ProgramAB chatBot;
   transient public static OpenNi openni;
@@ -880,7 +880,7 @@ public class Sweety extends Service {
     adaFruit16cRight = (Adafruit16CServoDriver) Runtime.start("I2cServoControlRight", "Adafruit16CServoDriver");
     chatBot = (ProgramAB) Runtime.start("chatBot", "ProgramAB");
     htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    mouth = (AbstractSpeechSynthesis) Runtime.start("mouth", "MarySpeech");
+    mouth = (SpeechSynthesis) Runtime.start("mouth", "MarySpeech");
     ear = (WebkitSpeechRecognition) Runtime.start("ear", "WebkitSpeechRecognition");
     webgui = (WebGui) Runtime.start("webgui", "WebGui");
     pir = (Pir) Runtime.start("pir", "Pir");

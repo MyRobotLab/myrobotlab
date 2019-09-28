@@ -123,11 +123,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
   protected Double maxSpeed = 500.0;
 
   /**
-   * status if the servo thinks its moving ..
-   */
-  protected boolean moving;
-
-  /**
    * the 'pin' for this Servo - it is Integer because it can be in a state of
    * 'not set' or null.
    * 
@@ -213,9 +208,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   int idleTimeout = 3000;
 
   /**
-   * if the servo was disabled through an idle-timeout
+   * If the servo was disabled through an idle-timeout.
+   * If the servo is disabled through an idle-timeout, it can be re-enabled on next move.
+   * If the servo was disabled through a human or event which "manually" disabled the servo,
+   * the servo SHOULD NOT be enabled next move - this is an internal field
    */
-  boolean idleDisabled = false;
+  private boolean idleDisabled = false;
 
   public AbstractServo(String reservedKey) {
     super(reservedKey);

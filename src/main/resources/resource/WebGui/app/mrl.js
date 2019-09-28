@@ -519,6 +519,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             msg.sendingMethod = 'sendTo';
                             _self.sendMessage(msg);
                         },
+                        sendTo: function(toName, method, data) {
+                            var args = Array.prototype.slice.call(arguments, 2);
+                            var msg = _self.createMessage(toName, method, args);
+                            msg.sendingMethod = 'sendTo';
+                            _self.sendMessage(msg);
+                        },
                         /**
                          *   sendArgs will be called by the dynamically generated code interface
                          */
@@ -590,6 +596,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 break;
                             }
                             // end switch
+                        },
+                        subscribeToMethod:function(callback, methodName) {
+                            _self.subscribeToMethod(callback, methodName);
+                        },
+                        subscribeTo: function(controller, serviceName, methodName) {                            
+                            _self.subscribeToServiceMethod(controller.onMsg, serviceName, methodName)                          
                         },
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {

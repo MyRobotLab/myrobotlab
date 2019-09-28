@@ -1,5 +1,8 @@
 package org.myrobotlab.service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
@@ -40,6 +43,31 @@ public class InMoovHead extends Service {
     neck = (ServoControl) createPeer("neck");
     rollNeck = (ServoControl) createPeer("rollNeck");
     initServoDefaults();
+  }
+  
+  public List<String> getServoNames() {
+    List<String> servos = new ArrayList<>();
+    
+    if (jaw != null) {
+      servos.add(jaw.getName());
+    }
+    if (eyeX != null) {
+      servos.add(eyeX.getName());
+    }
+    if (eyeY != null) {
+      servos.add(eyeY.getName());
+    }
+    if (rothead != null) {
+      servos.add(rothead.getName());
+    }
+    if (neck != null) {
+      servos.add(neck.getName());
+    }
+    if (rollNeck != null) {
+      servos.add(rollNeck.getName());
+    }  
+    Collections.sort(servos);
+    return servos;
   }
 
   private void initServoDefaults() {

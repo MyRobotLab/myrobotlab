@@ -1,16 +1,13 @@
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-2">
+        <div class="col-md-2">
             <input type="text" class="form-control" ng-model="searchText.name" placeholder="Search" typeahead-min-length="0">
         </div>
      </div>
-     <div class="row">
-        <div ng-repeat="panel in panels" service-ctrl-directive panel="panel">
-        <!--maybe move this to somewhere general?-->
-        </div>
+     <div class="row">  
         <!--1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right-->
         <!--migrate to Angular UI Bootstrap when they offer one-->
-        <div class="col-sm-1 col-lg-1 col-md-1">
+        <div class="col-md-1 col-lg-1 col-md-1">
             <ul class="nav nav-tabs nav-stacked nav-pills" role="tablist">
                 <li ng-repeat="panel in panels | orderBy:getName | filter:searchText" ng-class="{'active': view_tab == panel.name}">
                     <!--maybe move this to somewhere general? - seperate from tabs first-->
@@ -22,7 +19,14 @@
                 </li>
             </ul>
         </div>
-        <div class="col-sm-10">
+
+        <div ng-repeat="panel in panels" service-ctrl-directive panel="panel">
+        <!--maybe move this to somewhere general?-->
+        </div>
+        <div class="col-md-1">
+        &nbsp;
+        </div>
+        <div class="col-md-10">
             <div class="tab-content">
                 <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
             </div>

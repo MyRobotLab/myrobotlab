@@ -16,13 +16,13 @@ import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 
-@Ignore
+
 public class InMoovScriptTest extends AbstractTest {
 
   boolean testLocal = true;
 
   // set this to null to check the checked in scripts
-  static String scriptRoot = "C:\\mrl\\mrl.develop\\pyrobotlab\\service\\";
+  static String scriptRoot =  null;// "C:\\mrl\\mrl.develop\\pyrobotlab\\service\\";
   
   static String branch = "develop";
   
@@ -98,6 +98,7 @@ public class InMoovScriptTest extends AbstractTest {
       python.exec(content);
 
       InMoov i01 = (InMoov) Runtime.getService("i01");
+      
       // Assert something
       assertNotNull(i01);
       
