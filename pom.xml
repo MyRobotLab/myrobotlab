@@ -1500,6 +1500,14 @@
   </dependency>
 <!-- Xmpp end -->
 
+
+<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-sqs</artifactId>
+    <version>1.11.637</version>
+</dependency>
+
   </dependencies>
 
 	
