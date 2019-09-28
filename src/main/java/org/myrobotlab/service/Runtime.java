@@ -51,6 +51,7 @@ import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.NameAndType;
 import org.myrobotlab.framework.Platform;
@@ -701,6 +702,8 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   /*
    * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
    * definition info - Runtime should return based on ClassName
+   * 
+   * FIXME - INPUT PARAMETER SHOULD BE TYPE NOT INSTANCE NAME !!!!
    */
   public static Map<String, MethodEntry> getMethodMap(String serviceName) {
     if (!registry.containsKey(serviceName)) {
@@ -708,10 +711,12 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       return null;
     }
 
-    Map<String, MethodEntry> ret = new TreeMap<String, MethodEntry>();
+    Map<String, MethodEntry> ret = new TreeMap<>();
     ServiceInterface sw = registry.get(serviceName);
 
     Class<?> c = sw.getClass();
+    
+    /*
     Method[] methods = c.getDeclaredMethods();
 
     Method m;
@@ -727,8 +732,15 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       s = me.getSignature();
       ret.put(s, me);
     }
+    */
+    ///////////   BEGIN FIX ////////////////////////////
+    // FURTHER FIX IS TO CHANGE INPUT TO TYPE NOT INSTANCE !!!
+    MethodCache cache = MethodCache.getInstance();
+    return cache.getRemoteMethods(c.getTypeName());
+    
+    ///////////   END FIX //////////////////////////////
 
-    return ret;
+    // return ret;
   }
 
   // FIXME - max complexity method

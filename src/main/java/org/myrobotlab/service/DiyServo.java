@@ -429,7 +429,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     if (lastPosInput != pos) {
-      moving = true;
+      // moving = true;
       if (motorUpdater == null) {
         // log.info("Starting MotorUpdater");
         motorUpdater = new MotorUpdater(getName());
@@ -774,9 +774,11 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return currentVelocity;
   }
 
+  /*
   public boolean isMoving() {
     return moving;
   }
+  */
 
   public void setDisableDelayGrace(int disableDelayGrace) {
     this.disableDelayGrace = disableDelayGrace;

@@ -3,7 +3,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     var _self = this;
     var msg = this.msg;
     // init
-    $scope.controllerName = null ;
+    $scope.controller = null ;
     $scope.pinsList = [];
     $scope.pin = null ;
     $scope.min = 0;
@@ -36,8 +36,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             // $scope.pos.value = service.targetPos;            
         }
         $scope.possibleController = service.controller;
-        $scope.controllerName = service.controller;
-        $scope.velocity = service.velocity;
+        $scope.controller = service.controller;
+        $scope.speed = service.speed;
         $scope.pin = service.pin;
         $scope.rest = service.rest;
         $scope.min = service.mapper.minOutput;
@@ -83,11 +83,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         return "black";
     };
     $scope.isAttached = function() {
-        return $scope.service.controllerName != null ;
+        return $scope.service.controller != null ;
     }
     ;
-    $scope.update = function(velocity, rest, min, max) {
-        msg.send("setVelocity", velocity);
+    $scope.update = function(speed, rest, min, max) {
+        msg.send("setVelocity", $scope.service.speed);
         msg.send("setRest", rest);
         msg.send("setMinMax", min, max);
     }
@@ -107,16 +107,17 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.setSelectedController = function(name) {
         $log.info('setSelectedController - ' + name);
         $scope.selectedController = name;
-        $scope.controllerName = name;
+        $scope.controller = name;
     }
     $scope.attachController = function() {
         $log.info("attachController");
         msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest);
-        // msg.attach($scope.controllerName, $scope.pin, 90);
+        // msg.attach($scope.controller, $scope.pin, 90);
     }
     
     msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
+    
     msg.subscribe(this);
 
     // no longer needed - interfaces now travel with a service
