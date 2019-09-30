@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.ivy.Ivy;
 import org.apache.ivy.Main;
 import org.apache.ivy.core.module.descriptor.Artifact;
 import org.apache.ivy.core.report.ArtifactDownloadReport;
@@ -245,7 +246,9 @@ public class IvyWrapper extends Repo implements Serializable {
 
       Platform platform = Platform.getLocalInstance();
 
-      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]" };
+      // TODO - noterminate :P
+      // String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]", "-noterminate" };
+      String[] cmd = new String[] { "-settings", location + "/ivysettings.xml", "-ivy", location + "/ivy.xml", "-retrieve", location + "/jar" + "/[originalname].[ext]"};
 
       StringBuilder sb = new StringBuilder("java -jar ..\\..\\ivy-2.4.0-4.jar");
       for (String s : cmd) {
@@ -256,21 +259,31 @@ public class IvyWrapper extends Repo implements Serializable {
 
       // TODO: this breaks for me! please review why this needed to be commented
       // out.
+      // Ivy ivy = Ivy.newInstance(); <-- for future 2.5.x release
+      // ivy.getLoggerEngine().pushLogger(new IvyWrapperLogger(Message.MSG_INFO)); <-- for future 2.5.x release
       Main.setLogger(new IvyWrapperLogger(Message.MSG_INFO));
       ResolveReport report = Main.run(cmd);
 
-      // if no errors -
+      // if no errors -h
       // mark "service" as installed
       // mark all libraries as installed
 
-      List<?> err = report.getAllProblemMessages();
+      List<?> err= report.getAllProblemMessages();
 
+      boolean error = false;
       if (err.size() > 0) {
         for (int i = 0; i < err.size(); ++i) {
           String errStr = err.get(i).toString();
+          if (!errStr.startsWith("WARN:  symlinkmass")){
+        	  error = true;
+          }
           error(errStr);
-        }
-        return;
+        }        
+      }
+      
+      if (error) {
+    	  log.error("had errors - repo will not be updated");
+    	  return;
       }
 
       // TODO - promote to Repo.setInstalled

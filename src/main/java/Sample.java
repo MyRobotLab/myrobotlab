@@ -273,7 +273,7 @@ public class Sample implements MqttCallback {
     } catch (MqttException e) {
       e.printStackTrace();
       log("Unable to set up client: " + e.toString());
-      System.exit(1);
+      return;
     }
   }
 
