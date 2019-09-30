@@ -60,7 +60,7 @@ public class RTTTLPlay {
   public static void main(String[] args) {
     if (args.length < 2) {
       log.info(usage);
-      System.exit(0);
+      return;
     }
 
     String portname = args[0]; // e.g. "/dev/cu.KeySerial1"

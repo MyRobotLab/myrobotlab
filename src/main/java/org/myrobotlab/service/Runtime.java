@@ -2331,7 +2331,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     // apache 2.0 license
     meta.addDependency("com.google.code.gson", "gson", "2.8.5");
     // apache 2.0 license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     // apache 2.0 license
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     // apache 2.0 license

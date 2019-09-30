@@ -41,7 +41,7 @@ public class RTTTLParser {
   public static void main(String[] args) {
     if (args.length == 0) {
       log.info("usage: roombacomm.RTTTLParser <rttlstring>");
-      System.exit(0);
+      return;
     }
     String rtttl = args[0];
     ArrayList<Note> notelist = parse(rtttl);
