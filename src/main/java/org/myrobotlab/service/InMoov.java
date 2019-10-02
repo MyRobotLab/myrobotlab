@@ -2351,17 +2351,11 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.rightHand.wrist", "y");
     jme.setRotation("i01.leftHand.wrist", "y");
 
-    // jme.setRotation("i01.rightHand.index", "x");
-    // jme.setRotation("i01.rightHand.majeure", "x");
-    
-    // jme.setRotation("i01.leftHand.index", "x");
-    // jme.setRotation("i01.leftHand.majeure", "x");
-
     jme.setMapper("i01.head.jaw", 0, 180, -5, 80);
     jme.setMapper("i01.head.neck", 0, 180, 20, -20);
     jme.setMapper("i01.head.rollNeck", 0, 180, 30, -30);
-    jme.setMapper("i01.head.eyeY", 0, 180, 30, 175);
-    jme.setMapper("i01.head.eyeX", 0, 180, 30, 175); //TODO need to check the mapping
+    jme.setMapper("i01.head.eyeY", 0, 180, 40, 140);
+    jme.setMapper("i01.head.eyeX", 0, 180, -10, 70); //HERE there need to be two eyeX (left and right?)
     jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
 
@@ -2372,16 +2366,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.rightArm.omoplate", 0, 180, 10, -180);
     jme.setMapper("i01.leftArm.omoplate", 0, 180, -10, 180);
 
-    /*
-    jme.setMapper("i01.rightHand.index", 0, 180, 90, -90);
-    jme.setMapper("i01.rightHand.majeure", 0, 180, 90, -90);
-    */
     jme.setMapper("i01.rightHand.wrist", 0, 180, -20, 60);
-
-    /*
-    jme.setMapper("i01.leftHand.index", 0, 180, 90, -90);
-    jme.setMapper("i01.leftHand.majeure", 0, 180, 90, -90);
-    */
     jme.setMapper("i01.leftHand.wrist", 0, 180, 20, -60);
 
     jme.setMapper("i01.torso.topStom", 0, 180, -30, 30);
@@ -2391,9 +2376,11 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     // ========== gael's calibrations end ======================
 
     // ========== 3 joint finger mapping and attaching begin ===
+    
+    // ========== Requires VinMoov5.j3o ========================
 
-    jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb", "i01.leftHand.thumb2", "i01.leftHand.thumb3");
-    jme.setRotation("i01.leftHand.thumb", "y");
+    jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb1", "i01.leftHand.thumb2", "i01.leftHand.thumb3");
+    jme.setRotation("i01.leftHand.thumb1", "y");
     jme.setRotation("i01.leftHand.thumb2", "x");
     jme.setRotation("i01.leftHand.thumb3", "x");
 
@@ -2418,30 +2405,30 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.leftHand.pinky3", "x");
     
     // left hand mapping complexities of the fingers
-    jme.setMapper("i01.leftHand.index", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.index2", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.index3", 0, 180, -110, -200);
-    
-    jme.setMapper("i01.leftHand.majeure", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.majeure2", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.majeure3", 0, 180, -110, -200);
-          
-    jme.setMapper("i01.leftHand.ringFinger", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.ringFinger2", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.ringFinger3", 0, 180, -110, -200);
-    
-    jme.setMapper("i01.leftHand.pinky", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.pinky2", 0, 180, -110, -200);
-    jme.setMapper("i01.leftHand.pinky3", 0, 180, -110, -200);
-    
-    jme.setMapper("i01.leftHand.thumb", 0, 180, -90, -270);
-    jme.setMapper("i01.leftHand.thumb2", 0, 180, -90, -270); //TODO CHECK THIS MAPPING
-    jme.setMapper("i01.leftHand.thumb3", 0, 180, -90, -270); //TODO CHECK THIS MAPPING
+    jme.setMapper("i01.leftHand.index", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.index2", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.index3", 0, 180, -110, -179);
+
+    jme.setMapper("i01.leftHand.majeure", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.majeure2", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.majeure3", 0, 180, -110, -179);
+  
+    jme.setMapper("i01.leftHand.ringFinger", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.ringFinger2", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.ringFinger3", 0, 180, -110, -179);
+
+    jme.setMapper("i01.leftHand.pinky", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.pinky2", 0, 180, -110, -179);
+    jme.setMapper("i01.leftHand.pinky3", 0, 180, -110, -179);
+
+    jme.setMapper("i01.leftHand.thumb1", 0, 180, -30, -100);
+    jme.setMapper("i01.leftHand.thumb2", 0, 180, 80, 20);
+    jme.setMapper("i01.leftHand.thumb3", 0, 180, 80, 20);
     
     // right hand
     
-    jme.attach("i01.rightHand.thumb", "i01.rightHand.thumb", "i01.rightHand.thumb2", "i01.rightHand.thumb3");
-    jme.setRotation("i01.rightHand.thumb", "y");
+    jme.attach("i01.rightHand.thumb", "i01.rightHand.thumb1", "i01.rightHand.thumb2", "i01.rightHand.thumb3");
+    jme.setRotation("i01.rightHand.thumb1", "y");
     jme.setRotation("i01.rightHand.thumb2", "x");
     jme.setRotation("i01.rightHand.thumb3", "x");
     
@@ -2465,25 +2452,25 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.rightHand.pinky2", "x");
     jme.setRotation("i01.rightHand.pinky3", "x");
     
-    jme.setMapper("i01.rightHand.index", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.index2", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.index3", 0, 180, 60, -120);
+    jme.setMapper("i01.rightHand.index", 0, 180, 65, -10);
+    jme.setMapper("i01.rightHand.index2", 0, 180, 70, -10);
+    jme.setMapper("i01.rightHand.index3", 0, 180, 70, -10);
+      
+    jme.setMapper("i01.rightHand.majeure", 0, 180, 65, -10);
+    jme.setMapper("i01.rightHand.majeure2", 0, 180, 70, -10);
+    jme.setMapper("i01.rightHand.majeure3", 0, 180, 70, -10);
 
-    jme.setMapper("i01.rightHand.majeure", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.majeure2", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.majeure3", 0, 180, 60, -120);
+    jme.setMapper("i01.rightHand.ringFinger", 0, 180, 65, -10);
+    jme.setMapper("i01.rightHand.ringFinger2", 0, 180, 70, -10);
+    jme.setMapper("i01.rightHand.ringFinger3", 0, 180, 70, -10);
 
-    jme.setMapper("i01.rightHand.ringFinger", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.ringFinger2", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.ringFinger3", 0, 180, 60, -120);
+    jme.setMapper("i01.rightHand.pinky", 0, 180, 65, -10);
+    jme.setMapper("i01.rightHand.pinky2", 0, 180, 70, -10);
+    jme.setMapper("i01.rightHand.pinky3", 0, 180, 60, -10);
 
-    jme.setMapper("i01.rightHand.pinky", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.pinky2", 0, 180, 60, -120);
-    jme.setMapper("i01.rightHand.pinky3", 0, 180, 60, -120);
-
-    jme.setMapper("i01.rightHand.thumb", 0, 180, -90, -270);
-    jme.setMapper("i01.rightHand.thumb2", 0, 180, -90, -270); //TODO CHECK THIS MAPPING
-    jme.setMapper("i01.rightHand.thumb3", 0, 180, -90, -270); //TODO CHECK THIS MAPPING
+    jme.setMapper("i01.rightHand.thumb1", 0, 180, 30, 110);
+    jme.setMapper("i01.rightHand.thumb2", 0, 180, -100, -150);
+    jme.setMapper("i01.rightHand.thumb3", 0, 180, -100, -160);
 
     // additional experimental mappings
     /*
