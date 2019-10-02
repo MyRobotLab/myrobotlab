@@ -76,8 +76,8 @@ public class InMoovHead extends Service {
     rothead.setMinMax((double)30, (double)150);
     // reset by mouth control
     jaw.setMinMax((double)10, (double)25);
-    eyeX.setMinMax((double)60, (double)100);
-    eyeY.setMinMax((double)50, (double)100);
+    eyeX.setMinMax((double)60, (double)120);
+    eyeY.setMinMax((double)60, (double)120);
     neck.setRest(90.0);
     neck.setPosition(90.0);
     rollNeck.setRest(90.0);
@@ -86,8 +86,8 @@ public class InMoovHead extends Service {
     rothead.setPosition(90.0);
     jaw.setRest(10.0);
     jaw.setPosition(10.0);
-    eyeX.setRest(80.0);
-    eyeX.setPosition(80.0);
+    eyeX.setRest(90.0);
+    eyeX.setPosition(90.0);
     eyeY.setRest(90.0);
     eyeY.setPosition(90.0);
 
@@ -498,12 +498,12 @@ public class InMoovHead extends Service {
     }
     if (eyeX == null) {
       eyeX = (ServoControl) startPeer("eyeX");
-      eyeX.setMinMax(60.0, 100.0);
-      eyeX.setRest(80.0);
+      eyeX.setMinMax(60.0, 120.0);
+      eyeX.setRest(90.0);
     }
     if (eyeY == null) {
       eyeY = (ServoControl) startPeer("eyeY");
-      eyeY.setMinMax(50.0, 100.0);
+      eyeY.setMinMax(60.0, 120.0);
       eyeY.setRest(90.0);
     }
     if (rollNeck == null) {
