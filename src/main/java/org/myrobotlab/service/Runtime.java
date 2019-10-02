@@ -2025,6 +2025,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static Platform getPlatform() {
     return getInstance().platform;
   }
+  
+  public boolean is64bit() {
+    return getInstance().platform.getBitness() == 64;        
+  }
 
   public Repo getRepo() {
     return repo;

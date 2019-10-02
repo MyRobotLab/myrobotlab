@@ -82,7 +82,7 @@ public abstract class Repo {
     }
     
     if (DEFAULT_INSTALL_DIR == null) {      
-      DEFAULT_INSTALL_DIR = LOCATION + File.separator + "jar";
+      DEFAULT_INSTALL_DIR = LOCATION; //+ File.separator + "jar";
     }
     
     File libraries = new File(LOCATION);
