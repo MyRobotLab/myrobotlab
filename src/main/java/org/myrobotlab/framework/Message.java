@@ -33,11 +33,6 @@ import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
 
 /**
  * @author GroG
@@ -47,8 +42,6 @@ import org.slf4j.Logger;
  * 
  */
 public class Message implements Serializable {
-  
-  transient private final static Logger log = LoggerFactory.getLogger(Message.class);
   
   private static final long serialVersionUID = 1L;
 
@@ -208,7 +201,6 @@ public class Message implements Serializable {
   }
 
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.init(Level.DEBUG);
 
     Message msg = new Message();
     msg.method = "myMethod";
