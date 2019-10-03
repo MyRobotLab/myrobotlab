@@ -115,8 +115,7 @@ public class MethodCache {
       if (instance == null) {
         instance = new MethodCache();
         instance.excludeMethods.add("main");
-        instance.excludeMethods.add("getMetaData"); // why ?
-
+        // instance.excludeMethods.add("getMetaData"); // why ?
       }
     }
     return instance;
