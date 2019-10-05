@@ -44,8 +44,8 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     }
                     newscope.getMethods = function() {
                         //get an updated / fresh servicedata & convert it to json
-                        var servicedata = mrl.getMethods(scope.panel.name);
-                        newscope.methods = JSON.stringify(servicedata, null, 2);
+                        var methods = mrl.getMethods(scope.panel.simpleName);
+                        newscope.methods = methods;
                     }
                     var header = $templateCache.get('service/tab-header.html');
                     var content = $templateCache.get(scope.panel.simpleName + 'Gui.html');

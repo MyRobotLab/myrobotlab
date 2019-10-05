@@ -30,6 +30,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var environments = {};
     var myEnv = {};
     var registry = {};
+    var methodCache = {};
     var transport = 'websocket';
     var socket = null;
     var callbacks = [];
@@ -555,6 +556,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 // created to allow direct access from html views to a msg.{method}
                                 // bound to a service
                                 try {
+
+                                    
                                     var methodMap = msg.data[0];
                                     for (var method in methodMap) {
                                         if (methodMap.hasOwnProperty(method)) {
