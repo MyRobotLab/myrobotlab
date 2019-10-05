@@ -62,6 +62,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.Heartbeat;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
 
@@ -127,9 +128,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   private URI instanceId = null;
 
   /**
-   * unique name of the service
+   * unique name of the service (eqv. hostname)
    */
   private String name;
+
+  /**
+   * unique id - (eqv. domain suffix)
+   */
+  private String id;
 
   private String simpleName; // used in gson encoding for getSimpleName()
 
@@ -821,6 +827,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public Service(String reservedKey) {
     // necessary for serialized transport
+    id = Platform.getLocalInstance().getId();
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
@@ -862,7 +869,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       name = reservedKey;
     }
 
-    this.inbox = new Inbox(name);
+    this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
     Runtime.register(this);
   }
@@ -967,7 +974,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return;
     }
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
-    Message msg = Message.createMessage(this, getName(), method, params);
+    Message msg = Message.createMessage(getName(), getName(), method, params);
     Task task = new Task(this, taskName, intervalMs, msg);
     timer.schedule(task, delay);
     tasks.put(taskName, timer);
@@ -1357,13 +1364,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // this is to support nameless Runtime messages but theoretically it
     // could
     // happen in other situations...
-    if (!name.equals(msg.name)) {
+    if (Runtime.getInstance().isLocal(msg) && !name.equals(msg.getName())) {
       // wrong Service - get the correct one
-      return Runtime.getService(msg.name).invoke(msg);
+      return Runtime.getService(msg.getName()).invoke(msg);
     }
 
     retobj = invokeOn(this, msg.method, msg.data);
- 
+
     return retobj;
   }
 
@@ -1534,10 +1541,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
-    Message m = Message.createMessage(this, null, method, o); // create a
-                                                              // un-named
-                                                              // message
-                                                              // as output
+    Message m = Message.createMessage(getName(), null, method, o);
 
     if (m.sender.length() == 0) {
       m.sender = this.getName();
@@ -1715,12 +1719,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         }
 
         // nameless Runtime messages
-        if (m.name == null) {
+        if (m.getName() == null) {
           // don't know if this is "correct"
           // but we are substituting the Runtime name as soon as we
           // see that its a null
           // name message
-          m.name = Runtime.getInstance().getName();
+          m.setName(Runtime.getInstance().getFullName());
         }
 
         // route if necessary
@@ -1742,7 +1746,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // TODO should this declaration be outside the while loop?
           // create new message reverse sender and name set to same
           // msg id
-          Message msg = Message.createMessage(this, m.sender, m.method, ret);
+          Message msg = Message.createMessage(getName(), m.sender, m.method, ret);
           msg.sender = this.getName();
           msg.msgId = m.msgId;
           // msg.status = Message.BLOCKING;
@@ -1817,7 +1821,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void send(String name, String method, Object... data) {
-    Message msg = Message.createMessage(this, name, method, data);
+    Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getName();
     // All methods which are invoked will
     // get the correct sendingMethod
@@ -1832,7 +1836,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
-    Message msg = Message.createMessage(this, name, method, data);
+    Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
@@ -1840,24 +1844,31 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return sendBlocking(msg, timeout);
   }
 
+  /**
+   * In theory the only reason this should need to use synchronized wait/notify
+   * is when the msg destination is in another remote process. sendBlocking
+   * should either invoke directly or use a gateway's sendBlockingRemote. To use
+   * a gateways sendBlockingRemote - the msg must have a remote src
+   * 
+   * <pre>
+   * after attach:
+   * stdin (remote) --> gateway sendBlockingRemote --> invoke
+   *                <--                            <--
+   * </pre>
+   */
   public Object sendBlocking(Message msg, Integer timeout) {
-    Object[] returnContainer = new Object[1];
-    /*
-     * if (inbox.blockingList.contains(msg.msgID)) { log.error("DUPLICATE"); }
-     */
-    inbox.blockingList.put(msg.msgId, returnContainer);
-
-    try {
-      // block until message comes back
-      synchronized (returnContainer) {
-        outbox.add(msg);
-        returnContainer.wait(timeout); // NEW !!! TIMEOUT !!!!
+    if (Runtime.getInstance().isLocal(msg)) {
+      return invoke(msg);
+    } else {
+      // get gateway for remote address
+      Gateway gateway = Runtime.getGatway(msg.getId());
+      try {
+        return gateway.sendBlockingRemote(msg, timeout);
+      } catch (Exception e) {
+        log.error("gateway.sendBlockingRemote threw");
       }
-    } catch (InterruptedException e) {
-      log.error("interrupted", e);
     }
-
-    return returnContainer[0];
+    return null;
   }
 
   // BOXING - End --------------------------------------
@@ -2078,24 +2089,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       List<String> tnames = Runtime.getServiceNames(topicName);
       for (String serviceName : tnames) {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(this, serviceName, "addListener", listener));
+        send(Message.createMessage(getName(), serviceName, "addListener", listener));
       }
     } else {
       if (topicMethod.contains("*")) { // FIXME "any regex expression
         Set<String> tnames = Runtime.getMethodMap(topicName).keySet();
         for (String method : tnames) {
           MRLListener listener = new MRLListener(method, callbackName, callbackMethod);
-          send(Message.createMessage(this, topicName, "addListener", listener));
+          send(Message.createMessage(getName(), topicName, "addListener", listener));
         }
       } else {
         MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-        send(Message.createMessage(this, topicName, "addListener", listener));
+        send(Message.createMessage(getName(), topicName, "addListener", listener));
       }
     }
   }
 
   public void sendPeer(String peerKey, String method, Object... params) {
-    send(Message.createMessage(this, getPeerName(peerKey), method, params));
+    send(Message.createMessage(getName(), getPeerName(peerKey), method, params));
   }
 
   public void unsubscribe(NameProvider topicName, String topicMethod) {
@@ -2110,7 +2121,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void unsubscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
     log.info("unsubscribe [{}/{} ---> {}/{}]", topicName, topicMethod, callbackName, callbackMethod);
-    send(Message.createMessage(this, topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
+    send(Message.createMessage(getName(), topicName, "removeListener", new Object[] { topicMethod, callbackName, callbackMethod }));
   }
 
   // -------------- Messaging Ends -----------------------
@@ -2489,8 +2500,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.creationOrder = creationCount;
   }
 
+  @Deprecated
   public String getSwagger() {
     return null;
+  }
+  
+  public String getId() {
+    return id;
+  }
+  
+  public String getFullName() {
+    return String.format("%s@%s", name, id);
   }
 
 }

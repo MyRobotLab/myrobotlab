@@ -40,9 +40,8 @@ import java.util.UUID;
 
 import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
-import org.myrobotlab.client.Client.ResponseHandler;
+import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
-import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.ApiFactory;
 import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecUtils;
@@ -51,6 +50,7 @@ import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.NameAndType;
 import org.myrobotlab.framework.Platform;
@@ -69,6 +69,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
@@ -102,18 +103,10 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, ResponseHandler {
+public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
-
-  /**
-   * environments of running mrl instances - the null environment is the current
-   * local
-   */
-  // @Deprecated
-  // static private final Map<URI, ServiceEnvironment> environments = new
-  // HashMap<>();
 
   /**
    * a registry of all services regardless of which environment they came from -
@@ -138,6 +131,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    */
   static private final Map<String, Map<String, Object>> connections = new HashMap<>();
 
+  // idToconnections ?? - FIXME - make default route !
+  // id to Connection .. where id is like ip.. might need priority
+  // like routeTable <String, List<RouteEntry>>
+  // currently its <id, list<uuid>>
+  static private final Map<String, Set<String>> routeTable = new HashMap<>();
+
+  static private String defaultRoute = null;
+
   /**
    * map to hide methods we are not interested in
    */
@@ -146,11 +147,6 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   static private boolean needsRestart = false;
 
   static private String runtimeName;
-
-  /**
-   * the id of the agent which spawned us
-   */
-  // static String fromAgent = null;
 
   /**
    * Pid file of this process
@@ -170,6 +166,11 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
    * number of services created by this runtime
    */
   Integer creationCount = 0;
+  
+  /**
+   * current list of cli sessions and where they are from
+   */
+  List<String> cliSessions = new ArrayList<String>();
 
   /**
    * the local repo of this machine - it should not be static as other foreign
@@ -211,6 +212,13 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   private List<String> jvmArgs;
 
   private List<String> args;
+
+  /**
+   * 
+   */
+  String cliCwd = "/";
+
+  String remoteId = null;
 
   /**
    *
@@ -278,9 +286,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   static public synchronized ServiceInterface create(String name, String type) {
     String fullTypeName;
-    if (name.indexOf("/") != -1) {
+    if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
     }
+    
+    if (name.contains("@")) {
+      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
+    }
+    
     if (type.indexOf(".") == -1) {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
     } else {
@@ -682,7 +695,18 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public static Map<String, ServiceInterface> getLocalServices() {
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
-      if (!serviceName.contains("@")) {
+      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { // FIXME
+                                                                                                                           // -
+                                                                                                                           // @
+                                                                                                                           // should
+                                                                                                                           // be
+                                                                                                                           // a
+                                                                                                                           // requirement
+                                                                                                                           // of
+                                                                                                                           // "all"
+                                                                                                                           // entries
+                                                                                                                           // for
+                                                                                                                           // consistency
         local.put(serviceName, registry.get(serviceName));
       }
     }
@@ -723,7 +747,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       if (hideMethods.contains(m.getName())) {
         continue;
       }
-      me = new MethodEntry(m);      
+      me = new MethodEntry(m);
       s = me.getSignature();
       ret.put(s, me);
     }
@@ -888,7 +912,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public static String getUptime() {
     Date now = new Date();
     Platform platform = Platform.getLocalInstance();
-    return getDiffTime(now.getTime() - platform.getStartTime().getTime());
+    String uptime = getDiffTime(now.getTime() - platform.getStartTime().getTime());
+    log.info("up for {}", uptime);
+    return uptime;
   }
 
   public static String getDiffTime(long diff) {
@@ -1023,7 +1049,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
          * codec.decode(FileIO.toString(options.cfg), CmdOptions.class); new
          * CommandLine(fileOptions).parseArgs(args);
          */
-        try {          
+        try {
           options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
         } catch (Exception e) {
           log.error("config file {} was specified but could not be read", options.cfg);
@@ -1031,7 +1057,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       }
 
       try {
-        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.encodePretty(options).getBytes());
+        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.toPrettyJson(options).getBytes());
       } catch (Exception e) {
         log.error("writing lastOption.json failed", e);
       }
@@ -1104,8 +1130,8 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
       if (options.interactive || !options.spawnedFromAgent) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
-        // clientLocal = new InProcessCli(System.in, System.out);
-        // clientLocal.start();
+        Runtime runtime = Runtime.getInstance();
+        runtime.startInteractiveMode();
       }
 
     } catch (Exception e) {
@@ -1117,14 +1143,14 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   public void startInteractiveMode() {
-    if (clientLocal == null) {
-      clientLocal = new InProcessCli(System.in, System.out); // ????
+    if (stdInClient == null) {
+      stdInClient = new InProcessCli(getId(), getName(), System.in, System.out); // ????
     }
-    clientLocal.start();
+    stdInClient.start();
   }
 
   public void stopInteractiveMode() {
-    clientLocal.stop();
+    stdInClient.stop();
   }
 
   /**
@@ -1156,7 +1182,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   /**
-   * registers a service
+   * registers a service - internal to this mrl process
    * 
    * @param service
    * @return
@@ -1393,77 +1419,186 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
 
   // FIXME - should be a map of remotes ?
   static Client clientRemote = new Client();
-  static InProcessCli clientLocal = null;
+  static InProcessCli stdInClient = null;
 
-  public Endpoint connect() throws IOException {
-    // FIXME - connect("myName",
-    // return connect("ws://localhost:8887/api/messages2"); // vs routing
-    // through System.in ->
-    return connect("ws://localhost:8887/api/messages2");
+  public void connect() throws IOException {
+    connect("admin", "ws://localhost:8887/api/messages");
+  }
+  
+  /**
+   * jump to another process using the cli
+   * @param id
+   * @return
+   */
+  public String jump(String id) {
+    String route = getRoute(id);
+    if (route == null) {
+      // log.error("cannot attach - no routing information for {}", id);
+      return "cannot attach - no routing information for " + id;
+    }    
+    stdInClient.setRemote(id);
+    return id;
+  }
+  
+  public String exit() {    
+    stdInClient.setRemote(getId());
+    return getId();
+  }
+
+  @Override
+  public void connect(String url) throws IOException {
+    connect(url, url);
   }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
-  public Endpoint connect(String url) throws IOException {
+  public void connect(String id, String url) throws IOException {
 
     clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
                                            // on client creation?
 
     UUID uuid = java.util.UUID.randomUUID();
     Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
-    Message msg = Message.createMessage("runtime", "runtime", "getHelloResponse", new Object[] { CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    // Message msg = Message.createMessage("runtime", "runtime",
+    // "getHelloResponse", new Object[] { "runtime-client-uuid",
+    // CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    Message msg = getDefaultMsg(uuid.toString());
     // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
-    attributes.put("id", getId());
-    attributes.put("gateway", "runtime");// connecting out - the gateway will be
-                                         // runtime ...
+    // required data
+    // attributes.put("id", getId());
+    attributes.put("gateway", "runtime");
     attributes.put("uuid", uuid);
-    attributes.put("User-Agent", "runtime-client");
+
+    // connection specific
+    attributes.put("c-type", "wasync");
+    attributes.put("c-endpoint", endpoint);
+
+    // cli specific
     attributes.put("cwd", "/");
-    attributes.put("uri", url);
+    attributes.put("url", url);
+    attributes.put("uri", url); // not really correct
     attributes.put("user", "root");
     attributes.put("host", "local");
-    attributes.put("endpoint", endpoint);
 
-    addConnection(uuid.toString(), attributes);
+    // addendum
+    attributes.put("User-Agent", "runtime-client");
+    // addConnection(id, uuid.toString(), attributes);
+    Runtime.getInstance().addConnection(uuid.toString(), attributes);
 
+    // send getHelloResponse
     clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
-    return endpoint;
   }
 
   /**
+   * FIXME - this is a gateway callback - probably should be in the gateway
+   * interface - this is a "specific" gateway that supports typeless json or
+   * websockets
+   * 
    * callback - from clientRemote - all client connections will recieve here
    * TODO - get clients directional api - an api per direction incoming and
    * outgoing
    */
   @Override // uuid
-  public void onResponse(String uuid, String data) {
-    log.info("connection {} responded with {}", uuid, data);
-    // get api - decode msg - process it
-    Map<String, Object> connection = getConnection(uuid);
-    if (connection == null) {
-      log.error("no connection with uuid {}", uuid);
-      return;
-    }
-    String uri = (String) connection.get("uri");
-    String apiKey = Api.getApiKey(uri);
-    // client requesting api ???
-    log.info("connection {} requesting endpoint {}", connection.get("id"), connection.get("uri"));
-    Api api = ApiFactory.getApiProcessor(apiKey);
-    Endpoint endpoint = (Endpoint) connection.get("endpoint");
-    // api.process(this, apiKey, endpoint);
-    // api.process(this, apiKey, uuid, endpoint, data);
-    // OutputStream out = null because no point ...
+  public void onRemoteMessage(String uuid, String data) {
     try {
-      // return blocking ???
-      Object ret = api.process(this, apiKey, uri, uuid, null, data);
+
+      log.info("connection {} responded with {}", uuid, data);
+      // get api - decode msg - process it
+      Map<String, Object> connection = getConnection(uuid);
+      if (connection == null) {
+        error("no connection with uuid %s", uuid);
+        return;
+      }
+
+      // ================= begin messages2 api =======================
+
+      if (log.isDebugEnabled()) {
+        log.debug("data - [{}]", data);
+      }
+
+      // decoding message envelope
+      Message msg = CodecUtils.fromJson(data, Message.class);
+      msg.setProperty("uuid", uuid);
+
+      // if were blocking -
+      Message retMsg = null;
+      Object ret = null;
+
+      if (isLocal(msg)) {
+
+        String serviceName = msg.getName();
+        // to decode fully we need class name, method name, and an array of json
+        // encoded parameters
+        MethodCache cache = MethodCache.getInstance();
+        Class<?> clazz = Runtime.getClass(serviceName);
+        if (clazz == null) {
+          log.error("local msg but no Class for requested service {}", serviceName);
+          return;
+        }
+        Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+
+        Method method = cache.getMethod(clazz, msg.method, params);
+        ServiceInterface si = Runtime.getService(serviceName);
+        if (method == null) {
+          log.error("cannot find {}", cache.makeKey(clazz, msg.method, cache.getParamTypes(params)));
+          return;
+        }
+        if (si == null) {
+          log.error("si null for serviceName {}", serviceName);
+          return;
+        }
+        // higher level protocol - ordered steps to establish routing
+        // must add meta data of connection to system
+        if ("runtime".equals(serviceName) && "getHelloResponse".equals(msg.method)) {
+          params[0] = uuid;
+        }
+        ret = method.invoke(si, params);
+
+        // propagate return data to subscribers
+        si.out(msg.method, ret);
+
+        // sender is important - this "might" be right ;)
+        String sender = String.format("%s@%s", si.getName(), getId());
+
+        // Tri-Input broadcast
+        // if it was a blocking call return a serialized message back - must
+        // switch return address original sender
+        // with name
+        // TODO - at some point we want the option of "not trusting the sender's
+        // return address"
+        retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
+
+      } else {
+        // RELAYING !! in and out of process - don't decode !
+        // FIXME GET GATEWAY
+        // FIXME - send or sendBlocking
+
+        if (msg.isBlocking()) {
+          ret = sendBlockingRemote(msg, 3000);
+          // FIXME !!! Implement - we probably want the "whole" msg back from
+          // the inbox !
+          retMsg = null;
+        } else {
+          send(msg);
+        }
+      }
+
+      // handle the response back
+      if (msg.isBlocking()) {
+        retMsg.msgId = msg.msgId;
+        String retUuid = Runtime.getRoute(msg.getId()); //
+        Map<String, Object> retCon = Runtime.getConnection(retUuid);
+        // verify I'm the appropriate gateway
+        Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
+        // FIXME - double encode parameters ?
+        endpoint.socket.fire(CodecUtils.toJson(retMsg));
+      }
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("processing msg threw", e);
     } // this, apiKey, uuid, endpoint, data);
-    log.info("here");
   }
 
   public static void setRuntimeName(String inName) {
@@ -1790,6 +1925,87 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     }
   }
 
+  // start cli commands ----
+  /**
+   * change working directory to new path
+   * 
+   * @param path
+   */
+  public void cd(String path) {
+    cliCwd = path.trim();
+  }
+
+  /**
+   * print working directory
+   * 
+   * @return
+   */
+  public String pwd() {
+    return cliCwd;
+  }
+
+  /**
+   * list the contents of the current working directory
+   * 
+   * @return
+   */
+  public Object ls() {
+    return ls(cliCwd);
+  }
+
+  public String attachCli(String remoteId) {
+    this.remoteId = remoteId;
+    return remoteId;
+  }
+
+  /**
+   * list the contents of a specific path
+   * 
+   * @param inPath
+   * @return
+   */
+  public Object ls(String inPath) {
+    String absPath = null;
+
+    if (inPath.startsWith("/")) {
+      absPath = inPath;
+    } else {
+      absPath = cliCwd + inPath;
+    }
+
+    String[] parts = absPath.split("/");
+
+    String ret = null;
+    if (absPath.equals("/")) {
+      return Runtime.getServiceNames();
+    } else if (parts.length == 2 && !absPath.endsWith("/")) {
+      return Runtime.getService(parts[1]);
+    } else if (parts.length == 2 && absPath.endsWith("/")) {
+      ServiceInterface si = Runtime.getService(parts[1]);
+      return si.getDeclaredMethodNames();
+    }
+    return ret;
+  }
+
+  /**
+   * serviceName at id
+   * 
+   * @return
+   */
+  public String whoami() {
+    return "runtime@" + getId();
+  }
+
+  /**
+   * list connections - current connection names to this mrl runtime
+   * 
+   * @return
+   */
+  public List<String> lc() {
+    return Runtime.getConnectionNames();
+  }
+  // end cli commands ----
+
   // ---------- Java Runtime wrapper functions begin --------
   /*
    * Executes the specified command and arguments in a separate process. Returns
@@ -1823,7 +2039,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return repo;
   }
 
-  static public String getId() {
+  public String getId() {
     return Platform.getLocalInstance().getId();
   }
 
@@ -1972,7 +2188,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       // in this case however - the spawned process does not know the agents id
       // agent.1500211865673.json
 
-      Message msg = Message.createMessage(this, "agent", "restart", platform.getId());
+      Message msg = Message.createMessage(getName(), "agent", "restart", platform.getId());
       FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
       File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
       File json = new File(String.format("msgs/agent.%d.json", msg.msgId));
@@ -2498,48 +2714,35 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return options;
   }
 
-  // TODO - should be something more complex that a String[] ? - e.g. MrlFile[]
-  // ??
-  // public String[] ls(String cwd, String inPath) throws IOException {
-  public Object ls(String cwd, String inPath) throws IOException {
-
-    String absPath = null;
-
-    if (inPath.startsWith("/")) {
-      absPath = inPath;
-    } else {
-      absPath = cwd + inPath;
-    }
-
-    String[] parts = absPath.split("/");
-
-    String ret = null;
-    if (absPath.equals("/")) {
-      return Runtime.getServiceNames();
-    } else if (parts.length == 2 && !absPath.endsWith("/")) {
-      return Runtime.getService(parts[1]);
-    } else if (parts.length == 2 && absPath.endsWith("/")) {
-      ServiceInterface si = Runtime.getService(parts[1]);
-      return si.getDeclaredMethodNames();
-    }
-    return ret;
-  }
-
   // FIXME - a way to reach in a messages meta-data ?? is this a reference
   // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
   // its "meta-data"
-  public HelloResponse getHelloResponse(String uuid, HelloRequest request) {
+  public HelloResponse getHelloResponse(String uuid, HelloRequest hello) {
     HelloResponse response = new HelloResponse();
     Map<String, Object> connection = getConnection(uuid);
+    if (uuid == null) {
+      log.error("uuid could not be found in known connections {}", uuid);
+      // return null;
+    }
     response.id = getId();
     // this.uuid = uuid;
-    response.request = request;
+    response.request = hello;
     response.platform = Platform.getLocalInstance();
     response.services = Runtime.getServiceTypes();
-    connection.put("request", request);
+    connection.put("request", hello);
     // addClientAttribute(uuid, "request", request);
+    updateRoute(hello.id, uuid);
+    Runtime.getConnection(uuid).put("id", hello.id);
     return response;
+  }
+
+  public void onHelloResponse(HelloResponse response) {
+    log.info("onHelloResponse {}", response);
+  }
+
+  static public Map<String, Set<String>> route() {
+    return routeTable;
   }
 
   public static Map<String, String> getServiceTypes() {
@@ -2550,19 +2753,113 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     return ret;
   }
 
+  /**
+   * When a new connection is formed we have "connectivity" but not msg routing
+   * ability - The new connection will become the "new" default route, but we
+   * don't really have any information about the details of what id it has until
+   * we get a HelloResponse/HelloRequest message. When we have the new
+   * information we'll move the connections to the new id and this will be
+   * maintained in the routeTable
+   * 
+   * null key in the routeTable for id is "unknown" - ie its a connection which
+   * has not sent a getHelloResponse(request) msg
+   * 
+   * @param id
+   * @param uuid
+   */
+  static public void updateRoute(String id, String uuid) {
+
+    if (id == null) {
+      id = uuid;
+    }
+
+    if (routeTable.containsKey(id)) {
+      routeTable.get(id).add(uuid);
+    } else {
+      Set<String> uuids = new HashSet<>();
+      uuids.add(uuid);
+      routeTable.put(id, uuids);
+    }
+    // is this always the case - latest always wins?
+    defaultRoute = uuid;
+  }
+
+  static public void removeRoute(String uuid) {
+    if (routeTable.containsKey(uuid)) {
+      routeTable.remove(uuid);
+    }
+
+    Set<String> removeIds = new HashSet<String>();
+    for (String id : routeTable.keySet()) {
+      Set<String> routes = routeTable.get(id);
+      if (routes.contains(uuid)) {
+        routes.remove(uuid);
+      }
+      if (routes.size() == 0) {
+        // adding for delayed removal
+        removeIds.add(id);
+      }
+    }
+
+    for (String clean : removeIds) {
+      routeTable.remove(clean);
+    }
+
+    if (uuid.equals(defaultRoute)) {
+      if (routeTable.size() > 0) {
+        // if it was our default route - change it to next available
+        defaultRoute = routeTable.keySet().iterator().next();
+      } else {
+        defaultRoute = null;
+      }
+    }
+  }
+
+  public void deleteRoute(String id) {
+    routeTable.remove(id);
+  }
+
   public void addConnection(String uuid, Map<String, Object> attributes) {
     Map<String, Object> attr = null;
     if (!connections.containsKey(uuid)) {
       attr = attributes;
-      invoke("pubishNewConnection", attributes);
+      invoke("publishConnect", attributes);
     } else {
       attr = connections.get(uuid);
       attr.putAll(attributes);
     }
     connections.put(uuid, attr);
+
+    // recently removed - no connections in route table
+    // updateRoute(null, uuid);
   }
 
-  public Map<String, Object> pubishNewConnection(Map<String, Object> attributes) {
+  @Override
+  public Message getDefaultMsg(String connId) {
+    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "getHelloResponse",
+        new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Platform.getLocalInstance().getId(), connId)) });
+    msg.setBlocking();
+    return msg;
+  }
+
+  public void removeConection(String uuid) {
+    if (connections.remove(uuid) != null) {
+      invoke("publishDisconnect", uuid);
+    }
+    for (String id : routeTable.keySet()) {
+      Set<String> conn = routeTable.get(id);
+      if (conn != null) {
+        conn.remove(uuid);
+      }
+    }
+  }
+
+  public String publishDisconnect(String uuid) {
+    return uuid;
+  }
+
+  // FIXME - filter only serializable objects ?
+  public Map<String, Object> publishConnect(Map<String, Object> attributes) {
     return attributes;
   }
 
@@ -2599,7 +2896,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   }
 
   static String formatConnection(Map<String, Object> c) {
-    return String.format("%s@%s%s - %s - %s", c.get("user"), c.get("host"), c.get("uri"), c.get("uuid"), c.get("request"));
+    return String.format("%s %s %s", c.get("id"), c.get("uri"), c.get("uuid"));
   }
 
   static public String getConnectionName(String uuid) {
@@ -2662,6 +2959,166 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
       }
     }
     return ret;
+  }
+
+  public static Class<?> getClass(String name) {
+    ServiceInterface si = registry.get(name);
+    if (si == null) {
+      return null;
+    }
+    return si.getClass();
+  }
+
+  /**
+   * takes an id returns a connection uuid
+   * 
+   * @param id
+   * @return
+   */
+  public static String getRoute(String id) {
+    Set<String> ret = routeTable.get(id);
+    if (ret != null) {
+      return ret.iterator().next();
+    }
+    return defaultRoute;
+  }
+
+  /**
+   * get gateway based on remote address of a msg e.g. msg.getRemoteId()
+   * 
+   * @param name
+   * @return
+   */
+  public static Gateway getGatway(String remoteId) {
+    // get a route from the remote id
+    String uuid = getRoute(remoteId);
+
+    // get a connection from the route
+    Map<String, Object> conn = getConnection(uuid);
+
+    // find the gateway managing the connection
+    return (Gateway) getService((String) conn.get("gateway"));
+  }
+
+  // TODO - sendRemote
+  public Object sendBlockingRemote(Message msg, Integer timeout) throws IOException {
+    if (isLocal(msg)) {
+      log.error("msg NOT REMOTE yet sendBlockingRemote is called {}", msg);
+      return null;
+    }
+
+    if (msg.sender == null) {
+      // msg.sender = getName();
+      log.error("blocking remote msg must have a return sender address");
+      return null;
+    }
+
+    // get the appropriate connection - Runtime has a r ? wasync connection
+    // get a route from the remote id
+    String uuid = getRoute(msg.getId());
+
+    // get a connection from the route
+    Map<String, Object> conn = getConnection(uuid);
+
+    // make sure msg is blocking
+    // FIXME - should be enum !!!
+    msg.setBlocking();
+
+    // block the thread and wait for the return -
+    // if you have an msgId it should be stored a new one generated - and wait
+    // for its
+    // return - then replace with original and send back
+    // "send back" locally or - remotely remote --> gateway (process) gateway
+    // --> remote
+    // FIXME implement !
+    Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
+    endpoint.socket.fire(CodecUtils.toJson(msg));
+
+    Object[] returnContainer = new Object[1];
+
+    inbox.blockingList.put(msg.msgId, returnContainer);
+
+    try {
+      // block until message comes back
+      synchronized (returnContainer) {
+        outbox.add(msg);
+        returnContainer.wait(timeout);
+      }
+    } catch (InterruptedException e) {
+      log.error("interrupted", e);
+    }
+
+    return returnContainer[0];
+  }
+
+  @Override
+  public List<String> getClientIds() {
+    return Runtime.getConnectionIds(getName());
+  }
+
+  @Override
+  public Map<String, Map<String, Object>> getClients() {
+    return Runtime.getConnections(getName());
+  }
+
+  // FIXME - remove if not using ...
+  @Override
+  public void sendRemote(Message msg) throws IOException {
+    if (isLocal(msg)) {
+      log.error("msg NOT REMOTE yet sendBlockingRemote is called {}", msg);
+      return;
+    }
+
+    if (msg.sender == null) {
+      // msg.sender = getName();
+      log.error("blocking remote msg must have a return sender address");
+      return;
+    }
+
+    // get the appropriate connection - Runtime has a r ? wasync connection
+    // get a route from the remote id
+    String uuid = getRoute(msg.getId());
+
+    // get a connection from the route
+    Map<String, Object> conn = getConnection(uuid);
+
+    if (stdInClient.isLocal(msg)) {
+      if (msg.data == null) {
+        System.out.println("null");
+        return;
+      }
+      // should really "always" be a single item in the array since its a return
+      // msg
+      // but just in case ...
+      for (Object o : msg.data) {
+        System.out.println(CodecUtils.toPrettyJson(o));
+      }
+      
+      System.out.println(stdInClient.getPrompt(uuid));
+      
+    } else {
+      Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
+      endpoint.socket.fire(CodecUtils.toJson(msg));
+    }
+  }
+
+  /**
+   * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it
+   * 
+   * if the incoming Message's remote Id is the (same as ours) OR (it can't be
+   * found it our route table) - peel it off and treat it as local.
+   * 
+   * if we have an @{id/connection} but do not have the connection - we'll peel
+   * off the @{id/connection} and treat it as local if id is ours - peel it off
+   * !
+   */
+  public boolean isLocal(Message msg) {
+
+    if (msg.getId() == null || getId().equals(msg.getId())) {
+      return true;
+    }
+
+    return false;
   }
 
 }

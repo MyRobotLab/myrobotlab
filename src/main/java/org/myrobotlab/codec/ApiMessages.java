@@ -46,9 +46,9 @@ public class ApiMessages extends Api {
         msg.sender = webgui.getName();
       }
 
-      ServiceInterface si = Runtime.getService(msg.name);
+      ServiceInterface si = Runtime.getService(msg.getName());
       if (si == null) {
-        log.error("could not get service {} for msg {}", msg.name, msg);
+        log.error("could not get service {} for msg {}", msg.getName(), msg);
         return null;
       }
 
@@ -70,7 +70,7 @@ public class ApiMessages extends Api {
       paramTypes = MethodCache.getCandidateOnOrdinalSignature(si.getClass(), msg.method, encodedArray.length);
 
       if (log.isDebugEnabled()) {
-        StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.name, msg.method));
+        StringBuffer sb = new StringBuffer(String.format("(%s)%s.%s(", clazz.getSimpleName(), msg.getName(), msg.method));
         for (int i = 0; i < paramTypes.length; ++i) {
           if (i != 0) {
             sb.append(",");
@@ -94,7 +94,7 @@ public class ApiMessages extends Api {
       if (si.isLocal()) {
         log.debug("{} is local", si.getName());
 
-        log.debug("{}.{}({})", msg.name, msg.method, Arrays.toString(params));
+        log.debug("{}.{}({})", msg.getName(), msg.method, Arrays.toString(params));
         retobj = method.invoke(si, params);
         
         // propagate return data to subscribers
@@ -108,7 +108,7 @@ public class ApiMessages extends Api {
       } else {
         log.debug("{} is remote", si.getName());
         // TODO - inspect if blocking ...
-        webgui.send(msg.name, msg.method, params);
+        webgui.send(msg.getFullName(), msg.method, params);
       }
 
       MethodCache.cache(clazz, method);
@@ -133,7 +133,7 @@ public class ApiMessages extends Api {
 
       // Create msg from the return - and send it back
       // - is this correct ? should it be double encoded ?
-      Message msg = Message.createMessage(webgui, webgui.getName(), "onLocalServices", new Object[] { retobj });
+      Message msg = Message.createMessage(webgui.getName(), webgui.getName(), "onLocalServices", new Object[] { retobj });
       // apiKey == messages api uses JSON
       
       CodecUtils.toJson(out, msg);

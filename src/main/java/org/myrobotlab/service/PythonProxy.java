@@ -203,7 +203,7 @@ public class PythonProxy extends Service {
   public Object exec(String method, Object[] dat) {
     // Create message
     Message msg = new Message();
-    msg.name = getName();
+    msg.setName(getName());
     msg.method = method;
     if (dat != null) {
       for (int i = 0; i < dat.length; i++) {

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.atmosphere.cpr.AtmosphereResource;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.MessageSender;
 import org.myrobotlab.logging.Level;
@@ -50,6 +51,21 @@ public class ApiFactory {
 
   // per instance
   // MessageSender sender = null;
+
+  @Deprecated /*not normalized with webgui */
+  static public String getApiKey(String uri) {
+    int pos = uri.indexOf(Api.PARAMETER_API);
+    if (pos > -1) {
+      pos += Api.PARAMETER_API.length();
+      int pos2 = uri.indexOf("/", pos);
+      if (pos2 > -1) {
+        return uri.substring(pos, pos2);
+      } else {
+        return uri.substring(pos);
+      }
+    }
+    return null;
+  }
 
   public static class ApiDescription {
     String key;
@@ -118,11 +134,11 @@ public class ApiFactory {
       // FIXME change to CodecUtils.MIME_TYPE_JSON
 
       // FIXME !!! - double encoded data for messages api
-      Message msg = Message.createMessage(runtime, "runtime", "getUptime", null);
+      Message msg = Message.createMessage("runtime", "runtime", "getUptime", null);
       ByteArrayOutputStream encoded = new ByteArrayOutputStream();
       CodecUtils.toJson(encoded, msg);
 
-      Message msg2 = Message.createMessage(runtime, "runtime", "getD", null);
+      Message msg2 = Message.createMessage("runtime", "runtime", "getD", null);
       ByteArrayOutputStream encoded2 = new ByteArrayOutputStream();
       CodecUtils.toJson(encoded2, msg2);
 

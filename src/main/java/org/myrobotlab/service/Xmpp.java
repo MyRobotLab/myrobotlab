@@ -158,12 +158,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     roster.createEntry("grog@myrobotlab.org", "grog", null);
   }
 
-  @Override
-  public void addConnectionListener(String name) {
-    // TODO Auto-generated method stub
-
-  }
-
   public void addXmppMsgListener(Service service) {
     // FIXME - implement direct callback or pub sub support ??
   }
@@ -255,18 +249,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   }
 
-  @Override
-  public List<String> getClientIds() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public List<Connection> getConnections(URI clientKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
   public Contact getContact(RosterEntry r) {
     Contact contact = new Contact();
     contact.name = r.getName();
@@ -309,12 +291,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public String getPrefix(URI protocolKey) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public void presenceChanged(Presence presence) {
     log.info("presenceChanged {}", presence);
     // String user = presence.getFrom();
@@ -345,9 +321,9 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         try {
           org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
           Object ret = null;
-          ServiceInterface si = Runtime.getService(msg.name);
+          ServiceInterface si = Runtime.getService(msg.getName());
           if (si == null) {
-            ret = Status.error("could not find service %s", msg.name);
+            ret = Status.error("could not find service %s", msg.getName());
           } else {
             ret = si.invoke(msg.method, msg.data);
           }
@@ -377,12 +353,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   @Override
   public void processMessage(Message msg) {
     log.info("here");
-  }
-
-  @Override
-  public Connection publishConnect(Connection keys) {
-    // TODO Auto-generated method stub
-    return null;
   }
 
   public Contact publishPresenceChanged(Contact contact) {
@@ -427,15 +397,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public void sendRemote(String key, org.myrobotlab.framework.Message msg) throws URISyntaxException {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void sendRemote(URI key, org.myrobotlab.framework.Message msg) {
-    // TODO Auto-generated method stub
-
+  public void sendRemote(org.myrobotlab.framework.Message msg) throws URISyntaxException {
+    log.error("implement me");
   }
 
   public void setStatus(boolean available, String status) {
@@ -576,21 +539,30 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public String publishConnect() {
+  public List<String> getClientIds() {
+    return Runtime.getConnectionIds(getName());
+  }
+
+  @Override
+  public Map<String, Map<String, Object>> getClients() {
+    return Runtime.getConnections(getName());
+  }
+
+  @Override
+  public Object sendBlockingRemote(org.myrobotlab.framework.Message msg, Integer timeout) {
     // TODO Auto-generated method stub
+    // FIXME implement !!
     return null;
   }
 
   @Override
-  public String publishDisconnect() {
-    // TODO Auto-generated method stub
-    return null;
+  public boolean isLocal(org.myrobotlab.framework.Message msg) {
+    return Runtime.getInstance().isLocal(msg);
   }
 
   @Override
-  public Status publishError() {
-    // TODO Auto-generated method stub
-    return null;
+  public org.myrobotlab.framework.Message getDefaultMsg(String connId) {
+    return Runtime.getInstance().getDefaultMsg(connId);
   }
 
 }

@@ -106,7 +106,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    */
   @Override
   public boolean preProcessHook(Message msg) {
-    log.info("msg - {}.{}", msg.name, msg.method);
+    log.info("msg - {}.{}", msg.getName(), msg.method);
     put(msg);
     // TODO - determine if the callback method exists
     // if not warn return false - if so - return true;
