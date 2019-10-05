@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -693,7 +694,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         log.info("added mac");
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("getLocalHardwareAddresses threw", e);
     }
 
     log.info("done");
@@ -703,18 +704,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static Map<String, ServiceInterface> getLocalServices() {
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
-      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { // FIXME
-                                                                                                                           // -
-                                                                                                                           // @
-                                                                                                                           // should
-                                                                                                                           // be
-                                                                                                                           // a
-                                                                                                                           // requirement
-                                                                                                                           // of
-                                                                                                                           // "all"
-                                                                                                                           // entries
-                                                                                                                           // for
-                                                                                                                           // consistency
+      // FIXME @ should be a requirement of "all" entries for consistency
+      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { 
         local.put(serviceName, registry.get(serviceName));
       }
     }
@@ -742,28 +733,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       return null;
     }
 
-    Map<String, MethodEntry> ret = new TreeMap<>();
     ServiceInterface sw = registry.get(serviceName);
-
     Class<?> c = sw.getClass();
-
-    /*
-     * Method[] methods = c.getDeclaredMethods();
-     * 
-     * Method m; MethodEntry me; String s; for (int i = 0; i < methods.length;
-     * ++i) { m = methods[i];
-     * 
-     * if (hideMethods.contains(m.getName())) { continue; } me = new
-     * MethodEntry(m); s = me.getSignature(); ret.put(s, me); }
-     */
-    /////////// BEGIN FIX ////////////////////////////
-    // FURTHER FIX IS TO CHANGE INPUT TO TYPE NOT INSTANCE !!!
+ 
     MethodCache cache = MethodCache.getInstance();
     return cache.getRemoteMethods(c.getTypeName());
 
-    /////////// END FIX //////////////////////////////
-
-    // return ret;
   }
 
   // FIXME - max complexity method

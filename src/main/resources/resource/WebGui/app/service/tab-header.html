@@ -30,7 +30,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="" ng-click="getMethods(name)" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">
+                    <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">
                         <i class="glyphicon glyphicon-list-alt"></i>
                         &nbsp;&nbsp;list methods
                     
@@ -47,7 +47,7 @@
                                     </thead>
                                     <tbody>
                                     {{name}}
-                                        <tr ng-repeat="(key, value) in panel.msg_.temp.methodMap track by $index">
+                                        <tr ng-repeat="(key, value) in msg._interface.temp.methodMap track by $index">
                                             <td>{{value.name}}</td>
                                             <td><div ng-repeat="arg in value.parameterTypeNames track by $index">{{arg}}<br></div></td>
                                             <td>{{value.returnTypeName}}</td>

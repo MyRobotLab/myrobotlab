@@ -791,6 +791,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 });
                 return arrayOfServices;
             },
+            getMethods: function(serviceType) {
+                console.log(serviceType)
+                var arrayOfServices = Object.keys(registry).map(function(key) {
+                    return registry[key]
+                });
+                return arrayOfServices;
+            },
             sendTo: _self.sendTo,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,

@@ -73,6 +73,7 @@ public class MethodCache {
     // super index of all method entries
     Map<String, MethodEntry> methodsIndex = new TreeMap<>();
 
+    // index based on typeless resolution and invoking without interfaces
     Map<String, List<MethodEntry>> remoteOrdinalIndex = new TreeMap<>();
     // Map<String, List<MethodEntry>> declaredMethodOrdinalIndex = new
     // TreeMap<>();
@@ -400,11 +401,11 @@ public class MethodCache {
     return mi.methodsIndex.get(key).method;
   }
 
-  /*
+  
   public Map<String, Map<String, MethodEntry>> getRemoteMethods() {
     Map<String, Map<String, MethodEntry>> ret = new TreeMap<>();
     for (String name : objectCache.keySet()) {
-      ret.put(name, objectCache.get(name).remoteMethods);
+      ret.put(name, objectCache.get(name).methodsIndex);
     }
     return ret;
   }
@@ -414,11 +415,11 @@ public class MethodCache {
       type = "org.myrobotlab.service." + type;
     }
     if (objectCache.containsKey(type)) {
-      return objectCache.get(type).remoteMethods;
+      return objectCache.get(type).methodsIndex;
     }
     return null;
   }
-  */
+  
 
   final public Object invokeOn(Object obj, String methodName, Object... params)
       throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
