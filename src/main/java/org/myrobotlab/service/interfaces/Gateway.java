@@ -25,67 +25,26 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Status;
-import org.myrobotlab.net.Connection;
+import org.myrobotlab.framework.interfaces.NameProvider;
 
-public interface Gateway {
+public interface Gateway extends NameProvider {
 
-  public void addConnectionListener(String name);
+  public void connect(String uri) throws Exception; // <-- FIXME invalid I assume ?
 
-  public void connect(String uri) throws URISyntaxException;
-
-  /**
-   * list of unique clients currently connected to this gateway
-   * @return
-   */
   public List<String> getClientIds();
+  
+  public Map<String, Map<String, Object>> getClients();
 
-  /*
-   * important initial communication function related to discovery a broadcast
-   * goes out and replies must include details of communication so that a viable
-   * connection can be created
-   */
-  public List<Connection> getConnections(URI clientKey);
+  public void sendRemote(final Message msg) throws Exception;
+  
+  public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
+  
+  public boolean isLocal(Message msg);
+  
+  public Message getDefaultMsg(String connId);
 
-  public String getPrefix(URI protocolKey);
-
-  /*
-   * the publishing point
-   */
-  public Connection publishConnect(Connection keys);
-
-  public void sendRemote(final String key, final Message msg) throws URISyntaxException;
-
-  /*
-   * will send a message to the mrl key'ed uri the expectation is the uri is
-   * directly from the hosts registry in runtime therefore it has the following
-   * format
-   * 
-   * mrl://[gatewayName]/proto://protohost:protoport/otherkeyinfo
-   * 
-   * e.g. a tcp connection throughh a RemoteAdapter instance named "remote"
-   * would be
-   * 
-   * mrl://remote/tcp://somehost:6767
-   * 
-   * @param key - the url for the message
-   */
-
-  public void sendRemote(final URI key, final Message msg);
-
-  // begin new interface methods -----------------------
-  // FIXME ? - should publishConnection return a Connection object as with
-  // publishDisconnect ?
-  public String publishConnect();
-
-  public String publishDisconnect();
-
-  public Status publishError();
 }

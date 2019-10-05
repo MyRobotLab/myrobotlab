@@ -63,7 +63,7 @@ public class ApiService extends Api {
   @Override
   public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
   // public Object process(MessageSender sender, OutputStream out, Message msgFromUri, String data) throws Exception {
-    Message msgFromUri = uriToMsg(uri);
+    Message msgFromUri = uriToMsg(uri, getDefaultMethod());
     // FIXME change to CodecUtils.MIME_TYPE_JSON
     // Codec codec = CodecFactory.getCodec(CodecUtils.MIME_TYPE_JSON);
 
@@ -91,9 +91,9 @@ public class ApiService extends Api {
 
     // FIXME - TODO - conform to the Invoker interface - and build the "One
     // Invoker to Rule Them All"
-    ServiceInterface si = Runtime.getService(msgFromUri.name);
+    ServiceInterface si = Runtime.getService(msgFromUri.getName());
     if (si == null) {
-      throw new IOException(String.format("service %s not found", msgFromUri.name));
+      throw new IOException(String.format("service %s not found", msgFromUri.getName()));
     }
 
     Class<?> clazz = si.getClass();
@@ -129,17 +129,17 @@ public class ApiService extends Api {
     // sender.send(msgFromUri);
 
     if (si.isLocal()) {
-      log.debug("{} is local", msgFromUri.name);
+      log.debug("{} is local", msgFromUri.getName());
       ret = method.invoke(si, params);
     } else {
       // FIXME - create blocking message request
-      log.debug("{} is is remote", msgFromUri.name);
+      log.debug("{} is is remote", msgFromUri.getFullName());
       // Message msg = Runtime.getInstance().createMessage(si.getName(),
       // CodecUtils.getCallBackName(methodName), params);
       // FIXME MUST DO BLOCKING MSG !!!
       // FIXME - sendBlocking should throw and exception if it can't send !!!
       // NOT JUST RETURN NULL !!!
-      ret = webgui.sendBlocking(msgFromUri.name, msgFromUri.method, params);
+      ret = webgui.sendBlocking(msgFromUri.getFullName(), msgFromUri.method, params);
     }
 
     if (out != null) {

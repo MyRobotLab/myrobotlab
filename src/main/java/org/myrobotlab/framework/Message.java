@@ -33,9 +33,6 @@ import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
 
 /**
  * @author GroG
@@ -45,8 +42,10 @@ import org.myrobotlab.logging.LoggingFactory;
  * 
  */
 public class Message implements Serializable {
+  
   private static final long serialVersionUID = 1L;
 
+  // FIXME - change to enumeration and make it work !
   public final static String BLOCKING = "B";
   public final static String RETURN = "R";
 
@@ -57,20 +56,15 @@ public class Message implements Serializable {
   public long msgId;
 
   /**
-   * apiKey related to data encoding
-   */
-  public String apiKey;
-
-  /**
    * destination name of the message
    */
   public String name;
-  
+
   /**
    * name of the sending Service which sent this Message
    */
   public String sender;
-  
+
   /**
    * originating source method which generated this Message
    */
@@ -132,7 +126,15 @@ public class Message implements Serializable {
   }
 
   public String getName() {
-    return name;
+    if (name == null) {
+      return null;
+    }
+    int pos = name.indexOf("@");
+    if (pos < 0) {
+      return name;
+    } else {
+      return name.substring(0, pos);
+    }
   }
 
   final public void set(final Message other) {
@@ -164,37 +166,41 @@ public class Message implements Serializable {
     return CodecUtils.getMsgKey(this);
   }
 
-  public static Message createMessage(NameProvider sender, String name, String method, Object[] data) {
-    Message msg = new Message();
-    msg.name = name; // destination instance name
-    msg.sender = sender.getName();// this.getName();
-    msg.data = data;
-    msg.method = method;
-
-    return msg;
-  }
-
   public static Message createMessage(String sender, String name, String method, Object[] data) {
     Message msg = new Message();
     msg.name = name; // destination instance name
-    msg.sender = sender;// this.getName();
+    msg.sender = sender;
+    
+    /**
+     * <pre>
+     * THIS IS THE FUTURE !!!! - but both webgui and swinggui must change and maintain a "virtual" instance of
+     * all the services (which they currently do) with a "real" Runtime.getId() and be a gateway
+     *
+    if (sender == null) {
+      log.error("return address should not be null - but it is ... {}", msg);
+    } else if (!sender.contains("@")) {
+      // add our id - this pulls in Runtime (big dependency for a Message :( ) - but 
+      // its important to lay down the law and begin to write our "complete" address on our
+      // messages ..
+      msg.sender = String.format("%s@%s", sender, Runtime.getInstance().getId());
+    } else {
+      msg.sender = sender;
+    }
+    */
     msg.data = data;
     msg.method = method;
 
     return msg;
   }
 
-  static public Message createMessage(NameProvider sender, String name, String method, Object data) {
+  static public Message createMessage(String sender, String name, String method, Object data) {
     if (data == null) {
       return createMessage(sender, name, method, null);
     }
-    Object[] d = new Object[1];
-    d[0] = data;
-    return createMessage(sender, name, method, d);
+    return createMessage(sender, name, method, new Object[] { data });
   }
 
   public static void main(String[] args) throws InterruptedException {
-    LoggingFactory.init(Level.DEBUG);
 
     Message msg = new Message();
     msg.method = "myMethod";
@@ -202,10 +208,6 @@ public class Message implements Serializable {
     msg.msgId = System.currentTimeMillis();
     msg.data = new Object[] { "hello" };
 
-    /*
-     * try { CodecUtils.toJsonFile(msg, "msg.xml"); } catch (Exception e) {
-     * Logging.logError(e); }
-     */
   }
 
   public Object getProperty(String key) {
@@ -225,9 +227,37 @@ public class Message implements Serializable {
   public void putAll(Map<String, Object> props) {
     props.putAll(props);
   }
-  
-  public Map<String, Object> getProperties(){
+
+  public Map<String, Object> getProperties() {
     return properties;
+  }
+
+  public String getId() {
+    int p = name.indexOf("@");
+    if (p > 0) {
+      return name.substring(p + 1);
+    }
+    return null;
+  }
+
+  public boolean isBlocking() {
+    return BLOCKING.equals(msgType);
+  }
+
+  public String getSrcId() {
+    int pos = sender.indexOf("@");
+    if (pos > 0) {
+      return sender.substring(pos + 1);
+    }
+    return null;
+  }
+
+  public String getFullName() {
+    return name;
+  }
+
+  public void setBlocking() {
+    msgType = BLOCKING;
   }
 
 }

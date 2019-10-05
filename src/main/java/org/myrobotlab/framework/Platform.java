@@ -50,6 +50,7 @@ public class Platform implements Serializable {
   String os;
   String arch;
   int bitness;
+  String lang = "java";
   String vmName;
   String vmVersion;
   String mrlVersion;

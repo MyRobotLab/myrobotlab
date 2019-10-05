@@ -85,11 +85,15 @@ public abstract class Api {
    *          - inbound uri
    * @return - returns message constructed from the uri
    */
-  public Message uriToMsg(String uri) {
+  static public Message uriToMsg(String uri, String defaultMethodName) {
+    String id = null;// :(
     Message msg = new Message();
-    msg.name = "runtime"; // default
-    msg.method = "getApis"; // default
-    msg.apiKey = ApiFactory.API_TYPE_SERVICE; // default
+    if (id != null) {
+      msg.setName(String.format("runtime@%s", id)); // default
+    } else {
+      msg.setName("runtime");
+    }
+    msg.method = "getApis"; // default    
 
     int pos = uri.indexOf("/api/");
 
@@ -115,21 +119,23 @@ public abstract class Api {
     // to return 'default' instructions on what apis are
     // available
 
+    /*
     if (parts.length > 2) {
-      msg.apiKey = parts[2];
+      msg.srcId = parts[2];
     } else {
       return msg;
     }
+    */
 
     if (parts.length > 3) {
-      msg.name = parts[3];
+      msg.setName(parts[3]);
     }
 
     if (parts.length < 4) {
       // /api/service OR /api/service/
-      msg.method = getDefaultMethod();
+      msg.method = defaultMethodName;//getDefaultMethod();
     } else if (parts.length == 4) {
-      msg.name = "runtime";
+      msg.setName("runtime");
       if (requestUri.endsWith("/")) {
         msg.method = "getMethodMap";
       } else {
@@ -156,31 +162,6 @@ public abstract class Api {
 
   protected String getDefaultMethod() {
     return "getRegistry";
-  }
-
-  /**
-   * needed to get the api key to select the appropriate api processor
-   * 
-   * @param r
-   * @return
-   */
-  static public String getApiKey(AtmosphereResource r) {
-    String requestUri = r.getRequest().getRequestURI();
-    return getApiKey(requestUri);
-  }
-
-  static public String getApiKey(String uri) {
-    int pos = uri.indexOf(Api.PARAMETER_API);
-    if (pos > -1) {
-      pos += Api.PARAMETER_API.length();
-      int pos2 = uri.indexOf("/", pos);
-      if (pos2 > -1) {
-        return uri.substring(pos, pos2);
-      } else {
-        return uri.substring(pos);
-      }
-    }
-    return null;
   }
 
   // Api Imp has opportunity to override
@@ -264,7 +245,7 @@ public abstract class Api {
       response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
 
       Status error = Status.error(e); // name == null anonymous ?
-      Message msg = Message.createMessage(webgui, null, CodecUtils.getCallbackTopicName("getStatus"), error);
+      Message msg = Message.createMessage(webgui.getName(), null, CodecUtils.getCallbackTopicName("getStatus"), error);
       if (ApiFactory.API_TYPE_SERVICE.equals(apiKey)) {
         // for the purpose of only returning the data
         // e.g. http://api/services/runtime/getUptime -> return the uptime
@@ -319,6 +300,7 @@ public abstract class Api {
       return process(webgui, apiKey, r.getRequest().getRequestURI(), uuid, r.getResponse().getOutputStream(), data);
 
     } catch (Exception e) {
+      log.error("process threw", e);
       handleError(webgui, apiKey, r, e);
       return null;
     }

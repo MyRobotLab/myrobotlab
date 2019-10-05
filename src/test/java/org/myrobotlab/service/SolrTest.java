@@ -107,7 +107,7 @@ public class SolrTest extends AbstractServiceTest {
     Assert.assertEquals("doc_3", res.get("id"));
     
     // create a message 
-    Message mrlMessage = Message.createMessage(solr, null, "fooMethod", new String[] {"foo", "bar"});
+    Message mrlMessage = Message.createMessage(solr.getName(), null, "fooMethod", new String[] {"foo", "bar"});
     
     solr.onMessage(mrlMessage);
     
