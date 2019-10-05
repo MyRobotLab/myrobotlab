@@ -286,9 +286,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   static public synchronized ServiceInterface create(String name, String type) {
     String fullTypeName;
-    if (name.indexOf("/") != -1) {
+    if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
     }
+    
+    if (name.contains("@")) {
+      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
+    }
+    
     if (type.indexOf(".") == -1) {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
     } else {
