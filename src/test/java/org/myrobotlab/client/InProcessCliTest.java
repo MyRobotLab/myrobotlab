@@ -60,11 +60,6 @@ public class InProcessCliTest extends AbstractTest {
     return ret;
   }
   
-  @Test
-  public void testRemoteProcess() throws IOException {
-    
-  }
-  
   public String toJson(Object o) {
     return CodecUtils.toPrettyJson(o);
   }
