@@ -187,6 +187,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     meta.includeServiceInOneJar(true);
     meta.addDependency("org.atmosphere", "nettosphere", "3.0.13");
+    meta.addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
+    
 
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
     // hence these following dependencies are zipped with myrobotlab.jar !
@@ -1010,7 +1012,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("start threw", e);
     }
   }
 
@@ -1072,12 +1074,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
       
       Runtime.main(new String[] {"--interactive"});
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
+      //Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      Runtime.start("gui", "SwingGui");
+      //Runtime.start("gui", "SwingGui");
 
       log.info("leaving main");
 
