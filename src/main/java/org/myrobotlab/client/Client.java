@@ -31,6 +31,17 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+/**
+ * This class is a minimal Java websocket client which can attach to a MyRobotLab running instance.
+ * From the command line it should be capable of sending any command using the Cli Api notation.
+ * There are system commands such as ls, lp, cd, etc - but most invoking of service methods will be of the
+ * form
+ * 
+ *  /{service}/{method}/{param0}/{param1}....
+ *  
+ * @author GroG
+ *
+ */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
 public class Client {
 
@@ -71,12 +82,13 @@ public class Client {
   @Option(names = { "-v", "--verbose" }, description = "Be verbose.")
   boolean verbose = false;
 
-  String currentUrl = null;
+  String currentUuid = null;
 
   final transient Worker worker = new Worker();
 
-  public static interface ResponseHandler {
-    public void onResponse(String uuid, String data);
+  // FIXME - this should be promoted to Gateway !!!
+  public static interface RemoteMessageHandler {
+    public void onRemoteMessage(String uuid, String data);
   }
 
   public class Endpoint implements Decoder<String, Reader> {
@@ -100,8 +112,8 @@ public class Client {
 
         // main response
         System.out.println(data);
-        for (ResponseHandler handler : handlers) {
-          handler.onResponse(uuid, data);
+        for (RemoteMessageHandler handler : handlers) {
+          handler.onRemoteMessage(uuid, data);
         }
 
         // response
@@ -112,9 +124,9 @@ public class Client {
       }
   }
 
-  Set<ResponseHandler> handlers = new HashSet<>();
+  Set<RemoteMessageHandler> handlers = new HashSet<>();
 
-  public void addResponseHandler(ResponseHandler handler) {
+  public void addResponseHandler(RemoteMessageHandler handler) {
     handlers.add(handler);
   }
 
@@ -279,7 +291,7 @@ public class Client {
        */
       endpoint.socket = socket;
       endpoints.put(uuid, endpoint);
-      currentUrl = url;
+      currentUuid = uuid;
 
       return endpoint;
 
@@ -313,7 +325,7 @@ public class Client {
           System.out.print((char) c);
           readLine += (char) c;
           if (c == '\n') {
-            Endpoint resource = endpoints.get(currentUrl);
+            Endpoint resource = endpoints.get(currentUuid);
             resource.socket.fire(readLine);
             readLine = "";
           }

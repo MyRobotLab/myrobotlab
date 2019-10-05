@@ -14,6 +14,8 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+import com.google.gson.internal.LinkedTreeMap;
+
 /**
  * 
  * @author GroG
@@ -71,7 +73,7 @@ public class MethodCache {
     // super index of all method entries
     Map<String, MethodEntry> methodsIndex = new TreeMap<>();
 
-    Map<String, MethodEntry> remoteMethods = new TreeMap<>();
+    Map<String, List<MethodEntry>> remoteOrdinalIndex = new TreeMap<>();
     // Map<String, List<MethodEntry>> declaredMethodOrdinalIndex = new
     // TreeMap<>();
   }
@@ -113,8 +115,7 @@ public class MethodCache {
       if (instance == null) {
         instance = new MethodCache();
         instance.excludeMethods.add("main");
-        instance.excludeMethods.add("getMetaData");
-
+        // instance.excludeMethods.add("getMetaData"); // why ?
       }
     }
     return instance;
@@ -162,10 +163,11 @@ public class MethodCache {
     log.info("caching {}'s {} methods and {} declared methods", object.getSimpleName(), methods.length, declaredMethods.length);
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
-      Class<?>[] paramTypes = m.getParameterTypes();
+
 
       String key = getMethodKey(object, m);
       String ordinalKey = getMethodOrdinalKey(object, m);
+      boolean hasInterfaceInParamList = hasInterface(m);
 
       // FIXME - we are "building" an index, not at the moment - "using" the
       // index - so it should be "complete"
@@ -175,43 +177,45 @@ public class MethodCache {
       // if (excludeMethods.contains(m.getName())) {
       // continue;
       // }
+      
+/*      
+      if (m.getName().equals("subscribe") && m.getParameterTypes().length == 2) {
+        log.info("here");
+      }
+      */
+        
 
       // search for interfaces in parameters - if there are any the method is
       // not applicable for remote invoking !
 
       MethodEntry me = new MethodEntry(m);
       mi.methodsIndex.put(key, me);
+      
+      addMethodEntry(mi.methodOrdinalIndex, ordinalKey, me);
 
-      if (!mi.methodOrdinalIndex.containsKey(ordinalKey)) {
-        List<MethodEntry> mel = new ArrayList<>();
-        mel.add(me);
-        mi.methodOrdinalIndex.put(ordinalKey, mel);
-      } else {
-        List<MethodEntry> mel = mi.methodOrdinalIndex.get(ordinalKey);
-        mel.add(me);
-        // FIXME - output more info on collisions
-        // log.warn("{} method ordinal parameters collision ", ordinalKey);
-      }
-
-      if (!excludeFromDeclared.contains(m.getDeclaringClass()) && !excludeMethods.contains(m.getName())) {
-
-        boolean hasInterfaceInParamList = false;
-        // exclude interfaces from this index - the preference in design would
-        // be to have a
-        // string {name} reference to refer to the service instance, however,
-        // within in-process
-        // python binding, using a reference to an interface is preferred
-        for (Class<?> paramType : paramTypes) {
-          if (paramType.isInterface()) {
-            // skipping not applicable for remote invoking
-            hasInterfaceInParamList = true;
-            break;
-          }
+     // if (!hasInterfaceInParamList) { <- required in-process regular interface
+      /*
+        if (!mi.methodOrdinalIndex.containsKey(ordinalKey)) {
+          List<MethodEntry> mel = new ArrayList<>();
+          mel.add(me);
+          mi.methodOrdinalIndex.put(ordinalKey, mel);
+        } else {
+          List<MethodEntry> mel = mi.methodOrdinalIndex.get(ordinalKey);
+          mel.add(me);
+          // FIXME - output more info on collisions
+          // log.warn("{} method ordinal parameters collision ", ordinalKey);
         }
+        */
+    //  }
+
+      // FIXME - excluding from declared / declaring might be nice for small swagger interface
+    //   if (!excludeFromDeclared.contains(m.getDeclaringClass()) && !excludeMethods.contains(m.getName())) {
+
         if (!hasInterfaceInParamList) {
-          mi.remoteMethods.put(key, me);
+          addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
+          // mi.remoteMethods.put(key, me);
         }
-      }
+   //    }
       log.debug("processed {}", me);
     }
 
@@ -221,6 +225,37 @@ public class MethodCache {
     objectCache.put(object.getTypeName(), mi);
     log.info("cached {} {} methods with {} ordinal signatures in {} ms", object.getSimpleName(), mi.methodsIndex.size(), mi.methodOrdinalIndex.size(),
         System.currentTimeMillis() - start);
+  }
+
+  private void addMethodEntry(Map<String, List<MethodEntry>> index, String ordinalKey, MethodEntry me) {
+    if (!index.containsKey(ordinalKey)) {
+      List<MethodEntry> mel = new ArrayList<>();
+      mel.add(me);
+      index.put(ordinalKey, mel);
+    } else {
+      List<MethodEntry> mel = index.get(ordinalKey);
+      mel.add(me);
+      // FIXME - output more info on collisions
+      // log.warn("{} method ordinal parameters collision ", ordinalKey);
+    }
+  }
+
+  private boolean hasInterface(Method m) {
+    Class<?>[] paramTypes = m.getParameterTypes();
+    boolean hasInterfaceInParamList = false;
+    // exclude interfaces from this index - the preference in design would
+    // be to have a
+    // string {name} reference to refer to the service instance, however,
+    // within in-process
+    // python binding, using a reference to an interface is preferred
+    for (Class<?> paramType : paramTypes) {
+      if (paramType.isInterface()) {
+        // skipping not applicable for remote invoking
+        hasInterfaceInParamList = true;
+        break;
+      }
+    }
+    return hasInterfaceInParamList;
   }
 
   /**
@@ -260,9 +295,14 @@ public class MethodCache {
    * @param params
    *          - actual parameter
    * @return - the method to invoke
-   * @throws ClassNotFoundException 
+   * @throws ClassNotFoundException
    */
   public Method getMethod(Class<?> objectType, String methodName, Object... params) throws ClassNotFoundException {
+    Class<?>[] paramTypes = getParamTypes(params);
+    return getMethod(objectType, methodName, paramTypes);
+  }
+
+  public Class<?>[] getParamTypes(Object... params) {
     Class<?>[] paramTypes = null;
     if (params != null) {
       paramTypes = new Class<?>[params.length];
@@ -272,20 +312,7 @@ public class MethodCache {
     } else {
       paramTypes = new Class<?>[0];
     }
-    return getMethod(objectType, methodName, paramTypes);
-  }
-
-  public Method getMethod(String jsonMsg) { // vs getMethod(String object,
-                                            // String method, String[]
-                                            // paramsToDecode
-    // decode container
-
-    // find ordinal signature match
-    // if found & !collision
-    // return method
-    // if found and collision on ordinal - FIXME resolve somehow (test cases)
-    // return method
-    return null;
+    return paramTypes;
   }
 
   /**
@@ -297,13 +324,13 @@ public class MethodCache {
    * @param methodName
    * @param paramTypeNames
    * @return
-   * @throws ClassNotFoundException 
+   * @throws ClassNotFoundException
    */
   public Method getMethod(String fullType, String methodName, String[] paramTypeNames) throws ClassNotFoundException {
 
     if (!objectCache.containsKey(fullType)) {
       // attempt to load it
-      cacheMethodEntries(Class.forName(fullType));      
+      cacheMethodEntries(Class.forName(fullType));
     }
 
     MethodIndex mi = objectCache.get(fullType);
@@ -331,7 +358,7 @@ public class MethodCache {
         // easy ;)
         return possibleMatches.get(0).method;
       } else {
-        // now it gets more complex
+        // now it gets more complex with overloading
         // spin through the possibilites - see if all parameters can be coerced
         // into working
         for (MethodEntry me : possibleMatches) {
@@ -373,6 +400,7 @@ public class MethodCache {
     return mi.methodsIndex.get(key).method;
   }
 
+  /*
   public Map<String, Map<String, MethodEntry>> getRemoteMethods() {
     Map<String, Map<String, MethodEntry>> ret = new TreeMap<>();
     for (String name : objectCache.keySet()) {
@@ -390,17 +418,19 @@ public class MethodCache {
     }
     return null;
   }
+  */
 
-  final public Object invokeOn(Object obj, String methodName, Object... params) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
+  final public Object invokeOn(Object obj, String methodName, Object... params)
+      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
 
     if (obj == null) {
       log.error("invokeOn object is null");
       return null;
     }
-    
+
     Object retobj = null;
     MethodCache cache = MethodCache.getInstance();
-    Method method = cache.getMethod(obj.getClass(), methodName, params); 
+    Method method = cache.getMethod(obj.getClass(), methodName, params);
     retobj = method.invoke(obj, params);
     out(methodName, retobj); // <-- FIXME clean this up !!!
 
@@ -466,7 +496,11 @@ public class MethodCache {
   }
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
+    if (object == null) {
+      log.error("here");
+    }
     String objectKey = object.getTypeName();
+
     String ordinalKey = getMethodOrdinalKey(objectKey, methodName, parameterSize);
     MethodIndex methodIndex = objectCache.get(objectKey);
     if (methodIndex == null) {
@@ -476,25 +510,54 @@ public class MethodCache {
     return methodIndex.methodOrdinalIndex.get(ordinalKey);
   }
   
+  public List<MethodEntry> getRemoteOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
+    if (object == null) {
+      log.error("here");
+    }
+    String objectKey = object.getTypeName();
+
+    String ordinalKey = getMethodOrdinalKey(objectKey, methodName, parameterSize);
+    MethodIndex methodIndex = objectCache.get(objectKey);
+    if (methodIndex == null) {
+      log.error("cannot find index of {} !", objectKey);
+      return null;
+    }
+    return methodIndex.remoteOrdinalIndex.get(ordinalKey);
+  }
+
   public Object[] getDecodedJsonParameters(Class<?> clazz, String methodName, Object[] encodedParams) {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
     // get templates
-    List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
+    // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
+    List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
+    if (possible == null) {
+      log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz.getSimpleName(), methodName, encodedParams.length);
+      return null;
+    }
     Object[] params = new Object[encodedParams.length];
     // iterate through templates - attempt to decode
     for (int p = 0; p < possible.size(); ++p) {
       Class<?>[] paramTypes = possible.get(p).getParameterTypes();
       try {
         for (int i = 0; i < encodedParams.length; ++i) {
-          params[i] = CodecUtils.fromJson((String)encodedParams[i], paramTypes[i]);
+          if (encodedParams[i].getClass() == LinkedTreeMap.class) {
+            // specific gson implementation
+            // rather than double encode everything - i have chosen
+            // to re-encode objects back to string since gson will decode them
+            // all ot linked tree maps - if the json decoder changes from gson
+            // this will probably need to change too
+            encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
+          }
+          params[i] = CodecUtils.fromJson((String) encodedParams[i], paramTypes[i]);
         }
         // successfully decoded params
         return params;
       } catch (Exception e) {
         // not logged, because this is one of the only ways to search :P
         // log.error("getDecodedParameters threw", e);
+        log.error("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e);
       }
     }
 

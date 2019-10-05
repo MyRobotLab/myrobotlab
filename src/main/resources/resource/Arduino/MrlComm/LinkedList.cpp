@@ -50,7 +50,7 @@ ListNode<T>* LinkedList<T>::getNode(int index) {
     lastNodeGot = current;
     return current;
   }
-  return false;
+  return NULL;
 }
 
 template<typename T>

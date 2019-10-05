@@ -491,7 +491,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   @Override
   public boolean isAuthorized(Message msg) {
-    return isAuthorized(msg.getProperties(), msg.name, msg.method);
+    return isAuthorized(msg.getProperties(), msg.getName(), msg.method);
   }
 
   public boolean setDefaultNewGroupId(String userId, String groupId) {
