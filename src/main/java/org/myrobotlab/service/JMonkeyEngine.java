@@ -1167,7 +1167,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   }
 
   public void loadModels(String dirPath) {
+    log.info("loading models from {}", dirPath);
     File dir = new File(dirPath);
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
     if (!dir.isDirectory()) {
       error("%s is not a directory", dirPath);
       return;

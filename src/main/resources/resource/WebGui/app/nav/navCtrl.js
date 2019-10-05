@@ -22,6 +22,8 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         })
     })
     $scope.showAll = panelSvc.showAll
+    $scope.remoteId = mrl.getRemoteId();
+    $scope.id = mrl.getId();
 
     //service-panels & update-routine (also used for search)
     // populated for search

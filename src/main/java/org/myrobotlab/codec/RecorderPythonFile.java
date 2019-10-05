@@ -28,7 +28,7 @@ public class RecorderPythonFile implements Recorder {
   public void write(Message msg) throws IOException {
     // python
     Object[] data = msg.data;
-    String msgName = (msg.name.equals(Runtime.getInstance().getName())) ? "runtime" : msg.name;
+    String msgName = (msg.getName().equals(Runtime.getInstance().getName())) ? "runtime" : msg.getName();
     recordingPython.write(String.format("%s.%s(", msgName, msg.method).getBytes());
     if (data != null) {
       for (int i = 0; i < data.length; ++i) {

@@ -251,7 +251,7 @@ public class Blender extends Service {
   public void sendMsg(String method, Object... data) {
     if (isConnected()) {
       try {
-        Message msg = Message.createMessage(this, "Blender.py", method, data);
+        Message msg = Message.createMessage(getName(), "Blender.py", method, data);
         OutputStream out = control.getOutputStream();
         // FIXME - this encoder needs to
         // NOT PRETTY PRINT - delimiter is \n PRETY PRINT WILL BREAK IT !!!

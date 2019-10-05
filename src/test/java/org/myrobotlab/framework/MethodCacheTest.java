@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.Level;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Clock;
 import org.myrobotlab.service.Runtime;
@@ -18,8 +19,11 @@ import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestCatcher.Ball;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.test.AbstractTest;
+import org.slf4j.Logger;
 
 public class MethodCacheTest extends AbstractTest {
+  
+  public final static Logger log = LoggerFactory.getLogger(MethodCacheTest.class);
 
   static MethodCache cache;
   static TestCatcher tester;
@@ -96,8 +100,10 @@ public class MethodCacheTest extends AbstractTest {
 
     // log.info("Clock - {}",
     // CodecUtils.toJson(cache.getRemoteMethods("Clock")));
+    /* FIXME
     log.info("TestCatcher - {}", CodecUtils.toJson(cache.getRemoteMethods("org.myrobotlab.framework.TestCatcher")));
     cache.getRemoteMethods();
+    */
 
     method = cache.getMethod(TestCatcher.class, "getPin", 3);
     ret = method.invoke(tester, 3);
@@ -120,9 +126,11 @@ public class MethodCacheTest extends AbstractTest {
     Object ret = null;
     Method method = null;
 
+    /* FIXME
     log.info("TestCatcher - {}", CodecUtils.toJson(cache.getRemoteMethods("org.myrobotlab.framework.TestCatcher")));
     cache.getRemoteMethods();
-
+    */
+    
     // service super type test
     method = cache.getMethod(TestCatcher.class, "stopService");
     ret = method.invoke(tester);

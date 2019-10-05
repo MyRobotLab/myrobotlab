@@ -17,8 +17,8 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public abstract class Codec {
 
 
-  public byte[] encode(NameProvider sender, String name, String method, Object... data) throws Exception {
-    Message msg = Message.createMessage(sender, name, method, data);
+  public byte[] encode(NameProvider gateway, String name, String method, Object... data) throws Exception {
+    Message msg = Message.createMessage(gateway.getName(), name, method, data);
     ByteArrayOutputStream encoded = new ByteArrayOutputStream();
     encode(encoded, msg);
     return encoded.toByteArray();

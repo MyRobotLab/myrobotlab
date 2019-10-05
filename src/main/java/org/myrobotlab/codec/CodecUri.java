@@ -75,7 +75,7 @@ public class CodecUri {
     Message msg = new Message();
 
     if (parts.length > 3) {
-      msg.name = parts[2];
+      msg.setName(parts[2]);
       msg.method = parts[3];
     } else if (parts.length == 3) {
       // lazy runtime method call
@@ -109,7 +109,7 @@ public class CodecUri {
         jsonParams[i] = result;
       }
 
-      ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.name);
+      ServiceInterface si = org.myrobotlab.service.Runtime.getService(msg.getName());
       if (si == null) {
         si = org.myrobotlab.service.Runtime.getInstance();
       }

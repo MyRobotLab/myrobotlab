@@ -342,7 +342,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       Skeleton skeleton = data.skeleton;
 
       if (firstSkeleton) {
-        speakBlocking("i see you");
         firstSkeleton = false;
       }
 
@@ -531,10 +530,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       if (openni == null) {
         openni = startOpenNI();
       }
-      speakBlocking("copying gestures");
       openni.startUserTracking();
     } else {
-      speakBlocking("stop copying gestures");
       if (openni != null) {
         openni.stopCapture();
         firstSkeleton = true;
