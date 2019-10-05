@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -369,6 +368,15 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     shutdown();
   }
 
+  /**
+   * Setting the runtime virtual will set the platform virtual too. All
+   * subsequent services will be virtual
+   */
+  public void setVirtual(boolean b) {
+    Platform.setVirtual(true);
+    this.isVirtual = b;
+  }
+
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
     log.info("Runtime.createService {}", name);
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
@@ -715,30 +723,22 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
     ServiceInterface sw = registry.get(serviceName);
 
     Class<?> c = sw.getClass();
-    
+
     /*
-    Method[] methods = c.getDeclaredMethods();
-
-    Method m;
-    MethodEntry me;
-    String s;
-    for (int i = 0; i < methods.length; ++i) {
-      m = methods[i];
-
-      if (hideMethods.contains(m.getName())) {
-        continue;
-      }
-      me = new MethodEntry(m);      
-      s = me.getSignature();
-      ret.put(s, me);
-    }
-    */
-    ///////////   BEGIN FIX ////////////////////////////
+     * Method[] methods = c.getDeclaredMethods();
+     * 
+     * Method m; MethodEntry me; String s; for (int i = 0; i < methods.length;
+     * ++i) { m = methods[i];
+     * 
+     * if (hideMethods.contains(m.getName())) { continue; } me = new
+     * MethodEntry(m); s = me.getSignature(); ret.put(s, me); }
+     */
+    /////////// BEGIN FIX ////////////////////////////
     // FURTHER FIX IS TO CHANGE INPUT TO TYPE NOT INSTANCE !!!
     MethodCache cache = MethodCache.getInstance();
     return cache.getRemoteMethods(c.getTypeName());
-    
-    ///////////   END FIX //////////////////////////////
+
+    /////////// END FIX //////////////////////////////
 
     // return ret;
   }
@@ -1035,7 +1035,7 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
          * codec.decode(FileIO.toString(options.cfg), CmdOptions.class); new
          * CommandLine(fileOptions).parseArgs(args);
          */
-        try {          
+        try {
           options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
         } catch (Exception e) {
           log.error("config file {} was specified but could not be read", options.cfg);
@@ -1825,9 +1825,9 @@ public class Runtime extends Service implements MessageListener, ResponseHandler
   public static Platform getPlatform() {
     return getInstance().platform;
   }
-  
+
   public boolean is64bit() {
-    return getInstance().platform.getBitness() == 64;        
+    return getInstance().platform.getBitness() == 64;
   }
 
   public Repo getRepo() {

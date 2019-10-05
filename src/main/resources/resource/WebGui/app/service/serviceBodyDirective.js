@@ -3,12 +3,16 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
         scope: {
             panel: '='
         },
+        // controller: 'serviceCtrl',
         link: function(scope, elem, attr) {
 
+            console.log('serviceBodyDirective - link')
+            /*
             elem.css({
                 'overflow-x': 'auto',
                 'overflow-y': 'auto'
             });
+            */
 
             scope.panel.notifySizeYChanged = function(height) {
                 elem.css({
@@ -37,6 +41,11 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         //get an updated / fresh servicedata & convert it to json
                         var servicedata = mrl.getService(scope.panel.name);
                         newscope.servicedatajson = JSON.stringify(servicedata, null, 2);
+                    }
+                    newscope.getMethods = function() {
+                        //get an updated / fresh servicedata & convert it to json
+                        var servicedata = mrl.getMethods(scope.panel.name);
+                        newscope.methods = JSON.stringify(servicedata, null, 2);
                     }
                     var header = $templateCache.get('service/tab-header.html');
                     var content = $templateCache.get(scope.panel.simpleName + 'Gui.html');

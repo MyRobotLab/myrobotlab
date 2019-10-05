@@ -3,10 +3,14 @@ angular.module('mrlapp.views').controller('tabsViewCtrl', ['$scope', '$log', '$f
 
     var isUndefinedOrNull = function(val) {
         return angular.isUndefined(val) || val === null;
-    };
+    }
 
     $scope.view_tab = 'default';
 
+    $scope.noworky = function() {
+        noWorkySvc.openNoWorkyModal($scope.panel.name);
+    }
+    
     $scope.updateServiceData = function() {
         //get an updated / fresh servicedata & convert it to json
         var servicedata = mrl.getService($scope.view_tab);
@@ -23,7 +27,7 @@ angular.module('mrlapp.views').controller('tabsViewCtrl', ['$scope', '$log', '$f
         $timeout(function() {
             $scope.panels = $filter('panellist')($scope.panels, 'main');
 
-            // $log.info('panels-main', $scope.panels);
+            $log.info('panels-main', $scope.panels);
             if ($scope.view_tab == 'default' && !isUndefinedOrNull($scope.panels) && !isUndefinedOrNull($scope.panels[0])) {
                 $scope.view_tab = $scope.panels[0].name;
             }
