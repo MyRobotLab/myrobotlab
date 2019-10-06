@@ -1460,59 +1460,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return load(null, null);
   }
 
-  public JsonElement loadJsonTree() throws IOException {
-    String filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
-    String json = FileIO.toString(filename);
-    return loadJsonTree(json);
-  }
-
-  public JsonElement loadJsonTree(String json) {
-    return CodecUtils.toJsonTree(json);
-  }
-
-  public Object loadField(String fieldName) throws IOException {
-
-    JsonElement tree = loadJsonTree();
-    if (tree == null) {
-      return null;
-    }
-
-    JsonObject jsonObject = tree.getAsJsonObject();
-    if (jsonObject == null) {
-      return null;
-    }
-
-    JsonElement field = jsonObject.get(fieldName);
-    if (field == null) {
-      return null;
-    }
-
-    if (field.isJsonNull()) {
-      return null;
-    }
-
-    if (field.isJsonObject()) {
-      return field.getAsJsonObject();
-    }
-    // box for simplicity
-
-    if (field.isJsonPrimitive()) {
-      JsonPrimitive primitive = field.getAsJsonPrimitive();
-      if (primitive.isBoolean()) {
-        return primitive.getAsBoolean();
-      }
-
-      if (primitive.isString()) {
-        return primitive.getAsString();
-      }
-
-      if (primitive.isNumber()) {
-        return primitive.getAsDouble();
-      }
-    }
-    return null;
-  }
-
   public boolean load(Object o, String inCfgFileName) {
     String filename = null;
     if (inCfgFileName == null) {
