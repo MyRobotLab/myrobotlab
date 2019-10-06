@@ -80,17 +80,6 @@ public class CodecUri {
     } else if (parts.length == 3) {
       // lazy runtime method call
       msg.method = parts[2];
-      // FIXME - NOT GOOD - the encoder SHOULD NOT NEED OR DEPEND ON ANY RUNTIME
-      // OR
-      // INSTANCE INFO !!
-      // precedence -
-      // 1. Runtime method
-      /*
-       * if (Runtime.getInstance().getMessageSet().contains(msg.method)){
-       * 
-       * } // 2. get named instance of service if ()
-       */
-
     } else {
       // lazy runtime help
       msg.method = "help";

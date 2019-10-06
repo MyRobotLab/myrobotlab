@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -44,27 +42,13 @@ public class CodecUtils {
 
   public final static Logger log = LoggerFactory.getLogger(CodecUtils.class);
 
-  // uri schemes
-  public final static String SCHEME_MRL = "mrl";
-
-  public final static String SCHEME_BASE64 = "base64";
-
-  // TODO change to mime-type
-  public final static String TYPE_MESSAGES = "messages";
-  public final static String TYPE_JSON = "json";
-  public final static String TYPE_URI = "uri";
-
   // mime-types
   public final static String MIME_TYPE_JSON = "application/json";
 
-  // disableHtmlEscaping to prevent encoding or "=" -
-  // private transient static Gson gson = new
-  // GsonBuilder().setDateFormat("yyyy-MM-dd
-  // HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
   private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
   private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
-  private transient static JsonParser parser = new JsonParser();
+  // private transient static JsonParser parser = new JsonParser();
 
   private static boolean initialized = false;
 
@@ -157,20 +141,6 @@ public class CodecUtils {
     // no replacement - just pefix and capitalize
     // FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
     return String.format("on%s", capitalize(topicMethod));
-  }
-
-  // concentrator data coming from decoder
-  static public Method getMethod(String serviceType, String methodName, Object[] params) {
-    return getMethod("org.myrobotlab.service", serviceType, methodName, params);
-  }
-
-  // real encoded data ??? getMethodFromXML getMethodFromJson - all resolve to
-  // this getMethod with class form
-  // encoded data.. YA !
-  static public Method getMethod(String pkgName, String objectName, String methodName, Object[] params) {
-    String fullObjectName = String.format("%s.%s", pkgName, objectName);
-    log.debug("Full Object Name : {}", fullObjectName);
-    return null;
   }
 
   static public ArrayList<Method> getMethodCandidates(String serviceType, String methodName, int paramCount) {
@@ -349,15 +319,11 @@ public class CodecUtils {
       out.write(json.getBytes());
   }
 
-  public final static JsonElement toJsonTree(String json) {
-    JsonElement tree = null;
-    try {
-      tree = parser.parse(json);
-    } catch (Exception e) {
-      log.error("toJsonTree threw", e);
-    }
-    return tree;
-  }
+  /*
+   * public final static JsonElement toJsonTree(String json) { JsonElement tree
+   * = null; try { tree = parser.parse(json); } catch (Exception e) {
+   * log.error("toJsonTree threw", e); } return tree; }
+   */
 
   public final static String toJson(Object o, Class<?> clazz) {
     return gson.toJson(o, clazz);
@@ -489,5 +455,128 @@ public class CodecUtils {
     return null;
   }
 
-  // === method signatures end ===
+  /**
+   * This is the Cli encoder - it takes a line of text and generates the
+   * appropriate msg from it to either invoke (locally) or sendBlockingRemote
+   * (remotely)
+   * 
+   * <pre>
+   * 
+   * The expectation of this encoding is:
+   *    if "/api/service/" is found - the end of that string is the starting point
+   *    if "/api/service/" is not found - then the starting point of the string should be the service
+   *      e.g "runtime/getUptime"
+   * 
+   * Important to remember getRequestURI is NOT decoded and getPathInfo is.
+   * 
+   * 
+            http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S%3F+ID?p+1=c+d&p+2=e+f#a
+            
+            Method              URL-Decoded Result           
+            ----------------------------------------------------
+            getContextPath()        no      /app
+            getLocalAddr()                  127.0.0.1
+            getLocalName()                  30thh.loc
+            getLocalPort()                  8480
+            getMethod()                     GET
+            getPathInfo()           yes     /a?+b
+            getProtocol()                   HTTP/1.1
+            getQueryString()        no      p+1=c+d&p+2=e+f
+            getRequestedSessionId() no      S%3F+ID
+            getRequestURI()         no      /app/test%3F/a%3F+b;jsessionid=S+ID
+            getRequestURL()         no      http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S+ID
+            getScheme()                     http
+            getServerName()                 30thh.loc
+            getServerPort()                 8480
+            getServletPath()        yes     /test?
+            getParameterNames()     yes     [p 2, p 1]
+            getParameter("p 1")     yes     c d
+   * </pre>
+   * 
+   * @param from
+   *          - sender
+   * @param to
+   *          - target service
+   * @param data
+   *          - cli encoded msg
+   * @return
+   */
+  static public Message cliToMsg(String from, String to, String data) {
+    Message msg = Message.createMessage(from, to, "pwd", null);
+
+    // because we always want a "Blocking/Return" from the cmd line - without a
+    // subscription
+    msg.setBlocking();
+
+    /**
+     * <pre>
+    
+    "/"  -  list services
+    "/{serviceName}" - list data of service
+    "/{serviceName}/" - list methods of service
+    "/{serviceName}/{method}" - invoke method
+    "/{serviceName}/{method}/" - list parameters of method
+    "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
+    "/{serviceName}/{method}/p0/p1/p2/"
+     * 
+     * </pre>
+     */
+    
+    if (data.startsWith("/api/service/")) {
+      data = data.substring("/api/service/".length());
+    }
+    
+    if (data.startsWith("/") && data.length() != 1) {
+      data = data.substring(1);
+    }
+    
+    // at this point the format should be
+    // {service}/{method}/{p0}/{p1}..
+
+    String[] parts = data.split("/");
+    
+    
+    if (msg.name == null) {
+      msg.name = "runtime";
+    }
+    
+
+    // "/" - list services FIXME !! check this ! - not sure if this is correct
+    if (parts.length == 0) {
+      msg.method = "ls";
+      msg.data = new Object[] { "/" };
+    }
+    
+    if (parts.length > 0) {
+      msg.name = parts[0];
+    }
+     
+
+    // "/python" - list data of service
+    if (parts.length == 1 && !data.endsWith("/")) {
+      msg.method = "ls";
+      msg.data = new Object[] { "/" + parts[1] };
+    }
+
+    if (parts.length == 1 && data.endsWith("/")) {
+      msg.method = "ls";
+      msg.data = new Object[] { "/" + parts[1] + "/" };
+    }
+
+    // fix me diff from 2 & 3 "/"
+    if (parts.length > 1) {
+
+      // prepare the method
+      msg.method = parts[1];
+
+      // FIXME - to encode or not to encode that is the question ...
+      Object[] payload = new Object[parts.length - 2];
+      for (int i = 2; i < parts.length; ++i) {
+        payload[i - 2] = parts[i];
+      }
+      msg.data = payload;
+    }
+    return msg;
+  }
+
 }

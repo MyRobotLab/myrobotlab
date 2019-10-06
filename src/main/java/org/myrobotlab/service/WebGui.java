@@ -50,7 +50,6 @@ import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
@@ -604,11 +603,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       
       if (apiKey.equals("messages")) {
         r.suspend();
+        // FIXME - needed ?? - we use BroadcastFactory now !
+        setBroadcaster(apiKey, r);
       }
       
-      // FIXME - needed ?? - we use BroadcastFactory now !
-      setBroadcaster(apiKey, r);
-      
+     
       // default return encoding 
       r.getResponse().addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
 
@@ -647,7 +646,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         out.write(CodecUtils.toJson(msg).getBytes());
         return;
 
-      } // TODO - else if (newConnection && services
+      } else if (apiKey.equals("service")) {
+        Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+        Object ret = invoke(msg);
+        OutputStream out = r.getResponse().getOutputStream();
+        out.write(CodecUtils.toJson(ret).getBytes());
+        // FIXME - remove connection ! AND/OR figure out session
+        return;
+      }
 
       // ================= begin messages2 api =======================
 
