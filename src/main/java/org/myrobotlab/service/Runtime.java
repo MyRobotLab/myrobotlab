@@ -166,7 +166,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * number of services created by this runtime
    */
   Integer creationCount = 0;
-  
+
   /**
    * current list of cli sessions and where they are from
    */
@@ -289,11 +289,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
     }
-    
+
     if (name.contains("@")) {
       throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
     }
-    
+
     if (type.indexOf(".") == -1) {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
     } else {
@@ -387,7 +387,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   public void setVirtual(boolean b) {
     Platform.setVirtual(true);
+    for (ServiceInterface si : getServices()) {
+      if (!si.isRuntime()) {
+        si.setVirtual(b);
+      }
+    }
     this.isVirtual = b;
+    broadcastState();
   }
 
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
@@ -705,7 +711,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
       // FIXME @ should be a requirement of "all" entries for consistency
-      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { 
+      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) {
         local.put(serviceName, registry.get(serviceName));
       }
     }
@@ -735,7 +741,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     ServiceInterface sw = registry.get(serviceName);
     Class<?> c = sw.getClass();
- 
+
     MethodCache cache = MethodCache.getInstance();
     return cache.getRemoteMethods(c.getTypeName());
 
@@ -1409,9 +1415,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
-  
+
   /**
    * jump to another process using the cli
+   * 
    * @param id
    * @return
    */
@@ -1420,12 +1427,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (route == null) {
       // log.error("cannot attach - no routing information for {}", id);
       return "cannot attach - no routing information for " + id;
-    }    
+    }
     stdInClient.setRemote(id);
     return id;
   }
-  
-  public String exit() {    
+
+  public String exit() {
     stdInClient.setRemote(getId());
     return getId();
   }
@@ -3078,9 +3085,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       for (Object o : msg.data) {
         System.out.println(CodecUtils.toPrettyJson(o));
       }
-      
+
       System.out.println(stdInClient.getPrompt(uuid));
-      
+
     } else {
       Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
       endpoint.socket.fire(CodecUtils.toJson(msg));
