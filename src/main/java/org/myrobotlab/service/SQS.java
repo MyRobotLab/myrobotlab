@@ -67,8 +67,9 @@ public class SQS extends Service implements TextPublisher , TextListener {
       // publish the text from this message...  programAB can listen to this i guess?
       invoke("publishText", m.getBody());
       // TODO: assuming we've received this message, i suppose we should acknolege it somehow?
-      
-      
+      // maybe we should only delete the message if the attribute is a message for us?
+      String receiptHandle = m.getReceiptHandle();
+      sqs.deleteMessage(new DeleteMessageRequest(queueUrl, receiptHandle));
     }
    
   }
