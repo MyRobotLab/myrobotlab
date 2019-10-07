@@ -52,10 +52,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         newscope.methods = methods;
                     }
                     */
-                    newscope.toggleVirtual = function() {
+                    newscope.toggleVirtual = function(virtual) {
                         var service = mrl.getService(scope.panel.name);
-                        service.isVirtual = !service.isVirtual
-                        mrl.sendTo(scope.panel.name, 'setVirtual', service.isVirtual)
+                        //service.isVirtual = !service.isVirtual
+                        mrl.sendTo(scope.panel.name, 'setVirtual', virtual)
                     }
 
                     var header = $templateCache.get('service/tab-header.html');

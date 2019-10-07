@@ -998,6 +998,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void restart() {
     stop();
+    WebGui _self = this;
+
+    // done so a thread "from" webgui can restart itself
+    // similar thread within stop
+    // From a web request you cannot block on a request to stop/start self
+    new Thread() {
+      public void run() {
+        try {
+          while (nettosphere != null) {
+            Thread.sleep(500);
+          }
+        } catch (InterruptedException e) {
+        }
+        _self.start();
+      }
+    }.start();
     start();
   }
 
@@ -1147,17 +1163,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void stop() {
     if (nettosphere != null) {
       log.warn("==== nettosphere STOPPING ====");
-      nettosphere.stop();
+      // done so a thread "from" webgui can stop itself :P
       // Must not be called from a I/O-Thread to prevent deadlocks!
-      /*
-       * (new Thread("stopping nettophere") { public void run() {
-       * 
-       * log.error("==== nettosphere stopping  ===="); //
-       * nettosphere.framework(). // nettosphere.framework().destroy();
-       * nettosphere.stop(); log.error("==== nettosphere STOPPED ===="); }
-       * }).start(); sleep(1000);
-       */
-      log.warn("==== nettosphere STOPPED ====");
+      new Thread() {
+        public void run() {
+          nettosphere.stop();
+          nettosphere = null;
+          log.warn("==== nettosphere STOPPED ====");
+        }
+      }.start();
     }
   }
 
@@ -1195,8 +1209,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      // Runtime.start("gui", "SwingGui");
-      webgui.start();
 
       log.info("leaving main");
 

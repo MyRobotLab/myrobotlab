@@ -21,13 +21,13 @@
                     </a>
                 </li>
                 <li>
-                    <a href="" ng-click="toggleVirtual()">
-                        <i class="glyphicon glyphicon-chevron-down"></i>
+                  
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
                         &nbsp;&nbsp;virtualize                    
                         <span>
-                        <input type="checkbox" ng-model="service.isVirtual">
+                        <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
                         </span>
-                    </a>
+                    
                 </li>
                 <li>
                     <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">

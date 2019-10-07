@@ -8,9 +8,6 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
         $scope.service = service
     }
 
-    //init variables you always need
-    $scope.pulseData = ''
-
     //you HAVE TO define this method
     //-> you will receive all messages routed to your service here
     this.onMsg = function(inMsg) {
@@ -39,7 +36,7 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
     // $scope.msg.startClock()
 
     //subscribe to functions and to the service
-    msg.subscribe('pulse')
+    // msg.subscribe('x')
     msg.subscribe(this)
 }
 ])
