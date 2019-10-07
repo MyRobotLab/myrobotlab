@@ -113,7 +113,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(inMsg.data[0].pinDefs.pinIndex);
+                    setTraceButtons(inMsg.data[0].pinIndex);
                     scope.$apply();
                     break;
                 case 'onPinArray':

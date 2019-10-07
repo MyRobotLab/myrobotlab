@@ -1,3 +1,30 @@
-<div class="col-md-12">
-Security
+<div class="row">
+    <div class="col-lg-12">
+        
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <br>
+    </div>
+</div>
+<!--FIXME - repeat all active usernames -->
+<div class="row">
+    <div class="col-lg-12">
+        <form class="form-inline">
+            <input class="form-control" type="text" ng-model="user" placeholder="user">
+            <input class="form-control" type="password" ng-model="password" placeholder="password">
+            <button class="btn btn-default" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">add user</button>
+        </form>
+    </div>
+</div>
+<!--FIXME - repeat all active keynames -->
+<div class="row">
+    <div class="col-lg-12">
+        <form class="form-inline">
+            <input class="form-control" type="text" ng-model="key" placeholder="key">
+            <input class="form-control" type="password" ng-model="secret" placeholder="secret">
+            <button class="btn btn-default" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">add secret</button>
+        </form>
+    </div>
 </div>

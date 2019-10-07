@@ -2,7 +2,7 @@
     <h2>{{service.targetPos.toFixed(2)}}</h2>
 </div>
 <div class="col-md-1">
-<img src="enabled.png" ng-show="service.enabled" uib-tooltip="the servo is energized" />
+<img src="enabled.png" ng-show="service.enabled" title="the servo is energized" />
 </div>
 <div class="col-md-6">
     <h2>{{service.currentPos.toFixed(2)}}</h2>
@@ -39,19 +39,19 @@ Controller
 <!-- auto disable end -->
 <div class="input-group">
     <span class="input-group-addon">speed</span>
-    <input type="text" class="form-control" ng-model="service.speed" uib-tooltip="degrees per second">
+    <input type="text" class="form-control" ng-model="service.speed" title="current desired speed in degrees per second">
     <span class="input-group-addon">max speed</span>
-    <input type="text" class="form-control" ng-model="service.maxSpeed" uib-tooltip="degrees per second">
+    <input type="text" class="form-control" ng-model="service.maxSpeed" title="maximum speed of the servo in degrees per second - 500 is average for a hobby servo">
 </div>
 <div class="input-group">
     <span class="input-group-addon">input min</span>
-    <input type="text" class="form-control" ng-model="service.mapper.minX" uib-tooltip="minimum allowed position of servo">
+    <input type="text" class="form-control" ng-model="service.mapper.minX" title="minimum allowed position of servo">
     <span class="input-group-addon">input max</span>
-    <input type="text" class="form-control" ng-model="service.mapper.maxX" uib-tooltip="maximum allowed position of servo">
+    <input type="text" class="form-control" ng-model="service.mapper.maxX" title="maximum allowed position of servo">
     <span class="input-group-addon">output min</span>
-    <input type="text" class="form-control" ng-model="min" uib-tooltip="minimum allowed position of servo">
+    <input type="text" class="form-control" ng-model="min" title="minimum allowed position of servo">
     <span class="input-group-addon">output max</span>
-    <input type="text" class="form-control" ng-model="max" uib-tooltip="maximum allowed position of servo">
+    <input type="text" class="form-control" ng-model="max" title="maximum allowed position of servo">
     
     <span class="input-group-btn">
         <button class="btn btn-default" type="button" ng-click="update(velocity, rest, min, max)">update</button>
@@ -59,5 +59,5 @@ Controller
         <button class="btn btn-default" type="button" ng-click="msg.stop()" ng-show="service.isSweeping">stop</button>        
     </span>
     <span class="input-group-addon">rest</span>
-    <input type="text" class="form-control" ng-model="rest" uib-tooltip="resting position of servo">
+    <input type="text" class="form-control" ng-model="rest" title="resting position of servo">
 </div>
