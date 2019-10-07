@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,9 @@ import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.layers.objdetect.DetectedObject;
 import org.deeplearning4j.nn.layers.objdetect.YoloUtils;
+import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
+import org.deeplearning4j.nn.modelimport.keras.exceptions.InvalidKerasConfigurationException;
+import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfigurationException;
 // import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
@@ -136,6 +140,9 @@ public class Deeplearning4j extends Service {
   private ComputationGraph tinyyolo = null;
   private TinyYOLO tinyYOLOModel = null;
 
+  private ComputationGraph miniXCEPTION = null;
+  
+  
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
@@ -506,7 +513,40 @@ public class Deeplearning4j extends Service {
     // pretrained imagenet
     tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
+  
+  public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
+    // load it up!
+    String filename = "models"+File.separator+"_mini_XCEPTION.102-0.66.hdf5";
+    miniXCEPTION = KerasModelImport.importKerasModelAndWeights(filename);
+  }
 
+  public HashMap<String, Double> classifyImageMiniEXCEPTION(IplImage iplImage) throws IOException {
+
+    NativeImageLoader loader = new NativeImageLoader(64, 64, 1);
+    BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
+    INDArray image = loader.asMatrix(buffImg);
+    String[] emotionLabels = new String[]{"angry" ,"disgust","scared", "happy", "sad", "surprised", "neutral"};
+    HashMap<String, Double> emotionMap = new HashMap<String, Double>();
+    INDArray[] out = miniXCEPTION.output(image);
+    // presumably the first column is the output for the first input.  
+    System.out.println("Output Size" + out.length);
+    // Now.. what do we do with this output?
+    for (int i = 0 ; i < out.length; i++) {
+      System.out.println(out[i].toString());
+      INDArray result = out[i];
+      int j = -1;
+      double[] results = result.toDoubleVector();
+      for (String label : emotionLabels) {
+        j++;
+        Double val = results[j];
+        emotionMap.put(label, val);
+        log.info("Emotion {} Val {}", label, val);
+      }
+      //now for each label, we have the confidence
+    }
+    return emotionMap;
+  }
+  
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
     BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
