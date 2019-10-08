@@ -5,28 +5,29 @@ import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.InvalidKerasConfigurationException;
 import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfigurationException;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.Deeplearning4j;
+import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Solr;
 import org.slf4j.Logger;
 
 /**
- * this opencv filter will load the keras model for emotion detection published on this open source project:
+ * this opencv filter will load the keras model for emotion detection published on this open source project
  * https://github.com/omar178/Emotion-recognition
  * 
  * @author kwatters
@@ -42,17 +43,22 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   public Map<String, Double> lastResult = null;
   private volatile IplImage lastImage = null;
+  transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
+  // the additional border around the face detection to include in the emotion classification. (in pixels)
+  private int boxSlop = 10;
+  // a confidence threshold typically from 0.0 to 1.0 on how confident the classification is.
+  private double confidence = 0.25;
+  
   public OpenCVFilterMiniXception(String name) {
     super(name);
-    log.info("Constructor of dl4j filter");
     loadDL4j();
-    log.info("Finished loading vgg16 model.");
+    log.info("Finished loading mini XCEPTION model.");
   }
 
   private void loadDL4j() {
     dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
-    log.info("Loading VGG 16 Model.");
+    log.info("Loading mini XCEPTION Model.");
     try {
       dl4j.loadMiniEXCEPTION();
     } catch (IOException | UnsupportedKerasConfigurationException | InvalidKerasConfigurationException e) {
@@ -74,12 +80,43 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       // log.info("Display result " );
       displayResult(image, lastResult);
     }
-    // ok now we just need to update the image that the current thread is
-    // processing (if the current thread is idle i guess?)
-    lastImage = image;
+    
+    
+    // there's something currently being processed.. skip
+    if (lastImage != null) {
+      return image;
+    }
+    // here we want to update the lastImage as the one with the bounding box.
+    
+    List<Rectangle> boxes = data.getBoundingBoxArray();
+    // we should grab the center of the first box.. 
+    // crop a square around that center.. and set that as the last image to pass to the emotion detector.
+    if (boxes != null) {
+      for (Rectangle box : boxes) {
+        // log.info("Processing Box : {}", box);
+        int x = (int)(box.x + box.width/2);
+        int y = (int)(box.y + box.height/2);
+        // now we have the center point
+        // create a new box
+        int miniExceptionWidth = (int)Math.max(box.width , box.height) + boxSlop;
+        //int miniExceptionWidth = 64;
+        Rect miniBox = new Rect(x-miniExceptionWidth/2, y-miniExceptionWidth/2, miniExceptionWidth, miniExceptionWidth);
+        // now.. we need to crap the image for this bounding box..
+        lastImage = extractSubImage(OpenCV.toMat(image), miniBox);
+        // Here
+      }
+    }
+    
     return image;
   }
 
+  private IplImage extractSubImage(Mat inputMat, Rect boundingBox) {
+    Mat cropped = new Mat(inputMat, boundingBox);
+    IplImage image = converterToIpl.convertToIplImage(converterToIpl.convert(cropped));
+    return image;
+  }
+
+  
   public static String padRight(String s, int n) {
     return String.format("%1$-" + n + "s", s);
   }
@@ -147,24 +184,21 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       // be updating it while it's being classified maybe?!
       if (lastImage != null) {
         try {
-          // dl4j.yoloImage(lastImage);
-          // yoloLastResult = dl4j.classifyImageTinyYolo(lastImage,
-          // getVideoProcessor().frameIndex);
-          // dl4j.classifyImageDarknet(lastImage);
           count++;
-          lastResult = dl4j.classifyImageMiniEXCEPTION(lastImage);
+          lastResult = dl4j.classifyImageMiniEXCEPTION(lastImage, confidence);
+          // Sort this lastResult based on it's value..
           if (count % 100 == 0) {
             double rate = 1000.0 * count / (System.currentTimeMillis() - start);
             log.info("DL4J Filter Rate: {}", rate);
           }
           invoke("publishClassification", lastResult);
-          if (lastResult != null)
+          if (lastResult != null && lastResult.size() > 0)
             log.info(formatResultString(lastResult));
         } catch (IOException e) {
-          // TODO Auto-generated catch block
-          log.warn("Exception classifying image!");
-          e.printStackTrace();
+          log.warn("Exception classifying image!", e);
         }
+        // at this point, presumably we've finished classifying this image.. we should null it out.
+        lastImage = null;
       } else {
         // log.info("No Image to classify...");
       }
@@ -179,10 +213,28 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       }
     }
   }
-
+  
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;
+  }
+
+  public double getConfidence() {
+    return confidence;
+  }
+
+  public void setConfidence(double confidence) {
+    // log.info("Set confidence {}", confidence);
+    this.confidence = confidence;
+  }
+
+  public int getBoxSlop() {
+    return boxSlop;
+  }
+
+  public void setBoxSlop(int boxSlop) {
+    // log.info("Set slop {}", boxSlop);
+    this.boxSlop = boxSlop;
   }
 
 }
