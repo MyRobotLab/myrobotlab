@@ -523,7 +523,7 @@ public class Deeplearning4j extends Service {
   
   public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
     // load it up!
-    String filename = "models"+File.separator+"_mini_XCEPTION.102-0.66.hdf5";
+    String filename = "models"+File.separator+"miniXCEPTION"+File.separator+"_mini_XCEPTION.102-0.66.hdf5";
     miniXCEPTION = KerasModelImport.importKerasModelAndWeights(filename);
   }
 
@@ -977,6 +977,10 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.bytedeco", "openblas-platform", "0.3.6-1.5.1");
     meta.addDependency("org.bytedeco", "hdf5", "1.10.5-1.5.1");
     meta.addDependency("org.bytedeco", "hdf5-platform", "1.10.5-1.5.1");
+    
+    
+    // the miniXCEPTION network / model for emotion detection on detected faces
+    meta.addDependency("miniXCEPTION", "miniXCEPTION", "0.0", "zip");
     
     if (!cudaEnabled) {
       // By default support native CPU execution.
