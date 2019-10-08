@@ -1,7 +1,8 @@
 package org.myrobotlab.service;
 
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2RGB;
-
+import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +20,8 @@ import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
@@ -29,11 +35,9 @@ import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator;
 import org.deeplearning4j.eval.Evaluation;
-import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
-import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.deeplearning4j.nn.conf.distribution.GaussianDistribution;
 import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
@@ -47,7 +51,9 @@ import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.layers.objdetect.DetectedObject;
 import org.deeplearning4j.nn.layers.objdetect.YoloUtils;
-// import org.deeplearning4j.nn.modelimport.keras.trainedmodels.Utils.ImageNetLabels;
+import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
+import org.deeplearning4j.nn.modelimport.keras.exceptions.InvalidKerasConfigurationException;
+import org.deeplearning4j.nn.modelimport.keras.exceptions.UnsupportedKerasConfigurationException;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.transferlearning.FineTuneConfiguration;
 import org.deeplearning4j.nn.transferlearning.TransferLearning;
@@ -72,6 +78,7 @@ import org.myrobotlab.deeplearning4j.SolrLabelGenerator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -85,6 +92,8 @@ import org.nd4j.linalg.factory.Nd4jBackend.NoAvailableBackendException;
 import org.nd4j.linalg.learning.config.AdaDelta;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
 
 /**
  * Deeplearning4j wrapper service to expose the deep learning. This is basically
@@ -101,6 +110,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 public class Deeplearning4j extends Service {
 
   private static final long serialVersionUID = 1L;
+  transient public final static Logger log = LoggerFactory.getLogger(Deeplearning4j.class);
   // TODO: update these based on the input sample data...
   protected static int height = 100;
   protected static int width = 100;
@@ -136,6 +146,10 @@ public class Deeplearning4j extends Service {
   private ComputationGraph tinyyolo = null;
   private TinyYOLO tinyYOLOModel = null;
 
+  private ComputationGraph miniXCEPTION = null;
+  
+  transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+  
   // constructor.
   public Deeplearning4j(String reservedKey) {
     super(reservedKey);
@@ -506,7 +520,102 @@ public class Deeplearning4j extends Service {
     // pretrained imagenet
     tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
+  
+  public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
+    // load it up!
+    String filename = "models"+File.separator+"miniXCEPTION"+File.separator+"_mini_XCEPTION.102-0.66.hdf5";
+    miniXCEPTION = KerasModelImport.importKerasModelAndWeights(filename);
+  }
 
+  public HashMap<String, Double> classifyImageMiniEXCEPTION(IplImage iplImage, Double confidence) throws IOException {
+
+    // resize the image to the target size of 64x64
+    // resize to 64x64
+    IplImage ret = IplImage.create(64, 64, iplImage.depth(), iplImage.nChannels());
+    cvResize(iplImage, ret, Imgproc.INTER_AREA);
+    
+    //show(ret, "resized");
+    //log.info("Resized Image is : height {} width {}", ret.height(), ret.width()); 
+    // ok.. here we probably need to re-size the input?  possibly some other input transforms?
+    BufferedImage buffImg = OpenCV.toBufferedImage(ret);
+    NativeImageLoader loader = new NativeImageLoader(64, 64, 1,  new ColorConversionTransform(COLOR_BGR2GRAY));
+    INDArray image = loader.asMatrix(buffImg);
+    DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
+    scaler.transform(image);
+    
+    HashMap<String, Double> emotionMap = new HashMap<String, Double>();
+    INDArray[] out = miniXCEPTION.output(image);
+    // presumably the first column is the output for the first input.  
+    // System.out.println("Output Size" + out.length);
+    // Now.. what do we do with this output?
+    String[] emotionLabels = new String[]{"angry" ,"disgust","scared", "happy", "sad", "surprised", "neutral"};
+    for (int i = 0 ; i < out.length; i++) {
+      // System.out.println(out[i].toString());
+      INDArray result = out[i];
+      int j = -1;
+      double[] results = result.toDoubleVector();
+      for (String label : emotionLabels) {
+        j++;
+        Double val = results[j];
+        if (val >= confidence) {
+          emotionMap.put(label, val);
+          log.debug("Emotion {} Val {}", label, val);
+        } else {
+          log.debug("Filtered Emotion {} Val {}", label, val);
+          // not a good classification.. throw it away.
+        }
+      }
+      //now for each label, we have the confidence
+    }
+    // sort the resulting map accoring to the confidence
+    return sortHashMapByValues(emotionMap);
+  }
+  
+  
+  // TODO: this was taken from stackoverflow 
+  // https://stackoverflow.com/questions/8119366/sorting-hashmap-by-values
+  // seems like there should be a better way to sort a hashmap.
+  public LinkedHashMap<String, Double> sortHashMapByValues(
+      HashMap<String, Double> passedMap) {
+    List<String> mapKeys = new ArrayList<>(passedMap.keySet());
+    List<Double> mapValues = new ArrayList<>(passedMap.values());
+    Collections.sort(mapValues);
+    Collections.sort(mapKeys);
+
+    Collections.reverse(mapValues);
+    Collections.reverse(mapKeys);
+    
+    LinkedHashMap<String, Double> sortedMap =
+        new LinkedHashMap<>();
+
+    Iterator<Double> valueIt = mapValues.iterator();
+    while (valueIt.hasNext()) {
+      Double val = valueIt.next();
+      Iterator<String> keyIt = mapKeys.iterator();
+
+      while (keyIt.hasNext()) {
+        String key = keyIt.next();
+        Double comp1 = passedMap.get(key);
+        Double comp2 = val;
+
+        if (comp1.equals(comp2)) {
+          keyIt.remove();
+          sortedMap.put(key, val);
+          break;
+        }
+      }
+    }
+    return sortedMap;
+  }
+  
+  
+  public CanvasFrame show(final IplImage image, final String title) {
+    CanvasFrame canvas = new CanvasFrame(title);
+    // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(converterToImage.convert(image));
+    return canvas;
+  }
+  
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
     BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
@@ -868,6 +977,10 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.bytedeco", "openblas-platform", "0.3.6-1.5.1");
     meta.addDependency("org.bytedeco", "hdf5", "1.10.5-1.5.1");
     meta.addDependency("org.bytedeco", "hdf5-platform", "1.10.5-1.5.1");
+    
+    
+    // the miniXCEPTION network / model for emotion detection on detected faces
+    meta.addDependency("miniXCEPTION", "miniXCEPTION", "0.0", "zip");
     
     if (!cudaEnabled) {
       // By default support native CPU execution.
