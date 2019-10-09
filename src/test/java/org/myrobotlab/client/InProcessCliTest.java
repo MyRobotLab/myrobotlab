@@ -1,6 +1,7 @@
 package org.myrobotlab.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,11 +12,9 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-
-import org.myrobotlab.service.Runtime;
 import org.junit.Test;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
@@ -66,22 +65,25 @@ public class InProcessCliTest extends AbstractTest {
 
   @Test
   public void testProcess() throws IOException {
+    
+    Runtime runtime = Runtime.getInstance();
  
-    InProcessCli cli = new InProcessCli(NameGenerator.getName(), "runtime", in, bos);
+    InProcessCli cli = new InProcessCli(runtime.getId(), "runtime", in, bos);
     cli.start();
     
     clear();
     write("pwd");
     String ret = getResponse();
-    assertEquals("/", ret);
+    
+    assertTrue(ret.startsWith(toJson("/")));
     
     clear();
     write("ls");
-    assertEquals(toJson(Runtime.getServiceNames()), getResponse());
+    assertTrue(getResponse().startsWith(toJson(Runtime.getServiceNames())));
     
     clear();
     write("route");
-    assertEquals(toJson(Runtime.route()), getResponse());
+    assertTrue(getResponse().startsWith(toJson(Runtime.route())));
     
     // cd to different directory with and without /
     

@@ -49,6 +49,11 @@ public class ProcessData implements Serializable {
    * must read std out of 
    */
   transient public StreamGobbler stdout;
+  
+  /**
+   * std error or the process must be consumed as well
+   */
+  transient public StreamGobbler stderr;
 
   /**
    * monitor on the process - if it dies agent will know
