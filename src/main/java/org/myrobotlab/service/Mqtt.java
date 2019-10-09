@@ -71,10 +71,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   boolean cleanSession = true; // Non durable subscriptions
   transient MqttAsyncClient client;
-  String id = Platform.getLocalInstance().getId();
-  String clientId = String.format("%s@%s", getName(), id);
+  String clientId = String.format("%s@%s", getName(), getId());
   boolean isConnected = false;
-  String topic = String.format("myrobotlab/%s", id);
+  String topic = String.format("myrobotlab/%s", getId());
   int port = 1883;
   int qos = 2;
 
@@ -119,7 +118,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       inTopic = String.format("myrobotlab/%s/in", getName());
       outTopic = String.format("myrobotlab/%s/out", getName());
       conOpt.setCleanSession(true);
-      clientId = String.format("%s@%s", getName(), id);
+      clientId = String.format("%s@%s", getName(), getId());
 
       info("creating inTopic {} outTopic {}", inTopic, outTopic);
     } catch (Exception e) {

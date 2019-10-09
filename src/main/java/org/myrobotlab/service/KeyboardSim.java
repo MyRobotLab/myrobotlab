@@ -20,7 +20,7 @@ public class KeyboardSim extends Service {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(KeyboardSim.class);
 
-  private Robot robot;
+  transient private Robot robot;
 
   public KeyboardSim(String n) {
     super(n);

@@ -20,7 +20,7 @@ public class MouseSim extends Service {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(MouseSim.class);
 
-  private Robot robot;
+  transient private Robot robot;
 
   public MouseSim(String n) {
     super(n);
