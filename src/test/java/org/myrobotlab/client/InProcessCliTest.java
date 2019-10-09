@@ -64,7 +64,7 @@ public class InProcessCliTest extends AbstractTest {
   }
 
   @Test
-  public void testProcess() throws IOException {
+  public void testProcess() throws IOException, InterruptedException {
     
     Runtime runtime = Runtime.getInstance();
  
@@ -73,16 +73,19 @@ public class InProcessCliTest extends AbstractTest {
     
     clear();
     write("pwd");
+    Thread.sleep(1000);
     String ret = getResponse();
     
     assertTrue(ret.startsWith(toJson("/")));
     
     clear();
     write("ls");
+    Thread.sleep(1000);
     assertTrue(getResponse().startsWith(toJson(Runtime.getServiceNames())));
     
     clear();
     write("route");
+    Thread.sleep(1000);
     assertTrue(getResponse().startsWith(toJson(Runtime.route())));
     
     // cd to different directory with and without /
