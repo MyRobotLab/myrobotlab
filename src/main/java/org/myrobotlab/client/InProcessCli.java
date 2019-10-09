@@ -52,7 +52,7 @@ public class InProcessCli implements Runnable {
    * @param out
    */
   public InProcessCli(String id, String senderName, InputStream in, OutputStream out) {
-    this.id = "cli-" + id; // this becomes a local/remote id with prepended cli-
+    this.id = id + "-cli" ; // this becomes a local/remote id with prepended cli-
     this.remoteId = id; // remote id is the mrl instance
     this.name = senderName;
     this.in = in;
@@ -83,6 +83,7 @@ public class InProcessCli implements Runnable {
       attributes.put("uri", "/api/cli");
       attributes.put("user", "root");
       attributes.put("host", "local");
+      attributes.put("c-type", "cli");
       Runtime runtime = Runtime.getInstance();
       runtime.addConnection(uuid, attributes);
       runtime.getHelloResponse(uuid, new HelloRequest(id, uuid));
@@ -142,6 +143,7 @@ public class InProcessCli implements Runnable {
 
       Object ret = null;
 
+      // THIS IS NOT CORRECT !! - USE YOUR OWN isLocal !!!
       if (Runtime.getInstance().isLocal(cliMsg)) {
         // invoke locally
         ServiceInterface si = Runtime.getService(cliMsg.getName());
