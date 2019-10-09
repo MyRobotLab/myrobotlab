@@ -166,7 +166,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * number of services created by this runtime
    */
   Integer creationCount = 0;
-  
+
   /**
    * current list of cli sessions and where they are from
    */
@@ -289,11 +289,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
     }
-    
+
     if (name.contains("@")) {
       throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
     }
-    
+
     if (type.indexOf(".") == -1) {
       fullTypeName = String.format("org.myrobotlab.service.%s", type);
     } else {
@@ -1424,9 +1424,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
-  
+
   /**
    * jump to another process using the cli
+   * 
    * @param id
    * @return
    */
@@ -1435,12 +1436,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (route == null) {
       // log.error("cannot attach - no routing information for {}", id);
       return "cannot attach - no routing information for " + id;
-    }    
+    }
     stdInClient.setRemote(id);
     return id;
   }
-  
-  public String exit() {    
+
+  public String exit() {
     stdInClient.setRemote(getId());
     return getId();
   }
@@ -2030,9 +2031,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static Platform getPlatform() {
     return getInstance().platform;
   }
-  
+
   public boolean is64bit() {
-    return getInstance().platform.getBitness() == 64;        
+    return getInstance().platform.getBitness() == 64;
   }
 
   public Repo getRepo() {
@@ -3024,31 +3025,53 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // FIXME - should be enum !!!
     msg.setBlocking();
 
-    // block the thread and wait for the return -
-    // if you have an msgId it should be stored a new one generated - and wait
-    // for its
-    // return - then replace with original and send back
-    // "send back" locally or - remotely remote --> gateway (process) gateway
-    // --> remote
-    // FIXME implement !
-    Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
-    endpoint.socket.fire(CodecUtils.toJson(msg));
+    Object ret = null;
 
-    Object[] returnContainer = new Object[1];
+    String type = (String) conn.get("c-type");
+    if ("wasync".equals(type)) {
 
-    inbox.blockingList.put(msg.msgId, returnContainer);
+      // block the thread and wait for the return -
+      // if you have an msgId it should be stored a new one generated - and wait
+      // for its
+      // return - then replace with original and send back
+      // "send back" locally or - remotely remote --> gateway (process) gateway
+      // --> remote
+      // FIXME implement !
+      Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
+      endpoint.socket.fire(CodecUtils.toJson(msg));
 
-    try {
-      // block until message comes back
-      synchronized (returnContainer) {
-        outbox.add(msg);
-        returnContainer.wait(timeout);
+      Object[] returnContainer = new Object[1];
+
+      inbox.blockingList.put(msg.msgId, returnContainer);
+
+      try {
+        // block until message comes back
+        synchronized (returnContainer) {
+          outbox.add(msg);
+          returnContainer.wait(timeout);
+        }
+      } catch (InterruptedException e) {
+        log.error("interrupted", e);
       }
-    } catch (InterruptedException e) {
-      log.error("interrupted", e);
+      ret = returnContainer[0];
+    } else if ("cli".equals(type)) {
+      
+      if (msg.getId() == null || msg.getSrcId().equals(String.format("%s-cli", getId()))) {
+
+        // runtime is a gateway for cli - so change the name - invoke it
+        // and send it back
+        msg.name = msg.getName(); // this makes it "local"
+
+        ret = invoke(msg);
+      } else {
+        log.error("local id does not match cli msg {}", msg.getFullName());
+      }
+
+    } else {
+      log.error("do not know how to handle connection type " + type);
     }
 
-    return returnContainer[0];
+    return ret;
   }
 
   @Override
@@ -3093,9 +3116,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       for (Object o : msg.data) {
         System.out.println(CodecUtils.toPrettyJson(o));
       }
-      
+
       System.out.println(stdInClient.getPrompt(uuid));
-      
+
     } else {
       Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
       endpoint.socket.fire(CodecUtils.toJson(msg));
