@@ -2978,7 +2978,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * get gateway based on remote address of a msg e.g. msg.getRemoteId()
    * 
-   * @param name
+   * @param remoteId
    * @return
    */
   public static Gateway getGatway(String remoteId) {

@@ -145,7 +145,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * needed to get the api key to select the appropriate api processor
    * 
-   * @param r
+   * @param uri
    * @return
    */
   static public String getApiKey(String uri) {
