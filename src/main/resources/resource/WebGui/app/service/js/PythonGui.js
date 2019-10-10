@@ -70,13 +70,12 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     }
     //----- ace editors related callbacks end -----//
     $scope.addScript = function() {
+        let scriptName = $scope.scriptCount + 1;
         var newScript = {
-            name: 'Script ' + ($scope.scripts.length + 1),
+            name: 'untitled-' + ($scope.scriptCount + 1),
             code: ''
         };
-        $scope.scripts.push(newScript);
-        $timeout(function() {// $scope.activeTabIndex = ($scope.scripts.length - 1);
-        });
+        $scope.scripts["untitled-" + $scope.scriptCount] = newScript;
         console.log($scope.activeTabIndex);
     }
     ;
