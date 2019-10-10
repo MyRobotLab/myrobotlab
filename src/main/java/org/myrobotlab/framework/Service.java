@@ -1811,8 +1811,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * <pre>
    * after attach:
-   * stdin (remote) --> gateway sendBlockingRemote --> invoke
-   *                <--                            <--
+   * stdin (remote) --&gt; gateway sendBlockingRemote --&gt; invoke
+   *                &lt;--                            &lt;--
    * </pre>
    */
   public Object sendBlocking(Message msg, Integer timeout) {
