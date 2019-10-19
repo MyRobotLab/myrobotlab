@@ -39,6 +39,8 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,10 +67,6 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 /**
  * 
@@ -804,14 +802,59 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
+  
+  public String getResourceRoot() {
+    // FIXME - should "this" be the test ?  
+    // If so it should be its own static function...
+    
+    // order of precedence
+    // 1. if there is a src directory use it unless
+    // 2. options say to override it
+    
+    String resourceRoot = Runtime.getOptions().resourceDir;
+    if ("resource".equals(resourceRoot)) {
+      // allow default to be overriden by src if it exists
+      File src = new File("src");
+      if (src.exists()) {
+        resourceRoot = "src" + fs + "main" + fs + "resources" + fs + "resource";
+      }
+    }
+    
+    return resourceRoot;
+  }
 
   public String getResourceDir() {
-    String dataDir = Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
-    File f = new File(dataDir);
+
+    String resourceDir = getResourceRoot() + fs + getClass().getSimpleName();
+    File f = new File(resourceDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
+    return resourceDir;
+  }
+  
+  public byte[] getResource(String resourceName) {
+    String filename = getResourceDir() + fs + resourceName;
+    File f = new File(filename);
+    if (!f.exists()) {
+      error("resource %s does not exist", f);
+      return null;
+    }
+    byte[] content = null;
+    try {
+      content = Files.readAllBytes(Paths.get(filename));
+    } catch (IOException e) {
+      error(e);
+    }
+    return content;
+  }
+  
+  public String getResourceAsString(String resourceName) {
+    byte[] data = getResource(resourceName);
+    if (data != null) {
+      return new String(data);
+    }
+    return null;
   }
 
   public String getResourceInstanceDir() {
@@ -1259,27 +1302,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Peers.getPeerKey(getName(), key);
   }
 
-  /**
-   * a default way to attach Services to other Services An example would be
-   * attaching a Motor to a MotorControl or a Speaking service (TTS) to a
-   * Listening service (STT) such that when the system is speaking it does not
-   * try to listen &amp; act on its own speech (feedback loop)
-   * 
-   * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
-   * to bind Services with their swing views/tab panels. It should be
-   * generalized to this attach method
-   * 
-   * @param subpath
-   *          s
-   * 
-   * @return if successful
-   * 
-   */
-
-  public String getServiceResourceFile(String subpath) {
-    return FileIO.resourceToString(getSimpleName() + fs + subpath);
-  }
-
   @Override
   public String getSimpleName() {
     return simpleName;
@@ -1309,10 +1331,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return false;
     }
     return true;
-  }
-
-  public String help() {
-    return help("url", "declared");
   }
 
   public String help(String format, String level) {
@@ -2119,6 +2137,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Status warn(String format, Object... args) {
     Status status = Status.warn(format, args);
+    status.name = getName();
     invoke("publishStatus", status);
     return status;
   }
@@ -2140,6 +2159,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
+    status.name = getName();
     log.info(status.toString());
     invoke("publishStatus", status);
     return status;

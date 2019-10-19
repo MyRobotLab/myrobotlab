@@ -34,8 +34,30 @@ public class Status implements Serializable {// extends Exception {
 
   public String name; // service name ???
 
+  /**
+   * FIXME - should probably be an enum now that serialization mostly works now with enums
+   * [debug|info|warn|error|success] - yes the last part is different than "logging" but could
+   * still be a status...
+   * 
+   */
   public String level;
+  /**
+   * The key is the non changing part and good identifier of what went on...
+   * For Exceptions I would recommend the Exception.class.getSimpleName() for the key, whilst the "detail"
+   * is for "changing" detail.  This becomes important when Stati are aggregated - and humans are interested
+   * in "high" counts of specific Status while the details are not important unless diagnosing one.
+   * 
+   * Violating Servo limits is a good example - "key" can be "Outside servo limits".
+   * The key can contain spaces and punctuation - the important part is that it is STATIC.
+   * 
+   * "details" contain dynamic specifics - for example:   
+   * "key":"Outside servo limits", "detail":"servo01 moveTo(75) limit is > 100"
+   */
   public String key;
+  /**
+   * Dynamic of verbose explanation of the status.
+   * e.g. "detail":"servo01 moveTo(75) limit is > 100" or complete stack trace from an exception
+   */
   public String detail;
 
   /**

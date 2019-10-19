@@ -116,14 +116,14 @@ public class InProcessCli implements Runnable {
     myThread = null;
   }
 
-  public void process(String data) {
+  public Object process(String data) {
     try {
 
       data = data.trim();
 
       if ("".equals(data)) {
         writePrompt(out, uuid); // <-- should be id no ?
-        return;
+        return null; // FIXME RETURN ERROR ???
       }
 
       // parse line for /{serviceName}/{method}/jsonEncoded? parms ?? ...
@@ -138,7 +138,7 @@ public class InProcessCli implements Runnable {
         String ret = "exiting " + remoteId + "...";
         setRemote(Runtime.getInstance().getId());
         System.out.println(ret);
-        return;
+        return null;
       }
 
       Object ret = null;
@@ -169,9 +169,10 @@ public class InProcessCli implements Runnable {
         // goes to stdInClient - it "pretends" to be another instance/id
         ret = gateway.sendBlockingRemote(cliMsg, 3000);
       }
-
+      return ret;
     } catch (Exception e) {
       log.error("cli threw", e);
+      return null;
     }
   }
   

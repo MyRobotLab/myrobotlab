@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -10,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -23,6 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -55,61 +54,70 @@ import org.slf4j.Logger;
 public class Security extends Service implements AuthorizationProvider {
 
   public static class Group {
+    public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();
+    public boolean defaultAccess = true;
     // TODO - single access login
     // timestamp -
     public String groupId;
-    public boolean defaultAccess = true;
-    public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();
+  }
+
+  private class SavingTrustManager implements X509TrustManager {
+
+    private X509Certificate[] chain;
+    private final X509TrustManager tm;
+
+    SavingTrustManager(X509TrustManager tm) {
+      this.tm = tm;
+    }
+
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      throw new UnsupportedOperationException();
+    }
+
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      this.chain = chain;
+      tm.checkServerTrusted(chain, authType);
+    }
+
+    public X509Certificate[] getAcceptedIssuers() {
+
+      /**
+       * This change has been done due to the following resolution advised for
+       * Java 1.7+
+       * http://infposs.blogspot.kr/2013/06/installcert-and-java-7.html
+       **/
+
+      return new X509Certificate[0];
+      // throw new UnsupportedOperationException();
+    }
   }
 
   public static class User {
+    public String groupId; // support only 1 group now Yay !
+    public String password; // encrypt
     // timestamp - single access login
     public String userId;
-    public String password; // encrypt
-    public String groupId; // support only 1 group now Yay !
   }
 
-  private static final long serialVersionUID = 1L;
+  public static final String AES = "AES";
 
-  // TODO - concept (similar in Drupal) - anonymous, authenticated, admin ..
-  // default groups ?
   transient private static final HashMap<String, Boolean> allowExportByName = new HashMap<String, Boolean>();
 
   transient private static final HashMap<String, Boolean> allowExportByType = new HashMap<String, Boolean>();
 
-  public final static Logger log = LoggerFactory.getLogger(Security.class);
-
-  // many to 1 mapping - currently does not support many to many Yay !
-  // transient private static final HashMap <String,String> userToGroup = new
-  // HashMap <String,String>();
-
-  // transient private boolean defaultAccess = true;
-
   // below is authorization
   transient private static final HashMap<String, Group> groups = new HashMap<String, Group>();
 
-  // users only map to groups - groups have the only access rules
-  transient private static final HashMap<String, User> users = new HashMap<String, User>();
+  private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
+
+  public final static Logger log = LoggerFactory.getLogger(Security.class);
+
+  private static final long serialVersionUID = 1L;
 
   static private Properties store = new Properties();
 
-  private String storeDirPath = null;
-
-  static private String keyFileName = "key";
-
-  static private String storeFileName = "store";
-
-  // private static boolean isLoaded = false;
-
-  transient private boolean defaultAllowExport = true;
-
-  private String defaultNewGroupId = "anonymous";
-
-  // private HashMap<String, byte[]> keys = new HashMap<String, byte[]>();
-
-  public static final String AES = "AES";
-
-  private static final char[] HEXDIGITS = "0123456789abcdef".toCharArray();
+  // users only map to groups - groups have the only access rules
+  transient private static final HashMap<String, User> users = new HashMap<String, User>();
 
   /**
    * I think it might be easier concept to use a singleton for this service ...
@@ -121,14 +129,187 @@ public class Security extends Service implements AuthorizationProvider {
     return (Security) Runtime.start("security", "Security");
   }
 
-  public Set<Object> getKeyNames() {
-    return store.keySet();
+  /**
+   * This method returns all the details of the class without it having to be
+   * constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(Security.class.getCanonicalName());
+    meta.addDescription("provides security");
+    meta.addCategory("framework", "security");
+    meta.includeServiceInOneJar(true);
+
+    return meta;
   }
 
+  public static void main(String[] args) throws Exception {
+    // LoggingFactory.init(Level.INFO);
+
+    Runtime.getInstance(args);
+
+    Runtime.start("gui", "SwingGui");
+    // Security security = Security.getInstance();
+    // initializeStore("im a rockin rocker");
+    Runtime.getSecurity().setKey("myKeyName", "XXDDLKERIOEJKLJ##$KJKJ#LJ@@");
+    String key = Runtime.getSecurity().getKey("myKeyName");
+    log.info("key is {}", key);
+
+    Security security = Runtime.getSecurity();
+
+    security.setKey("amazon.polly.user.key", "XXXXXXXXXXXXXX");
+    security.setKey("amazon.polly.user.secret", "XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    security.setKey("xmpp.user", "user@gmail.com");
+    security.setKey("xmpp.pwd", "xxxxxxxx");
+    security.saveStore();
+    security.getKey("amazon.polly.user.key");
+    security.loadStore();
+    log.info(security.getKey("xmpp.user")); // FIXME - report stor is has not
+    // be loaded !!!
+    log.info(security.getKey("amazon.polly.user.key"));
+    log.info(security.getKey("amazon.polly.user.secret"));
+
+    /*
+     * String clearPwd = "mrlRocks!";
+     * 
+     * Properties p1 = new Properties();
+     * 
+     * p1.put("webgui.user", "supertick@gmail.com"); p1.put("webgui.pwd",
+     * "zd7"); p1.put("xmpp.user", "supertick@gmail.com"); String encryptedPwd =
+     * Security.encrypt(clearPwd, new File(KEY_FILE)); p1.put("xmpp.pwd",
+     * encryptedPwd); p1.store(new FileWriter(PWD_FILE), "");
+     * 
+     * // ================== Properties p2 = new Properties();
+     * 
+     * p2.load(new FileReader(PWD_FILE)); encryptedPwd =
+     * p2.getProperty("xmpp.pwd"); System.out.println(encryptedPwd);
+     * System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
+     */
+
+  }
+
+  transient private boolean defaultAllowExport = true;
+
+  private String defaultNewGroupId = "anonymous";
+
+  String keyFileName = null;
+
+  String storeDirPathx = null;
+
+  String storeFileName = "store";
+
+  public Security(String n) {
+    super(n);
+    keyFileName = String.format("%s%skey", FileIO.getCfgDir(), File.separator);
+    storeFileName = String.format("%s%sstore", getDataDir(), File.separator);
+    loadStore();
+    createDefaultGroups();
+
+    /*
+     * FIXME - set predefined levels - high security medium low
+     * allowExportByType.put("Xmpp", false);
+     * allowExportByType.put("RemoteAdapter", false);
+     * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
+     * false);
+     * 
+     * allowExportByType.put("Java", false); allowExportByType.put("Python",
+     * false);
+     * 
+     * allowExportByType.put("Security", false);
+     * allowExportByType.put("Runtime", false);
+     */
+
+    allowExportByType.put("Security", false);
+    setSecurityProvider(this);
+  }
+
+  public boolean addGroup(String groupId) {
+    return addGroup(groupId, false);
+  }
+
+  public boolean addGroup(String groupId, boolean defaultAccess) {
+    Group g = new Group();
+    g.groupId = groupId;
+    g.defaultAccess = defaultAccess;
+
+    if (groups.containsKey(groupId)) {
+      warn("group %s already exists", groupId);
+      return false;
+    }
+
+    info("added group %s", groupId);
+    groups.put(groupId, g);
+    return true;
+  }
+  
   @Deprecated // use setKey - name seems more appropriate
   public void addSecret(String name, String keyValue) {
     setKey(name, keyValue);
   }
+
+  public boolean addUser(String user) {
+    return addUser(user, null, null);
+  }
+
+  public boolean addUser(String userId, String password, String groupId) {
+
+    if (users.containsKey(userId)) {
+      log.warn("user {} already exists", userId);
+      return false;
+    }
+    User u = new User();
+    u.userId = userId;
+    u.password = password;
+    if (groupId == null) {
+      u.groupId = defaultNewGroupId;
+    } else {
+      u.groupId = groupId;
+    }
+    if (!groups.containsKey(u.groupId)) {
+      error("could not add user %s groupId %s does not exist", userId, groupId);
+      return false;
+    }
+    users.put(userId, u);
+    info("added user %s to group %s", userId, groupId);
+    return true;
+  }
+
+  @Override
+  public boolean allowExport(String serviceName) {
+
+    if (allowExportByName.containsKey(serviceName)) {
+      return allowExportByName.get(serviceName);
+    }
+
+    ServiceInterface si = Runtime.getService(serviceName);
+
+    if (si == null) {
+      error("%s could not be found for export", serviceName);
+      return false;
+    }
+
+    String fullType = si.getClass().getSimpleName();
+    if (allowExportByType.containsKey(fullType)) {
+      return allowExportByType.get(fullType);
+    }
+    return defaultAllowExport;
+  }
+
+  public Boolean allowExportByName(String name, Boolean access) {
+    return allowExportByName.put(name, access);
+  }
+
+  public Boolean allowExportByType(String type, Boolean access) {
+    return allowExportByType.put(CodecUtils.type(type), access);
+  }
+
+  // default group permissions - for new user/group
+  // anonymous
+  // authenticated
 
   private String byteArrayToHexString(byte[] b) {
     StringBuffer sb = new StringBuffer(b.length * 2);
@@ -140,6 +321,18 @@ public class Security extends Service implements AuthorizationProvider {
       sb.append(Integer.toHexString(v));
     }
     return sb.toString().toUpperCase();
+  }
+
+  public void createDefaultGroups() {
+    Group g = new Group();
+    g.groupId = "anonymous";
+    g.defaultAccess = false;
+    groups.put("anonymous", g);
+
+    g = new Group();
+    g.groupId = "authenticated";
+    g.defaultAccess = true;
+    groups.put("authenticated", g);
   }
 
   /**
@@ -161,6 +354,21 @@ public class Security extends Service implements AuthorizationProvider {
     cipher.init(Cipher.DECRYPT_MODE, sks);
     byte[] decrypted = cipher.doFinal(hexStringToByteArray(message));
     return new String(decrypted);
+  }
+
+  /**
+   * remove a key from the keystore
+   * @param keyName
+   */
+  public void deleteKey(String keyName) {
+    if (store.containsKey(keyName)) {
+      store.remove(keyName);
+      saveStore();
+      info("removed key %s", keyName);
+      invoke("getKeyNames");
+      return;
+    }
+    warn("could not remove key %s - does not exist", keyName);
   }
 
   /**
@@ -199,21 +407,14 @@ public class Security extends Service implements AuthorizationProvider {
     return byteArrayToHexString(encrypted);
   }
 
-  public String getKeyFileName() {
-    return String.format("%s%s%s", storeDirPath, File.separator, keyFileName);
-  }
-
   /**
    * get a key/secret from the secure store
    * 
-   * @param name - the name of the security key
+   * @param name
+   *          - the name of the security key
    * @return
    */
   public String getKey(String name) {
-    /*
-     * loading in constructor now if (!isLoaded) { loadStore(); }
-     */
-
     if (store.containsKey(name)) {
       return store.getProperty(name);
     }
@@ -222,17 +423,20 @@ public class Security extends Service implements AuthorizationProvider {
     return null;
   }
 
+  public String getKeyFileName() {
+    return keyFileName;
+  }
+
   /**
-   * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
-   * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
-   * code which sets the key can be removed
-   * 
-   * @param keyName
-   * @param keyValue
+   * return the set of key names currently stored in the key store
+   * @return
    */
-  public void setKey(String keyName, String keyValue) {
-    store.put(keyName, keyValue);
-    saveStore();
+  public Set<String> getKeyNames() {
+    Set<String> ret = new TreeSet<String>();
+    for (Object o : store.keySet()) {
+      ret.add(o.toString());
+    }
+    return ret;
   }
 
   @Deprecated // use getKey
@@ -247,12 +451,8 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   public String getStoreFileName() {
-    return String.format("%s%s%s", getDataDir(), File.separator, storeFileName);
+    return storeFileName;
   }
-
-  // default group permissions - for new user/group
-  // anonymous
-  // authenticated
 
   private byte[] hexStringToByteArray(String s) {
     byte[] b = new byte[s.length() / 2];
@@ -274,274 +474,6 @@ public class Security extends Service implements AuthorizationProvider {
     } catch (Exception e) {
       log.error("initializeStore threw", e);
     }
-  }
-
-  synchronized public void loadStore() {
-    try {
-
-      Properties fileStore = new Properties();
-      String storeFileContents = FileIO.toString(getStoreFileName());
-      if (storeFileContents != null) {
-        String properties = decrypt(storeFileContents, new File(getKeyFileName()));
-        ByteArrayInputStream bis = new ByteArrayInputStream(properties.getBytes());
-        fileStore.load(bis);
-        // memory has precedence over file
-        fileStore.putAll(store);
-        store = fileStore;
-        // isLoaded = true;
-      }
-    } catch (FileNotFoundException e) {
-      log.info("Security.loadStore file not found {}", getStoreFileName());
-    } catch (Exception e2) {
-      log.error("loadStore threw", e2);
-    }
-  }
-
-  private byte[] readKeyFile(File keyFile) throws FileNotFoundException {
-    Scanner scanner = new Scanner(keyFile);
-    scanner.useDelimiter("\\Z");
-    String keyValue = scanner.next();
-    scanner.close();
-    return hexStringToByteArray(keyValue);
-  }
-
-  public void saveStore() {
-    try {
-      /*
-       * - loading in constructor now if (!isLoaded) { loadStore(); }
-       */
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      store.store(out, null);
-      String encrypted = encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
-      FileIO.toFile(getStoreFileName(), encrypted);
-      log.info("aes secure file saved");
-    } catch (Exception e) {
-      log.error("saveStore threw", e);
-    }
-  }
-
-  public Security(String n) {
-    super(n);
-    storeDirPath = FileIO.getCfgDir();
-    loadStore();
-    createDefaultGroups();
-
-    /*
-     * FIXME - set predefined levels - high security medium low
-     * allowExportByType.put("Xmpp", false);
-     * allowExportByType.put("RemoteAdapter", false);
-     * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
-     * false);
-     * 
-     * allowExportByType.put("Java", false); allowExportByType.put("Python",
-     * false);
-     * 
-     * allowExportByType.put("Security", false);
-     * allowExportByType.put("Runtime", false);
-     */
-
-    allowExportByType.put("Security", false);
-    setSecurityProvider(this);
-  }
-
-  public boolean addGroup(String groupId) {
-    return addGroup(groupId, false);
-  }
-
-  public boolean addGroup(String groupId, boolean defaultAccess) {
-    Group g = new Group();
-    g.groupId = groupId;
-    g.defaultAccess = defaultAccess;
-
-    if (groups.containsKey(groupId)) {
-      log.warn("group {} already exists", groupId);
-      return false;
-    }
-
-    groups.put(groupId, g);
-    return true;
-  }
-
-  public boolean addUser(String user) {
-    return addUser(user, null, null);
-  }
-
-  public boolean addUser(String userId, String password, String groupId) {
-
-    if (users.containsKey(userId)) {
-      log.warn("user {} already exists", userId);
-      return false;
-    }
-    User u = new User();
-    u.userId = userId;
-    u.password = password;
-    if (groupId == null) {
-      u.groupId = defaultNewGroupId;
-    } else {
-      u.groupId = groupId;
-    }
-    if (!groups.containsKey(u.groupId)) {
-      error("could not add user %s groupId %s does not exist", userId, groupId);
-      return false;
-    }
-    users.put(userId, u);
-    return true;
-  }
-
-  @Override
-  public boolean allowExport(String serviceName) {
-
-    if (allowExportByName.containsKey(serviceName)) {
-      return allowExportByName.get(serviceName);
-    }
-
-    ServiceInterface si = Runtime.getService(serviceName);
-
-    if (si == null) {
-      error("%s could not be found for export", serviceName);
-      return false;
-    }
-
-    String fullType = si.getClass().getSimpleName();
-    if (allowExportByType.containsKey(fullType)) {
-      return allowExportByType.get(fullType);
-    }
-    return defaultAllowExport;
-  }
-
-  public Boolean allowExportByName(String name, Boolean access) {
-    return allowExportByName.put(name, access);
-  }
-
-  public Boolean allowExportByType(String type, Boolean access) {
-    return allowExportByType.put(CodecUtils.type(type), access);
-  }
-
-  public void createDefaultGroups() {
-    Group g = new Group();
-    g.groupId = "anonymous";
-    g.defaultAccess = false;
-    groups.put("anonymous", g);
-
-    g = new Group();
-    g.groupId = "authenticated";
-    g.defaultAccess = true;
-    groups.put("authenticated", g);
-  }
-
-  @Override
-  public boolean isAuthorized(Map<String, Object> annotation, String serviceName, String method) {
-
-    /*
-     * check not needed if (security == null) { // internal messaging return
-     * defaultAccess; }
-     */
-
-    // TODO - super cache Radix Tree ??? super key -- uri
-    // user:password@mrl://someService/someMethod - not found | ALLOWED ||
-    // DENIED
-
-    // user versus binary token
-    if (annotation.containsKey("user")) // && password || token
-    {
-      String fromUser = (String)annotation.get("user");
-
-      // user scheme found - get the group
-      if (!users.containsKey(fromUser)) {
-        // invoke UserNotFound / throw
-        return false;
-      } else {
-
-        User user = users.get(fromUser);
-        // check MD5 hash of password
-        // FIXME OPTIMIZE - GENERATE KEY user.group.accessRule - ALLOW ?
-        // I'm looking for a specific object method - should have that
-        // key
-        if (!groups.containsKey(user.groupId)) // FIXME - optimize only
-        // need a group look up
-        // not a user l
-        {
-          // credentials supplied - no match
-          // invoke Group for this user not found
-          return false;
-        } else {
-          // credentials supplied - match - check access rules
-          Group group = groups.get(user.groupId);
-          // make message key
-          // service level
-          if (group.accessRules.containsKey(serviceName)) {
-            return group.accessRules.get(serviceName);
-          }
-
-          // method level
-          String methodLevel = String.format("%s.%s", serviceName, method);
-          if (group.accessRules.containsKey(methodLevel)) {
-            return group.accessRules.get(methodLevel);
-          }
-
-          return group.defaultAccess;
-        }
-      }
-
-    } else {
-      // invoke UnavailableSecurityScheme
-      return false;
-    }
-  }
-
-  @Override
-  public boolean isAuthorized(Message msg) {
-    return isAuthorized(msg.getProperties(), msg.getName(), msg.method);
-  }
-
-  public boolean setDefaultNewGroupId(String userId, String groupId) {
-    if (!users.containsKey(userId)) {
-      error("user %s does not exist can not change groupId", userId);
-      return false;
-    }
-
-    if (!groups.containsKey(groupId)) {
-      error("group %s does not exist can not change groupId", groupId);
-      return false;
-    }
-
-    users.get(userId).groupId = groupId;
-
-    return false;
-
-  }
-
-  public boolean setGroup(String userId, String groupId) {
-    if (!users.containsKey(userId)) {
-      error("user %s does not exist", userId);
-      return false;
-    }
-    if (!groups.containsKey(groupId)) {
-      error("group %s does not exist", groupId);
-      return false;
-    }
-
-    User u = users.get(userId);
-    u.groupId = groupId;
-    return true;
-  }
-
-  /**
-   * This method returns all the details of the class without it having to be
-   * constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Security.class.getCanonicalName());
-    meta.addDescription("provides security");
-    meta.addCategory("framework", "security");
-    meta.includeServiceInOneJar(true);
-
-    return meta;
   }
 
   public void installCert(String[] args) throws Exception {
@@ -645,6 +577,163 @@ public class Security extends Service implements AuthorizationProvider {
     System.out.println("Added certificate to keystore 'jssecacerts' using alias '" + alias + "'");
   }
 
+  @Override
+  public boolean isAuthorized(Map<String, Object> annotation, String serviceName, String method) {
+
+    /*
+     * check not needed if (security == null) { // internal messaging return
+     * defaultAccess; }
+     */
+
+    // TODO - super cache Radix Tree ??? super key -- uri
+    // user:password@mrl://someService/someMethod - not found | ALLOWED ||
+    // DENIED
+
+    // user versus binary token
+    if (annotation.containsKey("user")) // && password || token
+    {
+      String fromUser = (String) annotation.get("user");
+
+      // user scheme found - get the group
+      if (!users.containsKey(fromUser)) {
+        // invoke UserNotFound / throw
+        return false;
+      } else {
+
+        User user = users.get(fromUser);
+        // check MD5 hash of password
+        // FIXME OPTIMIZE - GENERATE KEY user.group.accessRule - ALLOW ?
+        // I'm looking for a specific object method - should have that
+        // key
+        if (!groups.containsKey(user.groupId)) // FIXME - optimize only
+        // need a group look up
+        // not a user l
+        {
+          // credentials supplied - no match
+          // invoke Group for this user not found
+          return false;
+        } else {
+          // credentials supplied - match - check access rules
+          Group group = groups.get(user.groupId);
+          // make message key
+          // service level
+          if (group.accessRules.containsKey(serviceName)) {
+            return group.accessRules.get(serviceName);
+          }
+
+          // method level
+          String methodLevel = String.format("%s.%s", serviceName, method);
+          if (group.accessRules.containsKey(methodLevel)) {
+            return group.accessRules.get(methodLevel);
+          }
+
+          return group.defaultAccess;
+        }
+      }
+
+    } else {
+      // invoke UnavailableSecurityScheme
+      return false;
+    }
+  }
+
+  @Override
+  public boolean isAuthorized(Message msg) {
+    return isAuthorized(msg.getProperties(), msg.getName(), msg.method);
+  }
+
+  synchronized public void loadStore() {
+    try {
+
+      Properties fileStore = new Properties();
+      String storeFileContents = FileIO.toString(getStoreFileName());
+      if (storeFileContents != null) {
+        String properties = decrypt(storeFileContents, new File(getKeyFileName()));
+        ByteArrayInputStream bis = new ByteArrayInputStream(properties.getBytes());
+        fileStore.load(bis);
+        // memory has precedence over file
+        fileStore.putAll(store);
+        store = fileStore;
+        // isLoaded = true;
+      }
+    } catch (FileNotFoundException e) {
+      log.info("Security.loadStore file not found {}", getStoreFileName());
+    } catch (Exception e2) {
+      log.error("loadStore threw", e2);
+    }
+  }
+
+  private byte[] readKeyFile(File keyFile) throws FileNotFoundException {
+    Scanner scanner = new Scanner(keyFile);
+    scanner.useDelimiter("\\Z");
+    String keyValue = scanner.next();
+    scanner.close();
+    return hexStringToByteArray(keyValue);
+  }
+
+  public void saveStore() {
+    try {
+      /*
+       * - loading in constructor now if (!isLoaded) { loadStore(); }
+       */
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      store.store(out, null);
+      String encrypted = encrypt(new String(out.toByteArray()), new File(getKeyFileName()));
+      FileIO.toFile(getStoreFileName(), encrypted);
+      log.info("aes secure file saved");
+    } catch (Exception e) {
+      log.error("saveStore threw", e);
+    }
+  }
+
+  public boolean setDefaultNewGroupId(String userId, String groupId) {
+    if (!users.containsKey(userId)) {
+      error("user %s does not exist can not change groupId", userId);
+      return false;
+    }
+
+    if (!groups.containsKey(groupId)) {
+      error("group %s does not exist can not change groupId", groupId);
+      return false;
+    }
+
+    users.get(userId).groupId = groupId;
+
+    return false;
+
+  }
+
+  public boolean setGroup(String userId, String groupId) {
+    if (!users.containsKey(userId)) {
+      error("user %s does not exist", userId);
+      return false;
+    }
+    if (!groups.containsKey(groupId)) {
+      error("group %s does not exist", groupId);
+      return false;
+    }
+
+    User u = users.get(userId);
+    u.groupId = groupId;
+    return true;
+  }
+
+  /**
+   * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
+   * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
+   * code which sets the key can be removed
+   * 
+   * @param keyName
+   * @param keyValue
+   */
+  public String setKey(String keyName, String keyValue) {
+    store.put(keyName, keyValue);
+    saveStore();
+    invoke("getKeyNames");
+    info("added key %s", keyName);
+    return keyName;
+  }
+
   private String toHexString(byte[] bytes) {
     StringBuilder sb = new StringBuilder(bytes.length * 3);
     for (int b : bytes) {
@@ -654,82 +743,6 @@ public class Security extends Service implements AuthorizationProvider {
       sb.append(' ');
     }
     return sb.toString();
-  }
-
-  private class SavingTrustManager implements X509TrustManager {
-
-    private final X509TrustManager tm;
-    private X509Certificate[] chain;
-
-    SavingTrustManager(X509TrustManager tm) {
-      this.tm = tm;
-    }
-
-    public X509Certificate[] getAcceptedIssuers() {
-
-      /**
-       * This change has been done due to the following resolution advised for
-       * Java 1.7+
-       * http://infposs.blogspot.kr/2013/06/installcert-and-java-7.html
-       **/
-
-      return new X509Certificate[0];
-      // throw new UnsupportedOperationException();
-    }
-
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-      throw new UnsupportedOperationException();
-    }
-
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-      this.chain = chain;
-      tm.checkServerTrusted(chain, authType);
-    }
-  }
-
-  public static void main(String[] args) throws Exception {
-    // LoggingFactory.init(Level.INFO); 
-
-    Runtime.getInstance(args);
-
-    Runtime.start("gui", "SwingGui");
-    // Security security = Security.getInstance();
-    // initializeStore("im a rockin rocker");
-    Runtime.getSecurity().setKey("myKeyName", "XXDDLKERIOEJKLJ##$KJKJ#LJ@@");
-    String key = Runtime.getSecurity().getKey("myKeyName");
-    log.info("key is {}", key);
-
-    Security security = Runtime.getSecurity();
-
-    security.setKey("amazon.polly.user.key", "XXXXXXXXXXXXXX");
-    security.setKey("amazon.polly.user.secret", "XXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-    security.setKey("xmpp.user", "user@gmail.com");
-    security.setKey("xmpp.pwd", "xxxxxxxx");
-    security.saveStore();
-    security.getKey("amazon.polly.user.key");
-    security.loadStore();
-    log.info(security.getKey("xmpp.user")); // FIXME - report stor is has not
-    // be loaded !!!
-    log.info(security.getKey("amazon.polly.user.key"));
-    log.info(security.getKey("amazon.polly.user.secret"));
-
-    /*
-     * String clearPwd = "mrlRocks!";
-     * 
-     * Properties p1 = new Properties();
-     * 
-     * p1.put("webgui.user", "supertick@gmail.com"); p1.put("webgui.pwd",
-     * "zd7"); p1.put("xmpp.user", "supertick@gmail.com"); String encryptedPwd =
-     * Security.encrypt(clearPwd, new File(KEY_FILE)); p1.put("xmpp.pwd",
-     * encryptedPwd); p1.store(new FileWriter(PWD_FILE), "");
-     * 
-     * // ================== Properties p2 = new Properties();
-     * 
-     * p2.load(new FileReader(PWD_FILE)); encryptedPwd =
-     * p2.getProperty("xmpp.pwd"); System.out.println(encryptedPwd);
-     * System.out.println(Security.decrypt(encryptedPwd, new File(KEY_FILE)));
-     */
-
   }
 
 }

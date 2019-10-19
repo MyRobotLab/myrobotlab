@@ -14,7 +14,7 @@
         <li>
             <a href="http://myrobotlab.org">
             <!--{{platform.branch}}-->
-            {{remoteId}} - {{platform.arch}}.{{platform.bitness}}.{{platform.os}}
+            {{id}} &lt;-&gt;{{remoteId}} - {{platform.arch}}.{{platform.bitness}}.{{platform.os}}
 				{{platform.mrlVersion}}
 		</a>
         </li>
@@ -60,12 +60,16 @@
                             <i class="glyphicon glyphicon-info-sign"></i>
                             &nbsp;&nbsp;About                 
                         
+                        
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="help()">
                             <i class="glyphicon glyphicon-question-sign"></i>
                             &nbsp;&nbsp;Help
+                        
+                        
                         </a>
                     </li>
                     <li>
@@ -73,12 +77,16 @@
                             <i class="glyphicon glyphicon-alert"></i>
                             &nbsp;&nbsp;No Worky !           
                         
+                        
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="shutdown('shutdown')">
                             <i class="glyphicon glyphicon-off"></i>
                             &nbsp;&nbsp;Shutdown
+                        
+                        
                         </a>
                     </li>
                 </ul>
@@ -87,9 +95,28 @@
     </span>
     <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 </div>
-<!-- div navbar navbar-inverse container-fluid -->
-<!-- end navbar navbar-inverse container-fluid -->
-<div align="center" id="statusDisplay">
-    <span class="label label-info">{{status.level}}</span>
-    &nbsp;&nbsp;&nbsp;{{status.name}} : {{status.detail}}
+<!-- todo make a tranform which changes status to alert -->
+<div class="row">
+    <div class="col-md-2">&nbsp;</div>
+    <div class="col-md-2" ng-hide="errorStatus == null">
+        <button class="alert alert-danger alert-dismissable" data-ng-click="errorStatus = null">
+            <span class="label label-danger">error</span>
+            {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
+            <!-- span class="badge">5</span -->
+        </button>
+    </div>
+    <div class="col-md-2" ng-hide="warningStatus == null">
+        <button class="alert alert-warning alert-dismissable" data-ng-click="warningStatus = null">
+            <span class="label label-warning">warningStatus</span>
+            {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
+            <!-- span class="badge">5</span -->
+        </button>
+    </div>
+    <div class="col-md-2" ng-hide="infoStatus == null">
+        <button class="alert alert-info alert-dismissable" data-ng-click="infoStatus = null">
+            <span class="label label-info">info</span>
+            {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
+            <!-- span class="badge">5</span -->
+        </button>
+    </div>
 </div>

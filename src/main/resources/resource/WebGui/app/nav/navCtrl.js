@@ -1,6 +1,10 @@
 angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'panelSvc', 'noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, panelSvc, noWorkySvc, Flash) {
     //connection state LED
     $scope.connected = mrl.isConnected()
+    $scope.errorStatus = null
+    $scope.warningStatus = null
+    $scope.infoStatus = null
+
     mrl.subscribeConnected(function(connected) {
         $log.info('nav:connection update', connected)
         $timeout(function() {
@@ -18,12 +22,27 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.statusList = statusSvc.getStatuses()
     statusSvc.subscribeToUpdates(function(status) {
         $timeout(function() {
-            $scope.status = status
+            if (status.level == "error") {
+                $scope.errorStatus = status
+            } else if (status.level == "warn") {
+                $scope.warningStatus = status
+            } else {
+                $scope.infoStatus = status;
+            }
         })
     })
+
     $scope.showAll = panelSvc.showAll
     $scope.remoteId = mrl.getRemoteId();
     $scope.id = mrl.getId();
+    $scope.platform.vmVersion
+    if ($scope.platform.vmVersion != '1.8') {
+        $scope.status = {
+            level: "error",
+            key: "BadJVM",
+            detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
+        }
+    }
 
     //service-panels & update-routine (also used for search)
     // populated for search

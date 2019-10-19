@@ -409,7 +409,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     // FIXME - probably broken
     // get base simple.xml file - and modify it to
     // point to the correct .gram file
-    String simplexml = getServiceResourceFile("simple.xml");
+    String simplexml = getResourceAsString("simple.xml");
     // String grammarLocation = "file://" + cfgDir.replaceAll("\\\\", "/") +
     // "/";
     // simplexml = simplexml.replaceAll("resource:/resource/",

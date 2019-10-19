@@ -277,6 +277,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   boolean useLocalResources = false;
 
+  boolean debugConnectivity = false;
+
+  /**
+   * Broadcast mode deterimines how clients are to be handled - if they have a
+   * single id of webgui-client-1234-5678 or their own unique id - there are
+   * pros and cons of this. Previously, the webgui would just send its own name
+   * in subscriptions which was not a good design. Then unique id's were created
+   * which give the advantage of each page being individually assignable, but at
+   * the same time this cluttered the subscriptions. Everytime a page was
+   * refresh or a new page brought up many subscriptions would need to be
+   * created in order to support the same view.
+   * 
+   * In its current design, its in the middle where the javascript webgui has a
+   * "single" id but it isn't the java's webgui name.
+   */
+  private boolean broadcastMode = true;
+
   public WebGui(String n) {
     super(n);
     // api = ApiFactory.getInstance(this);
@@ -363,35 +380,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     this.autoStartBrowser = autoStartBrowser;
   }
 
-  // FIXME - only broadcast to clients who have subscribed
-  public void broadcast(Message msg) {
-    try {
-      if (broadcaster != null) {
-        // single encoding ? should be double ?
-        broadcaster.broadcast(CodecUtils.toJson(msg));
-      }
-    } catch (Exception e) {
-      StringBuilder sb = new StringBuilder();
-      if (msg.data != null) {
-        for (Object o : msg.data) {
-          sb.append(o.getClass().getCanonicalName());
-        }
-      }
-      log.error("broadcast threw for data types {}", sb, e);
-    }
-  }
-
-  public void broadcast(String str) {
-    try {
-      if (broadcaster != null) {
-        broadcaster.broadcast(str); // wtf
-      }
-    } catch (Exception e) {
-      log.error("broadcast threw", e);
-    }
-  }
-
-  // broadcast to specific uuid
+ 
+  /**
+   * String broadcast to specific client
+   * 
+   * @param uuid
+   * @param str
+   */
   public void broadcast(String uuid, String str) {
     Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
     broadcaster.broadcast(str);
@@ -572,10 +567,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // create a unique broadcaster in the framework for this uuid
     if (uuiBroadcaster == null) {
       uuiBroadcaster = getBroadcasterFactory().get(uuid);
+      uuiBroadcaster.addAtmosphereResource(r);
+      uuiBroadcaster.getAtmosphereResources();
+      // r.addBroadcaster(uuiBroadcaster);
     }
-    uuiBroadcaster.addAtmosphereResource(r);
-    uuiBroadcaster.getAtmosphereResources();
-    r.addBroadcaster(uuiBroadcaster);
+
     log.debug("resource {}", r);
     // log.debug("resource {}", StringUtil.toString(r.broadcasters()));
   }
@@ -615,17 +611,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       String bodyData = request.body().asString();
       String logData = null;
 
-      if ((bodyData != null) && log.isInfoEnabled()) {
-        if (bodyData.length() > 180) {
-          logData = String.format("%s ...", bodyData.substring(0, 179));
-        } else {
+      if (debugConnectivity) {
+        if ((bodyData != null) && log.isInfoEnabled()) {
+          if (bodyData.length() > 180) {
+            logData = String.format("%s ...", bodyData.substring(0, 179));
+          } else {
+            logData = bodyData;
+          }
+        } else if ((bodyData != null) && log.isDebugEnabled()) {
           logData = bodyData;
         }
-      } else if ((bodyData != null) && log.isDebugEnabled()) {
-        logData = bodyData;
+        log.debug(">>>{} {} {} - [{}] from connection {}", (newConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
-
-      log.info(">>{} {} {} - [{}] from connection {}", (newConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
 
       // get api - decode msg - process it
       Map<String, Object> connection = Runtime.getConnection(uuid);
@@ -643,7 +640,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // - we don't need to wait for a message from them with the outstream
         OutputStream out = r.getResponse().getOutputStream();
         Message msg = getDefaultMsg(uuid); // SEND BACK getHelloResponse(hello)
+        System.out.println(String.format(">>>new %s", request.getRequestURI()));
         out.write(CodecUtils.toJson(msg).getBytes());
+        System.out.println(String.format("<<< %s", msg));
         return;
 
       } else if (apiKey.equals("service")) {
@@ -674,6 +673,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // decoding 1st pass - decodes the containers
         Message msg = CodecUtils.fromJson(bodyData, Message.class);
         msg.setProperty("uuid", uuid);
+
+        System.out.println(String.format(">>> %s", msg));
 
         // if were blocking -
         Message retMsg = null;
@@ -915,8 +916,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void onRegistered(ServiceInterface si) {
     // new service
     // subscribe to the status events
-    subscribe(si.getName(), "publishStatus");
-    subscribe(si.getName(), "publishState");
+    // FIXED !!! - these subscribes are no longer needed because
+    // the angular app currently subscribes to them
+    // subscribe(si.getName(), "publishStatus");
+    // subscribe(si.getName(), "publishState");
 
     // for distributed Runtimes
     if (si.isRuntime()) {
@@ -934,25 +937,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      */
   }
 
-  @Override
-  public boolean preProcessHook(Message m) {
-    // FIXME - problem with collisions of this service's methods
-    // and dialog methods ?!?!?
-
-    // broadcast
-    broadcast(m);
-
-    // if the method name is == to a method in the WebGui
-    // process it
-    if (methodSet.contains(m.method)) {
-      // process the message like a regular service
-      return true;
-    }
-
-    // otherwise send the message to the dialog with the senders name
-    // broadcast(m);
-    return false;
-  }
+  /*
+   * @Override public boolean preProcessHook(Message m) { // FIXME - problem
+   * with collisions of this service's methods // and dialog methods ?!?!?
+   * 
+   * // broadcast broadcast(m);
+   * 
+   * // if the method name is == to a method in the WebGui // process it if
+   * (methodSet.contains(m.method)) { // process the message like a regular
+   * service return true; }
+   * 
+   * // otherwise send the message to the dialog with the senders name //
+   * broadcast(m); return false; }
+   */
 
   public String publishHide(String name) {
     return name;
@@ -1043,9 +1040,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public void sendRemote(Message msg) {
-    String uuid = Runtime.getRoute(msg.getId());
-    Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
-    broadcaster.broadcast(CodecUtils.toJson(msg));
+    if (broadcastMode) {
+      // multi-cast mode all clients have a single id
+      broadcaster.broadcast(CodecUtils.toJson(msg));
+    } else {
+      // uni-cast mode - all clients have their own id
+      String uuid = Runtime.getRoute(msg.getId());
+      Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
+      broadcaster.broadcast(CodecUtils.toJson(msg));
+    }
   }
 
   // === begin positioning panels plumbing ===
@@ -1198,19 +1201,20 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+    LoggingFactory.init(Level.ERROR);
 
     try {
 
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
-      
+      // Runtime.start("log", "Log");
+
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      
 
       log.info("leaving main");
 

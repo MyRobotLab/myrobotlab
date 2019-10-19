@@ -1441,6 +1441,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect(String url) throws IOException {
     connect(url, url);
   }
+  
+  public Object sendToCli(String cmd) {
+    // Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+    return stdInClient.process(cmd);
+  }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
@@ -1784,7 +1789,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-
+    
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
@@ -1855,6 +1860,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
+    
+    
+    String vmVersion = System.getProperty("java.specification.version");
+    vmVersion = "11";
+    if ("1.8".equals(vmVersion)){
+      error("Unsupported Java %s - please remove version and install Java 1.8", vmVersion);
+    }
+    
     // test ( force encoding )
     // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
