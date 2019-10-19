@@ -381,4 +381,9 @@ public class Platform implements Serializable {
       // log.info("Exception: ", e);
     }
   }
+
+  public boolean getVmVersion() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 }

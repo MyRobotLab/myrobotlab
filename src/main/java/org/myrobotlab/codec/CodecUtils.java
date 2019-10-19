@@ -160,8 +160,12 @@ public class CodecUtils {
   // public static Object encode(Object, encoding) - dispatches appropriately
 
   static final public String getMsgKey(Message msg) {
-    return String.format("msg %s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
-  }
+    if (msg.sendingMethod != null) {
+    return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
+    } else {
+      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);      
+    }
+    }
 
   static final public String getParameterSignature(final Object[] data) {
     if (data == null) {
@@ -522,6 +526,11 @@ public class CodecUtils {
      * </pre>
      */
     
+    // default to runtime
+    if (!data.startsWith("/")) {
+      data = "/runtime/" + data;
+    }
+    
     if (data.startsWith("/api/service/")) {
       data = data.substring("/api/service/".length());
     }
@@ -550,24 +559,23 @@ public class CodecUtils {
     if (parts.length > 0) {
       msg.name = parts[0];
     }
-     
 
     // "/python" - list data of service
     if (parts.length == 1 && !data.endsWith("/")) {
       msg.method = "ls";
-      msg.data = new Object[] { "/" + parts[1] };
+      msg.data = new Object[] { "/" + parts[0] };
     }
 
     if (parts.length == 1 && data.endsWith("/")) {
       msg.method = "ls";
-      msg.data = new Object[] { "/" + parts[1] + "/" };
+      msg.data = new Object[] { "/" + parts[0] + "/" };
     }
 
     // fix me diff from 2 & 3 "/"
     if (parts.length > 1) {
 
       // prepare the method
-      msg.method = parts[1];
+      msg.method = parts[1].trim();
 
       // FIXME - to encode or not to encode that is the question ...
       Object[] payload = new Object[parts.length - 2];

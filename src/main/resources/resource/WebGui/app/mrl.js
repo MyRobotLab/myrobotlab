@@ -178,9 +178,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.generateId = function() {
+        // one id to rule them all !
+        return 'webgui-client-' + 1234 + '-' + 5678;
+        /*
         let var1 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
         let var2 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
         return 'webgui-client-' + var1 + '-' + var2;
+        */
     }
 
     this.getLocalName = function(fullname) {
@@ -263,7 +267,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap');
-                if (nameCallbackMap.hasOwnProperty(msg.sender)) {
+                if (nameCallbackMap.hasOwnProperty(msg.sender) && msg.method != 'onMethodMap') {
                     cbs = nameCallbackMap[msg.sender];
                     for (var i = 0; i < cbs.length; i++) {
                         cbs[i](msg);
@@ -426,6 +430,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     */
     this.subscribe = function(topicName, topicMethod) {
         _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
+        // _self.sendTo(_self.gateway.name, "addListener", topicName, topicMethod);
     }
     ;
     this.unsubscribe = function(topicName, topicMethod) {
@@ -681,8 +686,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 but subscribe is a frozen interface of  either 1 or 4 args
                                 */
                                 if (arguments.length == 1) {
-                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
+                                    //_self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
+                                    _self.sendTo(name, "addListener", arguments[0], name + '@' + _self.id);
+                                    //_self.sendTo(name + '@' + _self.id, "subscribe", name, arguments[0]);
                                 } else if (arguments.length == 4) {
+                                    // TODO - fix this it should be addListener
                                     _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
                                 }
                             } else {
@@ -690,9 +698,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 //                                console.log("here");
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishStatus');
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishState');
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                                _self.sendTo(name, "addListener", "publishStatus", name + '@' + _self.id);
+                                _self.sendTo(name, "addListener", "publishState", name + '@' + _self.id);
+                                _self.sendTo(name, "addListener", "getMethodMap", name + '@' + _self.id);
+                                
                                 _self.sendTo(name, "broadcastState");
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
@@ -722,7 +731,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 msgInterfaces[name].temp.msg = {};
                 msgInterfaces[name].temp.msg._interface = msgInterfaces[name];
                 //FIXME - hacked here @GroG: please look at this
-                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                // _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                _self.sendTo(name, "addListener", "getMethodMap", name + '@' + _self.id);
                 _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap');
                 msgInterfaces[name].getMethodMap();
                 return deferred.promise;

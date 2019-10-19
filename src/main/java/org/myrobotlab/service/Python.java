@@ -16,9 +16,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
@@ -147,12 +145,9 @@ public class Python extends Service {
       } catch (Exception e) {
         String error = Logging.stackToString(e);
         if (error.contains("KeyboardInterrupt")) {
-          String status = "Python process killed !";
-          warn(status);
-          log.warn(status, error);
-          invoke("publishStatus", Status.warn(status));
+          warn("Python process killed !");
         } else {
-          invoke("publishStatus", Status.error(e));
+          error(e);
           String filtered = error;
           filtered = filtered.replace("'", "");
           filtered = filtered.replace("\"", "");
@@ -171,7 +166,7 @@ public class Python extends Service {
 
       } finally {
         executing = false;
-        invoke("publishStatus", Status.success());
+        info("script completed");
         invoke("finishedExecutingScript");
       }
     }
@@ -264,6 +259,8 @@ public class Python extends Service {
    * opened scripts
    */
   HashMap<String, Script> openedScripts = new HashMap<String, Script>();
+  
+  String activeScript = null;
 
   public Python(String n) {
     super(n);
@@ -283,7 +280,7 @@ public class Python extends Service {
       ServiceType st = sdt.get(i);
       // FIXME - cache in "data" dir Or perhaps it should be pulled into
       // resource directory during build time and packaged with jar
-      String url = String.format("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/%s/service/%s.py", p.getBranch(), st.getSimpleName());
+      String url = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
       exampleUrls.put(st.getSimpleName(), url);
     }
 
@@ -293,6 +290,7 @@ public class Python extends Service {
   }
 
   public void openScript(String scriptName, String code) {
+    activeScript = scriptName;
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
@@ -315,8 +313,7 @@ public class Python extends Service {
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
-      /** REMOVE IF FLAKEY BUGS APPEAR !! */
-      String consoleScript = getServiceResourceFile("pythonConsole.py");
+      String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
     }
   }
@@ -402,8 +399,8 @@ public class Python extends Service {
     String ret = o.toString();
     return ret;
   }
-
-  public void exec(PyObject code) {
+/*
+  private void exec(PyObject code) {
     log.info("exec \n{}\n", code);
     if (interp == null) {
       createPythonInterpreter();
@@ -416,9 +413,10 @@ public class Python extends Service {
       interpThreads.put(name, interpThread);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("exec threw", e);
     }
   }
+*/
 
   /**
    * execute code
@@ -444,7 +442,6 @@ public class Python extends Service {
    */
   public boolean exec(String code, boolean blocking) {
     log.info("exec(String) \n{}", code);
-    boolean success = true;
 
     try {
       if (!blocking) {
@@ -455,20 +452,18 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
+      
+      return true;
+      
     } catch (PyException pe) {
       // something specific with a python error
-      success = false;
       error(pe.toString());
-      Logging.logError(pe);
     } catch (Exception e) {
-      success = false;
-      // more general error handling.
-      error(e.getMessage());
-      // dump stack trace to log
-      Logging.logError(e);
+      error(e);
     }
-    return success;
+    return false;
   }
+   
 
   /**
    * This method will execute and block a string that represents a python
@@ -588,9 +583,14 @@ public class Python extends Service {
    * /resource/Python/examples name of file to load
    */
   public void loadPyRobotLabServiceScript(String serviceType) {
-    Platform p = Platform.getLocalInstance();
-    String serviceScript = GitHub.getPyRobotLabScript(p.getBranch(), serviceType);
-    openScript(String.format("%s.py", serviceType), serviceScript);
+    String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
+    String serviceScript = null;
+    try {
+      serviceScript = FileIO.toString(filename);
+    } catch(Exception e) {
+      log.error("getting service file script example threw {}", e);
+    }
+    openScript(filename, serviceScript);
   }
 
   /*

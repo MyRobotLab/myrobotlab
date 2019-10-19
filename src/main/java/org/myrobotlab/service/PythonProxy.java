@@ -220,7 +220,7 @@ public class PythonProxy extends Service {
    * Execute Message msg on the native service this class represents.
    **/
   public Object exec(Message msg) {
-    webgui.broadcast(msg);
+    webgui.sendRemote(msg);
     boolean timeout = false;
     long past = System.currentTimeMillis();
     long now = System.currentTimeMillis();
