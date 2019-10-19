@@ -230,7 +230,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         _self.setPanel = function(newPanel) {
 
             if (!(newPanel.name in _self.panels)) {
-                $log.info('service ' + newPanel.name + ' currently does not exist');
+                $log.error('service ' + newPanel.name + ' currently does not exist');
                 return;
             }
 
