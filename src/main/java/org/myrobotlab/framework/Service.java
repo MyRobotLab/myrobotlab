@@ -1632,6 +1632,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void removeAllListeners() {
     outbox.notifyList.clear();
   }
+  
+  public void removeListener(String topicMethod, String callbackName) {
+    removeListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
+  }
 
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
