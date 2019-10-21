@@ -738,7 +738,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
       }
     } catch (Exception e) {
-      log.error("handle threw", e);
+      error(e);
+      //log.error("handle threw", e);
     }
   }
 

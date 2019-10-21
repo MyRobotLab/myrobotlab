@@ -43,6 +43,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             break
         case 'onStdOut':
             $scope.output = $scope.output + msg.data[0]
+            var textarea = document.getElementById('output');
+            textarea.scrollTop = textarea.scrollHeight;
             $scope.$apply()
             break
         case 'onStatus':

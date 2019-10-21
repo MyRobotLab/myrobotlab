@@ -498,7 +498,7 @@ public class MethodCache {
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
-      log.error("here");
+      log.error("getOrdinalMethods on a null object ");
     }
     String objectKey = object.getTypeName();
 
@@ -513,7 +513,7 @@ public class MethodCache {
   
   public List<MethodEntry> getRemoteOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
-      log.error("here");
+      log.error("getRemoteOrdinalMethods object is null");
     }
     String objectKey = object.getTypeName();
 
@@ -556,8 +556,7 @@ public class MethodCache {
         // successfully decoded params
         return params;
       } catch (Exception e) {
-        // not logged, because this is one of the only ways to search :P
-        // log.error("getDecodedParameters threw", e);
+
         log.error("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e);
       }
     }
