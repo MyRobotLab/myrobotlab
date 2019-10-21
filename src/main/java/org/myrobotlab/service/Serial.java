@@ -399,7 +399,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       return;
     }
 
-    if (inPortName.toLowerCase().startsWith("tcp://")) {
+    if (inPortName != null && inPortName.toLowerCase().startsWith("tcp://")) {
       try {
         info("connecting tcp");
         connectTcp(inPortName);
@@ -407,6 +407,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       } catch (Exception e) {
         // not a big fan of re-throwing exceptions,
         // but I'll make an exception here
+        error("connect ctp threw");
         throw new IOException(e);
       }
     }
@@ -578,7 +579,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * disconnect = close + remove listeners all ports on serial network
    */
   public void disconnect() {
-    if (portName == null || !connectedPorts.containsKey(portName)) {
+    if (portName != null && !connectedPorts.containsKey(portName)) {
       info("disconnect unknown port %s", portName);
       return;
     }
@@ -1082,6 +1083,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     for (int i = 0; i < data.length; ++i) {
       write(data[i] & 0xff); // recently removed - & 0xFF
     }
+  }
+  
+  public void writeInt(int b) throws Exception {
+    write(b);
   }
 
   // TODO: remove this method use write(int[] b) instead
