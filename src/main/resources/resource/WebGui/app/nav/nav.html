@@ -98,25 +98,25 @@
 <!-- todo make a tranform which changes status to alert -->
 <div class="row">
     <div class="col-md-2">&nbsp;</div>
-    <div class="col-md-2" ng-hide="errorStatus == null">
-        <button class="alert alert-danger alert-dismissable" data-ng-click="errorStatus = null">
+    <div class="col-md-12" ng-hide="errorStatus == null">
+        <div class="alert alert-danger alert-dismissable" data-ng-click="errorStatus = null">
             <span class="label label-danger">error</span>
             {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
             <!-- span class="badge">5</span -->
-        </button>
+        </div>
     </div>
-    <div class="col-md-2" ng-hide="warningStatus == null">
-        <button class="alert alert-warning alert-dismissable" data-ng-click="warningStatus = null">
+    <div class="col-md-12" ng-hide="warningStatus == null">
+        <div class="alert alert-warning alert-dismissable" data-ng-click="warningStatus = null">
             <span class="label label-warning">warningStatus</span>
             {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
             <!-- span class="badge">5</span -->
-        </button>
+        </div>
     </div>
-    <div class="col-md-2" ng-hide="infoStatus == null">
-        <button class="alert alert-info alert-dismissable" data-ng-click="infoStatus = null">
+    <div class="col-md-12" ng-hide="infoStatus == null">
+        <div class="alert alert-info alert-dismissable" data-ng-click="infoStatus = null">
             <span class="label label-info">info</span>
             {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
             <!-- span class="badge">5</span -->
-        </button>
+        </div>
     </div>
 </div>
