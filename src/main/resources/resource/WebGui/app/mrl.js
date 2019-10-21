@@ -259,7 +259,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             try {
                 msg = jQuery.parseJSON(body);
 
-                if (msg == null){
+                if (msg == null) {
                     console.log('msg null');
                     return;
                 }
@@ -627,7 +627,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 // bound to a service
                                 try {
 
-                                    
                                     var methodMap = msg.data[0];
                                     for (var method in methodMap) {
                                         if (methodMap.hasOwnProperty(method)) {
@@ -670,12 +669,31 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                             // end switch
                         },
-                        subscribeToMethod:function(callback, methodName) {
+                        subscribeToMethod: function(callback, methodName) {
                             _self.subscribeToMethod(callback, methodName);
                         },
-                        subscribeTo: function(controller, serviceName, methodName) {                            
-                            _self.subscribeToServiceMethod(controller.onMsg, serviceName, methodName)                          
+                        subscribeTo: function(controller, serviceName, methodName) {
+                            _self.subscribeToServiceMethod(controller.onMsg, serviceName, methodName)
                         },
+                        unsubscribe: function(data) {
+                            if ((typeof arguments[0]) == "string") {
+                                // regular subscribe when used - e.g. msg.subscribe('publishData')
+                                /* we could handle var args this way ...
+
+                                var args = Array.prototype.slice.call(arguments, 0);
+                                _self.sendTo(_self.gateway.name, "subscribe", name, args);
+                                but subscribe is a frozen interface of  either 1 or 4 args
+                                */
+                                if (arguments.length == 1) {
+                                    _self.sendTo(name, "removeListener", arguments[0], name + '@' + _self.id);
+                                    //_self.sendTo(name + '@' + _self.id, "subscribe", name, arguments[0]);
+                                } else if (arguments.length == 4) {
+                                    // TODO - fix this it should be addListener
+                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
+                                }
+                            } else {}
+                        },
+
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
@@ -701,7 +719,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 _self.sendTo(name, "addListener", "publishStatus", name + '@' + _self.id);
                                 _self.sendTo(name, "addListener", "publishState", name + '@' + _self.id);
                                 _self.sendTo(name, "addListener", "getMethodMap", name + '@' + _self.id);
-                                
+
                                 _self.sendTo(name, "broadcastState");
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
