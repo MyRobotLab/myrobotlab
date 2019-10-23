@@ -1840,6 +1840,20 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } else {
       log.info("JAVA_HOME not defined");
     }
+
+    // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
+    String arch = env.get("PROCESSOR_ARCHITECTURE");
+    String archWow64 = System.getenv("PROCESSOR_ARCHITEW6432");
+    if (arch != null) {
+      log.info("PROCESSOR_ARCHITECTURE={}", arch);
+    } else {
+      log.info("PROCESSOR_ARCHITECTURE not defined");
+    }
+    if (archWow64 != null) {
+      log.info("PROCESSOR_ARCHITEW6432={}", archWow64);
+    } else {
+      log.info("PROCESSOR_ARCHITEW6432 not defined");
+    }
     log.info("============== env end ==============");
 
     // Platform platform = Platform.getLocalInstance();
@@ -1884,6 +1898,33 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
     // Access restriction - log.info("total physical mem [{}] Mb",
     // Runtime.getTotalPhysicalMemory() / 1048576);
+
+    // try to compare os bitness with java bitness
+    String osName = System.getProperty("os.name");
+    if (osName != null && osName.contains("Windows")) {
+      int osBitness = (arch != null && arch.endsWith("64") || archWow64 != null && archWow64.endsWith("64")) ? 64 : 32;
+      log.info("guessed os bitness [{}]", osBitness);
+      int jvmBitness;
+      switch (System.getProperty("os.arch")) {
+        case "x86":
+        case "i386":
+        case "i486":
+        case "i586":
+        case "i686":
+          jvmBitness = 32;
+          break;
+        case "x86_64":
+        case "amd64":
+          jvmBitness = 64;
+          break;
+        default:
+          jvmBitness = 0;
+          break;
+      }
+      if (osBitness != jvmBitness) {
+        log.warn("detected possible bitness mismatch between os & jvm");
+      }
+    }
 
     log.info("getting local repo");
 
