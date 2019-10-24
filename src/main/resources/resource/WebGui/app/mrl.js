@@ -677,40 +677,25 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                         },
                         unsubscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
-                                // regular subscribe when used - e.g. msg.subscribe('publishData')
-                                /* we could handle var args this way ...
-
-                                var args = Array.prototype.slice.call(arguments, 0);
-                                _self.sendTo(_self.gateway.name, "subscribe", name, args);
-                                but subscribe is a frozen interface of  either 1 or 4 args
-                                */
-                                if (arguments.length == 1) {
-                                    _self.sendTo(name, "removeListener", arguments[0], name + '@' + _self.id);
-                                    //_self.sendTo(name + '@' + _self.id, "subscribe", name, arguments[0]);
-                                } else if (arguments.length == 4) {
-                                    // TODO - fix this it should be addListener
-                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
+                                // only handle string argument
+                                if (arguments.length != 1) {
+                                    console.log("ERROR - unsubscribe expecting 1 arg got " + arguments.length)
+                                    return
                                 }
-                            } else {}
+                                _self.sendTo(name, "removeListener", arguments[0], name + '@' + _self.id);
+                            } else {
+                                console.error("ERROR - unsubscribe non string arg")
+                            }
                         },
 
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
-                                /* we could handle var args this way ...
-
-                                var args = Array.prototype.slice.call(arguments, 0);
-                                _self.sendTo(_self.gateway.name, "subscribe", name, args);
-                                but subscribe is a frozen interface of  either 1 or 4 args
-                                */
-                                if (arguments.length == 1) {
-                                    //_self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
-                                    _self.sendTo(name, "addListener", arguments[0], name + '@' + _self.id);
-                                    //_self.sendTo(name + '@' + _self.id, "subscribe", name, arguments[0]);
-                                } else if (arguments.length == 4) {
-                                    // TODO - fix this it should be addListener
-                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
+                                if (arguments.length != 1) {
+                                    console.log("subscribe(string) expecting single argument!")
+                                    return
                                 }
+                                _self.sendTo(name, "addListener", arguments[0], name + '@' + _self.id);
                             } else {
                                 // controller registering for framework subscriptions
                                 //                                console.log("here");
