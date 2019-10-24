@@ -60,8 +60,6 @@
                             <i class="glyphicon glyphicon-info-sign"></i>
                             &nbsp;&nbsp;About                 
                         
-                        
-                        
                         </a>
                     </li>
                     <li>
@@ -69,15 +67,12 @@
                             <i class="glyphicon glyphicon-question-sign"></i>
                             &nbsp;&nbsp;Help
                         
-                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="noWorky()">
                             <i class="glyphicon glyphicon-alert"></i>
                             &nbsp;&nbsp;No Worky !           
-                        
-                        
                         
                         </a>
                     </li>
@@ -96,27 +91,27 @@
     <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 </div>
 <!-- todo make a tranform which changes status to alert -->
-<div class="row">
-    <div class="col-md-2">&nbsp;</div>
-    <div class="col-md-12" ng-hide="errorStatus == null">
-        <div class="alert alert-danger alert-dismissable" data-ng-click="errorStatus = null">
-            <span class="label label-danger">error</span>
-            {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
-            <!-- span class="badge">5</span -->
-        </div>
-    </div>
-    <div class="col-md-12" ng-hide="warningStatus == null">
-        <div class="alert alert-warning alert-dismissable" data-ng-click="warningStatus = null">
-            <span class="label label-warning">warningStatus</span>
-            {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
-            <!-- span class="badge">5</span -->
-        </div>
-    </div>
-    <div class="col-md-12" ng-hide="infoStatus == null">
-        <div class="alert alert-info alert-dismissable" data-ng-click="infoStatus = null">
-            <span class="label label-info">info</span>
-            {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
-            <!-- span class="badge">5</span -->
-        </div>
-    </div>
+<div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
+    <span class="label label-danger">error</span>
+    {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
+            <span ng-hide="errorCount < 2" class="badge">{{errorCount}}</span>
+    <button type="button" class="close" data-ng-click="errorStatus = null;errorCount = 0" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="alert alert-warning alert-dismissable mb-0" ng-hide="warningStatus == null">
+    <span class="label label-warning">warning</span>
+    {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
+            <span ng-hide="warningCount < 2" class="badge">{{warningCount}}</span>
+    <button type="button" class="close" data-ng-click="warningStatus = null;warningCount = 0" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null">
+    <span class="label label-info">info</span>
+    {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
+            <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
+    <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
 </div>
