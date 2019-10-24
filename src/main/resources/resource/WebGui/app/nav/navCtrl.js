@@ -1,9 +1,14 @@
 angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'panelSvc', 'noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, panelSvc, noWorkySvc, Flash) {
     //connection state LED
     $scope.connected = mrl.isConnected()
+
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
+
+    $scope.errorCount = 0
+    $scope.warningCount = 0
+    $scope.infoCount = 0
 
     mrl.subscribeConnected(function(connected) {
         $log.info('nav:connection update', connected)
@@ -24,10 +29,13 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         $timeout(function() {
             if (status.level == "error") {
                 $scope.errorStatus = status
+                $scope.errorCount += 1
             } else if (status.level == "warn") {
                 $scope.warningStatus = status
+                $scope.warningCount += 1
             } else {
                 $scope.infoStatus = status;
+                $scope.infoCount += 1
             }
         })
     })

@@ -28,9 +28,9 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.statusLine = ""
     this.updateState = function(service) {
         $scope.service = service
-        $scope.boardType = service.boardType
+        $scope.boardType = service.board
         $scope.arduinoPath = service.arduinoIdePath
-        $scope.image = "service/arduino/" + service.boardType + ".png"
+        $scope.image = "service/arduino/" + service.board + ".png"
         var serial = $scope.service.serial
 
         $scope.serialName = null
