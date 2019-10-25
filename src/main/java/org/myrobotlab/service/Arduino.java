@@ -531,7 +531,7 @@ public class Arduino extends AbstractMicrocontroller
 
   /**
    * default params to connect to Arduino &amp; MrlComm.ino
-   *
+   * FIXME - remove the parameters except rate as they are not allowed to change with MRLComm
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
@@ -540,10 +540,6 @@ public class Arduino extends AbstractMicrocontroller
     initSerial();
     try {
 
-      // FIXME - GroG asks, who put the try here - shouldn't it throw if
-      // we
-      // can't connect
-      // how would you recover?
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
         return;
