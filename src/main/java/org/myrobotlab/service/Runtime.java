@@ -1836,6 +1836,20 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } else {
       log.info("JAVA_HOME not defined");
     }
+
+    // also look at bitness detection in framework.Platform 
+    String procArch = env.get("PROCESSOR_ARCHITECTURE");
+    String procArchWow64 = env.get("PROCESSOR_ARCHITEW6432");
+    if (procArch != null) {
+      log.info("PROCESSOR_ARCHITECTURE={}", procArch);
+    } else {
+      log.info("PROCESSOR_ARCHITECTURE not defined");
+    }
+    if (procArchWow64 != null) {
+      log.info("PROCESSOR_ARCHITEW6432={}", procArchWow64);
+    } else {
+      log.info("PROCESSOR_ARCHITEW6432 not defined");
+    }
     log.info("============== env end ==============");
 
     // Platform platform = Platform.getLocalInstance();
@@ -1844,7 +1858,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("{} - GMT - {}", sdf.format(startTime), gmtf.format(startTime));
     log.info("pid {}", platform.getPid());
     log.info("hostname {}", platform.getHostname());
-    log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getBitness(), platform.getOS());
+    log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getJvmBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
     log.info("platform [{}}]", platform);
     log.info("version [{}]", Runtime.getVersion());
@@ -1888,6 +1902,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
     // Access restriction - log.info("total physical mem [{}] Mb",
     // Runtime.getTotalPhysicalMemory() / 1048576);
+    
+    if (platform.isWindows()) {
+      log.info("guessed os bitness [{}]", platform.getOsBitness());
+      // try to compare os bitness with jvm bitness
+      if (platform.getOsBitness() != platform.getJvmBitness()) {
+        log.warn("detected possible bitness mismatch between os & jvm");
+      }
+    }
 
     log.info("getting local repo");
 
@@ -2037,7 +2059,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   public boolean is64bit() {
-    return getInstance().platform.getBitness() == 64;
+    return getInstance().platform.getJvmBitness() == 64;
   }
 
   public Repo getRepo() {
