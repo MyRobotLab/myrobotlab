@@ -67,36 +67,20 @@ public class ApiFactoryTest extends AbstractTest {
       o = api.process(bos, "http://localhost:8888/api/messages/runtime/getService/\"runtime\"");
       assertTrue(o == runtime);
       retJson = new String(bos.toByteArray());
-      // log.info("ret - {}", retJson);
-
+    
       // with user id
       o = null;
       bos.reset();
-      o = api.process(bos, "http://userid:passwd@localhost:8888/api/messages/runtime/getService/runtime");
+      o = api.process(bos, "http://userid:passwd@localhost:8888/api/service/runtime/getService/runtime");
       assertTrue(o == runtime);
-      retJson = new String(bos.toByteArray());
-      // log.info("ret - {}", retJson);
-      Message m = CodecUtils.fromJson(retJson, Message.class);
-      assertTrue(m.getClass() == Message.class);
-      assertTrue(m.data.length == 1);
-
+      
       // with user id
       o = null;
       o = api.process(bos, "http://userid:passwd@localhost:8888/api/service/runtime/start/servo/Servo");
       assertTrue(Servo.class == o.getClass());
-      retJson = new String(bos.toByteArray());
-      // log.info("ret - {}", retJson);
-
-      // messages with encoded data
-//       o = api.process(bos, "/api/messages", encoded.toByteArray());
-      assertTrue(String.class == o.getClass());
-      // CodecUtils.fromJson(retJson);
-      // log.info("ret - {}", o);
-
+      retJson = new String(bos.toByteArray());   
       bos.reset();
-//      o = api.process(bos, "/api/messages/", encoded.toByteArray());
-      // log.info("ret - {}", o);
-      bos.reset();
+
       // uri always has precedence over data
       o = api.process(bos, "/api/messages/runtime/getService/runtime");
       // log.info("ret - {}", new String(bos.toByteArray()));
