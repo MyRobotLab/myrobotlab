@@ -49,7 +49,8 @@ public class Platform implements Serializable {
   // non-changing values
   String os;
   String arch;
-  int bitness;
+  int osBitness;
+  int jvmBitness;
   String lang = "java";
   String vmName;
   String vmVersion;
@@ -90,7 +91,7 @@ public class Platform implements Serializable {
 
       platform.startTime = new Date();
 
-      // os
+      // === OS ===
       platform.os = System.getProperty("os.name").toLowerCase();
       if (platform.os.indexOf("win") >= 0) {
         platform.os = OS_WINDOWS;
@@ -103,17 +104,9 @@ public class Platform implements Serializable {
       platform.vmName = System.getProperty("java.vm.name");
       platform.vmVersion = System.getProperty("java.specification.version");
 
-      // bitness
-      String model = System.getProperty("sun.arch.data.model");
-      if ("64".equals(model)) {
-        platform.bitness = 64;
-      } else {
-        platform.bitness = 32;
-      }
-
-      // arch
+      // === ARCH ===
       String arch = System.getProperty("os.arch").toLowerCase();
-      if ("i386".equals(arch) || "i686".equals(arch) || "i586".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
+      if ("i386".equals(arch) || "i486".equals(arch) || "i586".equals(arch) || "i686".equals(arch) || "amd64".equals(arch) || arch.startsWith("x86")) {
         platform.arch = "x86"; // don't care at the moment
       }
 
@@ -145,7 +138,39 @@ public class Platform implements Serializable {
       if (platform.arch == null) {
         platform.arch = arch;
       }
+      
+      // === BITNESS ===
+      if (platform.isWindows()) {
+        // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
+        // this will attempt to guess the bitness of the underlying OS, Java tries very hard to hide this from running programs 
+        String procArch = System.getenv("PROCESSOR_ARCHITECTURE");
+        String procArchWow64 = System.getenv("PROCESSOR_ARCHITEW6432");
+        platform.osBitness = (procArch != null && procArch.endsWith("64") || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
+        switch (arch) {
+          case "x86":
+          case "i386":
+          case "i486":
+          case "i586":
+          case "i686":
+            platform.jvmBitness = 32;
+            break;
+          case "x86_64":
+          case "amd64":
+            platform.jvmBitness = 64;
+            break;
+          default:
+            platform.jvmBitness = 0; // ooops, I guess
+            break;
+        }
+      } else {
+        // this is actually a really bad way of doing jvm bitness (may return "64","32" or "unknown") - and is sometimes simply not there at all
+        // keeping this as a fallback for all Linux and Mac machines,
+        // I don't know enough to implement a more robust detection for them (and this was here before me, so it has to be good)
+        String model = System.getProperty("sun.arch.data.model");
+        platform.jvmBitness = "64".equals(model) ? 64 : 32;
+      }
 
+      // === MRL ===
       if (platform.mrlVersion == null) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
         platform.mrlVersion = format.format(new Date());
@@ -240,8 +265,12 @@ public class Platform implements Serializable {
     return arch;
   }
 
-  public int getBitness() {
-    return bitness;
+  public int getOsBitness() {
+    return osBitness;
+  }
+  
+  public int getJvmBitness() {
+    return jvmBitness;
   }
 
   public String getOS() {
@@ -249,7 +278,7 @@ public class Platform implements Serializable {
   }
 
   public String getPlatformId() {
-    return String.format("%s.%s.%s", getArch(), getBitness(), getOS());
+    return String.format("%s.%s.%s", getArch(), getJvmBitness(), getOS());
   }
 
   public String getVersion() {
@@ -333,7 +362,7 @@ public class Platform implements Serializable {
 
   @Override
   public String toString() {
-    return String.format("%s.%d.%s", arch, bitness, os);
+    return String.format("%s.%d.%s", arch, jvmBitness, os);
   }
 
   public String getId() {
