@@ -83,7 +83,7 @@ public class ApiFactory {
 
   public static List<ApiDescription> getApis() {
     List<ApiDescription> apis = new ArrayList<ApiDescription>();
-    String[] apiKeys = new String[] { API_TYPE_MESSAGES, API_TYPE_MESSAGES_BLOCKING, API_TYPE_SERVICE };
+    String[] apiKeys = new String[] { API_TYPE_MESSAGES, API_TYPE_SERVICE };
     for (String key : apiKeys) {
       try {
         Class<?> clazz = Class.forName(String.format("org.myrobotlab.codec.Api%s", key.substring(0, 1).toUpperCase() + key.substring(1)));
