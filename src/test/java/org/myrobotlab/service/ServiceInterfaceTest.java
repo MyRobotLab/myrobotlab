@@ -104,7 +104,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.createAndStart("python", "Python");
-    String testScriptDirectory = Util.getResourceDir() + File.separator + "Python" + File.separator + "examples/";
+    String testScriptDirectory = Util.getResourceDir() + File.separator + "%s/";
     ServiceData sd = ServiceData.getLocalInstance();
     List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
     
@@ -149,7 +149,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
 
       // validate that a script exists
-      File script = new File(testScriptDirectory + service + ".py");
+      File script = new File(String.format(testScriptDirectory, service) + service + ".py");
       if (script.exists()) {
         log.info("Service Has a Script: {}", service);
         numScripts++;
@@ -230,7 +230,7 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     // TODO: this blows stuff up too much.
 
-    String testScriptFile = testScriptDirectory + service + ".py";
+    String testScriptFile = String.format(testScriptDirectory, service) + service + ".py";
     String prefix = "virtual = True\n";
     File script = new File(testScriptFile);
     if (!script.exists()) {
