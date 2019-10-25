@@ -654,7 +654,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return networkPeers;
   }
 
-  public static List<ApiDescription> getApis() {
+  public List<ApiDescription> getApis() {
     return ApiFactory.getApis();
   }
 
@@ -3146,6 +3146,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       endpoint.socket.fire(CodecUtils.toJson(msg));
     }
   }
+  
 
   /**
    * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it

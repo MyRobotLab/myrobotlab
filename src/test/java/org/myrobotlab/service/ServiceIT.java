@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.repo.GitHub;
 import org.myrobotlab.framework.repo.ServiceData;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.test.AbstractTest;
 
 public class ServiceIT extends AbstractTest {
@@ -60,7 +61,8 @@ public class ServiceIT extends AbstractTest {
       for (int i = 0; i < sts.size(); ++i) {
         ServiceType st = sts.get(i);
         serviceTypes.add(st.getSimpleName());
-        String script = GitHub.getPyRobotLabScript(branch, st.getSimpleName());
+        System.out.println(System.getProperty("user.dir") + "/src/main/resources/resource/" + st.getSimpleName() + "/" + st.getSimpleName() + ".py");
+        String script = FileIO.toString("src/main/resources/resource/" + st.getSimpleName() + "/" + st.getSimpleName() + ".py"); // GitHub.getPyRobotLabScript(branch, st.getSimpleName());
         if (script != null) {
           pythonScripts.put(st.getSimpleName(), script);
         } else {
