@@ -2,28 +2,28 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $log.info('ArduinoGuiCtrl')
     var _self = this
     var msg = this.msg
-    $scope.editor = null 
+    $scope.editor = null
     $scope.version = "unknown"
     $scope.boardType = ""
     $scope.image = "service/arduino/Uno.png"
-    $scope.connectedStatus = ""
+    $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200']
     $scope.versionStatus = ""
-    // $scope.boardInfo = 0
-    $scope.singleModel = 0 
+    $scope.rate = '115200'
+    $scope.singleModel = 0
 
     $scope.boardInfo = {
         "boardType": null,
-        "deviceCount": null ,
-        "deviceList": null ,
-        "enableBoardInfo":false,
-        "sram": null ,
-        "us": null ,
+        "deviceCount": null,
+        "deviceList": null,
+        "enableBoardInfo": false,
+        "sram": null,
+        "us": null,
         "version": null
-    }   
+    }
 
     // for port directive
     $scope.portDirectiveScope = {}
-    
+
     // Status - from the Arduino service
     $scope.statusLine = ""
     this.updateState = function(service) {
@@ -34,33 +34,15 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         var serial = $scope.service.serial
 
         $scope.serialName = null
+
         // === service.serial begin ===
-        if (service.serial != null){
-            $scope.serialName = service.serial.name
-            $scope.isConnected = (serial.portName != null )
-            $scope.isConnectedImage = (serial.portName != null ) ? "connected" : "disconnected"
-        } else {
-            $scope.isConnected = false
-            $scope.isConnectedImage = "disconnected"
-        }
-        
-        
-        
-        if ($scope.isConnected) {
-            $scope.portName = serial.portName
-            $scope.connectedStatus = "connected to " + serial.portName + " at " + serial.baudrate
-        } else {
-            $scope.portName = (serial == null)?"":serial.lastPortName
-            $scope.connectedStatus = "disconnected"
-        }
-        // === service.serial begin ===
-        if (service.mrlCommVersion != null ) {
+        if (service.mrlCommVersion != null) {
             $scope.versionStatus = " with firmware version " + service.mrlCommVersion
         } else {
-            $scope.versionStatus = null 
+            $scope.versionStatus = null
         }
     }
-    
+
     _self.updateState($scope.service)
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
@@ -76,8 +58,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             // $scope.statusLine = data
             break
         case 'onPinArray':
-         // a NOOP - but necessary 
-        break
+            // a NOOP - but necessary 
+            break
         case 'onPortNames':
             $scope.possiblePorts = data
             $scope.$apply()
@@ -93,17 +75,35 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             }
             $scope.$apply()
             break
-        case 'onRefresh':
+        case 'onPortNames':
             $scope.possiblePorts = data
             $scope.$apply()
             break
             // FIXME - this should be in a prototype    
-        case 'onStatus':
-            // backend update 
-            // FIXME - SHOULD BE MODIFYING PARENT'S STATUS
-            // $scope.updateState(data)
-            // $scope.$apply()
-            break        
+        case 'onConnect':
+            $scope.isConnectedImage = "connected"
+            $scope.isConnected = true
+            $scope.$apply()
+            break
+        case 'onDisconnect':
+            $scope.serial = data
+            $scope.isConnected = false
+            $scope.$apply()
+            break
+            // FIXME - this should be in a prototype    
+        case 'onSerial':
+            $scope.serial = data
+            if ($scope.serial != null) {
+                $scope.isConnected = ($scope.serial.portName != null)
+                $scope.isConnectedImage = ($scope.serial.portName != null) ? "connected" : "disconnected"
+                $scope.connectText = ($scope.serial.portName == null) ? "connect" : "disconnect"
+                if ($scope.isConnected) {
+                    $scope.portName = $scope.serial.portName
+                } else {
+                    $scope.portName = $scope.serial.lastPortName
+                }
+            }
+            break
         case 'onPin':
             break
         case 'onTX':
@@ -116,32 +116,32 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             break
         }
     }
-    
+
     // $scope display methods
     $scope.onBoardChange = function(boardType) {
         if ($scope.service.boardType != boardType) {
             msg.send('setBoard', boardType)
         }
     }
-    
+
     $scope.upload = function(arduinoPath, portDirectiveScope, type) {
         // FIXME !!! - nicer global check empty method
         // FIXME !!! - parent error warn info - publishes to the appropriate service
-        if (angular.isUndefined(arduinoPath) || arduinoPath == null || arduinoPath == "" ){
+        if (angular.isUndefined(arduinoPath) || arduinoPath == null || arduinoPath == "") {
             msg.send('error', 'arduino path is not set')
             return
         }
-        if (angular.isUndefined(portDirectiveScope) || portDirectiveScope.portName == null || portDirectiveScope.portName == "" ){
+        if (angular.isUndefined(portDirectiveScope) || portDirectiveScope.portName == null || portDirectiveScope.portName == "") {
             msg.send('error', 'port name not set')
             return
         }
-        if (angular.isUndefined(type) || type == null || type == "" ){
+        if (angular.isUndefined(type) || type == null || type == "") {
             msg.send('error', 'board type not set')
             return
         }
         msg.send('uploadSketch', arduinoPath, portDirectiveScope.portName, type)
     }
-    
+
     $scope.aceLoaded = function(editor) {
         // FIXME - can't we get a handle to it earlier ?
         $scope.editor = editor
@@ -150,18 +150,26 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         editor.$blockScrolling = Infinity
         editor.setValue($scope.service.sketch.data, -1)
     }
-    
+
     $scope.aceChanged = function(e) {}
-    
+
     $scope.oink = function(e) {
         $log.info('hello')
     }
-    
+
     // get version
     msg.subscribe('publishVersion')
     msg.subscribe('publishBoardInfo')
-    msg.subscribe('publishBoardInfo')
-   // msg.subscribe('publishSensorData')
+    msg.subscribe('getPortNames')
+    msg.subscribe('publishConnect')
+    msg.subscribe('publishDisconnect')
+    msg.subscribe('getPortNames')
+    msg.subscribe('getSerial')
+
+    msg.send('getPortNames')
+    msg.send('getSerial')
+    // FIXME - onSerial ...
+    // msg.subscribe('publishSensorData')
     msg.subscribe(this)
 }
 ])

@@ -3,7 +3,7 @@
    <label>port</label>
     <div class="input-group">
    <!-- {{possiblePorts}} -->
-       <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8" typeahead-min-length="0"/>
+       <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0"/>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.rate, service.dataBits, service.stopBits, service.parity)">connect</button></span>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
@@ -18,7 +18,7 @@
 <div class="row" ng-show="!isConnected">
 <div class="col-lg-3">
     <label for="service.rate">rate</label>
-    <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue | limitTo:8">
+    <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue">
 </div>
 <div class="col-lg-3">    
     <label for="service.dataBits">data bits</label>
