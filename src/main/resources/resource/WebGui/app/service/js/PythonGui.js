@@ -146,7 +146,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     ;
 
     msg.subscribe('publishStdOut')
-    msg.send("attachPythonConsole")
     msg.subscribe(this)
 }
 ])

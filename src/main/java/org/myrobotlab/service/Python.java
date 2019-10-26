@@ -287,6 +287,7 @@ public class Python extends Service {
     localPythonFiles = getFileListing();
 
     createPythonInterpreter();
+    attachPythonConsole();
   }
 
   public void openScript(String scriptName, String code) {
@@ -315,6 +316,7 @@ public class Python extends Service {
     if (!pythonConsoleInitialized) {
       String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
+      pythonConsoleInitialized = true;
     }
   }
 
