@@ -64,7 +64,6 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
@@ -518,20 +517,13 @@ public class Arduino extends AbstractMicrocontroller
     connect(port, rate, 8, 1, 0);
   }
 
-  public void setVirtual(boolean b) {
-    if (b) {
-      virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
-    }
-    isVirtual = b;
-  }
-
   public VirtualArduino getVirtual() {
     return virtual;
   }
 
   /**
-   * default params to connect to Arduino &amp; MrlComm.ino
-   * FIXME - remove the parameters except rate as they are not allowed to change with MRLComm
+   * default params to connect to Arduino &amp; MrlComm.ino FIXME - remove the
+   * parameters except rate as they are not allowed to change with MRLComm
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
@@ -545,7 +537,10 @@ public class Arduino extends AbstractMicrocontroller
         return;
       }
 
-      if (isVirtual()) { // FIXME - might need some work to be re-entrant ?
+      if (isVirtual()) {
+        if (virtual == null) {
+          virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
+        }
         virtual.connect(port);
       }
 
@@ -1619,7 +1614,7 @@ public class Arduino extends AbstractMicrocontroller
       // invoke("getPinList");
       broadcastState();
     }
-    
+
     if (boardInfo != null) {
       DeviceSummary[] ds = boardInfo.getDeviceSummary();
       if (deviceList.size() - 1 > ds.length) { /* -1 for self */
@@ -1764,14 +1759,14 @@ public class Arduino extends AbstractMicrocontroller
         pinDataMap.put(pinArray[i].pin, pinArray[i]);
       }
     }
-    
+
     for (String name : pinArrayListeners.keySet()) {
       // put the pin data into a map for quick lookup
       PinArrayListener pal = pinArrayListeners.get(name);
       if (pal.getActivePins() != null && pal.getActivePins().length > 0) {
         int numActive = pal.getActivePins().length;
         PinData[] subArray = new PinData[numActive];
-        for (int i = 0 ; i < numActive; i++) {
+        for (int i = 0; i < numActive; i++) {
           String key = pal.getActivePins()[i];
           if (pinDataMap.containsKey(key)) {
             subArray[i] = pinDataMap.get(key);
@@ -1807,12 +1802,13 @@ public class Arduino extends AbstractMicrocontroller
 
   @Deprecated /**
                * Controllers should publish EncoderData - Servos can change that
-               * into ServoData and publish
-               * REMOVED BY GROG - use TimeEncoder !
+               * into ServoData and publish REMOVED BY GROG - use TimeEncoder !
                */
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      // REMOVED BY GROG  - use time encoder !((ServoControl) getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE, (double) currentPos);
+      // REMOVED BY GROG - use time encoder !((ServoControl)
+      // getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE,
+      // (double) currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -2276,15 +2272,13 @@ public class Arduino extends AbstractMicrocontroller
   public Map<String, DeviceMapping> getDeviceList() {
     return deviceList;
   }
-  
-  public void noAck(){
+
+  public void noAck() {
     log.error("no Ack we are resetting the serial port !");
     /*
-    String portName = getPortName();
-    disconnect();
-    sleep(1000);
-    connect(portName);
-    */
+     * String portName = getPortName(); disconnect(); sleep(1000);
+     * connect(portName);
+     */
   }
 
   public void publishMrlCommBegin(Integer version) {
@@ -2298,19 +2292,20 @@ public class Arduino extends AbstractMicrocontroller
 
   /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
-   *    
-   *   -Djava.library.path=libraries/native -Djna.library.path=libraries/native -Dfile.encoding=UTF-8
-   *   
+   * 
+   * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
+   * -Dfile.encoding=UTF-8
+   * 
    * @param args
    */
   public static void main(String[] args) {
     try {
-      
-      // DONT FORGET TO 
+
+      // DONT FORGET TO
       Platform.setVirtual(true);
       LoggingFactory.init(Level.WARN);
       // Platform.setVirtual(true);
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();

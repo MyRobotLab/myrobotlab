@@ -6,16 +6,14 @@
             <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">new
                 </button>
             <div class="dropdown-menu" role="menu" is-open="dropdownIsOpen">
-            <form ng-submit="dropdownIsOpen=false;msg.openScript(newName, '# new awesome robot script');newName='';">
-                <div class="input-group">
-                    <div class="input-group-btn">
-                        
+                <form ng-submit="dropdownIsOpen=false;msg.openScript(newName, '# new awesome robot script');newName='';">
+                    <div class="input-group">
+                        <div class="input-group-btn">
                             <input class="form-control btn-group" type="text" ng-model="newName" placeholder="file name"/>
                             <button class="form-control btn btn-default btn-group" type="submit">add file </button>
-                       
+                        </div>
                     </div>
-                </div>
-                 </form>
+                </form>
             </div>
         </div>
         <!-- end of dropdown -->
@@ -23,28 +21,26 @@
             <!--  input class="btn btn-default" type="button" value="new" ng-click="addScript()"/ -->
             <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
             <ul uib-dropdown-menu>
-                <li ng-repeat="(key, value) in service.exampleUrls" ng-class="navClass('{{key}}')">
-                    <a href='' ng-click="msg.loadPyRobotLabServiceScript(key)">{{key}}</a>
-                </li>
+                    <li id="newService">
+                        <form class="navbar-form">
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <input class="form-control" type="text" ng-model="example" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+                                    <button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(example.name)">load</button>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
             </ul>
         </div>
         <button type="button" class="btn btn-default" ng-click="exec()">
             <span class="glyphicon glyphicon-play"></span>
             execute
-        
-        
         </button>
         <button type="button" class="btn btn-default" ng-click="msg.stop()">
             <span class="glyphicon glyphicon-stop"></span>
             stop
-        
-        
         </button>
-        <!--
-        <button type="button" class="btn btn-default" ng-click="msg.saveCurrentScript()">
-            <span class="glyphicon glyphicon-save"></span>
-            save     
-        </button> -->
         <button class="btn btn-default" ng-click="saveTextAsFile()">save</button>
     </div>
 </div>
@@ -62,7 +58,15 @@
 <div class="row">
     Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/>
     <uib-tabset active="activeTabIndex">
-        <uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" heading="{{getTabHeader(key)}}" select="tabSelected(value)">
+        <uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" select="tabSelected(value)">
+            <uib-tab-heading>
+                <span>
+                    {{getTabHeader(key)}}&nbsp;&nbsp;&nbsp;
+                    <button type="button" class="close" data-ng-click="closeScript(key)" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </span>
+            </uib-tab-heading>
             <div ng-model="scripts[key].code" style="height: 500px;width: 50%;" id="$index" ui-ace="{
 		                                       useWrapMode : false,
 		                                       showGutter: true,		                                       

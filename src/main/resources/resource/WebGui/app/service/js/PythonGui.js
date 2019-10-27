@@ -88,6 +88,14 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         console.log($scope.activeTabIndex)
     }
 
+    $scope.closeScript = function(scriptName){
+        // FIXME - save first ?
+        msg.send('closeScript', scriptName)
+        delete $scope.scripts[scriptName]
+        $scope.scriptCount--
+        console.log("removed " + scriptName)
+    }
+
     $scope.exec = function() {
         msg.send('exec', $scope.activeScript.code)
     }
@@ -144,7 +152,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         });
     }
     ;
-
+    
+    $scope.possibleServices = mrl.getPossibleServices()
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
 }

@@ -1202,13 +1202,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.ERROR);
+    LoggingFactory.init(Level.INFO);
 
     try {
 
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
       Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
+      // Runtime.start("gui", "SwingGui");
       Runtime runtime = Runtime.getInstance();
       runtime.setVirtual(true);
       // Runtime.start("log", "Log");
@@ -1219,7 +1220,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8887);
       webgui.startService();
       
-      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
 
       log.info("leaving main");

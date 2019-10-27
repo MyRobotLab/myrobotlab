@@ -241,25 +241,6 @@ public class ServiceInterfaceTest extends AbstractTest {
     }
 
     return false;
-
-    // dead code
-    // if (true) {
-    // // Diabled testing of scripts currently.
-    // return false;
-    // }
-    // try {
-    // String test = FileUtils.readFileToString(script);
-    // System.out.println(test);
-    //
-    // python.execAndWait(test);
-    // } catch (IOException e) {
-    // // TODO Auto-generated catch block
-    // log.warn("Error Running script {}" , script);
-    // e.printStackTrace();
-    //
-    // return false;
-    // }
-    // return true;
   }
 
 }

@@ -26,11 +26,12 @@
             <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.getPortNames()">refresh</button>
             <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(portName, rate)">connect</button>
             <button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button>
+            <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
         </div>
     </div>
 </form>
-<div class="col-md-4">
-    <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
+<div class="row">
+    
     <!-- TODO - make directive -->
     <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
 </div>
