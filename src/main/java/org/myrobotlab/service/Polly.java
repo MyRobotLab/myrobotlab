@@ -123,7 +123,7 @@ public class Polly extends AbstractSpeechSynthesis {
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
     if (key == null || secret == null) {
-      log.error("this service requires 2 keys - you can set them once with Security.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
+      error("this service requires 2 keys");
       return null;
     }
 
@@ -144,7 +144,7 @@ public class Polly extends AbstractSpeechSynthesis {
               .build();
         } catch (Exception e2) {
 
-          error("could not get Polly client - did you setKeys ? polly.setKeys(AMAZON_POLLY_USER_KEY, AMAZON_POLLY_USER_SECRET)");
+          error("could not get Polly client - did you set the keys?");
           log.error("giving up", e2);
 
           polly = null;
@@ -183,6 +183,10 @@ public class Polly extends AbstractSpeechSynthesis {
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException {
     getPolly();
     Voice voice = getVoice();
+    if (voice == null) {
+      error("invalid voice - have keys been set ?");
+      return null;
+    }
     // com.amazonaws.services.polly.model.Voice awsVoice =
     // ((com.amazonaws.services.polly.model.Voice) voice.getVoiceProvider());
     SynthesizeSpeechRequest synthReq = new SynthesizeSpeechRequest().withText(toSpeak).withVoiceId(voice.getName()).withOutputFormat("mp3");
