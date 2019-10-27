@@ -27,8 +27,8 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
     // I suspect speak is not "setup" like other functions and is not accessable like others in the
     // theml e.g. msg.speak - so got to figure that out or temporarily create a $scope.speak kludge
     $scope.speak = function(text){
-        console.log($scope.service.voice.name)
         msg.send("speak", text)
+        //console.log($scope.service.voice.name)
     }
 
     $scope.setVoice  = function(text){

@@ -26,6 +26,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.views', //mainView, tabsView, serviceView, ...
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
+'angularTreeview', // any server filesystem browsing
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js');
