@@ -44,7 +44,7 @@ public class AudioProcessor extends Thread {
 
   AudioFile audioFile = null;
 
-  public boolean isPlaying = false;
+  boolean isPlaying = false;
 
   boolean isRunning = false;
 
@@ -63,6 +63,9 @@ public class AudioProcessor extends Thread {
   }
 
   public AudioData pause(boolean b) {
+    if (b) {
+      isPlaying = false;
+    }
     if (currentAudioData != null) {
       if (b) {
         currentAudioData.waitForLock = new Object();
@@ -329,6 +332,11 @@ public class AudioProcessor extends Thread {
    */
   public int getTrackSize() {
     return queue.size();
+  }
+
+  public void stopPlaying() {
+    isPlaying = false;
+    isRunning = false;
   }
 
 }

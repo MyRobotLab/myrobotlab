@@ -295,6 +295,11 @@ public class Python extends Service {
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
+  
+  public void closeScript(String scriptName) {
+    openedScripts.remove(scriptName);
+    broadcastState();
+  }
 
   /**
    * append more Python to the current script
@@ -454,6 +459,9 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
+      
+      // FIXME - TOO MANY DIFFERENT CODE-PATHS TO interp.exec ...
+      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN INVOKE(finishedExecutingScript) !!! HERE ???
       
       return true;
       

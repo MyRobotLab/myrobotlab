@@ -5,11 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -189,7 +186,9 @@ public class ServoTest extends AbstractTest {
   public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
     // then detach
-    Platform.setVirtual(true);
+    Runtime runtime = Runtime.getInstance();
+    runtime.setVirtual(true);
+    // Runtime.start("gui", "SwingGui");
     
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);

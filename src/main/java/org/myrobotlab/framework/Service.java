@@ -802,15 +802,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
-  
+
   public String getResourceRoot() {
-    // FIXME - should "this" be the test ?  
+    // FIXME - should "this" be the test ?
     // If so it should be its own static function...
-    
+
     // order of precedence
     // 1. if there is a src directory use it unless
     // 2. options say to override it
-    
+
     String resourceRoot = Runtime.getOptions().resourceDir;
     if ("resource".equals(resourceRoot)) {
       // allow default to be overriden by src if it exists
@@ -819,7 +819,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         resourceRoot = "src" + fs + "main" + fs + "resources" + fs + "resource";
       }
     }
-    
+
     return resourceRoot;
   }
 
@@ -832,7 +832,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return resourceDir;
   }
-  
+
   public byte[] getResource(String resourceName) {
     String filename = getResourceDir() + fs + resourceName;
     File f = new File(filename);
@@ -848,7 +848,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return content;
   }
-  
+
   public String getResourceAsString(String resourceName) {
     byte[] data = getResource(resourceName);
     if (data != null) {
@@ -1401,10 +1401,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   final public Object invoke(String method, Object... params) {
     return invokeOn(this, method, params);
   }
-  
-  
+
   /**
    * thread blocking invoke call on different service in the same process
+   * 
    * @param serviceName
    * @param methodName
    * @param params
@@ -1430,6 +1430,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Object retobj = null;
     try {
       MethodCache cache = MethodCache.getInstance();
+      if (obj == null) {
+        log.error("cannot invoke on a null object ! {}({})", methodName, MethodCache.formatParams(params));
+        return null;
+      }
       Method method = cache.getMethod(obj.getClass(), methodName, params);
       if (method == null) {
         error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
@@ -1599,6 +1603,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
+    
+    purgeTasks();
 
     // recently added - preference over detach(Runtime.getService(getName()));
     // since this service is releasing - it should be detached from all existing
@@ -1619,8 +1625,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - deprecate - peers are no longer used ...
     releasePeers();
 
-    purgeTasks();
-
     // Runtime.release(getName()); infinite loop with peers ! :(
 
     Runtime.unregister(getName());
@@ -1632,7 +1636,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void removeAllListeners() {
     outbox.notifyList.clear();
   }
-  
+
   public void removeListener(String topicMethod, String callbackName) {
     removeListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
@@ -2488,13 +2492,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getSwagger() {
     return null;
   }
-  
+
   public String getId() {
     return id;
   }
-  
+
   public String getFullName() {
     return String.format("%s@%s", name, id);
   }
 
+  public void copyResource(String src, String dest) throws IOException {
+    FileIO.copy(getResourceDir() + File.separator + src, dest);
+  }
 }
