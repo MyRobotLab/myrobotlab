@@ -85,7 +85,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   // PARTS ARE NOW PART OF CONTROLLER
 
   // inputs
-  Double powerInput;
+  Double powerInput = 0.0;
   Double positionInput; // aka targetPos
 
   // feedback
