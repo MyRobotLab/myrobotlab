@@ -4,10 +4,10 @@
 <div class="row">
     <div class="col-lg-6">
         <div class="row">
-            <div data-ng-repeat="(pinKey, pinDef) in pinIndex">
+            <div data-ng-repeat="(pinKey, pinDef) in pinMap">
                 <div ng-show="oscope.traces[pinKey].state">
                     <!-- TODO - this should become a 'trace' directive -->
-                    <canvas width="800" height="100" id="{{ 'oscope-address-' + pinKey}}"></canvas>
+                    <canvas width="800" height="100" id="{{ 'oscope-pin-' + pinKey}}"></canvas>
                     <!-- per screen buttons .. button type="button" class="btn btn-default" ng-click="zoomIn()">+</button -->
                 </div>
             </div>
@@ -22,10 +22,10 @@
                 <!-- TODO - read/write toggle -->
             </div>
             <div class="btn-group" role="group" aria-label="...">
-                <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinIndex">
+                <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinMap">
                     <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinKey].readStyle">{{ pinDef.pin }}</button>
                 </div>
-                <div class="btn-group" role="group" ng-show="readWrite == 'write'" data-ng-repeat="(pinKey, pinDef) in pinIndex">
+                <div class="btn-group" role="group" ng-show="readWrite == 'write'" data-ng-repeat="(pinKey, pinDef) in pinMap">
                     <button class="btn btn-default" type="button" ng-click="write(pinDef)" ng-style="oscope.traces[pinKey].writeStyle">{{ pinDef.pin }}</button>
                 </div>
                 <br>

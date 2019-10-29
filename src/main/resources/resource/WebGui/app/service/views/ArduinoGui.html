@@ -8,8 +8,8 @@
             <select ng-model="boardType" id="boardType" ng-change="onBoardChange(boardType)" class="form-control">
                 <option>uno</option>
                 <option>mega</option>
-                <option>megaADK</option>
                 <option>nano</option>
+                <option>micro</option>
             </select>
             <button class="btn btn-default" ng-click="">Serial</button>
         </div>
@@ -63,9 +63,9 @@
         <!-- end -->
         <!-- begin -->
         <uib-tab heading="Settings">
-            <span>Arduino IDE executable</span>
+            
             <!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
-            Path<input type="text" class="form-control" id="arduinoPath" ng-model="service.arduinoPath">
+            <input type="file" class="form-control" id="arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
             <!-- current implementation will not work as a jar -->
             <!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
             <!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->

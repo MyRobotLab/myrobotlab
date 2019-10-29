@@ -1,11 +1,9 @@
 package org.myrobotlab.framework;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -13,9 +11,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
 
 /**

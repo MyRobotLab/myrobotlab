@@ -428,9 +428,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         to all the callbacks which have been registered to it
         topicName.topicMethod ---> webgui gateway --> angular callback
     */
-    this.subscribe = function(topicName, topicMethod) {
-        _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
+    this.subscribe = function(name, method) {
+        // _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
         // _self.sendTo(_self.gateway.name, "addListener", topicName, topicMethod);
+        _self.sendTo(name, "addListener", method, name + '@' + _self.id);
     }
     ;
     this.unsubscribe = function(topicName, topicMethod) {
