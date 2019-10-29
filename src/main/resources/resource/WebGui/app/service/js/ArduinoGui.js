@@ -5,11 +5,12 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     $scope.editor = null
     $scope.version = "unknown"
     $scope.boardType = ""
-    $scope.image = "service/arduino/Uno.png"
+    $scope.image = "Arduino/Uno.png"
     $scope.possibleBaud = ['600', '1200', '2400', '4800', '9600', '19200', '38400', '57600', '115200']
     $scope.versionStatus = ""
     $scope.rate = '115200'
     $scope.singleModel = 0
+    $scope.isConnected = "disconnected"
 
     $scope.boardInfo = {
         "boardType": null,
@@ -30,7 +31,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         $scope.service = service
         $scope.boardType = service.board
         $scope.arduinoPath = service.arduinoIdePath
-        $scope.image = "service/arduino/" + service.board + ".png"
+        $scope.image = "Arduino/" + service.board + ".png"
         var serial = $scope.service.serial
 
         $scope.serialName = null
@@ -86,7 +87,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
             $scope.$apply()
             break
         case 'onDisconnect':
-            $scope.serial = data
+            $scope.isConnectedImage = "disconnected"
             $scope.isConnected = false
             $scope.$apply()
             break
@@ -165,6 +166,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     msg.subscribe('publishDisconnect')
     msg.subscribe('getPortNames')
     msg.subscribe('getSerial')
+    msg.subscribe('publishPinArray')
 
     msg.send('getPortNames')
     msg.send('getSerial')

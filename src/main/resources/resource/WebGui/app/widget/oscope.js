@@ -44,45 +44,42 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             // button toggle read/write
             // scope.blah = {};
             // scope.blah.display = false;
-            scope.pinIndex = {};
+            scope.pinMap = {};
             var x = 0;
-            var gradient = tinygradient([// tinycolor('#ff0000'),       // tinycolor object
-            // {r: 0, g: 255, b: 0},       // RGB object
+            var gradient = tinygradient([
             {
                 h: 0,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }, // HSVa object
+            }, 
             {
                 h: 240,
                 s: 0.4,
                 v: 1,
                 a: 1
-            }//, // HSVa object
-            //'rgb(120, 120, 0)',         // RGB CSS string
-            //'gold'                      // named color
+            }
             ]);
             scope.oscope = {};
             scope.oscope.traces = {};
             scope.oscope.writeStates = {};
             // display update interfaces
             // defintion stage
-            var setTraceButtons = function(pinIndex) {
-                if (pinIndex == null) {
+            var setTraceButtons = function(pinMap) {
+                if (pinMap == null) {
                     return;
                 }
-                var size = Object.keys(pinIndex).length
-                scope.pinIndex = pinIndex;
+                var size = Object.keys(pinMap).length
+                scope.pinMap = pinMap;
                 var colorsHsv = gradient.hsv(size);
-                // pass over pinIndex add display data
-                for (var key in pinIndex) {
-                    if (!pinIndex.hasOwnProperty(key)) {
+                // pass over pinMap add display data
+                for (var key in pinMap) {
+                    if (!pinMap.hasOwnProperty(key)) {
                         continue;
                     }
                     scope.oscope.traces[key] = {};
                     var trace = scope.oscope.traces[key];
-                    var pinDef = pinIndex[key];
+                    var pinDef = pinMap[key];
 
                     // adding style
                     var color = colorsHsv[pinDef.address];
@@ -113,7 +110,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                 switch (inMsg.method) {
                 case 'onState':
                     // backend update 
-                    setTraceButtons(inMsg.data[0].pinIndex);
+                    setTraceButtons(inMsg.data[0].pinMap);
                     scope.$apply();
                     break;
                 case 'onPinArray':
@@ -122,11 +119,11 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                     for (i = 0; i < pinArray.length; ++i) {
                         // get pin data & definition
                         pinData = pinArray[i];
-                        pinDef = scope.pinIndex[pinData.address];
+                        pinDef = scope.pinMap[pinData.pin];
                         // get correct screen and references
-                        var screen = document.getElementById('oscope-address-' + pinData.address);
+                        var screen = document.getElementById('oscope-pin-' + pinData.pin);
                         var ctx = screen.getContext('2d');
-                        var trace = scope.oscope.traces[pinData.address];
+                        var trace = scope.oscope.traces[pinData.pin];
                         var stats = trace.stats;
                         // TODO - sample rate Hz
                         trace.stats.totalSample++;
@@ -197,7 +194,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             scope.clearScreen = function(pinArray) {
                 for (i = 0; i < pinArray.length; ++i) {
                     pinData = pinArray[i];
-                    pinDef = scope.pinIndex[pinData.address];
+                    pinDef = scope.pinMap[pinData.pin];
                     _self.ctx = screen.getContext('2d');
                     // ctx.scale(1, -1); // flip y around for cartesian - bad idea :P
                     // width = screen.width;
@@ -217,14 +214,14 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             }
             ;// RENAME eanbleTrace - FIXME read values vs write values | ALL values from service not from ui !! - ui only sends commands
             scope.activateTrace = function(pinDef) {
-                var trace = scope.oscope.traces[pinDef.address];
+                var trace = scope.oscope.traces[pinDef.pin];
                 if (trace.state) {
                     toggleReadButton(trace);
-                    mrl.sendTo(name, 'disablePin', pinDef.address);
+                    mrl.sendTo(name, 'disablePin', pinDef.pin);
                     trace.state = false;
                 } else {
                     toggleReadButton(trace);
-                    mrl.sendTo(name, 'enablePin', pinDef.address);
+                    mrl.sendTo(name, 'enablePin', pinDef.pin);
                     trace.state = true;
                 }
             }
@@ -235,7 +232,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             ;
             scope.write = function(pinDef) {
                 scope.toggleWriteButton(trace);
-                mrl.sendTo(name, 'digitalWrite', pinDef.address, 1);
+                mrl.sendTo(name, 'digitalWrite', pinDef.pin, 1);
                 // trace.state = true;
 
                 /* 3 states READ/ENABLE | DIGITALWRITE | ANALOGWRITE
@@ -311,7 +308,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data      
-            setTraceButtons(service.pinIndex);
+            setTraceButtons(service.pinMap);
         }
     };
 }

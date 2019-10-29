@@ -724,6 +724,17 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   /**
+   * disablePin/address
+   */
+  @Override
+  public void disablePin(String pinName) {
+    // PinDefinition pinDef = getPin(address);
+    PinDefinition pinDef = getPin(pinName);
+    pinDef.setEnabled(false);
+    msg.disablePin(pinDef.getAddress());
+  }
+
+  /**
    * disable all pins
    */
   public void disablePins() {
