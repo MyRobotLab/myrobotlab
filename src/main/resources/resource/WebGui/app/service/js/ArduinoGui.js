@@ -44,6 +44,13 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         }
     }
 
+    $scope.base64ToArrayBuffer = function(string) {
+        const binaryString = window.atob(string);
+        // Comment this if not using base64
+        const bytes = new Uint8Array(binaryString.length);
+        return bytes.map((byte,i)=>binaryString.charCodeAt(i));
+    }
+
     _self.updateState($scope.service)
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
@@ -75,6 +82,29 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
                 $scope.version = "expected version or MRLComm.c is " + service.mrlCommVersion + " board returned " + $scope.version + " please upload version " + service.mrlCommVersion
             }
             $scope.$apply()
+            break
+        case 'onBase64ZippedMrlComm':
+
+            let binaryString = $scope.base64ToArrayBuffer(data);
+            var textFileAsBlob = new Blob([binaryString]);
+
+            var downloadLink = document.createElement("a");
+            downloadLink.download = 'MrlComm.zip';
+            downloadLink.innerHTML = "Download File";
+            if (window.webkitURL != null) {
+                // Chrome allows the link to be clicked
+                // without actually adding it to the DOM.
+                downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+            } else {
+                // Firefox requires the link to be added to the DOM
+                // before it can be clicked.
+                downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+                downloadLink.onclick = destroyClickedElement;
+                downloadLink.style.display = "none";
+                document.body.appendChild(downloadLink);
+            }
+
+            downloadLink.click();
             break
         case 'onPortNames':
             $scope.possiblePorts = data
@@ -167,6 +197,8 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     msg.subscribe('getPortNames')
     msg.subscribe('getSerial')
     msg.subscribe('publishPinArray')
+    // msg.subscribe('getZippedMrlComm')
+    msg.subscribe('getBase64ZippedMrlComm')
 
     msg.send('getPortNames')
     msg.send('getSerial')

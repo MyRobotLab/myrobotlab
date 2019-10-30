@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -67,6 +68,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
+
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
@@ -1565,6 +1567,30 @@ public class Arduino extends AbstractMicrocontroller
       error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
       log.error("openMrlComm threw", e);
     }
+  }
+  
+  public String getBase64ZippedMrlComm() {
+    return Base64.getEncoder().encodeToString((getZippedMrlComm()));
+  }
+
+  public byte[] getZippedMrlComm() {
+    try {
+      // get resource location
+      String filename = getDataDir() + File.separator + "MrlComm.zip";
+      File f = new File(filename);
+      if (f.exists()) {
+        f.delete();
+      }
+
+      // zip resource
+      Zip.zip(new String[] { getResourceDir() + File.separator + "MrlComm" }, filename);
+
+      // return zip file
+      return FileIO.toByteArray(new File(filename));
+    } catch (Exception e) {
+      error("could not get zipped mrl comm %s", e);
+    }
+    return null;
   }
 
   @Override
