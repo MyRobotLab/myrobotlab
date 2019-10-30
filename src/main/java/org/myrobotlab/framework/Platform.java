@@ -13,6 +13,9 @@ import java.util.TreeMap;
 import java.util.jar.Attributes;
 
 import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Arduino;
+import org.slf4j.Logger;
 
 /**
  * The purpose of this class is to retrieve all the detailed information
@@ -23,10 +26,10 @@ import org.myrobotlab.lang.NameGenerator;
  *
  */
 public class Platform implements Serializable {
+  transient static Logger log = LoggerFactory.getLogger(Platform.class);
 
   private static final long serialVersionUID = 1L;
-  // public static Logger log = LoggerFactory.getLogger(Platform.class);
-
+  
   // VM Names
   public final static String VM_DALVIK = "dalvik";
   public final static String VM_HOTSPOT = "hotspot";
@@ -134,11 +137,12 @@ public class Platform implements Serializable {
       if (platform.arch == null) {
         platform.arch = arch;
       }
-      
+
       // === BITNESS ===
       if (platform.isWindows()) {
         // https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
-        // this will attempt to guess the bitness of the underlying OS, Java tries very hard to hide this from running programs 
+        // this will attempt to guess the bitness of the underlying OS, Java
+        // tries very hard to hide this from running programs
         String procArch = System.getenv("PROCESSOR_ARCHITECTURE");
         String procArchWow64 = System.getenv("PROCESSOR_ARCHITEW6432");
         platform.osBitness = (procArch != null && procArch.endsWith("64") || procArchWow64 != null && procArchWow64.endsWith("64")) ? 64 : 32;
@@ -159,9 +163,11 @@ public class Platform implements Serializable {
             break;
         }
       } else {
-        // this is actually a really bad way of doing jvm bitness (may return "64","32" or "unknown") - and is sometimes simply not there at all
+        // this is actually a really bad way of doing jvm bitness (may return
+        // "64","32" or "unknown") - and is sometimes simply not there at all
         // keeping this as a fallback for all Linux and Mac machines,
-        // I don't know enough to implement a more robust detection for them (and this was here before me, so it has to be good)
+        // I don't know enough to implement a more robust detection for them
+        // (and this was here before me, so it has to be good)
         String model = System.getProperty("sun.arch.data.model");
         platform.jvmBitness = "64".equals(model) ? 64 : 32;
       }
@@ -264,7 +270,7 @@ public class Platform implements Serializable {
   public int getOsBitness() {
     return osBitness;
   }
-  
+
   public int getJvmBitness() {
     return jvmBitness;
   }
@@ -321,11 +327,15 @@ public class Platform implements Serializable {
         // IDE - version ...
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
+      
+      log.info("loading manifest");
+
       Properties p = new Properties();
       p.load(in);
-      
+
       for (final String name : p.stringPropertyNames()) {
         ret.put(name, p.getProperty(name));
+        log.info(name + "=" + p.getProperty(name));
       }
       in.close();
     } catch (Exception e) {

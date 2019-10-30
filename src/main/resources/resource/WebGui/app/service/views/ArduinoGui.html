@@ -27,6 +27,7 @@
             <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(portName, rate)">connect</button>
             <button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button>
             <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
+            <button class="btn btn-default" ng-click="msg.getBase64ZippedMrlComm()">Get MrlComm Library</button>
         </div>
     </div>
 </form>
@@ -58,14 +59,13 @@
         <!-- end -->
         <!-- begin -->
         <uib-tab heading="Pins">
-            <img src="{{image}}" width="600"/>
+            <img src="{{image}}" width="500"/>
         </uib-tab>
         <!-- end -->
         <!-- begin -->
         <uib-tab heading="Settings">
-            
             <!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
-            <input type="file" class="form-control" id="arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
+            <input type="text" class="form-control" id="arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
             <!-- current implementation will not work as a jar -->
             <!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
             <!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
