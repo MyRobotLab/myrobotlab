@@ -407,7 +407,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       } catch (Exception e) {
         // not a big fan of re-throwing exceptions,
         // but I'll make an exception here
-        error("connect ctp threw");
+        error("connect tcp threw");
         throw new IOException(e);
       }
     }
