@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -63,10 +65,10 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
+
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
@@ -276,7 +278,7 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   DeviceSummary[] arrayToDeviceSummary(int[] deviceSummary) {
-    log.info("mds - {}", Arrays.toString(deviceSummary));
+    log.debug("mds - {}", Arrays.toString(deviceSummary));
     DeviceSummary[] ds = new DeviceSummary[deviceSummary.length];
     for (int i = 0; i < deviceSummary.length; i++) {
       int id = deviceSummary[i];
@@ -495,8 +497,8 @@ public class Arduino extends AbstractMicrocontroller
         msg.servoAttachPin(dm.getId(), pin);
       }
     }
-    if (attachable instanceof HobbyServo) {
-      HobbyServo servo = (HobbyServo) attachable;
+    if (attachable instanceof Servo) {
+      Servo servo = (Servo) attachable;
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
@@ -517,20 +519,13 @@ public class Arduino extends AbstractMicrocontroller
     connect(port, rate, 8, 1, 0);
   }
 
-  public void setVirtual(boolean b) {
-    if (b) {
-      virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
-    }
-    isVirtual = b;
-  }
-
   public VirtualArduino getVirtual() {
     return virtual;
   }
 
   /**
-   * default params to connect to Arduino &amp; MrlComm.ino
-   *
+   * default params to connect to Arduino &amp; MrlComm.ino FIXME - remove the
+   * parameters except rate as they are not allowed to change with MRLComm
    */
   @Override
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
@@ -539,16 +534,15 @@ public class Arduino extends AbstractMicrocontroller
     initSerial();
     try {
 
-      // FIXME - GroG asks, who put the try here - shouldn't it throw if
-      // we
-      // can't connect
-      // how would you recover?
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
         return;
       }
 
-      if (isVirtual()) { // FIXME - might need some work to be re-entrant ?
+      if (isVirtual()) {
+        if (virtual == null) {
+          virtual = (VirtualArduino) Runtime.start("v" + getName(), "VirtualArduino");
+        }
         virtual.connect(port);
       }
 
@@ -729,6 +723,17 @@ public class Arduino extends AbstractMicrocontroller
     PinDefinition pinDef = getPin(address);
     pinDef.setEnabled(false);
     msg.disablePin(address);
+  }
+
+  /**
+   * disablePin/address
+   */
+  @Override
+  public void disablePin(String pinName) {
+    // PinDefinition pinDef = getPin(address);
+    PinDefinition pinDef = getPin(pinName);
+    pinDef.setEnabled(false);
+    msg.disablePin(pinDef.getAddress());
   }
 
   /**
@@ -1563,6 +1568,30 @@ public class Arduino extends AbstractMicrocontroller
       log.error("openMrlComm threw", e);
     }
   }
+  
+  public String getBase64ZippedMrlComm() {
+    return Base64.getEncoder().encodeToString((getZippedMrlComm()));
+  }
+
+  public byte[] getZippedMrlComm() {
+    try {
+      // get resource location
+      String filename = getDataDir() + File.separator + "MrlComm.zip";
+      File f = new File(filename);
+      if (f.exists()) {
+        f.delete();
+      }
+
+      // zip resource
+      Zip.zip(new String[] { getResourceDir() + File.separator + "MrlComm" }, filename);
+
+      // return zip file
+      return FileIO.toByteArray(new File(filename));
+    } catch (Exception e) {
+      error("could not get zipped mrl comm %s", e);
+    }
+    return null;
+  }
 
   @Override
   /**
@@ -1622,7 +1651,7 @@ public class Arduino extends AbstractMicrocontroller
       // invoke("getPinList");
       broadcastState();
     }
-    
+
     if (boardInfo != null) {
       DeviceSummary[] ds = boardInfo.getDeviceSummary();
       if (deviceList.size() - 1 > ds.length) { /* -1 for self */
@@ -1767,14 +1796,14 @@ public class Arduino extends AbstractMicrocontroller
         pinDataMap.put(pinArray[i].pin, pinArray[i]);
       }
     }
-    
+
     for (String name : pinArrayListeners.keySet()) {
       // put the pin data into a map for quick lookup
       PinArrayListener pal = pinArrayListeners.get(name);
       if (pal.getActivePins() != null && pal.getActivePins().length > 0) {
         int numActive = pal.getActivePins().length;
         PinData[] subArray = new PinData[numActive];
-        for (int i = 0 ; i < numActive; i++) {
+        for (int i = 0; i < numActive; i++) {
           String key = pal.getActivePins()[i];
           if (pinDataMap.containsKey(key)) {
             subArray[i] = pinDataMap.get(key);
@@ -1808,15 +1837,15 @@ public class Arduino extends AbstractMicrocontroller
     return serialData;
   }
 
-  @Deprecated /*
+  @Deprecated /**
                * Controllers should publish EncoderData - Servos can change that
-               * into ServoData and publish
+               * into ServoData and publish REMOVED BY GROG - use TimeEncoder !
                */
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      ((ServoControl) getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE, (double) targetPos);// (eventType,
-                                                                                                                   // currentPos,
-                                                                                                                   // targetPos);
+      // REMOVED BY GROG - use time encoder !((ServoControl)
+      // getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE,
+      // (double) currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -1939,7 +1968,12 @@ public class Arduino extends AbstractMicrocontroller
       speed = servo.getSpeed().intValue();
     }
     log.info("servoSetVelocity {} id {} velocity {}", servo.getName(), getDeviceId(servo), speed);
-    msg.servoSetVelocity(getDeviceId(servo), speed);
+    Integer i = getDeviceId(servo);
+    if (i == null) {
+      log.error("{} has null deviceId", servo);
+      return;
+    }
+    msg.servoSetVelocity(i, speed);
   }
 
   // FIXME - this needs fixing .. should be microseconds - but interface still
@@ -2275,15 +2309,13 @@ public class Arduino extends AbstractMicrocontroller
   public Map<String, DeviceMapping> getDeviceList() {
     return deviceList;
   }
-  
-  public void noAck(){
+
+  public void noAck() {
     log.error("no Ack we are resetting the serial port !");
     /*
-    String portName = getPortName();
-    disconnect();
-    sleep(1000);
-    connect(portName);
-    */
+     * String portName = getPortName(); disconnect(); sleep(1000);
+     * connect(portName);
+     */
   }
 
   public void publishMrlCommBegin(Integer version) {
@@ -2295,27 +2327,41 @@ public class Arduino extends AbstractMicrocontroller
     ++mrlCommBegin;
   }
 
+  /**
+   * DO NOT FORGET INSTALL AND VMARGS !!!
+   * 
+   * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
+   * -Dfile.encoding=UTF-8
+   * 
+   * @param args
+   */
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.ERROR);
+      // DONT FORGET TO
+      Platform.setVirtual(true);
+      LoggingFactory.init(Level.WARN);
       // Platform.setVirtual(true);
-      Runtime.start("gui", "SwingGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8887);
+      webgui.startService();
+      // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
 
       // hub.enableAck(false);
-      ServoControl sc = (ServoControl) Runtime.start("s1", "HobbyServo");
+      ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
       sc.setPin(7);
       hub.attach(sc);
-      sc = (ServoControl) Runtime.start("s2", "HobbyServo");
+      sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
 
       // hub.enableAck(true);
       /*
-       * sc = (ServoControl) Runtime.start("s3", "HobbyServo"); sc.setPin(12);
+       * sc = (ServoControl) Runtime.start("s3", "Servo"); sc.setPin(12);
        * hub.attach(sc);
        */
 
@@ -2360,7 +2406,7 @@ public class Arduino extends AbstractMicrocontroller
 
       // log.info("port names {}", mega.getPortNames());
 
-      HobbyServo servo = (HobbyServo) Runtime.start("servo", "HobbyServo");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
       // servo.load();
       log.info("rest is {}", servo.getRest());
       servo.save();

@@ -100,7 +100,7 @@ public class AudioFile extends Service {
 
   public void track(String trackName) {
     currentTrack = trackName;
-    if (!processors.containsKey(trackName)) {
+    if (!processors.containsKey(trackName) || !processors.get(trackName).isRunning()) {
       log.info("starting new track {}", trackName);
       AudioProcessor processor = new AudioProcessor(this, trackName);
       processors.put(trackName, processor);
@@ -114,6 +114,7 @@ public class AudioFile extends Service {
   public void stopService() {
     super.stopService();
     for (AudioProcessor p : processors.values()) {
+      p.stopPlaying();
       p.interrupt();
     }
   }
@@ -176,12 +177,10 @@ public class AudioFile extends Service {
   }
 
   public void pause() {
-    log.error("implement processor track pause");
     processors.get(currentTrack).pause(true);// = true;
   }
 
   public void resume() {
-    log.error("implement processor track resume");
     processors.get(currentTrack).pause(false);// .resume();
   }
 
@@ -221,21 +220,21 @@ public class AudioFile extends Service {
     playResource(filename, false);
   };
 
+  /**
+   * plays a resource file - currently there are very few resource files - and that's how it should
+   * be they are only used for demonstration/tutorial functionality
+   * @param filename - name of file relative to the resource dir
+   * @param isBlocking
+   */
   public void playResource(String filename, Boolean isBlocking) {
-    log.warn("Audio File playResource not implemented yet.");
-    // FIXME AudioData needs to have an InputStream !!!
-    // cheesy - should play resource from the classpath
-    playFile(filename, isBlocking);
-    // TODO: what/who uses this? should we use the class loader to
-    // playFile(filename, isBlocking, true);
-
+    playFile(getResourceDir() + File.separator + filename, isBlocking);
   }
 
   public void silence() {
     // stop all tracks
     for (Map.Entry<String, AudioProcessor> entry : processors.entrySet()) {
       String key = entry.getKey();
-      processors.get(key).isPlaying = false;// <<- FIXME necessary ???
+      // processors.get(key).isPlaying = false;// <<- FIXME necessary ???
       processors.get(key).pause(true);
       // do what you have to do here
       // In your case, an other loop.
@@ -275,10 +274,12 @@ public class AudioFile extends Service {
   }
 
   public void stop() {
+    AudioProcessor ap = processors.get(currentTrack);
     // dump the current song
-    processors.get(currentTrack).isPlaying = false; // FIXME -- necessary ????
+   
     // pause the next one if queued
-    processors.get(currentTrack).pause(false);
+    ap.pause(false); // FIXME me shouldn't it be true ?
+    ap.stopPlaying();
   }
 
   // FIXME - implement ???

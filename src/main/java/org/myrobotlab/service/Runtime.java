@@ -381,6 +381,21 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     shutdown();
   }
 
+  /**
+   * Setting the runtime virtual will set the platform virtual too. All
+   * subsequent services will be virtual
+   */
+  public void setVirtual(boolean b) {
+    Platform.setVirtual(true);
+    for (ServiceInterface si : getServices()) {
+      if (!si.isRuntime()) {
+        si.setVirtual(b);
+      }
+    }
+    this.isVirtual = b;
+    broadcastState();
+  }
+
   static public synchronized ServiceInterface createService(String name, String fullTypeName) {
     log.info("Runtime.createService {}", name);
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
@@ -685,7 +700,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         log.info("added mac");
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("getLocalHardwareAddresses threw", e);
     }
 
     log.info("done");
@@ -695,18 +710,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static Map<String, ServiceInterface> getLocalServices() {
     Map<String, ServiceInterface> local = new HashMap<>();
     for (String serviceName : registry.keySet()) {
-      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) { // FIXME
-                                                                                                                           // -
-                                                                                                                           // @
-                                                                                                                           // should
-                                                                                                                           // be
-                                                                                                                           // a
-                                                                                                                           // requirement
-                                                                                                                           // of
-                                                                                                                           // "all"
-                                                                                                                           // entries
-                                                                                                                           // for
-                                                                                                                           // consistency
+      // FIXME @ should be a requirement of "all" entries for consistency
+      if (!serviceName.contains("@") || serviceName.endsWith(String.format("@%s", Platform.getLocalInstance().getId()))) {
         local.put(serviceName, registry.get(serviceName));
       }
     }
@@ -725,6 +730,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /*
    * FIXME - DEPRECATE - THIS IS NOT "instance" specific info - its Class
    * definition info - Runtime should return based on ClassName
+   * 
+   * FIXME - INPUT PARAMETER SHOULD BE TYPE NOT INSTANCE NAME !!!!
    */
   public static Map<String, MethodEntry> getMethodMap(String serviceName) {
     if (!registry.containsKey(serviceName)) {
@@ -732,27 +739,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       return null;
     }
 
-    Map<String, MethodEntry> ret = new TreeMap<String, MethodEntry>();
     ServiceInterface sw = registry.get(serviceName);
-
     Class<?> c = sw.getClass();
-    Method[] methods = c.getDeclaredMethods();
 
-    Method m;
-    MethodEntry me;
-    String s;
-    for (int i = 0; i < methods.length; ++i) {
-      m = methods[i];
+    MethodCache cache = MethodCache.getInstance();
+    return cache.getRemoteMethods(c.getTypeName());
 
-      if (hideMethods.contains(m.getName())) {
-        continue;
-      }
-      me = new MethodEntry(m);
-      s = me.getSignature();
-      ret.put(s, me);
-    }
-
-    return ret;
   }
 
   // FIXME - max complexity method
@@ -1130,8 +1122,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
       if (options.interactive || !options.spawnedFromAgent) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
-        Runtime runtime = Runtime.getInstance();
-        runtime.startInteractiveMode();
+        getInstance().startInteractiveMode();
       }
 
     } catch (Exception e) {
@@ -1449,6 +1440,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   @Override
   public void connect(String url) throws IOException {
     connect(url, url);
+  }
+  
+  public Object sendToCli(String cmd) {
+    // Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+    return stdInClient.process(cmd);
   }
 
   // FIXME -
@@ -1793,7 +1789,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-
+    
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
@@ -1878,6 +1874,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
+    
+    
+    String vmVersion = System.getProperty("java.specification.version");
+    vmVersion = "11";
+    if ("1.8".equals(vmVersion)){
+      error("Unsupported Java %s - please remove version and install Java 1.8", vmVersion);
+    }
+    
     // test ( force encoding )
     // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
@@ -2559,7 +2563,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // apache 2.0 license
     meta.addDependency("com.google.code.gson", "gson", "2.8.5");
     // apache 2.0 license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-4");
+    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     // apache 2.0 license
     meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
     // apache 2.0 license

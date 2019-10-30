@@ -1364,6 +1364,10 @@ public class FileIO {
   }
 
   static public void toFile(File dst, byte[] data) throws IOException {
+    File p = dst.getParentFile();
+    if (p != null) {
+      p.mkdirs();
+    }
     FileOutputStream fos = null;
     fos = new FileOutputStream(dst);
     fos.write(data);
@@ -1553,6 +1557,20 @@ public class FileIO {
 
   public static String cwd() {
     return System.getProperty("user.dir");
+  }
+
+  /**
+   * Same as toString(filename) but does not throw - simply returns null in case of error
+   * @param string
+   * @return
+   */
+  public static String toSafeString(String filename) {
+    try {
+      return toString(filename);
+    } catch(Exception e) {
+      log.error("{} not found", filename);
+    }
+    return null;
   }
 
 

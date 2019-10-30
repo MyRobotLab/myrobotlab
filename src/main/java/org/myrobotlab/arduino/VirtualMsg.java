@@ -1570,6 +1570,7 @@ public class VirtualMsg {
           if (newByte > 64) {
             // TODO - send error back
             byteCount = 0;
+            // System.out.println("TO BIG");
             continue; // GroG - I guess  we continue now vs return false on error conditions?
           }
           msgSize = newByte;
@@ -1581,6 +1582,7 @@ public class VirtualMsg {
         // if received header + msg
         if (byteCount == 2 + msgSize) {
           // we've reach the end of the command, just return true .. we've got it
+          System.out.println("GOT " + msgSize + " BYTES");
           byteCount = 0;
           return true;
         }

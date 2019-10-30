@@ -25,6 +25,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.inmoov.LanguagePack;
 import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.inmoov.Vision;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.jme3.InMoov3DApp;
 import org.myrobotlab.kinematics.DHLinkType;
 import org.myrobotlab.kinematics.GravityCenter;
@@ -2264,15 +2265,25 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-
-    String leftPort = "COM3";
-    String rightPort = "COM4";
+    
+    boolean done = true;
+    
     
     Platform.setVirtual(true);
 
     Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
+    Python python = (Python)Runtime.start("python", "Python");
+    String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
+    python.exec(script);
     
+    if (done) {
+      return;
+    }
+
+    String leftPort = "COM3";
+    String rightPort = "COM4";
+    
+ 
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();

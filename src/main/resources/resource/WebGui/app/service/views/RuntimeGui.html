@@ -1,18 +1,24 @@
-<div class="col-lg-12">
-    <b>{{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</b>
+<div class="row">
+    <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</b>
 </div>
-<div class="col-lg-12">
-    <form class="form-inline">
-        <input class="form-control" type="text" ng-model="newName" placeholder="name">
-        <input class="form-control" type="text"
-               ng-model="newType"
-               placeholder="Service Type"
-               uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}"
-               typeahead-min-length="0"
-               typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-        <button class="btn btn-default" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">start service</button>
+<div class="row">
+    <div class="form-inline col-md-6">
+        <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created">
+        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+        <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">start service</button>
+        <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+    </div>
+</div>
+<div class="row">&nbsp;</div>
+<div class="row">
+    <form ng-submit="sendToCli(cmd);cmd=null">
+        <div class="form-group col-md-6">
+            <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory" />
+        </div>
     </form>
 </div>
-<div class="col-lg-12">
-    <button class="btn btn-default" ng-click="msg.install()">install all services</button>
+<div class="row">
+    <div class="form-group col-md-6">
+        <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
+    </div>
 </div>

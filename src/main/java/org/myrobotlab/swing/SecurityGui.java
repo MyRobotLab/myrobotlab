@@ -101,7 +101,7 @@ public class SecurityGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        Set<Object> names = security.getKeyNames();
+        Set<String> names = security.getKeyNames();
         // sort them
         Set<Object> sorted = new TreeSet<Object>(names);
         center.removeAll();

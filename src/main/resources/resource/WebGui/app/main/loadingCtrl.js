@@ -9,26 +9,6 @@ angular.module('mrlapp.main.mainCtrl')
 
                 $scope.mrlReady = false;
                 $scope.serviceSvcReady = false;
-                /*
-                mrl.init().then(function () {
-                    $log.info('mrl initialized!');
-                    $scope.mrlReady = true;
-                    if (panelSvc.isReady()) {
-                        $log.info('panelSvc is already ready', panelSvc);
-                        $scope.serviceSvcReady = true;
-                        go();
-                    } else {
-                        $log.info('wating for panelSvc to become ready');
-                        panelSvc.waitToBecomeReady().then(function () {
-                            $log.info('panelSvc is now ready', panelSvc);
-                            $scope.serviceSvcReady = true;
-                            go();
-                        });
-                    }
-                }, function (msg_) {
-                    $log.info('mrl.init()-meh!');
-                });
-                */
 
                 var go = function () {
                     var previousstate = $previousState.get();

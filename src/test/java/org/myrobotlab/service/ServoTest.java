@@ -5,11 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -54,7 +51,7 @@ public class ServoTest extends AbstractTest {
     servo01.attach(arduino01, 8, 30.0);
 
     servo02.attach(arduino01, 7, 40.0);
-    servo01.eventsEnabled(true);
+    // servo01.eventsEnable();
     // FIXME is attach re-entrant ???
     servo01.broadcastState();
     servo02.broadcastState();
@@ -189,7 +186,9 @@ public class ServoTest extends AbstractTest {
   public void testServo() throws Exception {
     // this basic test will create a servo and attach it to an arduino.
     // then detach
-    Platform.setVirtual(true);
+    Runtime runtime = Runtime.getInstance();
+    runtime.setVirtual(true);
+    // Runtime.start("gui", "SwingGui");
     
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
@@ -248,22 +247,6 @@ public class ServoTest extends AbstractTest {
 
   }
 
-  @Test
-  public void testDefaultEventsEnabled() {
-
-    // Servo.eventsEnabledDefault(true);
-    Servo s1 = (Servo) Runtime.start("s1", "Servo");
-
-    assertTrue("problem setting default events to true", s1.isEventsEnabled());
-
-    // Servo.eventsEnabledDefault(false);
-    Servo s2 = (Servo) Runtime.start("s2", "Servo");
-    assertTrue("problem setting default events to false", s2.isEventsEnabled());
-
-    s1.releaseService();
-    s2.releaseService();
-
-  }
 
   @Test
   public void testAutoDisable() throws Exception {
@@ -288,7 +271,7 @@ public class ServoTest extends AbstractTest {
     servo01.setAutoDisable(true);
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
     servo01.moveTo(130.0);
-    sleep(1200); // waiting for disable
+    sleep(8000); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
 
   }

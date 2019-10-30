@@ -32,9 +32,9 @@ public class VisionMemoryTest extends AbstractTest {
     // basic log level stuff
     // Runtime.setLogLevel("INFO");
     // for debugging
-    Runtime.createAndStart("gui", "SwingGui");
+    Runtime.start("gui", "SwingGui");
     // start up the embedded solr server
-    Solr solr = (Solr) Runtime.createAndStart("solr", "Solr");
+    Solr solr = (Solr) Runtime.start("solr", "Solr");
     solr.startEmbedded();
 
     VirtualArduino va = (VirtualArduino) Runtime.createAndStart("va", "VirtualArduino");

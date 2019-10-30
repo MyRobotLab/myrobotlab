@@ -25,6 +25,8 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
                         scope.msginterface = msg_;
                         scope.msgmethods = msg_.temp.msg;
                         elem.html(html).show();
+                        $log.info("elem.contents")
+                        $log.info(elem.contents())
                         $compile(elem.contents())(scope);
                     }, function(msg_) {
                         console.log('msgInterface-meh!');

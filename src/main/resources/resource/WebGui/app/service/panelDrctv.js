@@ -12,7 +12,7 @@ angular.module('mrlapp.service')
                         //width - change on size change
                         //-->preset sizes (width is undefined)
                         //-->free-form-resizing (width is defined)
-
+                        console.log('panelDrctv link defined')
                         scope.panel.notifySizeChanged = function (width) {
                             //check if a new width is to be set
                             //or the width should be resetted

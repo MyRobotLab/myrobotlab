@@ -84,7 +84,7 @@ public class ArduinoChaosTest {
     // arduino.publishServoEvent(pos);
     Thread.sleep(1000);
     int uS = 1400;
-    servo.writeMicroseconds(uS);
+    // servo.writeMicroseconds(uS);
     // TODO: why does this blow up
     // arduino.servoWriteMicroseconds(servo);
     Thread.sleep(1000);

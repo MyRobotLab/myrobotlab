@@ -1,29 +1,28 @@
-<div class="col-md-12">
-    <label>port</label>
-    <div class="input-group">
-        <input class="form-control" type="text" ng-model="port" placeholder="{{service.port}}"/>
-        <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.setPort(port)">update</button></span>
-        <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.save()">save</button></span>
-        <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.extract(true)">extract</button></span>
-        <span class="input-group-btn"><button class="btn btn-default" ng-click="msg.loadPanels()">load desktop</button></span>
-        <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
+<form class="form-inline" role="forms">
+    <div class="form-group">
+        <label data-toggle="tooltip">
+            autostart browser
+            <input type="checkbox" ng-model="service.autoStartBrowser" ng-change="msg.autoStartBrowser(service.autoStartBrowser);msg.broadcastState()" title="automatically spawns a new browser next startup">
+        </label>
     </div>
-</div>
-
+    <div class="form-group">
+        <label>
+            &nbsp;&nbsp;port
+                <input class="form-control" type="text" ng-model="port" placeholder="{{service.port}}" title="the port webgui is currently set to listen on"/>
+            <button class="btn btn-default" ng-click="msg.setPort(port);msg.restart()">restart</button>
+        </label>
+    </div>
+</form>
 <!--
 <pre>{{service}}</pre>
 -->
-
 <!-- <input type="text" ng-disabled="isConnected" ng-model="service.port" class="form-control"> -->
-
 <!--
 <video width="400" controls autoplay>
   <source src="/stream" type="video/x-flv">
   Your browser does not support HTML5 video.
 </stream>
 -->
-
-
 <!--
 <video width="600" controls autoplay>
   <source src="/stream">
@@ -31,7 +30,6 @@
 </stream>
 
 -->
-
 <!--  WORKY
 
 
@@ -41,15 +39,12 @@
 </stream>
 
 -->
-
 <!--
 <video width="320" controls autoplay>
   <source src="http://localhost:20000" >
   Your browser does not support HTML5 video.
 </stream>
 -->
-
-
 <!--
 <video width="400" controls autoplay>
 
@@ -57,4 +52,3 @@
   Your browser does not support HTML5 video.
 </stream>
 -->
-
