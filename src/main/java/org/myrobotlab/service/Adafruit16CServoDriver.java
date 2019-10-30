@@ -518,8 +518,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // this is guaranteed to be between -1.0 and 1.0
     // double powerLevel = mc.getPowerLevel();
 
-    double powerLevel = motorCalcOutput(mc);
-
+    double powerLevel = mc.getPowerLevel();
+    if (mc.isInverted()) {
+    	powerLevel = powerLevel * -1;
+    }
+    
     if (Motor.class == type) {
       Motor motor = (Motor) mc;
       if (motor.getPwmFreq() == null) {
@@ -530,7 +533,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       setPinValue(motor.getPwrPin(), powerLevel);
     } else if (MotorDualPwm.class == type) {
       MotorDualPwm motor = (MotorDualPwm) mc;
-      log.info("Adafrutit16C Motor DualPwm motorMove, powerOutput = {}", powerLevel);
+      log.info("Adafruit16C Motor DualPwm motorMove, powerLevel = {}", powerLevel);
       if (motor.getPwmFreq() == null) {
         motor.setPwmFreq(defaultMotorPwmFreq);
         setPWMFreq(motor.getLeftPwmPin(), motor.getPwmFreq());
@@ -538,10 +541,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       }
       if (powerLevel < 0) {
         setPinValue(motor.getLeftPwmPin(), 0);
-        setPinValue(motor.getRightPwmPin(), Math.abs(powerLevel / 255));
+        setPinValue(motor.getRightPwmPin(), Math.abs(powerLevel));
       } else if (powerLevel > 0) {
         setPinValue(motor.getRightPwmPin(), 0);
-        setPinValue(motor.getLeftPwmPin(), Math.abs(powerLevel / 255));
+        setPinValue(motor.getLeftPwmPin(), Math.abs(powerLevel));
       } else {
         setPinValue(motor.getRightPwmPin(), 0);
         setPinValue(motor.getLeftPwmPin(), 0);
