@@ -3,9 +3,9 @@
    <label>port</label>
     <div class="input-group">
    <!-- {{possiblePorts}} -->
-       <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue | limitTo:8"/>
+       <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0"/>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button></span>
-       <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.baudrate, service.databits, service.stopbits, service.parity)">connect</button></span>
+       <span class="input-group-btn"><button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.rate, service.dataBits, service.stopBits, service.parity)">connect</button></span>
        <span class="input-group-btn"><button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button></span>
        <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
     </div>
@@ -17,16 +17,16 @@
 </div>
 <div class="row" ng-show="!isConnected">
 <div class="col-lg-3">
-    <label for="service.baudrate">rate</label>
-    <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.baudrate" uib-typeahead="baudrate for baudrate in possibleBaud | filter:$viewValue | limitTo:8">
+    <label for="service.rate">rate</label>
+    <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue">
 </div>
 <div class="col-lg-3">    
-    <label for="service.databits">data bits</label>
-    <input type="text" size="3" ng-readonly="isConnected" ng-model="service.databits" class="form-control">
+    <label for="service.dataBits">data bits</label>
+    <input type="text" size="3" ng-readonly="isConnected" ng-model="service.dataBits" class="form-control">
 </div>
 <div class="col-lg-3">
-    <label for="service.stopbits">stop bits</label>
-    <input type="text" ng-readonly="isConnected" ng-model="service.stopbits" class="form-control">
+    <label for="service.stopBits">stop bits</label>
+    <input type="text" ng-readonly="isConnected" ng-model="service.stopBits" class="form-control">
 </div>
 <div class="col-lg-3">
     <label for="service.parity">parity</label>

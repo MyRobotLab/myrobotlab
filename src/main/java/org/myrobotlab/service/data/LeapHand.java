@@ -1,6 +1,10 @@
 package org.myrobotlab.service.data;
 
-public class LeapHand {
+import java.io.Serializable;
+
+public class LeapHand implements Serializable {
+
+  private static final long serialVersionUID = 1L;
   public String type;
   public int thumb;
   public int index;

@@ -1144,7 +1144,7 @@ public class GoogleCloud extends Service {
    * 
    * if (!outputPath.toString().toLowerCase().endsWith(".jpg")) {
    * System.err.println("outputImagePath must have the file extension 'jpg'.");
-   * System.exit(1); }
+   * return;s
    * 
    * // "API Project-c90c3d12e7d3.json"
    * 

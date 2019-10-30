@@ -116,21 +116,21 @@ public class InProcessCli implements Runnable {
     myThread = null;
   }
 
-  public void process(String data) {
+  public Object process(String data) {
     try {
 
       data = data.trim();
 
       if ("".equals(data)) {
         writePrompt(out, uuid); // <-- should be id no ?
-        return;
+        return null; // FIXME RETURN ERROR ???
       }
 
       // parse line for /{serviceName}/{method}/jsonEncoded? parms ?? ...
       // parse line for /{serviceName@id}/{method}/jsonEncoded? parms ?? ...
 
       // "create" cli specific msgs
-      Message cliMsg = msgFromCli(data);
+      Message cliMsg = cliToMsg(data);
 
       // FIXME - probably not the way to implement exit
       // should be sending id to remote and exiting their ???
@@ -138,7 +138,7 @@ public class InProcessCli implements Runnable {
         String ret = "exiting " + remoteId + "...";
         setRemote(Runtime.getInstance().getId());
         System.out.println(ret);
-        return;
+        return null;
       }
 
       Object ret = null;
@@ -169,12 +169,13 @@ public class InProcessCli implements Runnable {
         // goes to stdInClient - it "pretends" to be another instance/id
         ret = gateway.sendBlockingRemote(cliMsg, 3000);
       }
-
+      return ret;
     } catch (Exception e) {
       log.error("cli threw", e);
+      return null;
     }
   }
-
+  
   /**
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
@@ -183,95 +184,10 @@ public class InProcessCli implements Runnable {
    * @param data
    * @return
    */
-  public Message msgFromCli(String data) {
-
-    Message msg = Message.createMessage("runtime@" + id, "runtime@" + remoteId, "pwd", null);
-
-    // because we always want a "Blocking/Return" from the cmd line - without a
-    // subscription
-    msg.setBlocking();
-
-    if (!data.startsWith("/")) {
-      // quick form
-
-      String[] parts = data.split(" ");
-
-      msg.method = parts[0];
-
-      // TO ENCODE OR NOT TO ENCODE THAT IS THE QUESTION
-      // if local(same process) don't encode
-
-      // check in set of commands if necessary ...
-      if (parts.length > 1) {
-        Object[] params = new Object[parts.length - 1];
-        for (int i = 1; i < parts.length; ++i) {
-          // params[i - 1] = CodecUtils.toJson(parts[i]);
-          // if (inProcess(msg)) me or my process - then don't encode
-          params[i - 1] = parts[i];
-        }
-
-        msg.data = params;
-      }
-    } else {
-      /**
-       * <pre>
-      
-      "/"  -  list services
-      "/{serviceName}" - list data of service
-      "/{serviceName}/" - list methods of service
-      "/{serviceName}/{method}" - invoke method
-      "/{serviceName}/{method}/" - list parameters of method
-      "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
-      "/{serviceName}/{method}/p0/p1/p2/"
-       * 
-       * </pre>
-       */
-
-      String[] parts = data.split("/");
-
-      // "/" - list services
-      if (parts.length == 0) {
-        msg.name = "runtime@" + remoteId;
-        msg.method = "ls";
-        msg.data = new Object[] { "/" };
-      }
-
-      // "/python" - list data of service
-      if (parts.length == 2 && !data.endsWith("/")) {
-        msg.name = "runtime@" + remoteId;
-        msg.method = "ls";
-        msg.data = new Object[] { "/" + parts[1] };
-      }
-
-      if (parts.length == 2 && data.endsWith("/")) {
-        msg.name = "runtime@" + remoteId;
-        msg.method = "ls";
-        msg.data = new Object[] { "/" + parts[1] + "/" };
-      }
-
-      // fix me diff from 2 & 3 "/"
-      if (parts.length > 2) {
-        // address the msg
-        String address = parts[1];
-        if (!address.contains("@")) {
-          msg.name = address + "@" + remoteId;
-        } else {
-          msg.name = address;
-        }
-
-        // prepare the method
-        msg.method = parts[2];
-
-        // FIXME - to encode or not to encode that is the question ...
-        Object[] payload = new Object[parts.length - 3];
-        for (int i = 3; i < parts.length; ++i) {
-          payload[i - 3] = parts[i];
-        }
-        msg.data = payload;
-      }
-    }
-    return msg;
+  public Message cliToMsg(String data) {
+    return CodecUtils.cliToMsg("runtime@" + id, "runtime@" + remoteId, data);
   }
+
 
   public void write(String o) throws IOException {
     if (o == null) {

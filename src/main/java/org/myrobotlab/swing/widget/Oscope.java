@@ -114,7 +114,7 @@ public class Oscope extends ServiceGui implements ActionListener {
   public void onPinArray(final PinData[] data) {
     for (PinData pinData : data) {
       if (pinData != null && pinData.pin != null) {
-        OscopePinTrace trace = traces.get(pinData.pin);
+        OscopePinTrace trace = traces.get(pinData.pin);       
         trace.update(pinData);
       }
     }

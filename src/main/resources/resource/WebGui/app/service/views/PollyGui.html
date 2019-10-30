@@ -1,0 +1,44 @@
+<div class="row">
+    <div class="col-lg-12">&nbsp;</div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="row">
+            {{service.voice.name}}
+            </div>
+        <div class="row">
+            <textarea ng-model="text" rows="10" cols="80" />
+
+
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <form class="form-inline">
+                        <input class="form-control" type="text" ng-model="key" placeholder="aws polly key" title="key name to identify secret">
+                        <input class="form-control" type="password" ng-model="secret" placeholder="aws polly secret" title="Polly key and secret ">
+                        <button class="btn btn-default" ng-click="msg.setKeys(key, secret);">set keys</button>
+                        <a class="form-control" href="https://docs.aws.amazon.com/polly/latest/dg/authentication-and-access-control.html">get keys</a>
+                    </form>
+                </div>
+            </div>
+
+
+
+            <nav class="navbar">
+                <div class="dropdown navbar-nav">
+                    <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+                </div>
+                <div class="dropdown navbar-nav">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                        voices &nbsp;<span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li ng-repeat="voice in service.voices">
+                            <a href="#" ng-click="setVoice(voice)">{{voice.name}} {{voice.gender}} {{voice.local}}  {{voice.description}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+</div>

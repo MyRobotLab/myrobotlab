@@ -1,7 +1,21 @@
-<div>
-
-
-	<tjs-model-viewer assimp-url="assimpModelUrl"></tjs-model-viewer><br>
-	<button ng-click="changeModel()">change model</button>
-	<input ng-model="assimpModelUrl"></input>
+</div></div></div>
+<div class="container">
+    <div class="col-md-2"></div>
+    <div class="col-md-1">
+        <span class="input-group-btn">
+            <button class="btn btn-primary" ng-show="!isAttached()" ng-click="attachController()">control all</button>
+            <!-- <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">enable</button> -->
+        </span>
+    </div>
+</div>
+<div class="container">
+    <div ng-repeat="servo in servos" class="row">
+        <!-- div class="col-md-2">&nbsp;</div -->
+        <div class="col-md-10">
+            <rzslider class="custom-slider" rz-slider-model="sliders[servo].value" rz-slider-options="sliders[servo].options"/>
+        </div>
+        <div class="col-md-2">
+            <button ng-class="['btn', sliders[servo].tracking?'btn-default':'btn-primary']" ng-click="toggle(servo)">{{servo}}</button>
+        </div>
+    </div>
 </div>

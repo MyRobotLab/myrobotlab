@@ -85,8 +85,10 @@ public class WebSocketConnector extends Service implements TextPublisher {
     meta.addDescription("connect to a websocket");
     // meta.addCategory("");
     meta.addDependency("javax.websocket", "javax.websocket-api", "1.1");
+    /*
     meta.addDependency("org.glassfish.tyrus", "tyrus-client", "1.1");
     meta.addDependency("org.glassfish.tyrus", "tyrus-container-grizzly", "1.1");
+    */
     return meta;
   }
 

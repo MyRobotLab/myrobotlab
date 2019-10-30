@@ -18,8 +18,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.TitledBorder;
 
-import org.myrobotlab.swing.HobbyServoGui;
-
 public class CheckBoxTitledBorder extends AbstractBorder {
 
   private static final long serialVersionUID = 1L;

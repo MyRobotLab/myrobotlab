@@ -20,7 +20,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
     var deferred;
     //check if mrl.js is already connected and wait for it if it is not
 
-/*
+    /*
     if (!mrl.isConnected()) {
         $log.info('wait for mrl.js to become connected ...');
         var subscribeFunction = function(connected) {
@@ -34,11 +34,10 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
     } else {
         run();
     }
-*/    
-
+*/
 
     // mrl.waitUntilReady();
-    
+
     this.isReady = function() {
         return ready;
     }
@@ -59,6 +58,15 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         var isUndefinedOrNull = function(val) {
             return angular.isUndefined(val) || val === null;
         };
+
+        $http.get('service/tab-header.html').then(function(response) {
+            $templateCache.put('service/tab-header.html', response.data);
+        });
+
+        $http.get('service/tab-footer.html').then(function(response) {
+            $templateCache.put('service/tab-footer.html', response.data);
+        });
+
         //START_update-notification
         //notify all list-displays (e.g. main or min) that a panel was added or removed
         //TODO: think of better way
@@ -81,7 +89,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 value(panellist);
             });
         };
-        
+
         //END_update-notification
         _self.getPanels = function() {
             //return panels as an object
@@ -154,9 +162,9 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
                 $log.info('lazy-loading successful:', type);
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
-                    $templateCache.put(type + 'Gui.html', response.data);                    
+                    $templateCache.put(type + 'Gui.html', response.data);
                     var newPanel = addPanel(service);
-                    newPanel.templatestatus = 'loaded';                                  
+                    newPanel.templatestatus = 'loaded';
                     notifyAllOfUpdate();
                 }, function(response) {
                     addPanel(name).templatestatus = 'notfound';
@@ -164,7 +172,8 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 });
             }, function(e) {
                 // http template failure
-                type = "No"; // becomes NoGui
+                type = "No";
+                // becomes NoGui
                 $log.warn('lazy-loading wasnt successful:', type);
                 addPanel(name).templatestatus = 'notfound';
                 notifyAllOfUpdate();
@@ -179,7 +188,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             if (name in _self.panels) {
                 delete _self.panels[name];
             }
-        
+
             //update !
             notifyAllOfUpdate();
         }
@@ -219,12 +228,12 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
          * and notifies the scope so the gui panels arrange and positioned properly
          */
         _self.setPanel = function(newPanel) {
-            
+
             if (!(newPanel.name in _self.panels)) {
-                $log.info('service ' + newPanel.name + ' currently does not exist');
+                $log.info('service ' + newPanel.name + ' currently does not exist yet');
                 return;
             }
-            
+
             _self.panels[newPanel.name].name = newPanel.name;
             if (newPanel.simpleName) {
                 _self.panels[newPanel.name].simpleName = newPanel.simpleName;
@@ -237,9 +246,9 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             _self.panels[newPanel.name].zIndex = newPanel.zIndex;
             _self.panels[newPanel.name].hide = newPanel.hide;
             // data has been updated - now proccess the changes
-            _self.panels[newPanel.name].notifyPositionChanged();
-            _self.panels[newPanel.name].notifyZIndexChanged();
-            _self.panels[newPanel.name].notifySizeChanged();
+            //            _self.panels[newPanel.name].notifyPositionChanged();  // tabs breaks panels
+            //            _self.panels[newPanel.name].notifyZIndexChanged(); // tabs breaks panels
+            //            _self.panels[newPanel.name].notifySizeChanged(); // tabs breaks panels
             notifyAllOfUpdate();
             // <-- WTF is this?
         }
@@ -308,6 +317,6 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
     // end of function run()
 
     run();
-   // run();
+    // run();
 }
 ]);

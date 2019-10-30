@@ -1,34 +1,101 @@
-<!-- FIXME - this should be a portDirective begin -->
-<div class="row">
-  <div class="col-md-12">
-   <port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.name}}"></port>
-  </div>
-</div>
-
-<!-- FIXME - this should be a portDirective end -->
-
-<div class="row">
-  <div class="col-md-12">
-    <label class="btn btn-default pull-right" ng-model="monitorModel" uib-btn-checkbox ng-click="monitor()">monitor</label>   
-  </div>
-</div>
-
-
-
-<div class="row">
-<div class="col-lg-12">
-  <label for="rx">rx {{rxCount}}</label>
-  <textarea ng-model="rx" class="form-control" rows="8" id="rx" readonly scroll-glue></textarea>
-</div>
-</div>
-
-<div class="row">
-<div class="col-lg-12">
-  <label for="tx">tx {{txCount}}</label>
-  <textarea ng-model="tx" class="form-control" rows="3" id="tx" readonly scroll-glue></textarea>
-
-  <input type="text" ng-readonly="!isConnected" placeholder="send data here" ng-model="txData" class="form-control" press-enter="writeString(txData)">
-<button class="btn btn-default" ng-readonly="!isConnected" ng-click="writeString(txData)">send</button>
-<!-- TODO - implement :) <button class="btn btn-default" ng-readonly="!isConnected" ng-click="sendFile()">send file</button> -->
-</div>
+<div class="container col-md-12">
+    <div class="row col-md-6">
+        <!-- port start-->
+        <div class="row">
+            <div class="col-md-12">
+                <!-- port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.name}}"></port -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <label>port</label>
+                        <div class="input-group">
+                            <!-- {{possiblePorts}} -->
+                            <input class="form-control" type="text" id="portName" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-show="!isConnected" ng-click="refresh()">refresh</button>
+                            </span>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-show="!isConnected" ng-click="connect(portName, service.rate, service.dataBits, service.stopBits, service.parity)">connect</button>
+                            </span>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" ng-show="isConnected" ng-click="disconnect()">disconnect</button>
+                            </span>
+                            <!-- span class="input-group-btn"><button class="btn btn-default" ng-model="monitorModel" btn-checkbox ng-click="monitor()">monitor</button></span -->
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
+                        <!-- TODO - make directive -->
+                        <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
+                    </div>
+                </div>
+                <div class="row" ng-show="!isConnected">
+                    <div class="col-lg-3">
+                        <label for="service.rate">rate</label>
+                        <input type="text" class="form-control input-sm" ng-readonly="isConnected" ng-model="service.rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue" typeahead-min-length="0" />
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="service.dataBits">data bits</label>
+                        <input type="text" size="3" ng-readonly="isConnected" ng-model="service.dataBits" class="form-control">
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="service.stopBits">stop bits</label>
+                        <input type="text" ng-readonly="isConnected" ng-model="service.stopBits" class="form-control">
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="service.parity">parity</label>
+                        <input type="text" ng-readonly="isConnected" ng-model="service.parity" class="form-control">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- port end -->
+        <div class="row">
+            <div class="col-md-12">
+                <form class="form-inline pull-right">
+                    <div class="form-goup">
+                        <label class="form-goup btn btn-default" ng-model="monitorModel" uib-btn-checkbox ng-click="monitor()">monitor</label>
+                        <button class="form-goup btn btn-default" title="clear consoles" ng-click="clearConsoles()">
+                            <span class="glyphicon glyphicon-remove-circle"></span>
+                        </button>
+                        <select ng-model="format" class="form-goup form-control" title="format the data recieved as ascii, decimal or hex">
+                            <option>decimal</option>
+                            <option>hex</option>
+                            <option>ascii</option>
+                        </select>
+                        <select ng-model="delimiter" class="form-goup form-control" title="delimiter between bytes &#10; none - no delimiter between bytes &#10; space - a space is inserted between each byte &#10; new line - would be in vertical format">
+                            <option>none</option>
+                            <option>space</option>
+                            <option value="newline">new line</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="rx">rx {{rxCount}}</label>
+                <textarea ng-model="rx" class="form-control" rows="8" id="rx" readonly scroll-glue></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <label for="tx">tx {{txCount}}</label>
+                <textarea ng-model="tx" class="form-control" rows="3" id="tx" readonly scroll-glue></textarea>
+                <!-- TODO - implement :) <button class="btn btn-default" ng-readonly="!isConnected" ng-click="sendFile()">send file</button> -->
+            </div>
+        </div>
+        <div class="row">
+            <form class="form-inline col-lg-12">
+                <div class="form-goup">
+                    <input type="text" ng-readonly="!isConnected" placeholder="send data here" ng-model="txData" class="form-control" press-enter="writeString(txData)">
+                    <button class="btn btn-default" ng-readonly="!isConnected" ng-click="writeString(txData)" title="send the data in the data field">send</button>
+                    <select ng-model="sendFormat" class="form-goup form-control" title="format the data sent &#10; ascii - send an ascii string &#10; hex - you can send a space delimited string of hex characters &#10; decimal - send a space delmited string of the values to be sent">
+                        <option>ascii</option>
+                        <option>hex</option>
+                        <option>decimal</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

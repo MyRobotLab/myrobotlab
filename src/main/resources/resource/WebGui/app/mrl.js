@@ -33,6 +33,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     var environments = {};
     var myEnv = {};
     var registry = {};
+    var methodCache = {};
     var transport = 'websocket';
     var socket = null;
     var callbacks = [];
@@ -177,9 +178,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.generateId = function() {
+        // one id to rule them all !
+        return 'webgui-client-' + 1234 + '-' + 5678;
+        /*
         let var1 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
         let var2 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4);
         return 'webgui-client-' + var1 + '-' + var2;
+        */
     }
 
     this.getLocalName = function(fullname) {
@@ -253,10 +258,16 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var msg;
             try {
                 msg = jQuery.parseJSON(body);
+
+                if (msg == null) {
+                    console.log('msg null');
+                    return;
+                }
+
                 // THE CENTER OF ALL CALLBACKS
                 // process name callbacks - most common
                 // console.log('nameCallbackMap');
-                if (nameCallbackMap.hasOwnProperty(msg.sender)) {
+                if (nameCallbackMap.hasOwnProperty(msg.sender) && msg.method != 'onMethodMap') {
                     cbs = nameCallbackMap[msg.sender];
                     for (var i = 0; i < cbs.length; i++) {
                         cbs[i](msg);
@@ -354,7 +365,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         for (var name in registry) {
             var service = registry[name];
             // see if a service has the same input interface
-            if (!angular.isUndefined(service.interfaceSet[interface])) {
+            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interface])) {
                 ret.push(registry[name]);
             }
         }
@@ -417,8 +428,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         to all the callbacks which have been registered to it
         topicName.topicMethod ---> webgui gateway --> angular callback
     */
-    this.subscribe = function(topicName, topicMethod) {
-        _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
+    this.subscribe = function(name, method) {
+        // _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod);
+        // _self.sendTo(_self.gateway.name, "addListener", topicName, topicMethod);
+        _self.sendTo(name, "addListener", method, name + '@' + _self.id);
     }
     ;
     this.unsubscribe = function(topicName, topicMethod) {
@@ -577,6 +590,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             // FIXME - not very useful
                             _self.sendMessage(msg);
                         },
+                        sendTo: function(toName, method, data) {
+                            var args = Array.prototype.slice.call(arguments, 2);
+                            var msg = _self.createMessage(toName, method, args);
+                            msg.sendingMethod = 'sendTo';
+                            _self.sendMessage(msg);
+                        },
                         /**
                          *   sendArgs will be called by the dynamically generated code interface
                          */
@@ -608,6 +627,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 // created to allow direct access from html views to a msg.{method}
                                 // bound to a service
                                 try {
+
                                     var methodMap = msg.data[0];
                                     for (var method in methodMap) {
                                         if (methodMap.hasOwnProperty(method)) {
@@ -650,28 +670,42 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                             // end switch
                         },
+                        subscribeToMethod: function(callback, methodName) {
+                            _self.subscribeToMethod(callback, methodName);
+                        },
+                        subscribeTo: function(controller, serviceName, methodName) {
+                            _self.subscribeToServiceMethod(controller.onMsg, serviceName, methodName)
+                        },
+                        unsubscribe: function(data) {
+                            if ((typeof arguments[0]) == "string") {
+                                // only handle string argument
+                                if (arguments.length != 1) {
+                                    console.log("ERROR - unsubscribe expecting 1 arg got " + arguments.length)
+                                    return
+                                }
+                                _self.sendTo(name, "removeListener", arguments[0], name + '@' + _self.id);
+                            } else {
+                                console.error("ERROR - unsubscribe non string arg")
+                            }
+                        },
+
                         subscribe: function(data) {
                             if ((typeof arguments[0]) == "string") {
                                 // regular subscribe when used - e.g. msg.subscribe('publishData')
-                                /* we could handle var args this way ...
-
-                                var args = Array.prototype.slice.call(arguments, 0);
-                                _self.sendTo(_self.gateway.name, "subscribe", name, args);
-                                but subscribe is a frozen interface of  either 1 or 4 args
-                                */
-                                if (arguments.length == 1) {
-                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0]);
-                                } else if (arguments.length == 4) {
-                                    _self.sendTo(_self.gateway.name, "subscribe", name, arguments[0], arguments[1], arguments[2]);
+                                if (arguments.length != 1) {
+                                    console.log("subscribe(string) expecting single argument!")
+                                    return
                                 }
+                                _self.sendTo(name, "addListener", arguments[0], name + '@' + _self.id);
                             } else {
                                 // controller registering for framework subscriptions
                                 //                                console.log("here");
                                 // expected 'framework' level subscriptions - we should at a minimum
                                 // be interested in state and status changes of the services
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishStatus');
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'publishState');
-                                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                                _self.sendTo(name, "addListener", "publishStatus", name + '@' + _self.id);
+                                _self.sendTo(name, "addListener", "publishState", name + '@' + _self.id);
+                                _self.sendTo(name, "addListener", "getMethodMap", name + '@' + _self.id);
+
                                 _self.sendTo(name, "broadcastState");
                                 // below we subscribe to the Angular callbacks - where anything sent
                                 // back from the webgui with our service's name on the message - send
@@ -701,7 +735,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 msgInterfaces[name].temp.msg = {};
                 msgInterfaces[name].temp.msg._interface = msgInterfaces[name];
                 //FIXME - hacked here @GroG: please look at this
-                _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                // _self.sendTo(_self.gateway.name, "subscribe", name, 'getMethodMap');
+                _self.sendTo(name, "addListener", "getMethodMap", name + '@' + _self.id);
                 _self.subscribeToServiceMethod(msgInterfaces[name].onMsg, name, 'getMethodMap');
                 msgInterfaces[name].getMethodMap();
                 return deferred.promise;
@@ -770,6 +805,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 });
                 return arrayOfServices;
             },
+            /* NOT IMPLEMENTED - ONLY A STUB
+            getMethods: function(serviceType) {
+                console.log(serviceType)
+                var arrayOfServices = Object.keys(registry).map(function(key) {
+                    return registry[key]
+                });
+                return arrayOfServices;
+            },*/
             sendTo: _self.sendTo,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,

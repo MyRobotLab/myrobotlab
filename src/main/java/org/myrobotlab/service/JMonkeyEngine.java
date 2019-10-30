@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -20,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -45,6 +48,7 @@ import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.Simulator;
+import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -98,6 +102,12 @@ import com.simsilica.lemur.style.BaseStyles;
 /**
  * A simulator built on JMonkey 3 Engine.
  * 
+ * FIXME - use gateway analogy !
+ * A simulator should be treated as a gateway, the service "twins" that are represented inside are
+ * "remote".   Some services like UIs (webgui & swinggui) dynamically create "remote" services and
+ * allow the current process to interact with them the same way they would with other remote (networked)
+ * services.
+ * 
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
@@ -106,6 +116,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
   private static final long serialVersionUID = 1L;
+  
+  
+  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
   /**
    * This static method returns all the details of the class without it having
@@ -1431,6 +1444,9 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   public void onRegistered(Service service) throws Exception {
     // new service - see if we can virtualize it
     log.info("{}.onRegistered({})", getName(), service);
+    if (service.getName().contentEquals("i01.head.jaw")) {
+      log.info("here");
+    }
     if (autoAttach) {
       if (autoAttachAll) {
         // spin through all apps - attempt to attach
@@ -2063,7 +2079,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       log.warn("running in headless mode - will not start jmonkey app");
       return null;
     }
-    
+
     if (app == null) {
       // create app
       if (!appType.contains(".")) {
@@ -2189,6 +2205,36 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     // save it out
   }
 
+  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
+    addMsg("setTransform", name, x, y, z, xRot, yRot, zRot);
+  }
+
+  public void setTranslation(String name, double x, double y, double z) {
+    addMsg("setTranslation", name, x, y, z);
+  }
+
+  public void setRotation(String name, double xRot, double yRot, double zRot) {
+    addMsg("setRotation", name, xRot, yRot, zRot);
+  }
+
+  public Map<String, String[]> getMultiMapped() {
+    return multiMapped;
+  }
+
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si instanceof Servo) {
+        ((Servo) si).moveTo(angleMap.get(name));
+      }
+    }
+  }
+
+  public void setDefaultServoSpeed(Double speed) {
+    servoController.setDefaultServoSpeed(speed);
+  }
+
   public static void main(String[] args) {
     try {
 
@@ -2197,10 +2243,21 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       // FIXME - node/userdata can have a Map<String, String> of
       // reservedRotations from different controllers
       // FIXME - make "load" work ..
+      Platform.setVirtual(true);
       LoggingFactory.init("info");
 
       Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
+
+      // Arduino left = (Arduino) Runtime.start("i01.left", "Arduino");
+      // left.connect("COM4");
+
+      Servo i01_head_jaw = (Servo) Runtime.start("i01.head.jaw", "Servo");
+
+      for (int i = 0; i < 100; ++i) {
+        jme.rotateOnAxis("i01.head.jaw", "x", 100);
+        jme.rotateOnAxis("i01.head.jaw", "x", 20);        
+      }
 
       // FIXME - fix what you have broken but deprecate sc related rotation info
       /*
@@ -2243,11 +2300,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       // Servo yRot = (Servo) Runtime.start("yRot", "Servo");
       // Servo zRot = (Servo) Runtime.start("zRot", "Servo");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
       /*
        * jme.setRotation("i01.leftHand.index", "x");
        * jme.rotateTo("i01.leftHand.index", 20);
@@ -2256,10 +2308,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
        * jme.rotateTo("i01.leftHand.index", 120);
        */
 
-      Runtime.start("i01.mouth", "NaturalReaderSpeech");
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      i01.startSimulator();
-      jme = i01.getSimulator();
+      // Runtime.start("i01.mouth", "NaturalReaderSpeech");
+      /*
+       * InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+       * i01.startSimulator(); jme = i01.getSimulator();
+       */
       jme.rename("VinMoov4", "i01");
       // jme.scale("i01", 0.25f);
 
@@ -2296,34 +2349,43 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       log.error("main threw", e);
     }
   }
+  
+  
+  /**
+   * Simulators like Network Adapters are gateways to interoperate with remote services.
+   * Here subscriptions are maintained from 
+   */
+  
+  // @Override
+  /*
+  public boolean preProcessHook(Message m) {
+    // FIXME - problem with collisions of this service's methods
+    // and dialog methods ?!?!?
 
-  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
-    addMsg("setTransform", name, x, y, z, xRot, yRot, zRot);
-  }
+    // if the method name is == to a method in the SwingGui
+    // FIXME - correct way would be with "foreign address" servo@jme-simulator 
+    if (methodSet.contains(m.method)) {
+      // process the message like a regular service
+      return true;
+    }
 
-  public void setTranslation(String name, double x, double y, double z) {
-    addMsg("setTranslation", name, x, y, z);
-  }
-
-  public void setRotation(String name, double xRot, double yRot, double zRot) {
-    addMsg("setRotation", name, xRot, yRot, zRot);
-  }
-
-  public Map<String, String[]> getMultiMapped() {
-    return multiMapped;
-  }
-
-  @Override
-  public void onJointAngles(Map<String, Double> angleMap) {
-    for (String name : angleMap.keySet()) {
-      ServiceInterface si = Runtime.getService(name);
-      if (si instanceof Servo) {
-        ((Servo) si).moveTo(angleMap.get(name));
+    // otherwise send the message to the dialog with the senders name
+    // key is now for callback is {name}.method
+    String key = String.format("%s.%s", m.sender, m.method);
+    List<ServiceGui> sgs = nameMethodCallbackMap.get(key);
+    if (sgs == null) {
+      log.error("attempting to update derived ServiceGui with - callback " + key + " not available in map " + getName());
+    } else {
+      // FIXME - NORMALIZE - Instantiator or Service - not both !!!
+      // Instantiator.invokeMethod(serviceGuiMap.get(m.sender), m.method,
+      // m.data);
+      for (int i = 0; i < sgs.size(); ++i) {
+        ServiceGui sg = sgs.get(i);
+        invokeOn(sg, m.method, m.data);
       }
     }
-  }
 
-  public void setDefaultServoSpeed(Double speed) {
-    servoController.setDefaultServoSpeed(speed);
+    return false;
   }
+*/
 }

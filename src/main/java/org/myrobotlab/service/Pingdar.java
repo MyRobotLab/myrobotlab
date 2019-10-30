@@ -35,8 +35,8 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
 
   public final static Logger log = LoggerFactory.getLogger(Pingdar.class);
 
-  public int sweepMin = 0;
-  public int sweepMax = 180;
+  public double sweepMin = 0;
+  public double sweepMax = 180;
 
   public int step = 1;
   transient private Servo servo;
@@ -119,7 +119,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     sweep(sweepMin, sweepMax);
   }
 
-  public void sweep(int sweepMin, int sweepMax) {
+  public void sweep(double sweepMin, double sweepMax) {
     this.sweepMin = sweepMin;
     this.sweepMax = sweepMax;
     this.step = 1;
@@ -133,11 +133,11 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
 
     // servo.setSpeed(60);
     servo.setVelocity(30.0);
-    servo.eventsEnabled(true);
+    // servo.eventsEnabled(true);
 
     sensor.startRanging();
     // STEP ???
-    servo.sweep(sweepMin, sweepMax, 100, step);
+    servo.sweep(sweepMin, sweepMax, 15.0);
   }
 
   /**

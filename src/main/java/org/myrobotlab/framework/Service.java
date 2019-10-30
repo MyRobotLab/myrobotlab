@@ -39,6 +39,9 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -65,10 +68,6 @@ import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.slf4j.Logger;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
 /**
  * 
@@ -805,13 +804,62 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
+  public String getResourceRoot() {
+    // FIXME - should "this" be the test ?
+    // If so it should be its own static function...
+
+    // order of precedence
+    // 1. if there is a src directory use it unless
+    // 2. options say to override it
+
+    String resourceRoot = Runtime.getOptions().resourceDir;
+    if ("resource".equals(resourceRoot)) {
+      // allow default to be overriden by src if it exists
+      File src = new File("src");
+      if (src.exists()) {
+        resourceRoot = "src" + fs + "main" + fs + "resources" + fs + "resource";
+      }
+    }
+
+    return resourceRoot;
+  }
+
   public String getResourceDir() {
-    String dataDir = Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
-    File f = new File(dataDir);
+
+    String resourceDir = getResourceRoot() + fs + getClass().getSimpleName();
+    File f = new File(resourceDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName();
+    return resourceDir;
+  }
+
+  public byte[] getResource(String resourceName) {
+    String filename = getResourceDir() + fs + resourceName;
+    File f = new File(filename);
+    if (!f.exists()) {
+      error("resource %s does not exist", f);
+      return null;
+    }
+    byte[] content = null;
+    try {
+      content = Files.readAllBytes(Paths.get(filename));
+    } catch (IOException e) {
+      error(e);
+    }
+    return content;
+  }
+
+  public String getResourceAsString(String resourceName) {
+    byte[] data = getResource(resourceName);
+    if (data != null) {
+      try {
+      return new String(data, "UTF-8");
+      } catch(Exception e) {
+        log.error("getResourceAsString threw", e);
+      }
+    }
+    return null;
   }
 
   public String getResourceInstanceDir() {
@@ -1003,7 +1051,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         }
       }
     } else {
-      log.info("purgeTask - task {} does not exist", taskName);
+      log.debug("purgeTask - task {} does not exist", taskName);
     }
   }
 
@@ -1259,27 +1307,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Peers.getPeerKey(getName(), key);
   }
 
-  /**
-   * a default way to attach Services to other Services An example would be
-   * attaching a Motor to a MotorControl or a Speaking service (TTS) to a
-   * Listening service (STT) such that when the system is speaking it does not
-   * try to listen &amp; act on its own speech (feedback loop)
-   * 
-   * FIXME - the SwingGui currently has attachGUI() and detachGUI() - these are
-   * to bind Services with their swing views/tab panels. It should be
-   * generalized to this attach method
-   * 
-   * @param subpath
-   *          s
-   * 
-   * @return if successful
-   * 
-   */
-
-  public String getServiceResourceFile(String subpath) {
-    return FileIO.resourceToString(getSimpleName() + fs + subpath);
-  }
-
   @Override
   public String getSimpleName() {
     return simpleName;
@@ -1309,10 +1336,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return false;
     }
     return true;
-  }
-
-  public String help() {
-    return help("url", "declared");
   }
 
   public String help(String format, String level) {
@@ -1385,6 +1408,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
+   * thread blocking invoke call on different service in the same process
+   * 
+   * @param serviceName
+   * @param methodName
+   * @param params
+   * @return
+   */
+  final public Object invokeOn(String serviceName, String methodName, Object... params) {
+    return invokeOn(Runtime.getService(serviceName), methodName, params);
+  }
+
+  /**
    * the core working invoke method
    * 
    * @param obj
@@ -1400,6 +1435,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Object retobj = null;
     try {
       MethodCache cache = MethodCache.getInstance();
+      if (obj == null) {
+        log.error("cannot invoke on a null object ! {}({})", methodName, MethodCache.formatParams(params));
+        return null;
+      }
       Method method = cache.getMethod(obj.getClass(), methodName, params);
       if (method == null) {
         error("could not find method %s.%s(%s)", obj.getClass().getSimpleName(), methodName, MethodCache.formatParams(params));
@@ -1446,59 +1485,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public boolean load() {
     return load(null, null);
-  }
-
-  public JsonElement loadJsonTree() throws IOException {
-    String filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
-    String json = FileIO.toString(filename);
-    return loadJsonTree(json);
-  }
-
-  public JsonElement loadJsonTree(String json) {
-    return CodecUtils.toJsonTree(json);
-  }
-
-  public Object loadField(String fieldName) throws IOException {
-
-    JsonElement tree = loadJsonTree();
-    if (tree == null) {
-      return null;
-    }
-
-    JsonObject jsonObject = tree.getAsJsonObject();
-    if (jsonObject == null) {
-      return null;
-    }
-
-    JsonElement field = jsonObject.get(fieldName);
-    if (field == null) {
-      return null;
-    }
-
-    if (field.isJsonNull()) {
-      return null;
-    }
-
-    if (field.isJsonObject()) {
-      return field.getAsJsonObject();
-    }
-    // box for simplicity
-
-    if (field.isJsonPrimitive()) {
-      JsonPrimitive primitive = field.getAsJsonPrimitive();
-      if (primitive.isBoolean()) {
-        return primitive.getAsBoolean();
-      }
-
-      if (primitive.isString()) {
-        return primitive.getAsString();
-      }
-
-      if (primitive.isNumber()) {
-        return primitive.getAsDouble();
-      }
-    }
-    return null;
   }
 
   public boolean load(Object o, String inCfgFileName) {
@@ -1622,6 +1608,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
+    
+    purgeTasks();
 
     // recently added - preference over detach(Runtime.getService(getName()));
     // since this service is releasing - it should be detached from all existing
@@ -1642,8 +1630,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // FIXME - deprecate - peers are no longer used ...
     releasePeers();
 
-    purgeTasks();
-
     // Runtime.release(getName()); infinite loop with peers ! :(
 
     Runtime.unregister(getName());
@@ -1654,6 +1640,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void removeAllListeners() {
     outbox.notifyList.clear();
+  }
+
+  public void removeListener(String topicMethod, String callbackName) {
+    removeListener(topicMethod, callbackName, CodecUtils.getCallbackTopicName(topicMethod));
   }
 
   @Override
@@ -2160,6 +2150,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Status warn(String format, Object... args) {
     Status status = Status.warn(format, args);
+    status.name = getName();
     invoke("publishStatus", status);
     return status;
   }
@@ -2181,6 +2172,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public Status info(String format, Object... args) {
     Status status = Status.info(format, args);
+    status.name = getName();
     log.info(status.toString());
     invoke("publishStatus", status);
     return status;
@@ -2428,6 +2420,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void setVirtual(boolean b) {
     this.isVirtual = b;
+    broadcastState();
   }
 
   public boolean isVirtual() {
@@ -2504,13 +2497,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getSwagger() {
     return null;
   }
-  
+
   public String getId() {
     return id;
   }
-  
+
   public String getFullName() {
     return String.format("%s@%s", name, id);
   }
 
+  public void copyResource(String src, String dest) throws IOException {
+    FileIO.copy(getResourceDir() + File.separator + src, dest);
+  }
 }

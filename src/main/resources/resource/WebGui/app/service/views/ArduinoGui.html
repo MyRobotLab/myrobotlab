@@ -1,61 +1,80 @@
-<!-- begin status and control for board to be viewed in above all tabs -->
-
-		<div class="col-lg-8">
-		<!-- FIXME - port is not working well in that the controller can not get the portname back from the port directive :(
-		<port id="{{service.name + 'port'}}" port-test="{{service.name}}" service-name="{{service.serial.name}}"></port>
-		-->		
-		 <select ng-model="boardType" ng-change="onBoardChange(boardType)" class="form-control">
-			<option>uno</option>
-			<option>mega</option>
-			<option>megaADK</option>
-			<option>nano</option>
-		</select>    
-		</div>	
-	  <div class="col-md-4">
-	  </div>			
-
-	<div class="col-lg-12"><!-- TODO reduce this with show -->
-			{{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>		
-			 <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span> 
-			 <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
-			 <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span> <br/>			  			 
-    		 <span ng-repeat="device in boardInfo.deviceSummary"> <b>{{device.name}}</b> id:{{device.id}} </span>
-	</div>
-
-<!-- end status and control for board to be viewed in above all tabs -->
-
-<div class="col-lg-12">
-<uib-tabset active="active">
-	<!-- begin -->
-    <uib-tab heading="Oscope">
- 		<oscope id="oscope" service-name="{{service.name}}" ></oscope>
-    </uib-tab>
-	<!-- end -->
-	<!-- begin -->
-    <uib-tab heading="Pins">
-		<img src="{{image}}" width="600"/>
-    </uib-tab>
-	<!-- end -->
-
-		<!-- begin -->
-    <uib-tab heading="Settings">
-    	<span>Arduino IDE executable</span>
-    	
-    	<!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
-    	Path<input type="text" class="form-control" id="arduinoPath" ng-model="service.arduinoPath">
-
-    	<!-- current implementation will not work as a jar -->
-    	<!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
-    	<!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
-    	<button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
-    	<button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardInfo" uib-btn-checkbox ng-change="(mrlComm.enableBoardInfo)?msg.enableBoardInfo(true):msg.enableBoardInfo(false)">Status</button>
+<div class="row">
+    <div class="col-md-12">&nbsp;</div>
+</div>
+<form class="form-inline" role="forms">
+    <div class="row">
+        <div class="form-group">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="boardType">board type</label>
+            <select ng-model="boardType" id="boardType" ng-change="onBoardChange(boardType)" class="form-control">
+                <option>uno</option>
+                <option>mega</option>
+                <option>nano</option>
+                <option>micro</option>
+            </select>
+            <button class="btn btn-default" ng-click="">Serial</button>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-md-12">&nbsp;</div>
+</div>
+    <div class="row">
+        <div class="form-group">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="port">port</label>
+            <input class="form-control" type="text" id="port" ng-model="portName" ng-readonly="isConnected" uib-typeahead="portName for portName in possiblePorts | filter:$viewValue" typeahead-min-length="0" title="Serial port to connect to - &#10; clicking on this box should show a list of possible ports. &#10; Typically Windows list serial ports as COM1,COM2 etc and Linux or Mac will have /dev/ttyS1 .. etc &#10; You may create a virtual port just by typing some arbitrary name and making sure the service is in virtual mode, &#10; then pressing the connect button"/>
+            <label for="rate">rate</label>
+            <input type="text" class="form-control" ng-readonly="isConnected" id="rate" ng-model="rate" uib-typeahead="rate for rate in possibleBaud | filter:$viewValue" typeahead-min-length="0"/>
+            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.getPortNames()">refresh</button>
+            <button class="btn btn-default" ng-show="!isConnected" ng-click="msg.connect(portName, rate)">connect</button>
+            <button class="btn btn-default" ng-show="isConnected" ng-click="msg.disconnect()">disconnect</button>
+            <img ng-src="../../{{isConnectedImage}}.png" tilte="connected light &#10; green is connected &#10; red is disconnected"/>
+            <button class="btn btn-default" ng-click="msg.getBase64ZippedMrlComm()">Get MrlComm Library</button>
+        </div>
+    </div>
+</form>
+<div class="row">
     
-		<pre>
-{{service.uploadSketchResult}}
+    <!-- TODO - make directive -->
+    <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
+</div>
+<div class="col-md-12">
+    <!-- TODO reduce this with show -->
+    {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
+    <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span>
+    <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
+    <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span>
+    <br/>
+    <span ng-repeat="device in boardInfo.deviceSummary">
+        <b>{{device.name}}</b>
+        id:{{device.id}} 
+    
+    </span>
+</div>
+<!-- end status and control for board to be viewed in above all tabs -->
+<div class="col-md-12">
+    <uib-tabset active="active">
+        <!-- begin -->
+        <uib-tab heading="Oscope">
+            <oscope id="oscope" service-name="{{service.name}}"></oscope>
+        </uib-tab>
+        <!-- end -->
+        <!-- begin -->
+        <uib-tab heading="Pins">
+            <img src="{{image}}" width="500"/>
+        </uib-tab>
+        <!-- end -->
+        <!-- begin -->
+        <uib-tab heading="Settings">
+            <!-- AngularJs preferred access is through an object - most if not all data points should be in $scope.service - so "take" data from there -->
+            <input type="text" class="form-control" id="arduinoPath" ng-model="service.arduinoPath" placeholder="Arduino IDE executable Path">
+            <!-- current implementation will not work as a jar -->
+            <!-- button class="btn btn-default pull-right" ng-click="msg.openMrlComm()">Open in IDE</button -->
+            <!-- FIXME - for an successful upload the "FIELDS!" portname, arduinoPath & boardType all need to be filled in -->
+            <button class="btn btn-default pull-right" ng-click="upload(service.arduinoPath, formPort, boardType)">Upload</button>
+            <button class="btn btn-default pull-right" ng-model="mrlComm.enableBoardInfo" uib-btn-checkbox ng-change="(mrlComm.enableBoardInfo)?msg.enableBoardInfo(true):msg.enableBoardInfo(false)">Status</button>
+            <pre>{{service.uploadSketchResult}}
 		</pre>
-		   
-    </uib-tab>
-	<!-- end -->
-
-</uib-tabset>
+        </uib-tab>
+        <!-- end -->
+    </uib-tabset>
+</div>
 </div>

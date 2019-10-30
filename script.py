@@ -1,3 +1,5 @@
+from org.myrobotlab.framework import Platform
+ Platform.setVirtual(True)
 #file : InMoov3.minimalHead.py
 
 # this will run with versions of MRL above 1695

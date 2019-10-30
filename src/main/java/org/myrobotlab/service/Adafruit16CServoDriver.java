@@ -245,7 +245,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     private static final long serialVersionUID = 1L;
     String pin;
     SpeedControl speedcontrol;
-    double velocity = -1;
+    /**
+     * velocity/speed - when its null - no additional speed control is used
+     */
+    Double velocity = null;
     double acceleration = -1;
     boolean isMoving = false;
     double targetOutput;
@@ -455,7 +458,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     if (servoData.isEnergized) {
       // Move at max speed
-      if (servoData.velocity == -1) {
+      if (servoData.velocity == null || servoData.velocity == -1) {
         log.debug("Ada move at max speed");
         servoData.currentOutput = servo.getTargetOutput();
         servoData.targetOutput = servo.getTargetOutput();
@@ -956,6 +959,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   @Override
   public void servoDisable(ServoControl servo) {
     ServoData servoData = servoMap.get(servo.getName());
+    if (servoData == null) {
+      log.error("servo data {} could not get servo from map", servo.getName());
+      return;
+    }
     setPWM(servoData.pin, 4096, 0);
     servoData.isEnergized = false;
     log.info("Pin : " + servoData.pin + " detached from " + servo.getName());

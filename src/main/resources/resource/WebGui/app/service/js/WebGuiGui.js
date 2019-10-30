@@ -18,7 +18,6 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
             _self.updateState(inMsg.data[0]);
             $scope.$apply();
             break;
-            service
         case 'onShowAll':
             panelSvc.showAll(inMsg.data[0]);
             break;

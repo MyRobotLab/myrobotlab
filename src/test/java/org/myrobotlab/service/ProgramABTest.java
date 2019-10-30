@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
 
-  
   public final static Logger log = LoggerFactory.getLogger(ProgramABTest.class);
   private String botname = "lloyd";
   // TODO: move this to test resources
@@ -37,7 +36,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   public Service createService() {
 
-    //LoggingFactory.init("INFO");
+    // LoggingFactory.init("INFO");
     log.info("Setting up the Program AB Service ########################################");
     // Load the service under test
     // a test robot
@@ -86,11 +85,12 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Before
   public void setUp() {
-    // TODO: set the location for the temp folder via :  System.getProperty("java.io.tmpdir") 
+    // TODO: set the location for the temp folder via :
+    // System.getProperty("java.io.tmpdir")
     // LoggingFactory.init("INFO");
-    //testFolder.getRoot().getAbsolutePath()
+    // testFolder.getRoot().getAbsolutePath()
     try {
-      //testFolder.create();
+      // testFolder.create();
       this.path = testFolder.getRoot().getAbsolutePath() + File.separator + "ProgramAB";
       FileIO.extract(".", testResources, path);
     } catch (IOException e) {
@@ -111,13 +111,15 @@ public class ProgramABTest extends AbstractServiceTest {
   }
 
   public void sraixTest() {
-    Response resp = testService.getResponse(username, "MRLSRAIX");
-    System.out.println(resp);
-    // Response resp = testService.getResponse(username, "Why is the sky
-    // blue?");
-    // System.out.println(resp);
-    boolean contains = resp.msg.contains("atmosphere");
-    assertTrue(contains);
+    if (Runtime.hasInternet()) {
+      Response resp = testService.getResponse(username, "MRLSRAIX");
+      System.out.println(resp);
+      // Response resp = testService.getResponse(username, "Why is the sky
+      // blue?");
+      // System.out.println(resp);
+      boolean contains = resp.msg.contains("atmosphere");
+      assertTrue(contains);
+    }
   }
 
   public void testAddEntryToSetAndMaps() {
@@ -138,7 +140,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Test
   public void testJapanese() {
-    
+
     ProgramAB pikachu = new ProgramAB("pikachu");
     pikachu.setPath(path);
     // pikachu the service.
@@ -181,18 +183,18 @@ public class ProgramABTest extends AbstractServiceTest {
 
     assertEquals("Kevin", respA.msg);
     assertEquals("Grog", respB.msg);
-    
+
     // release this service.
     lloyd.releaseService();
-    
 
   }
 
   public void testOOBTags() throws Exception {
     Response resp = testService.getResponse(username, "OOB TEST");
     assertEquals("OOB Tag Test", resp.msg);
-    
-    // TODO figure a mock object that can wait on a callback to let us know the python service is started.
+
+    // TODO figure a mock object that can wait on a callback to let us know the
+    // python service is started.
     // wait up to 5 seconds for python service to start
     long maxWait = 6000;
     int i = 0;

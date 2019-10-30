@@ -73,6 +73,7 @@ public class MethodCache {
     // super index of all method entries
     Map<String, MethodEntry> methodsIndex = new TreeMap<>();
 
+    // index based on typeless resolution and invoking without interfaces
     Map<String, List<MethodEntry>> remoteOrdinalIndex = new TreeMap<>();
     // Map<String, List<MethodEntry>> declaredMethodOrdinalIndex = new
     // TreeMap<>();
@@ -400,11 +401,11 @@ public class MethodCache {
     return mi.methodsIndex.get(key).method;
   }
 
-  /*
+  
   public Map<String, Map<String, MethodEntry>> getRemoteMethods() {
     Map<String, Map<String, MethodEntry>> ret = new TreeMap<>();
     for (String name : objectCache.keySet()) {
-      ret.put(name, objectCache.get(name).remoteMethods);
+      ret.put(name, objectCache.get(name).methodsIndex);
     }
     return ret;
   }
@@ -414,11 +415,11 @@ public class MethodCache {
       type = "org.myrobotlab.service." + type;
     }
     if (objectCache.containsKey(type)) {
-      return objectCache.get(type).remoteMethods;
+      return objectCache.get(type).methodsIndex;
     }
     return null;
   }
-  */
+  
 
   final public Object invokeOn(Object obj, String methodName, Object... params)
       throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
@@ -497,7 +498,7 @@ public class MethodCache {
 
   public List<MethodEntry> getOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
-      log.error("here");
+      log.error("getOrdinalMethods on a null object ");
     }
     String objectKey = object.getTypeName();
 
@@ -512,7 +513,7 @@ public class MethodCache {
   
   public List<MethodEntry> getRemoteOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
-      log.error("here");
+      log.error("getRemoteOrdinalMethods object is null");
     }
     String objectKey = object.getTypeName();
 
@@ -555,8 +556,7 @@ public class MethodCache {
         // successfully decoded params
         return params;
       } catch (Exception e) {
-        // not logged, because this is one of the only ways to search :P
-        // log.error("getDecodedParameters threw", e);
+
         log.error("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e);
       }
     }

@@ -1031,7 +1031,7 @@ public class Deeplearning4j extends Service {
     // dl4j.evaluateModel(testIm);
     // // dl4j.evaluateModel(img);
     // log.info("Done evaluating the model.");
-    // System.exit(0);
+  
   }
 
 }
