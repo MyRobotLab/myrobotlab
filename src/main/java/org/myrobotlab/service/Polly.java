@@ -123,7 +123,7 @@ public class Polly extends AbstractSpeechSynthesis {
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
     if (key == null || secret == null) {
-      error("this service requires 2 keys");
+      error("this service requires a key and a secret");
       return null;
     }
 

@@ -39,6 +39,7 @@ import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -852,7 +853,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getResourceAsString(String resourceName) {
     byte[] data = getResource(resourceName);
     if (data != null) {
-      return new String(data);
+      try {
+      return new String(data, "UTF-8");
+      } catch(Exception e) {
+        log.error("getResourceAsString threw", e);
+      }
     }
     return null;
   }

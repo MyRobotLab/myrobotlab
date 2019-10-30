@@ -640,9 +640,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // - we don't need to wait for a message from them with the outstream
         OutputStream out = r.getResponse().getOutputStream();
         Message msg = getDefaultMsg(uuid); // SEND BACK getHelloResponse(hello)
-        System.out.println(String.format(">>>new %s", request.getRequestURI()));
+        log.info(String.format(">>>new %s", request.getRequestURI()));
         out.write(CodecUtils.toJson(msg).getBytes());
-        System.out.println(String.format("<<< %s", msg));
+        log.info(String.format("<<< %s", msg));
         return;
 
       } else if (apiKey.equals("service")) {
@@ -674,7 +674,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Message msg = CodecUtils.fromJson(bodyData, Message.class);
         msg.setProperty("uuid", uuid);
 
-        System.out.println(String.format(">>> %s", msg));
+        log.info(String.format(">>> %s", msg));
 
         // if were blocking -
         Message retMsg = null;
