@@ -228,7 +228,7 @@ public class Python extends Service {
    * FIXME - buildtime package in resources pyrobotlab python service urls -
    * created for referencing script
    */
-  Map<String, String> exampleUrls = new TreeMap<String, String>();
+  Map<String, String> exampleFiles = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
   transient InputQueueThread inputQueueThread;
@@ -280,8 +280,8 @@ public class Python extends Service {
       ServiceType st = sdt.get(i);
       // FIXME - cache in "data" dir Or perhaps it should be pulled into
       // resource directory during build time and packaged with jar
-      String url = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
-      exampleUrls.put(st.getSimpleName(), url);
+      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
+      exampleFiles.put(st.getSimpleName(), file);
     }
 
     localPythonFiles = getFileListing();

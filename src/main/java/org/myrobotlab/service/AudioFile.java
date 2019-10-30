@@ -220,6 +220,12 @@ public class AudioFile extends Service {
     playResource(filename, false);
   };
 
+  /**
+   * plays a resource file - currently there are very few resource files - and that's how it should
+   * be they are only used for demonstration/tutorial functionality
+   * @param filename - name of file relative to the resource dir
+   * @param isBlocking
+   */
   public void playResource(String filename, Boolean isBlocking) {
     playFile(getResourceDir() + File.separator + filename, isBlocking);
   }

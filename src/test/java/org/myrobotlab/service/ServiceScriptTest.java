@@ -82,7 +82,7 @@ public class ServiceScriptTest extends AbstractTest {
 
     for (String name : pythonScripts.keySet()) {
       
-      name = "AudioFile";
+      // name = "AudioFile";
       
       log.info("testing script {}", name);
 
