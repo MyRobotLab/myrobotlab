@@ -86,6 +86,7 @@ public class Platform implements Serializable {
   public static Platform getLocalInstance() {
 
     if (localInstance == null) {
+      log.info("initializing Platform");
       Platform platform = new Platform();
 
       platform.startTime = new Date();
@@ -318,8 +319,11 @@ public class Platform implements Serializable {
   static public Map<String, String> getManifest() {
     Map<String, String> ret = new TreeMap<String, String>();
     try {
+      log.info("getManifest");
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
       InputStream in = null;
+      log.info("source {}", source);
+
       if (source.endsWith("jar")) {
         // runtime
         in = Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
@@ -332,6 +336,7 @@ public class Platform implements Serializable {
 
       Properties p = new Properties();
       p.load(in);
+      log.info("properties {}", p);
 
       for (final String name : p.stringPropertyNames()) {
         ret.put(name, p.getProperty(name));
