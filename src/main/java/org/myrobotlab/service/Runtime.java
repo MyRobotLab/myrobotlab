@@ -1852,16 +1852,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     log.info("============== env end ==============");
 
-    // Platform platform = Platform.getLocalInstance();
-    log.info("============== normalized ==============");
+    log.info("============== platform ==============");
     long startTime = platform.getStartTime().getTime();
     log.info("{} - GMT - {}", sdf.format(startTime), gmtf.format(startTime));
     log.info("pid {}", platform.getPid());
     log.info("hostname {}", platform.getHostname());
     log.info("ivy [runtime,{}.{}.{}]", platform.getArch(), platform.getJvmBitness(), platform.getOS());
     log.info("version {} branch {} commit {} build {}", platform.getVersion(), platform.getBranch(), platform.getCommit(), platform.getBuild());
+    log.info("platform manifest {}", Platform.getManifest());
     log.info("platform [{}}]", platform);
-    log.info("version [{}]", Runtime.getVersion());
+    log.info("version [{}]", platform.getVersion());
     log.info("root [{}]", FileIO.getRoot());
     log.info("cfg dir [{}]", FileIO.getCfgDir());
     log.info("sun.arch.data.model [{}]", System.getProperty("sun.arch.data.model"));

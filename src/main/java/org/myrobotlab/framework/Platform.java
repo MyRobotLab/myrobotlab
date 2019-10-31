@@ -11,9 +11,10 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
@@ -22,6 +23,10 @@ import org.slf4j.Logger;
  * 
  * It must NOT have references to mrl services, or Runtime, or 3rd party library
  * dependencies except perhaps for logging
+ * 
+ * FIXME - it's silly to have some values in variables and others in the manifest map - 
+ * probably should have all in a Tree map but I didn't want to break any javascript which accessed
+ * the members directly
  *
  */
 public class Platform implements Serializable {
@@ -69,7 +74,10 @@ public class Platform implements Serializable {
   String motd;
   Date startTime;
 
-  static Platform localInstance; // = getLocalInstance();
+  // all values of the manifest
+  Map<String, String> manifest;
+
+  static Platform localInstance;
 
   /**
    * The one big convoluted function to get all the crazy platform specific
@@ -86,8 +94,8 @@ public class Platform implements Serializable {
 
     if (localInstance == null) {
       log.debug("initializing Platform");
+      
       Platform platform = new Platform();
-
       platform.startTime = new Date();
 
       // === OS ===
@@ -110,11 +118,6 @@ public class Platform implements Serializable {
       }
 
       if ("arm".equals(arch)) {
-
-        // FIXME - procparser is unsafe and borked !!
-        // Integer armv = ProcParser.getArmInstructionVersion();
-        // Current work around: trigger off the os.version to choose
-        // arm6 or arm7
 
         // assume ras pi 1 .
         Integer armv = 6;
@@ -180,24 +183,10 @@ public class Platform implements Serializable {
 
       // manifest
       Map<String, String> manifest = getManifest();
-
-      if (manifest.containsKey("GitBranch")) {
-        platform.branch = manifest.get("GitBranch");
-      } else {
-        platform.branch = "unknownBranch";
-      }
-
-      if (manifest.containsKey("Commit")) {
-        platform.commit = manifest.get("Commit");
-      } else {
-        platform.commit = "unknownCommit";
-      }
-
-      if (manifest.containsKey("Implementation-Version")) {
-        platform.mrlVersion = manifest.get("Implementation-Version");
-      } else {
-        platform.mrlVersion = "unknownVersion";
-      }
+      platform.manifest = manifest;
+      platform.branch = get(manifest, "GitBranch", "unknownBranch");
+      platform.commit = get(manifest, "GitCommitId", "unknownCommit");
+      platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
 
       // motd
       platform.motd = "resistance is futile, we have cookies and robots ...";
@@ -236,8 +225,14 @@ public class Platform implements Serializable {
 
       localInstance = platform;
     }
-
     return localInstance;
+  }
+
+  static public String get(Map<String,String> manifest, String key, String def) {
+    if (manifest != null & manifest.containsKey(key)) {
+      return manifest.get(key);
+    }
+    return def;
   }
 
   public Platform() {
@@ -341,12 +336,15 @@ public class Platform implements Serializable {
 
       Properties p = new Properties();
       p.load(in);
-      log.debug("properties {}", p);
 
       for (final String name : p.stringPropertyNames()) {
         ret.put(name, p.getProperty(name));
+      }
+
+      for (final String name : ret.keySet()) {
         log.debug(name + "=" + p.getProperty(name));
       }
+
       in.close();
     } catch (Exception e) {
       e.printStackTrace();
@@ -399,15 +397,13 @@ public class Platform implements Serializable {
 
   public static void main(String[] args) {
     try {
-      ZipFile zf = new ZipFile("/lhome/grperry/github/mrl.develop/myrobotlab/target/test/myrobotlab-unknownBranch-unknownVersion.jar");
-      InputStream in = zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF"));
-      log.debug("manifest {}", FileIO.toString(in));
+      LoggingFactory.init(Level.DEBUG);
       Platform platform = Platform.getLocalInstance();
-       log.debug("platform : {}", platform.toString());
-       log.debug("build {}", platform.getBuild());
-       log.debug("branch {}", platform.getBranch());
-       log.debug("commit {}", platform.getCommit());
-       log.debug("toString {}", platform.toString());
+      log.debug("platform : {}", platform.toString());
+      log.debug("build {}", platform.getBuild());
+      log.debug("branch {}", platform.getBranch());
+      log.debug("commit {}", platform.getCommit());
+      log.debug("toString {}", platform.toString());
 
     } catch (Exception e) {
       log.error("main threw", e);
