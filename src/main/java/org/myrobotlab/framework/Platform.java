@@ -6,15 +6,14 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.jar.Attributes;
+import java.util.zip.ZipFile;
 
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
 
 /**
@@ -326,13 +325,17 @@ public class Platform implements Serializable {
 
       if (source.endsWith("jar")) {
         // runtime
-        in = Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
+        // DO NOT DO IT THIS WAY -> Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
+        // IT DOES NOT WORK WITH OpenJDK !!!
+        ZipFile zf = new ZipFile(source);
+        in =  zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF")); 
+        zf.close();
       } else {
         // IDE - version ...
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
-      
-      log.info("loading manifest");
+      String manifest = FileIO.toString(in);
+      log.info("loading manifest {}", manifest);
 
       Properties p = new Properties();
       p.load(in);
@@ -349,7 +352,7 @@ public class Platform implements Serializable {
     }
     return ret;
   }
-
+/*
   private static Map<String, String> getAttributes(String part, Attributes attributes) {
     Map<String, String> data = new TreeMap<String, String>();
     Iterator<Object> it = attributes.keySet().iterator();
@@ -370,6 +373,7 @@ public class Platform implements Serializable {
     }
     return data;
   }
+  */
 
   @Override
   public String toString() {
@@ -408,7 +412,9 @@ public class Platform implements Serializable {
 
   public static void main(String[] args) {
     try {
-
+      ZipFile zf = new ZipFile("/lhome/grperry/github/mrl.develop/myrobotlab/target/test/myrobotlab-unknownBranch-unknownVersion.jar");
+      InputStream in = zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF"));
+      log.info("manifest {}", FileIO.toString(in));
       Platform platform = Platform.getLocalInstance();
       // log.info("platform : {}", platform.toString());
       // log.info("build {}", platform.getBuild());
