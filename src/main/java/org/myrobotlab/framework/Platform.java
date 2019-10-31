@@ -329,7 +329,7 @@ public class Platform implements Serializable {
         // IT DOES NOT WORK WITH OpenJDK !!!
         ZipFile zf = new ZipFile(source);
         in =  zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF")); 
-        zf.close();
+        // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
