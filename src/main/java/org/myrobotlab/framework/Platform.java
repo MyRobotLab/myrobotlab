@@ -85,7 +85,7 @@ public class Platform implements Serializable {
   public static Platform getLocalInstance() {
 
     if (localInstance == null) {
-      log.info("initializing Platform");
+      log.debug("initializing Platform");
       Platform platform = new Platform();
 
       platform.startTime = new Date();
@@ -319,10 +319,10 @@ public class Platform implements Serializable {
     Map<String, String> ret = new TreeMap<String, String>();
     ZipFile zf = null;
     try {
-      log.info("getManifest");
+      log.debug("getManifest");
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
       InputStream in = null;
-      log.info("source {}", source);
+      log.debug("source {}", source);
 
       if (source.endsWith("jar")) {
         // runtime
@@ -337,15 +337,15 @@ public class Platform implements Serializable {
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
-      // log.info("loading manifest {}", manifest);
+      // log.debug("loading manifest {}", manifest);
 
       Properties p = new Properties();
       p.load(in);
-      log.info("properties {}", p);
+      log.debug("properties {}", p);
 
       for (final String name : p.stringPropertyNames()) {
         ret.put(name, p.getProperty(name));
-        log.info(name + "=" + p.getProperty(name));
+        log.debug(name + "=" + p.getProperty(name));
       }
       in.close();
     } catch (Exception e) {
@@ -361,18 +361,6 @@ public class Platform implements Serializable {
     }
     return ret;
   }
-  /*
-   * private static Map<String, String> getAttributes(String part, Attributes
-   * attributes) { Map<String, String> data = new TreeMap<String, String>();
-   * Iterator<Object> it = attributes.keySet().iterator(); while (it.hasNext())
-   * { java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name)
-   * it.next(); Object value = attributes.get(key); String partKey = null; if
-   * (part == null) { partKey = key.toString(); } else { partKey =
-   * String.format("%s.%s", part, key); }
-   * 
-   * // log.info( "{}: {}", value,partKey); if (value != null) {
-   * data.put(partKey, value.toString()); } } return data; }
-   */
 
   @Override
   public String toString() {
@@ -413,17 +401,16 @@ public class Platform implements Serializable {
     try {
       ZipFile zf = new ZipFile("/lhome/grperry/github/mrl.develop/myrobotlab/target/test/myrobotlab-unknownBranch-unknownVersion.jar");
       InputStream in = zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF"));
-      log.info("manifest {}", FileIO.toString(in));
+      log.debug("manifest {}", FileIO.toString(in));
       Platform platform = Platform.getLocalInstance();
-      // log.info("platform : {}", platform.toString());
-      // log.info("build {}", platform.getBuild());
-      // log.info("branch {}", platform.getBranch());
-      // log.info("commit {}", platform.getCommit());
-      // log.info("toString {}", platform.toString());
+       log.debug("platform : {}", platform.toString());
+       log.debug("build {}", platform.getBuild());
+       log.debug("branch {}", platform.getBranch());
+       log.debug("commit {}", platform.getCommit());
+       log.debug("toString {}", platform.toString());
 
     } catch (Exception e) {
-      e.printStackTrace();
-      // log.info("Exception: ", e);
+      log.error("main threw", e);
     }
   }
 
