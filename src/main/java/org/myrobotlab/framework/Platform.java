@@ -28,7 +28,7 @@ public class Platform implements Serializable {
   transient static Logger log = LoggerFactory.getLogger(Platform.class);
 
   private static final long serialVersionUID = 1L;
-  
+
   // VM Names
   public final static String VM_DALVIK = "dalvik";
   public final static String VM_HOTSPOT = "hotspot";
@@ -317,6 +317,7 @@ public class Platform implements Serializable {
 
   static public Map<String, String> getManifest() {
     Map<String, String> ret = new TreeMap<String, String>();
+    ZipFile zf = null;
     try {
       log.info("getManifest");
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
@@ -325,17 +326,18 @@ public class Platform implements Serializable {
 
       if (source.endsWith("jar")) {
         // runtime
-        // DO NOT DO IT THIS WAY -> Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
+        // DO NOT DO IT THIS WAY ->
+        // Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
         // IT DOES NOT WORK WITH OpenJDK !!!
-        ZipFile zf = new ZipFile(source);
-        in =  zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF")); 
+        zf = new ZipFile(source);
+        in = zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF"));
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
-      String manifest = FileIO.toString(in);
-      log.info("loading manifest {}", manifest);
+      // String manifest = FileIO.toString(in);
+      // log.info("loading manifest {}", manifest);
 
       Properties p = new Properties();
       p.load(in);
@@ -349,31 +351,28 @@ public class Platform implements Serializable {
     } catch (Exception e) {
       e.printStackTrace();
       // log.warn("getManifest threw", e);
+    } finally {
+      if (zf != null) {
+        try {
+          zf.close();
+        } catch (Exception e) {
+        }
+      }
     }
     return ret;
   }
-/*
-  private static Map<String, String> getAttributes(String part, Attributes attributes) {
-    Map<String, String> data = new TreeMap<String, String>();
-    Iterator<Object> it = attributes.keySet().iterator();
-    while (it.hasNext()) {
-      java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
-      Object value = attributes.get(key);
-      String partKey = null;
-      if (part == null) {
-        partKey = key.toString();
-      } else {
-        partKey = String.format("%s.%s", part, key);
-      }
-
-      // log.info( "{}: {}", value,partKey);
-      if (value != null) {
-        data.put(partKey, value.toString());
-      }
-    }
-    return data;
-  }
-  */
+  /*
+   * private static Map<String, String> getAttributes(String part, Attributes
+   * attributes) { Map<String, String> data = new TreeMap<String, String>();
+   * Iterator<Object> it = attributes.keySet().iterator(); while (it.hasNext())
+   * { java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name)
+   * it.next(); Object value = attributes.get(key); String partKey = null; if
+   * (part == null) { partKey = key.toString(); } else { partKey =
+   * String.format("%s.%s", part, key); }
+   * 
+   * // log.info( "{}: {}", value,partKey); if (value != null) {
+   * data.put(partKey, value.toString()); } } return data; }
+   */
 
   @Override
   public String toString() {
