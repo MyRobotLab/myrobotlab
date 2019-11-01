@@ -50,10 +50,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     super(n);
   }
 
-  /*
-   * attach all the servos - this must be re-entrant and accomplish the
-   * re-attachment when servos are detached
-   */
   @Deprecated
   public boolean attach() {
     return enable();
@@ -81,30 +77,50 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void setAutoDisable(Boolean param) {
-    bicep.setAutoDisable(param);
-    rotate.setAutoDisable(param);
-    shoulder.setAutoDisable(param);
-    omoplate.setAutoDisable(param);
+    if (bicep != null) {
+      bicep.setAutoDisable(param);
+    }
+
+    if (rotate != null) {
+      rotate.setAutoDisable(param);
+    }
+    if (shoulder != null) {
+      shoulder.setAutoDisable(param);
+    }
+    if (omoplate != null) {
+      omoplate.setAutoDisable(param);
+    }
   }
 
   @Override
   public void broadcastState() {
-    // notify the gui
-    bicep.broadcastState();
-    rotate.broadcastState();
-    shoulder.broadcastState();
-    omoplate.broadcastState();
+    super.broadcastState();
+    if (bicep != null) {
+      bicep.broadcastState();
+    }
+
+    if (rotate != null) {
+      rotate.broadcastState();
+    }
+
+    if (shoulder != null) {
+      shoulder.broadcastState();
+    }
+
+    if (omoplate != null) {
+      omoplate.broadcastState();
+    }
   }
 
   public boolean connect(String port) throws Exception {
 
     // if the servos haven't been started already.. fire them up!
     startPeers();
-    controller = (ServoController)startPeer("arduino");
+    controller = (ServoController) startPeer("arduino");
     // set defaults for the servos
     initServoDefaults();
-    // we need a default controller  
-    
+    // we need a default controller
+
     if (controller == null) {
       error("controller is invalid");
       return false;
@@ -118,13 +134,11 @@ public class InMoovArm extends Service implements IKJointAngleListener {
         error("arm %s could not connect on port %s", getName(), port);
       }
     }
-    
 
-    
     bicep.attach(controller);
     rotate.attach(controller);
     shoulder.attach(controller);
-    omoplate.attach(controller);    
+    omoplate.attach(controller);
 
     enableAutoEnable(true);
 
@@ -141,8 +155,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
       shoulder.setPin(DEFAULT_SHOULDER_PIN);
     if (omoplate.getPin() == null)
       omoplate.setPin(DEFAULT_OMOPLATE_PIN);
-    
-    
+
     bicep.setMinMax(5.0, 90.0);
     rotate.setMinMax(40.0, 180.0);
     shoulder.setMinMax(0.0, 180.0);
@@ -156,7 +169,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     shoulder.setPosition(30.0);
     omoplate.setRest(10.0);
     omoplate.setPosition(10.0);
-    
 
     setVelocity(20.0, 20.0, 20.0, 20.0);
   }
@@ -349,19 +361,19 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   @Override
   public void startService() {
-    super.startService();    
+    super.startService();
     if (bicep == null) {
-      bicep = (ServoControl)startPeer("bicep");
+      bicep = (ServoControl) startPeer("bicep");
     }
     if (rotate == null) {
-      rotate = (ServoControl)startPeer("rotate");
+      rotate = (ServoControl) startPeer("rotate");
     }
     if (shoulder == null) {
-      shoulder = (ServoControl)startPeer("shoulder");
+      shoulder = (ServoControl) startPeer("shoulder");
     }
     if (omoplate == null) {
-      omoplate = (ServoControl)startPeer("omoplate");
-    }   
+      omoplate = (ServoControl) startPeer("omoplate");
+    }
   }
 
   public void test() {
@@ -450,13 +462,12 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     DHRobotArm arm = new DHRobotArm();
     // d , r, theta , alpha
 
-    
-//    HashMap<String, Double> calibMap = new HashMap<String, Double>();
-//    calibMap.put("i01.leftArm.omoplate", 90.0);
-//    calibMap.put("i01.leftArm.shoulder", -90.0+45);
-//    calibMap.put("i01.leftArm.rotate", 0.0);
-//    calibMap.put("i01.leftArm.bicep", -90.0);
-    
+    // HashMap<String, Double> calibMap = new HashMap<String, Double>();
+    // calibMap.put("i01.leftArm.omoplate", 90.0);
+    // calibMap.put("i01.leftArm.shoulder", -90.0+45);
+    // calibMap.put("i01.leftArm.rotate", 0.0);
+    // calibMap.put("i01.leftArm.bicep", -90.0);
+
     // TODO: the DH links should take into account the encoder offsets and
     // calibration maps
     DHLink link1 = new DHLink(String.format("%s.%sArm.omoplate", name, side), 0, 40, MathUtils.degToRad(-90), MathUtils.degToRad(-90));
@@ -483,7 +494,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     link3.setMin(MathUtils.degToRad(-90));
     link3.setMax(MathUtils.degToRad(90));
     link3.setOffset(0);
-    
+
     DHLink link4 = new DHLink(String.format("%s.%sArm.bicep", name, side), 0, 280, MathUtils.degToRad(90), MathUtils.degToRad(0));
     // TODO: this is probably inverted? should be 90 to 0...
     link4.setMin(MathUtils.degToRad(90));
