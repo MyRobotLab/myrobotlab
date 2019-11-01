@@ -6,15 +6,15 @@ import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.jar.Attributes;
+import java.util.zip.ZipFile;
 
 import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 /**
@@ -23,13 +23,17 @@ import org.slf4j.Logger;
  * 
  * It must NOT have references to mrl services, or Runtime, or 3rd party library
  * dependencies except perhaps for logging
+ * 
+ * FIXME - it's silly to have some values in variables and others in the manifest map - 
+ * probably should have all in a Tree map but I didn't want to break any javascript which accessed
+ * the members directly
  *
  */
 public class Platform implements Serializable {
   transient static Logger log = LoggerFactory.getLogger(Platform.class);
 
   private static final long serialVersionUID = 1L;
-  
+
   // VM Names
   public final static String VM_DALVIK = "dalvik";
   public final static String VM_HOTSPOT = "hotspot";
@@ -70,7 +74,10 @@ public class Platform implements Serializable {
   String motd;
   Date startTime;
 
-  static Platform localInstance; // = getLocalInstance();
+  // all values of the manifest
+  Map<String, String> manifest;
+
+  static Platform localInstance;
 
   /**
    * The one big convoluted function to get all the crazy platform specific
@@ -86,8 +93,9 @@ public class Platform implements Serializable {
   public static Platform getLocalInstance() {
 
     if (localInstance == null) {
+      log.debug("initializing Platform");
+      
       Platform platform = new Platform();
-
       platform.startTime = new Date();
 
       // === OS ===
@@ -110,11 +118,6 @@ public class Platform implements Serializable {
       }
 
       if ("arm".equals(arch)) {
-
-        // FIXME - procparser is unsafe and borked !!
-        // Integer armv = ProcParser.getArmInstructionVersion();
-        // Current work around: trigger off the os.version to choose
-        // arm6 or arm7
 
         // assume ras pi 1 .
         Integer armv = 6;
@@ -180,24 +183,10 @@ public class Platform implements Serializable {
 
       // manifest
       Map<String, String> manifest = getManifest();
-
-      if (manifest.containsKey("GitBranch")) {
-        platform.branch = manifest.get("GitBranch");
-      } else {
-        platform.branch = "unknownBranch";
-      }
-
-      if (manifest.containsKey("Commit")) {
-        platform.commit = manifest.get("Commit");
-      } else {
-        platform.commit = "unknownCommit";
-      }
-
-      if (manifest.containsKey("Implementation-Version")) {
-        platform.mrlVersion = manifest.get("Implementation-Version");
-      } else {
-        platform.mrlVersion = "unknownVersion";
-      }
+      platform.manifest = manifest;
+      platform.branch = get(manifest, "GitBranch", "unknownBranch");
+      platform.commit = get(manifest, "GitCommitId", "unknownCommit");
+      platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
 
       // motd
       platform.motd = "resistance is futile, we have cookies and robots ...";
@@ -236,8 +225,14 @@ public class Platform implements Serializable {
 
       localInstance = platform;
     }
-
     return localInstance;
+  }
+
+  static public String get(Map<String,String> manifest, String key, String def) {
+    if (manifest != null & manifest.containsKey(key)) {
+      return manifest.get(key);
+    }
+    return def;
   }
 
   public Platform() {
@@ -317,53 +312,52 @@ public class Platform implements Serializable {
 
   static public Map<String, String> getManifest() {
     Map<String, String> ret = new TreeMap<String, String>();
+    ZipFile zf = null;
     try {
+      log.debug("getManifest");
       String source = Platform.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
       InputStream in = null;
+      log.debug("source {}", source);
+
       if (source.endsWith("jar")) {
         // runtime
-        in = Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
+        // DO NOT DO IT THIS WAY ->
+        // Platform.class.getResource("/META-INF/MANIFEST.MF").openStream();
+        // IT DOES NOT WORK WITH OpenJDK !!!
+        zf = new ZipFile(source);
+        in = zf.getInputStream(zf.getEntry("META-INF/MANIFEST.MF"));
+        // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
         in = Platform.class.getResource("/MANIFEST.MF").openStream();
       }
-      
-      log.info("loading manifest");
+      // String manifest = FileIO.toString(in);
+      // log.debug("loading manifest {}", manifest);
 
       Properties p = new Properties();
       p.load(in);
 
       for (final String name : p.stringPropertyNames()) {
         ret.put(name, p.getProperty(name));
-        log.info(name + "=" + p.getProperty(name));
       }
+
+      for (final String name : ret.keySet()) {
+        log.debug(name + "=" + p.getProperty(name));
+      }
+
       in.close();
     } catch (Exception e) {
       e.printStackTrace();
       // log.warn("getManifest threw", e);
+    } finally {
+      if (zf != null) {
+        try {
+          zf.close();
+        } catch (Exception e) {
+        }
+      }
     }
     return ret;
-  }
-
-  private static Map<String, String> getAttributes(String part, Attributes attributes) {
-    Map<String, String> data = new TreeMap<String, String>();
-    Iterator<Object> it = attributes.keySet().iterator();
-    while (it.hasNext()) {
-      java.util.jar.Attributes.Name key = (java.util.jar.Attributes.Name) it.next();
-      Object value = attributes.get(key);
-      String partKey = null;
-      if (part == null) {
-        partKey = key.toString();
-      } else {
-        partKey = String.format("%s.%s", part, key);
-      }
-
-      // log.info( "{}: {}", value,partKey);
-      if (value != null) {
-        data.put(partKey, value.toString());
-      }
-    }
-    return data;
   }
 
   @Override
@@ -403,17 +397,16 @@ public class Platform implements Serializable {
 
   public static void main(String[] args) {
     try {
-
+      LoggingFactory.init(Level.DEBUG);
       Platform platform = Platform.getLocalInstance();
-      // log.info("platform : {}", platform.toString());
-      // log.info("build {}", platform.getBuild());
-      // log.info("branch {}", platform.getBranch());
-      // log.info("commit {}", platform.getCommit());
-      // log.info("toString {}", platform.toString());
+      log.debug("platform : {}", platform.toString());
+      log.debug("build {}", platform.getBuild());
+      log.debug("branch {}", platform.getBranch());
+      log.debug("commit {}", platform.getCommit());
+      log.debug("toString {}", platform.toString());
 
     } catch (Exception e) {
-      e.printStackTrace();
-      // log.info("Exception: ", e);
+      log.error("main threw", e);
     }
   }
 

@@ -275,7 +275,7 @@ public class FileIO {
         try {
           byte[] r = toByteArray(FileIO.class.getResourceAsStream(src));
           if (r != null) {
-            log.info("resource not null - not a directlry extracting");
+            log.info("resource not null - not a directory - extracting");
             FileIO.toFile(dst, r);
             return true;
           }
