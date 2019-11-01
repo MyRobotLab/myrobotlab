@@ -3,10 +3,10 @@
 	<!-- 
 
 		# shows system vars and env vars
-		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop help:system
+		mvn -DskipTests -Dbuild.number=71 help:system
 		
 		# fast build
-		mvn -DskipTests -Dbuild.number=180 -DGitBranch=develop compile package -o
+		mvn -DskipTests -Dbuild.number=180 compile package -o
 	
 	 -->	
 	<modelVersion>4.0.0</modelVersion>
@@ -28,7 +28,7 @@
 	     -->
 	    <!-- from jenkins env vars -->
 	    <build.number>${BUILD_NUMBER}</build.number>
-	    <GitBranch>${BRANCH_NAME}</GitBranch>
+	    <GitBranch>${git.branch}</GitBranch>
 	    <username>${NODE_NAME}</username>	    
 	    <platform>${NODE_LABELS}</platform>	    
 	    <!-- end env vars -->
@@ -1641,7 +1641,7 @@
 									      
 										<!-- maven git plugin id info -->
 										  <GitTags>${git.tags}</GitTags>
-										  <GitBranch>${GitBranch}</GitBranch>
+										  <GitBranch>${git.branch}</GitBranch>
 										  <GitDirty>${git.dirty}</GitDirty>
 										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
 										  <GitCommitId>${git.commit.id}</GitCommitId>
@@ -1661,8 +1661,7 @@
 										  <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
 										  <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
 										  <GitBuildTime>${git.build.time}</GitBuildTime>
-										  <GitBuildVersion>${git.build.version}</GitBuildVersion>									      
-									      
+										  <GitBuildVersion>${git.build.version}</GitBuildVersion>
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
@@ -1781,33 +1780,6 @@
                   </filesets>
                 </configuration>
 			</plugin>
-			<!-- not needed as jenkins has a "latest successful artifacts link" - duh
-			<plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-dependency-plugin</artifactId>
-		        <version>2.10</version>
-		        <executions>
-		          <execution>
-		            <id>copy-installed</id>
-		            <phase>install</phase>
-		            <goals>
-		              <goal>copy</goal>
-		            </goals>
-		            <configuration>
-		              <artifactItems>
-		                <artifactItem>
-		                  <groupId>${project.groupId}</groupId>
-		                  <artifactId>${project.artifactId}</artifactId>
-		                  <version>${project.version}</version>
-		                  <type>${project.packaging}</type>
-		                </artifactItem>
-		              </artifactItems>
-		              <outputDirectory>/mrl-test/latest</outputDirectory>
-		            </configuration>
-		          </execution>
-		        </executions>
-		      </plugin>
-			-->
 			
 			<plugin>
 				<groupId>org.jacoco</groupId>

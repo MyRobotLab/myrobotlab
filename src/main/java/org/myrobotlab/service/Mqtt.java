@@ -432,7 +432,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
      * client. mqttv3 --> <dependency org="org.eclipse.paho"
      * name="org.eclipse.paho.client.mqttv3" rev="1.2.0"/>
      */
-    meta.addDependency("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.0");
+    meta.addDependency("org.eclipse.paho", "org.eclipse.paho.client.mqttv3", "1.2.1");
     meta.setCloudService(true);
     return meta;
   }
