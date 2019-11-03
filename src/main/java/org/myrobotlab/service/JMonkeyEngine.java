@@ -104,7 +104,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * 
  * FIXME - use gateway analogy !
  * A simulator should be treated as a gateway, the service "twins" that are represented inside are
- * "remote".   Some services like UIs (webgui & swinggui) dynamically create "remote" services and
+ * "remote".   Some services like UIs (webgui and swinggui) dynamically create "remote" services and
  * allow the current process to interact with them the same way they would with other remote (networked)
  * services.
  * 
