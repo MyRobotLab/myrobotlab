@@ -136,6 +136,8 @@ Msg* Msg::getInstance() {
   void encoderAttach( byte deviceId,  byte type,  byte pin);
   // > setZeroPoint/deviceId
   void setZeroPoint( byte deviceId);
+  // > servoStop/deviceId
+  void servoStop( byte deviceId);
 
  */
 
@@ -620,6 +622,12 @@ void Msg::processCommand() {
       byte deviceId = ioCmd[startPos+1]; // bu8
       startPos += 1;
       mrlComm->setZeroPoint( deviceId);
+      break;
+	}
+  case SERVO_STOP: { // servoStop
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->servoStop( deviceId);
       break;
 	}
 

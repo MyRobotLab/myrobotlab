@@ -1381,4 +1381,10 @@ public class LegacyServo extends Service implements ServoControl {
     return null;
   }
 
+  @Override
+  public void writeMicroseconds(int uS) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }
