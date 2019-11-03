@@ -474,7 +474,6 @@ public class CodecUtils {
    * Important to remember getRequestURI is NOT decoded and getPathInfo is.
    * 
    * 
-            http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S%3F+ID?p+1=c+d&p+2=e+f#a
             
             Method              URL-Decoded Result           
             ----------------------------------------------------
