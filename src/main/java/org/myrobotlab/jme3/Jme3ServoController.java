@@ -173,4 +173,10 @@ public class Jme3ServoController implements ServoController {
     
   }
 
+  @Override
+  public void servoStop(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

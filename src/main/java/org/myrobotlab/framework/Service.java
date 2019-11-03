@@ -171,13 +171,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   transient protected Set<String> methodSet;
 
-  // :P - gson will default convert a HashSet into an Array :(
-  // So we need to make it a HashMap in order for gson to convert to an object
   /**
-   * FIXME - if you make this static it borks things - not sure why this should
-   * be static info and should not be a member variable !
+   * This is the map of interfaces - its really "static" information, since its a definition.
+   * However, since gson will not process statics - we are making it a member variable 
    */
-  transient protected Map<String, String> interfaceSet;
+  protected Map<String, String> interfaceSet;
 
   /**
    * order which this service was created

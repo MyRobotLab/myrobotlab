@@ -556,13 +556,12 @@ public class MethodCache {
         // successfully decoded params
         return params;
       } catch (Exception e) {
-
-        log.error("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e);
+        
+        log.info("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }
-
     // if successful return new msg
-
+    log.error("requested getDecodedJsonParameters({}, {},{}) could not decode", clazz.getSimpleName(), methodName, encodedParams);
     return null;
   }
 

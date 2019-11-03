@@ -25,7 +25,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 62;
+  static final Integer MRLCOMM_VERSION = 63;
 
   private String ackEnabled = "true";
 
@@ -211,10 +211,10 @@ public class ArduinoMsgGenerator {
     fileSnr.put("%javaDeviceTypes%", javaDeviceTypes.toString());
 
     // FIXME - will move to MrlComm.h
-    String mrlComm_h = toString("src/main/resources/resource/Arduino/MRLComm/MrlComm.h");
+    String mrlComm_h = toString("src/main/resources/resource/Arduino/MrlComm/MrlComm.h");
     String top = mrlComm_h.substring(0, mrlComm_h.indexOf("<generatedCallBacks>") + "<generatedCallBacks>".length());
     String bottom = mrlComm_h.substring(mrlComm_h.indexOf("</generatedCallBacks>"));
-    FileOutputStream mrlComm_updated_h = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/MrlComm.h");
+    FileOutputStream mrlComm_updated_h = new FileOutputStream("src/main/resources/resource/Arduino/MrlComm/MrlComm.h");
     mrlComm_updated_h.write((top + "\n" + cppGeneratedCallBacks.toString() + "    // " + bottom).getBytes());
     mrlComm_updated_h.close();
 
@@ -250,11 +250,11 @@ public class ArduinoMsgGenerator {
     }
 
     // write out to files ..
-    FileOutputStream MsgH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.h");
-    FileOutputStream MsgCpp = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/Msg.cpp");
+    FileOutputStream MsgH = new FileOutputStream("src/main/resources/resource/Arduino/MrlComm/Msg.h");
+    FileOutputStream MsgCpp = new FileOutputStream("src/main/resources/resource/Arduino/MrlComm/Msg.cpp");
     FileOutputStream MsgJava = new FileOutputStream("src/main/java/org/myrobotlab/arduino/Msg.java");
     FileOutputStream VirtualMsg = new FileOutputStream("src/main/java/org/myrobotlab/arduino/VirtualMsg.java");
-    FileOutputStream ArduinoMsgCodedH = new FileOutputStream("src/main/resources/resource/Arduino/MRLComm/ArduinoMsgCodec.h");
+    FileOutputStream ArduinoMsgCodedH = new FileOutputStream("src/main/resources/resource/Arduino/MrlComm/ArduinoMsgCodec.h");
 
     ArduinoMsgCodedH.write(arduinoMsgCodeTemplateH.getBytes());
     MsgH.write(idlToHpp.getBytes());

@@ -397,4 +397,10 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   }
 
+  @Override
+  public void servoStop(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

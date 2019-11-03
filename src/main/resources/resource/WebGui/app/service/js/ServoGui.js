@@ -1,18 +1,18 @@
 angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
-    $log.info('ServoGuiCtrl');
-    var _self = this;
-    var msg = this.msg;
+    $log.info('ServoGuiCtrl')
+    var _self = this
+    var msg = this.msg
     // init
-    $scope.controller = null ;
-    $scope.pinsList = [];
-    $scope.pin = null ;
-    $scope.min = 0;
-    $scope.max = 180;
-    $scope.possibleController = null;
-    $scope.testTime = 300;
+    $scope.controller = null
+    $scope.pinsList = []
+    $scope.pin = null
+    $scope.min = 0
+    $scope.max = 180
+    $scope.possibleController = null
+    $scope.testTime = 300
     // TODO - should be able to build this based on
     // current selection of controller
-    $scope.pinList = [];
+    $scope.pinList = []
     //slider config with callbacks
     $scope.pos = {
         value: 0,
@@ -21,109 +21,107 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             ceil: 180,
             onStart: function() {},
             onChange: function() {
-                msg.send('moveTo', $scope.pos.value);
+                msg.send('moveTo', $scope.pos.value)
             },
             onEnd: function() {}
         }
-    };
-  
+    }
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;
-        if (service.targetPos == null ) {
-            // $scope.pos.value = service.rest;
-        } else {
-            // $scope.pos.value = service.targetPos;            
+        $scope.service = service
+        if (service.targetPos == null) {// $scope.pos.value = service.rest
+        } else {// $scope.pos.value = service.targetPos            
         }
-        $scope.possibleController = service.controller;
-        $scope.controller = service.controller;
-        $scope.speed = service.speed;
-        $scope.pin = service.pin;
-        $scope.rest = service.rest;
-        $scope.min = service.mapper.minOutput;
-        $scope.max = service.mapper.maxOutput;
-        $scope.pinList = service.pinList;
+        $scope.possibleController = service.controller
+        $scope.controller = service.controller
+        $scope.speed = service.speed
+        $scope.pin = service.pin
+        $scope.rest = service.rest
+        $scope.min = service.mapper.minOutput
+        $scope.max = service.mapper.maxOutput
+        $scope.pinList = service.pinList
     }
-    ;
+    
     // initialize our state
-    _self.updateState($scope.service);
+    _self.updateState($scope.service)
     this.onMsg = function(inMsg) {
-        var data = inMsg.data[0];
+        var data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(data);
-            $scope.$apply();
-            break;
+            _self.updateState(data)
+            $scope.$apply()
+            break
             // servo event in the past 
             // meant feedback from MRLComm.c
             // but perhaps its come to mean
             // feedback from the service.moveTo
         case 'onServoData':
-            $scope.service.currentPos = data.pos;
-            $scope.$apply();
-            break;
+            $scope.service.currentPos = data.pos
+            $scope.$apply()
+            break
         case 'onStatus':
-            $scope.status = data;
-            $scope.$apply();
-            break;
+            $scope.status = data
+            $scope.$apply()
+            break
         case 'addListener':
             // wtf?
-            $log.info("Add listener called");
-            $scope.status = data;
-            $scope.$apply();
-            break;
+            $log.info("Add listener called")
+            $scope.status = data
+            $scope.$apply()
+            break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method);
-            break;
+            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            break
         }
-        ;
+        
     }
-    ;
-    $scope.getSelectionBarColor = function(){
-        return "black";
-    };
+    
+    $scope.getSelectionBarColor = function() {
+        return "black"
+    }
+    
     $scope.isAttached = function() {
-        return $scope.service.controller != null ;
+        return $scope.service.controller != null
     }
-    ;
+    
     $scope.update = function(speed, rest, min, max) {
-        msg.send("setVelocity", $scope.service.speed);
-        msg.send("setRest", rest);
-        msg.send("setMinMax", min, max);
+        msg.send("setVelocity", $scope.service.speed)
+        msg.send("setRest", rest)
+        msg.send("setMinMax", min, max)
     }
-    ;
+    
     $scope.setPin = function(inPin) {
-        $scope.pin = inPin;
+        $scope.pin = inPin
     }
-    ;
+    
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded
     // sweep method - there are several overloads in the
     // Java service - although msg.sweep() was tried for ng-click
     // for some reason Js resolved msg.sweep(null, null, null, null) :P
     $scope.sweep = function() {
-        msg.send('sweep');
+        msg.send('sweep')
     }
     $scope.setSelectedController = function(name) {
-        $log.info('setSelectedController - ' + name);
-        $scope.selectedController = name;
-        $scope.controller = name;
+        $log.info('setSelectedController - ' + name)
+        $scope.selectedController = name
+        $scope.controller = name
     }
     $scope.attachController = function() {
-        $log.info("attachController");
-        msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest);
-        // msg.attach($scope.controller, $scope.pin, 90);
+        $log.info("attachController")
+        msg.send('attach', $scope.possibleController, $scope.pin, $scope.rest)
+        // msg.attach($scope.controller, $scope.pin, 90)
     }
-    
+
     msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
-    
-    msg.subscribe(this);
+    msg.subscribe(this)
 
     // no longer needed - interfaces now travel with a service
-    // var runtimeName = mrl.getRuntime().name;
-    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface');
-    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface');
-    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController');
+    // var runtimeName = mrl.getRuntime().name
+    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface')
+    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface')
+    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController')
 }
-]);
+])

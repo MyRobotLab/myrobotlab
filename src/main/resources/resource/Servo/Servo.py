@@ -4,7 +4,7 @@
 # more info @: http://myrobotlab.org/service/Servo
 #########################################
 # uncomment for virtual hardware
-# virtual = True
+Platform.setVirtual(True)
 
 # Every settings like limits / port number / controller are saved after initial use
 # so you can share them between differents script 
@@ -14,11 +14,6 @@ servoPin02 = 5
 
 # port = "/dev/ttyUSB0"
 port = "COM15"
-
-# start optional virtual arduino service, used for test
-if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
-    virtualArduino.connect(port)
 
 # create a servo controller and a servo
 arduino = Runtime.start("arduino","Arduino")
@@ -47,7 +42,6 @@ servo02.attach(arduino.getName(), servoPin02)
 # auto disable - this enables (starts pwm) before a movement
 # and disables (stops pwm) after a movement
 servo01.setAutoDisable(True)
-servo01.setDisableDelayIfVelocity(1000) # grace period for autoDisable
 # servo02.setAutoDisable(False)
 
 # speed changes
@@ -65,8 +59,8 @@ sleep(2)
 
 # fast sweep 10 seconds
 print("fast sweep")
-#servo01.sweep(0, 180, delay, step);
-servo01.sweep(0, 180, 50, 5);
+servo01.setSpeed(300)
+servo01.sweep(0, 180);
 sleep(10)
 servo01.stop()
 

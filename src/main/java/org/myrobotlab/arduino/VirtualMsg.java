@@ -63,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 62;
+	public static final int MRLCOMM_VERSION = 63;
 	
 	int ackMaxWaitMs = 1000;
   
@@ -221,6 +221,8 @@ public class VirtualMsg {
   public final static int PUBLISH_ENCODER_DATA = 54;
   // < publishMrlCommBegin/version
   public final static int PUBLISH_MRL_COMM_BEGIN = 55;
+  // > servoStop/deviceId
+  public final static int SERVO_STOP = 56;
 
 
 /**
@@ -269,6 +271,7 @@ public class VirtualMsg {
   // public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
   // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
+  // public void servoStop(Integer deviceId/*byte*/){}
 	
 
 	
@@ -808,6 +811,16 @@ public class VirtualMsg {
       }
       break;
     }
+    case SERVO_STOP: {
+      Integer deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      if(invoke){
+        arduino.invoke("servoStop",  deviceId);
+      } else { 
+         arduino.servoStop( deviceId);
+      }
+      break;
+    }
 		
 		}
 	}
@@ -818,13 +831,11 @@ public class VirtualMsg {
 	public synchronized void publishMRLCommError(String errorMsg/*str*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -854,13 +865,11 @@ public class VirtualMsg {
 	public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -905,13 +914,11 @@ public class VirtualMsg {
 	public synchronized void publishAck(Integer function/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -941,13 +948,11 @@ public class VirtualMsg {
 	public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -983,13 +988,11 @@ public class VirtualMsg {
 	public synchronized void publishCustomMsg(int[] msg/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1019,13 +1022,11 @@ public class VirtualMsg {
 	public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1058,13 +1059,11 @@ public class VirtualMsg {
 	public synchronized void publishDebug(String debugMsg/*str*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1094,13 +1093,11 @@ public class VirtualMsg {
 	public synchronized void publishPinArray(int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1130,13 +1127,11 @@ public class VirtualMsg {
 	public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1175,13 +1170,11 @@ public class VirtualMsg {
 	public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1214,13 +1207,11 @@ public class VirtualMsg {
 	public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1253,13 +1244,11 @@ public class VirtualMsg {
 	public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1292,13 +1281,11 @@ public class VirtualMsg {
 	public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1493,6 +1480,9 @@ public class VirtualMsg {
     case PUBLISH_MRL_COMM_BEGIN:{
       return "publishMrlCommBegin";
     }
+    case SERVO_STOP:{
+      return "servoStop";
+    }
 
 		default: {
 			return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
@@ -1570,7 +1560,6 @@ public class VirtualMsg {
           if (newByte > 64) {
             // TODO - send error back
             byteCount = 0;
-            // System.out.println("TO BIG");
             continue; // GroG - I guess  we continue now vs return false on error conditions?
           }
           msgSize = newByte;
@@ -1582,7 +1571,6 @@ public class VirtualMsg {
         // if received header + msg
         if (byteCount == 2 + msgSize) {
           // we've reach the end of the command, just return true .. we've got it
-          System.out.println("GOT " + msgSize + " BYTES");
           byteCount = 0;
           return true;
         }
@@ -1772,6 +1760,9 @@ public class VirtualMsg {
       if (!ackRecievedLock.acknowledged) {
         //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
         log.error("Ack not received");
+        // part of resetting ?
+        // ackRecievedLock.acknowledged = true;
+        arduino.invoke("noAck");
       }
     }
 	}

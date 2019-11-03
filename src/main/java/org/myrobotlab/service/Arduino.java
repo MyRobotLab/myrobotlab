@@ -1987,6 +1987,7 @@ public class Arduino extends AbstractMicrocontroller
     msg.servoSweepStart(deviceId, servo.getMin().intValue(), servo.getMax().intValue(), servo.getSpeed().intValue());
   }
 
+  @Deprecated /* use servoStop */
   @Override
   // > servoSweepStop/deviceId
   public void servoSweepStop(ServoControl servo) {
@@ -2454,6 +2455,14 @@ public class Arduino extends AbstractMicrocontroller
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  /**
+   * stops the servo sweeping or moving with speed control
+   */
+  @Override
+  public void servoStop(ServoControl servo) {
+    msg.servoStop(getDeviceId(servo));
   }
 
 }
