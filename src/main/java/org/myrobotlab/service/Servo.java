@@ -30,7 +30,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractServo;
-import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
  * @author GroG
@@ -55,7 +55,7 @@ import org.myrobotlab.service.interfaces.ServoController;
  * 
  */
 
-public class Servo extends AbstractServo {
+public class Servo extends AbstractServo implements ServoControl {
 
   private static final long serialVersionUID = 1L;
 

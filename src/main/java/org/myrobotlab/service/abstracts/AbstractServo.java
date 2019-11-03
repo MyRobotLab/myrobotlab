@@ -812,8 +812,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void stop() {
     isSweeping = false;
+    // FIXME - figure out the appropriate thing to do for a TimeEncoder ????
+    processMove(getPos(), false, null);
+    invokeOn(controller, "servoStop", this);
     broadcastState();
   }
+  
 
   /**
    * disable servo
@@ -1017,6 +1021,19 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   public boolean isSweeping() {
     return isSweeping;
+  }
+  
+  public int setIdelTimeout(int idleTimeout) {
+    this.idleTimeout = idleTimeout;
+    return idleTimeout;
+  }
+  
+  public void writeMicroseconds(int uS) {
+    if (controller != null) {
+      invokeOn(controller, "servoWriteMicroseconds", this);
+    } else {
+      error("writeMicroseconds controller needs to be set %s", getName());
+    }
   }
 
   public static void main(String[] args) throws InterruptedException {

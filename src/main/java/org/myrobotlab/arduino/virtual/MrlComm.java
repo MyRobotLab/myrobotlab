@@ -848,4 +848,8 @@ public class MrlComm {
     loopCount = 0;
   }
 
+  public void servoStop(Integer deviceId) {
+    log.info("servoStop {}", deviceId);
+  }
+
 }

@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			62
+#define MRLCOMM_VERSION			63
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -135,6 +135,8 @@
 #define PUBLISH_ENCODER_DATA 54
 // < publishMrlCommBegin/version
 #define PUBLISH_MRL_COMM_BEGIN 55
+// > servoStop/deviceId
+#define SERVO_STOP 56
 
 
 

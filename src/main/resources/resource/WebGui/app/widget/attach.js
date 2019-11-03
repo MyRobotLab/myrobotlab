@@ -55,6 +55,8 @@ angular.module('mrlapp.service').directive('attach', ['mrl', '$log', '$compile',
             var interface = $scope.interface;
             $scope.services = mrl.getServicesFromInterface(interface);
 
+            console.log('here')
+
             /*
             var textField = $('input', elem).attr('ng-model', attrs.ngModel);
             $compile(textField)($scope.$parent);

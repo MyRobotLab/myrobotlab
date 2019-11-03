@@ -25,8 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.Set;
-
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
@@ -37,14 +35,16 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * attaches a servo data listener for servo data - like position information
+   * 
    * @param listener
    */
   void attach(ServoDataListener listener);
 
- /**
-  * remove the listener
-  * @param listener
-  */
+  /**
+   * remove the listener
+   * 
+   * @param listener
+   */
   void detach(ServoDataListener listener);
 
   /**
@@ -71,7 +71,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return
    */
   String getControllerName();
-
 
   /**
    * gets the Max X of the mapper (input)
@@ -235,10 +234,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return true (why?)
    */
   Double moveToBlocking(Double pos);
- 
+
   /**
-   * moveToBlocking with a timeout blocking calling thread until either
-   * move has been completed, or timeout reached
+   * moveToBlocking with a timeout blocking calling thread until either move has
+   * been completed, or timeout reached
    */
   Double moveToBlocking(Double pos, Long timeoutMs);
 
@@ -257,9 +256,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return
    */
   ServoData publishServoData(ServoStatus eventType, Double currentPosUs);
-  
+
   /**
    * Publishing topic for a servo stop event - returns position
+   * 
    * @param pos
    * @return
    */
@@ -393,18 +393,20 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * returns the encoder attached to this ServoControl
+   * 
    * @return - the Encoder
    */
   EncoderControl getEncoder();
 
   /**
-   * When moveBlocking is in motion, not only should it block the calling thread until the end of
-   * the move, it should also prevent (cancel) other threads (even ones doing moveTo
-   * commands) until its done... conversely mutli-threaded moveTo commands are a
-   * free-for-all .. if you call a servo thats in process of a moveBlocking with
-   * a moveTo - your moveTo is canceled (not blocked) until the moveToBlocking
-   * is done.  When a moveToBlocking is called from a different thread it should be blocked until
-   * the original is finished.
+   * When moveBlocking is in motion, not only should it block the calling thread
+   * until the end of the move, it should also prevent (cancel) other threads
+   * (even ones doing moveTo commands) until its done... conversely
+   * mutli-threaded moveTo commands are a free-for-all .. if you call a servo
+   * thats in process of a moveBlocking with a moveTo - your moveTo is canceled
+   * (not blocked) until the moveToBlocking is done. When a moveToBlocking is
+   * called from a different thread it should be blocked until the original is
+   * finished.
    * 
    * @return
    */
@@ -412,8 +414,29 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * Returns if the sevo is currently moving
+   * 
    * @return
    */
   boolean isMoving();
+
+  /**
+   * Writes a value in microseconds (uS) to the servo, controlling the shaft
+   * accordingly. On a standard servo, this will set the angle of the shaft. On
+   * standard servos a parameter value of 1000 is fully counter-clockwise, 2000
+   * is fully clockwise, and 1500 is in the middle.
+   *
+   * Note that some manufactures do not follow this standard very closely so
+   * that servos often respond to values between 700 and 2300. Feel free to
+   * increase these endpoints until the servo no longer continues to increase
+   * its range. Note however that attempting to drive a servo past its endpoints
+   * (often indicated by a growling sound) is a high-current state, and should
+   * be avoided.
+   *
+   * Continuous-rotation servos will respond to the writeMicrosecond function in
+   * an analogous manner to the write function.
+   * 
+   * @param uS
+   */
+  void writeMicroseconds(int uS);
 
 }

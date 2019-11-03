@@ -406,6 +406,12 @@ void MrlComm::servoSweepStop(byte deviceId)
 	servo->stopSweep();
 }
 
+void MrlComm::servoStop(byte deviceId)
+{
+	MrlServo *servo = (MrlServo *)getDevice(deviceId);
+	servo->stop();
+}
+
 void MrlComm::servoMoveToMicroseconds(byte deviceId, int target)
 {
 	MrlServo *servo = (MrlServo *)getDevice(deviceId);
