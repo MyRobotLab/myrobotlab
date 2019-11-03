@@ -116,6 +116,7 @@ public class InProcessCli implements Runnable {
     myThread = null;
   }
 
+  // FIXME determine if GET notation should use encoded ? (probably) - ie should it "always" be decoded ?
   public Object process(String data) {
     try {
 
@@ -131,6 +132,14 @@ public class InProcessCli implements Runnable {
 
       // "create" cli specific msgs
       Message cliMsg = cliToMsg(data);
+      
+      // agent specific commands
+      if ("lp".equals(cliMsg.method)) {
+        if (Runtime.getService("agent") == null) {
+          
+        }
+        cliMsg.name = "agent";
+      }
 
       // FIXME - probably not the way to implement exit
       // should be sending id to remote and exiting their ???
