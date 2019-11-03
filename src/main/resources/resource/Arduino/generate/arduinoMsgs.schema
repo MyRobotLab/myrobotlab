@@ -145,3 +145,7 @@
 
 # called in MrlComm setup after serial connection
 < publishMrlCommBegin/version
+
+# adding to the end for less compatibility impact
+# a method to stop a servo immediately - regardless of sweeping or speed control
+> servoStop/deviceId

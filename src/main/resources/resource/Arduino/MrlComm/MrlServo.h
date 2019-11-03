@@ -40,6 +40,7 @@ class MrlServo : public Device {
     // void servoWriteMicroseconds(int position);
     void startSweep(int minUs, int maxUs, int step);
     void stopSweep();
+    void stop();
     void setMaxVelocity(unsigned int velocity);
     void setVelocity(int velocity);
     void setAcceleration(int acceleration);

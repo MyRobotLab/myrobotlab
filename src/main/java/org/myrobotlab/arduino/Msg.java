@@ -63,7 +63,7 @@ public class Msg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 62;
+	public static final int MRLCOMM_VERSION = 63;
 	
 	int ackMaxWaitMs = 1000;
   
@@ -221,6 +221,8 @@ public class Msg {
   public final static int PUBLISH_ENCODER_DATA = 54;
   // < publishMrlCommBegin/version
   public final static int PUBLISH_MRL_COMM_BEGIN = 55;
+  // > servoStop/deviceId
+  public final static int SERVO_STOP = 56;
 
 
 /**
@@ -612,13 +614,11 @@ public class Msg {
 	public synchronized void getBoardInfo() {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -645,13 +645,11 @@ public class Msg {
 	public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -687,13 +685,11 @@ public class Msg {
 	public synchronized void setDebug(Boolean enabled/*bool*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -723,13 +719,11 @@ public class Msg {
 	public synchronized void setSerialRate(Integer rate/*b32*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -759,13 +753,11 @@ public class Msg {
 	public synchronized void softReset() {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -792,13 +784,11 @@ public class Msg {
 	public synchronized void enableAck(Boolean enabled/*bool*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -828,13 +818,11 @@ public class Msg {
 	public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -870,13 +858,11 @@ public class Msg {
 	public synchronized void customMsg(int[] msg/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -906,13 +892,11 @@ public class Msg {
 	public synchronized void deviceDetach(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -942,13 +926,11 @@ public class Msg {
 	public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -981,13 +963,11 @@ public class Msg {
 	public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1023,13 +1003,11 @@ public class Msg {
 	public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1065,13 +1043,11 @@ public class Msg {
 	public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1110,13 +1086,11 @@ public class Msg {
 	public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1152,13 +1126,11 @@ public class Msg {
 	public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1203,13 +1175,11 @@ public class Msg {
 	public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1242,13 +1212,11 @@ public class Msg {
 	public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1281,13 +1249,11 @@ public class Msg {
 	public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1320,13 +1286,11 @@ public class Msg {
 	public synchronized void disablePin(Integer pin/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1356,13 +1320,11 @@ public class Msg {
 	public synchronized void disablePins() {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1389,13 +1351,11 @@ public class Msg {
 	public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1428,13 +1388,11 @@ public class Msg {
 	public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1467,13 +1425,11 @@ public class Msg {
 	public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1506,13 +1462,11 @@ public class Msg {
 	public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1554,13 +1508,11 @@ public class Msg {
 	public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1593,13 +1545,11 @@ public class Msg {
 	public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1629,13 +1579,11 @@ public class Msg {
 	public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1668,13 +1616,11 @@ public class Msg {
 	public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1713,13 +1659,11 @@ public class Msg {
 	public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1749,13 +1693,11 @@ public class Msg {
 	public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1788,13 +1730,11 @@ public class Msg {
 	public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1827,13 +1767,11 @@ public class Msg {
 	public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1866,13 +1804,11 @@ public class Msg {
 	public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1905,13 +1841,11 @@ public class Msg {
 	public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1947,13 +1881,11 @@ public class Msg {
 	public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -1983,13 +1915,11 @@ public class Msg {
 	public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2019,13 +1949,11 @@ public class Msg {
 	public synchronized void setAref(Integer type/*b16*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2055,13 +1983,11 @@ public class Msg {
 	public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2097,13 +2023,11 @@ public class Msg {
 	public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2136,13 +2060,11 @@ public class Msg {
 	public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2175,13 +2097,11 @@ public class Msg {
 	public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2217,13 +2137,11 @@ public class Msg {
 	public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
 		try {
 		  if (ackEnabled){
-		  /*
 		    if (waiting) {
 		      // another thread and request is waiting
 		      // we are going to cancel
 		      return;
 		    }
-		    */
 		    waitForAck();
 		  }		  
 			write(MAGIC_NUMBER);
@@ -2247,6 +2165,40 @@ public class Msg {
 
 	  } catch (Exception e) {
 	  			log.error("setZeroPoint threw",e);
+	  }
+	}
+
+	public synchronized void servoStop(Integer deviceId/*byte*/) {
+		try {
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SERVO_STOP); // msgType = 56
+      write(deviceId);
+ 
+     if (ackEnabled){
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
+     }
+      if(record != null){
+        txBuffer.append("> servoStop");
+        txBuffer.append("/");
+        txBuffer.append(deviceId);
+        txBuffer.append("\n");
+        record.write(txBuffer.toString().getBytes());
+        txBuffer.setLength(0);
+      }
+
+	  } catch (Exception e) {
+	  			log.error("servoStop threw",e);
 	  }
 	}
 
@@ -2417,6 +2369,9 @@ public class Msg {
     }
     case PUBLISH_MRL_COMM_BEGIN:{
       return "publishMrlCommBegin";
+    }
+    case SERVO_STOP:{
+      return "servoStop";
     }
 
 		default: {

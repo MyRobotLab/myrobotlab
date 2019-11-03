@@ -90,13 +90,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
     beginPos = inBeginPos;
     targetPos = inTargetPos;
     distance = targetPos - beginPos;
-    // always positive ? :P
-    tspeed = (inSpeed == null) ? defaultMaxSpeedDegreesPerMs : inSpeed / 1000; // FIXME
-                                                                               // UNITS
-                                                                               // !!!!
-                                                                               // -
-                                                                               // for
-                                                                               // ms
+    // always positive ? :P FIXME units for ms
+    tspeed = (inSpeed == null) ? defaultMaxSpeedDegreesPerMs : inSpeed / 1000; 
     speedDegreesPerMs = (beginPos > targetPos) ? -1 * tspeed : tspeed;
 
     moveTimeMs = Math.abs(distance / speedDegreesPerMs);
@@ -113,7 +108,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
     now = beginMoveTs;
     name = servo.getName();
 
-    if (autoProcess) {
+    if (autoProcess) { // vs buffer ?
       processTrajectory(name);
     }
   }

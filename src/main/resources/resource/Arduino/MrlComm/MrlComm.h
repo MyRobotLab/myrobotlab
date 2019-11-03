@@ -160,6 +160,8 @@ public:
   void encoderAttach( byte deviceId,  byte type,  byte pin);
   // > setZeroPoint/deviceId
   void setZeroPoint( byte deviceId);
+  // > servoStop/deviceId
+  void servoStop( byte deviceId);
     // </generatedCallBacks>
   // end
 

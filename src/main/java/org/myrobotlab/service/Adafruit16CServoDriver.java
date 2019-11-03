@@ -995,4 +995,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return value;
   }
 
+  // FIXME - implement - if there is speed control 
+  // "stopping" should stop the servo
+  @Override
+  public void servoStop(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

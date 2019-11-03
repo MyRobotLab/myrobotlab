@@ -42,6 +42,8 @@ public interface ServoController extends Attachable {
   void servoSweepStop(ServoControl servo);
 
   void servoMoveTo(ServoControl servo);
+  
+  void servoStop(ServoControl servo);
 
   void servoWriteMicroseconds(ServoControl servo, int uS);
 
