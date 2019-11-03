@@ -1561,7 +1561,7 @@ public class FileIO {
 
   /**
    * Same as toString(filename) but does not throw - simply returns null in case of error
-   * @param string
+   * @param filename - name of file
    * @return
    */
   public static String toSafeString(String filename) {
