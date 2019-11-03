@@ -691,10 +691,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           String serviceName = msg.getName();
           Class<?> clazz = Runtime.getClass(serviceName);
 
-          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
-
-          Method method = cache.getMethod(clazz, msg.method, params);
-          ServiceInterface si = Runtime.getService(serviceName);
           // higher level protocol - ordered steps to establish routing
           // must add meta data of connection to system
           if (msg.getName().equals(serviceName) && "getHelloResponse".equals(msg.method)) {
@@ -705,8 +701,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             // thread data looked like a possibility ... it "could" be done with
             // using a msg key, or perhaps
             // msg.id = uuid + "-" + incremented
-            params[0] = uuid;
+            Object[] meta = new Object[2];
+            // uuid is "OUR" meta data - this process's id of the remote process
+            // that is why this msg needs to be intercepted - its binding the remote process
+            // to our internal identifier
+            meta[0] = uuid; 
+            // add what the remote process passed in
+            meta[1] = msg.data[0];
+            // send msg on its way
+            msg.data = meta;
           }
+          
+          Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
+
+          Method method = cache.getMethod(clazz, msg.method, params);
+          ServiceInterface si = Runtime.getService(serviceName);
+          
           ret = method.invoke(si, params);
 
           // propagate return data to subscribers
@@ -1207,7 +1217,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
 
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
-      Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
       Runtime.start("arduino", "Arduino");
       Runtime.start("servo01", "Servo");
