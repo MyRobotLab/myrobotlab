@@ -133,6 +133,11 @@ public class InProcessCli implements Runnable {
       // "create" cli specific msgs
       Message cliMsg = cliToMsg(data);
       
+      // fully address destination
+      if (!cliMsg.name.contains("@")) {
+        cliMsg.name += "@" + remoteId;
+      }
+      
       // agent specific commands
       if ("lp".equals(cliMsg.method)) {
         if (Runtime.getService("agent") == null) {
