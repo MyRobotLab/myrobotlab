@@ -711,6 +711,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
 
           Method method = cache.getMethod(clazz, msg.method, params);
+          if (method == null) {
+            log.error("method cache could not find {}.{}({})", clazz.getSimpleName(), msg.method, msg.data);
+            return;
+          }
+          
           ServiceInterface si = Runtime.getService(serviceName);
           
           ret = method.invoke(si, params);
