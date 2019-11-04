@@ -484,7 +484,7 @@ public class CodecUtils {
             getMethod()                     GET
             getPathInfo()           yes     /a?+b
             getProtocol()                   HTTP/1.1
-            getQueryString()        no      p+1=c+d&p+2=e+f
+            getQueryString()        no      p+1=c+dp+2=e+f
             getRequestedSessionId() no      S%3F+ID
             getRequestURI()         no      /app/test%3F/a%3F+b;jsessionid=S+ID
             getRequestURL()         no      http://30thh.loc:8480/app/test%3F/a%3F+b;jsessionid=S+ID
