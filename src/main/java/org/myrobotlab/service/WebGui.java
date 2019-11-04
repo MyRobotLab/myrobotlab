@@ -701,15 +701,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             // thread data looked like a possibility ... it "could" be done with
             // using a msg key, or perhaps
             // msg.id = uuid + "-" + incremented
-            Object[] meta = new Object[2];
+            // Object[] meta = new Object[2];
             // uuid is "OUR" meta data - this process's id of the remote process
             // that is why this msg needs to be intercepted - its binding the remote process
             // to our internal identifier
-            meta[0] = uuid; 
-            // add what the remote process passed in
-            meta[1] = msg.data[0];
-            // send msg on its way
-            msg.data = meta;
+            msg.data[0] = uuid; 
           }
           
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
@@ -1216,7 +1212,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      Runtime.main(new String[] { "--interactive", "--id", "admin"});
+      Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
       Runtime.start("arduino", "Arduino");
       Runtime.start("servo01", "Servo");

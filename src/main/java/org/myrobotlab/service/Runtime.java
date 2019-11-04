@@ -1753,7 +1753,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     public String client[];
 
     // for AGENT used to sync to the latest via source and build
-    @Option(names = { "--src" }, arity = "0..1", description = "use latest source")
+    @Option(names = { "--src", "--use-source" }, arity = "0..1", description = "use latest source")
     public String src;
 
     @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
