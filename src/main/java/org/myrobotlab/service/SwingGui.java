@@ -919,7 +919,9 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
-      // Runtime.main(new String[] {"--interactive", "--id", "remote02"});
+      if (args.length > 0) {
+        Runtime.main(new String[] {"--interactive", "--id", args[0]});
+      }
       Runtime.start("gui", "SwingGui");
       Runtime.start("python", "Python");
 
