@@ -29,7 +29,7 @@ public class LcdDisplay extends Service {
   public final static Logger log = LoggerFactory.getLogger(LcdDisplay.class);
   private static final long serialVersionUID = 1L;
 
-  private Pcf8574 i2cControler;
+  private Pcf8574 pcf8574;
 
   private final byte LCD_CLEARDISPLAY = (byte) 0x01;
   private final byte LCD_RETURNHOME = (byte) 0x02;
@@ -82,7 +82,7 @@ public class LcdDisplay extends Service {
   public void attach(Pcf8574 pcf8574) {
     // we need more checkup here...
     if (pcf8574.isAttached) {
-      this.i2cControler = pcf8574;
+      this.pcf8574 = pcf8574;
       setReady(true);
       log.info("{} attach {}", getName(), pcf8574.getName());
     } else {
@@ -90,40 +90,42 @@ public class LcdDisplay extends Service {
     }
   }
 
-  /*
+  /**
    * INIT LCD panel
    */
   public void init() {
     log.info("Init I2C Display");
-    lcd_write((byte) 0x03);
-    lcd_write((byte) 0x03);
-    lcd_write((byte) 0x03);
-    lcd_write((byte) 0x02);
-    lcd_write((byte) (LCD_FUNCTIONSET | LCD_2LINE | LCD_5x8DOTS | LCD_4BITMODE));
-    lcd_write((byte) (LCD_DISPLAYCONTROL | LCD_DISPLAYON));
-    lcd_write((byte) (LCD_CLEARDISPLAY));
-    lcd_write((byte) (LCD_ENTRYMODESET | LCD_ENTRYLEFT));
+    lcdWrite((byte) 0x03);
+    lcdWrite((byte) 0x03);
+    lcdWrite((byte) 0x03);
+    lcdWrite((byte) 0x02);
+    lcdWrite((byte) (LCD_FUNCTIONSET | LCD_2LINE | LCD_5x8DOTS | LCD_4BITMODE));
+    lcdWrite((byte) (LCD_DISPLAYCONTROL | LCD_DISPLAYON));
+    lcdWrite((byte) (LCD_CLEARDISPLAY));
+    lcdWrite((byte) (LCD_ENTRYMODESET | LCD_ENTRYLEFT));
   }
 
-  /*
+  /**
    * Send byte to PCF controller
+   * @param cmd
    */
-  public void write_cmd(byte cmd) {
+  public void writeRegister(byte cmd) {
     if (isReady()) {
-      i2cControler.writeRegister(cmd);
+      pcf8574.writeRegister(cmd);
     } else {
       log.error("LCD is not ready / attached !");
     }
   }
 
-  /*
+  /**
    * Turn ON/OFF LCD backlight
+   * @param status
    */
   public void setBackLight(boolean status) {
     if (status == true) {
-      write_cmd(LCD_BACKLIGHT);
+      writeRegister(LCD_BACKLIGHT);
     } else {
-      write_cmd(LCD_NOBACKLIGHT);
+      writeRegister(LCD_NOBACKLIGHT);
     }
     backLight = status;
     log.info("LCD backlight set to {}", status);
@@ -134,59 +136,61 @@ public class LcdDisplay extends Service {
     return backLight;
   }
 
-  /*
+  /**
    * Display string on LCD, by line 
+   * @param string
+   * @param line
    */
-  public void display_string(String string, int line) {
+  public void display(String string, int line) {
     screenContent.put(line, string);
     broadcastState();
     switch (line) {
       case 1:
-        lcd_write((byte) 0x80);
+        lcdWrite((byte) 0x80);
         break;
       case 2:
-        lcd_write((byte) 0xC0);
+        lcdWrite((byte) 0xC0);
         break;
       case 3:
-        lcd_write((byte) 0x94);
+        lcdWrite((byte) 0x94);
         break;
       case 4:
-        lcd_write((byte) 0xD4);
+        lcdWrite((byte) 0xD4);
         break;
     }
 
     for (int i = 0; i < string.length(); i++) {
-      lcd_write((byte) string.charAt(i), Rs);
+      lcdWrite((byte) string.charAt(i), Rs);
     }
   }
 
-  private void lcd_strobe(byte data) {
-    i2cControler.writeRegister((byte) (data | En | LCD_BACKLIGHT));
-    i2cControler.writeRegister((byte) ((data & ~En) | LCD_BACKLIGHT));
+  private void lcdStrobe(byte data) {
+    pcf8574.writeRegister((byte) (data | En | LCD_BACKLIGHT));
+    pcf8574.writeRegister((byte) ((data & ~En) | LCD_BACKLIGHT));
   }
 
-  private void lcd_write_four_bits(byte data) {
+  private void lcdWriteFourBits(byte data) {
 
-    i2cControler.writeRegister((byte) (data | LCD_BACKLIGHT));
-    lcd_strobe(data);
+    pcf8574.writeRegister((byte) (data | LCD_BACKLIGHT));
+    lcdStrobe(data);
   }
 
-  private void lcd_write(byte cmd, byte mode) {
-    lcd_write_four_bits((byte) (mode | (cmd & 0xF0)));
-    lcd_write_four_bits((byte) (mode | ((cmd << 4) & 0xF0)));
+  private void lcdWrite(byte cmd, byte mode) {
+    lcdWriteFourBits((byte) (mode | (cmd & 0xF0)));
+    lcdWriteFourBits((byte) (mode | ((cmd << 4) & 0xF0)));
   }
 
   // write a command to lcd
-  private void lcd_write(byte cmd) {
-    lcd_write(cmd, (byte) 0);
+  private void lcdWrite(byte cmd) {
+    lcdWrite(cmd, (byte) 0);
   }
 
-  /*
+  /**
    * clear lcd and set to home 
    */
   public void clear() {
-    lcd_write((byte) LCD_CLEARDISPLAY);
-    lcd_write((byte) LCD_RETURNHOME);
+    lcdWrite((byte) LCD_CLEARDISPLAY);
+    lcdWrite((byte) LCD_RETURNHOME);
     screenContent.clear();
     log.info("LCD content cleared");
   }
@@ -224,9 +228,8 @@ public class LcdDisplay extends Service {
     lcd.attach(pcf8574t);
     lcd.init();
     lcd.setBackLight(true);
-    lcd.display_string("Spot is ready !", 1);
-    lcd.display_string("* MyRobotLab *", 2);
+    lcd.display("Spot is ready !", 1);
+    lcd.display("* MyRobotLab *", 2);
 
   }
-
 }
