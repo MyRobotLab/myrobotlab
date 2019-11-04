@@ -51,12 +51,12 @@ public class Status implements Serializable {// extends Exception {
    * The key can contain spaces and punctuation - the important part is that it is STATIC.
    * 
    * "details" contain dynamic specifics - for example:   
-   * "key":"Outside servo limits", "detail":"servo01 moveTo(75) limit is > 100"
+   * "key":"Outside servo limits", "detail":"servo01 moveTo(75) limit is greater than 100"
    */
   public String key;
   /**
    * Dynamic of verbose explanation of the status.
-   * e.g. "detail":"servo01 moveTo(75) limit is > 100" or complete stack trace from an exception
+   * e.g. "detail":"servo01 moveTo(75) limit is greater than 100" or complete stack trace from an exception
    */
   public String detail;
 
