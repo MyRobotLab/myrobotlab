@@ -12,21 +12,21 @@ import org.slf4j.Logger;
 
 /**
  * 
- * LcdDisplay - Driver to play with lcd display panel
+ * HD44780 - Driver to play with lcd display panel
  * Tested with HD44780 1602 panel, attached to pcf8574
  * Driver pasted from Poduzov : https://github.com/Poduzov/PI4J-I2C-LCD
  * 
  * @author Moz4r
  * 
  */
-public class LcdDisplay extends Service {
+public class HD44780I2c extends Service {
 
-  public LcdDisplay(String reservedKey) {
+  public HD44780I2c(String reservedKey) {
     super(reservedKey);
     setReady(false);
   }
 
-  public final static Logger log = LoggerFactory.getLogger(LcdDisplay.class);
+  public final static Logger log = LoggerFactory.getLogger(HD44780I2c.class);
   private static final long serialVersionUID = 1L;
 
   private Pcf8574 pcf8574;
@@ -205,7 +205,7 @@ public class LcdDisplay extends Service {
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(LcdDisplay.class.getCanonicalName());
+    ServiceType meta = new ServiceType(HD44780I2c.class.getCanonicalName());
     meta.addDescription("I2C LCD Display driver");
     meta.addCategory("i2c", "display");
     return meta;
@@ -224,7 +224,7 @@ public class LcdDisplay extends Service {
       e.printStackTrace();
     }
     pcf8574t.attach(mega, "1", "0x27");
-    LcdDisplay lcd = (LcdDisplay) Runtime.start("lcd", "LcdDisplay");
+    HD44780I2c lcd = (HD44780I2c) Runtime.start("lcd", "HD44780I2c");
     lcd.attach(pcf8574t);
     lcd.init();
     lcd.setBackLight(true);
