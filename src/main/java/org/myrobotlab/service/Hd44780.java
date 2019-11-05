@@ -20,14 +20,14 @@ import org.slf4j.Logger;
  * @author Moz4r
  * 
  */
-public class Hd44780I2c extends Service {
+public class Hd44780 extends Service {
 
-  public Hd44780I2c(String reservedKey) {
+  public Hd44780(String reservedKey) {
     super(reservedKey);
     setReady(false);
   }
 
-  public final static Logger log = LoggerFactory.getLogger(Hd44780I2c.class);
+  public final static Logger log = LoggerFactory.getLogger(Hd44780.class);
   private static final long serialVersionUID = 1L;
 
   private Pcf8574 pcf8574;
@@ -206,7 +206,7 @@ public class Hd44780I2c extends Service {
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Hd44780I2c.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Hd44780.class.getCanonicalName());
     meta.addDescription("I2C LCD Display driver");
     meta.addCategory("i2c", "display");
     return meta;
@@ -226,7 +226,7 @@ public class Hd44780I2c extends Service {
       e.printStackTrace();
     }
     pcf8574t.attach(mega, "1", "0x27");
-    Hd44780I2c lcd = (Hd44780I2c) Runtime.start("lcd", "Hd44780I2c");
+    Hd44780 lcd = (Hd44780) Runtime.start("lcd", "Hd44780");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(true);
     webgui.startService();
