@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
@@ -19,14 +20,14 @@ import org.slf4j.Logger;
  * @author Moz4r
  * 
  */
-public class HD44780I2c extends Service {
+public class Hd44780I2c extends Service {
 
-  public HD44780I2c(String reservedKey) {
+  public Hd44780I2c(String reservedKey) {
     super(reservedKey);
     setReady(false);
   }
 
-  public final static Logger log = LoggerFactory.getLogger(HD44780I2c.class);
+  public final static Logger log = LoggerFactory.getLogger(Hd44780I2c.class);
   private static final long serialVersionUID = 1L;
 
   private Pcf8574 pcf8574;
@@ -76,7 +77,7 @@ public class HD44780I2c extends Service {
   private final byte Rw = (byte) 0b00000010; // Read/Write bit
   private final byte Rs = (byte) 0b00000001; // Register select bit
 
-  private boolean backLight;
+  public boolean backLight;
   public Map<Integer, String> screenContent = new HashMap<Integer, String>();
 
   public void attach(Pcf8574 pcf8574) {
@@ -205,7 +206,7 @@ public class HD44780I2c extends Service {
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(HD44780I2c.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Hd44780I2c.class.getCanonicalName());
     meta.addDescription("I2C LCD Display driver");
     meta.addCategory("i2c", "display");
     return meta;
@@ -213,6 +214,7 @@ public class HD44780I2c extends Service {
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
+    Platform.setVirtual(true);
     Pcf8574 pcf8574t = (Pcf8574) Runtime.start("pcf8574t", "Pcf8574");
     Runtime.start("gui", "SwingGui");
     Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
@@ -224,7 +226,12 @@ public class HD44780I2c extends Service {
       e.printStackTrace();
     }
     pcf8574t.attach(mega, "1", "0x27");
-    HD44780I2c lcd = (HD44780I2c) Runtime.start("lcd", "HD44780I2c");
+    Hd44780I2c lcd = (Hd44780I2c) Runtime.start("lcd", "Hd44780I2c");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(true);
+    webgui.startService();
+    webgui.startBrowser("http://localhost:8888/#/service/lcd");
+   
     lcd.attach(pcf8574t);
     lcd.init();
     lcd.setBackLight(true);
