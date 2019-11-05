@@ -44,11 +44,11 @@ import javax.swing.SwingUtilities;
 
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Hd44780I2c;
+import org.myrobotlab.service.Hd44780;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
-public class Hd44780I2cGui extends ServiceGui implements ActionListener {
+public class Hd44780Gui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AudioFileGui.class);
@@ -61,7 +61,7 @@ public class Hd44780I2cGui extends ServiceGui implements ActionListener {
   JRadioButton off = new JRadioButton("Off");
   JButton save = new JButton("Push to LCD");
 
-  public Hd44780I2cGui(final String boundServiceName, final SwingGui myService) throws IOException {
+  public Hd44780Gui(final String boundServiceName, final SwingGui myService) throws IOException {
     super(boundServiceName, myService);
 
     JPanel backLightPanel = new JPanel(new GridLayout(0, 2));
@@ -103,7 +103,7 @@ public class Hd44780I2cGui extends ServiceGui implements ActionListener {
     });
   }
 
-  public void onState(final Hd44780I2c lcd) {
+  public void onState(final Hd44780 lcd) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
