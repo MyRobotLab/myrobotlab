@@ -1,25 +1,92 @@
-   <div class="col-xs-6">
-   <div class="btn-group">
-    <div class="btn-group" uib-dropdown>
-      <button id="split-button" type="button" class="btn btn-default">level - {{logLevel}}</button>
-      <button type="button" class="btn btn-default" uib-dropdown-toggle>
-        <span class="caret"></span>
-        <span class="sr-only">Split button!</span>
-      </button>
+<div class="col-md-12">
+    <div class="btn-group">
+        <button class="btn btn-default" ng-show="!service.isLogging" ng-click="msg.startLogging();msg.broadcastState()">start logging</button>
+        <button class="btn btn-default" ng-show="service.isLogging" ng-click="msg.stopLogging();msg.broadcastState()">stop logging</button>
+        <div class="btn-group" uib-dropdown>
+            <button id="level-button" type="button" ng-class="{'btn': true, 'btn-success': service.logLevel == 'DEBUG','btn-default': service.logLevel == 'INFO', 'btn-warning': service.logLevel == 'WARN', 'btn-danger': service.logLevel == 'ERROR','small': true}" uib-dropdown-toggle>log level - {{service.logLevel}}</button>
+            <ul uib-dropdown-menu role="menu">
+                <li>
+                    <button class="btn btn-success col-md-12" ng-click="msg.setRootLogLevel('debug')">DEBUG</button>
+                </li>
+                <li>
+                    <button class="btn btn-default col-md-12" ng-click="msg.setRootLogLevel('info')">INFO</button>
+                </li>
+                <li>
+                    <button class="btn btn-warning col-md-12" ng-click="msg.setRootLogLevel('warn')">WARN</button>
+                </li>
+                <li>
+                    <button class="btn btn-danger col-md-12" ng-click="msg.setRootLogLevel('error')">ERROR</button>
+                </li>
+            </ul>
+        </div>
+        <button class="btn btn-default" ng-click="clear()">clear</button>
+         <button class="btn btn-default" ng-click="pause()">pause</button>
+        <button class="btn btn-default" ng-click="reverse =!reverse" title="sort log entries, arrow indicates direction which new log entries shall be inserted">
+            <span ng-class="{'glyphicon glyphicon-arrow-down': !reverse, 'glyphicon glyphicon-arrow-up':reverse}"></span>
+        </button>
+        <div class="btn-group" uib-dropdown>
+            <button class="btn btn-default dropdown-toggle" type="button" id="names" data-toggle="dropdown" title="filter on names of loggers">filter logger - {{loggerFilter.substring(loggerFilter.lastIndexOf('.')+1)}}
+</span></button>
+<ul class="dropdown-menu">
+    <li ng-repeat="n in loggers">
+        <a href="#" ng-click="setLoggerFilter(n)">{{n.substring(n.lastIndexOf('.')+1)}}</a>
+    </li>
+</ul>
+</div>
+<div class="btn-group" uib-dropdown>
+    <button class="btn btn-default dropdown-toggle" type="button" id="threads" data-toggle="dropdown" title="filter specific threads">filter threads - {{threadFilter}}
+</span></button>
+<ul class="dropdown-menu">
+    <li ng-repeat="t in threads">
+        <a href="#" ng-click="setThreadFilter(t)">{{t}}</a>
+    </li>
+</ul>
+</div>
+<div class="btn-group" uib-dropdown>
+    <button id="level-button" type="button" ng-class="{'btn': true, 'btn-success': filterLevelValue == 0,'btn-default': filterLevelValue == 1, 'btn-warning': filterLevelValue == 2, 'btn-danger':  filterLevelValue == 3,'small': true}" uib-dropdown-toggle>filter level - {{valueToLevel(filterLevelValue)}}</button>
+    <ul uib-dropdown-menu role="menu">
+        <li>
+            <button class="btn btn-success col-md-12" ng-click="setFilterLevelValue(0)">DEBUG</button>
+        </li>
+        <li>
+            <button class="btn btn-default col-md-12" ng-click="setFilterLevelValue(1)">INFO</button>
+        </li>
+        <li>
+            <button class="btn btn-warning col-md-12" ng-click="setFilterLevelValue(2)">WARN</button>
+        </li>
+        <li>
+            <button class="btn btn-danger col-md-12" ng-click="setFilterLevelValue(3)">ERROR</button>
+        </li>
+    </ul>
+</div>
 
-      <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
-        <li><a href="" ng-click="msg.setRootLogLevel('debug')">debug</a></li>
-        <li><a href="" ng-click="msg.setRootLogLevel('info')">info</a></li>
-        <li><a href="" ng-click="msg.setRootLogLevel('warn')">warn</a></li>
-        <li><a href="" ng-click="msg.setRootLogLevel('error')">error</a></li>      
-        <li class="divider"></li>
-        <li role="menuitem"><a href="">stop logging</a></li>
-      </ul>      
-    </div>
-
-          <button class="btn btn-default" ng-click="clear()">clear</button> 
+<button class="btn btn-default" ng-click="msg.getLog()" title="download the full myrobotlab.log">get log</button>
+</div>
+<!-- end of button group -->
+</div><div class="row"></div>
+<!-- filterLevelValue {{filterLevelValue}}  loggerFilter {{loggerFilter}}  threadFilter {{threadFilter}}  entries {{rowCount}} reverse {{reverse}} max records {{maxRecords}} -->
+{{rowCount}} log events processed - current window size is {{maxRecords}}
 
 
-   <textarea ng-model="log" ng-style="{'background-color':'black', 'color':'green'}" id="{{name}}" rows="20" cols="120" readonly scroll-glue></textarea>
-    <!-- button ng-click="broadcastState()"  class="btn btn-default" ng-init="count=0">broadcastState</button -->
-   </div>       
+<table class="table table-hover">
+    <!--
+    <thead>
+        <tr>
+            <th scope="col">level</th>
+            <th scope="col">detail</th>
+        </tr>
+    </thead>
+
+     table-danger
+      class="alert alert-danger"
+-->
+    <tbody>
+        <tr ng-repeat="e in log | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
+            <td>{{e.ts}}</td>
+            <td>[{{e.level}}]</td>
+            <td>{{e.className.substring(e.className.lastIndexOf('.')+1)}}</td>
+            <td>{{e.threadName}}</td>
+            <td>{{e.body}}</td>
+        </tr>
+    </tbody>
+</table>

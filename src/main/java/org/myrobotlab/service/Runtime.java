@@ -38,6 +38,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import javax.annotation.processing.FilerException;
+
 import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.RemoteMessageHandler;
@@ -1415,6 +1417,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
+  
+  public void disconnect() throws IOException {
+    connect("admin", "ws://localhost:8887/api/messages");
+  }
 
   /**
    * jump to another process using the cli
@@ -1444,6 +1450,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   
   public Object sendToCli(String cmd) {
     // Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+    if (stdInClient == null) {
+      log.warn("stdin client is null - did you want to run --interactive or runtime.startInteractiveMode() mode ?");
+      return null;
+    }
     return stdInClient.process(cmd);
   }
 
@@ -3130,6 +3140,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
+    if (conn == null) {
+      log.error("could not get connection {} from msg {}", uuid, msg); 
+      return;
+    }
 
     if (stdInClient.isLocal(msg)) {
       if (msg.data == null) {

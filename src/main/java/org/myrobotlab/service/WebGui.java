@@ -271,7 +271,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public Integer sslPort = null;
 
-  public String startURL = "http://localhost:%d/#/main";
+  public String startURL = "http://localhost:%d/#/tabs";
 
   transient LiveVideoStreamHandler stream = new LiveVideoStreamHandler();
 

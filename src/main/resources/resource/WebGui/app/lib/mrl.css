@@ -35,11 +35,13 @@ body {
     width: 100%;
 }
 
+/*
 table, th, td {
     border: 1px solid grey;
     border-collapse: collapse;
     padding: 5px;
 }
+*/
 
 /* custom slider begin */
 .custom-slider.rzslider .rz-bar {
