@@ -38,8 +38,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import javax.annotation.processing.FilerException;
-
 import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.RemoteMessageHandler;
