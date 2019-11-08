@@ -12,13 +12,18 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
     $scope.logButton = ''
     $scope.filterLevelValue = 0
     $scope.rowCount = 0
-    $scope.loggers = {"any":"any"}
-    $scope.threads = {"any":"any"}
+    $scope.loggers = {
+        "any": "any"
+    }
+    $scope.threads = {
+        "any": "any"
+    }
     $scope.threadFilter = "any"
     $scope.loggerFilter = "any"
     $scope.reverse = false
     $scope.maxRecords = 1000
-    
+    $scope.pauseText = "pause";
+
     $scope.logLevelValue = {
         "DEBUG": 0,
         "INFO": 1,
@@ -95,22 +100,22 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
             let events = msg.data[0]
             var length = $scope.log.length
 
-            events.forEach(function(e) {
-                $scope.log.push(e)
-                $scope.rowCount++
-                $scope.threads[e.threadName] = e.threadName
-                $scope.loggers[e.className.substring(e.className.lastIndexOf('.') + 1)] = e.className
+            if ($scope.pauseText == "pause") {
+                events.forEach(function(e) {
+                    $scope.log.push(e)
+                    $scope.rowCount++
+                    $scope.threads[e.threadName] = e.threadName
+                    $scope.loggers[e.className.substring(e.className.lastIndexOf('.') + 1)] = e.className
 
-                // remove the beginning if we are at maxRecords
-                if ($scope.log.length > $scope.maxRecords){
-                  $scope.log.shift()
-                }
-            })
+                    // remove the beginning if we are at maxRecords
+                    if ($scope.log.length > $scope.maxRecords) {
+                        $scope.log.shift()
+                    }
+                })
 
-
-
-            // $scope.log.concat(msg.data[0])
-            $scope.$apply()
+                // $scope.log.concat(msg.data[0])
+                $scope.$apply()
+            }
             break
         default:
             $log.error("ERROR - unhandled method " + $scope.name + "." + msg.method)
@@ -133,7 +138,8 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
     }
 
     $scope.setLoggerFilter = function(logger) {
-        $scope.loggerFilter = logger // shortname to fullname
+        $scope.loggerFilter = logger
+        // shortname to fullname
         $scope.$apply()
     }
 
@@ -142,10 +148,12 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
         $scope.$apply()
     }
 
+    $scope.pause = function() {
+        $scope.pauseText = ($scope.pauseText == "pause")?"unpause":"pause"
+    }
+
     $scope.showRecord = function(e) {
-        return $scope.filterLevelValue <= $scope.getLogLevelValue(e.level) 
-        && ($scope.loggerFilter == 'any' || e.className == $scope.loggerFilter) 
-        && ($scope.threadFilter == 'any' || e.threadName == $scope.threadFilter) 
+        return $scope.filterLevelValue <= $scope.getLogLevelValue(e.level) && ($scope.loggerFilter == 'any' || e.className == $scope.loggerFilter) && ($scope.threadFilter == 'any' || e.threadName == $scope.threadFilter)
     }
 
     $scope.toggle = function(label, interval) {
