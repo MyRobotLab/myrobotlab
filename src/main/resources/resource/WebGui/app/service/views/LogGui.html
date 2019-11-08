@@ -20,7 +20,7 @@
             </ul>
         </div>
         <button class="btn btn-default" ng-click="clear()">clear</button>
-         <button class="btn btn-default" ng-click="pause()">pause</button>
+         <button class="btn btn-default" ng-click="pause()">{{pauseText}}</button>
         <button class="btn btn-default" ng-click="reverse =!reverse" title="sort log entries, arrow indicates direction which new log entries shall be inserted">
             <span ng-class="{'glyphicon glyphicon-arrow-down': !reverse, 'glyphicon glyphicon-arrow-up':reverse}"></span>
         </button>
