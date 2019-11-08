@@ -919,9 +919,11 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
-      Runtime.main(new String[] {"--interactive"});
+      if (args.length > 0) {
+        Runtime.main(new String[] {"--interactive", "--id", args[0]});
+      }
       Runtime.start("gui", "SwingGui");
-      Runtime.start("client", "Arduino");
+      Runtime.start("python", "Python");
 
       boolean done = true;
       if (done) {
@@ -1035,7 +1037,9 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("gateway", getName());
     attributes.put("type", "swing");
+    attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
+    attributes.put("uuid", uuid);
     Runtime.getInstance().addConnection(uuid, attributes);
     Runtime.updateRoute(guiId, uuid);
   }
