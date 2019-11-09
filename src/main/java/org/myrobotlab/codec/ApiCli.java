@@ -22,7 +22,7 @@ public class ApiCli extends Api {
   public final static Logger log = LoggerFactory.getLogger(ApiCli.class);
 
   public String getPrompt(String uuid) {
-    Map<String, Object> gateway = Runtime.getConnection(uuid);
+    Map<String, Object> gateway = Runtime.getInstance().getConnection(uuid);
     String prompt = "root".equals(gateway.get("user")) ? "#" : "$";
     return String.format("[%s@%s %s]%s", gateway.get("user"), gateway.get("host"), gateway.get("cwd"), prompt);
   }
@@ -43,7 +43,7 @@ public class ApiCli extends Api {
     }
 
     Message msgFromUri = uriToMsg(uri, getDefaultMethod());
-
+    Runtime runtime = Runtime.getInstance();
     // no point in having output if no out pipe exists
     if (out != null && data != null) {
       data = data.trim();
@@ -56,25 +56,26 @@ public class ApiCli extends Api {
         if (data.length() > "cd".length()) {
           path = data.substring("cd".length()).trim();
         }
+        
+       
         // absolute or relative ! ..
         // FIXME - must check on validity
-        Map<String, Object> c = Runtime.getConnection(uuid);
+        Map<String, Object> c = runtime.getConnection(uuid);
         c.put("cwd", path);
       } else if ("pwd".equals(data)) {
-        Map<String, Object> c = Runtime.getConnection(uuid);
+        Map<String, Object> c = runtime.getConnection(uuid);
         out.write(c.get("cwd").toString().getBytes());
       } else if ("lc".equals(data)) {
-        ret = Runtime.getConnectionNames();
+        ret = runtime.getConnectionNames();
         // ret = Runtime.getClients();
         out.write(CodecUtils.toPrettyJson(ret).getBytes()); // FIXME - normalize
 
       } else if ("whoami".equals(data)) {
-        ret = Runtime.getConnectionName(uuid);
+        ret = runtime.getConnectionName(uuid);
         out.write(CodecUtils.toPrettyJson(ret).getBytes()); // FIXME - normalize
 
       } else if (data.startsWith("ls")) {
-        Runtime runtime = Runtime.getInstance();
-        Map<String, Object> c = Runtime.getConnection(uuid);
+        Map<String, Object> c = runtime.getConnection(uuid);
         ret = runtime.ls(data.substring("ls".length()).trim());
         out.write(CodecUtils.toPrettyJson(ret).getBytes()); // FIXME - normalize
 
@@ -87,7 +88,7 @@ public class ApiCli extends Api {
         String toUuid = Runtime.getRoute(id);
         
         // get remote connection
-        Map<String,Object> conn = Runtime.getConnection(toUuid);
+        Map<String,Object> conn = runtime.getConnection(toUuid);
         if (conn == null) {
           log.error("could not find {}", toUuid);
           return null;

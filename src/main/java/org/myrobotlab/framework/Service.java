@@ -1849,7 +1849,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return invoke(msg);
     } else {
       // get gateway for remote address
-      Gateway gateway = Runtime.getGatway(msg.getId());
+      Gateway gateway = Runtime.getInstance().getGatway(msg.getId());
       try {
         return gateway.sendBlockingRemote(msg, timeout);
       } catch (Exception e) {

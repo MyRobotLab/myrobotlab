@@ -316,8 +316,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       public void onDisconnect(AtmosphereResourceEvent event) {
         String uuid = event.getResource().uuid();
         log.info("onDisconnect - {} {}", event, uuid);
-        Runtime.removeConnection(uuid);
-        Runtime.removeRoute(uuid);
+        Runtime runtime = Runtime.getInstance();
+        runtime.removeConnection(uuid);
+        runtime.removeRoute(uuid);
         // sessions.remove(uuid);
         if (event.isCancelled()) {
           log.info("{} is canceled", uuid);
@@ -435,12 +436,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public List<String> getClientIds() {
-    return Runtime.getConnectionIds(getName());
+    return Runtime.getInstance().getConnectionIds(getName());
   }
 
   @Override
   public Map<String, Map<String, Object>> getClients() {
-    return Runtime.getConnections(getName());
+    return Runtime.getInstance().getConnections(getName());
   }
 
   public Config.Builder getConfig() {
@@ -586,17 +587,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void handle(AtmosphereResource r) {
 
-    boolean newConnection = false;
+    boolean newPersistentConnection = false;
 
     try {
 
       String apiKey = getApiKey(r.getRequest().getRequestURI());
 
-      // warning - r can change through the ws:// life-cycle
-      // we upsert it to keep it fresh ;)
-      newConnection = upsertConnection(r);
-
       if (apiKey.equals("messages")) {
+        // warning - r can change through the ws:// life-cycle
+        // we upsert it to keep it fresh ;)
+        newPersistentConnection = upsertConnection(r);
+
         r.suspend();
         // FIXME - needed ?? - we use BroadcastFactory now !
         setBroadcaster(apiKey, r);
@@ -621,19 +622,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         } else if ((bodyData != null) && log.isDebugEnabled()) {
           logData = bodyData;
         }
-        log.debug(">>>{} {} {} - [{}] from connection {}", (newConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
+        log.debug(">>>{} {} {} - [{}] from connection {}", (newPersistentConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
       // get api - decode msg - process it
+      /* REMOVE !
       Map<String, Object> connection = Runtime.getConnection(uuid);
       if (connection == null) {
         error("no connection with uuid %s", uuid);
         return;
       }
+      */
 
       MethodCache cache = MethodCache.getInstance();
 
-      if (newConnection && apiKey.equals("messages")) {
+      if (newPersistentConnection && apiKey.equals("messages")) {
         // new connection with messages api means we want to send a
         // getHelloResponse(hello) to the "NEW" client - we can do it because
         // its only 1 hop away and the outstream is connected to it
@@ -761,7 +764,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   private boolean upsertConnection(AtmosphereResource r) {
     Map<String, Object> attributes = new HashMap<>();
     String uuid = r.uuid();
-    if (!Runtime.connectionExists(r.uuid())) {
+    Runtime runtime = Runtime.getInstance();
+    if (!runtime.connectionExists(r.uuid())) {
       r.addEventListener(onDisconnect);
       AtmosphereRequest request = r.getRequest();
       Enumeration<String> headerNames = request.getHeaderNames();
@@ -799,7 +803,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } else {
       // keeping it "fresh" - the resource changes every request ..
       // it switches on
-      Runtime.getConnection(uuid).put("c-r", r);
+      runtime.getConnection(uuid).put("c-r", r);
       return false;
     }
   }
@@ -1220,9 +1224,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Runtime.main(new String[] { "--interactive", "--id", "admin"});
       Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
-      Runtime.start("arduino", "Arduino");
-      Runtime.start("servo01", "Servo");
-      Runtime.start("servo02", "Servo");
+      // Runtime.start("arduino", "Arduino");
+      // Runtime.start("servo01", "Servo");
+      // Runtime.start("servo02", "Servo");
       // Runtime.start("gui", "SwingGui");
       Runtime runtime = Runtime.getInstance();
       // runtime.setVirtual(true);
@@ -1247,7 +1251,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public Object sendBlockingRemote(Message msg, Integer timeout) {
     String remoteId = msg.getId();
-    Gateway gateway = Runtime.getGatway(remoteId);
+    Gateway gateway = Runtime.getInstance().getGatway(remoteId);
     if (!gateway.equals(this)) {
       log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
       return null;
@@ -1261,7 +1265,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
 
     // get remote connection
-    Map<String, Object> conn = Runtime.getConnection(toUuid);
+    Map<String, Object> conn = Runtime.getInstance().getConnection(toUuid);
     if (conn == null) {
       log.error("could not get connection for this uuid {}", toUuid);
       return null;

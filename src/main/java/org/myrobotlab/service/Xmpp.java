@@ -540,12 +540,12 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   @Override
   public List<String> getClientIds() {
-    return Runtime.getConnectionIds(getName());
+    return Runtime.getInstance().getConnectionIds(getName());
   }
 
   @Override
   public Map<String, Map<String, Object>> getClients() {
-    return Runtime.getConnections(getName());
+    return Runtime.getInstance().getConnections(getName());
   }
 
   @Override

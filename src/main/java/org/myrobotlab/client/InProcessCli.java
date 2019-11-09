@@ -174,7 +174,7 @@ public class InProcessCli implements Runnable {
         // get gateway
         // send blocking remote
         // return result
-        Gateway gateway = Runtime.getGatway(cliMsg.getId());
+        Gateway gateway = Runtime.getInstance().getGatway(cliMsg.getId());
         // FIXME send"Blocking" is not currently working - send "R"eturn is ..
         // so we aren't going to write it out - instead it will come in and
         // stdInClient will
