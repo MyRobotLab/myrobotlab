@@ -278,7 +278,7 @@ public class Outbox implements Runnable, Serializable {
         }
       } else {
         // get gateway
-        Gateway gateway = (Gateway) Runtime.getGatway(msg.getId());
+        Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
         gateway.sendRemote(msg);
       }
 
