@@ -29,8 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.processing.FilerException;
-
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
@@ -45,6 +43,9 @@ import ch.qos.logback.core.Context;
 import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
+
+
+
 
 public class Log extends Service implements Appender<ILoggingEvent> {
 
@@ -69,10 +70,6 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   }
   
 
-  public void t() throws FilerException {
-    throw new FilerException("some file exploded");
-  }
-
   public final static Logger log = LoggerFactory.getLogger(Log.class);
 
   private static final long serialVersionUID = 1L;
@@ -93,6 +90,11 @@ public class Log extends Service implements Appender<ILoggingEvent> {
 
     return meta;
   }
+  
+  /**
+   * log file name
+   */
+  public static String MYROBOTLAB_LOG = "myrobotlab.log";
 
   /**
    * buffer of log event - made transient because the appropriate way to
@@ -297,7 +299,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   }
 
   public String getLog() throws IOException {
-    return FileIO.toString("myrobotlab.log");
+    return FileIO.toString(MYROBOTLAB_LOG);
   }
   
   public void stopLogging() {
