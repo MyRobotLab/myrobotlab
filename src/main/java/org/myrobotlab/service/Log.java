@@ -62,6 +62,10 @@ public class Log extends Service implements Appender<ILoggingEvent> {
       className = event.getLoggerName();
       body = event.getFormattedMessage();
     }
+    
+    public String toString() {
+      return String.format("%d %s %s %s %s", ts, level, threadName, className, body);
+    }
   }
   
 
