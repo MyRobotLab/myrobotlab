@@ -3143,7 +3143,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       return;
     }
 
-    if (stdInClient.isLocal(msg)) {
+    // two possible types of "remote" for this gateway
+    // one is a cli "remote" the other is a ws:// message remote api
+    if (stdInClient != null && stdInClient.isLocal(msg)) {
       if (msg.data == null) {
         System.out.println("null");
         return;
