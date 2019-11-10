@@ -187,7 +187,7 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
     ServiceType meta = new ServiceType(DocumentPipeline.class.getCanonicalName());
     meta.addDescription("This service will pass a document through a document processing pipeline made up of transformers");
     meta.addCategory("ingest");
-    meta.addDependency("org.apache.tika", "tika-core", "1.20");
+    meta.addDependency("org.apache.tika", "tika-core", "1.22");
     meta.addDependency("org.apache.opennlp", "opennlp-tools", "1.6.0");
     meta.addDependency("net.objecthunter", "exp4j", "0.4.8");
     // for parsing wikitext

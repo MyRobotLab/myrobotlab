@@ -4,10 +4,11 @@
 # categories: microcontroller, servo, control, motor
 # more info @: http://myrobotlab.org/service/Arduino
 #########################################
-virtual = True # uncomment this to connect to a virtual arduino
+Platform.setVirtual(True) # uncomment this to connect to a virtual arduino
 #
 # Connects a serial device on Windows this would COMx
 # You will need MRLComm.ino loaded on the Arduino
+# http://www.myrobotlab.org/content/uploading-mrlcomm-arduino
 
 port="COM3"
 outputPin = 8
@@ -16,12 +17,7 @@ inputPin = 13
 # start the services
 arduino = Runtime.start("arduino","Arduino")
 
-# start optional virtual arduino service, used for test
-if ('virtual' in globals() and virtual):
-    virtualArduino = Runtime.start("virtualArduino", "VirtualArduino")
-    virtualArduino.connect(port)
-
-#you have to replace COMX with your arduino serial port number
+# you have to replace COMX with your arduino serial port number
 # arduino.connect("/dev/ttyUSB0") - Linux way
 arduino.connect(port)
 
