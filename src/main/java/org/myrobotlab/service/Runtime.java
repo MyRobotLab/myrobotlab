@@ -42,9 +42,8 @@ import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
-import org.myrobotlab.codec.ApiFactory;
-import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
@@ -129,7 +128,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * (lots more attributes with the Map<String, Object> to provide necessary data for the connection)
    * </pre>
    */
-  static private final Map<String, Map<String, Object>> connections = new HashMap<>();
+  transient private final Map<String, Map<String, Object>> connections = new HashMap<>();
 
   // idToconnections ?? - FIXME - make default route !
   // id to Connection .. where id is like ip.. might need priority
@@ -176,7 +175,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  private Repo repo = null;
+  transient private Repo repo = null;
 
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
@@ -212,11 +211,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   private List<String> jvmArgs;
 
   private List<String> args;
-
-  /**
-   * 
-   */
-  String cliCwd = "/";
 
   String remoteId = null;
 
@@ -669,8 +663,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return networkPeers;
   }
 
-  public List<ApiDescription> getApis() {
-    return ApiFactory.getApis();
+  static public List<ApiDescription> getApis() {
+    return CodecUtils.getApis();
   }
 
   // @TargetApi(9)
@@ -1415,7 +1409,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
-  
+
   public void disconnect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
@@ -1445,9 +1439,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect(String url) throws IOException {
     connect(url, url);
   }
-  
+
   public Object sendToCli(String cmd) {
-    // Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+    // Message msg = CodecUtils.cliToMsg(getName(), null,
+    // r.getRequest().getPathInfo());
     if (stdInClient == null) {
       log.warn("stdin client is null - did you want to run --interactive or runtime.startInteractiveMode() mode ?");
       return null;
@@ -1595,7 +1590,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       if (msg.isBlocking()) {
         retMsg.msgId = msg.msgId;
         String retUuid = Runtime.getRoute(msg.getId()); //
-        Map<String, Object> retCon = Runtime.getConnection(retUuid);
+        Map<String, Object> retCon = getConnection(retUuid);
         // verify I'm the appropriate gateway
         Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
         // FIXME - double encode parameters ?
@@ -1797,7 +1792,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-    
+
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
@@ -1845,7 +1840,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       log.info("JAVA_HOME not defined");
     }
 
-    // also look at bitness detection in framework.Platform 
+    // also look at bitness detection in framework.Platform
     String procArch = env.get("PROCESSOR_ARCHITECTURE");
     String procArchWow64 = env.get("PROCESSOR_ARCHITEW6432");
     if (procArch != null) {
@@ -1882,14 +1877,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
-    
-    
+
     String vmVersion = System.getProperty("java.specification.version");
     vmVersion = "11";
-    if ("1.8".equals(vmVersion)){
+    if ("1.8".equals(vmVersion)) {
       error("Unsupported Java %s - please remove version and install Java 1.8", vmVersion);
     }
-    
+
     // test ( force encoding )
     // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
@@ -1910,7 +1904,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
     // Access restriction - log.info("total physical mem [{}] Mb",
     // Runtime.getTotalPhysicalMemory() / 1048576);
-    
+
     if (platform.isWindows()) {
       log.info("guessed os bitness [{}]", platform.getOsBitness());
       // try to compare os bitness with jvm bitness
@@ -1962,21 +1956,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   // start cli commands ----
   /**
-   * change working directory to new path
+   * change working directory to new path FIXME - implement ???? it really has
+   * to be a function of the gateway "perhaps" it would be worthwhile to make
+   * static'ish ?
    * 
    * @param path
    */
   public void cd(String path) {
-    cliCwd = path.trim();
-  }
-
-  /**
-   * print working directory
-   * 
-   * @return
-   */
-  public String pwd() {
-    return cliCwd;
+    // cliCwd = path.trim();
   }
 
   /**
@@ -1985,7 +1972,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   public Object ls() {
-    return ls(cliCwd);
+    return ls(null, null);
+  }
+
+  public Object ls(String path) {
+    return ls(null, path);
   }
 
   public String attachCli(String remoteId) {
@@ -1996,17 +1987,28 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * list the contents of a specific path
    * 
-   * @param inPath
+   * @param path
    * @return
    */
-  public Object ls(String inPath) {
+  public Object ls(String contextPath, String path) {
     String absPath = null;
 
-    if (inPath.startsWith("/")) {
-      absPath = inPath;
-    } else {
-      absPath = cliCwd + inPath;
+    if (contextPath != null) {
+      path = contextPath + path;
     }
+
+    if (path == null) {
+      path = "/";
+    }
+
+    // ALL SHOULD BE ABSOLUTE PATH AT THIS POINT
+    // IE STARTING WITH /
+
+    if (!path.startsWith("/")) {
+      path = "/" + path;
+    }
+
+    absPath = path;
 
     String[] parts = absPath.split("/");
 
@@ -2037,7 +2039,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   public List<String> lc() {
-    return Runtime.getConnectionNames();
+    return getConnectionNames();
   }
   // end cli commands ----
 
@@ -2768,7 +2770,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     connection.put("request", hello);
     // addClientAttribute(uuid, "request", request);
     updateRoute(hello.id, uuid);
-    Runtime.getConnection(uuid).put("id", hello.id);
+    getConnection(uuid).put("id", hello.id);
     return response;
   }
 
@@ -2819,7 +2821,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     defaultRoute = uuid;
   }
 
-  static public void removeRoute(String uuid) {
+  public void removeRoute(String uuid) {
     if (routeTable.containsKey(uuid)) {
       routeTable.remove(uuid);
     }
@@ -2898,7 +2900,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return attributes;
   }
 
-  static public void removeConnection(String uuid) {
+  public void removeConnection(String uuid) {
     connections.remove(uuid);
   }
 
@@ -2907,7 +2909,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @return
    */
-  static public Map<String, Map<String, Object>> getConnections() {
+  public Map<String, Map<String, Object>> getConnections() {
     return connections;
   }
 
@@ -2918,7 +2920,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @param gatwayName
    * @return
    */
-  static public Map<String, Map<String, Object>> getConnections(String gatwayName) {
+  public Map<String, Map<String, Object>> getConnections(String gatwayName) {
     Map<String, Map<String, Object>> ret = new HashMap<>();
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
@@ -2934,8 +2936,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return String.format("%s %s %s", c.get("id"), c.get("uri"), c.get("uuid"));
   }
 
-  static public String getConnectionName(String uuid) {
-    Map<String, Object> c = Runtime.getConnection(uuid);
+  public String getConnectionName(String uuid) {
+    Map<String, Object> c = getConnection(uuid);
     if (c != null)
       return formatConnection(c);
     else
@@ -2945,9 +2947,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   // FIXME - if Connection was an abstract this could be promoted or abstracted
   // for
   // every service display properties
-  static public List<String> getConnectionNames() {
+  public List<String> getConnectionNames() {
     List<String> ret = new ArrayList<>();
-    Map<String, Map<String, Object>> connections = Runtime.getConnections();
+    Map<String, Map<String, Object>> connections = getConnections();
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
       ret.add(formatConnection(c));
@@ -2961,7 +2963,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @param uuid
    * @return
    */
-  static public Map<String, Object> getConnection(String uuid) {
+  public Map<String, Object> getConnection(String uuid) {
     return connections.get(uuid);
   }
 
@@ -2970,11 +2972,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @return
    */
-  static public List<String> getConnectionIds() {
+  public List<String> getConnectionIds() {
     return getConnectionIds(null);
   }
 
-  static public boolean connectionExists(String uuid) {
+  boolean connectionExists(String uuid) {
     return connections.containsKey(uuid);
   }
 
@@ -2984,7 +2986,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @param name
    * @return
    */
-  static public List<String> getConnectionIds(String name) {
+  public List<String> getConnectionIds(String name) {
     List<String> ret = new ArrayList<>();
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
@@ -3024,7 +3026,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @param remoteId
    * @return
    */
-  public static Gateway getGatway(String remoteId) {
+  public Gateway getGatway(String remoteId) {
     // get a route from the remote id
     String uuid = getRoute(remoteId);
 
@@ -3089,7 +3091,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
       ret = returnContainer[0];
     } else if ("cli".equals(type)) {
-      
+
       if (msg.getId() == null || msg.getSrcId().equals(String.format("%s-cli", getId()))) {
 
         // runtime is a gateway for cli - so change the name - invoke it
@@ -3110,12 +3112,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   @Override
   public List<String> getClientIds() {
-    return Runtime.getConnectionIds(getName());
+    return getConnectionIds(getName());
   }
 
   @Override
   public Map<String, Map<String, Object>> getClients() {
-    return Runtime.getConnections(getName());
+    return getConnections(getName());
   }
 
   // FIXME - remove if not using ...
@@ -3139,11 +3141,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
     if (conn == null) {
-      log.error("could not get connection {} from msg {}", uuid, msg); 
+      log.error("could not get connection {} from msg {}", uuid, msg);
       return;
     }
 
-    if (stdInClient.isLocal(msg)) {
+    // two possible types of "remote" for this gateway
+    // one is a cli "remote" the other is a ws:// message remote api
+    if (stdInClient != null && stdInClient.isLocal(msg)) {
       if (msg.data == null) {
         System.out.println("null");
         return;
@@ -3162,7 +3166,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       endpoint.socket.fire(CodecUtils.toJson(msg));
     }
   }
-  
 
   /**
    * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it
