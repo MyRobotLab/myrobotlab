@@ -9,6 +9,7 @@ import java.util.Map;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
@@ -39,6 +40,8 @@ public class InProcessCli implements Runnable {
   String prefix = "/";
 
   private String remoteId;
+
+  private String contextPath = null;// TODO - make this stateful ?? - "runtime/ls/";
 
   /**
    * The inProcessCli behave like a remote id - although it is in the same
@@ -138,6 +141,7 @@ public class InProcessCli implements Runnable {
         cliMsg.name += "@" + remoteId;
       }
       
+      // FIXME - remove .. no special exceptions - use contextPath
       // agent specific commands
       if ("lp".equals(cliMsg.method)) {
         if (Runtime.getService("agent") == null) {
@@ -159,14 +163,19 @@ public class InProcessCli implements Runnable {
 
       // THIS IS NOT CORRECT !! - USE YOUR OWN isLocal !!!
       if (Runtime.getInstance().isLocal(cliMsg)) {
-        // invoke locally
+        
+        // webgui way with decoding of parameters - begin
+        String serviceName = cliMsg.getName();
+        Class<?> clazz = Runtime.getClass(serviceName);
+        Object[] params = MethodCache.getInstance().getDecodedJsonParameters(clazz, cliMsg.method, cliMsg.data);
+        cliMsg.data = params;
         ServiceInterface si = Runtime.getService(cliMsg.getName());
         ret = si.invoke(cliMsg);
+        // webgui way with decoding of parameters - end
 
         // FIXME the ret could be set by sendBlockingRemote too "if it worked"
         // instead we handle it asynchronously
         writeToJson(ret);
-
         writePrompt(out, data);
 
       } else {
@@ -199,7 +208,7 @@ public class InProcessCli implements Runnable {
    * @return
    */
   public Message cliToMsg(String data) {
-    return CodecUtils.cliToMsg("runtime@" + id, "runtime@" + remoteId, data);
+    return CodecUtils.cliToMsg(contextPath , "runtime@" + id, "runtime@" + remoteId, data);
   }
 
 
