@@ -14,12 +14,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -41,14 +44,29 @@ import com.google.gson.GsonBuilder;
 public class CodecUtils {
 
   public final static Logger log = LoggerFactory.getLogger(CodecUtils.class);
+  
+  public static class ApiDescription {
+    String key;
+    String path; // {scheme}://{host}:{port}/api/messages
+    String exampleUri;
+    String description;
+
+    public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
+      this.key = key;
+      this.path = uriDescription;
+      this.exampleUri = exampleUri;
+      this.description = description;
+    }
+  }
+  
+  public final static String PARAMETER_API = "/api/";
+  public final static String PREFIX_API = "api";
 
   // mime-types
   public final static String MIME_TYPE_JSON = "application/json";
 
   private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
   private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-
-  // private transient static JsonParser parser = new JsonParser();
 
   private static boolean initialized = false;
 
@@ -82,8 +100,6 @@ public class CodecUtils {
   final static HashMap<String, ArrayList<Method>> methodOrdinal = new HashMap<String, ArrayList<Method>>();
 
   final static HashSet<String> objectsCached = new HashSet<String>();
-
-  final static HashMap<String, String> keyToMimeType = new HashMap<String, String>();
 
   public static final String capitalize(final String line) {
     return Character.toUpperCase(line.charAt(0)) + line.substring(1);
@@ -143,29 +159,16 @@ public class CodecUtils {
     return String.format("on%s", capitalize(topicMethod));
   }
 
-  static public ArrayList<Method> getMethodCandidates(String serviceType, String methodName, int paramCount) {
-    if (!objectsCached.contains(serviceType)) {
-      loadObjectCache(serviceType);
-    }
-
-    String ordinalKey = makeMethodOrdinalKey(serviceType, methodName, paramCount);
-    if (!methodOrdinal.containsKey(ordinalKey)) {
-      log.error("cant find matching method candidate for {}.{} {} params", serviceType, methodName, paramCount);
-      return null;
-    }
-    return methodOrdinal.get(ordinalKey);
-  }
-
   // TODO
   // public static Object encode(Object, encoding) - dispatches appropriately
 
   static final public String getMsgKey(Message msg) {
     if (msg.sendingMethod != null) {
-    return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
+      return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     } else {
-      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);      
+      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     }
-    }
+  }
 
   static final public String getParameterSignature(final Object[] data) {
     if (data == null) {
@@ -232,73 +235,7 @@ public class CodecUtils {
   public static boolean isWrapper(String className) {
     return WRAPPER_TYPES_CANONICAL.contains(className);
   }
-
-  // FIXME - axis's Method cache - loads only requested methods
-  // this would probably be more gracefull than batch loading as I am doing..
-  // http://svn.apache.org/repos/asf/webservices/axis/tags/Version1_2RC2/java/src/org/apache/axis/utils/cache/MethodCache.java
-  static public void loadObjectCache(String serviceType) {
-    try {
-      objectsCached.add(serviceType);
-      Class<?> clazz = Class.forName(serviceType);
-      Method[] methods = clazz.getMethods();
-      for (int i = 0; i < methods.length; ++i) {
-        Method m = methods[i];
-        Class<?>[] types = m.getParameterTypes();
-
-        String ordinalKey = makeMethodOrdinalKey(serviceType, m.getName(), types.length);
-        String methodKey = makeMethodKey(serviceType, m.getName(), types);
-
-        if (!methodOrdinal.containsKey(ordinalKey)) {
-          ArrayList<Method> keys = new ArrayList<Method>();
-          keys.add(m);
-          methodOrdinal.put(ordinalKey, keys);
-        } else {
-          methodOrdinal.get(ordinalKey).add(m);
-        }
-
-        if (log.isDebugEnabled()) {
-          log.debug("loading {} into method cache", methodKey);
-        }
-        methodCache.put(methodKey, m);
-      }
-    } catch (Exception e) {
-      Logging.logError(e);
-    }
-  }
-
-  // FIXME !!! - encoding for Message ----> makeMethodKey(Message msg)
-
-  static public String makeMethodKey(String fullObjectName, String methodName, Class<?>[] paramTypes) {
-    StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < paramTypes.length; ++i) {
-      sb.append("/");
-      sb.append(paramTypes[i].getCanonicalName());
-    }
-    return String.format("%s/%s%s", fullObjectName, methodName, sb.toString());
-  }
-
-  static public String makeMethodOrdinalKey(String fullObjectName, String methodName, int paramCount) {
-    return String.format("%s/%s/%d", fullObjectName, methodName, paramCount);
-  }
-
-  public static String msgToGson(Message msg) {
-    return gson.toJson(msg, Message.class);
-  }
-
-  public static boolean setJSONPrettyPrinting(boolean b) {
-    if (b) {
-      gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-    } else {
-      gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
-    }
-    return b;
-  }
-
-  // --- xml codec begin ------------------
-  // inbound parameters are probably strings or xml bits encoded in some way -
-  // need to match
-  // ordinal first
-
+  
   static public String toCamelCase(String s) {
     String[] parts = s.split("_");
     String camelCaseString = "";
@@ -322,12 +259,6 @@ public class CodecUtils {
     if (json != null)
       out.write(json.getBytes());
   }
-
-  /*
-   * public final static JsonElement toJsonTree(String json) { JsonElement tree
-   * = null; try { tree = parser.parse(json); } catch (Exception e) {
-   * log.error("toJsonTree threw", e); } return tree; }
-   */
 
   public final static String toJson(Object o, Class<?> clazz) {
     return gson.toJson(o, clazz);
@@ -392,40 +323,8 @@ public class CodecUtils {
 
   static final String JSON = "application/javascript";
 
-  // start fresh :P
-  // FIXME should probably use a object factory and interface vs static methods
-  static public void write(OutputStream out, Object toEncode) throws IOException {
-    write(JSON, out, toEncode);
-  }
-
-  static public void write(String mimeType, OutputStream out, Object toEncode) throws IOException {
-    if (JSON.equals(mimeType)) {
-      out.write(gson.toJson(toEncode).getBytes());
-      // out.flush();
-    } else {
-      log.error("write mimeType {} not supported", mimeType);
-    }
-  }
-
-  public static String getKeyToMimeType(String apiTypeKey) {
-    if (!initialized) {
-      init();
-    }
-
-    String ret = MIME_TYPE_JSON;
-    if (keyToMimeType.containsKey(apiTypeKey)) {
-      ret = keyToMimeType.get(apiTypeKey);
-    }
-
-    return ret;
-  }
-
-  // API KEY to MIME TYPES (request or response?)
-  private static synchronized void init() {
-    keyToMimeType.put("messages", MIME_TYPE_JSON);
-    keyToMimeType.put("services", MIME_TYPE_JSON);
-    initialized = true;
-  }
+  public static final String API_MESSAGES = "messages";
+  public static final String API_SERVICE = "service";
 
   public static String getSimpleName(String serviceType) {
     int pos = serviceType.lastIndexOf(".");
@@ -454,9 +353,8 @@ public class CodecUtils {
     return ret;
   }
 
-  public static Object[] decodeArray(String string) {
-    // TODO Auto-generated method stub
-    return null;
+  static public Message cliToMsg(String from, String to, String data) {
+    return cliToMsg(null, from, to, data);
   }
 
   /**
@@ -496,6 +394,9 @@ public class CodecUtils {
             getParameter("p 1")     yes     c d
    * </pre>
    * 
+   * @param contextPath
+   *          - prefix to be added if supplied
+   * 
    * @param from
    *          - sender
    * @param to
@@ -504,8 +405,8 @@ public class CodecUtils {
    *          - cli encoded msg
    * @return
    */
-  static public Message cliToMsg(String from, String to, String data) {
-    Message msg = Message.createMessage(from, to, "pwd", null);
+  static public Message cliToMsg(String contextPath, String from, String to, String data) {
+    Message msg = Message.createMessage(from, to, "ls", null);
 
     // because we always want a "Blocking/Return" from the cmd line - without a
     // subscription
@@ -513,6 +414,10 @@ public class CodecUtils {
 
     /**
      * <pre>
+     
+     The key to this interface is leading "/" ...
+     "/" is absolute path - dir or execute
+     without "/" means runtime method - spaces and quotes can be delimiters
     
     "/"  -  list services
     "/{serviceName}" - list data of service
@@ -520,70 +425,106 @@ public class CodecUtils {
     "/{serviceName}/{method}" - invoke method
     "/{serviceName}/{method}/" - list parameters of method
     "/{serviceName}/{method}/p0/p1/p2" - invoke method with parameters
-    "/{serviceName}/{method}/p0/p1/p2/"
+    
+     or runtime
+     {method}
+     {method}/
+     {method}/p01
+     * 
      * 
      * </pre>
      */
-    
-    // default to runtime
-    if (!data.startsWith("/")) {
-      data = "/runtime/" + data;
-    }
-    
-    if (data.startsWith("/api/service/")) {
-      data = data.substring("/api/service/".length());
-    }
-    
-    if (data.startsWith("/") && data.length() != 1) {
-      data = data.substring(1);
-    }
-    
-    // at this point the format should be
-    // {service}/{method}/{p0}/{p1}..
 
-    String[] parts = data.split("/");
-    
-    
+    data = data.trim();
+
+    // remove uninteresting api prefix
+    if (data.startsWith("/api/service")) {
+      data = data.substring("/api/service".length());
+    }
+
+    if (contextPath != null) {
+      data = contextPath + data;
+    }
+
+    // assume runtime as 'default'
     if (msg.name == null) {
       msg.name = "runtime";
     }
-    
 
-    // "/" - list services FIXME !! check this ! - not sure if this is correct
-    if (parts.length == 0) {
-      msg.method = "ls";
-      msg.data = new Object[] { "/" };
-    }
-    
-    if (parts.length > 0) {
-      msg.name = parts[0];
-    }
+    // two possibilities - either it begins with "/" or it does not
+    // if it does begin with "/" its an absolute path to a dir, ls, or invoke
+    // if not then its a runtime method
 
-    // "/python" - list data of service
-    if (parts.length == 1 && !data.endsWith("/")) {
-      msg.method = "ls";
-      msg.data = new Object[] { "/" + parts[0] };
-    }
+    if (data.startsWith("/")) {
+      // ABSOLUTE PATH !!!
+      String[] parts = data.split("/");
 
-    if (parts.length == 1 && data.endsWith("/")) {
-      msg.method = "ls";
-      msg.data = new Object[] { "/" + parts[0] + "/" };
-    }
+      if (parts.length < 3) {
+        msg.method = "ls";
+        msg.data = new Object[] { "\"" + data + "\"" };
+        return msg;
+      }
 
-    // fix me diff from 2 & 3 "/"
-    if (parts.length > 1) {
+      // fix me diff from 2 & 3 "/"
+      if (parts.length >= 3) {
+        msg.name = parts[1];
+        // prepare the method
+        msg.method = parts[2].trim();
 
-      // prepare the method
-      msg.method = parts[1].trim();
-
-      // FIXME - to encode or not to encode that is the question ...
-      Object[] payload = new Object[parts.length - 2];
-      for (int i = 2; i < parts.length; ++i) {
-        payload[i - 2] = parts[i];
+        // FIXME - to encode or not to encode that is the question ...
+        Object[] payload = new Object[parts.length - 3];
+        for (int i = 3; i < parts.length; ++i) {
+          payload[i - 3] = parts[i];
+        }
+        msg.data = payload;
+      }
+      return msg;
+    } else {
+      // NOT ABOSLUTE PATH - SIMILAR TO EXECUTING IN THE RUNTIME /usr/bin path
+      // (ie runtime methods!)
+      // spaces for parameter delimiters ?
+      String[] spaces = data.split(" ");
+      // FIXME - need to deal with double quotes e.g. func A "B and C" D - p0 =
+      // "A" p1 = "B and C" p3 = "D"
+      msg.method = spaces[0];
+      Object[] payload = new Object[spaces.length - 1];
+      for (int i = 1; i < spaces.length; ++i) {
+        // webgui will never use this section of code
+        // currently the codepath is only excercised by InProcessCli
+        // all of this methods will be "optimized" single commands to runtime (i think)
+        // so we are going to error on the side of String parameters - other data types will have problems
+        payload[i - 1] = "\"" + spaces[i] + "\"";
       }
       msg.data = payload;
+
+      return msg;
     }
-    return msg;
+  }
+  
+  static public List<ApiDescription> getApis() {
+    List<ApiDescription> ret = new ArrayList<>();
+    ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
+        "An asynchronous api useful for bi-directional websocket communication, primary messages api for the webgui.  URI is /api/messages data contains a json encoded Message structure"));
+    ret.add(new ApiDescription("service", "{scheme}://{host}:{port}/api/service", "http://localhost:8888/api/service/runtime/getUptime",
+        "An synchronous api useful for simple REST responses"));
+    return ret;
+  }
+  
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+      String json = CodecUtils.fromJson("test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("a test", String.class);
+      log.info("json {}", json);
+      json = CodecUtils.fromJson("\"a/test\"", String.class);
+      log.info("json {}", json);
+      CodecUtils.fromJson("a/test", String.class);
+      
+    } catch(Exception e) {
+      log.error("main threw", e);
+    }
   }
 
 }

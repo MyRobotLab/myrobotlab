@@ -23,7 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class ApiSwagger extends Api {
+public class ApiSwagger  {
 
   public final static Logger log = LoggerFactory.getLogger(Runtime.class);
 
@@ -218,7 +218,6 @@ public class ApiSwagger extends Api {
     }
   }
 
-  @Override
   public Object process(MessageSender webgui, String apiKey, String uri, String uuid, OutputStream out, String json) throws Exception {
     // TODO Auto-generated method stub
     return null;

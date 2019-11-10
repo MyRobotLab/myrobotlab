@@ -39,7 +39,6 @@ import org.atmosphere.nettosphere.Handler;
 import org.atmosphere.nettosphere.Nettosphere;
 import org.jboss.netty.handler.ssl.SslContext;
 import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
-import org.myrobotlab.codec.Api;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
@@ -149,9 +148,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * @return
    */
   static public String getApiKey(String uri) {
-    int pos = uri.indexOf(Api.PARAMETER_API);
+    int pos = uri.indexOf(CodecUtils.PARAMETER_API);
     if (pos > -1) {
-      pos += Api.PARAMETER_API.length();
+      pos += CodecUtils.PARAMETER_API.length();
       int pos2 = uri.indexOf("/", pos);
       if (pos2 > -1) {
         return uri.substring(pos, pos2);
@@ -160,20 +159,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     }
     return null;
-  }
-
-  public static class ApiDescription {
-    String key;
-    String path; // {scheme}://{host}:{port}/api/messages
-    String exampleUri;
-    String description;
-
-    public ApiDescription(String key, String uriDescription, String exampleUri, String description) {
-      this.key = key;
-      this.path = uriDescription;
-      this.exampleUri = exampleUri;
-      this.description = description;
-    }
   }
 
   // FIXME - move to security
@@ -381,7 +366,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     this.autoStartBrowser = autoStartBrowser;
   }
 
- 
   /**
    * String broadcast to specific client
    * 
@@ -592,8 +576,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
 
       String apiKey = getApiKey(r.getRequest().getRequestURI());
+      
+      if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)){
+        // NOT A VALID API - send what we support - we're done...
+        OutputStream out = r.getResponse().getOutputStream();
+        out.write(CodecUtils.toJson(CodecUtils.getApis()).getBytes());
+        return;
+      }
 
-      if (apiKey.equals("messages")) {
+      if (apiKey.equals(CodecUtils.API_MESSAGES)) {
         // warning - r can change through the ws:// life-cycle
         // we upsert it to keep it fresh ;)
         newPersistentConnection = upsertConnection(r);
@@ -625,18 +616,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         log.debug(">>>{} {} {} - [{}] from connection {}", (newPersistentConnection == true) ? "new" : "", request.getMethod(), request.getRequestURI(), logData, uuid);
       }
 
-      // get api - decode msg - process it
-      /* REMOVE !
-      Map<String, Object> connection = Runtime.getConnection(uuid);
-      if (connection == null) {
-        error("no connection with uuid %s", uuid);
-        return;
-      }
-      */
-
       MethodCache cache = MethodCache.getInstance();
 
-      if (newPersistentConnection && apiKey.equals("messages")) {
+      if (newPersistentConnection && apiKey.equals(CodecUtils.API_MESSAGES)) {
         // new connection with messages api means we want to send a
         // getHelloResponse(hello) to the "NEW" client - we can do it because
         // its only 1 hop away and the outstream is connected to it
@@ -648,7 +630,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         log.info(String.format("<<< %s", msg));
         return;
 
-      } else if (apiKey.equals("service")) {
+      } else if (apiKey.equals(CodecUtils.API_SERVICE)) {
+
+        // decode into a String[] or json strings
+
         Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
 
         if (isLocal(msg)) {
@@ -667,7 +652,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         }
         // FIXME - remove connection ! AND/OR figure out session
         return;
-      }
+      } 
 
       // ================= begin messages2 api =======================
 
@@ -706,11 +691,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             // msg.id = uuid + "-" + incremented
             // Object[] meta = new Object[2];
             // uuid is "OUR" meta data - this process's id of the remote process
-            // that is why this msg needs to be intercepted - its binding the remote process
+            // that is why this msg needs to be intercepted - its binding the
+            // remote process
             // to our internal identifier
-            msg.data[0] = uuid; 
+            msg.data[0] = uuid;
           }
-          
+
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
 
           Method method = cache.getMethod(clazz, msg.method, params);
@@ -718,9 +704,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
             log.error("method cache could not find {}.{}({})", clazz.getSimpleName(), msg.method, msg.data);
             return;
           }
-          
+
           ServiceInterface si = Runtime.getService(serviceName);
-          
+
           ret = method.invoke(si, params);
 
           // propagate return data to subscribers
@@ -753,7 +739,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       }
     } catch (Exception e) {
       error(e);
-      //log.error("handle threw", e);
+      // log.error("handle threw", e);
     }
   }
 
@@ -1221,7 +1207,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      Runtime.main(new String[] { "--interactive", "--id", "admin"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin" });
       Runtime.setLogLevel("ERROR");
       Runtime.start("python", "Python");
       // Runtime.start("arduino", "Arduino");
@@ -1237,7 +1223,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      
+
       // Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
 

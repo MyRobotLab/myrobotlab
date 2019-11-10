@@ -42,9 +42,8 @@ import org.myrobotlab.client.Client;
 import org.myrobotlab.client.Client.Endpoint;
 import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
-import org.myrobotlab.codec.ApiFactory;
-import org.myrobotlab.codec.ApiFactory.ApiDescription;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
@@ -212,11 +211,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   private List<String> jvmArgs;
 
   private List<String> args;
-
-  /**
-   * 
-   */
-  String cliCwd = "/";
 
   String remoteId = null;
 
@@ -669,8 +663,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return networkPeers;
   }
 
-  public List<ApiDescription> getApis() {
-    return ApiFactory.getApis();
+  static public List<ApiDescription> getApis() {
+    return CodecUtils.getApis();
   }
 
   // @TargetApi(9)
@@ -1415,7 +1409,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
-  
+
   public void disconnect() throws IOException {
     connect("admin", "ws://localhost:8887/api/messages");
   }
@@ -1445,9 +1439,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void connect(String url) throws IOException {
     connect(url, url);
   }
-  
+
   public Object sendToCli(String cmd) {
-    // Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+    // Message msg = CodecUtils.cliToMsg(getName(), null,
+    // r.getRequest().getPathInfo());
     if (stdInClient == null) {
       log.warn("stdin client is null - did you want to run --interactive or runtime.startInteractiveMode() mode ?");
       return null;
@@ -1797,7 +1792,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
     }
-    
+
     // setting the id and the platform
     platform = Platform.getLocalInstance();
 
@@ -1845,7 +1840,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       log.info("JAVA_HOME not defined");
     }
 
-    // also look at bitness detection in framework.Platform 
+    // also look at bitness detection in framework.Platform
     String procArch = env.get("PROCESSOR_ARCHITECTURE");
     String procArchWow64 = env.get("PROCESSOR_ARCHITEW6432");
     if (procArch != null) {
@@ -1882,14 +1877,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("java.vm.name [{}]", System.getProperty("java.vm.name"));
     log.info("java.vm.vendor [{}]", System.getProperty("java.vm.vendor"));
     log.info("java.specification.version [{}]", System.getProperty("java.specification.version"));
-    
-    
+
     String vmVersion = System.getProperty("java.specification.version");
     vmVersion = "11";
-    if ("1.8".equals(vmVersion)){
+    if ("1.8".equals(vmVersion)) {
       error("Unsupported Java %s - please remove version and install Java 1.8", vmVersion);
     }
-    
+
     // test ( force encoding )
     // System.setProperty("file.encoding","UTF-8" );
     log.info("file.encoding [{}]", System.getProperty("file.encoding"));
@@ -1910,7 +1904,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("total free [{}] Mb", Runtime.getFreeMemory() / 1048576);
     // Access restriction - log.info("total physical mem [{}] Mb",
     // Runtime.getTotalPhysicalMemory() / 1048576);
-    
+
     if (platform.isWindows()) {
       log.info("guessed os bitness [{}]", platform.getOsBitness());
       // try to compare os bitness with jvm bitness
@@ -1962,21 +1956,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   // start cli commands ----
   /**
-   * change working directory to new path
+   * change working directory to new path FIXME - implement ???? it really has
+   * to be a function of the gateway "perhaps" it would be worthwhile to make
+   * static'ish ?
    * 
    * @param path
    */
   public void cd(String path) {
-    cliCwd = path.trim();
-  }
-
-  /**
-   * print working directory
-   * 
-   * @return
-   */
-  public String pwd() {
-    return cliCwd;
+    // cliCwd = path.trim();
   }
 
   /**
@@ -1985,7 +1972,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   public Object ls() {
-    return ls(cliCwd);
+    return ls(null, null);
+  }
+
+  public Object ls(String path) {
+    return ls(null, path);
   }
 
   public String attachCli(String remoteId) {
@@ -1996,17 +1987,28 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * list the contents of a specific path
    * 
-   * @param inPath
+   * @param path
    * @return
    */
-  public Object ls(String inPath) {
+  public Object ls(String contextPath, String path) {
     String absPath = null;
 
-    if (inPath.startsWith("/")) {
-      absPath = inPath;
-    } else {
-      absPath = cliCwd + inPath;
+    if (contextPath != null) {
+      path = contextPath + path;
     }
+
+    if (path == null) {
+      path = "/";
+    }
+
+    // ALL SHOULD BE ABSOLUTE PATH AT THIS POINT
+    // IE STARTING WITH /
+
+    if (!path.startsWith("/")) {
+      path = "/" + path;
+    }
+
+    absPath = path;
 
     String[] parts = absPath.split("/");
 
@@ -3089,7 +3091,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
       ret = returnContainer[0];
     } else if ("cli".equals(type)) {
-      
+
       if (msg.getId() == null || msg.getSrcId().equals(String.format("%s-cli", getId()))) {
 
         // runtime is a gateway for cli - so change the name - invoke it
@@ -3139,7 +3141,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
     if (conn == null) {
-      log.error("could not get connection {} from msg {}", uuid, msg); 
+      log.error("could not get connection {} from msg {}", uuid, msg);
       return;
     }
 
@@ -3164,7 +3166,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       endpoint.socket.fire(CodecUtils.toJson(msg));
     }
   }
-  
 
   /**
    * DONT MODIFY NAME - JUST work on is Local - and InvokeOn should handle it

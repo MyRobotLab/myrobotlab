@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,8 +33,6 @@ import org.jivesoftware.smack.roster.packet.RosterPacket.ItemStatus;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration.Builder;
-import org.myrobotlab.codec.Api;
-import org.myrobotlab.codec.CodecUri;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -45,7 +42,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
@@ -114,8 +110,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
     return meta;
   }
-
-  transient CodecUri uri = new CodecUri();
 
   TreeMap<String, Contact> contacts = new TreeMap<String, Contact>();
   String username;
@@ -317,9 +311,12 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
       if (body.startsWith("/")) {
         // String pathInfo = String.format("/%s/service%s",
         // CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
-        String pathInfo = String.format("/%s%s", Api.PREFIX_API, body);
+        String pathInfo = String.format("/%s%s", CodecUtils.PREFIX_API, body);
         try {
-          org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
+          // org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
+          org.myrobotlab.framework.Message msg =  CodecUtils.cliToMsg(getName(), null, pathInfo);
+          
+          // FIXME - do the same as InProcessCli & WebGui
           Object ret = null;
           ServiceInterface si = Runtime.getService(msg.getName());
           if (si == null) {
