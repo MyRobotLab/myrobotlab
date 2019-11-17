@@ -69,8 +69,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   /**
    * controller name this control is attached to
+   * If not transient, loadAndStart will load last controller used, and break some things
    */
-  protected String controller = null;
+  protected transient String controller = null;
 
   /**
    * the current input position (pre-mapper)
