@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.Ignore;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -273,11 +274,22 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    */
   Map<Integer, PinDefinition> pinIndex = null;
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
     LoggingFactory.init();
 
     Adafruit16CServoDriver driver = (Adafruit16CServoDriver) Runtime.start("pwm", "Adafruit16CServoDriver");
+    Platform.setVirtual(true);
+    
+    Runtime.start("gui", "SwingGui");
+    // Runtime.start("python", "Python");
+
+    Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
+    mega.connect("COM4");
+    // mega.setBoardMega();
+    driver.attach(mega,"1","0x40");
+    Servo servo03 = (Servo) Runtime.loadAndStart("servo03", "Servo");
+    servo03.attach(driver,1);
     log.info("Driver {}", driver);
 
   }
@@ -862,9 +874,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     servoData.targetOutput = servo.getTargetOutput();
     servoData.currentOutput = servo.getTargetOutput();
     servoData.velocity = servo.getSpeed();
-    servoData.isEnergized = true;
     servoData.servo = servo;
     servoMap.put(servo.getName(), servoData);
+    servoEnable(servo);
     servo.attach(this);
   }
 
@@ -953,7 +965,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   
   @Override
   public void servoEnable(ServoControl servo) {
-    
+    ServoData servoData = servoMap.get(servo.getName());
+    if (servoData == null) {
+      log.error("servo data {} could not get servo from map", servo.getName());
+      return;
+    }
+    servoData.isEnergized = true;
+    //needed to energize it
+    servoMoveTo(servoData.servo);
+    log.info("Pin : " + servoData.pin + " attached from " + servo.getName());
+ 
   }
  
   @Override
