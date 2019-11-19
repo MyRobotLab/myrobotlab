@@ -158,6 +158,7 @@ public class Python extends Service {
           if (interp != null) {
             interp.exec(String.format("print '%s'", filtered));
           }
+          log.error("following script errored {}", code);
           log.error("interp.exec threw", e);
           if (filtered.length() > 40) {
             filtered = filtered.substring(0, 40);
@@ -386,12 +387,12 @@ public class Python extends Service {
     initScript.append("from org.myrobotlab.service import Runtime\n");
     Iterator<String> it = svcs.keySet().iterator();
     while (it.hasNext()) {
-      String serviceName = it.next();
-      ServiceInterface sw = svcs.get(serviceName);
+      String fullname = it.next();
+      ServiceInterface sw = svcs.get(fullname);
 
       initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
 
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(serviceName), serviceName);
+      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
 
       // get a handle on running service
       initScript.append(serviceScript);

@@ -111,7 +111,7 @@ public class Client {
         }
 
         // main response
-        System.out.println(data);
+        //System.out.println(data);
         for (RemoteMessageHandler handler : handlers) {
           handler.onRemoteMessage(uuid, data);
         }
@@ -231,12 +231,14 @@ public class Client {
       nettyConfig.setWebSocketMaxFrameSize(262144);
       nettyConfig.addProperty("child.tcpNoDelay", "true");
       nettyConfig.addProperty("child.keepAlive", "true");
+      // nettyConfig.setWebSocketMaxFrameSize(65536);
 
       // AsyncHttpClientConfig Config
       AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
       b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
       AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
       AsyncHttpClient asc = new AsyncHttpClient(config);
+      
 
       Socket socket = client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
       socket.on(Event.CLOSE.name(), new Function<String>() {

@@ -129,5 +129,9 @@ public interface ServiceInterface
    * @param creationCount
    */
   public void setOrder(int creationCount);
+  
+  public String getId();
+
+  public String getFullName();
 
 }

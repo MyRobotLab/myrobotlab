@@ -114,18 +114,20 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         }
         ;
         var addPanel = function(service) {
-            if (_self.panels.hasOwnProperty(service.name)) {
-                $log.warn(service.name + ' already has panel');
-                return _self.panels[service.name];
+            var fullname = mrl.getFullName(service)
+            
+            if (_self.panels.hasOwnProperty(fullname)) {
+                $log.warn(fullname + ' already has panel');
+                return _self.panels[fullname];
             }
             lastPosY += 40;
             var posY = lastPosY;
             _self.zIndex++;
             //construct panel & add it to list
-            _self.panels[service.name] = {
+            _self.panels[fullname] = {
                 simpleName: service.simpleName,
                 //serviceType (e.g. Runtime, Python, ...)
-                name: service.name,
+                name: fullname,// service.name,
                 //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                 templatestatus: service.templatestatus,
                 //the state the loading of the template is in (loading, loaded, notfound)
@@ -151,10 +153,10 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                     hide = true;
                 }
             };
-            return _self.panels[service.name];
+            return _self.panels[fullname];
         };
         _self.addService = function(service) {
-            var name = service.name;
+            var name = mrl.getFullName(service);
             var type = service.simpleName;
             //first load & parse the controller,    //js
             //then load and save the template       //html
@@ -181,8 +183,9 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         }
         ;
         // TODO - releasePanel
-        _self.releasePanel = function(name) {
+        _self.releasePanel = function(inName) {
             //remove a service and it's panels
+            let name = mrl.getFullName(inName)
             $log.info('removing service', name);
             //remove panels
             if (name in _self.panels) {
@@ -201,7 +204,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             $log.info('registering controllers scope', name, scope);
-            if ('scope'in _self.panels[name]) {
+            if ('scope' in _self.panels[name]) {
                 $log.warn('replacing an existing scope for ' + name);
             }
             _self.panels[name].scope = scope;
@@ -300,7 +303,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 break;
             case 'onReleased':
                 $log.info('release service', msg);
-                _self.releasePanel(msg.data[0].name);
+                _self.releasePanel(msg.data[0]);
                 break;
             }
         }

@@ -1524,10 +1524,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
-    Message m = Message.createMessage(getName(), null, method, o);
+    Message m = Message.createMessage(getFullName(), null, method, o);
 
     if (m.sender.length() == 0) {
-      m.sender = this.getName();
+      m.sender = this.getFullName();
     }
     if (m.sendingMethod.length() == 0) {
       m.sendingMethod = method;
@@ -1734,7 +1734,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // create new message reverse sender and name set to same
           // msg id
           Message msg = Message.createMessage(getName(), m.sender, m.method, ret);
-          msg.sender = this.getName();
+          msg.sender = this.getFullName();
           msg.msgId = m.msgId;
           // msg.status = Message.BLOCKING;
           msg.status = Message.RETURN;
@@ -1809,7 +1809,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void send(String name, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getName();
+    msg.sender = this.getFullName();
     // All methods which are invoked will
     // get the correct sendingMethod
     // here its hardcoded
@@ -1824,7 +1824,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getName();
+    msg.sender = this.getFullName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
 
