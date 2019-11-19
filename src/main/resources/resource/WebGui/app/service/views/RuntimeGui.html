@@ -1,5 +1,6 @@
+<div class="row">&nbsp;</div>
 <div class="row">
-    <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.bitness}}.{{platform.os}} {{platform.mrlVersion}}</b>
+    <h3>{{platform.id}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}}</h3>
 </div>
 <div class="row">
     <div class="form-inline col-md-6">
@@ -13,12 +14,42 @@
 <div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">
         <div class="form-group col-md-6">
-            <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory" />
+            <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory"/>
         </div>
     </form>
 </div>
 <div class="row">
     <div class="form-group col-md-6">
         <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
+    </div>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">remote id</th>
+                    <th scope="col">connections</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr ng-repeat="(id, connectionList) in connections">
+                    <td>{{id}}</td>
+                    <td>
+                        <table class="table table-hover">
+                            <tr ng-repeat="c in connectionList">
+                                <td>
+                                    <img ng-src="{{'/' + c['c-type'] + '.png'}}" width="18"/>{{c['c-type']}}
+                                
+                                </td>
+                                <td>{{c.gateway}}</td>
+                                <td>{{c.uuid}}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>

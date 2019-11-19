@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.framework.NameAndType;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -202,8 +203,8 @@ public class Swagger3 {
 
       Swagger3 swagger = new Swagger3();
       List<NameAndType> nameAndTypes = new ArrayList<>();
-      nameAndTypes.add(new NameAndType("runtime", "Runtime"));
-      nameAndTypes.add(new NameAndType("servo01", "Servo"));
+      nameAndTypes.add(new NameAndType(Platform.getLocalInstance().getId(), "runtime", "Runtime"));
+      nameAndTypes.add(new NameAndType(Platform.getLocalInstance().getId(), "servo01", "Servo"));
 
       System.out.println(gson.toJson(swagger.getSwagger(nameAndTypes)));
       // cli.processInput("test", null);

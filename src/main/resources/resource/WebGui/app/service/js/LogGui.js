@@ -125,7 +125,7 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
 
     $scope.clear = function() {
         $scope.log = []
-        $scope.apply()
+        $scope.$apply()
     }
 
     $scope.getLogLevelValue = function(level) {

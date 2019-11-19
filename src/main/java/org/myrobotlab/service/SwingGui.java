@@ -395,7 +395,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       @Override
       public void run() {
 
-        String name = sw.getName();
+        String name = sw.getFullName();//sw.getName();
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
@@ -1036,7 +1036,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // easy single client support
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("gateway", getName());
-    attributes.put("type", "swing");
+    attributes.put("c-type", getSimpleName());
     attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
     attributes.put("uuid", uuid);
