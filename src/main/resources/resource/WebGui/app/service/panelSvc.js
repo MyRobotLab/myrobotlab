@@ -11,42 +11,32 @@
 angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$templateCache', '$timeout', '$ocLazyLoad', '$q', function(mrl, $log, $http, $templateCache, $timeout, $ocLazyLoad, $q) {
     $log.info('panelSvc');
     var _self = this;
+
     // object containing all panels
     _self.panels = {};
     // global zIndex
     _self.zIndex = 0;
     var ready = false;
     // TODO - refactor
-    var deferred;
-    //check if mrl.js is already connected and wait for it if it is not
-
-    /*
-    if (!mrl.isConnected()) {
-        $log.info('wait for mrl.js to become connected ...');
-        var subscribeFunction = function(connected) {
-            $log.info('mrl.js seems to be ready now ...', connected, mrl.isConnected());
-            if (connected) {
-                mrl.unsubscribeConnected(subscribeFunction);
-                run();
-            }
-        };
-        mrl.subscribeConnected(subscribeFunction);
-    } else {
-        run();
-    }
-*/
-
-    // mrl.waitUntilReady();
+    // var deferred;
 
     this.isReady = function() {
-        return ready;
+        return true;
     }
-    ;
+
+    var getSimpleName = function(fullname) {
+        if (fullname == null){
+            console.error("error!")
+        }
+        return (fullname.substring(fullname.lastIndexOf(".") + 1))
+    }
+    
+    /*
     this.waitToBecomeReady = function() {
         $log.info('panelSvc.waitToBecomeReady()');
         deferred = $q.defer();
         return deferred.promise;
-    }
+    }*/
     ;
     var run = function() {
         $log.info('initalizing panelSvc');
@@ -115,7 +105,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         ;
         var addPanel = function(service) {
             var fullname = mrl.getFullName(service)
-            
+
             if (_self.panels.hasOwnProperty(fullname)) {
                 $log.warn(fullname + ' already has panel');
                 return _self.panels[fullname];
@@ -125,9 +115,10 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             _self.zIndex++;
             //construct panel & add it to list
             _self.panels[fullname] = {
-                simpleName: service.simpleName,
+                simpleName: getSimpleName(service.serviceClass),
                 //serviceType (e.g. Runtime, Python, ...)
-                name: fullname,// service.name,
+                name: fullname,
+                // service.name,
                 //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                 templatestatus: service.templatestatus,
                 //the state the loading of the template is in (loading, loaded, notfound)
@@ -204,7 +195,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             $log.info('registering controllers scope', name, scope);
-            if ('scope' in _self.panels[name]) {
+            if ('scope'in _self.panels[name]) {
                 $log.warn('replacing an existing scope for ' + name);
             }
             _self.panels[name].scope = scope;
@@ -292,13 +283,15 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 _self.savePanel(key);
             });
         }
-        ;
+        
+        /*
         //END_ServicePanels
         //add & remove panels for started & stopped services
         _self.onMsg = function(msg) {
             switch (msg.method) {
             case 'onRegistered':
                 var service = msg.data[0];
+                // THIS IS A REGISTRATION NOT A SINGLE SERVICE !!!!
                 _self.addService(service);
                 break;
             case 'onReleased':
@@ -308,14 +301,17 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             }
         }
         ;
+
         mrl.subscribeToService(_self.onMsg, runtime.name);
         //add all existing services
-        for (var name in registry) {
-            if (registry.hasOwnProperty(name)) {
-                _self.addService(registry[name]);
-            }
-        }
+        */
+
+        // we need to give mrl the ability to addPanels
+        // so we set mrls function ptr
+        mrl.setAddServicePanel(_self.addService)
+
         ready = true;
+
     };
     // end of function run()
 

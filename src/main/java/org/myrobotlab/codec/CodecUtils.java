@@ -21,12 +21,12 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -67,8 +67,6 @@ public class CodecUtils {
 
   private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
   private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-
-  private static boolean initialized = false;
 
   public final static String makeFullTypeName(String type) {
     if (type == null) {
@@ -115,6 +113,10 @@ public class CodecUtils {
 
   public final static <T extends Object> T fromJson(String json, Type type) {
     return gson.fromJson(json, type);
+  }
+  
+  public final static LinkedTreeMap<String,Object> toTree(String json) {
+    return gson.fromJson(json, LinkedTreeMap.class);
   }
 
   public static Type getType(final Class<?> rawClass, final Class<?>... parameterClasses) {

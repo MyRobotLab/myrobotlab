@@ -280,7 +280,7 @@ public class Outbox implements Runnable, Serializable {
         // get gateway
         Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
         if (gateway == null) {
-          log.error("gateway not found for msg.id {}", msg.getId());
+          log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
           return;
         }
         gateway.sendRemote(msg);
