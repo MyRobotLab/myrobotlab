@@ -89,7 +89,7 @@ public class InProcessCli implements Runnable {
       attributes.put("c-type", "Cli");
       Runtime runtime = Runtime.getInstance();
       runtime.addConnection(uuid, attributes);
-      runtime.getHelloResponse(uuid, new HelloRequest(id, uuid, runtime.getServiceList()));
+      runtime.getHelloResponse(uuid, new HelloRequest(id, uuid));
 
       int c = '\n';
       String readLine = "";

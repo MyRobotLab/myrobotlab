@@ -45,7 +45,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -395,12 +394,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       @Override
       public void run() {
 
-        String name = sw.getFullName();//sw.getName();
+        String name = sw.getFullName();// sw.getName();
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
 
-        String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
+        String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getSimpleName());
 
         log.debug("createTab {} {}", name, guiClass);
         ServiceGui newGui = null;
@@ -919,11 +918,11 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
-      if (args.length > 0) {
-        Runtime.main(new String[] {"--interactive", "--id", args[0]});
-      }
-      Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
+      Runtime.main(new String[] { "--interactive", "--id", "r1" });
+
+      // Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
+      Runtime.start("clock01", "Clock");
 
       boolean done = true;
       if (done) {

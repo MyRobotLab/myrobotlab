@@ -1,12 +1,20 @@
 package org.myrobotlab.service;
 
+import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Inbox;
+import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
+
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * A proxy for services in other languages (Javascript, Python, C++, Go, Node,
@@ -29,10 +37,64 @@ public class Proxy extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Proxy.class);
 
-  // LinkedTreeMap<String> data;
+  public Proxy(String name, String id, String type) {
+    super(name);
+    
+    // necessary for serialized transport
+    this.id = id;
+    serviceClass = type;
+    int period = type.lastIndexOf(".");
+    simpleName = type.substring(period);
+    MethodCache cache = MethodCache.getInstance();
+    
+    // hmm interesting ....
+    cache.cacheMethodEntries(this.getClass());
 
-  public Proxy(String n) {
-    super(n);
+    try {
+      serviceType = getMetaData(type);
+    } catch (Exception e) {
+      log.error("could not extract meta data for {}", type);
+    }
+
+    // FIXME - this is 'sort-of' static :P
+    if (methodSet == null) {
+      // FIXME - this is handled elsewhere (but very important)
+      methodSet = getMessageSet();
+    }
+
+    if (interfaceSet == null) {
+   // FIXME - this is handled elsewhere (but very important)
+      interfaceSet = getInterfaceSet();
+    }
+
+    this.inbox = new Inbox(getFullName());
+    this.outbox = new Outbox(this);
+    Runtime.register(this);
+  }
+  
+  String type = null;
+  
+  LinkedTreeMap<String, Object> state = null;
+  
+  // pre-processor hook
+  // overloaded invoke ?
+  // methodMap data - dynaFuncs
+  // overloaded serialization toJson ...
+  
+  public String getId() {
+    return "unknown";
+  }
+  
+  public boolean isLocal() {
+    return false;
+  }
+  
+  public String getType() {
+    return null;
+  }
+  
+  public void setState(String json) {
+    state = CodecUtils.toTree(json);
   }
 
   /**
@@ -67,5 +129,19 @@ public class Proxy extends Service {
       Logging.logError(e);
     }
   }
+
+  /*
+  public void setId(String id) {
+    this.id = id;
+  }*/
+
+  public void setState(LinkedTreeMap<String, Object> state) {
+    this.state = state;
+  }
+
+  /*
+  public void setType(String type) {
+      this.type = type;
+  } */
 
 }

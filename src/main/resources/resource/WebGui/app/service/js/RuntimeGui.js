@@ -183,7 +183,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     // _self.promiseTimeout(1000, myVar = setTimeout({}, 3000))
 
-    $scope.possibleServices = mrl.getPossibleServices()
+    $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
     msg.subscribe("getConnectionHeaders")

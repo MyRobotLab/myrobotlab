@@ -153,7 +153,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     }
     ;
     
-    $scope.possibleServices = mrl.getPossibleServices()
+    $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
 }

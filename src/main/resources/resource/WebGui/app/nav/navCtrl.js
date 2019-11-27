@@ -20,7 +20,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     var runtime = mrl.getRuntime()
 
     // load type ahead service types
-    $scope.possibleServices = mrl.getPossibleServices()
+    $scope.possibleServices = Object.values(mrl.getPossibleServices())
     // get platform information for display
     $scope.platform = mrl.getPlatform()
     // status info warn error

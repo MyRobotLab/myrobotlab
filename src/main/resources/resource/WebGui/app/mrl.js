@@ -6,25 +6,69 @@
 * The javascript service is effectively named "runtime@webgui-client-1234-5678" - although this will soon changee
 * to become more unique
 */
+
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     console.log('mrl.js')
     var _self = this
+
+    // FIXME - make all instance variables and make a true singleton - half and half is a mess
+
+    this.generateId = function() {
+        // one id to rule them all !
+        return 'webgui-client-' + 1234 + '-' + 5678
+        /*
+        let var1 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4)
+        let var2 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4)
+        return 'webgui-client-' + var1 + '-' + var2
+        */
+    }
+
     // The name of the gateway I am
     // currently attached to
     // tried to make these private ..
     // too much of a pain :P
     // FIXME - try again... {}
     this.gateway
-    this.runtime
-    this.platform
+
+    // FIXME - THIS HAS THE WRONG CONCEPT - PREVIOUSLY IT WAS THE MRL JAVA RUNTIME - IT NEEDS TO BE THE JS RUNTIME !!!
+    // FIXME - IT WILL BE OVERWRITTEN ! - THAT NEEDS TO BE FIXED
+    this.runtime = {
+        name: "runtime",
+        id: _self.generateId()
+    }
+
+    // add Panel function to be set by PanelSvc for callback ability 
+    // in this service to addPanels
+    this.addServicePanel = null
+
     this.id = null
+
+    // FIXME - must be "multiple" remoteIds... - although there is only 1 connected runtime
     this.remoteId = null
-    // FIXME - must be "multiple" remoteIds...
+
     this.blockingKeyList = {}
+
+    // TODO - get 'real' platform info - browser type - node version - etc
+    this.platform = {
+        os: "chrome",
+        lang: "javascript",
+        bitness: 64,
+        mrlVersion: "unknown"
+    }
 
     var connected = false
 
+    // FIXMME - serviceTypes is 'type' information - and this will be
+    // retrieved from the Java server.  It will become the defintion of what
+    // possible services we can support - IT SHOULD NOT COME FROM THE JAVA SERVER
+    // instead it should be defined by the {service}Gui.js and {service}View.js we have !
+    // FIXME - load this with a request NOT from runtime
+    // var serviceTypes = []
+    var serviceTypes = {}
+
     var registry = {}
+    var ids = {}
+
     var methodCache = {}
     var transport = 'websocket'
     var socket = null
@@ -50,10 +94,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         logLevel: 'info'
     }
 
-    // determine if we've gotten all the services - before drawing ui
-    var lastServiceNameRequested = null
     // connectivity related end
     var msgCount = 0
+
+    // FIXME - clean up maps and target vs source runtime
+    // msg map of js runtime 
+    var jsRuntimeMethodMap = {}
     // map of 'full' service names to callbacks
     var nameCallbackMap = {}
     // map of service types to callbacks
@@ -121,16 +167,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         methodCallbackMap[methodName].push(callback)
     }
 
+  
     /**
-     * registered is called when the subscribed remote runtime.registered is published and this
-     * callback is invoked
-     */
-    this.onRegistered = function(msg) {
-        var newService = msg.data[0]
-        registry[_self.getFullName(newService)] = newService
-    }
-
-    /**
+     * FIXME - use a callback method like addServicePanel
      * registered is called when the subscribed remote runtime.registered is published and this
      * callback is invoked
      */
@@ -141,39 +180,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         delete registry[_self.getFullName(service)]
     }
 
-    /**
-     * Strategy to get description of pre-existing services by subscribing to Runtime.getService and
-     * iterate through all services in the getHelloResponse
-     */
-    this.onService = function(msg) {
-        let newService = msg.data[0]
-        let fullname = _self.getFullName(newService)
-        registry[fullname] = newService
-
-        // FIXME remove this - need to handle "multiple" runtimes
-        if (newService.name == 'runtime') {
-            _self.runtime = newService
-        }
-
-        // when we iterate through the list of services offered in getHelloResponse
-        // since its asynchronous - we don't know when to initially draw the gui until
-        // we've processed the last service
-        if (lastServiceNameRequested == fullname) {
-            _self.gateway = registry[msg.sender]
-            deferred.resolve('connected !')
-            return deferred.promise
-        }
-    }
-
     this.sendBlockingMessage = function(msg) {
 
-        // _self.blockingKeyList[msg.msgId] = msg
         let promise = new Promise(function(resolve, reject) {
 
             // timer to check at interval
             (function theLoop(msg, i) {
                 setTimeout(function() {
-                    console.log("blocking timer looking for " + msg.msgId + " in blockingKeyList")
+                    console.log("blocking timer looking for " + msg.msgId + " in blockingKeyList " + JSON.stringify(msg))
                     // if > 0 ...
                     if (i--) {
                         if (msg.msgId in _self.blockingKeyList) {
@@ -191,7 +205,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                         theLoop(msg, i)
                         // Call the loop again
                     }
-                }, 100)
+                }, 1000)
             }
             )(msg, 20)
             // you can add arbitrary amount of parameters
@@ -218,86 +232,96 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 }
             }
         }
-        //var json = jQuery.stringifyJSON(msg) <-- from atmosphere
-        // now encode the container & contents
+
         var json = JSON.stringify(msg)
-        // <-- native STILL DOES NOT ENCODE QUOTES :P !
         _self.sendRaw(json)
+    }
+
+    this.setAddServicePanel = function(addPanelFunction) {
+        _self.addServicePanel = addPanelFunction
     }
 
     this.sendRaw = function(msg) {
         socket.push(msg)
-        // console.log('sendRaw: ' + msg)
     }
 
-    this.onHelloResponse = function(request) {
+    this.onHelloResponse = function(response) {
         console.log('onHelloResponse:')
-        console.log(request)
+        console.log(response)
     }
 
+    /**
+     *
+     */
+    this.setServiceTypes = function(msg) {
+        const values = Object.values(msg.data[0].serviceTypes)
+        for (const v of values) {
+            serviceTypes[v.simpleName] = v
+        }
+        deferred.resolve('connected !')
+    }
+
+    this.onRegistered = function(msg) {
+        console.log("onRegistered")
+
+        let registration = msg.data[0]
+        let fullname = registration.name
+        let simpleTypeName = getSimpleName(registration.typeKey)
+
+        // FIXME - what the hell its expecting a img - is this needed ????
+        registration['img'] = simpleTypeName + '.png'
+        // model.alt = serviceType.description - do not have that info at the moment                                                       
+        serviceTypes[simpleTypeName] = registration.type
+
+        // initial de-serialization of state
+        let service = JSON.parse(registration.state)
+        registry[fullname] = service
+
+        // FIXME remove this - need to handle "multiple" runtimes
+        if (fullname.startsWith('runtime')) {
+            _self.runtime = service
+        }
+
+        // now use the panelSvc to add a panel - with the function it registered
+        _self.addServicePanel(service)
+    }
+
+    /**
+     * The first message recieved from remote webgui process.  After a connection is negotiated, a "hello" msg is
+     * sent by both processes. The processes then respond to each other and begin the dialog of asking for details of
+     * services and continuing additional setup.  The hello has a summarized list of services which only include name,
+     * and type. If this process can provide a panelSvc UI panel it will wait until the foreign process sends a onRegistered
+     * with details of state info
+     */
     this.getHelloResponse = function(request) {
         console.log('getHelloResponse:')
         let hello = JSON.parse(request.data[1])
+
+        // FIXME - remove this - there aren't 1 remoteId there are many !
         _self.remoteId = hello.id
-        console.log(request)
 
         // once we have our mrl instance's id - we are
         // ready to ask more questions
 
         // FIXME - git list of current services (name and types)
         // FIXME - iterate through list request getService on each -or publishState
-
-        _self.platform = hello.platform
+        _self.platform.mrlVersion = hello.platform.mrlVersion
         // FIXME - Wrong !  - multiple platforms !
 
-        for (let i = 0; i < hello.serviceList.length; i++) {
-            let service = hello.serviceList[i];
-            // FIXME - send msg to get details or force service to be
-            // "registered" with mrl.js 
-            if (service.name == 'runtime') {
-                let fullname = service.name + '@' + service.id
-                // _self.subscribeToService 
-                // FIXME - subscribe to process all runtime's registered 
-                jsRuntimeMethodCallbackMap[fullname + '.onRegistered'] = _self.onRegistered
-                jsRuntimeMethodCallbackMap[fullname + '.onReleased'] = _self.onReleased
-                jsRuntimeMethodCallbackMap[fullname + '.onService'] = _self.onService
+        // suscribe to future registration requests
+        
+        let fullname = 'runtime@' + hello.id
+        jsRuntimeMethodCallbackMap[fullname + '.onRegistered'] = _self.onRegistered
+        jsRuntimeMethodCallbackMap[fullname + '.onReleased'] = _self.onReleased
 
-                _self.subscribe(fullname, 'registered')
-                _self.subscribe(fullname, 'released')
-                _self.subscribe(fullname, 'getService')
+        _self.subscribe(fullname, 'registered')
+        _self.subscribe(fullname, 'released')
 
-                // FIXME FIXME FIXME - must send addListener ! or subscribe !! to the above methods
-            }
-        }
-
-        // needed to register to runtime for callbacks, now we query each service
-        for (let i = 0; i < hello.serviceList.length; i++) {
-            let service = hello.serviceList[i];
-            let fullname = service.name + '@' + service.id
-            _self.sendTo('runtime@' + service.id, 'getService', fullname)
-            // last service name is used to make sure all the services have returned to us in the onService method
-            lastServiceNameRequested = fullname;
-        }
-
-        // FIXME - default gateway would be default Id (the one currently serving webgui)
-        // FIXME runtime should be fully addressed so should service name
-        // FIXME - this isn't correct .. it was in onLocalServices - is should be onConnect :P
+        // FIXME - move this to onConnect
         connected = true
 
-        // FIXME - subscribe/addListener to foreign runtimes
-        console.log(service)
-        // console.log(si)
-
-    }
-
-    this.generateId = function() {
-        // one id to rule them all !
-        return 'webgui-client-' + 1234 + '-' + 5678
-        /*
-        let var1 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4)
-        let var2 = ("0000" + Math.floor(Math.random() * 10000)).slice(-4)
-        return 'webgui-client-' + var1 + '-' + var2
-        */
+        // FIXME - remove the over-complicated promise
+        deferred.resolve('connected !')
     }
 
     this.getLocalName = function(fullname) {
@@ -336,10 +360,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     _self.blockingKeyList[msg.msgId] = msg
                 }
 
+                // msg "to" the jsRuntime .. TODO - all all methods of this class
+                let key = msg.name + '.' + msg.method
+                if (jsRuntimeMethodMap.hasOwnProperty(key)) {
+                    let cbs = jsRuntimeMethodMap[key]
+                    cbs(msg)
+                }
+
                 // HIDDEN single javascript service -> runtime@webgui-client-1234-5678
                 // handles all delegation of incoming msgs and initial registrations
                 // e.g. : runtime@remote-robot.onRegistered
-                let key = msg.sender + '.' + msg.method
+                // FIXME - this is wrong - its handling callbacks from the connected Runtime - there can be
+                // multiple connected runtimes.  This "should" handle all msg.name == js runtime (not sender)
+                key = msg.sender + '.' + msg.method
                 if (jsRuntimeMethodCallbackMap.hasOwnProperty(key)) {
                     let cbs = jsRuntimeMethodCallbackMap[key]
                     cbs(msg)
@@ -517,16 +550,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return 'on' + capitalize(topicMethod)
     }
     this.sendTo = function(name, method, data) {
-        //console.log(arguments[0])
         var args = Array.prototype.slice.call(arguments, 2)
         var msg = _self.createMessage(name, method, args)
         msg.sendingMethod = 'sendTo'
-        // console.log('SendTo:', msg)
         _self.sendMessage(msg)
     }
 
     this.sendToBlocking = function(name, method, data) {
-        //console.log(arguments[0])
         var args = Array.prototype.slice.call(arguments, 2)
         var msg = _self.createMessage(name, method, args)
         msg.msgType = "B"
@@ -538,6 +568,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     /*
+        FIXME - these are probably add and remove listeners for the js runtime service - NOT NEEDED
+        - add the callbacks - remove these methods
+
         The "real" subscribe - this creates a subscription
         from the Java topicName service, such that every time the
         topicMethod is invoked a message comes back to the gateway(webgui),
@@ -546,13 +579,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         topicName.topicMethod ---> webgui gateway --> angular callback
     */
     this.subscribe = function(name, method) {
-        // _self.sendTo(_self.gateway.name, "subscribe", topicName, topicMethod)
-        // _self.sendTo(_self.gateway.name, "addListener", topicName, topicMethod)
         _self.sendTo(name, "addListener", method, 'runtime@' + _self.id)
     }
 
-    this.unsubscribe = function(topicName, topicMethod) {
-        _self.sendTo(_self.gateway.name, "unsubscribe", topicName, topicMethod)
+    this.unsubscribe = function(name, method) {
+        _self.sendTo(name, "removeListener", method, 'runtime@' + _self.id)
     }
 
     this.invoke = function(functionName, context) {
@@ -589,19 +620,17 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // was asked and recieved from the backend
         console.log('mrl.onOpen: ' + transport + ' connection opened.')
 
-        let platform = {
-            os: "chrome",
-            lang: "javascript",
-            bitness: 64,
-            mrlVersion: "version!"
-        }
-
         let hello = {
             id: _self.id,
             uuid: _self.uuid,
-            platform: platform
+            platform: _self.platform
         }
-        _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
+
+        // blocking in the sense it will take the return data switch sender & destination - place an 'R'
+        // and effectively return to sender without a subscription
+        // _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
+        _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
+
     }
 
     var getSimpleName = function(fullname) {
@@ -612,12 +641,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         connectedCallbacks.push(callback)
     }
 
-    this.unsubscribeConnected = function(callback) {
-        var index = connectedCallbacks.indexOf(callback)
-        if (index != -1) {
-            connectedCallbacks.splice(index, 1)
-        }
+/*
+    this.init = function(http){
+        http.get("http://localhost:8887/api/service/runtime/getServiceData")
+        .then(function(response){ $scope.details = response.data; });
     }
+    */
 
     // injectables go here
     // the special $get method called when
@@ -625,7 +654,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // it also represents config's view of the provider
     // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to
     // retrieve the object to inject
-    this.$get = function($q, $log) {
+    this.$get = function($q, $log, $http) {
         this.connect = function(url, proxy) {
             if (connected) {
                 $log.info("aleady connected")
@@ -635,13 +664,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (url != undefined && url != null) {
                 this.url = url
             }
-            // FIXME - make a hello() protocol !!
-            // setting up initial callback - this possibly will change
-            // when the framework creates a "hello()" method
-            // FIXME - optimize and subscribe on {gatewayName}.onLocalService ???
-            this.subscribeToMethod(this.onLocalServices, 'onLocalServices')
-            this.subscribeToMethod(this.getHelloResponse, 'getHelloResponse')
-            this.subscribeToMethod(this.onHelloResponse, 'onHelloResponse')
+
             socket = atmosphere.subscribe(this.request)
             deferred = $q.defer()
             deferred.promise.then(function(result) {
@@ -856,20 +879,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return _self.id
             },
             getPossibleServices: function() {
-                var possibleServices = []
-                for (var property in _self.runtime.serviceData.serviceTypes) {
-                    if (_self.runtime.serviceData.serviceTypes.hasOwnProperty(property)) {
-                        var serviceType = _self.runtime.serviceData.serviceTypes[property]
-                        if (serviceType.available) {
-                            var model = {}
-                            model.name = getSimpleName(property)
-                            model.img = model.name + '.png'
-                            model.alt = serviceType.description
-                            possibleServices.push(model)
-                        }
-                    }
-                }
-                return possibleServices
+                return serviceTypes;
             },
             getRuntime: function() {
                 // FIXME - this is wrong mrl.js is a js runtime service - this is just the runtime its connected to
@@ -920,19 +930,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getFullName: _self.getFullName,
             subscribeOnOpen: _self.subscribeOnOpen,
             sendBlockingMessage: _self.sendBlockingMessage,
-            unsubscribeOnOpen: _self.unsubscribeOnOpen,
             subscribeConnected: _self.subscribeConnected,
-            unsubscribeConnected: _self.unsubscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             sendRaw: self.sendRaw,
             sendMessage: _self.sendMessage,
+            setAddServicePanel: _self.setAddServicePanel,
             createMessage: _self.createMessage,
             promise: _self.promise // FIXME - no sql like interface
             // put/get value to and from webgui service
         }
         return service
     }
+
     // assign callbacks
     this.request.onOpen = this.onOpen
     this.request.onClose = this.onClose
@@ -941,5 +951,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError
     this.id = this.generateId()
+
+    // correct way to put in callbacks for js runtime instance
+    jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
+    jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
+
+    // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
+    // it was standardized with the others to do so
+    methodCallbackMap['getHelloResponse'] = []
+    methodCallbackMap['getHelloResponse'].push(_self.getHelloResponse)
+    methodCallbackMap['onHelloResponse'] = []
+    methodCallbackMap['onHelloResponse'].push(_self.onHelloResponse)
+
+    // set callback for subscribeNameMethod["runtime@webgui-client-1234-5678"] = _self.onRegistered
 }
 ])

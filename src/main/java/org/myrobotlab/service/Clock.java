@@ -187,6 +187,8 @@ public class Clock extends Service {
     } else {
       log.info("clock already stopped");
     }
+    isClockRunning = false;
+    broadcastState();
   }
 
   @Override
@@ -197,14 +199,16 @@ public class Clock extends Service {
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
-
-    Clock clock = (Clock) Runtime.start("clock", "Clock");
+    Runtime.main(new String[]{"--interactive","-id","r2"});
+    Clock clock = (Clock) Runtime.start("clock02", "Clock");
+    /*
     clock.setInterval(1000);
     clock.restartClock();
     sleep(2000);
     clock.restartClock();
     sleep(2000);
     clock.stopClock();
+    */
   }
 
   /**

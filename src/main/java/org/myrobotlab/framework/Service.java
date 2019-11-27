@@ -90,7 +90,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * data for an instance
    * 
    */
-  ServiceType serviceType;
+  protected ServiceType serviceType;
 
   /**
    * a radix-tree of data -"DNA" Description of Neighboring Automata ;) this is
@@ -133,11 +133,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * unique id - (eqv. domain suffix)
    */
-  private String id;
+  protected String id;
 
-  private String simpleName; // used in gson encoding for getSimpleName()
+  protected String simpleName; // used in gson encoding for getSimpleName()
 
-  private String serviceClass;
+  protected String serviceClass;
 
   private boolean isRunning = false;
 
@@ -171,8 +171,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Set<String> methodSet;
 
   /**
-   * This is the map of interfaces - its really "static" information, since its a definition.
-   * However, since gson will not process statics - we are making it a member variable 
+   * This is the map of interfaces - its really "static" information, since its
+   * a definition. However, since gson will not process statics - we are making
+   * it a member variable
    */
   protected Map<String, String> interfaceSet;
 
@@ -851,8 +852,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     byte[] data = getResource(resourceName);
     if (data != null) {
       try {
-      return new String(data, "UTF-8");
-      } catch(Exception e) {
+        return new String(data, "UTF-8");
+      } catch (Exception e) {
         log.error("getResourceAsString threw", e);
       }
     }
@@ -916,7 +917,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    Runtime.register(this);
   }
 
   /**
@@ -1491,24 +1491,45 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } else {
       filename = inCfgFileName;
     }
+
+    File cfg = new File(filename);
+    if (cfg.exists()) {
+      try {
+        String json = FileIO.toString(filename);
+        if (!loadFromJson(o, json)) {
+          log.info("could not load file {}", filename);
+        } else {
+          return true;
+        }
+      } catch (Exception e) {
+        log.error("load threw", e);
+      }
+    } else {
+      log.info("cfg file {} does not exist", filename);
+    }
+    return false;
+  }
+  
+  @Override
+  public boolean loadFromJson(String json) {
+    return loadFromJson(this, json);
+  }
+  
+  public boolean loadFromJson(Object o, String json) {
+
     if (o == null) {
       o = this;
     }
 
     try {
-      File cfg = new File(filename);
-      if (cfg.exists()) {
-        // serializer.read(o, cfg);
-        String json = FileIO.toString(filename);
-        Object saved = CodecUtils.fromJson(json, o.getClass());
 
-        copyShallowFrom(o, saved);
-        broadcastState();
-        return true;
-      }
-      log.info("cfg file {} does not exist", filename);
+      Object saved = CodecUtils.fromJson(json, o.getClass());
+      copyShallowFrom(o, saved);
+      broadcastState();
+      return true;
+
     } catch (Exception e) {
-      log.error("failed loading {}", filename, e);
+      log.error("failed loading {}", e);
     }
     return false;
   }
@@ -1605,7 +1626,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
-    
+
     purgeTasks();
 
     // recently added - preference over detach(Runtime.getService(getName()));
@@ -1765,7 +1786,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return false;
       }
 
-      String s = CodecUtils.toJson(this);
+      String s = CodecUtils.toPrettyJson(this);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
       out.close();
@@ -1940,6 +1961,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
+    Runtime.register(this);
     ServiceInterface si = Runtime.getService(name);
     // if not registered - register
     if (si == null) {
@@ -2504,5 +2526,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void copyResource(String src, String dest) throws IOException {
     FileIO.copy(getResourceDir() + File.separator + src, dest);
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 }

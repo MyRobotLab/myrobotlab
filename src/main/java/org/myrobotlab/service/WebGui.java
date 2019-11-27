@@ -1221,8 +1221,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     try {
 
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
-      Runtime.setLogLevel("ERROR");
-      Runtime.start("python", "Python");
+      // Runtime.setLogLevel("ERROR");
+      //Runtime.start("python", "Python");
+      // Runtime.start("clock01", "Clock");
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("servo01", "Servo");
       // Runtime.start("servo02", "Servo");
