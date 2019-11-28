@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.framework.Instantiator;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -1441,17 +1441,17 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   }
 
   // auto Register
-  public void onRegistered(Service service) throws Exception {
+  public void onRegistered(Registration registration) throws Exception {
     // new service - see if we can virtualize it
-    log.info("{}.onRegistered({})", getName(), service);
-    if (service.getName().contentEquals("i01.head.jaw")) {
+    log.info("{}.onRegistered({})", getName(), registration);
+    if (registration.getName().contentEquals("i01.head.jaw")) {
       log.info("here");
     }
     if (autoAttach) {
       if (autoAttachAll) {
         // spin through all apps - attempt to attach
       }
-      attach(service);
+      attach(registration.service);
     }
   }
 

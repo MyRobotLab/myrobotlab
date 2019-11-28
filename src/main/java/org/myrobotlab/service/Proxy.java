@@ -4,9 +4,8 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -69,7 +68,7 @@ public class Proxy extends Service {
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    Runtime.register(this);
+    Runtime.register(new Registration(this));
   }
   
   String type = null;

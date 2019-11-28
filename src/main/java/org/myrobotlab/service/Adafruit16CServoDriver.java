@@ -17,10 +17,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.Ignore;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
@@ -286,7 +286,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     super(n);
     createPinList();
     refreshControllers();
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribeToRuntime("registered");
     // map(-1, 1, -1, 1); - currently Adafruit16CServoDriver is not a "real"
     // motor controller because
     // it doesn't inherit from AbstractMotorController & Servo's aren't merged
@@ -294,7 +294,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // it will need to wait for the grand unification of Servos & Motors
   }
 
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
   }

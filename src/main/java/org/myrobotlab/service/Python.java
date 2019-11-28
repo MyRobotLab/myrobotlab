@@ -14,6 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -578,7 +579,8 @@ public class Python extends Service {
     openScript(filename, data);
   }
 
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration r) {
+    ServiceInterface s = r.service;
 
     String registerScript = "";
 

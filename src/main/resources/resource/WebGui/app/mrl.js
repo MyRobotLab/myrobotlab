@@ -262,10 +262,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.onRegistered = function(msg) {
-        console.log("onRegistered")
-
+        
         let registration = msg.data[0]
-        let fullname = registration.name
+        let fullname = registration.name + '@' + registration.id
+        console.log("onRegistered " + fullname)
+  
         let simpleTypeName = getSimpleName(registration.typeKey)
 
         // FIXME - what the hell its expecting a img - is this needed ????
@@ -276,11 +277,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // initial de-serialization of state
         let service = JSON.parse(registration.state)
         registry[fullname] = service
-
-        // FIXME remove this - need to handle "multiple" runtimes
-        if (fullname.startsWith('runtime')) {
-            _self.runtime = service
-        }
 
         // now use the panelSvc to add a panel - with the function it registered
         _self.addServicePanel(service)
@@ -352,7 +348,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     return
                 }
 
-                console.log('--> ' + msg.msgId + ' ' + msg.msgType)
+                //console.log('--> ' + msg.msgId + ' ' + msg.msgType)
+                console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
 
                 // handle blocking 'R'eturn msgs here - FIXME - timer to clean old errored msg ?
                 // the blocking call removes any msg resolved
@@ -360,13 +357,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     _self.blockingKeyList[msg.msgId] = msg
                 }
 
-                // msg "to" the jsRuntime .. TODO - all all methods of this class
-                let key = msg.name + '.' + msg.method
-                if (jsRuntimeMethodMap.hasOwnProperty(key)) {
-                    let cbs = jsRuntimeMethodMap[key]
-                    cbs(msg)
-                }
-
+        
+                // TODO - msg "to" the jsRuntime .. TODO - all all methods of this class
                 // HIDDEN single javascript service -> runtime@webgui-client-1234-5678
                 // handles all delegation of incoming msgs and initial registrations
                 // e.g. : runtime@remote-robot.onRegistered
@@ -629,6 +621,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // blocking in the sense it will take the return data switch sender & destination - place an 'R'
         // and effectively return to sender without a subscription
         // _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
+        // FIXME - this is not full address - but its being sent to a remote runtime :()
         _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
 
     }
@@ -640,13 +633,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.subscribeConnected = function(callback) {
         connectedCallbacks.push(callback)
     }
-
-/*
-    this.init = function(http){
-        http.get("http://localhost:8887/api/service/runtime/getServiceData")
-        .then(function(response){ $scope.details = response.data; });
-    }
-    */
 
     // injectables go here
     // the special $get method called when

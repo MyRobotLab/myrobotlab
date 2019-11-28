@@ -35,10 +35,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -135,10 +135,10 @@ public class NeoPixel extends Service implements NeoPixelControl {
     animationSettings.put(NEOPIXEL_ANIMATION_RAINBOW_CYCLE, new boolean[] { false, true });
     animationSettings.put(NEOPIXEL_ANIMATION_FLASH_RANDOM, new boolean[] { true, true });
     animationSettings.put(NEOPIXEL_ANIMATION_IRONMAN, new boolean[] { true, true });
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribeToRuntime("registered");
   }
 
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
   }

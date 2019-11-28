@@ -1444,7 +1444,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       retobj = method.invoke(obj, params);
       out(methodName, retobj);
     } catch (Exception e) {
-      error(e);
+      error("could not invoke %s.%s (%s) - check logs for details",getName(), methodName, params);
+      log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
     }
     return retobj;
   }
@@ -1961,12 +1962,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
-    Runtime.register(this);
+    // register locally
+    Registration registration = new Registration(this); 
+    Runtime.register(registration);
     ServiceInterface si = Runtime.getService(name);
-    // if not registered - register
-    if (si == null) {
-      Runtime.register(this);
-    }
+   
 
     // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
     // should be created
@@ -2089,6 +2089,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void subscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
+  }
+  
+  public void subscribeTo(String service, String method) {
+    subscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void subscribeToRuntime(String method) {
+    subscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void unsubscribeTo(String service, String method) {
+    unsubscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void unsubscribeToRuntime(String method) {
+    unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {

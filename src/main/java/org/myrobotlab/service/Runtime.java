@@ -51,14 +51,15 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -72,8 +73,6 @@ import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
-
-import com.google.gson.internal.LinkedTreeMap;
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -172,7 +171,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  transient private Repo repo = null;
+  private IvyWrapper repo = null; // was transient abstract Repo
 
   private ServiceData serviceData = ServiceData.getLocalInstance();
 
@@ -387,14 +386,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     broadcastState();
   }
 
-  static public synchronized ServiceInterface createService(String name, String fullTypeName, String id) {
+  static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {
     log.info("Runtime.createService {}", name);
+    String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
       return null;
     }
 
-    ServiceInterface sw = Runtime.getService(name);
+    // TODO - test new create of existing service
+    ServiceInterface sw = Runtime.getService(String.format("%s@%s", name, id));
     if (sw != null) {
       log.info("service {} already exists", name);
       return sw;
@@ -424,19 +425,23 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         }
       }
 
+      if (fullTypeName.equals("org.myrobotlab.service.Runtime")) {
+        log.warn("here with runtime");
+      }
+
       // create an instance
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
 
-      si.setId((id == null) ? runtime.getId() : id);
+      si.setId(id);
 
       si.setVirtual(Platform.isVirtual());
       Runtime.getInstance().creationCount++;
       si.setOrder(Runtime.getInstance().creationCount);
       return (Service) newService;
     } catch (Exception e) {
-      log.error("createService failed", e);
+      log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
     }
     return null;
   }
@@ -1188,20 +1193,69 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   /**
-   * registers a service - internal to this mrl process
+   * Registration is the process where a remote system sends detailed info
+   * related to its services. It will have details on each service type, state,
+   * id, and other info. The registration is serializable, with state
+   * information in a serialized for so that stateless processes or other
+   * non-Java instances can register or be registered.
    * 
-   * @param service
+   * Registration might setup subscriptions to support a UI.
+   * 
+   * Additional info which will be added in the future is a method map (a
+   * swagger concept) and a list of supported interfaces
+   * 
+   * TODO - have rules on what registrations to accept - dependent on security,
+   * desire, re-broadcasting configuration etc. TODO - determine rules on
+   * re-broadcasting based on configuration
+   * 
+   * @param registration
    * @return
    */
-  public final static synchronized ServiceInterface register(ServiceInterface service) {
-    registry.put(String.format("%s@%s", service.getName(), service.getId()), service);
-    if (runtime != null) {
-      runtime.invoke("registered", service);
+  public final static synchronized Registration register(Registration registration) {
+
+    try {
+
+      // TODO - have rules on what registrations to accept - dependent on
+      // security, desire, re-broadcasting configuration etc.
+
+      String fullname = String.format("%s@%s", registration.getName(), registration.getId());
+      if (registry.containsKey(fullname)) {
+        log.info("{} already registered", fullname);
+        return registration;
+      }
+
+      if (!registration.isLocal(Platform.getLocalInstance().getId())) {
+        // de-serialize
+        registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
+        if (registration.getName().equals("runtime")) {
+          log.warn("onRegistered - not registering foreign runtime sent to use - we're not ready ..");
+          // return;
+        }
+        copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
+        // registration.service.startService(); // <-- this auto registers WARN
+        // if you 'start' it you'll have to put it in the registry first
+        // otherwise you'll get a cyclical call ! - hopefully we don't need to
+        // start it - no messages should be going to or coming from it
+      }
+
+      registry.put(fullname, registration.service);
+
+      if (runtime != null) {
+        // TODO - determine rules on re-broadcasting based on configuration
+        runtime.invoke("registered", registration);
+      }
+
+      // TODO - remove ? already get state from registration
+      if (!registration.isLocal(Platform.getLocalInstance().getId())) {
+        runtime.subscribe(registration.getName(), "publishState");
+      }
+
+    } catch (Exception e) {
+      log.error("registration threw for {}@{}", registration.getName(), registration.getId(), e);
+      return null;
     }
-    if (!service.isLocal()) {
-      runtime.subscribe(service.getName(), "publishState");
-    }
-    return service;
+
+    return registration;
   }
 
   /**
@@ -1796,7 +1850,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           options = new CmdOptions();
         }
 
-        repo = Repo.getInstance(options.libraries, "IvyWrapper");
+        repo = (IvyWrapper)Repo.getInstance(options.libraries, "IvyWrapper"); // previously was not (IvyWrapper)
         if (options == null) {
           options = new CmdOptions();
         }
@@ -1932,7 +1986,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     log.info("getting local repo");
 
-    repo.addStatusPublisher(this);
+    if (repo != null)/* transient */ {
+      repo.addStatusPublisher(this);
+    }
 
     hideMethods.add("main");
     hideMethods.add("loadDefaultConfiguration");
@@ -1950,7 +2006,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       startService();
     } catch (Exception e) {
       error("OMG Runtime won't start GAME OVER ! :( %s", e.getMessage());
-      Logging.logError(e);
+      log.error("OMG Runtime won't start GAME OVER ! :(", e);
     }
   }
 
@@ -2062,21 +2118,20 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   /*
-   * publishing point of Ivy sub system - sends event failedDependency when the
-   * retrieve report for a Service fails
+   * FIXME - see if this is used anymore publishing point of Ivy sub system -
+   * sends event failedDependency when the retrieve report for a Service fails
    */
+  @Deprecated /* remove */
   public String failedDependency(String dep) {
     return dep;
   }
-
-  // FIXME - you don't need that many "typed" messages - resolve,
-  // resolveError, ... etc
-  // just use & parse "message"
 
   public static Platform getPlatform() {
     return getInstance().platform;
   }
 
+  // FIXME - should be removed - use Platform.getLocalInstance().is64bit()
+  @Deprecated
   public boolean is64bit() {
     return getInstance().platform.getJvmBitness() == 64;
   }
@@ -2085,11 +2140,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return repo;
   }
 
-  public String getId() {
-    return Platform.getLocalInstance().getId();
-  }
-
-  /*
+  
+  /**
    * Returns an array of all the simple type names of all the possible services.
    * The data originates from the repo's serviceData.xml file https:/
    * /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty
@@ -2105,11 +2157,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getServiceTypeNames("all");
   }
 
-  // ============== configuration end ==============
-
-  /*
-   * publishing event to get the possible services currently available
-   *
+  /** 
+   * getServiceTypeNames will publish service names based on some filter criteria
+   * @param filter
+   * @return
    */
   public String[] getServiceTypeNames(String filter) {
     return serviceData.getServiceTypeNames(filter);
@@ -2169,14 +2220,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("onMessage()");
   }
 
-  // ---------------- callback events begin -------------
-  /*
-   * registration event
-   *
-   * @param sw - the name of the Service which was successfully registered
+  /**
+   * Publishing point when a service was successfully registered locally -
+   * regardless if the service is local or not.
+   * 
+   * TODO - more business logic can be created here to limit broadcasting or
+   * re-broadcasting published registrations
+   * 
+   * @param registration
+   *          - contains all the information need for a registration to process
+   * @return
    */
-  public ServiceInterface registered(ServiceInterface sw) {
-    return sw;
+  public Registration registered(Registration registration) {
+    return registration;
   }
 
   /*
@@ -2186,25 +2242,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   public ServiceInterface released(ServiceInterface sw) {
     return sw;
-  }
-
-  /*
-   * published events
-   *
-   */
-  public String resolveBegin(String className) {
-    return className;
-  }
-
-  public void resolveEnd() {
-  }
-
-  public List<String> resolveError(List<String> errors) {
-    return errors;
-  }
-
-  public String resolveSuccess(String className) {
-    return className;
   }
 
   /**
@@ -2752,6 +2789,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return options;
   }
 
+  public ServiceData setServiceTypes(ServiceData sd) {
+    return sd;
+  }
+
   // FIXME - a way to reach in a messages meta-data ?? is this a reference
   // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
@@ -2783,8 +2824,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // definitions !
       // FIXME THE TYPE DEFINITION SHOULD BE PART OF THE REGISTRATION !!!! -
       // making registration atomic
-      Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "setServiceTypes", serviceData);
-      send(msg);
+      // Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "setServiceTypes", serviceData);
+      // send(msg);
 
       // NOW - SEND WHAT WE WANT REMOTELY REGISTERED !!! - filter as desired
       // TODO - getRegistry(isLocal=true, excludeTypes=[], includeTypes[],
@@ -2796,96 +2837,66 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       String[] list = new String[set.size()];
       set.toArray(list);
 
+      // TODO - filtering on what is broadcasted or re-broadcasted
       for (int i = 0; i < list.length; ++i) {
-        ServiceInterface si = registry.get(list[i]);
-        Registration registration = new Registration(si.getId(), si.getFullName(), si.getType(), serviceData.getServiceType(si.getType()));
-        registration.state = CodecUtils.toJson(si);
-        msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
-        // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
-        // from the outbox .... it should have
-        send(msg);
+        String fullname = list[i];
+        ServiceInterface si = registry.get(fullname);
+        // Registration registration = new Registration(si.getId(),
+        // si.getFullName(), si.getType(),
+        // serviceData.getServiceType(si.getType()));
+        // registration.state = CodecUtils.toJson(si);
+        // TODO - surface configuration for security, policy, broadcasting,
+        // re-broadcasting and other filtering
+        // TODO - configuration here has to be SYNC'd with onRegistration for
+        // later callbacks
+        // TODO - inclusive / exclusive filters
+        // if (si.getType().contains("Clock") || getId().equals(si.getId())) {
+        
+          Registration registration = new Registration(si);
+          Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
+          // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
+          // from the outbox .... it should have
+          send(msg);
+        // }
       }
 
     } catch (Exception e) {
       log.error("getHelloResponse threw", e);
     }
 
-    // This is the "strategy" of registration
-    // New connections allow messages to be exchanged without registration !
-    // Registration allows UI interaction, dynamic method generation in JS,
-    // auto-subscribing
-    // and auto-call-back handling
-    // getHelloResponse has a list of services, their names, ids and types.
-    // This list is processed and queried with for new Registrations
-
-    // iterating through service list - (could be filtering if desired) -
-    // setting up
-    // subscriptions for registration process
-    /*
-     * if (hello.serviceList != null) { for (int i = 0; i <
-     * hello.serviceList.size(); ++i) { NameAndType service =
-     * hello.serviceList.get(i);
-     * 
-     * // for registration we need details of each service - so first find the
-     * // runtime // then addListeners to the appropriate callbacks - then query
-     * each // service // there might be multiple runtimes in the query list if
-     * (service.name.equals("runtime") && !service.id.equals(getId())) {
-     * addListener("registered", service.name + '@' + service.id);
-     * addListener("released", service.name + '@' + service.id);
-     * addListener("initService", service.name + '@' + service.id); } }
-     * 
-     * // now that callbacks are in place - we query each service // the
-     * callback for this will be "onService" for (int i = 0; i <
-     * hello.serviceList.size(); ++i) { NameAndType service =
-     * hello.serviceList.get(i); if (!service.id.equals(getId())) { // create a
-     * proxy - if // !service.type.beginsWith('org.myrobotlab.service.') ie - if
-     * service // is from JS Python other... // Proxy proxy = new
-     * Proxy(service.name, service.id, service.type);// //
-     * (Proxy)Runtime.create(service.name, "Proxy"); // proxy.startService(); //
-     * proxy.setId(service.id); // proxy.setType(service.type); String fullname
-     * = service.name + "@" + service.id; if (!registry.containsKey(fullname)) {
-     * // create digital 'twin' of service ServiceInterface si =
-     * Runtime.createService(service.name, service.type, service.id);
-     * si.startService(); // <-- this will register it
-     * log.info("created remote shell for {}", si.getName()); // set the remote
-     * id // si.setId(service.id); // start the 'twin' and is 'registered' in
-     * startService // si.startService(); } // registry.put(service.name,
-     * proxy);
-     * 
-     * // FIXME - send getRegisteredService ????? send("runtime@" + service.id,
-     * "initService", service.name + "@" + service.id); } } }
-     */
     return response;
   }
 
-  public String initService(String name) {
-    // double encode - otherwise method cache will get confused and try to
-    // select an object parameter
-    return CodecUtils.toJson(CodecUtils.toJson(registry.get(getFullName(name))));
-  }
+  /**
+   * IMPORTANT IMPORTANT IMPORTANT - Newly connected remote mrl processes blas a
+   * list of registrations through onRegistered messages, for each service they
+   * currently have in their registry. This process will send a list of
+   * registrations to the newly connected remote process. If the "registered"
+   * event is subscribed, any newly created service will be broadcasted thorough
+   * this publishing point as well.
+   * 
+   * TODO - write filtering, configuration, or security which affects what can
+   * be registered
+   * 
+   * Primarily, this is where new services are registered from remote systems
+   * 
+   * @param registration
+   */
+  public void onRegistered(Registration registration) {
+    try {
+      // check if registered ?
 
-  // FIXME - don't know if this should be getService -> onService
-  // or if its prone to be too "chatty" and a new channel should be created
-  // e.g. : getRegisteredService -> onRegisteredService
-  public void onInitService(String jsonService) {
-    log.info("onService {}", jsonService);
-    // CANNOT DO THIS with typeless serialization !!!
-    // register(service);
-    LinkedTreeMap<String, Object> state = CodecUtils.toTree(jsonService);
-    String serviceName = state.get("name").toString() + "@" + state.get("id").toString();
-    ServiceInterface si = getService(serviceName);
-    if (si == null) {
-      log.error("onInitService did not find {}", serviceName);
-      return;
+      // TODO - filtering - include/exclude
+
+      String fullname = registration.getName() + "@" + registration.getId();
+      if (!registry.containsKey(fullname)) {
+        register(registration);
+      } else {
+        log.info("{} already registered", fullname);
+      }
+    } catch (Exception e) {
+      log.error("onRegistered threw {}", registration, e);
     }
-    si.loadFromJson(jsonService);
-    // si.startService();
-
-    // For non-existent services not defined with Java classes (e.g. JS Python,
-    // .. other)
-    // Proxy proxy = (Proxy)registry.get(serviceName);
-    // proxy.setState(state);
-
   }
 
   public void onHelloResponse(HelloResponse response) {
