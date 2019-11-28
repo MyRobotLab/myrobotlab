@@ -250,17 +250,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         console.log(response)
     }
 
-    /**
-     *
-     */
-    this.setServiceTypes = function(msg) {
-        const values = Object.values(msg.data[0].serviceTypes)
-        for (const v of values) {
-            serviceTypes[v.simpleName] = v
-        }
-        deferred.resolve('connected !')
-    }
-
     this.onRegistered = function(msg) {
         
         let registration = msg.data[0]
@@ -455,7 +444,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
                     console.error('string supplied name did not have remoteId - this will be a problem !')
-                    return service + '@' + _self.remoteId
+                    return service + '@' + _self.id
                 } else {
                     return service
                 }
@@ -941,7 +930,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // correct way to put in callbacks for js runtime instance
     jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
-    jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
+    // jsRuntimeMethodMap["runtime@" + this.id + ".setServiceTypes"] = _self.setServiceTypes
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so
