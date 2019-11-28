@@ -42,6 +42,7 @@ import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -847,25 +848,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  public void handleServiceApi(AtmosphereResource r) throws Exception {
-    AtmosphereRequest request = r.getRequest();
-    AtmosphereResponse response = r.getResponse();
-    OutputStream out = response.getOutputStream();
-    response.addHeader("Content-Type", CodecUtils.MIME_TYPE_JSON);
-
-    String hack = null;
-    byte[] data = null;
-    if (request.body() != null) {
-      hack = request.body().asString();
-      // data = request.body().asBytes();
-      if (hack != null) { // FIXME - hack because request.body().asBytes()
-        // ALWAYS returns null !!
-        data = hack.getBytes();
-      }
-    }
-    // api.process(out, r.getRequest().getRequestURI(), data);
-  }
-
   public void hide(String name) {
     invoke("publishHide", name);
   }
@@ -919,7 +901,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-  public void onRegistered(ServiceInterface si) {
+  public void onRegistered(Registration r) {
+    ServiceInterface si = r.service;
     // new service
     // subscribe to the status events
     // FIXED !!! - these subscribes are no longer needed because
@@ -933,29 +916,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
 
     invoke("publishPanel", si.getName());
-
-    // broadcast it too
-    // repackage message
-    /*
-     * don't need to do this :) Message m = createMessage(getName(),
-     * "onRegistered", si); m.sender = Runtime.getInstance().getName();
-     * broadcast(m);
-     */
   }
-
-  /*
-   * @Override public boolean preProcessHook(Message m) { // FIXME - problem
-   * with collisions of this service's methods // and dialog methods ?!?!?
-   * 
-   * // broadcast broadcast(m);
-   * 
-   * // if the method name is == to a method in the WebGui // process it if
-   * (methodSet.contains(m.method)) { // process the message like a regular
-   * service return true; }
-   * 
-   * // otherwise send the message to the dialog with the senders name //
-   * broadcast(m); return false; }
-   */
 
   public String publishHide(String name) {
     return name;
@@ -1046,23 +1007,27 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   @Override
   public void sendRemote(Message msg) {
-    String json = CodecUtils.toJson(msg);
-    if (json.length() > 65536) {
-      log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
-      try {
-        FileIO.toFile(String.format("too-big-%s-%d.json", msg.method, System.currentTimeMillis()), json);
-      } catch (Exception e) {
+    try {
+      String json = CodecUtils.toJson(msg);
+      if (json.length() > 65536) {
+        log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
+        try {
+          FileIO.toFile(String.format("too-big-%s-%d.json", msg.method, System.currentTimeMillis()), json);
+        } catch (Exception e) {
+        }
       }
-    }
 
-    if (broadcastMode) {
-      // multi-cast mode all clients have a single id
-      broadcaster.broadcast(json);
-    } else {
-      // uni-cast mode - all clients have their own id
-      String uuid = Runtime.getRoute(msg.getId());
-      Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
-      broadcaster.broadcast(json);
+      if (broadcastMode) {
+        // multi-cast mode all clients have a single id
+        broadcaster.broadcast(json);
+      } else {
+        // uni-cast mode - all clients have their own id
+        String uuid = Runtime.getRoute(msg.getId());
+        Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
+        broadcaster.broadcast(json);
+      }
+    } catch (Exception e) {
+      log.error("WebGui.sendRemote threw", e);
     }
   }
 
@@ -1137,10 +1102,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       log.info("WebGui {} started on port {}", getName(), port);
       // get all instances
 
+      // 20191126 - REMOVED ... does it make a difference ? Groot ?
       // we want all onState & onStatus events from all services
-      for (ServiceInterface si : Runtime.getLocalServices().values()) {
-        onRegistered(si);
-      }
+      // for (ServiceInterface si : Runtime.getLocalServices().values()) {
+      // onRegistered(si);
+      // }
 
       // additionally we will want onState & onStatus events from all
       // services
@@ -1222,7 +1188,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
       // Runtime.setLogLevel("ERROR");
-      //Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
       // Runtime.start("arduino", "Arduino");
       // Runtime.start("servo01", "Servo");
@@ -1231,6 +1197,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Runtime runtime = Runtime.getInstance();
       // runtime.setVirtual(true);
       // Runtime.start("log", "Log");
+      /*
+      Runtime.start("clock01", "Clock");
+      Runtime.start("clock02", "Clock");
+      Runtime.start("clock03", "Clock");
+      Runtime.start("clock04", "Clock");
+      Runtime.start("clock05", "Clock");
+      */
+
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

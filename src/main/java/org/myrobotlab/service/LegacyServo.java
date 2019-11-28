@@ -36,11 +36,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -328,7 +328,7 @@ public class LegacyServo extends Service implements ServoControl {
   public LegacyServo(String n) {
     super(n);
     refreshControllers();
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribeToRuntime("registered");
     lastActivityTime = System.currentTimeMillis();
     if (isEventsEnabledDefault != null) {
       isEventsEnabled = isEventsEnabledDefault;
@@ -361,7 +361,7 @@ public class LegacyServo extends Service implements ServoControl {
     }
   }
 
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
   }

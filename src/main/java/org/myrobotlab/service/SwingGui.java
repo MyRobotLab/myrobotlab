@@ -63,6 +63,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -264,7 +265,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // new service --go--> addTab
     // remove service --go--> removeTab
     subscribe("runtime", "released", getName(), "removeTab");
-    subscribe("runtime", "registered", getName(), "addTab");
+    // subscribe("runtime", "registered", getName(), "addTab");
+    subscribeToRuntime("registered");
+  }
+  
+  public void onRegistered(Registration registration) {
+    addTab(registration.service);
   }
 
   public void about() {
@@ -920,9 +926,15 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       logging.setLevel(Level.INFO);
       Runtime.main(new String[] { "--interactive", "--id", "r1" });
 
-      // Runtime.start("gui", "SwingGui");
+      Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
+      /*
       Runtime.start("clock01", "Clock");
+      Runtime.start("clock02", "Clock");
+      Runtime.start("clock03", "Clock");
+      Runtime.start("clock04", "Clock");
+      Runtime.start("clock05", "Clock");
+      */
 
       boolean done = true;
       if (done) {

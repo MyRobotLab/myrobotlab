@@ -147,6 +147,7 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
             return _self.panels[fullname];
         };
         _self.addService = function(service) {
+            
             var name = mrl.getFullName(service);
             var type = service.simpleName;
             //first load & parse the controller,    //js
@@ -283,28 +284,6 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 _self.savePanel(key);
             });
         }
-        
-        /*
-        //END_ServicePanels
-        //add & remove panels for started & stopped services
-        _self.onMsg = function(msg) {
-            switch (msg.method) {
-            case 'onRegistered':
-                var service = msg.data[0];
-                // THIS IS A REGISTRATION NOT A SINGLE SERVICE !!!!
-                _self.addService(service);
-                break;
-            case 'onReleased':
-                $log.info('release service', msg);
-                _self.releasePanel(msg.data[0]);
-                break;
-            }
-        }
-        ;
-
-        mrl.subscribeToService(_self.onMsg, runtime.name);
-        //add all existing services
-        */
 
         // we need to give mrl the ability to addPanels
         // so we set mrls function ptr

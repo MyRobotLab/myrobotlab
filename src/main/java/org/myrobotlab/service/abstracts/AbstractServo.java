@@ -7,6 +7,7 @@ import java.util.Set;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -221,7 +222,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // this servo is interested in new services which support either
     // ServoControllers or EncoderControl interfaces
     // we subscribe to runtime here for new services
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribeToRuntime("registered");
 
     /*
      * // new feature - // extracting the currentPos from serialized servo
@@ -984,7 +985,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     return cs;
   }
 
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
   }
