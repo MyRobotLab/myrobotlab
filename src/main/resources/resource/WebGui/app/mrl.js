@@ -267,7 +267,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         let fullname = registration.name + '@' + registration.id
         console.log("onRegistered " + fullname)
   
-        let simpleTypeName = getSimpleName(registration.typeKey)
+        let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
         // FIXME - what the hell its expecting a img - is this needed ????
         registration['img'] = simpleTypeName + '.png'
@@ -626,7 +626,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     }
 
-    var getSimpleName = function(fullname) {
+    this.getSimpleName = function(fullname) {
         return (fullname.substring(fullname.lastIndexOf(".") + 1))
     }
 
@@ -910,6 +910,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
+            getSimpleName: _self.getSimpleName,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,
             subscribeToService: _self.subscribeToService,

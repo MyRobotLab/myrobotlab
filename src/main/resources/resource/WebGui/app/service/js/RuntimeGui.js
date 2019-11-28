@@ -9,7 +9,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.service = service
     }
 
-    if ($scope.service == null){
+    if ($scope.service == null) {
         console.log('RuntimeGui $scope.service == null')
     }
 
@@ -20,6 +20,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.cmd = ""
     $scope.registry = {}
     $scope.connections = {}
+    $scope.newName = null;
+    $scope.newType = null;
 
     var msgKeys = {}
 
@@ -46,6 +48,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }).catch(function(error) {
             console.error(error);
         })
+    }
+
+    $scope.start = function() {
+
+        if (typeof $scope.newType == 'object') {
+            $scope.newType = $scope.newType.name
+        }
+        msg.send('start', $scope.newName, $scope.newType)
+
+        $scope.newName = null;
+        $scope.newType = null;
     }
 
     this.cliToMsg = function(contextPath, from, to, cmd) {
@@ -127,6 +140,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.registry = inMsg.data[0]
                 break
             }
+        case 'onServiceTypes':
+            {
+                $scope.possibleServices = inMsg.data[0]
+                break
+            }
         case 'onRegistered':
             {
                 // inMsg.data[0]
@@ -187,7 +205,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     // _self.promiseTimeout(1000, myVar = setTimeout({}, 3000))
 
-    $scope.possibleServices = Object.values(mrl.getPossibleServices())
+    // $scope.possibleServices = Object.values(mrl.getPossibleServices())
+    msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
     msg.subscribe("getConnectionHeaders")
@@ -195,6 +214,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     //msg.send("getLocalServices")
     msg.send("getConnectionHeaders")
+    msg.send("getServiceTypes")
     msg.subscribe(this)
 }
 ])

@@ -5,8 +5,8 @@
 <div class="row">
     <div class="form-inline col-md-6">
         <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created">
-        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-        <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="msg.start(newName, newType.name); newName = ''; newType = '';">start service</button>
+        <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+        <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType);">start service</button>
         <button class="btn btn-default" ng-click="msg.install()">install all services</button>
     </div>
 </div>

@@ -1,4 +1,4 @@
 <a>
-    <img ng-src="/{{match.model.img}}" width="16">
+    <img ng-src="/{{match.model.name.substring(23) + '.png'}}" width="16">
     <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>
 </a>
