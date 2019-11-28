@@ -171,9 +171,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  private IvyWrapper repo = null; // was transient abstract Repo
+  transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  private ServiceData serviceData = ServiceData.getLocalInstance();
+  transient private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -804,7 +804,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     List<ServiceInterface> si = getServices();
     String[] ret = new String[si.size()];
     for (int i = 0; i < ret.length; ++i) {
-      ret[i] = si.get(i).getName();
+      ServiceInterface s = si.get(i);
+      if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
+        ret[i] = s.getName();
+      } else {
+        ret[i] = s.getFullName();
+      }
     }
     return ret;
   }

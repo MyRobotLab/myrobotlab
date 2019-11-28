@@ -124,6 +124,14 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         $scope.newType = ''
     }
 
+    $scope.getRegistry = function() {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'nav/about.html',
+            controller: 'aboutCtrl'
+        })
+    }
+
     $scope.stateGo = $state.go
 }
 ])

@@ -28,7 +28,7 @@ angular.module('mrlapp.main.noWorkySvc', [])
                         statusSvc.addAlert('success', 'noWorky sent !');
                     }
                 };
-              
-                mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
-                mrl.subscribe(mrl.getRuntime().name, 'publishNoWorky');
+              // FIXME -  NOWORKY is RUNTIME specific - WHICH RUNTIME
+                // mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
+                // mrl.subscribe(mrl.getRuntime().name, 'publishNoWorky');
             }]);
