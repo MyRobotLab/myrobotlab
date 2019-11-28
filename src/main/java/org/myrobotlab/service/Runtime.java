@@ -2907,12 +2907,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return routeTable;
   }
 
-  public static Map<String, String> getServiceTypes() {
-    Map<String, String> ret = new HashMap<>();
-    for (String name : registry.keySet()) {
-      ret.put(name, registry.get(name).getClass().getCanonicalName());
-    }
-    return ret;
+  public List<ServiceType> getServiceTypes() {
+    return serviceData.getServiceTypes();
   }
 
   /**
