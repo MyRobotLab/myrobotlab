@@ -1667,8 +1667,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         Map<String, Object> retCon = getConnection(retUuid);
         // verify I'm the appropriate gateway
         Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
+        if (endpoint != null) {
         // FIXME - double encode parameters ?
         endpoint.socket.fire(CodecUtils.toJson(retMsg));
+        } else {
+          log.warn("client endpoint c-endpoint null for uuid {}", retUuid);
+        }
       }
     } catch (Exception e) {
       log.error("processing msg threw", e);
@@ -2807,12 +2811,22 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public HelloResponse getHelloResponse(String uuid, HelloRequest hello) {
 
     HelloResponse response = new HelloResponse();
+    response.status = Status.success("Ahoy!");
+    
     try {
       Map<String, Object> connection = getConnection(uuid);
       if (uuid == null) {
         log.error("uuid could not be found in known connections {}", uuid);
-        // return null;
       }
+      
+      log.info("Hello {} I am {} !", hello.id, getId());
+      if (getId().equals(hello.id)) {
+        log.warn("incoming request was for my own id {} - loopback not supported - removing connection", getId());
+        removeConection(uuid);
+        response.status = Status.error("loopback not supported");
+        return response;
+      }
+      
       response.id = getId();
       // this.uuid = uuid;
       response.request = hello;
@@ -2849,10 +2863,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       for (int i = 0; i < list.length; ++i) {
         String fullname = list[i];
         ServiceInterface si = registry.get(fullname);
-        // Registration registration = new Registration(si.getId(),
-        // si.getFullName(), si.getType(),
-        // serviceData.getServiceType(si.getType()));
-        // registration.state = CodecUtils.toJson(si);
+        
         // TODO - surface configuration for security, policy, broadcasting,
         // re-broadcasting and other filtering
         // TODO - configuration here has to be SYNC'd with onRegistration for
@@ -2865,7 +2876,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
         // from the outbox .... it should have
         send(msg);
-        // }
       }
 
     } catch (Exception e) {

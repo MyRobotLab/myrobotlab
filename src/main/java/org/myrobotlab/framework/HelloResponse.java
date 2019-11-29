@@ -6,6 +6,7 @@ public class HelloResponse {
   public String uuid;
   public HelloRequest request;
   public Platform platform;
+  public Status status;
 
   // FIXME move serviceList into HelloResponse ... result of introduction ... !
   
