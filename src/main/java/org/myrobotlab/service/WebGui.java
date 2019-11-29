@@ -315,6 +315,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // This API is only with 1.1 and up
           log.info("{} is closed by client", uuid);
         }
+        
+        // broadcasting - closing of a connection means removal of a connection and all associated services
+        // TODO - int the future perhaps do not be so destructive - mark the services as 'unknown' state 
+
+  
+        
       }
     };
   }

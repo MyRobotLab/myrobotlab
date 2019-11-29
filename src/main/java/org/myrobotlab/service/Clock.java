@@ -199,7 +199,7 @@ public class Clock extends Service {
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
-    Runtime.main(new String[]{"--interactive","--id","r2"});
+    Runtime.main(new String[]{"--interactive","--id","r7"});
     Clock clock = (Clock) Runtime.start("clock02", "Clock");
     /*
     clock.setInterval(1000);

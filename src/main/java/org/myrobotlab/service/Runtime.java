@@ -424,21 +424,18 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           repo.install(fullTypeName);
         }
       }
-
-      if (fullTypeName.equals("org.myrobotlab.service.Runtime")) {
-        log.warn("here with runtime");
-      }
-
+      
       // create an instance
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
 
       si.setId(id);
-
-      si.setVirtual(Platform.isVirtual());
-      Runtime.getInstance().creationCount++;
-      si.setOrder(Runtime.getInstance().creationCount);
+      if (Platform.getLocalInstance().getId().equals(id)) {
+        si.setVirtual(Platform.isVirtual());
+        Runtime.getInstance().creationCount++;
+        si.setOrder(Runtime.getInstance().creationCount);
+      }
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
@@ -1219,7 +1216,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public final static synchronized Registration register(Registration registration) {
 
     try {
-
+      
       // TODO - have rules on what registrations to accept - dependent on
       // security, desire, re-broadcasting configuration etc.
 
@@ -1229,13 +1226,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         return registration;
       }
 
+      log.info("{}@{} registering at {} of type {}",registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
+
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
         // de-serialize
         registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
-        if (registration.getName().equals("runtime")) {
-          log.warn("onRegistered - not registering foreign runtime sent to use - we're not ready ..");
-          // return;
-        }
+        
         copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
         // registration.service.startService(); // <-- this auto registers WARN
         // if you 'start' it you'll have to put it in the registry first
@@ -1587,7 +1583,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void onRemoteMessage(String uuid, String data) {
     try {
 
-      log.info("connection {} responded with {}", uuid, data);
+      // log.debug("connection {} responded with {}", uuid, data);
       // get api - decode msg - process it
       Map<String, Object> connection = getConnection(uuid);
       if (connection == null) {
@@ -1610,6 +1606,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       Object ret = null;
 
       if (isLocal(msg)) {
+
+        log.info("--> {}.{} {} from {}", msg.name, msg.method, (msg.isBlocking()) ? "BLOCKING" : "", msg.sender);
 
         String serviceName = msg.getName();
         // to decode fully we need class name, method name, and an array of json
@@ -1654,7 +1652,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
 
       } else {
-        log.info("<-- RELAY {} {} to {} from {}", msg.msgId, msg.method, msg.name, msg.sender);
+        log.info("<-- RELAY {} {} to {}@{} from {}@{}", msg.msgId, msg.method, msg.name, msg.getId(), msg.sender, msg.getSrcId());
         send(msg);
       }
 
@@ -1855,7 +1853,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           options = new CmdOptions();
         }
 
-        repo = (IvyWrapper)Repo.getInstance(options.libraries, "IvyWrapper"); // previously was not (IvyWrapper)
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); // previously
+                                                                               // was
+                                                                               // not
+                                                                               // (IvyWrapper)
         if (options == null) {
           options = new CmdOptions();
         }
@@ -2145,7 +2146,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return repo;
   }
 
-  
   /**
    * Returns an array of all the simple type names of all the possible services.
    * The data originates from the repo's serviceData.xml file https:/
@@ -2162,8 +2162,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getServiceTypeNames("all");
   }
 
-  /** 
-   * getServiceTypeNames will publish service names based on some filter criteria
+  /**
+   * getServiceTypeNames will publish service names based on some filter
+   * criteria
+   * 
    * @param filter
    * @return
    */
@@ -2829,7 +2831,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // definitions !
       // FIXME THE TYPE DEFINITION SHOULD BE PART OF THE REGISTRATION !!!! -
       // making registration atomic
-      // Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "setServiceTypes", serviceData);
+      // Message msg = Message.createMessage("runtime@" + getId(), "runtime@" +
+      // hello.id, "setServiceTypes", serviceData);
       // send(msg);
 
       // NOW - SEND WHAT WE WANT REMOTELY REGISTERED !!! - filter as desired
@@ -2856,12 +2859,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         // later callbacks
         // TODO - inclusive / exclusive filters
         // if (si.getType().contains("Clock") || getId().equals(si.getId())) {
-        
-          Registration registration = new Registration(si);
-          Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
-          // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
-          // from the outbox .... it should have
-          send(msg);
+
+        Registration registration = new Registration(si);
+        Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
+        // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
+        // from the outbox .... it should have
+        send(msg);
         // }
       }
 
@@ -2896,6 +2899,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       String fullname = registration.getName() + "@" + registration.getId();
       if (!registry.containsKey(fullname)) {
         register(registration);
+        if (fullname.startsWith("runtime@")) {
+          // We want to TELL remote runtime if we have new registrations - we'll
+          // send them
+          // to it's runtime
+          // subscribe(fullname, "registered");
+          // subscribe(fullname, "released");
+          // IMPORTANT w
+          addListener("registered", fullname);
+          addListener("released", fullname);
+        }
       } else {
         log.info("{} already registered", fullname);
       }
