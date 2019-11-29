@@ -87,7 +87,7 @@ public class Clock extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Clock.class);
   public boolean isClockRunning;
 
   public int interval = 1000;

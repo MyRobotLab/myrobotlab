@@ -531,8 +531,10 @@ public class Arduino extends AbstractMicrocontroller
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
     // test to see if we've been started. the serial might be null
-    initSerial();
+    
     try {
+      
+      initSerial();
 
       if (isConnected() && port.equals(serial.getPortName())) {
         log.info("already connected to port {}", port);
@@ -2343,14 +2345,18 @@ public class Arduino extends AbstractMicrocontroller
       Platform.setVirtual(true);
       LoggingFactory.init(Level.WARN);
       // Platform.setVirtual(true);
+      /*
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      // Runtime.start("gui", "SwingGui");
+      */
+      Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+      
+      hub.connect("COM3");
 
       // hub.enableAck(false);
       ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
@@ -2369,7 +2375,7 @@ public class Arduino extends AbstractMicrocontroller
       log.info("here");
       // hub.connect("COM6"); // uno
 
-      hub.connect("COM3");
+      
 
       // hub.startTcpServer();
 

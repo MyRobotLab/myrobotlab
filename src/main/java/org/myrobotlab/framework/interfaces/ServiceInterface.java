@@ -133,6 +133,4 @@ public interface ServiceInterface
 
   public String getFullName();
 
-  public void setId(String id);
-
 }

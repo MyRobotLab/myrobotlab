@@ -430,7 +430,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
 
-      si.setId(id);
+      // si.setId(id);
       if (Platform.getLocalInstance().getId().equals(id)) {
         si.setVirtual(Platform.isVirtual());
         Runtime.getInstance().creationCount++;
@@ -1480,20 +1480,25 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     return ret;
   }
-
+ 
+  
+  // FIXME - NO STATICS !!!
   // FIXME - should be a map of remotes ?
   static Client clientRemote = new Client();
   static InProcessCli stdInClient = null;
+  
 
   public void connect() throws IOException {
-    connect("admin", "ws://localhost:8887/api/messages");
+    connect("ws://localhost:8887/api/messages");
   }
 
+  // FIXME - implement !
   public void disconnect() throws IOException {
-    connect("admin", "ws://localhost:8887/api/messages");
+    // connect("admin", "ws://localhost:8887/api/messages");
   }
 
   /**
+   * FIXME - can this be renamed back to attach ?
    * jump to another process using the cli
    * 
    * @param id
@@ -1514,11 +1519,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getId();
   }
 
-  @Override
-  public void connect(String url) throws IOException {
-    connect(url, url);
-  }
-
   public Object sendToCli(String cmd) {
     // Message msg = CodecUtils.cliToMsg(getName(), null,
     // r.getRequest().getPathInfo());
@@ -1532,13 +1532,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
-  public void connect(String id, String url) throws IOException {
+  @Override
+  public void connect(String wsUrl) throws IOException {
 
     clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
                                            // on client creation?
 
     UUID uuid = java.util.UUID.randomUUID();
-    Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
+    Endpoint endpoint = clientRemote.connect(uuid.toString(), wsUrl);
 
     // TODO - filter this message's serviceList according as desired
     Message msg = getDefaultMsg(uuid.toString());
@@ -1556,8 +1557,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     // cli specific
     attributes.put("cwd", "/");
-    attributes.put("url", url);
-    attributes.put("uri", url); // not really correct
+    attributes.put("url", wsUrl);
+    attributes.put("uri", wsUrl); // not really correct
     attributes.put("user", "root");
     attributes.put("host", "local");
 
