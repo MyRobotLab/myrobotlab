@@ -27,8 +27,8 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
@@ -41,16 +41,13 @@ import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.IKJointAngleListener;
-import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -305,14 +302,14 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     refreshPinArrayControls();
     motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
     initPid();
-    subscribe(Runtime.getInstance().getName(), "registered", this.getName(), "onRegistered");
+    subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();
   }
 
   /*
    * Update the list of PinArrayControls
    */
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshPinArrayControls();
     broadcastState();
 

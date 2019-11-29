@@ -21,12 +21,12 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * handles all encoding and decoding of MRL messages or api(s) assumed context -
@@ -67,8 +67,6 @@ public class CodecUtils {
 
   private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").disableHtmlEscaping().create();
   private transient static Gson prettyGson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-
-  private static boolean initialized = false;
 
   public final static String makeFullTypeName(String type) {
     if (type == null) {
@@ -115,6 +113,10 @@ public class CodecUtils {
 
   public final static <T extends Object> T fromJson(String json, Type type) {
     return gson.fromJson(json, type);
+  }
+  
+  public final static LinkedTreeMap<String,Object> toTree(String json) {
+    return gson.fromJson(json, LinkedTreeMap.class);
   }
 
   public static Type getType(final Class<?> rawClass, final Class<?>... parameterClasses) {
@@ -166,7 +168,7 @@ public class CodecUtils {
     if (msg.sendingMethod != null) {
       return String.format("%s.%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     } else {
-      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.sendingMethod, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
+      return String.format("%s --> %s.%s(%s) - %d", msg.sender, msg.name, msg.method, CodecUtils.getParameterSignature(msg.data), msg.msgId);
     }
   }
 
@@ -401,11 +403,11 @@ public class CodecUtils {
    *          - sender
    * @param to
    *          - target service
-   * @param data
+   * @param cmd
    *          - cli encoded msg
    * @return
    */
-  static public Message cliToMsg(String contextPath, String from, String to, String data) {
+  static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
 
     // because we always want a "Blocking/Return" from the cmd line - without a
@@ -435,15 +437,15 @@ public class CodecUtils {
      * </pre>
      */
 
-    data = data.trim();
+    cmd = cmd.trim();
 
     // remove uninteresting api prefix
-    if (data.startsWith("/api/service")) {
-      data = data.substring("/api/service".length());
+    if (cmd.startsWith("/api/service")) {
+      cmd = cmd.substring("/api/service".length());
     }
 
     if (contextPath != null) {
-      data = contextPath + data;
+      cmd = contextPath + cmd;
     }
 
     // assume runtime as 'default'
@@ -455,13 +457,13 @@ public class CodecUtils {
     // if it does begin with "/" its an absolute path to a dir, ls, or invoke
     // if not then its a runtime method
 
-    if (data.startsWith("/")) {
+    if (cmd.startsWith("/")) {
       // ABSOLUTE PATH !!!
-      String[] parts = data.split("/");
+      String[] parts = cmd.split("/");
 
       if (parts.length < 3) {
         msg.method = "ls";
-        msg.data = new Object[] { "\"" + data + "\"" };
+        msg.data = new Object[] { "\"" + cmd + "\"" };
         return msg;
       }
 
@@ -483,7 +485,7 @@ public class CodecUtils {
       // NOT ABOSLUTE PATH - SIMILAR TO EXECUTING IN THE RUNTIME /usr/bin path
       // (ie runtime methods!)
       // spaces for parameter delimiters ?
-      String[] spaces = data.split(" ");
+      String[] spaces = cmd.split(" ");
       // FIXME - need to deal with double quotes e.g. func A "B and C" D - p0 =
       // "A" p1 = "B and C" p3 = "D"
       msg.method = spaces[0];

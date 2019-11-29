@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.myrobotlab.framework.NameAndType;
+import org.myrobotlab.framework.Registration;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -34,7 +35,7 @@ public class Swagger3 {
 
   // FIXME - resolve
   // {instance} vs {static class} info ???
-  public Map<String, Object> getSwagger(List<NameAndType> nameAndTypes) {
+  public Map<String, Object> getSwagger(List<Registration> nameAndTypes) {
     Map<String, Object> swagger = new TreeMap<>();
 
     try {
@@ -81,13 +82,13 @@ public class Swagger3 {
       Map<String, Object> components = new TreeMap<>();
       swagger.put("components", components);
 
-      for (NameAndType nameAndType : nameAndTypes) {
+      for (Registration nameAndType : nameAndTypes) {
         ///////////////////////////////////
         // BUILD IT !!!
         ///////////////////////////////////
         // get static class info
         String name = nameAndType.name;
-        Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", nameAndType.type));
+        Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", nameAndType.typeKey));
 
         // TODO - make examples and other info in MetaData !
         Method method = c.getMethod("getMetaData");
@@ -201,9 +202,9 @@ public class Swagger3 {
     try {
 
       Swagger3 swagger = new Swagger3();
-      List<NameAndType> nameAndTypes = new ArrayList<>();
-      nameAndTypes.add(new NameAndType("runtime", "Runtime"));
-      nameAndTypes.add(new NameAndType("servo01", "Servo"));
+      List<Registration> nameAndTypes = new ArrayList<>();
+      nameAndTypes.add(new Registration(Platform.getLocalInstance().getId(), "runtime", "Runtime", null));
+      nameAndTypes.add(new Registration(Platform.getLocalInstance().getId(), "servo01", "Servo", null));
 
       System.out.println(gson.toJson(swagger.getSwagger(nameAndTypes)));
       // cli.processInput("test", null);

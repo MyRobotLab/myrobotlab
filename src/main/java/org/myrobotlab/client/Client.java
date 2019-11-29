@@ -3,10 +3,10 @@ package org.myrobotlab.client;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import org.atmosphere.wasync.ClientFactory;
@@ -17,6 +17,9 @@ import org.atmosphere.wasync.Function;
 import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Clock;
+import org.slf4j.Logger;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -44,26 +47,9 @@ import picocli.CommandLine.Option;
  */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
 public class Client {
+  
+  public final static Logger log = LoggerFactory.getLogger(Client.class);
 
-  // private transient static Gson gson = new
-  // GsonBuilder().setDateFormat("yyyy-MM-dd
-  // HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
-
-  // interactive / non-interactive - single command
-  // credentials
-  // tls
-  // send vs msg - asynchrounous
-  // alias for url .. attach
-  // subscribe
-  // subscribe output - ??? file
-  // look to curl for ideas ?
-  // verbose / quiet
-  // "connect" - connect to multiple instances ... (switch instance) - reference
-  // instance
-
-  // FIXME - this is a project and a different jar potentially - but source has
-  // to be filtered !!!
-  // FIXME - --key dfsdfDafDI834839jfdksji123jf1398
   @Option(names = "--option", description = "Some option.")
   String option;
 
@@ -111,7 +97,7 @@ public class Client {
         }
 
         // main response
-        System.out.println(data);
+        //System.out.println(data);
         for (RemoteMessageHandler handler : handlers) {
           handler.onRemoteMessage(uuid, data);
         }
@@ -125,6 +111,46 @@ public class Client {
   }
 
   Set<RemoteMessageHandler> handlers = new HashSet<>();
+  
+  public class AutoConnector implements Runnable {
+    transient Thread worker;
+    boolean isRunning = false;
+    long interval = 1000;
+    
+    public void run() {
+      isRunning = true;
+      while(isRunning) {
+        try {
+        Thread.sleep(interval);
+        } catch(Exception e) {
+          isRunning = false;
+        }
+        for (String url : endpoints.keySet()) {
+          try {
+            if (endpoints.get(url).socket == null) {
+              connect(url);
+            }
+          } catch(Exception e) {
+            log.error("could not connect to {}", url, e);
+          }
+        }
+      }
+      isRunning = false;
+      worker = null;
+    }
+    
+    synchronized public void start() {
+      if (worker == null) {
+        worker = new Thread(this, "auto-connector");
+        worker.start();
+      }
+    }
+    
+   synchronized public void stop() {
+     isRunning = false;
+    }
+  }
+  
 
   public void addResponseHandler(RemoteMessageHandler handler) {
     handlers.add(handler);
@@ -158,7 +184,7 @@ public class Client {
     }
   }
 
-  Map<String, Endpoint> endpoints = new HashMap<>();
+  Map<String, Endpoint> endpoints = new TreeMap<>();
 
   public Endpoint connect(String url) {
     return connect(null, url);
@@ -168,13 +194,14 @@ public class Client {
     try {
 
       Endpoint endpoint = new Endpoint();
-
+      
       if (uuid == null) {
         UUID u = java.util.UUID.randomUUID();
         uuid = u.toString();
       }
 
       endpoint.uuid = uuid;
+      endpoints.put(uuid, endpoint);
 
       org.atmosphere.wasync.Client client = ClientFactory.getDefault().newClient();
       // what benefits are there with the atmosphere client ?
@@ -192,32 +219,7 @@ public class Client {
           return new StringReader(s);
         }
       }).decoder(endpoint
-          
-          /*new Decoder<String, Reader>() {
-        @Override
-        public Reader decode(Event type, String data) {
-          // System.out.println("=========== decode <----- ===========");
-          // System.out.println("decoding [{} - {}]", type, s);
-          if (data != null && "X".equals(data)) {
-            // System.out.println("MESSAGE - X");
-            return null;
-          }
-          if ("OPEN".equals(data)) {
-            return null;
-          }
-
-          // main response
-          System.out.println(data);
-          for (ResponseHandler handler : handlers) {
-            handler.onResponse(uuid, data);
-          }
-
-          // response
-          // System.out.println("OPENED" + s);
-
-          return new StringReader(data);
-        }
-      }*/).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
+          ).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
           .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
                                                       // Long-Polling
 
@@ -231,12 +233,14 @@ public class Client {
       nettyConfig.setWebSocketMaxFrameSize(262144);
       nettyConfig.addProperty("child.tcpNoDelay", "true");
       nettyConfig.addProperty("child.keepAlive", "true");
+      // nettyConfig.setWebSocketMaxFrameSize(65536);
 
       // AsyncHttpClientConfig Config
       AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
       b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
       AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
       AsyncHttpClient asc = new AsyncHttpClient(config);
+      
 
       Socket socket = client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
@@ -282,25 +286,18 @@ public class Client {
         }
       }).open(request.build());
 
-      /*
-       * using cli socket.fire("/runtime/getUptime");
-       * 
-       * System.out.println("here");
-       * 
-       * socket.fire("/runtime/getUptime");
-       */
+  
       endpoint.socket = socket;
-      endpoints.put(uuid, endpoint);
       currentUuid = uuid;
 
       return endpoint;
 
     } catch (Exception e) {
-      e.printStackTrace();
-      // log.error("something threw", e);
+      log.error("connect {} threw", url, e);
     }
     return null;
   }
+  
 
   public class Worker implements Runnable {
 

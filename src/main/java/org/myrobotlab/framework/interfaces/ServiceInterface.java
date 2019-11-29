@@ -63,7 +63,6 @@ public interface ServiceInterface
 
   public Outbox getOutbox();
 
-  // Deprecate - just use class
   public String getSimpleName();
 
   // important to maintain a method to return canonical type
@@ -129,5 +128,9 @@ public interface ServiceInterface
    * @param creationCount
    */
   public void setOrder(int creationCount);
+  
+  public String getId();
+
+  public String getFullName();
 
 }

@@ -17,10 +17,8 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         })
     })
 
-    var runtime = mrl.getRuntime()
-
     // load type ahead service types
-    $scope.possibleServices = mrl.getPossibleServices()
+    $scope.possibleServices = Object.values(mrl.getPossibleServices())
     // get platform information for display
     $scope.platform = mrl.getPlatform()
     // status info warn error
@@ -124,6 +122,14 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         mrl.sendTo(mrl.getRuntime().name, "start", newName, newTypeModel.name)
         $scope.newName = ''
         $scope.newType = ''
+    }
+
+    $scope.getRegistry = function() {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'nav/about.html',
+            controller: 'aboutCtrl'
+        })
     }
 
     $scope.stateGo = $state.go

@@ -84,11 +84,13 @@ public class Servo extends AbstractServo implements ServoControl {
   public static void main(String[] args) throws InterruptedException {
     try {
 
+      Runtime.main(new String[] { "--interactive"});
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
+      Runtime.start("webgui", "WebGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       mega.connect("COM7");

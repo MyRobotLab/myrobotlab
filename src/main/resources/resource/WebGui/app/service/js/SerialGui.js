@@ -47,10 +47,6 @@ angular.module('mrlapp.service.SerialGui', []).controller('SerialGuiCtrl', ['$sc
         title: 'Title'
     }
 
-    // initial update
-    $scope.service = mrl.getService($scope.service.name)
-    _self.updateState($scope.service)
-
     //you HAVE TO define this method &
     //it is the ONLY exception of writing into .panel
     //-> you will receive all messages routed to your service here

@@ -161,7 +161,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(VirtualArduino.class.getCanonicalName());
+    ServiceType meta = new ServiceType(VirtualArduino.class);
     meta.addDescription("virtual hardware of for the Arduino!");
     meta.setAvailable(true);
     meta.addPeer("uart", "Serial", "serial device for this Arduino");
@@ -182,8 +182,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public void start() {    
     runner.start();
   }
-
-  public boolean usedByInmoov = false;
 
   public void stop() {
     runner.stop();

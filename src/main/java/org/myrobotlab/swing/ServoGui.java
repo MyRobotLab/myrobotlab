@@ -54,16 +54,16 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicArrowButton;
 
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
+import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.VirtualArduino;
@@ -812,7 +812,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
    * 
    * @param s
    */
-  public void onRegistered(ServiceInterface s) {
+  public void onRegistered(Registration s) {
     refreshControllers();
     refreshEncoders();
   }

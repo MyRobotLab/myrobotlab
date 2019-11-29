@@ -68,6 +68,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -694,9 +695,9 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   /*
    * new Service has been created list it..
    */
-  public ServiceInterface onRegistered(Service sw) {
-    currentServicesModel.addElement(sw);
-    return sw;
+  public ServiceInterface onRegistered(Registration r) {
+    currentServicesModel.addElement(r.service);
+    return r.service;
   }
 
   /*

@@ -4,4 +4,6 @@ angular.module('mrlapp.nav')
         
                 // get platform information for display
                 $scope.platform = mrl.getPlatform();
+
+                $scope.registry = mrl.getRegistry();
             }]);
