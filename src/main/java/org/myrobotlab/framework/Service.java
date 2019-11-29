@@ -917,6 +917,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
+    
+    // register this service
+    Registration registration = new Registration(this); 
+    Runtime.register(registration);
+    
   }
 
   /**
@@ -1963,11 +1968,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   synchronized public void startService() {
     // register locally
+    /* had to register here  for synchronization issues before ...
     Registration registration = new Registration(this); 
     Runtime.register(registration);
-    ServiceInterface si = Runtime.getService(name);
+    */
    
-
     // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
     // should be created
     // currently they are started by the UI vs created - and there is no desire

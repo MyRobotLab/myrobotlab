@@ -90,6 +90,7 @@ public class Servo extends AbstractServo implements ServoControl {
       
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
+      Runtime.start("webgui", "WebGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       mega.connect("COM7");
