@@ -75,9 +75,9 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   /**
    * dependency keys of with key structure {org}-{version}
    */
-  public List<ServiceDependency> dependencies = new ArrayList<ServiceDependency>();
-  public Set<String> categories = new HashSet<String>();
-  public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
+  transient public List<ServiceDependency> dependencies = new ArrayList<ServiceDependency>();
+  transient public Set<String> categories = new HashSet<String>();
+  transient  public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
   // only used for appending ServiceExcludes to ServiceDependencies
   transient private ServiceDependency lastDependency;

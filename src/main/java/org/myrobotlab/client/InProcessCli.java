@@ -86,7 +86,7 @@ public class InProcessCli implements Runnable {
       attributes.put("uri", "/api/cli");
       attributes.put("user", "root");
       attributes.put("host", "local");
-      attributes.put("c-type", "cli");
+      attributes.put("c-type", "Cli");
       Runtime runtime = Runtime.getInstance();
       runtime.addConnection(uuid, attributes);
       runtime.getHelloResponse(uuid, new HelloRequest(id, uuid));
@@ -120,12 +120,12 @@ public class InProcessCli implements Runnable {
   }
 
   // FIXME determine if GET notation should use encoded ? (probably) - ie should it "always" be decoded ?
-  public Object process(String data) {
+  public Object process(String cmd) {
     try {
 
-      data = data.trim();
+      cmd = cmd.trim();
 
-      if ("".equals(data)) {
+      if ("".equals(cmd)) {
         writePrompt(out, uuid); // <-- should be id no ?
         return null; // FIXME RETURN ERROR ???
       }
@@ -134,7 +134,7 @@ public class InProcessCli implements Runnable {
       // parse line for /{serviceName@id}/{method}/jsonEncoded? parms ?? ...
 
       // "create" cli specific msgs
-      Message cliMsg = cliToMsg(data);
+      Message cliMsg = cliToMsg(cmd);
       
       // fully address destination
       if (!cliMsg.name.contains("@")) {
@@ -176,7 +176,7 @@ public class InProcessCli implements Runnable {
         // FIXME the ret could be set by sendBlockingRemote too "if it worked"
         // instead we handle it asynchronously
         writeToJson(ret);
-        writePrompt(out, data);
+        writePrompt(out, cmd);
 
       } else {
         // send remotely

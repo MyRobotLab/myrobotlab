@@ -45,7 +45,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -64,6 +63,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
@@ -265,7 +265,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // new service --go--> addTab
     // remove service --go--> removeTab
     subscribe("runtime", "released", getName(), "removeTab");
-    subscribe("runtime", "registered", getName(), "addTab");
+    // subscribe("runtime", "registered", getName(), "addTab");
+    subscribeToRuntime("registered");
+  }
+  
+  public void onRegistered(Registration registration) {
+    addTab(registration.service);
   }
 
   public void about() {
@@ -395,12 +400,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       @Override
       public void run() {
 
-        String name = sw.getName();
+        String name = sw.getFullName();// sw.getName();
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
 
-        String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getClass().getSimpleName());
+        String guiClass = String.format("org.myrobotlab.swing.%sGui", sw.getSimpleName());
 
         log.debug("createTab {} {}", name, guiClass);
         ServiceGui newGui = null;
@@ -919,11 +924,17 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     Logging logging = LoggingFactory.getInstance();
     try {
       logging.setLevel(Level.INFO);
-      if (args.length > 0) {
-        Runtime.main(new String[] {"--interactive", "--id", args[0]});
-      }
+      Runtime.main(new String[] { "--interactive", "--id", "r1" });
+
       Runtime.start("gui", "SwingGui");
-      Runtime.start("python", "Python");
+      // Runtime.start("python", "Python");
+      /*
+      Runtime.start("clock01", "Clock");
+      Runtime.start("clock02", "Clock");
+      Runtime.start("clock03", "Clock");
+      Runtime.start("clock04", "Clock");
+      Runtime.start("clock05", "Clock");
+      */
 
       boolean done = true;
       if (done) {
@@ -1036,7 +1047,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // easy single client support
     Map<String, Object> attributes = new HashMap<>();
     attributes.put("gateway", getName());
-    attributes.put("type", "swing");
+    attributes.put("c-type", getSimpleName());
     attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
     attributes.put("uuid", uuid);

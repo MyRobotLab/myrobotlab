@@ -3,8 +3,8 @@ angular.module('mrlapp.main.mainCtrl', ['mrlapp.mrl'])
             function ($scope, $log, $state, mrl, panelSvc) {
                 $log.info('mainCtrl');
                 // FIXME - while (!mrl.isConnected()){ sleep(3);}
-                $log.info('mrl.isConnected', mrl.isConnected(), 'panelSvc.isRead', panelSvc.isReady());
-                if (!mrl.isConnected() || !panelSvc.isReady()) {
+                //  $log.info('mrl.isConnected', mrl.isConnected(), 'panelSvc.isRead', panelSvc.isReady());
+                if (!mrl.isConnected() /*|| !panelSvc.isReady()*/) {
                     //you shouldn't be here if something isn't ready yet
                     $log.info('redirect main-->loading');
                     $state.go('loading');

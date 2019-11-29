@@ -11,42 +11,32 @@
 angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$templateCache', '$timeout', '$ocLazyLoad', '$q', function(mrl, $log, $http, $templateCache, $timeout, $ocLazyLoad, $q) {
     $log.info('panelSvc');
     var _self = this;
+
     // object containing all panels
     _self.panels = {};
     // global zIndex
     _self.zIndex = 0;
     var ready = false;
     // TODO - refactor
-    var deferred;
-    //check if mrl.js is already connected and wait for it if it is not
-
-    /*
-    if (!mrl.isConnected()) {
-        $log.info('wait for mrl.js to become connected ...');
-        var subscribeFunction = function(connected) {
-            $log.info('mrl.js seems to be ready now ...', connected, mrl.isConnected());
-            if (connected) {
-                mrl.unsubscribeConnected(subscribeFunction);
-                run();
-            }
-        };
-        mrl.subscribeConnected(subscribeFunction);
-    } else {
-        run();
-    }
-*/
-
-    // mrl.waitUntilReady();
+    // var deferred;
 
     this.isReady = function() {
-        return ready;
+        return true;
     }
-    ;
+
+    var getSimpleName = function(fullname) {
+        if (fullname == null){
+            console.error("error!")
+        }
+        return (fullname.substring(fullname.lastIndexOf(".") + 1))
+    }
+    
+    /*
     this.waitToBecomeReady = function() {
         $log.info('panelSvc.waitToBecomeReady()');
         deferred = $q.defer();
         return deferred.promise;
-    }
+    }*/
     ;
     var run = function() {
         $log.info('initalizing panelSvc');
@@ -114,18 +104,21 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         }
         ;
         var addPanel = function(service) {
-            if (_self.panels.hasOwnProperty(service.name)) {
-                $log.warn(service.name + ' already has panel');
-                return _self.panels[service.name];
+            var fullname = mrl.getFullName(service)
+
+            if (_self.panels.hasOwnProperty(fullname)) {
+                $log.warn(fullname + ' already has panel');
+                return _self.panels[fullname];
             }
             lastPosY += 40;
             var posY = lastPosY;
             _self.zIndex++;
             //construct panel & add it to list
-            _self.panels[service.name] = {
-                simpleName: service.simpleName,
+            _self.panels[fullname] = {
+                simpleName: getSimpleName(service.serviceClass),
                 //serviceType (e.g. Runtime, Python, ...)
-                name: service.name,
+                name: fullname,
+                // service.name,
                 //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                 templatestatus: service.templatestatus,
                 //the state the loading of the template is in (loading, loaded, notfound)
@@ -151,10 +144,11 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                     hide = true;
                 }
             };
-            return _self.panels[service.name];
+            return _self.panels[fullname];
         };
         _self.addService = function(service) {
-            var name = service.name;
+            
+            var name = mrl.getFullName(service);
             var type = service.simpleName;
             //first load & parse the controller,    //js
             //then load and save the template       //html
@@ -181,8 +175,9 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
         }
         ;
         // TODO - releasePanel
-        _self.releasePanel = function(name) {
+        _self.releasePanel = function(inName) {
             //remove a service and it's panels
+            let name = mrl.getFullName(inName)
             $log.info('removing service', name);
             //remove panels
             if (name in _self.panels) {
@@ -289,30 +284,13 @@ angular.module('mrlapp.service').service('panelSvc', ['mrl', '$log', '$http', '$
                 _self.savePanel(key);
             });
         }
-        ;
-        //END_ServicePanels
-        //add & remove panels for started & stopped services
-        _self.onMsg = function(msg) {
-            switch (msg.method) {
-            case 'onRegistered':
-                var service = msg.data[0];
-                _self.addService(service);
-                break;
-            case 'onReleased':
-                $log.info('release service', msg);
-                _self.releasePanel(msg.data[0].name);
-                break;
-            }
-        }
-        ;
-        mrl.subscribeToService(_self.onMsg, runtime.name);
-        //add all existing services
-        for (var name in registry) {
-            if (registry.hasOwnProperty(name)) {
-                _self.addService(registry[name]);
-            }
-        }
+
+        // we need to give mrl the ability to addPanels
+        // so we set mrls function ptr
+        mrl.setAddServicePanel(_self.addService)
+
         ready = true;
+
     };
     // end of function run()
 

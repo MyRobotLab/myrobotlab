@@ -18,5 +18,6 @@ angular.module('mrlapp.nav')
                         $scope.status = 'success';
                     }
                 };
-                mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
+// FIXME - a noWorky is Runtime specific ... WHICH RUNTIME !!!
+//                mrl.subscribeToServiceMethod(onNoWorky, mrl.getRuntime().name, 'publishNoWorky');
             }]);

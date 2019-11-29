@@ -87,7 +87,7 @@ public class Clock extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Clock.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(Clock.class);
   public boolean isClockRunning;
 
   public int interval = 1000;
@@ -187,6 +187,8 @@ public class Clock extends Service {
     } else {
       log.info("clock already stopped");
     }
+    isClockRunning = false;
+    broadcastState();
   }
 
   @Override
@@ -197,14 +199,16 @@ public class Clock extends Service {
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.INFO);
-
-    Clock clock = (Clock) Runtime.start("clock", "Clock");
+    Runtime.main(new String[]{"--interactive","--id","r7"});
+    Clock clock = (Clock) Runtime.start("clock02", "Clock");
+    /*
     clock.setInterval(1000);
     clock.restartClock();
     sleep(2000);
     clock.restartClock();
     sleep(2000);
     clock.stopClock();
+    */
   }
 
   /**

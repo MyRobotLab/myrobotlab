@@ -51,14 +51,15 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
-import org.myrobotlab.framework.NameAndType;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -167,17 +168,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   Integer creationCount = 0;
 
   /**
-   * current list of cli sessions and where they are from
-   */
-  List<String> cliSessions = new ArrayList<String>();
-
-  /**
    * the local repo of this machine - it should not be static as other foreign
    * repos will come in with other Runtimes from other machines.
    */
-  transient private Repo repo = null;
+  transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  private ServiceData serviceData = ServiceData.getLocalInstance();
+  transient private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -293,7 +289,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } else {
       fullTypeName = type;
     }
-    return createService(name, fullTypeName);
+    return createService(name, fullTypeName, null);
   }
 
   /**
@@ -390,14 +386,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     broadcastState();
   }
 
-  static public synchronized ServiceInterface createService(String name, String fullTypeName) {
+  static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {
     log.info("Runtime.createService {}", name);
+    String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
       return null;
     }
 
-    ServiceInterface sw = Runtime.getService(name);
+    // TODO - test new create of existing service
+    ServiceInterface sw = Runtime.getService(String.format("%s@%s", name, id));
     if (sw != null) {
       log.info("service {} already exists", name);
       return sw;
@@ -426,17 +424,21 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           repo.install(fullTypeName);
         }
       }
-
+      
       // create an instance
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
-      si.setVirtual(Platform.isVirtual());
-      Runtime.getInstance().creationCount++;
-      si.setOrder(Runtime.getInstance().creationCount);
+
+      // si.setId(id);
+      if (Platform.getLocalInstance().getId().equals(id)) {
+        si.setVirtual(Platform.isVirtual());
+        Runtime.getInstance().creationCount++;
+        si.setOrder(Runtime.getInstance().creationCount);
+      }
       return (Service) newService;
     } catch (Exception e) {
-      log.error("createService failed", e);
+      log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
     }
     return null;
   }
@@ -727,7 +729,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * FIXME - INPUT PARAMETER SHOULD BE TYPE NOT INSTANCE NAME !!!!
    */
-  public static Map<String, MethodEntry> getMethodMap(String serviceName) {
+  public static Map<String, MethodEntry> getMethodMap(String inName) {
+    String serviceName = getFullName(inName);
     if (!registry.containsKey(serviceName)) {
       runtime.error(String.format("%1$s not in registry - can not return method map", serviceName));
       return null;
@@ -741,25 +744,47 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   }
 
+  /**
+   * getServiceList returns the most important identifiers for a service which
+   * are it's process id, it's name, and it's type.
+   * 
+   * This will be part of the getHelloRequest - and the first listing from a
+   * process of what services are available.
+   * 
+   * TODO - future work would be to supply a query to the getServiceList(query)
+   * such that interfaces, types, or processes ids, can selectively be queried
+   * out of it
+   * 
+   * @return
+   */
+  synchronized public List<Registration> getServiceList() {
+    List<Registration> ret = new ArrayList<>();
+    for (ServiceInterface si : registry.values()) {
+      // problem with
+      // ret.add(new NameAndType(si.getId(), si.getName(), si.getType(),
+      // CodecUtils.toJson(si)));
+      ret.add(new Registration(si.getId(), si.getName(), si.getType(), serviceData.getServiceType(si.getType())));
+    }
+    return ret;
+  }
+
   // FIXME - max complexity method
-  static public Map<String, Object> getSwagger(String name, String type) {
+  public Map<String, Object> getSwagger(String id, String name, String type) {
     Swagger3 swagger = new Swagger3();
-    List<NameAndType> nameAndTypes = new ArrayList<>();
-    nameAndTypes.add(new NameAndType(name, type));
+    List<Registration> nameAndTypes = new ArrayList<>();
+    nameAndTypes.add(new Registration(id, name, type, serviceData.getServiceType(type)));
     return swagger.getSwagger(nameAndTypes);
   }
 
+  // FIXME - scary function - returns private data
   public static Map<String, ServiceInterface> getRegistry() {
     return registry;// FIXME should return copy
   }
 
-  public static ServiceInterface getService(String name) {
+  public static ServiceInterface getService(String inName) {
 
-    // FIXME - don't do this by default - an API will get the "default" service
-    // if that is desired
-    if (name == null || name.length() == 0) {
-      return Runtime.getInstance();
-    }
+    String name = getFullName(inName);
+
     if (!registry.containsKey(name)) {
       return null;
     } else {
@@ -776,7 +801,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     List<ServiceInterface> si = getServices();
     String[] ret = new String[si.size()];
     for (int i = 0; i < ret.length; ++i) {
-      ret[i] = si.get(i).getName();
+      ServiceInterface s = si.get(i);
+      if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
+        ret[i] = s.getName();
+      } else {
+        ret[i] = s.getFullName();
+      }
     }
     return ret;
   }
@@ -831,12 +861,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     List<ServiceInterface> list = new ArrayList<>();
     // otherwise we are getting services of an instance
+
     for (String serviceName : registry.keySet()) {
-      if (serviceName.indexOf("@") != -1) {
-        String sid = serviceName.substring(serviceName.indexOf("@") + 1);
-        if (id.equals(sid)) {
-          list.add(registry.get(serviceName));
-        }
+      ServiceInterface si = registry.get(serviceName);
+      if (si.getId().equals(id)) {
+        list.add(registry.get(serviceName));
       }
     }
     return list;
@@ -867,7 +896,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         }
       }
     }
-
     return ret;
   }
 
@@ -1163,24 +1191,72 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   public void onState(ServiceInterface updatedService) {
     log.info("runtime updating registry info for remote service {}", updatedService.getName());
-    registry.put(updatedService.getName(), updatedService);
+    registry.put(String.format("%s@%s", updatedService.getName(), updatedService.getId()), updatedService);
   }
 
   /**
-   * registers a service - internal to this mrl process
+   * Registration is the process where a remote system sends detailed info
+   * related to its services. It will have details on each service type, state,
+   * id, and other info. The registration is serializable, with state
+   * information in a serialized for so that stateless processes or other
+   * non-Java instances can register or be registered.
    * 
-   * @param service
+   * Registration might setup subscriptions to support a UI.
+   * 
+   * Additional info which will be added in the future is a method map (a
+   * swagger concept) and a list of supported interfaces
+   * 
+   * TODO - have rules on what registrations to accept - dependent on security,
+   * desire, re-broadcasting configuration etc. TODO - determine rules on
+   * re-broadcasting based on configuration
+   * 
+   * @param registration
    * @return
    */
-  public final static synchronized ServiceInterface register(ServiceInterface service) {
-    registry.put(service.getName(), service);
-    if (runtime != null) {
-      runtime.invoke("registered", service);
+  public final static synchronized Registration register(Registration registration) {
+
+    try {
+      
+      // TODO - have rules on what registrations to accept - dependent on
+      // security, desire, re-broadcasting configuration etc.
+
+      String fullname = String.format("%s@%s", registration.getName(), registration.getId());
+      if (registry.containsKey(fullname)) {
+        log.info("{} already registered", fullname);
+        return registration;
+      }
+
+      log.info("{}@{} registering at {} of type {}",registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
+
+      if (!registration.isLocal(Platform.getLocalInstance().getId())) {
+        // de-serialize
+        registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
+        
+        copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
+        // registration.service.startService(); // <-- this auto registers WARN
+        // if you 'start' it you'll have to put it in the registry first
+        // otherwise you'll get a cyclical call ! - hopefully we don't need to
+        // start it - no messages should be going to or coming from it
+      }
+
+      registry.put(fullname, registration.service);
+
+      if (runtime != null) {
+        // TODO - determine rules on re-broadcasting based on configuration
+        runtime.invoke("registered", registration);
+      }
+
+      // TODO - remove ? already get state from registration
+      if (!registration.isLocal(Platform.getLocalInstance().getId())) {
+        runtime.subscribe(registration.getName(), "publishState");
+      }
+
+    } catch (Exception e) {
+      log.error("registration threw for {}@{}", registration.getName(), registration.getId(), e);
+      return null;
     }
-    if (!service.isLocal()) {
-      runtime.subscribe(service.getName(), "publishState");
-    }
-    return service;
+
+    return registration;
   }
 
   /**
@@ -1193,7 +1269,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
 
   // FIXME - clean up subscriptions from released
-  public synchronized static boolean release(String name) {
+  public synchronized static boolean release(String inName) {
+    String name = getFullName(inName);
+
     log.info("releasing service {}", name);
     Runtime rt = getInstance();
 
@@ -1223,7 +1301,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return true;
   }
 
-  synchronized public static void unregister(String name) {
+  synchronized public static void unregister(String inName) {
+    String name = getFullName(inName);
     log.info("unregister {}", name);
     Runtime rt = getInstance();
 
@@ -1401,20 +1480,25 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     return ret;
   }
-
+ 
+  
+  // FIXME - NO STATICS !!!
   // FIXME - should be a map of remotes ?
   static Client clientRemote = new Client();
   static InProcessCli stdInClient = null;
+  
 
   public void connect() throws IOException {
-    connect("admin", "ws://localhost:8887/api/messages");
+    connect("ws://localhost:8887/api/messages");
   }
 
+  // FIXME - implement !
   public void disconnect() throws IOException {
-    connect("admin", "ws://localhost:8887/api/messages");
+    // connect("admin", "ws://localhost:8887/api/messages");
   }
 
   /**
+   * FIXME - can this be renamed back to attach ?
    * jump to another process using the cli
    * 
    * @param id
@@ -1435,11 +1519,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getId();
   }
 
-  @Override
-  public void connect(String url) throws IOException {
-    connect(url, url);
-  }
-
   public Object sendToCli(String cmd) {
     // Message msg = CodecUtils.cliToMsg(getName(), null,
     // r.getRequest().getPathInfo());
@@ -1453,39 +1532,39 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
-  public void connect(String id, String url) throws IOException {
+  @Override
+  public void connect(String wsUrl) throws IOException {
 
     clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
                                            // on client creation?
 
     UUID uuid = java.util.UUID.randomUUID();
-    Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
-    // Message msg = Message.createMessage("runtime", "runtime",
-    // "getHelloResponse", new Object[] { "runtime-client-uuid",
-    // CodecUtils.toJson(new HelloRequest(getId(), uuid.toString())) });
+    Endpoint endpoint = clientRemote.connect(uuid.toString(), wsUrl);
+
+    // TODO - filter this message's serviceList according as desired
     Message msg = getDefaultMsg(uuid.toString());
     // put as many attribs as possible in
     Map<String, Object> attributes = new HashMap<String, Object>();
 
     // required data
     // attributes.put("id", getId());
-    attributes.put("gateway", "runtime");
+    attributes.put("gateway", getFullName("runtime"));
     attributes.put("uuid", uuid);
 
     // connection specific
-    attributes.put("c-type", "wasync");
+    attributes.put("c-type", "Runtime");
     attributes.put("c-endpoint", endpoint);
 
     // cli specific
     attributes.put("cwd", "/");
-    attributes.put("url", url);
-    attributes.put("uri", url); // not really correct
+    attributes.put("url", wsUrl);
+    attributes.put("uri", wsUrl); // not really correct
     attributes.put("user", "root");
     attributes.put("host", "local");
 
     // addendum
     attributes.put("User-Agent", "runtime-client");
-    // addConnection(id, uuid.toString(), attributes);
+
     Runtime.getInstance().addConnection(uuid.toString(), attributes);
 
     // send getHelloResponse
@@ -1505,7 +1584,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void onRemoteMessage(String uuid, String data) {
     try {
 
-      log.info("connection {} responded with {}", uuid, data);
+      // log.debug("connection {} responded with {}", uuid, data);
       // get api - decode msg - process it
       Map<String, Object> connection = getConnection(uuid);
       if (connection == null) {
@@ -1528,6 +1607,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       Object ret = null;
 
       if (isLocal(msg)) {
+
+        log.info("--> {}.{} {} from {}", msg.name, msg.method, (msg.isBlocking()) ? "BLOCKING" : "", msg.sender);
 
         String serviceName = msg.getName();
         // to decode fully we need class name, method name, and an array of json
@@ -1572,29 +1653,27 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
 
       } else {
-        // RELAYING !! in and out of process - don't decode !
-        // FIXME GET GATEWAY
-        // FIXME - send or sendBlocking
-
-        if (msg.isBlocking()) {
-          ret = sendBlockingRemote(msg, 3000);
-          // FIXME !!! Implement - we probably want the "whole" msg back from
-          // the inbox !
-          retMsg = null;
-        } else {
-          send(msg);
-        }
+        log.info("<-- RELAY {} {} to {}@{} from {}@{}", msg.msgId, msg.method, msg.name, msg.getId(), msg.sender, msg.getSrcId());
+        send(msg);
       }
 
       // handle the response back
-      if (msg.isBlocking()) {
+      if (retMsg != null && msg.isBlocking()) {
+
         retMsg.msgId = msg.msgId;
+        // 'R'eturning
+        retMsg.msgType = "R";
+        log.info("<-- RETURN {} to {} from {}", retMsg.msgId, retMsg.name, retMsg.sender);
         String retUuid = Runtime.getRoute(msg.getId()); //
         Map<String, Object> retCon = getConnection(retUuid);
         // verify I'm the appropriate gateway
         Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
+        if (endpoint != null) {
         // FIXME - double encode parameters ?
         endpoint.socket.fire(CodecUtils.toJson(retMsg));
+        } else {
+          log.warn("client endpoint c-endpoint null for uuid {}", retUuid);
+        }
       }
     } catch (Exception e) {
       log.error("processing msg threw", e);
@@ -1779,7 +1858,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           options = new CmdOptions();
         }
 
-        repo = Repo.getInstance(options.libraries, "IvyWrapper");
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); // previously
+                                                                               // was
+                                                                               // not
+                                                                               // (IvyWrapper)
         if (options == null) {
           options = new CmdOptions();
         }
@@ -1915,7 +1997,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     log.info("getting local repo");
 
-    repo.addStatusPublisher(this);
+    if (repo != null)/* transient */ {
+      repo.addStatusPublisher(this);
+    }
 
     hideMethods.add("main");
     hideMethods.add("loadDefaultConfiguration");
@@ -1933,7 +2017,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       startService();
     } catch (Exception e) {
       error("OMG Runtime won't start GAME OVER ! :( %s", e.getMessage());
-      Logging.logError(e);
+      log.error("OMG Runtime won't start GAME OVER ! :(", e);
     }
   }
 
@@ -2033,14 +2117,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return "runtime@" + getId();
   }
 
-  /**
-   * list connections - current connection names to this mrl runtime
-   * 
-   * @return
-   */
-  public List<String> lc() {
-    return getConnectionNames();
-  }
   // end cli commands ----
 
   // ---------- Java Runtime wrapper functions begin --------
@@ -2053,21 +2129,20 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   /*
-   * publishing point of Ivy sub system - sends event failedDependency when the
-   * retrieve report for a Service fails
+   * FIXME - see if this is used anymore publishing point of Ivy sub system -
+   * sends event failedDependency when the retrieve report for a Service fails
    */
+  @Deprecated /* remove */
   public String failedDependency(String dep) {
     return dep;
   }
-
-  // FIXME - you don't need that many "typed" messages - resolve,
-  // resolveError, ... etc
-  // just use & parse "message"
 
   public static Platform getPlatform() {
     return getInstance().platform;
   }
 
+  // FIXME - should be removed - use Platform.getLocalInstance().is64bit()
+  @Deprecated
   public boolean is64bit() {
     return getInstance().platform.getJvmBitness() == 64;
   }
@@ -2076,11 +2151,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return repo;
   }
 
-  public String getId() {
-    return Platform.getLocalInstance().getId();
-  }
-
-  /*
+  /**
    * Returns an array of all the simple type names of all the possible services.
    * The data originates from the repo's serviceData.xml file https:/
    * /code.google.com/p/myrobotlab/source/browse/trunk/myrobotlab/thirdParty
@@ -2096,11 +2167,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getServiceTypeNames("all");
   }
 
-  // ============== configuration end ==============
-
-  /*
-   * publishing event to get the possible services currently available
-   *
+  /**
+   * getServiceTypeNames will publish service names based on some filter
+   * criteria
+   * 
+   * @param filter
+   * @return
    */
   public String[] getServiceTypeNames(String filter) {
     return serviceData.getServiceTypeNames(filter);
@@ -2160,14 +2232,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("onMessage()");
   }
 
-  // ---------------- callback events begin -------------
-  /*
-   * registration event
-   *
-   * @param sw - the name of the Service which was successfully registered
+  /**
+   * Publishing point when a service was successfully registered locally -
+   * regardless if the service is local or not.
+   * 
+   * TODO - more business logic can be created here to limit broadcasting or
+   * re-broadcasting published registrations
+   * 
+   * @param registration
+   *          - contains all the information need for a registration to process
+   * @return
    */
-  public ServiceInterface registered(ServiceInterface sw) {
-    return sw;
+  public Registration registered(Registration registration) {
+    return registration;
   }
 
   /*
@@ -2177,25 +2254,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   public ServiceInterface released(ServiceInterface sw) {
     return sw;
-  }
-
-  /*
-   * published events
-   *
-   */
-  public String resolveBegin(String className) {
-    return className;
-  }
-
-  public void resolveEnd() {
-  }
-
-  public List<String> resolveError(List<String> errors) {
-    return errors;
-  }
-
-  public String resolveSuccess(String className) {
-    return className;
   }
 
   /**
@@ -2367,14 +2425,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return execute(program, list, null, null, null);
   }
 
-  /*
-   * FIXME - return a POJO - because there are lots of downstream which would
-   * want different parts of the results FIXME - stream gobbler reconciled -
-   * threaded stream consumption FIXME - watchdog - a good idea FIXME - most
-   * common use case would be returning a string i would think FIXME -
-   * ProcessData &amp; ProcessData2 reconciled
-   *
-   */
   static public String execute(String program, List<String> args, String workingDir, Map<String, String> additionalEnv, Boolean block) {
 
     log.info("execToString(\"{} {}\")", program, args);
@@ -2751,27 +2801,131 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return options;
   }
 
+  public ServiceData setServiceTypes(ServiceData sd) {
+    return sd;
+  }
+
   // FIXME - a way to reach in a messages meta-data ?? is this a reference
   // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
   // its "meta-data"
   public HelloResponse getHelloResponse(String uuid, HelloRequest hello) {
+
     HelloResponse response = new HelloResponse();
-    Map<String, Object> connection = getConnection(uuid);
-    if (uuid == null) {
-      log.error("uuid could not be found in known connections {}", uuid);
-      // return null;
+    response.status = Status.success("Ahoy!");
+    
+    try {
+      Map<String, Object> connection = getConnection(uuid);
+      if (uuid == null) {
+        log.error("uuid could not be found in known connections {}", uuid);
+      }
+      
+      log.info("Hello {} I am {} !", hello.id, getId());
+      if (getId().equals(hello.id)) {
+        log.warn("incoming request was for my own id {} - loopback not supported - removing connection", getId());
+        removeConection(uuid);
+        response.status = Status.error("loopback not supported");
+        return response;
+      }
+      
+      response.id = getId();
+      // this.uuid = uuid;
+      response.request = hello;
+      response.platform = Platform.getLocalInstance();
+      connection.put("request", hello);
+      // addClientAttribute(uuid, "request", request);
+      updateRoute(hello.id, uuid);
+      getConnection(uuid).put("id", hello.id);
+
+      // broadcast completed connection information
+      invoke("getConnectionHeaders");
+
+      // FIXME - lame .. have to send the whole serviceData because its member
+      // is correctly a "map" .. yet getServiceTypes returns a list :(
+      // FIXME - bad design ... JS should be in charge of its own service type
+      // definitions !
+      // FIXME THE TYPE DEFINITION SHOULD BE PART OF THE REGISTRATION !!!! -
+      // making registration atomic
+      // Message msg = Message.createMessage("runtime@" + getId(), "runtime@" +
+      // hello.id, "setServiceTypes", serviceData);
+      // send(msg);
+
+      // NOW - SEND WHAT WE WANT REMOTELY REGISTERED !!! - filter as desired
+      // TODO - getRegistry(isLocal=true, excludeTypes=[], includeTypes[],
+      // excludeNames=[], includeNames=[])
+
+      // defensive copy to avoid conncurrent modifications for inprocess mrl
+      // instances
+      Set<String> set = registry.keySet();
+      String[] list = new String[set.size()];
+      set.toArray(list);
+
+      // TODO - filtering on what is broadcasted or re-broadcasted
+      for (int i = 0; i < list.length; ++i) {
+        String fullname = list[i];
+        ServiceInterface si = registry.get(fullname);
+        
+        // TODO - surface configuration for security, policy, broadcasting,
+        // re-broadcasting and other filtering
+        // TODO - configuration here has to be SYNC'd with onRegistration for
+        // later callbacks
+        // TODO - inclusive / exclusive filters
+        // if (si.getType().contains("Clock") || getId().equals(si.getId())) {
+
+        Registration registration = new Registration(si);
+        Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
+        // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
+        // from the outbox .... it should have
+        send(msg);
+      }
+
+    } catch (Exception e) {
+      log.error("getHelloResponse threw", e);
     }
-    response.id = getId();
-    // this.uuid = uuid;
-    response.request = hello;
-    response.platform = Platform.getLocalInstance();
-    response.services = Runtime.getServiceTypes();
-    connection.put("request", hello);
-    // addClientAttribute(uuid, "request", request);
-    updateRoute(hello.id, uuid);
-    getConnection(uuid).put("id", hello.id);
+
     return response;
+  }
+
+  /**
+   * IMPORTANT IMPORTANT IMPORTANT - Newly connected remote mrl processes blas a
+   * list of registrations through onRegistered messages, for each service they
+   * currently have in their registry. This process will send a list of
+   * registrations to the newly connected remote process. If the "registered"
+   * event is subscribed, any newly created service will be broadcasted thorough
+   * this publishing point as well.
+   * 
+   * TODO - write filtering, configuration, or security which affects what can
+   * be registered
+   * 
+   * Primarily, this is where new services are registered from remote systems
+   * 
+   * @param registration
+   */
+  public void onRegistered(Registration registration) {
+    try {
+      // check if registered ?
+
+      // TODO - filtering - include/exclude
+
+      String fullname = registration.getName() + "@" + registration.getId();
+      if (!registry.containsKey(fullname)) {
+        register(registration);
+        if (fullname.startsWith("runtime@")) {
+          // We want to TELL remote runtime if we have new registrations - we'll
+          // send them
+          // to it's runtime
+          // subscribe(fullname, "registered");
+          // subscribe(fullname, "released");
+          // IMPORTANT w
+          addListener("registered", fullname);
+          addListener("released", fullname);
+        }
+      } else {
+        log.info("{} already registered", fullname);
+      }
+    } catch (Exception e) {
+      log.error("onRegistered threw {}", registration, e);
+    }
   }
 
   public void onHelloResponse(HelloResponse response) {
@@ -2782,12 +2936,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return routeTable;
   }
 
-  public static Map<String, String> getServiceTypes() {
-    Map<String, String> ret = new HashMap<>();
-    for (String name : registry.keySet()) {
-      ret.put(name, registry.get(name).getClass().getCanonicalName());
-    }
-    return ret;
+  public List<ServiceType> getServiceTypes() {
+    return serviceData.getServiceTypes();
   }
 
   /**
@@ -2873,6 +3023,29 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   @Override
   public Message getDefaultMsg(String connId) {
+
+    // FIXME move serviceList into HelloResponse ... result of introduction ...
+    // !
+    // TODO - whitelist and blacklist filters
+    List<Registration> serviceList = new ArrayList<>();
+
+    for (Registration nt : runtime.getServiceList()) {
+      /*
+       * if (nt.id.equals(getId()) &&
+       * !nt.type.equals("org.myrobotlab.service.Runtime") &&
+       * !nt.type.equals("org.myrobotlab.service.Agent") &&
+       * !nt.type.equals("org.myrobotlab.service.Security") &&
+       * !nt.type.equals("org.myrobotlab.service.WebGui")) {
+       * serviceList.add(nt); }
+       */
+
+      // if (/*nt.id.equals(getId()) &&
+      // */(nt.type.equals("org.myrobotlab.service.Clock") ||
+      // nt.type.equals("org.myrobotlab.service.Runtime"))) {
+      serviceList.add(nt);
+      // }
+    }
+
     Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "getHelloResponse",
         new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Platform.getLocalInstance().getId(), connId)) });
     msg.setBlocking();
@@ -2902,6 +3075,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   public void removeConnection(String uuid) {
     connections.remove(uuid);
+    invoke("getConnectionHeaders");
   }
 
   /**
@@ -2932,27 +3106,49 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return ret;
   }
 
-  static String formatConnection(Map<String, Object> c) {
-    return String.format("%s %s %s", c.get("id"), c.get("uri"), c.get("uuid"));
+  /**
+   * list connections - current connection names to this mrl runtime
+   * 
+   * @return
+   */
+  public Map<String, List<Map<String, String>>> lc() {
+    return getConnectionHeaders();
   }
 
-  public String getConnectionName(String uuid) {
+  public Map<String, String> getConnectionHeader(String uuid) {
     Map<String, Object> c = getConnection(uuid);
-    if (c != null)
-      return formatConnection(c);
-    else
-      return null;
+    if (c != null) {
+      Map<String, String> ret = new TreeMap<>();
+      // Transfer the serializable types
+      ret.put("gateway", c.get("gateway").toString());
+      ret.put("id", c.get("id").toString());
+      ret.put("c-type", c.get("c-type").toString());
+      ret.put("uuid", c.get("uuid").toString());
+      return ret;
+    }
+    return null;
   }
 
   // FIXME - if Connection was an abstract this could be promoted or abstracted
   // for
   // every service display properties
-  public List<String> getConnectionNames() {
-    List<String> ret = new ArrayList<>();
+  public Map<String, List<Map<String, String>>> getConnectionHeaders() {
+    Map<String, List<Map<String, String>>> ret = new TreeMap<>();
     Map<String, Map<String, Object>> connections = getConnections();
+
+    // organized by process id
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
-      ret.add(formatConnection(c));
+      String id = c.get("id").toString();
+
+      List<Map<String, String>> conns = null;
+      if (ret.containsKey(id)) {
+        conns = ret.get(id);
+      } else {
+        conns = new ArrayList<Map<String, String>>();
+      }
+      conns.add(getConnectionHeader(uuid));
+      ret.put(id, conns);
     }
     return ret;
   }
@@ -2972,8 +3168,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @return
    */
-  public List<String> getConnectionIds() {
-    return getConnectionIds(null);
+  public List<String> getConnectionUuids() {
+    return getConnectionUuids(null);
   }
 
   boolean connectionExists(String uuid) {
@@ -2981,12 +3177,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   /**
-   * Get connection ids that belong to a specific connection
+   * Get connection ids that belong to a specific gateway
    * 
    * @param name
    * @return
    */
-  public List<String> getConnectionIds(String name) {
+  public List<String> getConnectionUuids(String name) {
     List<String> ret = new ArrayList<>();
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
@@ -2998,7 +3194,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return ret;
   }
 
-  public static Class<?> getClass(String name) {
+  public static Class<?> getClass(String inName) {
+    String name = getFullName(inName);
     ServiceInterface si = registry.get(name);
     if (si == null) {
       return null;
@@ -3032,6 +3229,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
+    if (conn == null) {
+      log.error("no connection for uuid {}", uuid);
+      return null;
+    }
 
     // find the gateway managing the connection
     return (Gateway) getService((String) conn.get("gateway"));
@@ -3064,7 +3265,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     Object ret = null;
 
     String type = (String) conn.get("c-type");
-    if ("wasync".equals(type)) {
+    if ("Runtime".equals(type)) {
 
       // block the thread and wait for the return -
       // if you have an msgId it should be stored a new one generated - and wait
@@ -3074,7 +3275,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // --> remote
       // FIXME implement !
       Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
-      endpoint.socket.fire(CodecUtils.toJson(msg));
+      String json = CodecUtils.toJson(msg);
+      if (json.length() > 65536) {
+        log.warn("default msg size exceeded for msg {}", msg);
+      }
+      endpoint.socket.fire(json);
 
       Object[] returnContainer = new Object[1];
 
@@ -3110,9 +3315,18 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return ret;
   }
 
+  static public String getFullName(String shortname) {
+    if (shortname.contains("@")) {
+      // already long form
+      return shortname;
+    }
+    // if nothing is supplied assume local
+    return String.format("%s@%s", shortname, Platform.getLocalInstance().getId());
+  }
+
   @Override
   public List<String> getClientIds() {
-    return getConnectionIds(getName());
+    return getConnectionUuids(getName());
   }
 
   @Override
@@ -3156,13 +3370,21 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // msg
       // but just in case ...
       for (Object o : msg.data) {
-        System.out.println(CodecUtils.toPrettyJson(o));
+        if (msg.method.equals("remoteRegister")) {
+          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).name, msg.name));
+        } else {
+          System.out.println(CodecUtils.toPrettyJson(o));
+        }
       }
 
       System.out.println(stdInClient.getPrompt(uuid));
 
     } else {
       Endpoint endpoint = (Endpoint) conn.get("c-endpoint");
+      if (endpoint == null) {
+        log.error("could not get endpoint for connection {}", uuid);
+        return;
+      }
       endpoint.socket.fire(CodecUtils.toJson(msg));
     }
   }

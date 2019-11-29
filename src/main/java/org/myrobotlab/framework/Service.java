@@ -90,7 +90,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * data for an instance
    * 
    */
-  ServiceType serviceType;
+  protected ServiceType serviceType;
 
   /**
    * a radix-tree of data -"DNA" Description of Neighboring Automata ;) this is
@@ -133,11 +133,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * unique id - (eqv. domain suffix)
    */
-  private String id;
+  protected String id;
 
-  private String simpleName; // used in gson encoding for getSimpleName()
+  protected String simpleName; // used in gson encoding for getSimpleName()
 
-  private String serviceClass;
+  protected String serviceClass;
 
   private boolean isRunning = false;
 
@@ -171,8 +171,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Set<String> methodSet;
 
   /**
-   * This is the map of interfaces - its really "static" information, since its a definition.
-   * However, since gson will not process statics - we are making it a member variable 
+   * This is the map of interfaces - its really "static" information, since its
+   * a definition. However, since gson will not process statics - we are making
+   * it a member variable
    */
   protected Map<String, String> interfaceSet;
 
@@ -851,8 +852,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     byte[] data = getResource(resourceName);
     if (data != null) {
       try {
-      return new String(data, "UTF-8");
-      } catch(Exception e) {
+        return new String(data, "UTF-8");
+      } catch (Exception e) {
         log.error("getResourceAsString threw", e);
       }
     }
@@ -916,7 +917,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    Runtime.register(this);
+    
+    // register this service
+    Registration registration = new Registration(this); 
+    Runtime.register(registration);
+    
   }
 
   /**
@@ -1444,7 +1449,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       retobj = method.invoke(obj, params);
       out(methodName, retobj);
     } catch (Exception e) {
-      error(e);
+      error("could not invoke %s.%s (%s) - check logs for details",getName(), methodName, params);
+      log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
     }
     return retobj;
   }
@@ -1491,24 +1497,45 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     } else {
       filename = inCfgFileName;
     }
+
+    File cfg = new File(filename);
+    if (cfg.exists()) {
+      try {
+        String json = FileIO.toString(filename);
+        if (!loadFromJson(o, json)) {
+          log.info("could not load file {}", filename);
+        } else {
+          return true;
+        }
+      } catch (Exception e) {
+        log.error("load threw", e);
+      }
+    } else {
+      log.info("cfg file {} does not exist", filename);
+    }
+    return false;
+  }
+  
+  @Override
+  public boolean loadFromJson(String json) {
+    return loadFromJson(this, json);
+  }
+  
+  public boolean loadFromJson(Object o, String json) {
+
     if (o == null) {
       o = this;
     }
 
     try {
-      File cfg = new File(filename);
-      if (cfg.exists()) {
-        // serializer.read(o, cfg);
-        String json = FileIO.toString(filename);
-        Object saved = CodecUtils.fromJson(json, o.getClass());
 
-        copyShallowFrom(o, saved);
-        broadcastState();
-        return true;
-      }
-      log.info("cfg file {} does not exist", filename);
+      Object saved = CodecUtils.fromJson(json, o.getClass());
+      copyShallowFrom(o, saved);
+      broadcastState();
+      return true;
+
     } catch (Exception e) {
-      log.error("failed loading {}", filename, e);
+      log.error("failed loading {}", e);
     }
     return false;
   }
@@ -1524,10 +1551,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * of the driver - only that it wants to method="write" data to the driver
    */
   public void out(String method, Object o) {
-    Message m = Message.createMessage(getName(), null, method, o);
+    Message m = Message.createMessage(getFullName(), null, method, o);
 
     if (m.sender.length() == 0) {
-      m.sender = this.getName();
+      m.sender = this.getFullName();
     }
     if (m.sendingMethod.length() == 0) {
       m.sendingMethod = method;
@@ -1605,7 +1632,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   synchronized public void releaseService() {
-    
+
     purgeTasks();
 
     // recently added - preference over detach(Runtime.getService(getName()));
@@ -1734,7 +1761,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // create new message reverse sender and name set to same
           // msg id
           Message msg = Message.createMessage(getName(), m.sender, m.method, ret);
-          msg.sender = this.getName();
+          msg.sender = this.getFullName();
           msg.msgId = m.msgId;
           // msg.status = Message.BLOCKING;
           msg.status = Message.RETURN;
@@ -1765,7 +1792,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return false;
       }
 
-      String s = CodecUtils.toJson(this);
+      String s = CodecUtils.toPrettyJson(this);
       FileOutputStream out = new FileOutputStream(cfg);
       out.write(s.getBytes());
       out.close();
@@ -1809,7 +1836,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void send(String name, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getName();
+    msg.sender = this.getFullName();
     // All methods which are invoked will
     // get the correct sendingMethod
     // here its hardcoded
@@ -1824,7 +1851,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
     Message msg = Message.createMessage(getName(), name, method, data);
-    msg.sender = this.getName();
+    msg.sender = this.getFullName();
     msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
 
@@ -1940,12 +1967,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   synchronized public void startService() {
-    ServiceInterface si = Runtime.getService(name);
-    // if not registered - register
-    if (si == null) {
-      Runtime.register(this);
-    }
-
+    // register locally
+    /* had to register here  for synchronization issues before ...
+    Registration registration = new Registration(this); 
+    Runtime.register(registration);
+    */
+   
     // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
     // should be created
     // currently they are started by the UI vs created - and there is no desire
@@ -2067,6 +2094,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void subscribe(String topicName, String topicMethod) {
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
+  }
+  
+  public void subscribeTo(String service, String method) {
+    subscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void subscribeToRuntime(String method) {
+    subscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void unsubscribeTo(String service, String method) {
+    unsubscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
+  }
+  
+  public void unsubscribeToRuntime(String method) {
+    unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
 
   public void subscribe(String topicName, String topicMethod, String callbackName, String callbackMethod) {
@@ -2504,5 +2547,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void copyResource(String src, String dest) throws IOException {
     FileIO.copy(getResourceDir() + File.separator + src, dest);
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 }

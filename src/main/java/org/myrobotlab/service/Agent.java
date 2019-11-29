@@ -61,6 +61,9 @@ import picocli.CommandLine;
  * 
  *         Agent is responsible for managing running instances of myrobotlab. It
  *         can start, stop and update myrobotlab.
+ *         
+ *         FIXME - remove all "building" - should be a new service Builder .. which can build mrl - Agent should have seperation of concerns
+ *         and only deal with "starting" and "running" of built mrl processes
  * 
  * 
  *         FIXME - test switching branches and remaining on the branch for multiple updates

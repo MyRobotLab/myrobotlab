@@ -514,6 +514,7 @@ public class MethodCache {
   public List<MethodEntry> getRemoteOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
       log.error("getRemoteOrdinalMethods object is null");
+      return null;
     }
     String objectKey = object.getTypeName();
 
