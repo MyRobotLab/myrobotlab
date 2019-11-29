@@ -1017,10 +1017,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       String json = CodecUtils.toJson(msg);
       if (json.length() > 65536) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
+        /* debugging large msgs
         try {
           FileIO.toFile(String.format("too-big-%s-%d.json", msg.method, System.currentTimeMillis()), json);
         } catch (Exception e) {
         }
+        */
       }
 
       if (broadcastMode) {
