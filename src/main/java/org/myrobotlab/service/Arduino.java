@@ -26,7 +26,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -2341,22 +2340,21 @@ public class Arduino extends AbstractMicrocontroller
   public static void main(String[] args) {
     try {
 
-      // DONT FORGET TO
-      Platform.setVirtual(true);
+      // Platform.setVirtual(true);
       LoggingFactory.init(Level.WARN);
       // Platform.setVirtual(true);
-      /*
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      */
-      Runtime.start("gui", "SwingGui");
+      
+      // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
       
-      hub.connect("COM3");
+      hub.connect("/dev/ttyACM0");
 
       // hub.enableAck(false);
       ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
