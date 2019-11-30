@@ -45,6 +45,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             // scope.blah = {};
             // scope.blah.display = false;
             scope.pinMap = {};
+            scope.pinIndex = service.pinIndex;
             var x = 0;
             var gradient = tinygradient([
             {
@@ -308,9 +309,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data     
-            let pincontroller = mrl.getService(name); 
-            log.info(pincontroller)
-            setTraceButtons(service.pinMap);
+           
+            setTraceButtons(service.pinIndex);
         }
     };
 }

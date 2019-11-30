@@ -15,8 +15,8 @@
         </div>
     </div>
     <div class="row">
-    <div class="col-md-12">&nbsp;</div>
-</div>
+        <div class="col-md-12">&nbsp;</div>
+    </div>
     <div class="row">
         <div class="form-group">
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="port">port</label>
@@ -32,7 +32,6 @@
     </div>
 </form>
 <div class="row">
-    
     <!-- TODO - make directive -->
     <label ng-show="isConnected" title="line speed - the data rate which this serial port is actually recieving,&#10; which can vary significantly from the data rate depending on the amount of data sampled">{{stats.lineSpeed}} Kbps</label>
 </div>
@@ -40,12 +39,14 @@
     <!-- TODO reduce this with show -->
     {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
     <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span>
-    <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
     <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span>
+    <span ng-show="boardInfo != null">heartbeat {{boardInfo.receiveTs}}</span>
+    <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
     <br/>
     <span ng-repeat="device in boardInfo.deviceSummary">
         <b>{{device.name}}</b>
         id:{{device.id}} 
+    
     
     </span>
 </div>

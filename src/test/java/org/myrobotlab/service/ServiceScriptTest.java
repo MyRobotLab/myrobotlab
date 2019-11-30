@@ -12,15 +12,14 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.test.AbstractTest;
-
+@Ignore
 public class ServiceScriptTest extends AbstractTest {
-
-  private static ServiceData sd;
  
   private Map<String, String> pythonScripts;
   private List<String> servicesNeedingPythonScripts = new ArrayList<String>();
