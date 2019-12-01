@@ -9,7 +9,6 @@ angular.module('mrlapp.service.BlocksGui', [])
                     $scope.service = service;
                 };
 
-                _self.updateState($scope.service);
 
                 // init scope variables
                 $scope.pulseData = '';

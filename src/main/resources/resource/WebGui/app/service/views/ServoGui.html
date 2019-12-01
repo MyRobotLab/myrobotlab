@@ -1,64 +1,87 @@
 <div class="container col-md-6">
-<div class="col-md-5">
-    <h2>{{service.targetPos.toFixed(2)}}</h2>
-</div>
-<div class="col-md-1">
-    <img src="enabled.png" ng-show="service.enabled" title="the servo is energized"/>
-</div>
-<div class="col-md-6">
-    <h2>{{service.currentPos.toFixed(2)}}</h2>
-</div>
-<div class="col-md-12">
-    <rzslider class="custom-slider" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
-</div>
-Controller    
+    <div class="row">
+        <div class="col-md-5">
+            <h2>{{service.targetPos.toFixed(2)}}</h2>
+        </div>
+        <div class="col-md-1">
+            <img src="enabled.png" ng-show="service.enabled" title="the servo is energized"/>
+        </div>
+        <div class="col-md-6">
+            <h2>{{service.currentPos.toFixed(2)}}</h2>
+        </div>
+        <div class="col-md-12">
+            <rzslider class="custom-slider" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+        </div>
+        <div class="col-md-12">
+            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" rz-slider-options="limits.options"/>
+        </div>
 
-<div class="input-group col-md-12">
-    <attach ng-model="possibleController" ng-disabled="service.controller != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
-    <span class="input-group-btn">
-        <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">attach</button>
-        <button class="btn btn-default" ng-show="isAttached()" ng-click="msg.detach(service.controller)">detach</button>
-    </span>
-    <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="pin" ng-model="pin"/>
-    <span class="input-group-btn">
-        <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.disable()">disable pin</button>
-        <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">enable pin</button>
-    </span>
-</div>
-<!-- auto disable begin -->
-<div class="input-group col-md-6">
-    <input type="checkbox" ng-model="service.autoDisable" ng-click="msg.setAutoDisable(service.autoDisable)"/>Auto-Disable &nbsp;&nbsp;&nbsp;
-</div>
-<div class="input-group col-md-1">&nbsp;Idle Time
-</div>
-<div class="input-group col-md-2">
-    <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="idle timeout" ng-model="service.idleTimeout"/>
-    <span class="input-group-addon">ms</span>
-</div>
-<!-- auto disable end -->
-<div class="input-group">
-    <span class="input-group-addon">speed</span>
-    <input type="text" class="form-control" ng-model="service.speed" title="current desired speed in degrees per second">
-    <span class="input-group-addon">max speed</span>
-    <input type="text" class="form-control" ng-model="service.maxSpeed" title="maximum speed of the servo in degrees per second - 500 is average for a hobby servo">
-</div>
-<div class="input-group">
-    <span class="input-group-addon">input min</span>
-    <input type="text" class="form-control" ng-model="service.mapper.minX" title="minimum allowed position of servo">
-    <span class="input-group-addon">input max</span>
-    <input type="text" class="form-control" ng-model="service.mapper.maxX" title="maximum allowed position of servo">
-    <span class="input-group-addon">output min</span>
-    <input type="text" class="form-control" ng-model="min" title="minimum allowed position of servo">
-    <span class="input-group-addon">output max</span>
-    <input type="text" class="form-control" ng-model="max" title="maximum allowed position of servo">
-    <span class="input-group-addon">rest</span>
-    <input type="text" class="form-control" ng-model="rest" title="resting position of servo">
-    <span class="input-group-btn">
-        <button class="btn btn-default" type="button" ng-click="update(velocity, rest, min, max)">update</button>
-    </span>
-</div>
-<div class="input-group col-md-12">
-        <button class="btn btn-default" type="button" ng-click="sweep()">sweep</button>
-        <button class="btn btn-default" type="button" ng-click="msg.stop()"><!-- span class="glyphicon glyphicon-stop"></span --> <img src="../stop.png" />&nbsp;&nbsp;&nbsp;&nbsp;stop</button>
-</div>
+
+        <div class="col-md-12 input-group">
+            <attach ng-model="possibleController" ng-disabled="service.controller != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
+            <span class="input-group-btn">
+                <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">attach</button>
+                <button class="btn btn-default" ng-show="isAttached()" ng-click="msg.detach(service.controller)">detach</button>
+            </span>
+            <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="pin" ng-model="pin"/>
+            <span class="input-group-btn">
+                <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.disable()">disable pin</button>
+                <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">enable pin</button>
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" ng-click="sweep()">sweep</button>
+                <button class="btn btn-default" type="button" ng-click="msg.stop()">
+                    <span>
+                        <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                    </span>
+                </button>
+            </span>
+        </div>
+    </div>
+    <br/>
+    <div ng-show="showProperties" class="row">
+        <span class="label label-default pull-right">properties</span>
+        <table class="table table-striped">
+            <tr>
+                <td>controller</td>
+                <td>{{service.controller}}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>min</td>
+                <td>{{service.mapper.minX}}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>max</td>
+                <td>{{service.mapper.maxX}}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>rest</td>
+                <td>{{service.rest}}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>speed</td>
+                <td>{{service.speed}}</td>
+                <td>deg/s</td>
+            </tr>
+            <tr>
+                <td>estimated max speed</td>
+                <td>{{service.maxSpeed}}</td>
+                <td>deg/s</td>
+            </tr>
+            <tr>
+                <td>auto disable</td>
+                <td>{{service.autoDisable}}</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>idle timeout</td>
+                <td>{{service.idleTimeout}}</td>
+                <td>ms</td>
+            </tr>
+        </table>
+    </div>
 </div>

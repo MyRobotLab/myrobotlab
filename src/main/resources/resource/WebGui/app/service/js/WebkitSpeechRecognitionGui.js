@@ -43,8 +43,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
     }
     ;
-    _self.updateState($scope.service);
-
     // when to use $scope or anything?!
     $scope.currResponse = '';
     $scope.utterance = '';

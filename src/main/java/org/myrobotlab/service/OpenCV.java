@@ -734,7 +734,7 @@ public class OpenCV extends AbstractComputerVision {
 
   transient BlockingQueue<OpenCVData> blockingData = new LinkedBlockingQueue<>();
   Integer cameraIndex;
-  transient volatile boolean capturing = false;
+  volatile boolean capturing = false;
   Classifications classifications = null;
   boolean closeOutputs = false;
 
@@ -1741,7 +1741,7 @@ public class OpenCV extends AbstractComputerVision {
   public String recordFrame() {
     try {
       OpenCVData d = getOpenCVData();
-      String filename = d.writeDisplay();
+      String filename = d.writeDisplay(getDataDir(), "png");
       info("saved frame %s", filename);
       return filename;
     } catch (Exception e) {

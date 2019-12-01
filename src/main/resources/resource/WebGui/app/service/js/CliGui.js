@@ -10,7 +10,6 @@ angular.module('mrlapp.service.CliGui', [])
         $scope.service = service;
     }
     ;
-    _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {

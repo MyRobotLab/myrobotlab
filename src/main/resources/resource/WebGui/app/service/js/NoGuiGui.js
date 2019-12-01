@@ -12,8 +12,6 @@ angular.module('mrlapp.service.NoGuiGui', [])
                 // get fresh copy
                 $scope.service = mrl.getService($scope.service.name);
 
-                _self.updateState($scope.service);
-
                 //set custom-sizes
                 this.panelconfig.setPanelSizes({
                     me1: {

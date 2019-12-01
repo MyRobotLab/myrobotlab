@@ -26,8 +26,6 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
         }
     }
 
-    _self.updateState($scope.service)
-
     msg.subscribe('getKeyNames')
     msg.send('getKeyNames')
     msg.subscribe(this)

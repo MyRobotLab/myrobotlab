@@ -293,9 +293,10 @@ public class Joystick extends Service {
     service.subscribe(this.getName(), "publishJoystickInput");
   }
 
-  public void addListener(String serviceName, String id) {
+  public void attach(String serviceName, String id) {
     if (!components.containsKey(id)) {
       error("%s requests subscription to component %s - but %d does not exist", serviceName, id, id);
+      return;
     }
     Set<MRLListener> listeners = null;
     if (idAndServiceSubscription.containsKey(id)) {

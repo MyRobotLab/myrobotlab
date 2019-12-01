@@ -17,8 +17,6 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             $scope.service = service;
         };
 
-        _self.updateState($scope.service);
-
         // Rendering area helper functions
         function buildAxis( src, dst, colorHex, dashed ) {
 	        var geom = new THREE.Geometry(),

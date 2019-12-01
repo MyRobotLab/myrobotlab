@@ -89,8 +89,7 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         $scope.filtered_z_angle = service.filtered_z_angle;
     }
     ;
-    
-    _self.updateState($scope.service);
+   
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

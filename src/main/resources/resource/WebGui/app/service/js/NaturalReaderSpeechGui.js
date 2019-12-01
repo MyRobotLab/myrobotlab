@@ -7,8 +7,6 @@ angular.module('mrlapp.service.NaturalReaderSpeechGui', []).controller('NaturalR
 		$scope.service = service;
 	};
 
-    _self.updateState($scope.service);
-
     // console.log('mary', $scope.service);
 
     this.onMsg = function(inMsg) {

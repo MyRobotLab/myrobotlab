@@ -30,8 +30,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
     }
     ;
     
-    _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         $log.info("Program AB Msg !");
         switch (inMsg.method) {

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log', '$scope', 'mrl', function($log, $scope, mrl) {
+angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log', '$timeout', '$scope', 'mrl', function($log, $timeout, $scope, mrl) {
     $log.info('ServoGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -8,6 +8,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
+    $scope.showProperties = true
     $scope.possibleController = null
     $scope.testTime = 300
     // TODO - should be able to build this based on
@@ -19,12 +20,31 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         options: {
             floor: 0,
             ceil: 180,
+            minLimit: 0,
+            maxLimit: 180,
             onStart: function() {},
             onChange: function() {
                 msg.send('moveTo', $scope.pos.value)
             },
             onEnd: function() {}
         }
+    }
+
+    $scope.limits = {
+        minValue: 1,
+        maxValue: 179,
+        options: {
+            floor: 0,
+            ceil: 180,
+            step: 1,
+            showTicks: false,
+            onStart: function() {},
+            onChange: function() {
+                msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
+            },
+            onEnd: function() {}
+        }
+
     }
 
     // GOOD TEMPLATE TO FOLLOW
@@ -38,18 +58,46 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         $scope.speed = service.speed
         $scope.pin = service.pin
         $scope.rest = service.rest
+
+        /*
         $scope.min = service.mapper.minOutput
         $scope.max = service.mapper.maxOutput
+        $scope.pos.options.minLimit = service.mapper.minOutput
+        $scope.pos.options.maxLimit = service.mapper.maxOutput
+        */
+
+        // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
+        // $scope.limits.minValue = service.mapper.minX
+        // $scope.limits.maxValue = service.mapper.maxX
+        // $scope.limits.maxValue ++;
+        //$scope.limits.maxValue --;
+
         $scope.pinList = service.pinList
+
+        $scope.limits = {
+            minValue: service.mapper.minX,
+            maxValue: service.mapper.maxX,
+            options: {
+                floor: 0,
+                ceil: 180,
+                step: 1,
+                showTicks: false,
+                onStart: function() {},
+                onChange: function() {
+                    msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
+                },
+                onEnd: function() {}
+            }
+
+        }
     }
-    
-    // initialize our state
-    _self.updateState($scope.service)
+
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
+
             $scope.$apply()
             break
             // servo event in the past 
@@ -74,27 +122,27 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
-        
+
     }
-    
+
     $scope.getSelectionBarColor = function() {
         return "black"
     }
-    
+
     $scope.isAttached = function() {
         return $scope.service.controller != null
     }
-    
+
     $scope.update = function(speed, rest, min, max) {
-        msg.send("setVelocity", $scope.service.speed)
+        msg.send("setSpeed", speed)
         msg.send("setRest", rest)
         msg.send("setMinMax", min, max)
     }
-    
+
     $scope.setPin = function(inPin) {
         $scope.pin = inPin
     }
-    
+
     // regrettably the onMethodMap dynamic
     // generation of methods failed on this overloaded
     // sweep method - there are several overloads in the
@@ -117,6 +165,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
     msg.subscribe(this)
+    // msg.send('broadcastState')
 
     // no longer needed - interfaces now travel with a service
     // var runtimeName = mrl.getRuntime().name

@@ -31,8 +31,7 @@ angular.module('mrlapp.service.Ads1115Gui', [])
         $scope.voltage3 = service.voltage3;
     }
     ;
-    
-    _self.updateState($scope.service);
+   
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

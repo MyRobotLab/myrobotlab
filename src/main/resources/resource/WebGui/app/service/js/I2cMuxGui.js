@@ -27,8 +27,6 @@ angular.module('mrlapp.service.I2cMuxGui', [])
     }
     ;
     
-    _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];
         switch (inMsg.method) {

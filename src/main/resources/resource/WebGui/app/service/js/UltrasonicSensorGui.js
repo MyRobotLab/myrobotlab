@@ -9,8 +9,7 @@ angular.module('mrlapp.service.UltrasonicSensorGui', [])
         $scope.service = service;
     }
     ;
-    
-    _self.updateState($scope.service);
+   
     
     // init scope variables
     $scope.pulseData = '';
