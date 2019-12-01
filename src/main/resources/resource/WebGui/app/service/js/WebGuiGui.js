@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', 'panelSvc', function($scope, $log, mrl, panelSvc) {
+angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
     $log.info('WebGuiGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -19,16 +19,16 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
             $scope.$apply()
             break
         case 'onShowAll':
-            panelSvc.showAll(inMsg.data[0])
+            // panelSvc.showAll(inMsg.data[0]) TODO - fix
             break
         case 'onShow':
-            panelSvc.show(inMsg.data[0])
+            // panelSvc.show(inMsg.data[0]) TODO - fix
             break
         case 'onHide':
-            panelSvc.hide(inMsg.data[0])
+            // panelSvc.hide(inMsg.data[0]) TODO - fix
             break
          case 'onPanel':
-            panelSvc.setPanel(inMsg.data[0])
+            // panelSvc.setPanel(inMsg.data[0]) TODO - fix
             break        
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
