@@ -1,6 +1,6 @@
 angular.module('mrlapp.main.mainCtrl')
-        .controller('loadingCtrl', ['$scope', '$log', 'mrl', 'panelSvc', '$state', '$previousState',
-            function ($scope, $log, mrl, panelSvc, $state, $previousState) {
+        .controller('loadingCtrl', ['$scope', '$log', 'mrl', '$state', '$previousState',
+            function ($scope, $log, mrl, $state, $previousState) {
                 $log.info('loadingCtrl.js');
                 // test();
                 var isUndefinedOrNull = function (val) {

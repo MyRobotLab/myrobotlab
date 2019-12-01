@@ -1,5 +1,5 @@
 angular.module('mrlapp.service')
-        .directive('dragDirective', ['$document', 'panelSvc', function ($document, panelSvc) {
+        .directive('dragDirective', ['$document', 'mrl', function ($document, mrl) {
                 return {
                     link: function (scope, element, attr) {
 
@@ -17,7 +17,7 @@ angular.module('mrlapp.service')
                                 // Prevent default dragging of selected content
                                 event.preventDefault();
 
-                                panelSvc.putPanelZIndexOnTop(scope.panel.name);
+                                // mrl.putPanelZIndexOnTop(scope.panel.name);
 
                                 element.css({
                                     cursor: 'move'
@@ -38,7 +38,7 @@ angular.module('mrlapp.service')
                         function mouseup(event) {
                             $document.off('mousemove', mousemove);
                             $document.off('mouseup', mouseup);
-                            panelSvc.savePanel(scope.panel.name);
+                            // panelSvc.savePanel(scope.panel.name);
                             element.css({
                                 cursor: 'auto'
                             });

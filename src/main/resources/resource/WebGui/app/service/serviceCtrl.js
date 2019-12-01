@@ -1,6 +1,6 @@
 angular.module('mrlapp.service')
-        .controller('serviceCtrl', ['$scope', '$log', '$uibModal', 'mrl', 'panelSvc', 'noWorkySvc',
-            function ($scope, $log, $uibModal, mrl, panelSvc, noWorkySvc) {
+        .controller('serviceCtrl', ['$scope', '$log', '$uibModal', 'mrl', 'noWorkySvc',
+            function ($scope, $log, $uibModal, mrl, noWorkySvc) {
                 $log.info('serviceCtrl', $scope.panel.name);
 
 //                var isUndefinedOrNull = function (val) {

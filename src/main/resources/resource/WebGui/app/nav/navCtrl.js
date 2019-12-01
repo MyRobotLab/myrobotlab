@@ -1,4 +1,4 @@
-angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'panelSvc', 'noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, panelSvc, noWorkySvc, Flash) {
+angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc','noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
     //connection state LED
     $scope.connected = mrl.isConnected()
 
@@ -38,7 +38,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         })
     })
 
-    $scope.showAll = panelSvc.showAll
+    $scope.showAll  = true // = panelSvc.showAll
     $scope.remoteId = mrl.getRemoteId();
     $scope.id = mrl.getId();
     $scope.platform.vmVersion
@@ -59,7 +59,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     }
 
     // maintains some for of subscription ... onRegistered I'd assume
-    panelSvc.subscribeToUpdates(panelsUpdated)
+   // panelSvc.subscribeToUpdates(panelsUpdated)
 
     $scope.shutdown = function(type) {
         var modalInstance = $uibModal.open({
@@ -100,14 +100,14 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         //expand panel if minified
         if (item.list == 'min') {
             item.panelsize.aktsize = item.panelsize.oldsize
-            panelSvc.movePanelToList(item.name)
+            // panelSvc.movePanelToList(item.name)
         }
         //show panel if hidden
         if (item.hide) {
             item.hide = false
         }
         //put panel on top
-        panelSvc.putPanelZIndexOnTop(item.name)
+        //panelSvc.putPanelZIndexOnTop(item.name)
         item.notifyZIndexChanged()
         //move panel to top of page
         item.posX = 15

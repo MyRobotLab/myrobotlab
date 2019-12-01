@@ -1213,7 +1213,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Runtime.start("clock05", "Clock");
       */
 
-      
+      Runtime.start("arduino", "Arduino");
+      Runtime.start("servo01", "Servo");
+      Runtime.start("servo02", "Servo");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

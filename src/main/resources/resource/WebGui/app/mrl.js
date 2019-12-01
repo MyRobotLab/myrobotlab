@@ -11,6 +11,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     console.log('mrl.js')
     var _self = this
 
+    // panelSvc -- begin ---
+    var _self = this;
+
+    // object containing all panels
+    _self.panels = {};
+    // global zIndex
+    _self.zIndex = 0;
+    var ready = false;
+    // TODO - refactor
+    // var deferred;
+
+    // panelSvc -- end ----
+
     // FIXME - make all instance variables and make a true singleton - half and half is a mess
 
     this.generateId = function() {
@@ -39,7 +52,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // add Panel function to be set by PanelSvc for callback ability 
     // in this service to addPanels
-    this.addServicePanel = null
+    // this.addServicePanel = null
 
     this.id = null
 
@@ -57,6 +70,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     var connected = false
+    var connecting = false
 
     // FIXMME - serviceTypes is 'type' information - and this will be
     // retrieved from the Java server.  It will become the defintion of what
@@ -237,9 +251,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.sendRaw(json)
     }
 
+/*
     this.setAddServicePanel = function(addPanelFunction) {
         _self.addServicePanel = addPanelFunction
     }
+    */
 
     this.sendRaw = function(msg) {
         socket.push(msg)
@@ -267,15 +283,16 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         let service = JSON.parse(registration.state)
         registry[fullname] = service
 
-        // now use the panelSvc to add a panel - with the function it registered
-        _self.addServicePanel(service)
+        // now add a panel - with the function it registered
+        // _self.addServicePanel(service)
+        _self.addService(service)
     }
 
     /**
      * The first message recieved from remote webgui process.  After a connection is negotiated, a "hello" msg is
      * sent by both processes. The processes then respond to each other and begin the dialog of asking for details of
      * services and continuing additional setup.  The hello has a summarized list of services which only include name,
-     * and type. If this process can provide a panelSvc UI panel it will wait until the foreign process sends a onRegistered
+     * and type. It will wait until the foreign process sends a onRegistered
      * with details of state info
      */
     this.getHelloResponse = function(request) {
@@ -302,11 +319,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.subscribe(fullname, 'registered')
         _self.subscribe(fullname, 'released')
 
-        // FIXME - move this to onConnect
-        connected = true
 
         // FIXME - remove the over-complicated promise
-        deferred.resolve('connected !')
+        
     }
 
     this.getLocalName = function(fullname) {
@@ -597,10 +612,16 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         this.serviceListeners.push(callback)
     }
     this.onOpen = function(response) {
+
+        // FIXME - does this need to be done later when ids are setup ?
+        connected = true
+        connecting = false
+        deferred.resolve('connected !')
+
         // connected = true
         // this.connected = true mrl.isConnected means data
         // was asked and recieved from the backend
-        console.log('mrl.onOpen: ' + transport + ' connection opened.')
+        console.log('mrl.onOpen: ' + transport + ' connection opened')
 
         let hello = {
             id: _self.id,
@@ -608,10 +629,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             platform: _self.platform
         }
 
+
+        
+        angular.forEach(connectedCallbacks, function(value, key) {
+            value(connected)
+        })
+
         // blocking in the sense it will take the return data switch sender & destination - place an 'R'
         // and effectively return to sender without a subscription
         // _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
         // FIXME - this is not full address - but its being sent to a remote runtime :()
+
+        // var msg = _self.createMessage('runtime', "getHelloResponse", "fill-uuid", hello)
+        // msg.msgType = 'B' // no timeout - simple 'B'locking expects a resturn msg
+        // _self.sendMessage(msg)
         _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
 
     }
@@ -630,7 +661,276 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // it also represents config's view of the provider
     // when we inject our provider into a function by way of the provider name ("mrl"), Angular will call $get to
     // retrieve the object to inject
-    this.$get = function($q, $log, $http) {
+    this.$get = function($q, $log, $http, $templateCache, $ocLazyLoad) {
+        // panelSvc begin -----------------------------------
+
+
+
+   // var run = function() {
+        $log.info('initalizing panelSvc');
+        var lastPosY = -40;
+        // var gateway = mrl.getGateway();
+        // var runtime = mrl.getRuntime();
+        //var platform = mrl.getPlatform();
+        //var registry = mrl.getRegistry();
+        var isUndefinedOrNull = function(val) {
+            return angular.isUndefined(val) || val === null;
+        };
+
+        $http.get('service/tab-header.html').then(function(response) {
+            $templateCache.put('service/tab-header.html', response.data);
+        });
+
+        $http.get('service/tab-footer.html').then(function(response) {
+            $templateCache.put('service/tab-footer.html', response.data);
+        });
+
+        //START_update-notification
+        //notify all list-displays (e.g. main or min) that a panel was added or removed
+        //TODO: think of better way
+        //-> not top priority, works quite well
+        var updateSubscribtions = [];
+        _self.subscribeToUpdates = function(callback) {
+            updateSubscribtions.push(callback);
+        }
+        ;
+        _self.unsubscribeFromUpdates = function(callback) {
+            var index = updateSubscribtions.indexOf(callback);
+            if (index != -1) {
+                updateSubscribtions.splice(index, 1);
+            }
+        }
+        ;
+        var notifyAllOfUpdate = function() {
+            var panellist = _self.getPanelsList();
+            angular.forEach(updateSubscribtions, function(value, key) {
+                value(panellist);
+            });
+        };
+
+        //END_update-notification
+        _self.getPanels = function() {
+            //return panels as an object
+            return _self.panels;
+        }
+        ;
+        // TODO - implement
+        _self.savePanels = function() {
+            $log.info("here");
+        }
+        /**
+         * panelSvc (PanelData) --to--> MRL
+         * saves panel data from panelSvc to MRL
+         */
+        _self.savePanel = function(name) {
+            mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name));
+        }
+        _self.getPanelsList = function() {
+            return Object.keys(_self.panels).map(function(key) {
+                return _self.panels[key];
+            });
+        }
+        ;
+        var addPanel = function(service) {
+            var fullname = _self.getFullName(service)
+
+            if (_self.panels.hasOwnProperty(fullname)) {
+                $log.warn(fullname + ' already has panel');
+                return _self.panels[fullname];
+            }
+            lastPosY += 40;
+            var posY = lastPosY;
+            _self.zIndex++;
+            //construct panel & add it to list
+            _self.panels[fullname] = {
+                simpleName: _self.getSimpleName(service.serviceClass),
+                //serviceType (e.g. Runtime, Python, ...)
+                name: fullname,
+                // service.name,
+                //name of the service instance (e.g. runtime, python, rt, pyt, ...)
+                templatestatus: service.templatestatus,
+                //the state the loading of the template is in (loading, loaded, notfound)
+                list: 'main',
+                // ???
+                //the list this panel belongs to (e.g. main, min, ...)
+                // panelname: 'main',
+                // TODO - rename as 'panelType'
+                size: 'free',
+                // TODO - rename as 'panelType'
+                height: 0,
+                //the height of this panel
+                width: 800,
+                // TODO - getPreferredWidth
+                posX: 15,
+                posY: posY,
+                zIndex: _self.zIndex,
+                hide: false,
+                //if this panel should be hidden // TODO -load hide...
+                // a reference to the panelSvc
+                svc: _self,
+                hide: function() {
+                    hide = true;
+                }
+            };
+            return _self.panels[fullname];
+        };
+        _self.addService = function(service) {
+            
+            var name = _self.getFullName(service);
+            var type = service.simpleName;
+            //first load & parse the controller,    //js
+            //then load and save the template       //html
+            $log.info('lazy-loading:', type);
+            $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
+                $log.info('lazy-loading successful:', type);
+                $http.get('service/views/' + type + 'Gui.html').then(function(response) {
+                    $templateCache.put(type + 'Gui.html', response.data);
+                    var newPanel = addPanel(service);
+                    newPanel.templatestatus = 'loaded';
+                    notifyAllOfUpdate();
+                }, function(response) {
+                    addPanel(name).templatestatus = 'notfound';
+                    notifyAllOfUpdate();
+                });
+            }, function(e) {
+                // http template failure
+                type = "No";
+                // becomes NoGui
+                $log.warn('lazy-loading wasnt successful:', type);
+                addPanel(name).templatestatus = 'notfound';
+                notifyAllOfUpdate();
+            });
+        }
+        ;
+        // TODO - releasePanel
+        _self.releasePanel = function(inName) {
+            //remove a service and it's panels
+            let name = mrl.getFullName(inName)
+            $log.info('removing service', name);
+            //remove panels
+            if (name in _self.panels) {
+                delete _self.panels[name];
+            }
+
+            //update !
+            notifyAllOfUpdate();
+        }
+        ;
+        // TODO remove it then - if it will be abused ... 
+        _self.controllerscope = function(name, scope) {
+            //puts a reference to the scope of a service
+            //in the service & it's panels
+            //WARNING: DO NOT ABUSE THIS !!!
+            //->it's needed to bring controller & template together
+            //->and should otherwise only be used in VERY SPECIAL cases !!!
+            $log.info('registering controllers scope', name, scope);
+            if ('scope'in _self.panels[name]) {
+                $log.warn('replacing an existing scope for ' + name);
+            }
+            _self.panels[name].scope = scope;
+        }
+        ;
+        _self.putPanelZIndexOnTop = function(name) {
+            //panel requests to be put on top of the other panels
+            $log.info('putPanelZIndexOnTop', name);
+            _self.zIndex++;
+            _self.panels[name].zIndex = _self.zIndex;
+            _self.panels[name].notifyZIndexChanged();
+        }
+        ;
+        _self.movePanelToList = function(name, panelname, list) {
+            //move panel to specified list
+            $log.info('movePanelToList', name, panelname, list);
+            _self.panels[name].list = list;
+            notifyAllOfUpdate();
+        }
+        ;
+        /**
+         * MRL panelData ----to----> UI
+         * setPanel takes panelData from a foriegn source
+         * and notifies the scope so the gui panels arrange and positioned properly
+         */
+        _self.setPanel = function(newPanel) {
+
+            if (!(newPanel.name in _self.panels)) {
+                $log.info('service ' + newPanel.name + ' currently does not exist yet');
+                return;
+            }
+
+            _self.panels[newPanel.name].name = newPanel.name;
+            if (newPanel.simpleName) {
+                _self.panels[newPanel.name].simpleName = newPanel.simpleName;
+            }
+            _self.panels[newPanel.name].posY = newPanel.posY;
+            _self.panels[newPanel.name].posX = newPanel.posX;
+            _self.panels[newPanel.name].width = newPanel.width;
+            _self.panels[newPanel.name].height = newPanel.height;
+            _self.zIndex = (newPanel.zIndex > _self.zIndex) ? (newPanel.zIndex + 1) : _self.zIndex;
+            _self.panels[newPanel.name].zIndex = newPanel.zIndex;
+            _self.panels[newPanel.name].hide = newPanel.hide;
+            // data has been updated - now proccess the changes
+            //            _self.panels[newPanel.name].notifyPositionChanged();  // tabs breaks panels
+            //            _self.panels[newPanel.name].notifyZIndexChanged(); // tabs breaks panels
+            //            _self.panels[newPanel.name].notifySizeChanged(); // tabs breaks panels
+            notifyAllOfUpdate();
+            // <-- WTF is this?
+        }
+        /**
+         * getPanelData - input is a panels name
+         * output is a panelData object which which will serialize into a 
+         * WebGui's PanelData object - we have to create a data object from the
+         * angular "panel" since the angular panels cannot be serialized due to
+         * circular references and other contraints
+         */
+        _self.getPanelData = function(panelName) {
+            return {
+                "name": _self.panels[panelName].name,
+                "simpleName": _self.panels[panelName].simpleName,
+                "posX": _self.panels[panelName].posX,
+                "posY": _self.panels[panelName].posY,
+                "zIndex": _self.panels[panelName].zIndex,
+                "width": _self.panels[panelName].width,
+                "height": _self.panels[panelName].height,
+                "hide": _self.panels[panelName].hide
+            };
+        }
+        ;
+        _self.show = function(panelName) {
+            _self.panels[panelName].hide = false;
+        }
+        ;
+        _self.hide = function(name) {
+            _self.panels[name].hide = true;
+            _self.savePanel(name);
+        }
+        ;
+        _self.showAll = function(show) {
+            //hide or show all panels
+            $log.info('showAll', show);
+            angular.forEach(_self.panels, function(value, key) {
+                value.hide = !show;
+                _self.savePanel(key);
+            });
+        }
+
+        // we need to give mrl the ability to addPanels
+        // so we set mrls function ptr
+        // mrl.setAddServicePanel(_self.addService)
+
+        ready = true;
+
+    // };
+    // end of function run()
+
+
+
+
+        
+
+
+
+
+        // panelSvc end -------------------------------------
         this.connect = function(url, proxy) {
             if (connected) {
                 $log.info("aleady connected")
@@ -640,6 +940,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (url != undefined && url != null) {
                 this.url = url
             }
+
+            connecting = true
 
             socket = atmosphere.subscribe(this.request)
             deferred = $q.defer()
@@ -873,8 +1175,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             init: function() {
                 console.log('mrl.init()')
                 if (connected) {
+                    console.log('mrl.init() connected')
                     return true
                 }
+                if (connecting) {
+                    console.log('mrl.init() connecting')
+                    return false
+                }
+
                 _self.connect()
                 return deferred.promise
             },
@@ -898,6 +1206,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return arrayOfServices
             },
 
+            controllerscope: _self.controllerscope,
+            subscribeToUpdates: _self.subscribeToUpdates,
+            getPanelsList: _self.getPanelsList,
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
@@ -912,13 +1223,28 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             sendRaw: self.sendRaw,
             sendMessage: _self.sendMessage,
-            setAddServicePanel: _self.setAddServicePanel,
+            //setAddServicePanel: _self.setAddServicePanel,
             createMessage: _self.createMessage,
             promise: _self.promise // FIXME - no sql like interface
             // put/get value to and from webgui service
         }
+
+        service.init();
+        // run();
+        
         return service
     }
+
+    // panelSvc -- begin ---
+
+    this.isReady = function() {
+        return true;
+    }
+
+
+
+
+    // panelSvc -- end ---
 
     // assign callbacks
     this.request.onOpen = this.onOpen
