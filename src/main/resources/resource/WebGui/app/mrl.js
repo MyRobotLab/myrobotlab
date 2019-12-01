@@ -338,7 +338,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 }
 
                 //console.log('--> ' + msg.msgId + ' ' + msg.msgType)
-                console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
+                // console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
+                console.log('---> ' + msg.name + '.' + msg.method)
 
                 // handle blocking 'R'eturn msgs here - FIXME - timer to clean old errored msg ?
                 // the blocking call removes any msg resolved

@@ -61,7 +61,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         return bytes.map((byte,i)=>binaryString.charCodeAt(i));
     }
 
-    // _self.updateState($scope.service)
+
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
         // this.constructor.prototype.onMsg.call(this, inMsg)

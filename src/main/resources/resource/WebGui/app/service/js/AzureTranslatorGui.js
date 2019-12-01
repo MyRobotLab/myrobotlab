@@ -12,8 +12,7 @@ angular.module('mrlapp.service.AzureTranslatorGui', [])
         $scope.from = service.fromLanguage;
         $scope.to = service.toLanguage;
     }
-    ;
-    _self.updateState($scope.service);
+    
     
     // init scope variables
     $scope.translatedText = '';

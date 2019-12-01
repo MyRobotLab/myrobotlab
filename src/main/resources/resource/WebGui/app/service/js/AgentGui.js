@@ -60,8 +60,6 @@ angular.module('mrlapp.service.AgentGui', [])
         $scope.processes = service.processes;    
     }
     ;
-
-    _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

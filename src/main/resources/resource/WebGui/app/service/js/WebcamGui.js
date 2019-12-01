@@ -9,8 +9,7 @@ angular.module('mrlapp.service.WebcamGui', [])
                     $scope.service = service;
                     $scope.port = service.port;
                 };
-                
-                _self.updateState($scope.service);
+               
 
                 // init scope variables
                 $scope.pulseData = '';

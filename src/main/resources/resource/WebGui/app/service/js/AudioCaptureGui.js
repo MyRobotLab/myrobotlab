@@ -16,8 +16,7 @@ angular.module('mrlapp.service.AudioCaptureGui', [])
         $scope.playAudio        = service.playAudio;
     }
     ;
-    
-    _self.updateState($scope.service);
+  
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

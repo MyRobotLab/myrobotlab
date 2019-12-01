@@ -7,8 +7,6 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
 		$scope.service = service
 	}
 
-    _self.updateState($scope.service)
-
     // console.log('mary', $scope.service)
 
     this.onMsg = function(inMsg) {
