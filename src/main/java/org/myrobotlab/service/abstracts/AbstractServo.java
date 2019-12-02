@@ -759,6 +759,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   @Override
   public void setAutoDisable(Boolean autoDisable) {
+   
+    boolean valueChanged = !this.autoDisable.equals(autoDisable);
+    
     this.autoDisable = autoDisable;
 
     if (autoDisable) {
@@ -768,6 +771,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
     } else {
       purgeTask("idleDisable");
       idleDisabled = false;
+    }
+    
+    if (valueChanged) {
+      broadcastState();
     }
   }
 

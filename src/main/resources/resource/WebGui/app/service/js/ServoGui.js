@@ -2,21 +2,32 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $log.info('ServoGuiCtrl')
     var _self = this
     var msg = this.msg
+
+    var firstTime = true
+
     // init
     $scope.controller = null
     $scope.pinsList = []
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
-    $scope.showProperties = true
+    
     $scope.possibleController = null
     $scope.testTime = 300
+    $scope.sliderEnabled = false
+    $scope.properties = []
+    $scope.speed = null
+
+    $scope.showControls = true
+    $scope.showLimits = true
+    $scope.showProperties = false
+
     // TODO - should be able to build this based on
     // current selection of controller
     $scope.pinList = []
     //slider config with callbacks
     $scope.pos = {
-        value: 0,
+        value: 90,
         options: {
             floor: 0,
             ceil: 180,
@@ -24,24 +35,27 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             maxLimit: 180,
             onStart: function() {},
             onChange: function() {
-                msg.send('moveTo', $scope.pos.value)
+                if ($scope.sliderEnabled) {
+                    msg.send('moveTo', $scope.pos.value)
+                }
             },
             onEnd: function() {}
         }
     }
 
     $scope.limits = {
-        minValue: 1,
-        maxValue: 179,
+        minValue: 0,
+        maxValue: 180,
         options: {
             floor: 0,
             ceil: 180,
             step: 1,
             showTicks: false,
             onStart: function() {},
+            /* - changing only on mouse up event - look in ServoGui.html
             onChange: function() {
                 msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
-            },
+            },*/
             onEnd: function() {}
         }
 
@@ -59,37 +73,16 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         $scope.pin = service.pin
         $scope.rest = service.rest
 
-        /*
-        $scope.min = service.mapper.minOutput
-        $scope.max = service.mapper.maxOutput
-        $scope.pos.options.minLimit = service.mapper.minOutput
-        $scope.pos.options.maxLimit = service.mapper.maxOutput
-        */
+        if (firstTime) {
+            $scope.pos.value = service.currentPos
+            $scope.sliderEnabled = true
+            firstTime = false
+        }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
-        // $scope.limits.minValue = service.mapper.minX
-        // $scope.limits.maxValue = service.mapper.maxX
-        // $scope.limits.maxValue ++;
-        //$scope.limits.maxValue --;
-
+        $scope.limits.minValue = service.mapper.minX
+        $scope.limits.maxValue = service.mapper.maxX
         $scope.pinList = service.pinList
-
-        $scope.limits = {
-            minValue: service.mapper.minX,
-            maxValue: service.mapper.maxX,
-            options: {
-                floor: 0,
-                ceil: 180,
-                step: 1,
-                showTicks: false,
-                onStart: function() {},
-                onChange: function() {
-                    msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
-                },
-                onEnd: function() {}
-            }
-
-        }
     }
 
     this.onMsg = function(inMsg) {
@@ -97,7 +90,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
-
+            _self.setProperties(data)
             $scope.$apply()
             break
             // servo event in the past 
@@ -162,9 +155,104 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         // msg.attach($scope.controller, $scope.pin, 90)
     }
 
+    // FIXME - put this in mrl service
+    // lovely function - https://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
+    this.flatten = function(data) {
+        var result = {};
+        function recurse(cur, prop) {
+            if (Object(cur) !== cur) {
+                result[prop] = cur;
+            } else if (Array.isArray(cur)) {
+                for (var i = 0, l = cur.length; i < l; i++)
+                    recurse(cur[i], prop + "[" + i + "]");
+                if (l == 0)
+                    result[prop] = [];
+            } else {
+                var isEmpty = true;
+                for (var p in cur) {
+                    isEmpty = false;
+                    recurse(cur[p], prop ? prop + "." + p : p);
+                }
+                if (isEmpty && prop)
+                    result[prop] = {};
+            }
+        }
+        recurse(data, "");
+        return result;
+    }
+
+    this.unflatten = function(data) {
+        "use strict";
+        if (Object(data) !== data || Array.isArray(data))
+            return data;
+        var regex = /\.?([^.\[\]]+)|\[(\d+)\]/g
+          , resultholder = {};
+        for (var p in data) {
+            var cur = resultholder, prop = "", m;
+            while (m = regex.exec(p)) {
+                cur = cur[prop] || (cur[prop] = (m[2] ? [] : {}));
+                prop = m[2] || m[1];
+            }
+            cur[prop] = data[p];
+        }
+        return resultholder[""] || resultholder;
+    }
+    
+
     msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
     msg.subscribe(this)
+
+    this.setProperties = function(service) {
+
+        let flat = this.flatten(service)
+        console.table(flat)
+
+        $scope.properties = [];
+
+        let exclude = {
+            id: "id",
+            simpleName: "simpleName",
+            creationOrder: "creationOrder",
+            "serviceType.name": "serviceType.name",
+            "serviceType.simpleName": "serviceType.simpleName",
+            "serviceType.isCloudService": "serviceType.isCloudService",
+            "serviceType.includeServiceInOneJar": "serviceType.includeServiceInOneJar",
+            "serviceType.description": "serviceType.description",
+            "serviceType.available": "serviceType.available",
+            "interfaceSet.org.myrobotlab.service.interfaces.ServoControl":"interfaceSet.org.myrobotlab.service.interfaces.ServoControl", // this will need work :P
+            serviceClass: "serviceClass",
+            name: "name",
+            statusBroadcastLimitMs: "statusBroadcastLimitMs",
+            interfaceSet: "interfaceSet",
+            isRunning: "isRunning"
+        }
+
+        let info = {
+            autoDisable: "servo will de-energize if no activity occurs in {idleTimeout} ms - saving the servo from unnecessary wear",
+            idleTimeout: "number of milliseconds the servo will de-energize if no activity has occurred",
+            isSweeping: "servo is in sweep mode - which will make the servo swing back and forth at current speed between min and max values",
+            lastActivityTimeTs: "timestamp of last move servo did"
+        }
+
+        // Push each JSON Object entry in array by [key, value]
+        for (var i in flat) {
+
+            let o = flat[i]
+            if (typeof o == "object") {
+                console.log('ere')
+            }
+
+            if (i in exclude) {
+                continue
+            }
+            $scope.properties.push([i, flat[i]]);
+        }
+
+        // Run native sort function and returns sorted array.
+        return $scope.properties.sort();
+    }
+
     // msg.send('broadcastState')
 
     // no longer needed - interfaces now travel with a service
