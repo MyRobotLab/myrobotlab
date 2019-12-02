@@ -1,4 +1,4 @@
-angular.module('mrlapp.views').controller('mainViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', function($scope, $log, $filter, $timeout, mrl, $state) {
+angular.module('mrlapp.mrl').controller('mainViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', function($scope, $log, $filter, $timeout, mrl, $state) {
     $log.info('mainViewCtrl');
 
     //service-panels & update-routine

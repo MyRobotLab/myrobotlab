@@ -1,4 +1,4 @@
-angular.module('mrlapp.views')
+angular.module('mrlapp.mrl')
         .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl',
             function ($scope, $log, $stateParams, $filter, $timeout, mrl) {
                 $log.info('serviceViewCtrl');

@@ -13,10 +13,8 @@
             <rzslider class="custom-slider" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
         </div>
         <div class="col-md-12">
-            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" rz-slider-options="limits.options"/>
+            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" ng-mouseup="msg.setMinMax(limits.minValue, limits.maxValue)" rz-slider-options="limits.options"/>
         </div>
-
-
         <div class="col-md-12 input-group">
             <attach ng-model="possibleController" ng-disabled="service.controller != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
             <span class="input-group-btn">
@@ -28,7 +26,14 @@
                 <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.disable()">disable pin</button>
                 <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">enable pin</button>
             </span>
+            <input type="text" class="form-control" placeholder="speed" ng-model="speed"/>
             <span class="input-group-btn">
+                <button class="btn btn-default" ng-click="msg.setSpeed(speed);">set speed</button>
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button" ng-click="msg.setAutoDisable(!service.autoDisable)">
+                    auto-disable <span>{{(service.autoDisable)?"on":"off"}}</span>
+                </button>
                 <button class="btn btn-default" type="button" ng-click="sweep()">sweep</button>
                 <button class="btn btn-default" type="button" ng-click="msg.stop()">
                     <span>
@@ -38,50 +43,22 @@
             </span>
         </div>
     </div>
-    <br/>
-    <div ng-show="showProperties" class="row">
-        <span class="label label-default pull-right">properties</span>
-        <table class="table table-striped">
-            <tr>
-                <td>controller</td>
-                <td>{{service.controller}}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>min</td>
-                <td>{{service.mapper.minX}}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>max</td>
-                <td>{{service.mapper.maxX}}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>rest</td>
-                <td>{{service.rest}}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>speed</td>
-                <td>{{service.speed}}</td>
-                <td>deg/s</td>
-            </tr>
-            <tr>
-                <td>estimated max speed</td>
-                <td>{{service.maxSpeed}}</td>
-                <td>deg/s</td>
-            </tr>
-            <tr>
-                <td>auto disable</td>
-                <td>{{service.autoDisable}}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>idle timeout</td>
-                <td>{{service.idleTimeout}}</td>
-                <td>ms</td>
-            </tr>
-        </table>
+    <div class="row">
+        <span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
+        <div ng-show="showProperties">
+            <table class="table table-striped">
+                <tr ng-repeat="(key, value) in properties">
+                    <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
+                    <td>{{value[0]}}</td>
+                    <td>{{value[1]}}</td>
+                    <td>
+                    <!-- units -->
+                    </td>
+                    <td>
+                    <!-- info -->
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
