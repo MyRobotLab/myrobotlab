@@ -1,28 +1,35 @@
 /**
 * The initial javascript service created to display MyRobotLab services.
-* This webgui should be considered equivalent to a mrl instance - with a single javascript service.
+* This javascript client should be considered equivalent to a mrl instance - with a single javascript runtime service.
 * Its purpose is to display controls and published data from other services mostly from other processes.
 * This UI is a reflection of all the services which have been 'registered' with this javascript service.
-* The javascript service is effectively named "runtime@webgui-client-1234-5678" - although this will soon changee
-* to become more unique
+* The javascript service is effectively named "runtime@webgui-client-1234-5678" - although it would be more advantageous if the 
+* remote Java WebGui passed up its {id}, and managed its uniqueness
 */
 
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     console.log('mrl.js - starting')
+
+    // TODO - get 'real' platform info - browser type - node version - etc
+    let platform = {
+        os: "chrome",
+        lang: "javascript",
+        bitness: 64,
+        mrlVersion: "unknown"
+    }
+
     var _self = this
 
     // object containing all panels
-    _self.panels = {}
+    let panels = {}
 
     // global zIndex
-    _self.zIndex = 0
-
-    // var ready = false
+    let zIndex = 0
 
     // FIXME - make all instance variables and make a true singleton - half and half is a mess
 
     // FIXME - let the webgui pass up the id unless configured not to
-    this.generateId = function() {
+    function generateId() {
         // one id to rule them all !
         return 'webgui-client-' + 1234 + '-' + 5678
     }
@@ -32,13 +39,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // tried to make these private ..
     // too much of a pain :P
     // FIXME - try again... {}
-    this.gateway
+    let gateway = null
 
     // FIXME - THIS HAS THE WRONG CONCEPT - PREVIOUSLY IT WAS THE MRL JAVA RUNTIME - IT NEEDS TO BE THE JS RUNTIME !!!
     // FIXME - IT WILL BE OVERWRITTEN ! - THAT NEEDS TO BE FIXED
-    this.runtime = {
+    let runtime = {
         name: "runtime",
-        id: _self.generateId()
+        id: generateId()
     }
 
     this.id = null
@@ -48,16 +55,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.blockingKeyList = {}
 
-    // TODO - get 'real' platform info - browser type - node version - etc
-    this.platform = {
-        os: "chrome",
-        lang: "javascript",
-        bitness: 64,
-        mrlVersion: "unknown"
-    }
-
-    var connected = false
-    var connecting = false
+    let connected = false
+    let connecting = false
 
     // FIXMME - serviceTypes is 'type' information - and this will be
     // retrieved from the Java server.  It will become the defintion of what
@@ -65,20 +64,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // instead it should be defined by the {service}Gui.js and {service}View.js we have !
     // FIXME - load this with a request NOT from runtime
     // var serviceTypes = []
-    var serviceTypes = {}
+    let serviceTypes = {}
 
-    var registry = {}
-    var ids = {}
+    let registry = {}
+    let ids = {}
 
-    var methodCache = {}
-    var transport = 'websocket'
-    var socket = null
-    var callbacks = []
+    let methodCache = {}
+    let transport = 'websocket'
+    let socket = null
+    let callbacks = []
 
-    var onStatus = []
-    var connectedCallbacks = []
-    var deferred = null
-    var msgInterfaces = {}
+    let onStatus = []
+    let connectedCallbacks = []
+    let deferred = null
+    let msgInterfaces = {}
 
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
     // See the following link for all websocket configuration
@@ -116,19 +115,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return string.charAt(0).toUpperCase() + string.slice(1)
     }
 
-    this.getCallBackName = function(topicMethod) {
-        // replacements
-        if (topicMethod.startsWith("publish")) {
-            return "on" + capitalize(topicMethod.substring(""))
-        } else if (topicMethod.startsWith("get")) {
-            return "get"
-        }
-        // no replacement - just pefix and capitalize
-        // FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
-        return "on%s",
-        capitalize(topicMethod)
-    }
-
     // FIXME CHECK FOR DUPLICATES
     this.subscribeToService = function(callback, inName) {
         let serviceName = _self.getFullName(inName)
@@ -141,7 +127,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // NEW !!! - subscribe to a specific instance.method callback
     // will be used by the framework
     this.subscribeToServiceMethod = function(callback, serviceName, methodName) {
-        var key = _self.getFullName(serviceName) + "." + _self.getCallBackName(methodName)
+        var key = _self.getFullName(serviceName) + "." + getCallBackName(methodName)
         if (!(key in nameMethodCallbackMap)) {
             nameMethodCallbackMap[key] = []
         }
@@ -280,7 +266,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         // FIXME - git list of current services (name and types)
         // FIXME - iterate through list request getService on each -or publishState
-        _self.platform.mrlVersion = hello.platform.mrlVersion
+        platform.mrlVersion = hello.platform.mrlVersion
         // FIXME - Wrong !  - multiple platforms !
 
         // suscribe to future registration requests
@@ -491,21 +477,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         delete registry[_self.getFullName(name)]
     }
 
-    this.capitalize = function(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1)
-    }
-
-    this.getCallBackName = function(topicMethod) {
+    function getCallBackName(topicMethod) {
         // replacements
         if (topicMethod.startsWith("publish")) {
-            return 'on' + _self.capitalize(topicMethod.substring("publish".length))
+            return 'on' + capitalize(topicMethod.substring("publish".length))
         } else if (topicMethod.startsWith("get")) {
-            return 'on' + _self.capitalize(topicMethod.substring("get".length))
+            return 'on' + capitalize(topicMethod.substring("get".length))
         }
         // no replacement - just pefix and capitalize
         // FIXME - subscribe to onMethod --- gets ---> onOnMethod :P
         return 'on' + capitalize(topicMethod)
     }
+
     this.sendTo = function(name, method, data) {
         var args = Array.prototype.slice.call(arguments, 2)
         var msg = _self.createMessage(name, method, args)
@@ -586,7 +569,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         let hello = {
             id: _self.id,
             uuid: _self.uuid,
-            platform: _self.platform
+            platform: platform
         }
 
         angular.forEach(connectedCallbacks, function(value, key) {
@@ -660,7 +643,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         //END_update-notification
         _self.getPanels = function() {
             //return panels as an object
-            return _self.panels
+            return panels
         }
 
         // TODO - implement
@@ -675,23 +658,23 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
         _self.getPanelsList = function() {
-            return Object.keys(_self.panels).map(function(key) {
-                return _self.panels[key]
+            return Object.keys(panels).map(function(key) {
+                return panels[key]
             })
         }
 
         var addPanel = function(service) {
             var fullname = _self.getFullName(service)
 
-            if (_self.panels.hasOwnProperty(fullname)) {
+            if (panels.hasOwnProperty(fullname)) {
                 $log.warn(fullname + ' already has panel')
-                return _self.panels[fullname]
+                return panels[fullname]
             }
             lastPosY += 40
             var posY = lastPosY
-            _self.zIndex++
+            zIndex++
             //construct panel & add it to list
-            _self.panels[fullname] = {
+            panels[fullname] = {
                 simpleName: _self.getSimpleName(service.serviceClass),
                 //serviceType (e.g. Runtime, Python, ...)
                 name: fullname,
@@ -712,7 +695,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // TODO - getPreferredWidth
                 posX: 15,
                 posY: posY,
-                zIndex: _self.zIndex,
+                zIndex: zIndex,
                 hide: false,
                 //if this panel should be hidden // TODO -load hide...
                 // a reference to the panelSvc
@@ -721,7 +704,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     hide = true
                 }
             }
-            return _self.panels[fullname]
+            return panels[fullname]
         }
         _self.addService = function(service) {
 
@@ -757,8 +740,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let name = mrl.getFullName(inName)
             $log.info('removing service', name)
             //remove panels
-            if (name in _self.panels) {
-                delete _self.panels[name]
+            if (name in panels) {
+                delete panels[name]
             }
 
             //update !
@@ -773,24 +756,24 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             $log.info('registering controllers scope', name, scope)
-            if ('scope'in _self.panels[name]) {
+            if ('scope'in panels[name]) {
                 $log.warn('replacing an existing scope for ' + name)
             }
-            _self.panels[name].scope = scope
+            panels[name].scope = scope
         }
 
         _self.putPanelZIndexOnTop = function(name) {
             //panel requests to be put on top of the other panels
             $log.info('putPanelZIndexOnTop', name)
-            _self.zIndex++
-            _self.panels[name].zIndex = _self.zIndex
-            _self.panels[name].notifyZIndexChanged()
+            zIndex++
+            panels[name].zIndex = zIndex
+            panels[name].notifyZIndexChanged()
         }
 
         _self.movePanelToList = function(name, panelname, list) {
             //move panel to specified list
             $log.info('movePanelToList', name, panelname, list)
-            _self.panels[name].list = list
+            panels[name].list = list
             notifyAllOfUpdate()
         }
 
@@ -801,26 +784,26 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
          */
         _self.setPanel = function(newPanel) {
 
-            if (!(newPanel.name in _self.panels)) {
+            if (!(newPanel.name in panels)) {
                 $log.info('service ' + newPanel.name + ' currently does not exist yet')
                 return
             }
 
-            _self.panels[newPanel.name].name = newPanel.name
+            panels[newPanel.name].name = newPanel.name
             if (newPanel.simpleName) {
-                _self.panels[newPanel.name].simpleName = newPanel.simpleName
+                panels[newPanel.name].simpleName = newPanel.simpleName
             }
-            _self.panels[newPanel.name].posY = newPanel.posY
-            _self.panels[newPanel.name].posX = newPanel.posX
-            _self.panels[newPanel.name].width = newPanel.width
-            _self.panels[newPanel.name].height = newPanel.height
-            _self.zIndex = (newPanel.zIndex > _self.zIndex) ? (newPanel.zIndex + 1) : _self.zIndex
-            _self.panels[newPanel.name].zIndex = newPanel.zIndex
-            _self.panels[newPanel.name].hide = newPanel.hide
+            panels[newPanel.name].posY = newPanel.posY
+            panels[newPanel.name].posX = newPanel.posX
+            panels[newPanel.name].width = newPanel.width
+            panels[newPanel.name].height = newPanel.height
+            zIndex = (newPanel.zIndex > zIndex) ? (newPanel.zIndex + 1) : zIndex
+            panels[newPanel.name].zIndex = newPanel.zIndex
+            panels[newPanel.name].hide = newPanel.hide
             // data has been updated - now proccess the changes
-            //            _self.panels[newPanel.name].notifyPositionChanged()  // tabs breaks panels
-            //            _self.panels[newPanel.name].notifyZIndexChanged() // tabs breaks panels
-            //            _self.panels[newPanel.name].notifySizeChanged() // tabs breaks panels
+            //            panels[newPanel.name].notifyPositionChanged()  // tabs breaks panels
+            //            panels[newPanel.name].notifyZIndexChanged() // tabs breaks panels
+            //            panels[newPanel.name].notifySizeChanged() // tabs breaks panels
             notifyAllOfUpdate()
             // <-- WTF is this?
         }
@@ -833,41 +816,35 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
          */
         _self.getPanelData = function(panelName) {
             return {
-                "name": _self.panels[panelName].name,
-                "simpleName": _self.panels[panelName].simpleName,
-                "posX": _self.panels[panelName].posX,
-                "posY": _self.panels[panelName].posY,
-                "zIndex": _self.panels[panelName].zIndex,
-                "width": _self.panels[panelName].width,
-                "height": _self.panels[panelName].height,
-                "hide": _self.panels[panelName].hide
+                "name": panels[panelName].name,
+                "simpleName": panels[panelName].simpleName,
+                "posX": panels[panelName].posX,
+                "posY": panels[panelName].posY,
+                "zIndex": panels[panelName].zIndex,
+                "width": panels[panelName].width,
+                "height": panels[panelName].height,
+                "hide": panels[panelName].hide
             }
         }
 
-        _self.show = function(panelName) {
-            _self.panels[panelName].hide = false
+        function show(panelName) {
+            panels[panelName].hide = false
         }
 
-        _self.hide = function(name) {
-            _self.panels[name].hide = true
+        function hide(name) {
+            panels[name].hide = true
             _self.savePanel(name)
         }
 
-        _self.showAll = function(show) {
+        function showAll(show) {
             //hide or show all panels
             $log.info('showAll', show)
-            angular.forEach(_self.panels, function(value, key) {
+            angular.forEach(panels, function(value, key) {
                 value.hide = !show
                 _self.savePanel(key)
             })
         }
 
-        // ready = true
-
-        // }
-        // end of function run()
-
-        // panelSvc end -------------------------------------
         this.connect = function(url, proxy) {
             if (connected) {
                 $log.info("aleady connected")
@@ -1074,7 +1051,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return deferred.promise
             },
             getPlatform: function() {
-                return _self.platform
+                return platform
             },
             getRemoteId: function() {
                 return _self.remoteId
@@ -1087,7 +1064,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             },
             getRuntime: function() {
                 // FIXME - this is wrong mrl.js is a js runtime service - this is just the runtime its connected to
-                return _self.runtime
+                return runtime
             },
             getServicesFromInterface: function(name) {
                 return _self.getServicesFromInterface(name)
@@ -1118,7 +1095,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             noWorky: function(userId) {
                 $log.info('mrl-noWorky', userId)
-                _self.sendTo(_self.runtime.name + '@' + _self.remoteId, "noWorky", userId)
+                _self.sendTo(runtime.name + '@' + _self.remoteId, "noWorky", userId)
             },
             getRegistry: function() {
                 return registry
@@ -1159,7 +1136,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.request.onMessage = this.onMessage
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError
-    this.id = this.generateId()
+    this.id = generateId()
 
     // correct way to put in callbacks for js runtime instance
     jsRuntimeMethodMap["runtime@" + this.id + ".onRegistered"] = _self.onRegistered
