@@ -13,7 +13,7 @@
             <rzslider class="custom-slider" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
         </div>
         <div class="col-md-12">
-            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" ng-mouseup="msg.setMinMax(limits.minValue, limits.maxValue)" rz-slider-options="limits.options"/>
+            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" rz-slider-options="limits.options"/>
         </div>
         <div class="col-md-12 input-group">
             <attach ng-model="possibleController" ng-disabled="service.controller != null" interface="org.myrobotlab.service.interfaces.ServoController"/>
@@ -56,6 +56,7 @@
                     </td>
                     <td>
                     <!-- info -->
+                    {{value[2]}}
                     </td>
                 </tr>
             </table>

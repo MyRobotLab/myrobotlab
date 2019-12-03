@@ -17,9 +17,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.sliderEnabled = false
     $scope.properties = []
     $scope.speed = null
-
-    $scope.showControls = true
-    $scope.showLimits = true
+   
     $scope.showProperties = false
 
     // TODO - should be able to build this based on
@@ -52,10 +50,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             step: 1,
             showTicks: false,
             onStart: function() {},
-            /* - changing only on mouse up event - look in ServoGui.html
+            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
                 msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
-            },*/
+            },
             onEnd: function() {}
         }
 
@@ -229,7 +227,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
 
         let info = {
-            autoDisable: "servo will de-energize if no activity occurs in {idleTimeout} ms - saving the servo from unnecessary wear",
+            autoDisable: "servo will de-energize if no activity occurs in {idleTimeout} ms - saving the servo from unnecessary wear or damage",
             idleTimeout: "number of milliseconds the servo will de-energize if no activity has occurred",
             isSweeping: "servo is in sweep mode - which will make the servo swing back and forth at current speed between min and max values",
             lastActivityTimeTs: "timestamp of last move servo did"
@@ -246,7 +244,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             if (i in exclude) {
                 continue
             }
-            $scope.properties.push([i, flat[i]]);
+
+            let inf = (info[i] == null)?'':info[i]
+            
+            $scope.properties.push([i, flat[i], inf]);
         }
 
         // Run native sort function and returns sorted array.
