@@ -152,4 +152,3 @@ void MrlServo::setAcceleration(int acceleration) {
 void MrlServo::publishServoEvent(int type) {
   msg->publishServoEvent(id, type, (int)currentPosUs, targetPosUs);
 }
-

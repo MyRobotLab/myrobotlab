@@ -510,6 +510,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
         String name = controller;
         controller = null;
         invokeOn(name, "detach", getName());
+        broadcastState();
       }
     }
   }
@@ -970,13 +971,23 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public boolean isMoving() {
     return isMoving;
   }
+  
+  @Override
+  public void unsetSpeed() {
+    log.info("disabling speed control");
+    speed = null;
+    if (controller != null) {
+      invokeOn(controller, "servoSetVelocity", this);
+    }
+    broadcastState();
+  }
 
   @Override
   @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
-      log.info("disabling speed control");
-      speed = null;
+      unsetSpeed();
+      return;
     }
 
     if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond > maxSpeed) {

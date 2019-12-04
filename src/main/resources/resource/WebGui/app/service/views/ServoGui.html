@@ -23,12 +23,12 @@
             </span>
             <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="pin" ng-model="pin"/>
             <span class="input-group-btn">
-                <button class="btn btn-default" ng-show="service.enabled" ng-click="msg.disable()">disable pin</button>
-                <button class="btn btn-default" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">enable pin</button>
+                <button class="btn btn-default" ng-disabled="service.controller == null" ng-show="service.enabled" ng-click="msg.disable()">disable pin</button>
+                <button class="btn btn-default" ng-disabled="service.controller == null" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">enable pin</button>
             </span>
             <input type="text" class="form-control" placeholder="speed" ng-model="speed"/>
             <span class="input-group-btn">
-                <button class="btn btn-default" ng-click="msg.setSpeed(speed);">set speed</button>
+                <button class="btn btn-default" ng-click="setSpeed(speed);">set speed</button>
             </span>
             <span class="input-group-btn">
                 <button class="btn btn-default" type="button" ng-click="msg.setAutoDisable(!service.autoDisable)">

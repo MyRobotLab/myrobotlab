@@ -2317,6 +2317,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Attachable.detach(serviceName) - routes to reference parameter
    * Attachable.detach(Attachable)
+   * 
+   * FIXME - the "string" attach/detach(string) method should be in the implementation..
+   * and this abstract should implement the attach/detach(Attachable) .. because if 
+   * a string was used as the base implementation - it would always work when serialized (and not registered)
+   * 
    */
   public void detach(String serviceName) {
     detach(Runtime.getService(serviceName));

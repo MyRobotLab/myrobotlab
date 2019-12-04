@@ -850,4 +850,3 @@ void MrlNeopixel::onDisconnect() {
   setAnimation(NEOPIXEL_ANIMATION_THEATER_CHASE, 255, 0, 0, 1);
   
 }
-
