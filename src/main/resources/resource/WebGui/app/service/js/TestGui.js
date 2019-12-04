@@ -67,7 +67,6 @@ angular.module('mrlapp.service.TestGui', [])
     }
     ;
     
-    _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {

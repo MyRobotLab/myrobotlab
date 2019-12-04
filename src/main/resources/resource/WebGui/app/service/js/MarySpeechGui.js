@@ -7,7 +7,6 @@ angular.module('mrlapp.service.MarySpeechGui', []).controller('MarySpeechGuiCtrl
 		$scope.service = service;
 	};
 
-    _self.updateState($scope.service);
 
     // console.log('mary', $scope.service);
 

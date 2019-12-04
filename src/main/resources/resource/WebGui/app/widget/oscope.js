@@ -45,6 +45,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             // scope.blah = {};
             // scope.blah.display = false;
             scope.pinMap = {};
+            scope.pinIndex = service.pinIndex;
             var x = 0;
             var gradient = tinygradient([
             {
@@ -165,7 +166,7 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
                             var newColor = tinycolor(highlight);
                             ctx.fillStyle = trace.colorHexString;
                             // TODO - highlight saturtion of text
-                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.name + ' ' + pinData.address, 10, minY);
+                            ctx.fillText('MAX ' + stats.max + '   ' + pinDef.pin + ' ' + pinDef.address, 10, minY);
                             ctx.fillText(('AVG ' + (stats.totalValue / stats.totalSample)).substring(0, 11), 10, height / 2);
                             ctx.fillText('MIN ' + stats.min, 10, maxY);
                             trace.posX = 0;
@@ -308,9 +309,8 @@ angular.module('mrlapp.service').directive('oscope', ['mrl', '$log', function(mr
             mrl.subscribe(name, 'publishPinArray');
             mrl.subscribeToServiceMethod(_self.onMsg, name, 'publishPinArray');
             // initializing display data     
-            let pincontroller = mrl.getService(name); 
-            log.info(pincontroller)
-            setTraceButtons(service.pinMap);
+           
+            setTraceButtons(service.pinIndex);
         }
     };
 }

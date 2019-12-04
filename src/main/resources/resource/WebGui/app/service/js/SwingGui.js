@@ -7,7 +7,7 @@ angular.module('mrlapp.service.GUIServiceGui', [])
                 this.updateState = function (service) {
                     $scope.service = service;
                 };
-                _self.updateState($scope.service);
+
 
                 this.onMsg = function (inMsg) {
                     switch (inMsg.method) {

@@ -26,7 +26,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -492,16 +491,6 @@ public class Arduino extends AbstractMicrocontroller
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
-      msg.servoAttach(dm.getId(), pin, uS, (int) velocity, servo.getName());
-      if (servo.isEnabled()) {
-        msg.servoAttachPin(dm.getId(), pin);
-      }
-    }
-    if (attachable instanceof Servo) {
-      Servo servo = (Servo) attachable;
-      int uS = degreeToMicroseconds(servo.getTargetOutput());
-      double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
-      int pin = getAddress(servo.getPin());
       log.info("================ {} {} {} ================", servo.getName(), dm.getId(), pin);
       msg.servoAttach(dm.getId(), pin, uS, (int) velocity, servo.getName());
       if (servo.isEnabled()) {
@@ -565,7 +554,7 @@ public class Arduino extends AbstractMicrocontroller
       // so we turn off ack'ing locally
 
       // TODO - can we re-enable acks ?
-      // msg.enableAcks(false);
+      msg.enableAcks(false);
       long startBoardRequestTs = System.currentTimeMillis();
 
       // start the heartbeat
@@ -2340,31 +2329,36 @@ public class Arduino extends AbstractMicrocontroller
    */
   public static void main(String[] args) {
     try {
+      
+      Runtime.main(new String[] { "--interactive", "--id", "id"});
 
-      // DONT FORGET TO
-      Platform.setVirtual(true);
-      LoggingFactory.init(Level.WARN);
       // Platform.setVirtual(true);
-      /*
+      LoggingFactory.init(Level.INFO);
+      // Platform.setVirtual(true);
+      
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
-      */
-      Runtime.start("gui", "SwingGui");
+      
+      
+      // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
       
-      hub.connect("COM3");
+      hub.connect("/dev/ttyACM0");
 
       // hub.enableAck(false);
+      
       ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
-      sc.setPin(7);
+      sc.setPin(3);
       hub.attach(sc);
       sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
+      
 
       // hub.enableAck(true);
       /*

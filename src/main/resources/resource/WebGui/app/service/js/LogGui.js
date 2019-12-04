@@ -59,8 +59,6 @@ angular.module('mrlapp.service.LogGui', []).controller('LogGuiCtrl', ['$scope', 
 
     }
 
-    _self.updateState($scope.service)
-
     this.onMsg = function(msg) {
 
         switch (msg.method) {

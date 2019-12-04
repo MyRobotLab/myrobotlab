@@ -39,7 +39,7 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
         // directly
     }
     ;
-    _self.updateState($scope.service);
+
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
         case 'onState':

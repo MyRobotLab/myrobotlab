@@ -16,20 +16,18 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'sticky', //sticky elements
 'checklist-model', // checklists
 'angular-intro', // intro
-//'ngclipboard',
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
 'nvd3ChartDirectives', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
 'mrlapp.main.mainCtrl', 'mrlapp.main.statusSvc', //very basic service for storing "statuses"
 'mrlapp.main.noWorkySvc', //send a noWorky !
-'mrlapp.views', //mainView, tabsView, serviceView, ...
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
 'angularTreeview', // any server filesystem browsing
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
-    console.log('app.js');
+    console.log('app.js - starting');
     $urlRouterProvider.otherwise("/tabs");
     $stateProvider.state('loading', {
         url: "/loading",

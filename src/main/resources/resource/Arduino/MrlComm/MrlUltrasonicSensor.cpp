@@ -41,4 +41,3 @@ void MrlUltrasonicSensor::update() {
 
 	lastDistance = distance;
 }
-

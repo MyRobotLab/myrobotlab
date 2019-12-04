@@ -23,8 +23,6 @@ angular.module('mrlapp.service.ShoutboxGui', [])
     }
     ;
     
-    _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         
         switch (inMsg.method) {

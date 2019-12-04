@@ -379,7 +379,16 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   @Deprecated /* use an encoder ! */
   long getLastActivityTime();
 
+  /**
+   * set the speed of the servo
+   * @param d
+   */
   public void setSpeed(Double d);
+  
+  /**
+   * remove speed control
+   */
+  public void unsetSpeed();
 
   Double getTargetPos();
 

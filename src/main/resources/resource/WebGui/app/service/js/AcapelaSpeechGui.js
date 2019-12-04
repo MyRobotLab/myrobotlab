@@ -13,7 +13,6 @@ angular.module('mrlapp.service.AcapelaSpeechGui', [])
         $scope.voice = service.voice;
     }
     ;
-    _self.updateState($scope.service);
     
     // init scope variables
     $scope.text = '';

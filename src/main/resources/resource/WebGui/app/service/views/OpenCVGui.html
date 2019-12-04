@@ -1,34 +1,45 @@
+<div class="row">&nbsp;</div>
+<div class="row">
+    <div class="col-md-1">
+        <button ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()">capture</button>
+        <button ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">stop capture</button>
+    </div>
+    <div class="col-md-5">
+        <img class="responsive-img" src="../../OpenCV/cv-20382.png"/>
+    </div>
+    <div class="col-md-1">
+        <table>
+            <tr>
+                <td>
+                    <span class="label label-default">current filters</span>
+                    <select class="custom-select" size="20">
+                        <option selected>Open this select menu</option>
+                        <option value="1">Canny</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-default">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    <button class="btn btn-default">
+                        <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                </td>
+                <td>
+                    <span class="label label-default">available filters</span>
+                    <select class="custom-select" size="20">
+                        <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-1"></div>
+    <div class="col-md-1"></div>
+</div>
 <div>
-  Camera Index: {{cameraIndex}}
-  <br/>
-  Frame Grabber: {{frameGrabber}}
-  <br/>
-  <select name="frameGrabber" ng-model="frameGrabber" ng-change="selectFrameGrabber(frameGrabber)" >
-    <option value="org.bytedeco.javacv.VideoInputFrameGrabber">Video Input</option>
-    <option value="org.bytedeco.javacv.OpenCVFrameGrabber">OpenCV</option>
-  </select>
-  <br/>
-  Select Camera: <br/>
-  <select name="cameraSelect" ng-model="cameraIndex" ng-change="selectCameraIndex(cameraIndex)">
-    <option value="0">0</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4">4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-  </select>
-  <br/>
-  <button id="startCapture" class="btn btn-default"  ng-click="startCapture()" ng-init="startCaptureLabel = 'Start Capture'">{{startCaptureLabel}}</button>
-  </div>
-  <div>
-    Video Widget <a href="http://localhost:9090/input">Here</a><br/>
-   
-    <img ng-src="{{imgSource}}" />
-
-  </div>
-  <div>
-  Filter Control
-  </div>
+    Video Widget <a href="http://localhost:9090/input">Here</a>
+    <br/>
+    <img ng-src="{{imgSource}}"/>
 </div>

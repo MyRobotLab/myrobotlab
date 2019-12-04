@@ -9,9 +9,10 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 // local scope variables
                 $scope.cameraIndex = 1;
                 $scope.frameGrabber = "VideoInput";
+                $scope.possibleFilters = null
 
                 // initial state of service.
-                $scope.service = mrl.getService($scope.service.name);
+               
                 if ($scope.service.capturing) {
                 	$scope.startCaptureLabel = "Stop Capture";
                 	// $sce.trustAsResourceUrl ?
@@ -36,7 +37,6 @@ angular.module('mrlapp.service.OpenCVGui', [])
                     	$scope.imgSource = "service/img/OpenCV.png";
                     };
                 };
-                _self.updateState($scope.service);
 
                 // controls for select frame grabber
                 $scope.selectFrameGrabber = function selectFrameGrabber(frameGrabber) {
@@ -52,24 +52,15 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 	mrl.sendTo($scope.service.name, "setCameraIndex", cameraIndex);
                 }
                 
-                // start capture button click.
-                $scope.startCapture = function() {
-                	// send a message to open cv servce to start capture.
-                	$log.info("Start capture clicked.");
-                	// TODO: should i grab it here?
-                	$scope.service = mrl.getService($scope.service.name);
-                	if ($scope.startCaptureLabel === "Stop Capture") {
-                		// TODO: re-enable this.
-                	    mrl.sendTo($scope.service.name, "stopCapture");
-                	} else {
-                	    mrl.sendTo($scope.service.name, "capture");
-                	};
-                };
                 
                 this.onMsg = function (inMsg) {
                     switch (inMsg.method) {
                         case 'onState':
                         	_self.updateState(inMsg.data[0]);
+                            $scope.$apply();
+                            break;
+                        case 'onPossibleFilters':
+                        	$scope.possibleFilters = inMsg.data[0]
                             $scope.$apply();
                             break;
                         case 'onDisplay':
@@ -86,6 +77,8 @@ angular.module('mrlapp.service.OpenCVGui', [])
                 // mrl.subscribe($scope.service.name, 'publishState');
                 msg.subscribe('getPossibleFilters');
                 msg.subscribe('publishState');
+
+                msg.send('getPossibleFilters')
                 msg.subscribe(this);
             }
         ]);

@@ -372,6 +372,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void autoStartBrowser(boolean autoStartBrowser) {
     this.autoStartBrowser = autoStartBrowser;
   }
+  
+  public boolean getAutoStartBrowser() {
+    return autoStartBrowser;
+  }
+
 
   /**
    * String broadcast to specific client
@@ -547,6 +552,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public Integer getPort() {
     return port;
   }
+  
+  public String getAddress() {
+    return address;
+  }
 
   @Deprecated
   public Map<String, List<String>> getRelays() {
@@ -713,7 +722,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
           Method method = cache.getMethod(clazz, msg.method, params);
           if (method == null) {
-            log.error("method cache could not find {}.{}({})", clazz.getSimpleName(), msg.method, msg.data);
+            error("method cache could not find %s.%s(%s)", clazz.getSimpleName(), msg.method, msg.data);
             return;
           }
 
@@ -1194,7 +1203,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+ //     Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
@@ -1202,7 +1211,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("servo01", "Servo");
       // Runtime.start("servo02", "Servo");
       // Runtime.start("gui", "SwingGui");
-      Runtime runtime = Runtime.getInstance();
+      
       // runtime.setVirtual(true);
       // Runtime.start("log", "Log");
       /*
@@ -1213,12 +1222,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Runtime.start("clock05", "Clock");
       */
 
+      
+      Runtime.start("arduino", "Arduino");
+      Runtime.start("servo01", "Servo");
+      Runtime.start("servo02", "Servo");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.setPort(8887);
       webgui.startService();
+      
 
       // Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
