@@ -7,7 +7,7 @@
  ***********************************************************************************/
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node () { // use any node
+node { // use any node
 
 // node ('ubuntu') {  // use labels to direct build
 
