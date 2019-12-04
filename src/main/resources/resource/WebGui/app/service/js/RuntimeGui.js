@@ -13,8 +13,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.log('RuntimeGui $scope.service == null')
     }
 
-    _self.updateState($scope.service)
-
     $scope.platform = $scope.service.platform
     $scope.status = ""
     $scope.cmd = ""

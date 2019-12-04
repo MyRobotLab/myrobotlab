@@ -9,7 +9,7 @@ angular.module('mrlapp.service.ClockGui', [])
                     $scope.service = service;
                 };
 
-                _self.updateState($scope.service);
+
 
                 // init scope variables
                 $scope.pulseData = '';

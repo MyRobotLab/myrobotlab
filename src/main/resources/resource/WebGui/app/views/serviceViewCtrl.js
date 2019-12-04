@@ -1,6 +1,6 @@
-angular.module('mrlapp.views')
-        .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl', 'panelSvc',
-            function ($scope, $log, $stateParams, $filter, $timeout, mrl, panelSvc) {
+angular.module('mrlapp.mrl')
+        .controller('serviceViewCtrl', ['$scope', '$log', '$stateParams', '$filter', '$timeout', 'mrl',
+            function ($scope, $log, $stateParams, $filter, $timeout, mrl) {
                 $log.info('serviceViewCtrl');
                 
                 $scope.servicename = $stateParams.servicename;
@@ -28,6 +28,6 @@ angular.module('mrlapp.views')
                         $log.info('panel-serviceView', $scope.panel);
                     });
                 };
-                panelsUpdated(panelSvc.getPanelsList());
-                panelSvc.subscribeToUpdates(panelsUpdated);
+                panelsUpdated(mrl.getPanelsList());
+                mrl.subscribeToUpdates(panelsUpdated);
             }]);

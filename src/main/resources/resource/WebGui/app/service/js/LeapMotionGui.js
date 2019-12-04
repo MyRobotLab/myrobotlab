@@ -8,7 +8,7 @@ angular.module('mrlapp.service.LeapMotionGui', [])
                 this.updateState = function (service) {
                     $scope.service = service;
                 };
-                _self.updateState($scope.service);
+               
 
                 // leap data is pretty much everything.
                 $scope.leapData = '';

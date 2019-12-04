@@ -43,7 +43,6 @@ angular.module('mrlapp.service.NeoPixelGui', [])
      }
     ;
     
-    _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

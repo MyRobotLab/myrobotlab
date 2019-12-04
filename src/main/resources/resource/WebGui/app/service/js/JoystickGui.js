@@ -63,7 +63,6 @@ angular.module('mrlapp.service.JoystickGui', []).controller('JoystickGuiCtrl', [
     }
     ;
 
-    _self.updateState($scope.service);
     this.onMsg = function(inMsg) {
 
         switch (inMsg.method) {

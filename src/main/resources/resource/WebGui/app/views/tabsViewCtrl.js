@@ -1,4 +1,4 @@
-angular.module('mrlapp.views').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', 'panelSvc', '$state', function($scope, $log, $filter, $timeout, mrl, panelSvc, $state) {
+angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', function($scope, $log, $filter, $timeout, mrl, $state) {
     $log.info('tabsViewCtrl');
 
     var isUndefinedOrNull = function(val) {
@@ -10,7 +10,7 @@ angular.module('mrlapp.views').controller('tabsViewCtrl', ['$scope', '$log', '$f
     $scope.noworky = function() {
         noWorkySvc.openNoWorkyModal($scope.panel.name);
     }
-    
+
     $scope.updateServiceData = function() {
         //get an updated / fresh servicedata & convert it to json
         var servicedata = mrl.getService($scope.view_tab);
@@ -33,11 +33,15 @@ angular.module('mrlapp.views').controller('tabsViewCtrl', ['$scope', '$log', '$f
             }
         });
     };
-    panelsUpdated(panelSvc.getPanelsList());
-    panelSvc.subscribeToUpdates(panelsUpdated);
+    panelsUpdated(mrl.getPanelsList());
+    mrl.subscribeToUpdates(panelsUpdated);
 
     $scope.changeTab = function(tab) {
         $scope.view_tab = tab;
+        $timeout(function() {
+            $scope.$broadcast('rzSliderForceRender')
+        })
+
     }
     ;
 }

@@ -22,7 +22,7 @@
                 <!-- TODO - read/write toggle -->
             </div>
             <div class="btn-group" role="group" aria-label="...">
-                <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinMap">
+                <div class="btn-group" role="group" ng-show="readWrite == 'read'" data-ng-repeat="(pinKey, pinDef) in pinIndex">
                     <button class="btn btn-default" type="button" ng-click="activateTrace(pinDef)" ng-style="oscope.traces[pinKey].readStyle">{{ pinDef.pin }}</button>
                 </div>
                 <div class="btn-group" role="group" ng-show="readWrite == 'write'" data-ng-repeat="(pinKey, pinDef) in pinMap">

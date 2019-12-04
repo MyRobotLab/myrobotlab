@@ -8,7 +8,6 @@ angular.module('mrlapp.service.PirGui', []).controller('PirGuiCtrl', ['$scope', 
     }
     ;
     
-    _self.updateState($scope.service);
     // init scope variables
     $scope.pulseData = '';
     this.onMsg = function(inMsg) {

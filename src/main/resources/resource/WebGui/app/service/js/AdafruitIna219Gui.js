@@ -28,8 +28,6 @@ angular.module('mrlapp.service.AdafruitIna219Gui', [])
     }
     ;
     
-    _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];
         switch (inMsg.method) {

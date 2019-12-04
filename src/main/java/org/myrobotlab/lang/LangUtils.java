@@ -1,8 +1,6 @@
 package org.myrobotlab.lang;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,12 +23,30 @@ public class LangUtils {
   // meta data generated seperate from string code generation ...
   // NEEDS ORDER
   enum CodePart {
-    create, start, attach, subscribe;
+    create, configure, start, attach, subscribe;
   }
 
   public CodeMeta toMeta(List<ServiceInterface> si) {
     return null;
   }
+  
+  static public String escape(String v) {
+    if (v == null) {
+      return "None";
+    }
+    return String.format("\"%s\"", v);
+  }
+
+  static public String toPython(Boolean b) {
+    if (b == null) {
+      return "None";
+    }
+    if (b) {
+      return "True";
+    }
+    return "False";
+  }
+
 
   // FIXME !! - no "." dots should be allowed in names - dots should always be a
   // network delinator
@@ -51,6 +67,13 @@ public class LangUtils {
   
   static public String toPython() throws IOException {
     return toPython(null, null, null);
+  }
+  
+  static public String toPython(Double value) {
+    if (value == null) {
+      return "None";
+    }
+    return value.toString();
   }
 
   // TODO ???? - make meta ?? seems meta is already registery and methods &
@@ -110,7 +133,7 @@ public class LangUtils {
     }
     
     sb.append("##############################################################\n");
-    sb.append(String.format("## creating and starting %d services ####\n", services.size()));
+    sb.append(String.format("## creating %d services ####\n", services.size()));
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
     sb.append("# substitute peers, types or references of other sub services before the service is \"started\"\n");
     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
@@ -121,7 +144,7 @@ public class LangUtils {
       if (si.isRuntime()) {
         continue;
       }
-      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
+      sb.append(String.format("%s = Runtime.create('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
       // do peers with comments
       // top level peers - others commented out
     }
@@ -153,7 +176,20 @@ public class LangUtils {
         }
       }
 
-      
+      // do peers with comments
+      // top level peers - others commented out
+    }
+    
+    
+    sb.append("##############################################################\n");
+    sb.append(String.format("## starting %d services ####\n", services.size()));
+
+    // the easy start (start peers auto-magically creates peers)
+    for (ServiceInterface si2 : services) {
+      if (si2.isRuntime()) {
+        continue;
+      }
+      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si2), si2.getName(), si2.getSimpleName()));
       // do peers with comments
       // top level peers - others commented out
     }

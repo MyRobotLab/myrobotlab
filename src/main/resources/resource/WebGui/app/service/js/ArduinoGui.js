@@ -25,11 +25,21 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
     // for port directive
     $scope.portDirectiveScope = {}
 
+    $scope.toBoardType = function(boardName) {
+        if (boardName.includes('mega')){
+            return 'mega'
+        }
+        if (boardName.includes('uno')){
+            return uno
+        }
+        return boardName
+    }
+
     // Status - from the Arduino service
     $scope.statusLine = ""
     this.updateState = function(service) {
         $scope.service = service
-        $scope.boardType = service.board
+        $scope.boardType = service.board // $scope.toBoardType(service.boardInfo.boardTypeName)
         $scope.arduinoPath = service.arduinoIdePath
         $scope.image = "Arduino/" + service.board + ".png"
         var serial = $scope.service.serial
@@ -51,7 +61,7 @@ angular.module('mrlapp.service.ArduinoGui', []).controller('ArduinoGuiCtrl', ['$
         return bytes.map((byte,i)=>binaryString.charCodeAt(i));
     }
 
-    // _self.updateState($scope.service)
+
     this.onMsg = function(inMsg) {
         // TODO - make "super call" as below
         // this.constructor.prototype.onMsg.call(this, inMsg)

@@ -209,9 +209,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
   int idleTimeout = 3000;
 
   /**
-   * If the servo was disabled through an idle-timeout.
-   * If the servo is disabled through an idle-timeout, it can be re-enabled on next move.
-   * If the servo was disabled through a human or event which "manually" disabled the servo,
+   * If the servo was disabled through an idle-timeout. If the servo is disabled
+   * through an idle-timeout, it can be re-enabled on next move. If the servo
+   * was disabled through a human or event which "manually" disabled the servo,
    * the servo SHOULD NOT be enabled next move - this is an internal field
    */
   private boolean idleDisabled = false;
@@ -288,7 +288,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
    * maximum complexity attach with reference to controller
    */
   public void attach(ServoController sc, Integer pin, Double pos, Double speed, Double acceleration) throws Exception {
-    
+
     if (isAttached(sc)) {
       return;
     }
@@ -389,7 +389,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   public void detach() {
     disable();
-    invokeOn(controller, "detach", this);
+    if (controller != null) {
+      invokeOn(controller, "detach", this);
+    }
     controller = null;
     broadcastState();
   }
@@ -508,6 +510,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
         String name = controller;
         controller = null;
         invokeOn(name, "detach", getName());
+        broadcastState();
       }
     }
   }
@@ -757,6 +760,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   @Override
   public void setAutoDisable(Boolean autoDisable) {
+   
+    boolean valueChanged = !this.autoDisable.equals(autoDisable);
+    
     this.autoDisable = autoDisable;
 
     if (autoDisable) {
@@ -766,6 +772,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
     } else {
       purgeTask("idleDisable");
       idleDisabled = false;
+    }
+    
+    if (valueChanged) {
+      broadcastState();
     }
   }
 
@@ -784,8 +794,10 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
 
   @Override
+  // SEE - http://myrobotlab.org/content/servo-limits
   public void setMinMax(Double min, Double max) {
-    mapper.setMinMaxInput(min, max);
+    // mapper.setMinMaxInput(min, max);
+    mapper.map(min, max, min, max);
   }
 
   @Override
@@ -818,7 +830,6 @@ public abstract class AbstractServo extends Service implements ServoControl {
     invokeOn(controller, "servoStop", this);
     broadcastState();
   }
-  
 
   /**
    * disable servo
@@ -960,13 +971,23 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public boolean isMoving() {
     return isMoving;
   }
+  
+  @Override
+  public void unsetSpeed() {
+    log.info("disabling speed control");
+    speed = null;
+    if (controller != null) {
+      invokeOn(controller, "servoSetVelocity", this);
+    }
+    broadcastState();
+  }
 
   @Override
   @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
-      log.info("disabling speed control");
-      speed = null;
+      unsetSpeed();
+      return;
     }
 
     if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond > maxSpeed) {
@@ -1023,12 +1044,12 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public boolean isSweeping() {
     return isSweeping;
   }
-  
+
   public int setIdelTimeout(int idleTimeout) {
     this.idleTimeout = idleTimeout;
     return idleTimeout;
   }
-  
+
   public void writeMicroseconds(int uS) {
     if (controller != null) {
       invokeOn(controller, "servoWriteMicroseconds", this);

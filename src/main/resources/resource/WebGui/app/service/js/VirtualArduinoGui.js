@@ -9,8 +9,6 @@ angular.module('mrlapp.service.VirtualArduinoGui', [])
                     $scope.service = service;
                 };
 
-                _self.updateState($scope.service);
-
                 // init scope variables
                 $scope.pulseData = '';
 

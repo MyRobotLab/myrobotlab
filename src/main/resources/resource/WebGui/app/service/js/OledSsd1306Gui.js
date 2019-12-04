@@ -25,7 +25,6 @@ angular.module('mrlapp.service.OledSsd1306Gui', [])
     }
     ;
     
-    _self.updateState($scope.service);
     
     this.onMsg = function(inMsg) {
         var data = inMsg.data[0];

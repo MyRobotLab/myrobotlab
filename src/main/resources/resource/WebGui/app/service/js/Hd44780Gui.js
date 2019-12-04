@@ -28,8 +28,6 @@ angular.module('mrlapp.service.Hd44780Gui', [])
     }
     ;
     
-    _self.updateState($scope.service);
-    
     this.onMsg = function(inMsg) {
         $log.info("Hd44780 Msg !");
         switch (inMsg.method) {
