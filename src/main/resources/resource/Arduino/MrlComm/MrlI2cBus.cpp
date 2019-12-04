@@ -65,4 +65,3 @@ void MrlI2CBus::i2cWriteRead(byte deviceAddress, byte readSize, byte writeValue)
 void MrlI2CBus::update() {
 	//Nothing to do
 }
-

@@ -11,13 +11,13 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
-    
+
     $scope.possibleController = null
     $scope.testTime = 300
     $scope.sliderEnabled = false
     $scope.properties = []
     $scope.speed = null
-   
+
     $scope.showProperties = false
 
     // TODO - should be able to build this based on
@@ -56,7 +56,14 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             },
             onEnd: function() {}
         }
+    }
 
+    $scope.setSpeed = function(speed) {
+        if (speed == null || speed.trim().length == 0) {
+            msg.send("unsetSpeed")
+        } else {
+            msg.send("setSpeed", speed)
+        }
     }
 
     // GOOD TEMPLATE TO FOLLOW
@@ -65,7 +72,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         if (service.targetPos == null) {// $scope.pos.value = service.rest
         } else {// $scope.pos.value = service.targetPos            
         }
-        $scope.possibleController = service.controller
+
+        if (service.controller != null) {
+            $scope.possibleController = service.controller
+        }
         $scope.controller = service.controller
         $scope.speed = service.speed
         $scope.pin = service.pin
@@ -195,7 +205,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
         return resultholder[""] || resultholder;
     }
-    
 
     msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
@@ -218,7 +227,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             "serviceType.includeServiceInOneJar": "serviceType.includeServiceInOneJar",
             "serviceType.description": "serviceType.description",
             "serviceType.available": "serviceType.available",
-            "interfaceSet.org.myrobotlab.service.interfaces.ServoControl":"interfaceSet.org.myrobotlab.service.interfaces.ServoControl", // this will need work :P
+            "interfaceSet.org.myrobotlab.service.interfaces.ServoControl": "interfaceSet.org.myrobotlab.service.interfaces.ServoControl",
+            // this will need work :P
             serviceClass: "serviceClass",
             name: "name",
             statusBroadcastLimitMs: "statusBroadcastLimitMs",
@@ -245,8 +255,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
                 continue
             }
 
-            let inf = (info[i] == null)?'':info[i]
-            
+            let inf = (info[i] == null) ? '' : info[i]
+
             $scope.properties.push([i, flat[i], inf]);
         }
 

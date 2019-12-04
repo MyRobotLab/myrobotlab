@@ -15,7 +15,7 @@ public class LegacyServoLang extends LangUtils {
     sb.append("# in theory this is the position of the servo when this file was created\n");
     sb.append(name + String.format(".setPosition(%.1f)\n", s.getPos()));
     sb.append(name + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
-    sb.append(name + ".setVelocity(" + s.getSpeed() + ")\n");
+    sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
     sb.append(name + ".setRest(" + s.getRest() + ")\n");
     if (s.getPin() != null) {
       sb.append(name + ".setPin(" + s.getPin() + ")\n");
@@ -36,5 +36,7 @@ public class LegacyServoLang extends LangUtils {
     }
     return sb.toString();
   }
+
+
 
 }

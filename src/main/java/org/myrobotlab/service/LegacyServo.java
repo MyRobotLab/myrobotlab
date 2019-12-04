@@ -689,6 +689,13 @@ public class LegacyServo extends Service implements ServoControl {
     mapper.setInverted(invert);
     broadcastState();
   }
+  
+  @Override
+  public void unsetSpeed() {
+    log.info("disabling speed control");
+    velocity = null;
+    broadcastState();
+  }
 
   @Override
   public void setMinMax(Double min, Double max) {
