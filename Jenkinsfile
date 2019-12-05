@@ -24,7 +24,8 @@ node { // use any node
    def mvnHome
    stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
-      checkout scm
+      // checkout scm
+      checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
       // git 'https://github.com/MyRobotLab/myrobotlab.git'
       // git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
       
