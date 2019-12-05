@@ -7,9 +7,9 @@
  ***********************************************************************************/
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
-node { // use any node
+// node { // use any node
 
-// node ('ubuntu') {  // use labels to direct build
+node ('ubuntu') {  // use labels to direct build
 
    // withEnv(javaEnv) {
    
@@ -24,8 +24,8 @@ node { // use any node
    def mvnHome
    stage('preparation') { // for display purposes
       // Get some code from a GitHub repository
-      // checkout scm
-      checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
+      checkout scm
+      // checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
       // git 'https://github.com/MyRobotLab/myrobotlab.git'
       // git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
       
