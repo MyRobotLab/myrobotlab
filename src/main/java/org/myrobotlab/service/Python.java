@@ -121,13 +121,7 @@ public class Python extends Service {
 
   class PIThread extends Thread {
     private String code;
-    private PyObject compiledCode;
     public boolean executing = false;
-
-    PIThread(String name, PyObject compiledCode) {
-      super(name);
-      this.compiledCode = compiledCode;
-    }
 
     PIThread(String name, String code) {
       super(name);
@@ -137,12 +131,14 @@ public class Python extends Service {
     @Override
     public void run() {
       try {
-        executing = true;
-        if (compiledCode != null) {
-          interp.exec(compiledCode);
-        } else {
-          interp.exec(code);
+        if (interp == null) {
+          log.warn("cannot run script - python interpreter is null - not initialized yet ?");
+          return;
         }
+
+        executing = true;
+        interp.exec(code);
+
       } catch (Exception e) {
         String error = Logging.stackToString(e);
         if (error.contains("KeyboardInterrupt")) {
@@ -180,7 +176,6 @@ public class Python extends Service {
   private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
-
 
   /**
    * Get a compiled version of the python call.
@@ -225,7 +220,6 @@ public class Python extends Service {
     return meta;
   }
 
-
   /**
    * FIXME - buildtime package in resources pyrobotlab python service urls -
    * created for referencing script
@@ -261,11 +255,11 @@ public class Python extends Service {
    * opened scripts
    */
   HashMap<String, Script> openedScripts = new HashMap<String, Script>();
-  
+
   String activeScript = null;
 
-  public Python(String n) {
-    super(n);
+  public Python(String n, String id) {
+    super(n, id);
 
     subscribe(Runtime.getInstance().getName(), "registered");
     log.info("created python {}", getName());
@@ -297,7 +291,7 @@ public class Python extends Service {
     openedScripts.put(scriptName, new Script(scriptName, code));
     broadcastState();
   }
-  
+
   public void closeScript(String scriptName) {
     openedScripts.remove(scriptName);
     broadcastState();
@@ -376,8 +370,6 @@ public class Python extends Service {
     }
     log.info("Python System Path: {}", sys.path);
 
-
-
   }
 
   public String eval(String method) {
@@ -421,12 +413,13 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
-      
+
       // FIXME - TOO MANY DIFFERENT CODE-PATHS TO interp.exec ...
-      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN INVOKE(finishedExecutingScript) !!! HERE ???
-      
+      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN
+      // INVOKE(finishedExecutingScript) !!! HERE ???
+
       return true;
-      
+
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
@@ -435,7 +428,6 @@ public class Python extends Service {
     }
     return false;
   }
-   
 
   /**
    * This method will execute and block a string that represents a python
@@ -559,7 +551,7 @@ public class Python extends Service {
     String serviceScript = null;
     try {
       serviceScript = FileIO.toString(filename);
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("getting service file script example threw {}", e);
     }
     openScript(filename, serviceScript);
@@ -646,7 +638,7 @@ public class Python extends Service {
   @Override
   public void startService() {
     super.startService();
-    
+
     String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("myService = Runtime.getService(\"%s\")\n", getName());
@@ -669,8 +661,8 @@ public class Python extends Service {
       // get a handle on running service
       initScript.append(serviceScript);
     }
-    
-    exec(initScript.toString(), false); 
+
+    exec(initScript.toString(), false);
     log.info("starting python {}", getName());
     if (inputQueueThread == null) {
       inputQueueThread = new InputQueueThread(this);
@@ -726,7 +718,7 @@ public class Python extends Service {
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
-    
+
     Runtime.start("python", "Python");
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
@@ -746,8 +738,6 @@ public class Python extends Service {
       // Runtime.start("gui", "SwingGui");
       // String f = "C:\\Program Files\\blah.1.py";
       // log.info(getName(f));
-     
-      Runtime.start("cli", "Cli");
 
       // python.error("this is an error");
       // python.loadScriptFromResource("VirtualDevice/Arduino.py");

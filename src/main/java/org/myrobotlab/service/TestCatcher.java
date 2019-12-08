@@ -82,8 +82,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return isLocal;
   }
 
-  public TestCatcher(String n) {
-    super(n);
+  public TestCatcher(String n, String id) {
+    super(n, id);
   }
 
   /**

@@ -10,7 +10,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-import pl.allegro.tech.embeddedelasticsearch.IndexSettings;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
 public class Elasticsearch extends Service {
@@ -21,8 +20,8 @@ public class Elasticsearch extends Service {
 
   transient EmbeddedElastic elastic = null;
 
-  public Elasticsearch(String n) {
-    super(n);
+  public Elasticsearch(String n, String id) {
+    super(n, id);
   }
 
   public void install() throws IOException, InterruptedException {

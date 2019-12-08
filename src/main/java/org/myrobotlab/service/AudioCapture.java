@@ -196,8 +196,8 @@ public class AudioCapture extends Service {
      */
   }
 
-  public AudioCapture(String n) {
-    super(n);
+  public AudioCapture(String n, String id) {
+    super(n, id);
   }
 
   public void captureAudio() {

@@ -421,8 +421,8 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
 
   public double voltage3 = 0;
 
-  public Ads1115(String n) {
-    super(n);
+  public Ads1115(String n, String id) {
+    super(n, id);
     createPinList();
     refreshControllers();
     subscribeToRuntime("registered");

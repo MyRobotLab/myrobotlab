@@ -21,8 +21,8 @@ public class Motor extends AbstractMotor {
   String dirPin;
   Integer pwmFreq;
 
-  public Motor(String n) {
-    super(n);
+  public Motor(String n, String id) {
+    super(n, id);
   }
   
   public void setPwrDirPins(String pwrPin, String dirPin) {

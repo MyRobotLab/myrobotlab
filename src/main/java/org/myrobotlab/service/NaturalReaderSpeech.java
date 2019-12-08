@@ -30,8 +30,8 @@ public class NaturalReaderSpeech extends AbstractSpeechSynthesis {
 
   private int rate = 100;
 
-  public NaturalReaderSpeech(String reservedKey) {
-    super(reservedKey);
+  public NaturalReaderSpeech(String n, String id) {
+    super(n, id);
   }
 
   /**

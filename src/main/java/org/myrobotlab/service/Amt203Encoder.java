@@ -30,8 +30,8 @@ public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl 
   private static final long serialVersionUID = 1L;
 
 
-  public Amt203Encoder(String reservedKey) {
-    super(reservedKey);
+  public Amt203Encoder(String n, String id) {
+    super(n, id);
     // 12 bit encoder is 4096 steps of resolution
     resolution = 4096;
   }

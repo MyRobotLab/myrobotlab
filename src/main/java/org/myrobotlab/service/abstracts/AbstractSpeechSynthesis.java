@@ -245,8 +245,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   // protected boolean isReady = false;
 
-  public AbstractSpeechSynthesis(String reservedKey) {
-    super(reservedKey);
+  public AbstractSpeechSynthesis(String n, String id) {
+    super(n, id);
     setReady(false);   
 
     if (langIndex == null) {

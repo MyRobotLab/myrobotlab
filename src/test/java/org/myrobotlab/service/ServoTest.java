@@ -35,11 +35,18 @@ public class ServoTest extends AbstractTest {
 
     // Adafruit16CServoDriver afdriverx = (Adafruit16CServoDriver)
     // Runtime.start("afdriver", "Adafruit16CServoDriver");
-    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
-    Servo servo02 = (Servo) Runtime.start("servo02", "Servo");
+    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
+    Servo servo02 = (Servo) Runtime.start("s2", "Servo");
     // initialize an arduinos
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    
     arduino01.connect(port01);
+    
+    
+    // because I'm just so tired of race conditions !
+    // just friggen wait 1/2 a second
+//    Service.sleep(500);
+  
     log.warn("arduino01 connected {}", arduino01.isConnected());
 
     Serial serial = arduino01.getSerial();
@@ -63,7 +70,7 @@ public class ServoTest extends AbstractTest {
     servo01.moveTo(31.0);
     servo01.moveTo(30.0);
 
-    servo01.setVelocity(3.0);
+    servo01.setSpeed(3.0);
     servo01.moveTo(130.0);
     servo02.moveTo(130.0);
     servo01.setSpeed(30.0);
@@ -173,7 +180,9 @@ public class ServoTest extends AbstractTest {
     servo02.moveTo(130.0);
     servo02.moveTo(30.0);
     servo02.moveTo(130.0);
-
+    
+    //servo01.releaseService();
+    //servo02.releaseService();
   }
 
   @Test
@@ -251,7 +260,7 @@ public class ServoTest extends AbstractTest {
   @Test
   public void testAutoDisable() throws Exception {
     if (!isHeadless()) {
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // Runtime.start("gui", "WebGui");
     }
 
@@ -266,7 +275,7 @@ public class ServoTest extends AbstractTest {
     sleep(100);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     servo01.setAutoDisable(false);
-    servo01.setVelocity(10.0);
+    servo01.setSpeed(10.0);
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
     servo01.setAutoDisable(true);
     assertTrue("setting autoDisable true", servo01.getAutoDisable());

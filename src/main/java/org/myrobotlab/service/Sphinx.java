@@ -251,8 +251,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
     LoggingFactory.init(Level.DEBUG);
     try {
-      Sphinx ear = (Sphinx) Runtime.createAndStart("ear", "Sphinx");
-      SpeechSynthesis speech = new MarySpeech("speech");
+      Sphinx ear = (Sphinx) Runtime.start("ear", "Sphinx");
+      SpeechSynthesis speech = (MarySpeech)Runtime.start("speech", "MarySpeech");
       ((MarySpeech) speech).startService();
 
       // attache speech to ear -
@@ -295,8 +295,8 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
   }
 
-  public Sphinx(String n) {
-    super(n);
+  public Sphinx(String n, String id) {
+    super(n, id);
   }
 
   public void addBypass(String... txt) {

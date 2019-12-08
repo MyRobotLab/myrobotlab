@@ -22,8 +22,8 @@ public class MouseSim extends Service {
 
   transient private Robot robot;
 
-  public MouseSim(String n) {
-    super(n);
+  public MouseSim(String n, String id) {
+    super(n, id);
     try {
       if (!GraphicsEnvironment.isHeadless()) {
         robot = new Robot();

@@ -17,8 +17,8 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
 
   public final static Logger log = LoggerFactory.getLogger(BoofCv.class);
 
-  public BoofCv(String n) {
-    super(n);
+  public BoofCv(String n, String id) {
+    super(n, id);
   }
 
   /**

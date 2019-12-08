@@ -22,8 +22,8 @@ import org.slf4j.Logger;
  */
 public class Hd44780 extends Service {
 
-  public Hd44780(String reservedKey) {
-    super(reservedKey);
+  public Hd44780(String n, String id) {
+    super(n, id);
     setReady(false);
   }
 

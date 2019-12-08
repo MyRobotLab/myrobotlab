@@ -280,8 +280,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   private boolean broadcastMode = false;
 
-  public WebGui(String n) {
-    super(n);
+  public WebGui(String n, String id) {
+    super(n, id);
     // api = ApiFactory.getInstance(this);
     if (desktops == null) {
       desktops = new HashMap<String, Map<String, Panel>>();
@@ -655,7 +655,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
 
         if (isLocal(msg)) {
-          String serviceName = msg.getName();
+          String serviceName = msg.getFullName();//getName();
           Class<?> clazz = Runtime.getClass(serviceName);
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
           msg.data = params;
@@ -694,7 +694,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // json
           // encoded parameters
 
-          String serviceName = msg.getName();
+          String serviceName = msg.getFullName();//.getName();
           Class<?> clazz = Runtime.getClass(serviceName);
           if (clazz == null) {
             log.error("cannot derive local type from service {}", serviceName);
@@ -1203,7 +1203,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
- //     Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");

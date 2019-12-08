@@ -297,8 +297,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    * @param n
    *          name of the service
    */
-  public DiyServo(String n) {
-    super(n);
+  public DiyServo(String n, String id) {
+    super(n, id);
     refreshPinArrayControls();
     motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
     initPid();
@@ -854,7 +854,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
       Thread.sleep(1000);
       // let's start the encoder!!
-      Amt203Encoder encoder = new Amt203Encoder("encoder");
+      Amt203Encoder encoder = (Amt203Encoder)Runtime.start("encoder", "Amt203Encoder"); // new Amt203Encoder("encoder");
       encoder.setPin(3);
 
       arduino.attach(encoder);

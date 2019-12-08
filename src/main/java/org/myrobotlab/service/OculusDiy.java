@@ -46,8 +46,8 @@ public class OculusDiy extends Service implements OrientationListener {
   Integer bicep = 5;
   Integer headingint = 90;
 
-  public OculusDiy(String n) {
-    super(n);
+  public OculusDiy(String n, String id) {
+    super(n, id);
     arduino = (Arduino) createPeer("arduino");
     mpu6050 = (Mpu6050) createPeer("mpu6050");
   }

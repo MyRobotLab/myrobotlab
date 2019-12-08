@@ -26,8 +26,8 @@ public class Database extends Service {
   public static String jdbcPassword = "password";
   static Connection connection = null;
 
-  public Database(String n) {
-    super(n);
+  public Database(String n, String id) {
+    super(n, id);
   }
 
   public static void connect() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {

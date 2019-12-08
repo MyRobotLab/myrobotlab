@@ -69,8 +69,8 @@ public class Lm75a extends Service implements I2CControl {
     }
   }
 
-  public Lm75a(String n) {
-    super(n);
+  public Lm75a(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
   }

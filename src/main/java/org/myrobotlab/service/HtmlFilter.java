@@ -39,8 +39,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     }
   }
 
-  public HtmlFilter(String reservedKey) {
-    super(reservedKey);
+  public HtmlFilter(String n, String id) {
+    super(n, id);
   }
 
   // helper function to add html tags

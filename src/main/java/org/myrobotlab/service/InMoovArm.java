@@ -46,8 +46,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
   String side;
 
-  public InMoovArm(String n) throws Exception {
-    super(n);
+  public InMoovArm(String n, String id) throws Exception {
+    super(n, id);
   }
 
   @Deprecated
@@ -287,8 +287,13 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void releaseService() {
-    super.releaseService();
-    disable();
+    try {
+      releasePeers();
+      super.releaseService();
+      disable();
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void rest() {
@@ -533,10 +538,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    this.bicep.setVelocity(bicep);
-    this.rotate.setVelocity(rotate);
-    this.shoulder.setVelocity(shoulder);
-    this.omoplate.setVelocity(omoplate);
+    this.bicep.setSpeed(bicep);
+    this.rotate.setSpeed(rotate);
+    this.shoulder.setSpeed(shoulder);
+    this.omoplate.setSpeed(omoplate);
   }
 
   public void setController(ServoController controller) {

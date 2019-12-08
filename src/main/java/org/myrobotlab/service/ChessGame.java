@@ -62,8 +62,8 @@ public class ChessGame extends Service {
 
   }
 
-  public ChessGame(String n) {
-    super(n);
+  public ChessGame(String n, String id) {
+    super(n, id);
   }
 
   public String computerMoved(String move) {

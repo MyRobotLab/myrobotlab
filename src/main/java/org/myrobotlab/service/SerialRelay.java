@@ -29,8 +29,8 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
 
   private int controllerAttachAs;
 
-  public SerialRelay(String n) {
-    super(n);
+  public SerialRelay(String n, String id) {
+    super(n, id);
   }
 
   /**

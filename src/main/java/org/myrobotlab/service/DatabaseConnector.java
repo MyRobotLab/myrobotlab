@@ -29,8 +29,8 @@ public class DatabaseConnector extends AbstractConnector {
   private String idField;
   private Connection connection = null;
 
-  public DatabaseConnector(String name) {
-    super(name);
+  public DatabaseConnector(String name, String id) {
+    super(name, id);
   }
 
   @Override

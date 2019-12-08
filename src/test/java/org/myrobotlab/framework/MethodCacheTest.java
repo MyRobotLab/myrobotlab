@@ -71,11 +71,11 @@ public class MethodCacheTest extends AbstractTest {
     method = cache.getMethod(TestCatcher.class, "invokeTest", "echo");
     ret = method.invoke(tester, "echo");
     assertEquals("echo", ret);
-
+    Registration registration = new Registration(tester);
     // interface test - method with a interface parameter
-    method = cache.getMethod(Runtime.class, "register", tester);
-    ret = method.invoke(Runtime.getInstance(), tester);
-    assertEquals(tester, ret);
+    method = cache.getMethod(Runtime.class, "register", registration);
+    ret = method.invoke(Runtime.getInstance(), registration);
+    assertEquals(registration, ret);
 
     // primitive parameter only test
     method = cache.getMethod(TestCatcher.class, "primitiveOnlyMethod", 3);

@@ -832,8 +832,8 @@ public class OpenCV extends AbstractComputerVision {
 
   static String DATA_DIR;
 
-  public OpenCV(String n) {
-    super(n);
+  public OpenCV(String n, String id) {
+    super(n, id);
     // pre-loading so filters, functions and tests don't incur a performance hit
     // while
     // processing

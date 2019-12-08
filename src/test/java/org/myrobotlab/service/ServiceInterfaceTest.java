@@ -94,7 +94,10 @@ public class ServiceInterfaceTest extends AbstractTest {
 
     HashSet<String> blacklist = new HashSet<String>();
     blacklist.add("OpenNi");
+    blacklist.add("VirtualDevice");
+    blacklist.add("GoogleAssistant");
     blacklist.add("LeapMotion");
+    blacklist.add("Python"); // python's interpreter cannot be restarted cleanly
     blacklist.add("Runtime");
     blacklist.add("WorkE");
     blacklist.add("JMonkeyEngine");
@@ -103,7 +106,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("Solr");
     
     // start up python so we have it available to do some testing with.
-    Python python = (Python) Runtime.createAndStart("python", "Python");
+    Python python = (Python) Runtime.start("python", "Python");
     String testScriptDirectory = Util.getResourceDir() + File.separator + "%s/";
     ServiceData sd = ServiceData.getLocalInstance();
     List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
@@ -119,6 +122,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     // script REQUIRED to complete in 4 minutes ... or BOOM it fails
     
     for (ServiceType serviceType : sts) {
+      // test single service
+      // serviceType = sd.getServiceType("org.myrobotlab.service.VirtualDevice");
       String service = serviceType.getSimpleName();
       System.out.println("SYSTEM TESTING " + service);
       System.out.flush();

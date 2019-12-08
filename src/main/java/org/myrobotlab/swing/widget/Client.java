@@ -39,7 +39,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
-
+import org.myrobotlab.service.Runtime;
 public class Client extends JApplet {
 
   public final static Logger log = LoggerFactory.getLogger(Client.class);
@@ -84,7 +84,7 @@ public class Client extends JApplet {
        */
       // TODO - hardcode set SwingGui to display only appropriate
       // components !!!
-      guiService = new SwingGui(appletAddress.getHostName() + " gui");
+      guiService = (SwingGui)Runtime.start(appletAddress.getHostName() + " gui", "SwingGui");
       guiService.startService();
 
       if (codeBaseHostAddress.length() == 0) {

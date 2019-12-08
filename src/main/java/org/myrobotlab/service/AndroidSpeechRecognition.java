@@ -194,8 +194,8 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
     }
   }
 
-  public AndroidSpeechRecognition(String n) {
-    super(n);
+  public AndroidSpeechRecognition(String n, String id) {
+    super(n, id);
     // intializing variables
     // Should do something useful here in future
   }

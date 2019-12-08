@@ -30,8 +30,8 @@ public abstract class AbstractConnector extends Service implements DocumentPubli
   // private long maxFeedCount = 10000;
   private long maxFeedCount = -1;
 
-  public AbstractConnector(String name) {
-    super(name);
+  public AbstractConnector(String name, String id) {
+    super(name, id);
     // no overruns!
     this.getOutbox().setBlocking(true);
   }

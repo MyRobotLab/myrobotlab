@@ -14,8 +14,8 @@ public class TarsosDsp extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(TarsosDsp.class);
 
-  public TarsosDsp(String n) {
-    super(n);
+  public TarsosDsp(String n, String id) {
+    super(n, id);
   }
 
   /**

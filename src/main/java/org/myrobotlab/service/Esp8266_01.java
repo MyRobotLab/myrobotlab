@@ -108,8 +108,8 @@ public class Esp8266_01 extends Service implements I2CController {
 
   }
 
-  public Esp8266_01(String n) {
-    super(n);
+  public Esp8266_01(String n, String id) {
+    super(n, id);
     httpclient = HttpClientBuilder.create().build();
 
   }

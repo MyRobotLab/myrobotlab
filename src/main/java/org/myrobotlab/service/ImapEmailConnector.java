@@ -48,8 +48,8 @@ public class ImapEmailConnector extends AbstractConnector {
   private transient String docIdPrefix = "email_";
   private transient Store store;
 
-  public ImapEmailConnector(String name) {
-    super(name);
+  public ImapEmailConnector(String name, String id) {
+    super(name, id);
   }
 
   @Override

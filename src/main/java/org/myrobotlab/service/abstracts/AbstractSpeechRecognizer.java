@@ -12,8 +12,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   String wakeWord = null;
 
-  public AbstractSpeechRecognizer(String reservedKey) {
-    super(reservedKey);
+  public AbstractSpeechRecognizer(String n, String id) {
+    super(n, id);
   }
 
   public void setWakeWord(String word) {

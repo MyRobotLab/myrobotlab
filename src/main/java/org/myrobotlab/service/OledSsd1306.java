@@ -160,8 +160,8 @@ public class OledSsd1306 extends Service implements I2CControl {
     }
   }
 
-  public OledSsd1306(String n) {
-    super(n);
+  public OledSsd1306(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
 

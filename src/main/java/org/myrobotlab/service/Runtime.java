@@ -425,8 +425,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         }
       }
       
+      
       // create an instance
-      Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name);
+      Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name, id);
       log.debug("returning {}", fullTypeName);
       ServiceInterface si = (ServiceInterface) newService;
 
@@ -525,7 +526,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
           // taking away capability of having a different runtime name
           runtimeName = "runtime";
-          runtime = new Runtime(runtimeName);
+          runtime = new Runtime(runtimeName, Platform.getLocalInstance().getId());
 
           // setting the singleton security
           security = Security.getInstance();
@@ -802,11 +803,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     String[] ret = new String[si.size()];
     for (int i = 0; i < ret.length; ++i) {
       ServiceInterface s = si.get(i);
+      
       if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
         ret[i] = s.getName();
       } else {
         ret[i] = s.getFullName();
       }
+      
+      // ret[i] = s.getFullName();
     }
     return ret;
   }
@@ -1163,7 +1167,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   public void stopInteractiveMode() {
-    stdInClient.stop();
+    if (stdInClient != null) {
+      stdInClient.stop();
+    }
   }
 
   /**
@@ -1263,12 +1269,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * releases a service - stops the service, its threads, releases its
    * resources, and removes registry entries
    *
-   * @param name
-   *          of the service to be released
-   * @return whether or not it successfully released the service
+   * FIXME - clean up subscriptions from released
+   * 
+   * @param inName
+   * @return
    */
-
-  // FIXME - clean up subscriptions from released
   public synchronized static boolean release(String inName) {
     String name = getFullName(inName);
 
@@ -1416,6 +1421,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   public static void shutdown() {
     log.info("mrl shutdown");
+    
+    if (runtime != null) {
+      runtime.stopInteractiveMode();
+    }
 
     for (ServiceInterface service : getServices()) {
       service.preShutdown();
@@ -1424,6 +1433,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     for (ServiceInterface service : getServices()) {
       service.save();
     }
+    
 
     try {
       releaseAll();
@@ -1846,8 +1856,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   }
 
-  public Runtime(String n) {
-    super(n);
+  public Runtime(String n, String id) {
+    super(n, id);
 
     synchronized (instanceLockObject) {
       if (runtime == null) {
@@ -2039,6 +2049,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   // start cli commands ----
+  // FIXME - CD AND PWD ARE "ALWAYS" LOCAL - the represent a state change associated with direct input (typically stdin)
+  // so they are property of the InProcessCli ***NOT*** Runtime
   /**
    * change working directory to new path FIXME - implement ???? it really has
    * to be a function of the gateway "perhaps" it would be worthwhile to make
@@ -2046,9 +2058,25 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @param path
    */
-  public void cd(String path) {
+  /* FIXME -- ALWAYS LOCAL !!!!
+  public String cd(String path) {
     // cliCwd = path.trim();
+    if (stdInClient != null) {
+      if (path != null) {
+        path = path.trim();
+      }
+      stdInClient.setPrefix(path);
+    }
+    return path;
   }
+  
+  public String pwd() {
+    if (stdInClient != null) {      
+      return stdInClient.getCwd();
+    }
+    return null;
+  }
+  */
 
   /**
    * list the contents of the current working directory
@@ -2104,7 +2132,17 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } else if (parts.length == 2 && absPath.endsWith("/")) {
       ServiceInterface si = Runtime.getService(parts[1]);
       return si.getDeclaredMethodNames();
-    }
+      /*
+    } else if (parts.length == 3 && !absPath.endsWith("/")) {
+      // execute 0 parameter function ???
+      return Runtime.getService(parts[1]);
+      */
+    } else if (parts.length == 3) {
+      ServiceInterface si = Runtime.getService(parts[1]);
+      MethodCache cache = MethodCache.getInstance();
+      List<MethodEntry> me = cache.query(si.getType(), parts[2]);
+      return me; //si.getMethodMap().get(parts[2]);
+    }  
     return ret;
   }
 
@@ -2353,6 +2391,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   @Override
   public void stopService() {
+    if (runtime != null) {
+      runtime.stopInteractiveMode();
+    }
     super.stopService();
     runtime = null;
   }
@@ -2617,7 +2658,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     ServiceType meta = new ServiceType(Runtime.class.getCanonicalName());
     meta.addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     meta.addCategory("framework");
-    meta.addPeer("cli", "Cli", "command line interpreter for the runtime");
 
     meta.includeServiceInOneJar(true);
     // apache 2.0 license
