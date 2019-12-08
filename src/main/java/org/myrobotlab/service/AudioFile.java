@@ -94,8 +94,8 @@ public class AudioFile extends Service {
   // if set to true, playback will become a no-op
   private boolean mute = false;
 
-  public AudioFile(String n) {
-    super(n);
+  public AudioFile(String n, String id) {
+    super(n, id);
   }
 
   public void track(String trackName) {
@@ -428,7 +428,7 @@ public class AudioFile extends Service {
 
         Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
         Runtime.createAndStart("python", "Python");
-        AudioFile player = new AudioFile("player");
+        AudioFile player = (AudioFile)Runtime.start("player", "AudioFile"); // new AudioFile("player");
         // player.playFile(filename, true);
         player.startService();
         Runtime.createAndStart("gui", "SwingGui");

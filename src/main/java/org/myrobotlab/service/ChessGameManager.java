@@ -34,8 +34,8 @@ public class ChessGameManager extends Service {
     }
   }
 
-  public ChessGameManager(String n) {
-    super(n);
+  public ChessGameManager(String n, String id) {
+    super(n, id);
   }
 
   /**

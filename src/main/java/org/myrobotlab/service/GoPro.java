@@ -20,8 +20,8 @@ public class GoPro extends Service {
   String password;
   String ipAddress = "10.5.5.9";
 
-  public GoPro(String n) {
-    super(n);
+  public GoPro(String n, String id) {
+    super(n, id);
     http = (HttpClient) createPeer("http");
   }
 

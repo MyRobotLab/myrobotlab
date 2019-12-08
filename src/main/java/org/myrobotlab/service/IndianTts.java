@@ -30,8 +30,8 @@ public class IndianTts extends AbstractSpeechSynthesis {
   public final String INDIANTTS_USER_USERID = "indiantts.user.userid";
   public final String INDIANTTS_USER_API = "indiantts.user.api";
 
-  public IndianTts(String reservedKey) {
-    super(reservedKey);
+  public IndianTts(String n, String id) {
+    super(n, id);
   }
 
   public void startService() {

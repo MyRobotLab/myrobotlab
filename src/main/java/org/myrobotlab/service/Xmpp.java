@@ -139,8 +139,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   transient Chat chat = null;
 
-  public Xmpp(String n) {
-    super(n);
+  public Xmpp(String n, String id) {
+    super(n, id);
   }
 
   public void addBuddy(String user) throws NotLoggedInException, NoResponseException, XMPPErrorException, NotConnectedException {

@@ -145,8 +145,8 @@ public class MobilePlatform extends Service {
 
   public boolean inMotion = false;
 
-  public MobilePlatform(String n) {
-    super(n);
+  public MobilePlatform(String n, String id) {
+    super(n, id);
   }
 
   public void attach(Motor left, Motor right) {

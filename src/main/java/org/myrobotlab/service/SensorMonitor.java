@@ -65,7 +65,7 @@ public class SensorMonitor extends Service {
 
     try {
 
-      SensorMonitor sm = new SensorMonitor("sensors");
+      SensorMonitor sm = (SensorMonitor)Runtime.start("sensors","SensorMonitor");
       sm.startService();
 
       Runtime.createAndStart("arduino", "Arduino");
@@ -93,8 +93,8 @@ public class SensorMonitor extends Service {
     return String.format("%s_%d", source, pin);
   }
 
-  public SensorMonitor(String n) {
-    super(n);
+  public SensorMonitor(String n, String id) {
+    super(n, id);
   }
 
   /*

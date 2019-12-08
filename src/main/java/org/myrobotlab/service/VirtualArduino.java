@@ -140,8 +140,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
   }
 
-  public VirtualArduino(String n) {
-    super(n);
+  public VirtualArduino(String n, String id) {
+    super(n, id);
     uart = (Serial) createPeer("uart");
   }
 

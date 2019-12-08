@@ -36,8 +36,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
   private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
 
-  public LocalSpeech(String n) {
-    super(n);
+  public LocalSpeech(String n, String id) {
+    super(n, id);
   }
 
   static public ServiceType getMetaData() {

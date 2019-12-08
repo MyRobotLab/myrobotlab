@@ -284,7 +284,7 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
     try {
       // Runtime.getStartInfo();
 
-      PickToLight pick = new PickToLight("pick.1");
+      PickToLight pick = (PickToLight)Runtime.start("pick.1", "PickToLight");
       String response = pick.getServerTime();
       log.info("Response: {}", response);
       // pick.sendSoap(soapAction, soapEnv);
@@ -361,8 +361,8 @@ public class PickToLight extends Service implements GpioPinListenerDigital {
 
   }
 
-  public PickToLight(String n) {
-    super(n);
+  public PickToLight(String n, String id) {
+    super(n, id);
     webgui = (WebGui) createPeer("webgui");
     webgui.autoStartBrowser(false);
     webgui.useLocalResources(true);

@@ -58,8 +58,8 @@ public class JavaScript extends Service {
     engine.put(varName, obj);
   }
 
-  public JavaScript(String n) {
-    super(n);
+  public JavaScript(String n, String id) {
+    super(n, id);
   }
 
   public Object get(String varName) {

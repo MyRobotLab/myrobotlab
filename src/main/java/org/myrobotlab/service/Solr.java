@@ -93,8 +93,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public int yoloPersonTrainingCount = 0;
   public String yoloPersonLabel = null;
 
-  public Solr(String n) {
-    super(n);
+  public Solr(String n, String id) {
+    super(n, id);
   }
 
   public void startEmbedded() throws SolrServerException, IOException {

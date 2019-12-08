@@ -57,8 +57,8 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   private boolean lockOutAllGrammar = false;
   private String lockPhrase = "";
 
-  public WebkitSpeechRecognition(String reservedKey) {
-    super(reservedKey);
+  public WebkitSpeechRecognition(String n, String id) {
+    super(n, id);
     languagesList.put("en-US", "English - United States");
     languagesList.put("en-GB", "English - British");
     languagesList.put("af-ZA", "Afrikaans");

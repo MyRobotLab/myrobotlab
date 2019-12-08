@@ -12,8 +12,8 @@ import org.myrobotlab.logging.LoggingFactory;
  **/
 public class _TemplateProxy extends PythonProxy {
 
-  public _TemplateProxy(String n) {
-    super(n);
+  public _TemplateProxy(String n, String id) {
+    super(n, id);
   }
 
   public Object test(String testString) {

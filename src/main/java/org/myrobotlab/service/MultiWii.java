@@ -40,8 +40,8 @@ public class MultiWii extends Service {
     }
   }
 
-  public MultiWii(String n) {
-    super(n);
+  public MultiWii(String n, String id) {
+    super(n, id);
   }
 
   /**

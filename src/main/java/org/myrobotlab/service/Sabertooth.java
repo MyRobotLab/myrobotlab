@@ -68,8 +68,8 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
 
   public final static int MOTOR2_BACKWARD = 5;
 
-  public Sabertooth(String n) {
-    super(n);
+  public Sabertooth(String n, String id) {
+    super(n, id);
     // setup config
     motorPorts.add("m1");
     motorPorts.add("m2");

@@ -579,4 +579,16 @@ public class MethodCache {
     return sb.toString();
   }
 
+  public List<MethodEntry> query(String fullClassName, String methodName) {
+    MethodIndex methodIndex = objectCache.get(fullClassName);
+    String keyPart = String.format("%s.%s(", fullClassName, methodName);
+    List<MethodEntry> ret = new ArrayList<>();
+    for (String key : methodIndex.methodsIndex.keySet()) {
+      if (key.startsWith(keyPart)) {
+        ret.add(methodIndex.methodsIndex.get(key));
+      }
+    }
+    return ret;
+  }
+
 }

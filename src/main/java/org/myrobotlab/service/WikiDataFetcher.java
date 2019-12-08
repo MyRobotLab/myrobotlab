@@ -57,8 +57,8 @@ public class WikiDataFetcher extends Service {
     }
   }
 
-  public WikiDataFetcher(String n) {
-    super(n);
+  public WikiDataFetcher(String n, String id) {
+    super(n, id);
   }
 
   public String[] getCategories() {

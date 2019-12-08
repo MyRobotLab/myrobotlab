@@ -869,11 +869,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
-  // FIXME - make a static initialization part !!!
+  /*
+   * public Service(String reservedKey) { this(reservedKey, null); }
+   */
 
-  public Service(String reservedKey) {
-    // necessary for serialized transport
-    id = Platform.getLocalInstance().getId();
+  public Service(String reservedKey, String inId) {
+    // necessary for serialized transport\
+    if (inId == null) {
+      id = Platform.getLocalInstance().getId();
+      log.info("creating local service for id {}", id);
+    } else {
+      id = inId;
+      log.info("creating remote proxy service for id {}", id);
+    }
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
@@ -917,11 +925,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    
-    // register this service
-    Registration registration = new Registration(this); 
-    Runtime.register(registration);
-    
+
+    // register this service if local - if we are a foreign service, we probably
+    // are being created in a
+    // registration already
+    if (id.equals(Platform.getLocalInstance().getId())) {
+      Registration registration = new Registration(this);
+      Runtime.register(registration);
+    }
+
   }
 
   /**
@@ -1449,7 +1461,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       retobj = method.invoke(obj, params);
       out(methodName, retobj);
     } catch (Exception e) {
-      error("could not invoke %s.%s (%s) - check logs for details",getName(), methodName, params);
+      error("could not invoke %s.%s (%s) - check logs for details", getName(), methodName, params);
       log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
     }
     return retobj;
@@ -1515,12 +1527,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return false;
   }
-  
+
   @Override
   public boolean loadFromJson(String json) {
     return loadFromJson(this, json);
   }
-  
+
   public boolean loadFromJson(Object o, String json) {
 
     if (o == null) {
@@ -1651,7 +1663,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // GroG says, I don't think so - this is releasing itself from itself
     // detach(Runtime.getService(getName()));
 
-    // FIXME - deprecate - peers are no longer used ...
     releasePeers();
 
     // Runtime.release(getName()); infinite loop with peers ! :(
@@ -1968,11 +1979,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   synchronized public void startService() {
     // register locally
-    /* had to register here  for synchronization issues before ...
-    Registration registration = new Registration(this); 
-    Runtime.register(registration);
-    */
-   
+    /*
+     * had to register here for synchronization issues before ... Registration
+     * registration = new Registration(this); Runtime.register(registration);
+     */
+
     // startPeers(); FIXME - TOO BIG A CHANGE .. what should happen is services
     // should be created
     // currently they are started by the UI vs created - and there is no desire
@@ -2095,19 +2106,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String callbackMethod = CodecUtils.getCallbackTopicName(topicMethod);
     subscribe(topicName, topicMethod, getName(), callbackMethod);
   }
-  
+
   public void subscribeTo(String service, String method) {
     subscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
   }
-  
+
   public void subscribeToRuntime(String method) {
     subscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
-  
+
   public void unsubscribeTo(String service, String method) {
     unsubscribe(service, method, getName(), CodecUtils.getCallbackTopicName(method));
   }
-  
+
   public void unsubscribeToRuntime(String method) {
     unsubscribe(Runtime.getInstance().getName(), method, getName(), CodecUtils.getCallbackTopicName(method));
   }
@@ -2318,9 +2329,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Attachable.detach(serviceName) - routes to reference parameter
    * Attachable.detach(Attachable)
    * 
-   * FIXME - the "string" attach/detach(string) method should be in the implementation..
-   * and this abstract should implement the attach/detach(Attachable) .. because if 
-   * a string was used as the base implementation - it would always work when serialized (and not registered)
+   * FIXME - the "string" attach/detach(string) method should be in the
+   * implementation.. and this abstract should implement the
+   * attach/detach(Attachable) .. because if a string was used as the base
+   * implementation - it would always work when serialized (and not registered)
    * 
    */
   public void detach(String serviceName) {

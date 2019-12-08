@@ -140,7 +140,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
           continue;
         }
 
-        while (now < endMoveTs) {
+        while (now < endMoveTs && isRunning) {
 
           now = System.currentTimeMillis();
           // speed has +/- direction
@@ -169,6 +169,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
     } catch (InterruptedException e) {
       log.info("stopping TimeEncoder Timer ...");
     }
+    myThread = null;
   }
 
   public String toString() {
@@ -237,10 +238,6 @@ public class TimeEncoder implements Runnable, EncoderControl {
   @Override
   public void disable() {
     isRunning = false;
-    if (myThread != null) {
-      myThread.interrupt();
-    }
-    myThread = null;
   }
 
   @Override

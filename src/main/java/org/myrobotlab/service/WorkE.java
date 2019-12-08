@@ -50,7 +50,6 @@ public class WorkE extends Service implements StatusListener {
 
     ServiceType meta = new ServiceType(WorkE.class);
 
-    // meta.addPeer("cli", "Cli", "command line interface for worke");
     meta.addPeer("git", "Git", "synching repos");
 
     // motor control - output
@@ -147,8 +146,8 @@ public class WorkE extends Service implements StatusListener {
 
   private String brainPath = "../github";
 
-  public WorkE(String n) {
-    super(n);
+  public WorkE(String n, String id) {
+    super(n, id);
   }
 
   // FIXME

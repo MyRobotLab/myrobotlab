@@ -59,8 +59,8 @@ public class Servo extends AbstractServo implements ServoControl {
 
   private static final long serialVersionUID = 1L;
 
-  public Servo(String name) {
-    super(name);
+  public Servo(String n, String id) {
+    super(n, id);
   }
   
   /**
@@ -88,9 +88,9 @@ public class Servo extends AbstractServo implements ServoControl {
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       
-      Runtime.start("gui", "SwingGui");
+      //Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      Runtime.start("webgui", "WebGui");
+      // Runtime.start("webgui", "WebGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       mega.connect("COM7");

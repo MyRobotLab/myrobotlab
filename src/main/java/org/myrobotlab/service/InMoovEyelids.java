@@ -85,8 +85,8 @@ public class InMoovEyelids extends Service {
 
   }
 
-  public InMoovEyelids(String n) {
-    super(n);
+  public InMoovEyelids(String n, String id) {
+    super(n, id);
     if (eyelidleft == null) {
       eyelidleft = (ServoControl) createPeer("eyelidleft");
     }
@@ -251,10 +251,10 @@ public class InMoovEyelids extends Service {
 
   public void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
     if (eyelidleft != null) {
-      eyelidleft.setVelocity(eyelidleftVelo);
+      eyelidleft.setSpeed(eyelidleftVelo);
     }
     if (eyelidleft != null) {
-      eyelidright.setVelocity(eyelidrightVelo);
+      eyelidright.setSpeed(eyelidrightVelo);
     }
   }
 }

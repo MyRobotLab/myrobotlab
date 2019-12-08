@@ -11,8 +11,8 @@ public class MockDocumentListener extends Service implements DocumentListener {
   private static final long serialVersionUID = 1L;
   private int count = 0;
 
-  public MockDocumentListener(String name) {
-    super(name);
+  public MockDocumentListener(String n, String id) {
+    super(n, id);
     this.inbox.setBlocking(true);
 
   }

@@ -14,8 +14,8 @@ public class SegmentDisplay extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(SegmentDisplay.class);
 
-  public SegmentDisplay(String n) {
-    super(n);
+  public SegmentDisplay(String n, String id) {
+    super(n, id);
   }
 
   /**

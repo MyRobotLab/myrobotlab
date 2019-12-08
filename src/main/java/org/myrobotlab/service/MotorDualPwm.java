@@ -50,8 +50,8 @@ public class MotorDualPwm extends AbstractMotor {
     broadcastState();
   }
 
-  public MotorDualPwm(String n) {
-    super(n);
+  public MotorDualPwm(String n, String id) {
+    super(n, id);
   }
 
   public void setPwmPins(int leftPwmPin, int rightPwmPin) {

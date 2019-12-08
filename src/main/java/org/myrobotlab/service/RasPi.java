@@ -105,8 +105,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
   private boolean wiringPi = true; // Defined to be able to switch between
 
-  public RasPi(String n) {
-    super(n);
+  public RasPi(String n, String id) {
+    super(n, id);
 
     Platform platform = Platform.getLocalInstance();
     log.info("platform is {}", platform);
@@ -519,7 +519,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     Runtime.createAndStart(String.format("rasGUI%d", i), "SwingGui");
     Runtime.createAndStart(String.format("rasPython%d", i), "Python");
     // Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
-    Runtime.createAndStart(String.format("rasRemote%d", i), "RemoteAdapter");
+   
   }
 
   @Override

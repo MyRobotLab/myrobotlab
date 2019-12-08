@@ -316,8 +316,8 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     }
   }
 
-  public Mpr121(String n) {
-    super(n);
+  public Mpr121(String n, String id) {
+    super(n, id);
     createPinList();
     refreshControllers();
     subscribeToRuntime("registered");

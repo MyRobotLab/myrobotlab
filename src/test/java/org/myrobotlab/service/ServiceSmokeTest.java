@@ -71,7 +71,10 @@ public class ServiceSmokeTest extends AbstractTest {
       }
       log.warn("Testing service type {}", serviceType);
       String serviceName = serviceType.toLowerCase();
-      ServiceInterface s = Runtime.create(serviceName, serviceType);            
+      ServiceInterface s = Runtime.create(serviceName, serviceType);      
+      if (s == null) {
+        log.error("service type {} could not be created", serviceType);
+      }
       assertNotNull(String.format("could not create %s",  serviceName), s);
       s.setVirtual(true);
       s = Runtime.start(serviceName, serviceType);

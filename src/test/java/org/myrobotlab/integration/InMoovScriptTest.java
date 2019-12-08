@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.net.Http;
 import org.myrobotlab.service.InMoov;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
@@ -20,11 +18,6 @@ import org.myrobotlab.test.AbstractTest;
 public class InMoovScriptTest extends AbstractTest {
 
   boolean testLocal = true;
-
-  // set this to null to check the checked in scripts
-  static String scriptRoot =  null;// "C:\\mrl\\mrl.develop\\pyrobotlab\\service\\";
-  
-  static String branch = "develop";
   
   static boolean virtual = true;
 
@@ -33,28 +26,20 @@ public class InMoovScriptTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
 
-    addScript("InMoov.py", scriptRoot);
-    addScript("InMoovArm.py", scriptRoot);
-    addScript("InMoovEyelids.py", scriptRoot);
-    addScript("InMoovFingerStarter.py", scriptRoot);
-    addScript("InMoovGestureCreator.py", scriptRoot);
-    addScript("InMoovHand.py", scriptRoot);
-    addScript("InMoovHead.py", scriptRoot);
-    addScript("InMoov.py", scriptRoot);
-    addScript("InMoovTorso.py", scriptRoot);
-
+    addScript("./src/main/resources/resource/InMoov/InMoovFingerStarter.py");
+    addScript("./src/main/resources/resource/InMoov/InMoov.py");
+    addScript("./src/main/resources/resource/InMoovHead/InMoovHead.py");
+    addScript("./src/main/resources/resource/InMoovArm/InMoovArm.py");
+    // addScript("./src/main/resources/resource/InMoovEyelids/InMoovEyelids.py"); - these script don't even create a i01 which is the only check :P
+    addScript("./src/main/resources/resource/InMoovHand/InMoovHand.py");
+    // addScript("./src/main/resources/resource/InMoovGestureCreator/InMoovGestureCreator.py");
+    addScript("./src/main/resources/resource/InMoovTorso/InMoovTorso.py");
+ 
   }
 
-  public static void addScript(String filename, String root) throws IOException {
-
-    String content = null;
-    if (root == null) {
-      content = new String(Http.get("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/"+branch+"/service/" + filename));
-    } else {
-      content = FileIO.toString(root + filename);
-    }
-
-    scripts.add(new Script(filename, content));
+  public static void addScript(String path) throws IOException {
+    String content = FileIO.toString(path);
+    scripts.add(new Script(path, content));
   }
 
   static class Script {
@@ -85,7 +70,7 @@ public class InMoovScriptTest extends AbstractTest {
     }
         
     for (Script script : scripts) {
-
+      // script = new Script("./src/main/resources/resource/InMoovEyelids/InMoovEyelids.py", FileIO.toString("./src/main/resources/resource/InMoovEyelids/InMoovEyelids.py"));
       log.warn("testing inmoov script {}", script.filename);
       
       String content = v + script.content;

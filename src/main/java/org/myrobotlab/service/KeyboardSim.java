@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.AWTException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
@@ -22,8 +21,8 @@ public class KeyboardSim extends Service {
 
   transient private Robot robot;
 
-  public KeyboardSim(String n) {
-    super(n);
+  public KeyboardSim(String n, String id) {
+    super(n, id);
     try {
       if (!GraphicsEnvironment.isHeadless()) {
         robot = new Robot();

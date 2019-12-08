@@ -105,8 +105,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   String controllerName;
 
-  public AbstractMotor(String n) {
-    super(n);
+  public AbstractMotor(String n, String id) {
+    super(n, id);
     subscribeToRuntime("registered");
     // "top" half of the mapper is set by the control
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same

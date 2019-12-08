@@ -127,8 +127,8 @@ public class Log extends Service implements Appender<ILoggingEvent> {
    */
   long minIntervalMs = 1000;
   
-  public Log(String n) {
-    super(n);
+  public Log(String n, String id) {
+    super(n, id);
     getLogLevel();
   }
   

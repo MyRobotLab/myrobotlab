@@ -36,8 +36,8 @@ public class XMLConnector extends AbstractConnector {
   // TODO: wire in so we can interrupt and stop the crawler.
   // private boolean interrupted = false;
 
-  public XMLConnector(String name) {
-    super(name);
+  public XMLConnector(String n, String id) {
+    super(n, id);
   }
 
   @Override

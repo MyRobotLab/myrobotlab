@@ -48,9 +48,9 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
   transient BlockingQueue<Message> msgs = new LinkedBlockingQueue<Message>();
 
-  public VirtualDevice(String n) {
-    super(n);
-    logic = (Python) createPeer("logic");
+  public VirtualDevice(String n, String id) {
+    super(n, id);
+    // logic = (Python) createPeer("logic");
   }
 
   public void startService() {
@@ -237,6 +237,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
     try {
 
+      Runtime.main(new String[] { "--interactive" });
       String portName = "vport";
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       // Serial serial = arduino.getSerial();
@@ -248,7 +249,7 @@ public class VirtualDevice extends Service implements SerialDataListener {
       arduino.connect(portName);
 
       // Runtime.start("gui", "SwingGui");
-      Runtime.start("webgui", "WebGui");
+      // Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       Logging.logError(e);

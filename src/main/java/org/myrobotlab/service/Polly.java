@@ -56,8 +56,8 @@ public class Polly extends AbstractSpeechSynthesis {
 
   Regions defaultRegion;
 
-  public Polly(String n) {
-    super(n);
+  public Polly(String n, String id) {
+    super(n, id);
   }
 
   /**

@@ -306,7 +306,7 @@ public class WiiDar extends Service {
     LoggingFactory.init(Level.DEBUG);
     try {
 
-      WiiDar wiidar = new WiiDar("wiidar");
+      WiiDar wiidar = (WiiDar)Runtime.start("wiidar", "WiiDar");
       wiidar.startService();
       Runtime.createAndStart("gui", "SwingGui");
       // wiidar.startRobot();
@@ -317,8 +317,8 @@ public class WiiDar extends Service {
 
   }
 
-  public WiiDar(String n) {
-    super(n);
+  public WiiDar(String n, String id) {
+    super(n, id);
   }
 
   public double computeDepth(IRData ir) {

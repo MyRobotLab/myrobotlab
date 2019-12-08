@@ -25,8 +25,8 @@ public class CleverBot extends Service {
   boolean initialized = false;
   boolean continueToTalkToSelf = true;
 
-  public CleverBot(String n) {
-    super(n);
+  public CleverBot(String n, String id) {
+    super(n, id);
     init();
   }
 

@@ -96,8 +96,8 @@ public class Lloyd extends Service {
   public String imageRecognizerModelFilename = "visual_cortex.bin";
   public String yoloPersonImageRecognizerModelFilename = "person_visual_cortex.bin";
 
-  public Lloyd(String name) {
-    super(name);
+  public Lloyd(String name, String id) {
+    super(name, id);
   }
 
   @Override

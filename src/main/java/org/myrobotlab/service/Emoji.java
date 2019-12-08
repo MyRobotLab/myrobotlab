@@ -59,8 +59,8 @@ public class Emoji extends Service
   }
 
   // FIXME ! - emoji are multi-unicode !!! - create unicode key
-  public Emoji(String n) {
-    super(n);
+  public Emoji(String n, String id) {
+    super(n, id);
     
     startPeer("fsm");
     startPeer("fsm");

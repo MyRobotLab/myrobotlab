@@ -10,8 +10,8 @@ public abstract class AbstractVideoSink extends Service implements VideoSink {
 
   private static final long serialVersionUID = 1L;
 
-  public AbstractVideoSink(String reservedKey) {
-    super(reservedKey);
+  public AbstractVideoSink(String n, String id) {
+    super(n, id);
   }
 
   public boolean attach(VideoSource vs) {

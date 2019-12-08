@@ -79,8 +79,8 @@ public class Osc extends Service implements OSCListener {
     }
   }
 
-  public Osc(String n) {
-    super(n);
+  public Osc(String n, String id) {
+    super(n, id);
   }
 
   /**

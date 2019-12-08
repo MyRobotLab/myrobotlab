@@ -26,8 +26,8 @@ public abstract class AbstractBodyPart extends Service {
    */
   protected HashMap<String, Integer> servoOrder = new HashMap<String, Integer>();
 
-  public AbstractBodyPart(String reservedKey) {
-    super(reservedKey);
+  public AbstractBodyPart(String reservedKey, String id) {
+    super(reservedKey, id);
   }
 
   /**

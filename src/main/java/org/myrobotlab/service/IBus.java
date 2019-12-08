@@ -49,8 +49,8 @@ public class IBus extends Service implements SerialDataListener {
 
   SerialDevice serial;
 
-  public IBus(String n) {
-    super(n);
+  public IBus(String n, String id) {
+    super(n, id);
   }
 
   public void attach(SerialDevice serial) throws Exception {

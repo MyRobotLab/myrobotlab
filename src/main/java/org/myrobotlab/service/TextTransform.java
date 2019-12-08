@@ -30,8 +30,8 @@ public class TextTransform extends Service implements TextListener, TextPublishe
     }
   }
 
-  public TextTransform(String n) {
-    super(n);
+  public TextTransform(String n, String id) {
+    super(n, id);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package org.myrobotlab.client;
+package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,6 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.client.InProcessCli;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
@@ -67,26 +68,30 @@ public class InProcessCliTest extends AbstractTest {
   public void testProcess() throws IOException, InterruptedException {
     
     Runtime runtime = Runtime.getInstance();
+    // runtime.startInteractiveMode();
  
     InProcessCli cli = new InProcessCli(runtime.getId(), "runtime", in, bos);
+    Runtime.stdInClient = cli;
     cli.start();
     
+   
     clear();
     write("pwd");
     Thread.sleep(1000);
-    String ret = getResponse();
-    
+    String ret = getResponse();    
     assertTrue(ret.startsWith(toJson("/")));
+    
     
     clear();
     write("ls");
     Thread.sleep(1000);
-    assertTrue(getResponse().startsWith(toJson(Runtime.getServiceNames())));
+    assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
+    
     
     clear();
     write("route");
     Thread.sleep(1000);
-    assertTrue(getResponse().startsWith(toJson(Runtime.route())));
+    assertTrue(getResponse().contains(toJson(Runtime.route())));
     
     // cd to different directory with and without /
     

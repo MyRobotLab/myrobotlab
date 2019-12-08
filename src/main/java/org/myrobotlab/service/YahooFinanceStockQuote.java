@@ -20,8 +20,8 @@ public class YahooFinanceStockQuote extends HttpClient {
   private String apiBase = "https://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=&q=";
   public final static Logger log = LoggerFactory.getLogger(YahooFinanceStockQuote.class);
 
-  public YahooFinanceStockQuote(String reservedKey) {
-    super(reservedKey);
+  public YahooFinanceStockQuote(String n, String id) {
+    super(n, id);
   }
 
   // Return a sentence describing the stock price
@@ -56,7 +56,7 @@ public class YahooFinanceStockQuote extends HttpClient {
   }
 
   public static void main(String[] args) {
-    YahooFinanceStockQuote owm = new YahooFinanceStockQuote("quote");
+    YahooFinanceStockQuote owm = (YahooFinanceStockQuote)Runtime.start("quote", "YahooFinanceStockQuote");
     owm.startService();
     try {
       String response = owm.fetchQuote("NVDA");

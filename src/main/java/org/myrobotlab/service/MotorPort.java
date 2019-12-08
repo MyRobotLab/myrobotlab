@@ -18,8 +18,8 @@ public class MotorPort extends AbstractMotor {
 
   String port;
 
-  public MotorPort(String n) {
-    super(n);
+  public MotorPort(String n, String id) {
+    super(n, id);
   }
 
   public void setPort(String port) {
