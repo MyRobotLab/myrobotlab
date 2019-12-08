@@ -68,8 +68,8 @@ public class TopCodes extends Service {
    * 
    */
 
-  public TopCodes(String n) {
-    super(n);
+  public TopCodes(String n, String id) {
+    super(n, id);
   }
 
   public List<TopCode> scan(BufferedImage img) {

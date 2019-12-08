@@ -49,8 +49,8 @@ public class InMoovTorso extends Service {
     }
   }
 
-  public InMoovTorso(String n) {
-    super(n);
+  public InMoovTorso(String n, String id) {
+    super(n, id);
     // TODO: just call startPeers here.
     //    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
     //    // FRAMEWORK !!!!!
@@ -340,8 +340,8 @@ public class InMoovTorso extends Service {
   }
 
   public void setVelocity(Double topStom, Double midStom, Double lowStom) {
-    this.topStom.setVelocity(topStom);
-    this.midStom.setVelocity(midStom);
-    this.lowStom.setVelocity(lowStom);
+    this.topStom.setSpeed(topStom);
+    this.midStom.setSpeed(midStom);
+    this.lowStom.setSpeed(lowStom);
   }
 }

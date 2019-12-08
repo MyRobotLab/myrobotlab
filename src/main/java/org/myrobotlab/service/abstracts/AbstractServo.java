@@ -216,8 +216,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   private boolean idleDisabled = false;
 
-  public AbstractServo(String reservedKey) {
-    super(reservedKey);
+  public AbstractServo(String n, String id) {
+    super(n, id);
 
     // this servo is interested in new services which support either
     // ServoControllers or EncoderControl interfaces
@@ -738,6 +738,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
    */
   public void releaseService() {
     super.releaseService();
+    if (encoder != null) {
+      encoder.disable();
+    }
     detach();
   }
 
@@ -816,6 +819,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     this.rest = rest;
   }
 
+  @Deprecated /* this is really speed not velocity, velocity is a vector */
   @Override
   public void setVelocity(Double degreesPerSecond) {
     setSpeed(degreesPerSecond);
@@ -957,6 +961,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
     return maxSpeed;
   }
 
+  @Deprecated /* this is really speed - velocity is a vector */
   @Override
   public Double getVelocity() {
     return speed;

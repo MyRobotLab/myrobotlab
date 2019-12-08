@@ -44,8 +44,8 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     }
   }
 
-  public AzureTranslator(String n) {
-    super(n);
+  public AzureTranslator(String n, String id) {
+    super(n, id);
   }
 
   public String translate(String toTranslate) throws Exception {

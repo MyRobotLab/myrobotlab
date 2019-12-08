@@ -27,8 +27,8 @@ public class CsvConnector extends AbstractConnector {
   private int skipRows = 1;
   private boolean firstRowAsColumns = false;
 
-  public CsvConnector(String name) {
-    super(name);
+  public CsvConnector(String name, String id) {
+    super(name, id);
   }
 
   @Override

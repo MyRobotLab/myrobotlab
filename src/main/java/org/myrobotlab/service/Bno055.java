@@ -376,8 +376,8 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     }
   }
 
-  public Bno055(String n) {
-    super(n);
+  public Bno055(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
   }

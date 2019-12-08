@@ -26,8 +26,8 @@ public class HtmlParser extends Service {
     }
   }
 
-  public HtmlParser(String n) {
-    super(n);
+  public HtmlParser(String n, String id) {
+    super(n, id);
   }
 
   /**

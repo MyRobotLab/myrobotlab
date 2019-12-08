@@ -267,8 +267,8 @@ public class Agent extends Service {
 
   Updater updater;
 
-  public Agent(String n) throws IOException {
-    super(n);
+  public Agent(String n, String id) throws IOException {
+    super(n, id);
     updater = new Updater(this);
     currentBranch = Platform.getLocalInstance().getBranch();
     currentVersion = Platform.getLocalInstance().getVersion();
@@ -1471,7 +1471,7 @@ public class Agent extends Service {
 
       // FIXME - use wsclient for remote access
       if (globalOptions.client != null) {
-        // Runtime.start("cli", "Cli");
+        
         return;
       }
 

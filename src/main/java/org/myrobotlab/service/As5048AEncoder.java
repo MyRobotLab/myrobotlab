@@ -15,8 +15,8 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
 
   private static final long serialVersionUID = 1L;
 
-  public As5048AEncoder(String reservedKey) {
-    super(reservedKey);
+  public As5048AEncoder(String n, String id) {
+    super(n, id);
     // 14 bit encoder is 2^16 steps of resolution
     resolution = 4096*4;
   }

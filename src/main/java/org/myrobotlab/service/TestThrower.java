@@ -70,8 +70,8 @@ public class TestThrower extends Service {
     }
   }
 
-  public TestThrower(String n) {
-    super(n);
+  public TestThrower(String n, String id) {
+    super(n, id);
   }
 
   public Integer pitch(Integer number) {

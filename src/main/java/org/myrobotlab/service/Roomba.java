@@ -66,7 +66,7 @@ public class Roomba extends Service {
     LoggingFactory.init(Level.DEBUG);
 
     try {
-      Roomba roomba = new Roomba("roomba");
+      Roomba roomba = (Roomba)Runtime.start("roomba", "Roomba");
       roomba.startService();
 
       /*
@@ -109,7 +109,7 @@ public class Roomba extends Service {
        * 
        * roomba.setHardwareHandshake(false);
        */
-      SwingGui gui = new SwingGui("gui");
+      SwingGui gui =  (SwingGui)Runtime.start("gui", "SwingGui"); ;
       gui.startService();
 
     } catch (Exception e) {
@@ -118,8 +118,8 @@ public class Roomba extends Service {
 
   }
 
-  public Roomba(String n) {
-    super(n);
+  public Roomba(String n, String id) {
+    super(n, id);
     roombacomm = new RoombaCommPort();
     serial = (Serial) createPeer("serial");
   }

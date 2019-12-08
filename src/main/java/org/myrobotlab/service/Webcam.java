@@ -25,8 +25,8 @@ public class Webcam extends Service implements WebcamListener {
 
   private Object streamer;
 
-  public Webcam(String n) {
-    super(n);
+  public Webcam(String n, String id) {
+    super(n, id);
   }
 
   /**

@@ -37,7 +37,7 @@ public class InProcessCli implements Runnable {
   InputStream in;
   OutputStream out;
   boolean running = false;
-  String prefix = "/";
+  String cwd = "/";
 
   private String remoteId;
 
@@ -124,6 +124,54 @@ public class InProcessCli implements Runnable {
     try {
 
       cmd = cmd.trim();
+   
+      Message cliMsg = null;
+      
+      if (!cmd.startsWith("/")) {
+        // FIXME - THIS IS LOCAL ONLY !!!!
+        // cd is a "local" command
+        if (cmd.startsWith("cd")) {
+          String[] parts = cmd.split(" ");
+          if (parts.length == 2) {
+            // cd xxx
+            if (parts[1].startsWith("/")) {
+              cwd = parts[1];
+            } else {
+              cwd += parts[1];
+            }
+          }
+          // cmd = String.format("/runtime/cd %s", cwd);  LOCAL !
+          writeToJson(cwd);
+          writePrompt(out, uuid);
+          return cwd;
+        } else if (cmd.startsWith("pwd")) {
+          // FIXME - THIS IS LOCAL ONLY !!!!
+          writeToJson(cwd);
+          writePrompt(out, uuid);
+          return cwd;
+        } else if (cmd.startsWith("ls")) {
+          // "ls" is a special query
+          // FIXME - ls with params !
+          String[] parts = cmd.split(" ");
+          String lsPath = cwd;
+          if (parts.length == 2) {
+            // cd xxx
+            if (parts[1].startsWith("/")) {
+              lsPath = parts[1];
+            } else {
+              lsPath = cwd + parts[1];
+            }
+          }
+          cliMsg = cliToMsg(cmd);
+          cliMsg.method = "ls";
+          cliMsg.data = new Object[] {"\"" + lsPath + "\""};
+          //cmd = String.format("/runtime/ls %s", lsPath);
+        } else if (cwd.equals("/")) {
+          cmd = "/runtime/" + cmd;
+        } else {
+          cmd = cwd + cmd;
+        }
+      } // else - must start with "/" - its a complete command
 
       if ("".equals(cmd)) {
         writePrompt(out, uuid); // <-- should be id no ?
@@ -134,7 +182,9 @@ public class InProcessCli implements Runnable {
       // parse line for /{serviceName@id}/{method}/jsonEncoded? parms ?? ...
 
       // "create" cli specific msgs
-      Message cliMsg = cliToMsg(cmd);
+      if (cliMsg == null) {
+        cliMsg = cliToMsg(cmd);
+      }
       
       // fully address destination
       if (!cliMsg.name.contains("@")) {
@@ -237,7 +287,7 @@ public class InProcessCli implements Runnable {
    * @return
    */
   public String getPrompt(String uuid) {
-    return String.format("[%s@%s %s]%s", name, remoteId, "/fixpath", "#");
+    return String.format("[%s@%s %s]%s", name, remoteId, cwd, "#");
   }
 
   // FIXME - interrupt does not work on a infinite blocked read
@@ -283,6 +333,14 @@ public class InProcessCli implements Runnable {
       log.error("msg cannot be tested for local cli - needs to be not null {}", msg);
     }
     return msgId.endsWith(id);
+  }
+
+  public void setPrefix(String path) {
+      cwd = path;
+  }
+
+  public String getCwd() {
+    return cwd;
   }
 
 }

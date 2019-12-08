@@ -109,8 +109,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     }
   }
 
-  public EddieControlBoard(String n) {
-    super(n);
+  public EddieControlBoard(String n, String id) {
+    super(n, id);
   }
 
   public void connect(String port) throws IOException {
@@ -400,13 +400,23 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   @Override
   public void startService() {
     super.startService();
-    serial = (Serial) startPeer("serial");
-    serial.addByteListener(this);
-    serial.setTimeout(500);
-    keyboard = (Keyboard) startPeer("keyboard");
-    keyboard.addKeyListener(this);
-    python = (Python) Runtime.start("python", "Python");
-    mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
+    try {
+      if (serial == null) {
+        serial = (Serial) startPeer("serial");
+      }
+      serial.addByteListener(this);
+      serial.setTimeout(500);
+      if (keyboard == null) {
+        keyboard = (Keyboard) startPeer("keyboard");
+      }
+      keyboard.attach(getName());
+      python = (Python) Runtime.start("python", "Python");
+      if (mouth == null) {
+        mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
+      }
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   public void startWebGUI() throws Exception {
@@ -462,7 +472,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     meta.addPeer("serial", "Serial", "serial");
     meta.addPeer("keyboard", "Keyboard", "serial");
     meta.addPeer("webgui", "WebGui", "webgui");
-    meta.addPeer("remote", "RemoteAdapter", "remote interface");
+    //meta.addPeer("remote", "RemoteAdapter", "remote interface");
     meta.addPeer("joystick", "Joystick", "joystick");
 
     return meta;

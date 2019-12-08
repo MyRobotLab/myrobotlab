@@ -20,8 +20,8 @@ public class Relay extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Relay.class);
 
-  public Relay(String n) {
-    super(n);
+  public Relay(String n, String id) {
+    super(n, id);
   }
 
   static public ServiceType getMetaData() {

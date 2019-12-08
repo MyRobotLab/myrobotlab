@@ -14,8 +14,8 @@ public class Esp8266 extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Esp8266.class);
 
-  public Esp8266(String n) {
-    super(n);
+  public Esp8266(String n, String id) {
+    super(n, id);
   }
 
   public static void main(String[] args) {

@@ -128,8 +128,8 @@ public class Tracking extends Service {
   // reservatinos ?
   // e.g if I come to the party does the reservations get updated or do I
   // crash the party ??
-  public Tracking(String n) throws Exception {
-    super(n);
+  public Tracking(String n, String id) throws Exception {
+    super(n, id);
 
     pid = (Pid) createPeer("pid");
     // the kp should be proportional to the input min/max of the servo.. for now
@@ -270,9 +270,9 @@ public class Tracking extends Service {
       if (sc.servoControl.isAttached()) {
         // avoid dangerous moves
         Double velocity = sc.servoControl.getSpeed();
-        sc.servoControl.setVelocity(20.0);
+        sc.servoControl.setSpeed(20.0);
         sc.servoControl.moveToBlocking(sc.servoControl.getRest());
-        sc.servoControl.setVelocity(velocity);
+        sc.servoControl.setSpeed(velocity);
       }
     }
   }

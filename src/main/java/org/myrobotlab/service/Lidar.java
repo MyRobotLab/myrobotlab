@@ -48,7 +48,7 @@ public class Lidar extends Service implements SerialDataListener {
 
     try {
 
-      Lidar template = new Lidar("Lidar");
+      Lidar template =  (Lidar)Runtime.start("Lidar", "Lidar");
       template.startService();
 
       // Lidar lidar01 = (Lidar) Runtime.createAndStart("lidar01",
@@ -71,7 +71,7 @@ public class Lidar extends Service implements SerialDataListener {
       // parses the data.
       // lidar01.singleScan();
 
-      Python python = new Python("python");
+      Python python = (Python) Runtime.start("python", "Python");
       python.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -84,8 +84,8 @@ public class Lidar extends Service implements SerialDataListener {
     }
   }
 
-  public Lidar(String n) {
-    super(n);
+  public Lidar(String n, String id) {
+    super(n, id);
     reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar");
   }
 

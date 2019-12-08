@@ -59,8 +59,8 @@ public class JFugue extends Service {
     jfugue.play("C5maj7w");
   }
 
-  public JFugue(String n) {
-    super(n);
+  public JFugue(String n, String id) {
+    super(n, id);
   }
 
   public void play(Integer i) { // play tone

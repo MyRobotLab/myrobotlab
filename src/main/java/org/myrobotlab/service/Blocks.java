@@ -14,8 +14,8 @@ public class Blocks extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Blocks.class);
 
-  public Blocks(String n) {
-    super(n);
+  public Blocks(String n, String id) {
+    super(n, id);
   }
 
   /**

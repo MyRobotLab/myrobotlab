@@ -149,8 +149,8 @@ public class Shoutbox extends Service {
   
   int maxArchiveRecordCount = 50;
 
-  public Shoutbox(String n) {
-    super(n);
+  public Shoutbox(String n, String id) {
+    super(n, id);
     chatbotNames.add("@mrt");
     chatbotNames.add("@mr.turing");
     chatbotNames.add("@mrturing");
@@ -522,8 +522,6 @@ public class Shoutbox extends Service {
       shoutbox.createShout(TYPE_SYSTEM, "this is a test shout");
       shoutbox.createShout(TYPE_SYSTEM, "this is another test shout");
       shoutbox.createShout(TYPE_SYSTEM, "more test shouting");
-
-      Runtime.start("cli", "Cli");
 
       Runtime.start("webgui", "WebGui");
 

@@ -14,8 +14,8 @@ public class Speech extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Speech.class);
 
-  public Speech(String n) {
-    super(n);
+  public Speech(String n, String id) {
+    super(n, id);
   }
 
   /**

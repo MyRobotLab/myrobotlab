@@ -46,8 +46,8 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   String maryBase = "mary";
  
-  public MarySpeech(String reservedKey) throws MaryConfigurationException {
-    super(reservedKey);
+  public MarySpeech(String n, String id) throws MaryConfigurationException {
+    super(n, id);
     getMaryTts();
   }
   
@@ -271,7 +271,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-      // Runtime.start("cli", "Cli");
+     
       // mary.grabRemoteAudioEffect("LAUGH01_F");
       Runtime.start("python", "Python");
 

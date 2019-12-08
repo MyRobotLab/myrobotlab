@@ -194,8 +194,8 @@ public class Joystick extends Service {
     }
   }
 
-  public Joystick(String n) {
-    super(n);
+  public Joystick(String n, String id) {
+    super(n, id);
     // we will force a system property here to specify the native location for
     // the
     // jinput libraries
@@ -581,7 +581,7 @@ public class Joystick extends Service {
 
       // joy.mapId("x", "rx");
       // joy.map("y", -1, 1, 0, 180);
-      // Runtime.start("cli", "Cli");
+     
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {

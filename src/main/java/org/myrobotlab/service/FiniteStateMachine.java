@@ -57,8 +57,8 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   // FIXME - have "default" state !!!
   // FIXME emotionalState.addTransition("emotional-state", "ill", "ill-event",
   // "ill") EXPLODES !!!
-  public FiniteStateMachine(String n) {
-    super(n);
+  public FiniteStateMachine(String n, String id) {
+    super(n, id);
     // if conditions for json loads
     if (currentStates == null) {
       currentStates = new ArrayList<>();

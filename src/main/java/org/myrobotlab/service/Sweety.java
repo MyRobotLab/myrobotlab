@@ -290,8 +290,8 @@ public class Sweety extends Service {
     }
   }
 
-  public Sweety(String n) {
-    super(n);
+  public Sweety(String n, String id) {
+    super(n, id);
   }
 
   /**
@@ -967,32 +967,32 @@ public class Sweety extends Service {
     neckTiltServo.setRest(neckTilt.rest);
     neckPanServo.setRest(neckPan.rest);
 
-    setVelocity(75);
+    setSpeed(75);
   }
 
-  void setVelocity(double value) {
-    rightShoulderServo.setVelocity(value);
-    rightArmServo.setVelocity(value);
-    rightBicepsServo.setVelocity(value);
-    rightElbowServo.setVelocity(value);
-    rightWristServo.setVelocity(value);
-    leftShoulderServo.setVelocity(value);
-    leftArmServo.setVelocity(value);
-    leftBicepsServo.setVelocity(value);
-    leftElbowServo.setVelocity(value);
-    leftWristServo.setVelocity(value);
-    rightThumbServo.setVelocity(value);
-    rightIndexServo.setVelocity(value);
-    rightMiddleServo.setVelocity(value);
-    rightRingServo.setVelocity(value);
-    rightPinkyServo.setVelocity(value);
-    leftThumbServo.setVelocity(value);
-    leftIndexServo.setVelocity(value);
-    leftMiddleServo.setVelocity(value);
-    leftRingServo.setVelocity(value);
-    leftPinkyServo.setVelocity(value);
-    neckTiltServo.setVelocity(value);
-    neckPanServo.setVelocity(value);
+  void setSpeed(double value) {
+    rightShoulderServo.setSpeed(value);
+    rightArmServo.setSpeed(value);
+    rightBicepsServo.setSpeed(value);
+    rightElbowServo.setSpeed(value);
+    rightWristServo.setSpeed(value);
+    leftShoulderServo.setSpeed(value);
+    leftArmServo.setSpeed(value);
+    leftBicepsServo.setSpeed(value);
+    leftElbowServo.setSpeed(value);
+    leftWristServo.setSpeed(value);
+    rightThumbServo.setSpeed(value);
+    rightIndexServo.setSpeed(value);
+    rightMiddleServo.setSpeed(value);
+    rightRingServo.setSpeed(value);
+    rightPinkyServo.setSpeed(value);
+    leftThumbServo.setSpeed(value);
+    leftIndexServo.setSpeed(value);
+    leftMiddleServo.setSpeed(value);
+    leftRingServo.setSpeed(value);
+    leftPinkyServo.setSpeed(value);
+    neckTiltServo.setSpeed(value);
+    neckPanServo.setSpeed(value);
 
   }
 

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.myrobotlab.service.Runtime;
 
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.service.Serial;
@@ -101,7 +102,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   // constructor
   public RoombaCommPort() {
     super();
-    serial = new Serial("serial");
+    serial = (Serial)Runtime.start("serial", "Serial");
     serial.startService();
     makePorts();
   }

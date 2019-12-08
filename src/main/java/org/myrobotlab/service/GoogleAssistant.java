@@ -17,8 +17,8 @@ public class GoogleAssistant extends PythonProxy {
    */
   private static final long serialVersionUID = 1L;
 
-  public GoogleAssistant(String n) {
-    super(n);
+  public GoogleAssistant(String n, String id) {
+    super(n, id);
   }
 
   public Object test(String testString) {

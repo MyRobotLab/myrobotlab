@@ -101,8 +101,8 @@ public class InMoovGestureCreator extends Service {
 
   }
 
-  public InMoovGestureCreator(String n) {
-    super(n);
+  public InMoovGestureCreator(String n, String id) {
+    super(n, id);
     // intializing variables
     servoitemholder = new ServoItemHolder[6][];
     frameitemholder = new ArrayList<FrameItemHolder>();

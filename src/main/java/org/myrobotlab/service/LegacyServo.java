@@ -325,8 +325,8 @@ public class LegacyServo extends Service implements ServoControl {
     // public int type;
   }
 
-  public LegacyServo(String n) {
-    super(n);
+  public LegacyServo(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
     lastActivityTime = System.currentTimeMillis();

@@ -72,8 +72,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(InMoov.class);
 
-  public InMoov(String n) {
-    super(n);
+  public InMoov(String n, String id) {
+    super(n, id);
   }
 
   // ---------------------------------------------------------------

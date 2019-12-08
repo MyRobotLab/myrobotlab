@@ -42,7 +42,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // a test robot
     // TODO: this should probably be created by Runtime,
     // OOB tags might not know what the service name is ?!
-    testService = new ProgramAB(botname);
+    testService = (ProgramAB)Runtime.start(botname, "ProgramAB");
     testService.setPath(path);
     // testService = new ProgramAB("simple");
     // testService.setPath("c:/mrl/develop/ProgramAB");
@@ -141,7 +141,7 @@ public class ProgramABTest extends AbstractServiceTest {
   @Test
   public void testJapanese() {
 
-    ProgramAB pikachu = new ProgramAB("pikachu");
+    ProgramAB pikachu = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
     pikachu.setPath(path);
     // pikachu the service.
     pikachu.startService();
@@ -163,7 +163,7 @@ public class ProgramABTest extends AbstractServiceTest {
 
   @Test
   public void testMultiSession() {
-    ProgramAB lloyd = new ProgramAB("lloyd");
+    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
     lloyd.setPath(path);
     // pikachu the service.
     lloyd.startService();

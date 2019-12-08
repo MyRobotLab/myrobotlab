@@ -64,8 +64,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     return (us - 544) / 10;
   };
 
-  public Ssc32UsbServoController(String n) {
-    super(n);
+  public Ssc32UsbServoController(String n, String id) {
+    super(n, id);
   }
 
   /**

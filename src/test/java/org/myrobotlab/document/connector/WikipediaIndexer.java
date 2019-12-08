@@ -55,7 +55,7 @@ public class WikipediaIndexer {
     solrStageConfig.setStringParam("solrUrl", solrUrl);
     solrStageConfig.setIntegerParam("batchSize", 500);
     solrStageConfig.setBoolParam("issueCommit", false);
-    DocumentPipeline docproc = new DocumentPipeline("docproc");
+    DocumentPipeline docproc = (DocumentPipeline)Runtime.start("docproc", "DocumentPipeline");
     // build the pipeline.. assemble the stages.
     // create our document processing pipeline workflow.
     WorkflowConfiguration workflowConfig = new WorkflowConfiguration("default");

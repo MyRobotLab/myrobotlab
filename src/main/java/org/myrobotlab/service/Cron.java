@@ -111,8 +111,8 @@ public class Cron extends Service {
     }
   }
 
-  public Cron(String n) {
-    super(n);
+  public Cron(String n, String id) {
+    super(n, id);
   }
 
   /*

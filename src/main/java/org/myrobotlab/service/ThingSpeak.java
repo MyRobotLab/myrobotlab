@@ -46,7 +46,7 @@ public class ThingSpeak extends Service {
 
       log.info("hello");
 
-      ThingSpeak thingSpeak = new ThingSpeak("thingSpeak");
+      ThingSpeak thingSpeak = (ThingSpeak)Runtime.start("thingSpeak", "ThingSpeak");
       thingSpeak.update(33);
       thingSpeak.startService();
 
@@ -58,8 +58,8 @@ public class ThingSpeak extends Service {
     }
   }
 
-  public ThingSpeak(String n) {
-    super(n);
+  public ThingSpeak(String n, String id) {
+    super(n, id);
   }
 
   public Integer getIntervalSeconds() {

@@ -112,8 +112,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
   char[] password = null;
   boolean autoReconnect = true;
 
-  public Mqtt(String n) {
-    super(n);
+  public Mqtt(String n, String id) {
+    super(n, id);
     try {      
       inTopic = String.format("myrobotlab/%s/in", getName());
       outTopic = String.format("myrobotlab/%s/out", getName());
@@ -272,7 +272,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
       // COMMON GATEWAY REGISTERATION AND X-FORWARDED BEGIN --------------
 
       // make a mrl key and protocol uri begin ------
-      // ADD TCP CLIENT BEGIN ! - probably should not be in RemoteAdapter - as
       // this is
       // a detail for tcp
 

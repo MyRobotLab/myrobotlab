@@ -101,8 +101,8 @@ public class Clock extends Service {
 
   private boolean restartMe;
 
-  public Clock(String n) {
-    super(n);
+  public Clock(String n, String id){
+    super(n, id);
   }
 
   public void addClockEvent(Date time, String name, String method, Object... data) {

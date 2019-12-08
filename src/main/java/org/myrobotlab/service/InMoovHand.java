@@ -73,7 +73,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       // arduino.pinMode(13, ServoController.OUTPUT);
       // arduino.digitalWrite(13, 1);
 
-      InMoovHand rightHand = new InMoovHand("r01");
+      InMoovHand rightHand = (InMoovHand)Runtime.start("r01", "InMoovHand");//InMoovHand("r01");
       Runtime.createAndStart("gui", "SwingGui");
       rightHand.connect("COM15");
       rightHand.startService();
@@ -93,8 +93,8 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     }
   }
 
-  public InMoovHand(String n) {
-    super(n);
+  public InMoovHand(String n, String id) {
+    super(n, id);
   }
 
   /*
@@ -678,17 +678,17 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
 
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     if (thumb != null)
-      this.thumb.setVelocity(thumb);
+      this.thumb.setSpeed(thumb);
     if (index != null)
-      this.index.setVelocity(index);
+      this.index.setSpeed(index);
     if (majeure != null)
-      this.majeure.setVelocity(majeure);
+      this.majeure.setSpeed(majeure);
     if (ringFinger != null)
-      this.ringFinger.setVelocity(ringFinger);
+      this.ringFinger.setSpeed(ringFinger);
     if (pinky != null)
-      this.pinky.setVelocity(pinky);
+      this.pinky.setSpeed(pinky);
     if (wrist != null)
-      this.wrist.setVelocity(wrist);
+      this.wrist.setSpeed(wrist);
   }
 
   public void setController(ServoController servoController) {

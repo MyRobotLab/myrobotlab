@@ -68,8 +68,8 @@ public class Pir extends Service implements PinListener {
   PinArrayControl pinControl;
   List<String> controllers;
 
-  public Pir(String n) {
-    super(n);
+  public Pir(String n, String id) {
+    super(n, id);
   }
 
   public void attach(PinArrayControl control, int pin) {

@@ -22,8 +22,8 @@ public class DocumentPipeline extends Service implements DocumentListener, Docum
   private transient WorkflowServer workflowServer;
   private String workflowName = "default";
 
-  public DocumentPipeline(String reservedKey) {
-    super(reservedKey);
+  public DocumentPipeline(String n, String id) {
+    super(n, id);
   }
 
   static public String[] getCategories() {

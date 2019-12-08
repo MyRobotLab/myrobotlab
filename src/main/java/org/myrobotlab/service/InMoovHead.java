@@ -34,8 +34,8 @@ public class InMoovHead extends Service {
   transient public ServoControl rollNeck;
   transient public ServoController controller;
 
-  public InMoovHead(String n) {
-    super(n);
+  public InMoovHead(String n, String id) {
+    super(n, id);
     jaw = (ServoControl) createPeer("jaw");
     eyeX = (ServoControl) createPeer("eyeX");
     eyeY = (ServoControl) createPeer("eyeY");
@@ -581,12 +581,12 @@ public class InMoovHead extends Service {
     if (log.isDebugEnabled()) {
       log.debug(String.format("%s setVelocity %.2f %.2f %.2f %.2f %.2f %.2f", getName(), headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed));
     }
-    rothead.setVelocity(headXSpeed);
-    neck.setVelocity(headYSpeed);
-    eyeX.setVelocity(eyeXSpeed);
-    eyeY.setVelocity(eyeYSpeed);
-    jaw.setVelocity(jawSpeed);
-    rollNeck.setVelocity(rollNeckSpeed);
+    rothead.setSpeed(headXSpeed);
+    neck.setSpeed(headYSpeed);
+    eyeX.setSpeed(eyeXSpeed);
+    eyeY.setSpeed(eyeYSpeed);
+    jaw.setSpeed(jawSpeed);
+    rollNeck.setSpeed(rollNeckSpeed);
   }
 
   public static void main(String[] args) {

@@ -29,8 +29,8 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
   private String mimicExecutable = mimicFolder + File.separator + "mimic.exe";
   public String mimicOutputFilePath = System.getProperty("user.dir") + File.separator + mimicFolder + File.separator;
 
-  public MimicSpeech(String reservedKey) {
-    super(reservedKey);
+  public MimicSpeech(String n, String id) {
+    super(n, id);
   }
 
   static public ServiceType getMetaData() {

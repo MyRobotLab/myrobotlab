@@ -42,11 +42,11 @@ public class WiiBot extends Service {
   public final static Logger log = LoggerFactory.getLogger(WiiBot.class.getCanonicalName());
 
   transient Arduino arduino = null;
-  transient Wii wii = new Wii("wii");
-  transient Servo servo = new Servo("servo");
-  transient OpenCV opencv = new OpenCV("opencv");
-  transient WiiDar wiidar = new WiiDar("wiidar");
-  transient SwingGui gui = new SwingGui("gui");
+  transient Wii wii = (Wii)Runtime.start("wii", "Wii");
+  transient Servo servo = (Servo)Runtime.start("servo", "Servo");
+  transient OpenCV opencv = (OpenCV)Runtime.start("opencv", "OpenCV");
+  transient WiiDar wiidar = (WiiDar)Runtime.start("wiidar", "WiiDar");
+  transient SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui");
 
   int speedRight = 0;
 
@@ -56,7 +56,7 @@ public class WiiBot extends Service {
     LoggingFactory.init(Level.WARN);
     try {
 
-      WiiBot wiibot = new WiiBot("wiibot");
+      WiiBot wiibot = (WiiBot)Runtime.start("wiibot", "WiiBot");
       wiibot.startService();
       wiibot.startRobot();
 
@@ -66,8 +66,8 @@ public class WiiBot extends Service {
 
   }
 
-  public WiiBot(String n) {
-    super(n);
+  public WiiBot(String n, String id) {
+    super(n, id);
   }
 
   public void keyPressed(Integer i) {
@@ -144,7 +144,7 @@ public class WiiBot extends Service {
   }
 
   public void startRobot() throws Exception {
-    arduino = new Arduino("arduino");
+    arduino = (Arduino)Runtime.start("arduino","Arduino");
 
     // adding wiicom as an option
     /*

@@ -202,8 +202,8 @@ public class Security extends Service implements AuthorizationProvider {
 
   String storeFileName = "store";
 
-  public Security(String n) {
-    super(n);
+  public Security(String n, String id) {
+    super(n, id);
     keyFileName = String.format("%s%skey", FileIO.getCfgDir(), File.separator);
     storeFileName = String.format("%s%sstore", getDataDir(), File.separator);
     loadStore();
@@ -212,7 +212,7 @@ public class Security extends Service implements AuthorizationProvider {
     /*
      * FIXME - set predefined levels - high security medium low
      * allowExportByType.put("Xmpp", false);
-     * allowExportByType.put("RemoteAdapter", false);
+    
      * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
      * false);
      * 

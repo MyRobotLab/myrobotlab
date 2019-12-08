@@ -122,8 +122,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     return jmeApp;
   }
 
-  public IntegratedMovement(String n) {
-    super(n);
+  public IntegratedMovement(String n, String id) {
+    super(n, id);
   }
 
   public Point currentPosition(String arm) {

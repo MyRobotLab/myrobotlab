@@ -232,8 +232,8 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     }
   }
 
-  public SwingGui(String n) {
-    super(n);
+  public SwingGui(String n, String id) {
+    super(n, id);
     this.self = this;
     guiId = "gui-" + getId();
 
@@ -944,8 +944,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       // Runtime.start("i01", "InMoov");
       // Runtime.start("mac", "Runtime");
       // Runtime.start("python", "Python");
-      // RemoteAdapter remote = (RemoteAdapter)Runtime.start("remote",
-      // "RemoteAdapter");
       // remote.setDefaultPrefix("raspi");
       // remote.connect("tcp://127.0.0.1:6767");
 

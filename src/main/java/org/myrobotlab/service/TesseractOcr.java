@@ -59,8 +59,8 @@ public class TesseractOcr extends Service {
     }
   }
 
-  public TesseractOcr(String n) {
-    super(n);
+  public TesseractOcr(String n, String id) {
+    super(n, id);
   }
 
   public String ocr(BufferedImage image) throws IOException {

@@ -23,7 +23,7 @@ public class BeagleBoardBlack extends Service {
     LoggingFactory.init(Level.WARN);
 
     try {
-      BeagleBoardBlack bbb = new BeagleBoardBlack("bbb");
+      BeagleBoardBlack bbb = (BeagleBoardBlack)Runtime.start("bbb", "BeagleBoardBlack");// new BeagleBoardBlack("bbb");
       bbb.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -35,8 +35,8 @@ public class BeagleBoardBlack extends Service {
     }
   }
 
-  public BeagleBoardBlack(String n) {
-    super(n);
+  public BeagleBoardBlack(String n, String id) {
+    super(n, id);
   }
 
   /**

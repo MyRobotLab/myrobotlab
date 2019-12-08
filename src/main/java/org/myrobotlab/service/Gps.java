@@ -169,10 +169,10 @@ public class Gps extends Service implements SerialDataListener {
 
     try {
 
-      Gps template = new Gps("gps1");
+      Gps template = (Gps) Runtime.start("gps1", "Gps");
       template.startService();
 
-      Python python = new Python("python");
+      Python python = (Python) Runtime.start("python", "Python"); // new Python("python");
       python.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -185,8 +185,8 @@ public class Gps extends Service implements SerialDataListener {
     }
   }
 
-  public Gps(String n) {
-    super(n);
+  public Gps(String n, String id) {
+    super(n, id);
   }
 
   public void addGPSListener(Service service) {
@@ -842,6 +842,7 @@ public class Gps extends Service implements SerialDataListener {
     super.startService();
     try {
       serial = (Serial) startPeer("serial", "Serial");
+      // serial.attach(getName());
       serial.addByteListener(this);
 
       if (model == null) {

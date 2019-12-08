@@ -50,8 +50,8 @@ public class VoiceRss extends AbstractSpeechSynthesis {
   public final static String VOICERSS_API_KEY = "voicerss.api.key";
   public Integer rate = 0;
 
-  public VoiceRss(String n) {
-    super(n);
+  public VoiceRss(String n, String id) {
+    super(n, id);
   }
 
   public Integer getRate() {

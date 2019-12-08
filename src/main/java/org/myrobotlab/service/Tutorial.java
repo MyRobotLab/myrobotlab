@@ -14,8 +14,8 @@ public class Tutorial extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Tutorial.class);
 
-  public Tutorial(String n) {
-    super(n);
+  public Tutorial(String n, String id) {
+    super(n, id);
   }
 
   /**

@@ -17,8 +17,8 @@ public class ServoMixer extends Service {
   private static final String POSES_DIRECTORY = "poses";
   private static final long serialVersionUID = 1L;
 
-  public ServoMixer(String reservedKey) {
-    super(reservedKey);
+  public ServoMixer(String n, String id) {
+    super(n, id);
   }
 
   public List<ServoControl> listAllServos() {

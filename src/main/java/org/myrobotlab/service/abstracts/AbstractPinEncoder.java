@@ -20,8 +20,8 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   protected long lastUpdate = 0;
   protected Double velocity = 0.0;
 
-  public AbstractPinEncoder(String reservedKey) {
-    super(reservedKey);
+  public AbstractPinEncoder(String n, String id) {
+    super(n, id);
   }
 
   public void attach(EncoderController controller) throws Exception {
