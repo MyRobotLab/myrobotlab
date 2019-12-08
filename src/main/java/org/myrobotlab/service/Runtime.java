@@ -1269,12 +1269,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * releases a service - stops the service, its threads, releases its
    * resources, and removes registry entries
    *
-   * @param name
-   *          of the service to be released
-   * @return whether or not it successfully released the service
+   * FIXME - clean up subscriptions from released
+   * 
+   * @param inName
+   * @return
    */
-
-  // FIXME - clean up subscriptions from released
   public synchronized static boolean release(String inName) {
     String name = getFullName(inName);
 

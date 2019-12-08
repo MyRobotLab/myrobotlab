@@ -103,7 +103,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Default constructor for the program ab service.
    * 
-   * @param name
+   * 
+   * @param n - service name
+   * @param id - process id
    */
   public ProgramAB(String n, String id) {
     super(n, id);
