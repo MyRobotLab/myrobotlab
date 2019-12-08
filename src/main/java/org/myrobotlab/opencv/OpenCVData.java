@@ -282,7 +282,8 @@ public class OpenCVData extends CvData {
    * exist it return the original input - most other type converters should use
    * this method
    * 
-   * @return the image
+   * @param filterKey
+   * @return
    */
   public IplImage getImage(String filterKey) {
 
