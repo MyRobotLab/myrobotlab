@@ -36,8 +36,11 @@ public class Proxy extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Proxy.class);
 
-  public Proxy(String name, String id, String type) {
-    super(name);
+  public Proxy(String name, String id) {
+    super(name, id);
+  }
+    public Proxy(String name, String id, String type) {
+    super(name, id);
     
     // necessary for serialized transport
     this.id = id;
@@ -89,7 +92,8 @@ public class Proxy extends Service {
   }
   
   public String getType() {
-    return null;
+    // overloaded to support other types
+    return Proxy.class.getCanonicalName();
   }
   
   public void setState(String json) {
@@ -106,7 +110,7 @@ public class Proxy extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Proxy.class.getCanonicalName());
+    ServiceType meta = new ServiceType(Proxy.class);
     meta.addDescription("used as a general template");
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     // add dependency if necessary
@@ -119,10 +123,8 @@ public class Proxy extends Service {
     try {
 
       LoggingFactory.init(Level.INFO);
-
-      Runtime.start("template", "_TemplateService");
-      Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
+      Runtime.main(new String[] { "--interactive", "--id", "id"});
+      Runtime.start("proxy", "Proxy");
 
     } catch (Exception e) {
       Logging.logError(e);

@@ -23,8 +23,8 @@ public class RSSConnector extends AbstractConnector {
   private String rssUrl = "http://www.myrobotlab.org/rss.xml";
   private boolean interrupted = false;
 
-  public RSSConnector(String reservedKey) {
-    super(reservedKey);
+  public RSSConnector(String n, String id) {
+    super(n, id);
   }
 
   @Override

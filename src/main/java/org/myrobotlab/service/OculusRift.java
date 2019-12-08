@@ -94,8 +94,8 @@ public class OculusRift extends Service implements PointPublisher {
     public SerializableImage right;
   }
 
-  public OculusRift(String reservedKey) {
-    super(reservedKey);
+  public OculusRift(String n, String id) {
+    super(n, id);
   }
 
   // Boradcast the state of the peers to notify the gui.

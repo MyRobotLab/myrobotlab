@@ -211,8 +211,8 @@ public class WatchDogTimer extends Service {
    */
   int defaultIntervalMs = 2000;
 
-  public WatchDogTimer(String n) {
-    super(n);
+  public WatchDogTimer(String n, String id) {
+    super(n, id);
   }
 
   public Timer addTimer() {

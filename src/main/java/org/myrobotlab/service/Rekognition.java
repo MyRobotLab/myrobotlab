@@ -51,8 +51,8 @@ public class Rekognition extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Rekognition.class);
 
-  public Rekognition(String n) {
-    super(n);
+  public Rekognition(String n, String id) {
+    super(n, id);
   }
 
   public void setMinConfidence(float confidence) {

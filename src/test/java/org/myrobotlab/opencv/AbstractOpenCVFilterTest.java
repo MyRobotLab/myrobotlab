@@ -44,7 +44,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
       sourceImage = filter.show(input, "Input Image");
     }
 
-    OpenCV opencv = new OpenCV("opencv");
+    OpenCV opencv = (OpenCV)Runtime.start("opencv", "OpenCV");
     filter.setOpenCV(opencv);
 
     // we need to set the CV Data object on the filter before we process. 

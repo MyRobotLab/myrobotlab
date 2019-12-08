@@ -61,9 +61,9 @@ node ('ubuntu') {  // use labels to direct build
    stage('verify'){
 	   if (isUnix()) {
              // -o == offline
-	     sh "'${mvnHome}/bin/mvn' verify"
+	     sh "'${mvnHome}/bin/mvn' -Dfile.encoding=UTF-8 verify"
 	   } else {
-	     bat(/"${mvnHome}\bin\mvn" verify/)
+	     bat(/"${mvnHome}\bin\mvn" -Dfile.encoding=UTF-8 verify/)
 	   }
    }
    stage('extended-verify'){

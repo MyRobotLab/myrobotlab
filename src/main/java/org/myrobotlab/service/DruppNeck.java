@@ -31,8 +31,8 @@ public class DruppNeck extends Service {
   public double middleOffset = 120 + 90;
   public double downOffset = -120 + 90;
 
-  public DruppNeck(String name) {
-    super(name);
+  public DruppNeck(String n, String id) {
+    super(n, id);
   }
 
   private DruppIKSolver solver = new DruppIKSolver();

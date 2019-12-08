@@ -27,8 +27,8 @@ public class LidarVlp16 extends Service {
   transient DatagramSocket dataSocket;
   transient DatagramSocket positionSocket;
 
-  public LidarVlp16(String n) {
-    super(n);
+  public LidarVlp16(String n, String id) {
+    super(n, id);
   }
 
   public void listen() throws SocketException, UnknownHostException {

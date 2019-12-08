@@ -34,7 +34,7 @@ public class WolframAlpha extends Service {
 
     try {
 
-      WolframAlpha template = new WolframAlpha("wolfram");
+      WolframAlpha template = (WolframAlpha)Runtime.start("wolfram", "WolframAlpha");
       template.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -46,8 +46,8 @@ public class WolframAlpha extends Service {
      */
   }
 
-  public WolframAlpha(String n) {
-    super(n);
+  public WolframAlpha(String n, String id) {
+    super(n, id);
   }
 
   public WAQueryResult getQueryResult(String query) {

@@ -154,8 +154,8 @@ public class OpenNi extends Service // implements
     return radians * RAD_TO_DEG;
   }
 
-  public OpenNi(String n) {
-    super(n);
+  public OpenNi(String n, String id) {
+    super(n, id);
   }
 
   // USER BEGIN ---------------------------------------------

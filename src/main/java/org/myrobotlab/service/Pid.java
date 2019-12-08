@@ -135,8 +135,8 @@ public class Pid extends Service {
 
   public Map<String, PidData> data = new HashMap<String, PidData>();
 
-  public Pid(String n) {
-    super(n);
+  public Pid(String n, String id) {
+    super(n, id);
   }
 
   /*

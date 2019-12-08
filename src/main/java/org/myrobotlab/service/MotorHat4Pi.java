@@ -21,8 +21,8 @@ public class MotorHat4Pi extends AbstractMotor {
 
   public List<String> motorList = Arrays.asList("M1", "M2", "M3", "M4");
 
-  public MotorHat4Pi(String n) {
-    super(n);
+  public MotorHat4Pi(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
   }

@@ -23,8 +23,8 @@ public class Chassis extends Service {
   MotorControl right;
   Joystick joystick;
 
-  public Chassis(String n) {
-    super(n);
+  public Chassis(String n, String id) {
+    super(n, id);
   }
 
   /**

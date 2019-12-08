@@ -53,8 +53,8 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
 
   // long rangeAvg = 0;
 
-  public Pingdar(String n) {
-    super(n);
+  public Pingdar(String n, String id) {
+    super(n, id);
   }
 
   // ----------- interface begin ----------------
@@ -132,7 +132,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     servo.attach((ServoDataListener)this);
 
     // servo.setSpeed(60);
-    servo.setVelocity(30.0);
+    servo.setSpeed(30.0);
     // servo.eventsEnabled(true);
 
     sensor.startRanging();

@@ -103,8 +103,8 @@ public class Blender extends Service {
 
   String expectedBlenderVersion = "0.9";
 
-  public Blender(String n) {
-    super(n);
+  public Blender(String n, String id) {
+    super(n, id);
   }
 
   /*

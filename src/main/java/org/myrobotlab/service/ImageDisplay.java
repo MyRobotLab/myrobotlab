@@ -235,8 +235,8 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
 
   boolean autoNumber = false;
 
-  public ImageDisplay(String n) {
-    super(n);
+  public ImageDisplay(String n, String id) {
+    super(n, id);
   }
 
   @Override

@@ -93,8 +93,8 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     rightArm.getBodyParts();
   }
 
-  public BodyPart(String n) {
-    super(n);
+  public BodyPart(String n, String id) {
+    super(n, id);
     // optional standardised servo names for priority order
     servoOrder.put("thumb", 0);
     servoOrder.put("index", 1);

@@ -54,8 +54,8 @@ public class GoogleCloud extends Service {
   int maxResults = 32;
   boolean connected = false;
 
-  public GoogleCloud(String n) {
-    super(n);
+  public GoogleCloud(String n, String id) {
+    super(n, id);
   }
 
   /**
@@ -108,7 +108,7 @@ public class GoogleCloud extends Service {
     String command = args[0];
     String path = args.length > 1 ? args[1] : "";
 
-    GoogleCloud app = new GoogleCloud("googleVision");
+    GoogleCloud app = (GoogleCloud)Runtime.start("googleVision", "GoogleCloud");
     if (command.equals("faces")) {
       if (path.startsWith("gs://")) {
         detectFacesGcs(path, out);

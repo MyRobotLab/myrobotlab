@@ -65,8 +65,8 @@ public class Git extends Service {
 
   }
 
-  public Git(String n) {
-    super(n);
+  public Git(String n, String id) {
+    super(n, id);
   }
 
   // max complexity clone

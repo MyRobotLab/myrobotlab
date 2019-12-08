@@ -72,7 +72,7 @@ public class ServiceScriptTest extends AbstractTest {
 
   @Test
   public void testServiceScripts() throws Exception {
-    String[] b = new String[] { "Agent", "LeapMotion", "OpenNi", "Runtime", "SlamBad", "_TemplateService", "Cli", "WebGui", "JMonkeyEngine", "ImageDisplay", "GoogleAssistant",
+    String[] b = new String[] { "Agent", "LeapMotion", "OpenNi", "Runtime", "SlamBad", "_TemplateService", "WebGui", "JMonkeyEngine", "ImageDisplay", "GoogleAssistant",
         "PickToLight", "PythonProxy", "Sprinkler", "_TemplateProxy", "SwingGui" };
     Set<String> blacklist = new HashSet<String>(Arrays.asList(b));
 

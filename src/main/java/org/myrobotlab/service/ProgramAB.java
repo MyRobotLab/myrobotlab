@@ -105,8 +105,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * 
    * @param name
    */
-  public ProgramAB(String name) {
-    super(name);
+  public ProgramAB(String n, String id) {
+    super(n, id);
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
   }
 

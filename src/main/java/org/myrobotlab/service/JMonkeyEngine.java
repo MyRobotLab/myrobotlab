@@ -261,8 +261,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   List<Jme3Msg> history = new ArrayList<Jme3Msg>();
   boolean saveHistory = false;
 
-  public JMonkeyEngine(String n) {
-    super(n);
+  public JMonkeyEngine(String n, String id) {
+    super(n, id);
     File d = new File(modelsDir);
     d.mkdirs();
     util = new Jme3Util(this);

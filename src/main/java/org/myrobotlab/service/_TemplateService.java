@@ -13,8 +13,8 @@ public class _TemplateService extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(_TemplateService.class);
 
-  public _TemplateService(String n) {
-    super(n);
+  public _TemplateService(String n, String id) {
+    super(n, id);
   }
 
   /**

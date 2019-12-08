@@ -57,8 +57,8 @@ public class VideoStreamer
     }
   }
 
-  public VideoStreamer(String name) {
-    super(name);
+  public VideoStreamer(String n, String id) {
+    super(n, id);
   }
 
   public void attach(String videoSource) {

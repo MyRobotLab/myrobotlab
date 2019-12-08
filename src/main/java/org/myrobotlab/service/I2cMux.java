@@ -72,8 +72,8 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     }
   }
 
-  public I2cMux(String n) {
-    super(n);
+  public I2cMux(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
   }

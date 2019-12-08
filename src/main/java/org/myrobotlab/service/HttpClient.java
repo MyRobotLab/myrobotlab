@@ -96,8 +96,8 @@ public class HttpClient extends Service {
 
   transient CloseableHttpClient client;
 
-  public HttpClient(String n) {
-    super(n);
+  public HttpClient(String n, String id) {
+    super(n, id);
   }
 
   public void attach(Attachable service) {

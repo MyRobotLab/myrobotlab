@@ -53,8 +53,8 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
   // check - http://myrobotlab.org/content/inverse-kinematics-update
   transient InputTrackingThread trackingThread = null;
 
-  public InverseKinematics3D(String n) {
-    super(n);
+  public InverseKinematics3D(String n, String id) {
+    super(n, id);
     // TODO: init
   }
 

@@ -90,8 +90,8 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
 
   final Poller poller = new Poller();
 
-  public RoboClaw(String n) {
-    super(n);
+  public RoboClaw(String n, String id) {
+    super(n, id);
     // add motor ports the roboclaw supports
     ports.add("m1");
     ports.add("m2");

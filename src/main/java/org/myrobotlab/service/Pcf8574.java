@@ -199,8 +199,8 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
   // output
   // assignment
 
-  public Pcf8574(String n) {
-    super(n);
+  public Pcf8574(String n, String id) {
+    super(n, id);
     createPinList();
     refreshControllers();
     subscribeToRuntime("registered");

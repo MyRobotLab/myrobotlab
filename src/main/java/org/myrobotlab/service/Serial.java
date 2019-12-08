@@ -242,8 +242,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * consumed by Ivy to download and manage the appropriate resources
    */
 
-  public Serial(String n) {
-    super(n);
+  public Serial(String n, String id) {
+    super(n, id);
     listeners.put(n, this);
     if (formats == null) {
       formats = new ArrayList<String>();
@@ -274,15 +274,20 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   public void addByteListener(String name) {
     ServiceInterface si = Runtime.getService(name);
+    
+    if (si == null) {
+      log.error("{} service interface is null!");
+      return;
+    }
 
-    if (SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
+    if (si != null && SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
       // local optimization
       listeners.put(si.getName(), (SerialDataListener) si);
     } else {
       // pub sub
-      addListener("publishRX", si.getName(), "onByte");
-      addListener("publishConnect", si.getName(), "onConnect");
-      addListener("publishDisconnect", si.getName(), "onDisconnect");
+      addListener("publishRX", name, "onByte");
+      addListener("publishConnect", name, "onConnect");
+      addListener("publishDisconnect", name, "onDisconnect");
     }
   }
 

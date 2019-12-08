@@ -26,8 +26,8 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
   // TODO: add file path includes/excludes
   private boolean interrupted = false;
 
-  public FileConnector(String name) {
-    super(name);
+  public FileConnector(String name, String id) {
+    super(name, id);
   }
 
   @Override

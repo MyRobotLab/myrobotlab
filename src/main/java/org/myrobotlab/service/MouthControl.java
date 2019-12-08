@@ -32,8 +32,8 @@ public class MouthControl extends Service {
   transient private ServoControl jaw;
   transient private SpeechSynthesis mouth;
 
-  public MouthControl(String n) {
-    super(n);
+  public MouthControl(String n, String id) {
+    super(n, id);
   }
 
   public void attach(Attachable attachable) {
@@ -159,7 +159,7 @@ public class MouthControl extends Service {
     LoggingFactory.init(Level.DEBUG);
     try {
       // LoggingFactory.getInstance().setLevel(Level.INFO);
-      MouthControl MouthControl = new MouthControl("MouthControl");
+      MouthControl MouthControl = (MouthControl)Runtime.start("MouthControl", "MouthControl");
       MouthControl.startService();
 
       Runtime.createAndStart("gui", "SwingGui");

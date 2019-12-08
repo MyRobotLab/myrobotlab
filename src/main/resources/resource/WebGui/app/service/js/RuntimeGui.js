@@ -91,15 +91,22 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             // fix me diff from 2 & 3 "/"
             if (parts.length >= 3) {
                 msg.name = parts[1]
+
+                if (!msg.name.includes('@')) {
+                    msg.name += '@' + $scope.service.id
+                }
+
                 // prepare the method
                 msg.method = parts[2].trim()
 
                 // FIXME - to encode or not to encode that is the question ...
-                payload = [parts.length - 3]
-                for (var i = 3; i < parts.length; ++i) {
-                    payload[i - 3] = parts[i]
+                if (parts.length > 3) {// WTF ? 0 length array has something in it ?
+                    payload = [parts.length - 3]
+                    for (var i = 3; i < parts.length; ++i) {
+                        payload[i - 3] = parts[i]
+                    }
+                    msg.data = payload
                 }
-                msg.data = payload
             }
             return msg
         } else {

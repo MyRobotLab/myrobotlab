@@ -17,7 +17,7 @@ public class Ros extends Service {
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
     try {
-      Ros ros = new Ros("ros");
+      Ros ros = (Ros) Runtime.start("ros","Ros");
       ros.startService();
       /*
        * SwingGui gui = new SwingGui("gui"); gui.startService();
@@ -28,8 +28,8 @@ public class Ros extends Service {
     }
   }
 
-  public Ros(String n) {
-    super(n);
+  public Ros(String n, String id) {
+    super(n, id);
   }
 
   static public String[] getCategories() {

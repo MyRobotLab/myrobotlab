@@ -70,8 +70,8 @@ public class Android extends Service {
     }
   }
 
-  public Android(String n) {
-    super(n);
+  public Android(String n, String id) {
+    super(n, id);
   }
 
   /**

@@ -40,8 +40,8 @@ public class OpenWeatherMap extends HttpClient {
 
   public final static Logger log = LoggerFactory.getLogger(OpenWeatherMap.class);
 
-  public OpenWeatherMap(String reservedKey) {
-    super(reservedKey);
+  public OpenWeatherMap(String n, String id) {
+    super(n, id);
   }
 
   /**
@@ -261,7 +261,7 @@ public class OpenWeatherMap extends HttpClient {
   }
 
   public static void main(String[] args) {
-    OpenWeatherMap owm = new OpenWeatherMap("weather");
+    OpenWeatherMap owm = (OpenWeatherMap)Runtime.start("weather", "OpenWeatherMap");
     // owm.setKey("XXX");
     owm.setLocation("Paris,FR");
     owm.setPeriod(1);

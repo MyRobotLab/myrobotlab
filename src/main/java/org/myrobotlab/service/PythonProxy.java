@@ -102,8 +102,8 @@ public class PythonProxy extends Service {
     }
   }
 
-  public PythonProxy(String n) {
-    super(n);
+  public PythonProxy(String n, String id) {
+    super(n, id);
 
   }
 

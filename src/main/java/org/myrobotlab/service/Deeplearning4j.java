@@ -151,8 +151,8 @@ public class Deeplearning4j extends Service {
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
   
   // constructor.
-  public Deeplearning4j(String reservedKey) {
-    super(reservedKey);
+  public Deeplearning4j(String reservedKey, String id) {
+    super(reservedKey, id);
     // initialize the nd4j backend once up front.
     // not sure if you can call this multiple times.
     try {

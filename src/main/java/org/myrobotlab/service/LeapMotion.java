@@ -34,8 +34,8 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
 
   public LeapData lastLeapData = null;
 
-  public LeapMotion(String n) {
-    super(n);
+  public LeapMotion(String n, String id) {
+    super(n, id);
   }
 
   public void activateDefaultMode() {
@@ -165,7 +165,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     LoggingFactory.init(Level.INFO);
     try {
 
-      LeapMotion leap = new LeapMotion("leap");
+      LeapMotion leap =  (LeapMotion) Runtime.start("leap", "LeapMotion");
       leap.startService();
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");

@@ -33,8 +33,8 @@ public class Tensorflow extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public Tensorflow(String name) {
-    super(name);
+  public Tensorflow(String name, String id) {
+    super(name, id);
   }
 
   static public ServiceType getMetaData() {

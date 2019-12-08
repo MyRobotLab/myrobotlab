@@ -199,8 +199,8 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     broadcastState();
   }
 
-  public MyoThalmic(String n) {
-    super(n);
+  public MyoThalmic(String n, String id) {
+    super(n, id);
   }
 
   @Override

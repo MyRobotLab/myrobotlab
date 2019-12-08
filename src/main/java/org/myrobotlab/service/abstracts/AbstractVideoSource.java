@@ -8,8 +8,8 @@ public abstract class AbstractVideoSource extends Service implements VideoSource
 
   private static final long serialVersionUID = 1L;
 
-  public AbstractVideoSource(String reservedKey) {
-    super(reservedKey);
+  public AbstractVideoSource(String n, String id) {
+    super(n, id);
   }
 
   @Override

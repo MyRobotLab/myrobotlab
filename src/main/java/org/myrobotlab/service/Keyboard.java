@@ -98,8 +98,8 @@ public class Keyboard extends Service {
     }
   }
 
-  public Keyboard(String n) {
-    super(n);
+  public Keyboard(String n, String id) {
+    super(n, id);
     if (Runtime.isHeadless()) {
       log.warn("the Keyboard service requires a DISPLAY to function correctly");
       keyboard = null;

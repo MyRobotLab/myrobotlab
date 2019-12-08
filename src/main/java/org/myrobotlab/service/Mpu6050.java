@@ -569,8 +569,8 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     }
   }
 
-  public Mpu6050(String n) {
-    super(n);
+  public Mpu6050(String n, String id) {
+    super(n, id);
     refreshControllers();
     subscribeToRuntime("registered");
   }

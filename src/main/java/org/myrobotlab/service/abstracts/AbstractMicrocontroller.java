@@ -78,8 +78,8 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     return (int) Math.round((degree * (2400 - 544) / 180) + 544);
   }
 
-  public AbstractMicrocontroller(String reservedKey) {
-    super(reservedKey);
+  public AbstractMicrocontroller(String reservedKey, String id) {
+    super(reservedKey, id);
   }
 
   /**

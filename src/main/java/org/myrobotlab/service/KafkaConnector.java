@@ -31,8 +31,8 @@ public class KafkaConnector extends Service {
   private transient KafkaConsumer<String, String> consumer;
   // TODO: mark volitile?
 
-  public KafkaConnector(String name) {
-    super(name);
+  public KafkaConnector(String name, String id) {
+    super(name, id);
   }
 
   public void connect() {

@@ -44,7 +44,7 @@ public class Twitter extends Service {
     LoggingFactory.init(Level.WARN);
 
     try {
-      Twitter twitter = new Twitter("twitter");
+      Twitter twitter = (Twitter)Runtime.start("twitter", "Twitter");
 
       twitter.startService();
 
@@ -81,8 +81,8 @@ public class Twitter extends Service {
    * consumed by Ivy to download and manage the appropriate resources
    */
 
-  public Twitter(String n) {
-    super(n);
+  public Twitter(String n, String id) {
+    super(n, id);
   }
 
   public void configure() {

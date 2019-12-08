@@ -332,8 +332,8 @@ public class Test extends Service implements StatusListener {
 
   String pythonServiceScriptDir;
 
-  public Test(String n) {
-    super(n);
+  public Test(String n, String id) {
+    super(n, id);
 
     // protecting previously serialized data
     if (matrix == null) {

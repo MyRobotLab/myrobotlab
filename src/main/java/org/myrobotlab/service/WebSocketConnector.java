@@ -31,8 +31,8 @@ public class WebSocketConnector extends Service implements TextPublisher {
 
   private WebsocketClientEndpoint client;
 
-  public WebSocketConnector(String n) {
-    super(n);
+  public WebSocketConnector(String n, String id) {
+    super(n, id);
   }
 
   public void addTextListener(TextListener service) {

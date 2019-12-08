@@ -124,8 +124,8 @@ public class NeoPixel extends Service implements NeoPixelControl {
   public transient boolean animationSettingSpeed = false;
   transient HashMap<Integer, boolean[]> animationSettings = new HashMap<Integer, boolean[]>();
 
-  public NeoPixel(String n) {
-    super(n);
+  public NeoPixel(String n, String id) {
+    super(n, id);
     animationSettings.put(NEOPIXEL_ANIMATION_STOP, new boolean[] { false, false });
     animationSettings.put(NEOPIXEL_ANIMATION_COLOR_WIPE, new boolean[] { true, true });
     animationSettings.put(NEOPIXEL_ANIMATION_LARSON_SCANNER, new boolean[] { true, true });
