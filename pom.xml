@@ -1118,12 +1118,12 @@
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
-  <dependency>
+  <!-- <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
     <version>0.0.8.4</version>
     <scope>provided</scope>
-  </dependency>
+  </dependency>  -->
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
   <dependency>
     <groupId>commons-io</groupId>
@@ -1152,6 +1152,14 @@
     <version>2.7.1</version>
   </dependency>
 <!-- Python end -->
+
+<!-- CPython begin -->
+        <dependency>
+            <groupId>org.bytedeco</groupId>
+            <artifactId>cpython-platform</artifactId>
+            <version>3.7.3-1.5.1</version>
+        </dependency>
+<!-- CPython end -->
 
 <!-- RSSConnector begin -->
   <dependency>
