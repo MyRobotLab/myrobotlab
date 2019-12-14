@@ -754,6 +754,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setAcceleration(Double acceleration) {
     this.acceleration = acceleration;
+    broadcastState();
   }
 
   /**
@@ -794,6 +795,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setInverted(Boolean invert) {
     mapper.setInverted(invert);
+    broadcastState();
   }
 
   @Override
@@ -801,22 +803,28 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void setMinMax(Double min, Double max) {
     // mapper.setMinMaxInput(min, max);
     mapper.map(min, max, min, max);
+    broadcastState();
   }
 
   @Override
   @Config // default - if pin is different - output servo.setPin()
   public void setPin(Integer pin) {
-    this.pin = pin + "";
+    setPin(pin + "");
   }
 
+  /**
+   * pin is a string value at its core "address" is an int or long
+   */
   @Override
   public void setPin(String pin) {
     this.pin = pin;
+    broadcastState();
   }
 
   @Override
   public void setRest(Double rest) {
     this.rest = rest;
+    broadcastState();
   }
 
   @Deprecated /* this is really speed not velocity, velocity is a vector */
@@ -877,6 +885,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setMapper(Mapper mapper) {
     this.mapper = mapper;
+    broadcastState();
   }
 
   @Override
@@ -939,6 +948,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setPosition(Double pos) {
     currentPos = targetPos = pos;
+    broadcastState();
   }
 
   @Override
@@ -949,11 +959,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Override
   public void setMaxSpeed(Double maxSpeed) {
     this.maxSpeed = maxSpeed;
+    broadcastState();
   }
 
   /* decide on one deprecate the other ! */
+  @Deprecated
   public void setMaxVelocity(Double maxSpeed) {
-    this.maxSpeed = maxSpeed;
+    setMaxSpeed(maxSpeed);
   }
 
   @Override
@@ -1052,12 +1064,13 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
   public int setIdelTimeout(int idleTimeout) {
     this.idleTimeout = idleTimeout;
+    broadcastState();
     return idleTimeout;
   }
 
   public void writeMicroseconds(int uS) {
     if (controller != null) {
-      invokeOn(controller, "servoWriteMicroseconds", this);
+      invokeOn(controller, "servoWriteMicroseconds", this, uS);
     } else {
       error("writeMicroseconds controller needs to be set %s", getName());
     }

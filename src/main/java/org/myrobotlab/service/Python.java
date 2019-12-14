@@ -548,10 +548,11 @@ public class Python extends Service {
    */
   public void loadPyRobotLabServiceScript(String serviceType) {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
-    String serviceScript = null;
+    String serviceScript = null; 
     try {
       serviceScript = FileIO.toString(filename);
     } catch (Exception e) {
+      error("%s.py not  found", serviceType);
       log.error("getting service file script example threw {}", e);
     }
     openScript(filename, serviceScript);

@@ -4,16 +4,16 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     var msg = this.msg
     var name = $scope.name
     // init scope values
-    $scope.service = mrl.getService(name)
+    // $scope.service = mrl.getService(name)
     $scope.output = ''
     $scope.activeTabIndex = 0
     $scope.scriptCount = 0
     $scope.activeScript = null
     $scope.scripts = {}
     $scope.test = null
-    $scope.openingScript = true;
-    $scope.dropdownIsOpen = true;
-    $scope.lastStatus = null;
+    $scope.openingScript = true
+    $scope.dropdownIsOpen = true
+    $scope.lastStatus = null
 
     this.updateState = function(service) {
         $scope.service = service
@@ -43,14 +43,14 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             break
         case 'onStdOut':
             $scope.output = $scope.output + msg.data[0]
-            var textarea = document.getElementById('output');
-            textarea.scrollTop = textarea.scrollHeight;
+            var textarea = document.getElementById('output')
+            textarea.scrollTop = textarea.scrollHeight
             $scope.$apply()
             break
         case 'onStatus':
             $scope.lastStatus = msg.data[0]
             $scope.$apply()
-            break      
+            break
         default:
             $log.error("ERROR - unhandled method " + msg.method)
             break
@@ -88,7 +88,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         console.log($scope.activeTabIndex)
     }
 
-    $scope.closeScript = function(scriptName){
+    $scope.closeScript = function(scriptName) {
         // FIXME - save first ?
         msg.send('closeScript', scriptName)
         delete $scope.scripts[scriptName]
@@ -114,31 +114,31 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.saveTextAsFile = function() {
         var textFileAsBlob = new Blob([$scope.activeScript.code],{
             type: 'text/plain'
-        });
-        var downloadLink = document.createElement("a");
-        downloadLink.download = $scope.getName($scope.activeScript.file.path);
-        downloadLink.innerHTML = "Download File";
+        })
+        var downloadLink = document.createElement("a")
+        downloadLink.download = $scope.getName($scope.activeScript.file.path)
+        downloadLink.innerHTML = "Download File"
         if (window.webkitURL != null) {
             // Chrome allows the link to be clicked
             // without actually adding it to the DOM.
-            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+            downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob)
         } else {
             // Firefox requires the link to be added to the DOM
             // before it can be clicked.
-            downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
-            downloadLink.onclick = destroyClickedElement;
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
+            downloadLink.href = window.URL.createObjectURL(textFileAsBlob)
+            downloadLink.onclick = destroyClickedElement
+            downloadLink.style.display = "none"
+            document.body.appendChild(downloadLink)
         }
 
-        downloadLink.click();
+        downloadLink.click()
     }
 
     $scope.item = "blah"
 
     $scope.edit = function(item) {
 
-        var itemToEdit = item;
+        var itemToEdit = item
 
         $dialogs.dialog(angular.extend(dialogOptions, {
             resolve: {
@@ -146,14 +146,17 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             }
         })).open().then(function(result) {
             if (result) {
-                angular.copy(result, itemToEdit);
+                angular.copy(result, itemToEdit)
             }
-            itemToEdit = undefined;
-        });
+            itemToEdit = undefined
+        })
     }
-    ;
-    
-    $scope.possibleServices = Object.values(mrl.getPossibleServices())
+
+    $scope.getPossibleServices = function(item) {
+        return Object.values(mrl.getPossibleServices())
+    }
+
+    // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
 }

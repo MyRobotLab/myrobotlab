@@ -277,8 +277,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * 
    * In its current design, its in the middle where the javascript webgui has a
    * "single" id but it isn't the java's webgui name.
+   * 
+   * MAKE NOTE !!! - if broadcastMode = false there is a bug since only 1 key is served
+   *                 although its a many to one relations ship with 1 id internally == webgui-client-1234-5678 
+   *                 sendRemote will ONLY SEND TO ONE CLIENT until this is fixed I'm leaving it in broadcastMode
+   * 
    */
-  private boolean broadcastMode = false;
+  private boolean broadcastMode = true;
 
   public WebGui(String n, String id) {
     super(n, id);
@@ -643,6 +648,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // - we don't need to wait for a message from them with the outstream
         OutputStream out = r.getResponse().getOutputStream();
         Message msg = getDefaultMsg(uuid); // SEND BACK getHelloResponse(hello)
+// Service.sleep(1000);        
         log.info(String.format("new connection %s", request.getRequestURI()));
         out.write(CodecUtils.toJson(msg).getBytes());
         log.info(String.format("<-- %s", msg));
@@ -1203,7 +1209,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin"});
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
