@@ -20,15 +20,22 @@ public abstract class Port implements Runnable, SerialControl {
   public final static Logger log = LoggerFactory.getLogger(Port.class);
 
   String portName;
-  String threadName;
 
   transient HashMap<String, SerialDataListener> listeners = new HashMap<>();
 
   static int pIndex = 0;
 
-  // thread related
+  /**
+   * Thread for reading if required - in case of PortQueue and PortStream (but
+   * not PortJSSC)
+   */
   transient Thread readingThread = null;
   boolean listening = false;
+  
+
+  public boolean debug = true;
+  public boolean debugTX = true;
+  public boolean debugRX = false;
 
   QueueStats stats = new QueueStats();
 
@@ -45,6 +52,7 @@ public abstract class Port implements Runnable, SerialControl {
 
   boolean isOpen = false;
 
+  // FIXME - find a better way to handle this
   // necessary - to be able to invoke
   // "nameless" port implementation to query "hardware" ports
   // overloading a "Port" and a PortQuery - :P
@@ -72,7 +80,7 @@ public abstract class Port implements Runnable, SerialControl {
       readingThread.interrupt();
     }
     readingThread = null;
-  
+
     log.info("closed port {}", portName);
   }
 
@@ -82,6 +90,30 @@ public abstract class Port implements Runnable, SerialControl {
 
   abstract public boolean isHardware();
 
+  public boolean isCTS() {
+    return false;
+  }
+
+  public boolean isDSR() {
+    return false;
+  }
+
+  public int getStopBits() {
+    return stopBits;
+  }
+
+  public int getBaudRate() {
+    return rate;
+  }
+
+  public int getDataBits() {
+    return dataBits;
+  }
+
+  public int getParity() {
+    return parity;
+  }
+
   public boolean isListening() {
     return listening;
   }
@@ -90,18 +122,17 @@ public abstract class Port implements Runnable, SerialControl {
     return isOpen;
   }
 
-  public void listen(Map<String, SerialDataListener> listeners) {   
+  public void listen(Map<String, SerialDataListener> listeners) {
     this.listeners.putAll(listeners);
     if (readingThread == null) {
       ++pIndex;
-      threadName = String.format("%s.portListener %s", portName, pIndex);
-      readingThread = new Thread(this, threadName);
-      readingThread.start();      
+      readingThread = new Thread(this, String.format("%s.portListener %s", portName, pIndex));
+      readingThread.start();
     } else {
       log.info("{} already listening", portName);
     }
   }
-  
+
   public void listen(SerialDataListener listener) {
     Map<String, SerialDataListener> sdl = new HashMap<>();
     sdl.put(listener.getName(), listener);
@@ -117,7 +148,7 @@ public abstract class Port implements Runnable, SerialControl {
 
   /**
    * reads from Ports input stream and puts it on the Serials main RX line - to
-   * be published and buffered
+   * be published and buffered - PortJSSC uses the thread of the library to "push" serial data
    */
   @Override
   public void run() {
@@ -125,11 +156,11 @@ public abstract class Port implements Runnable, SerialControl {
     log.info("listening on port {}", portName);
     listening = true;
     Integer newByte = -1;
-    try {      
+    try {
       while (listening && ((newByte = read()) > -1)) { // "real" java byte
         // 255 / -1 will
         // kill this
-        // log.error(String.format("%d",newByte)); 
+        // log.error(String.format("%d",newByte));
         for (String key : listeners.keySet()) {
           listeners.get(key).onByte(newByte);
           // log.info(String.format("%d",newByte));
@@ -151,7 +182,7 @@ public abstract class Port implements Runnable, SerialControl {
       log.info("port {} interrupted - stopping listener", portName);
     } catch (Exception e1) {
       log.error("port reading thread threw", e1);
-    } finally {      
+    } finally {
       log.info("stopped listening on {}", portName);
     }
   }
@@ -162,7 +193,7 @@ public abstract class Port implements Runnable, SerialControl {
    * iostream, tcp/ip)
    * 
    * @param state
-   *          
+   * 
    */
   public void setDTR(boolean state) {
   }
@@ -189,8 +220,12 @@ public abstract class Port implements Runnable, SerialControl {
   abstract public void write(int[] data) throws Exception;
 
   public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
-    // TODO Auto-generated method stub
-    return false;
+    log.debug("setSerialPortParams {} {} {} {}", rate, dataBits, stopBits, parity);
+    this.rate = rate;
+    this.dataBits = dataBits;
+    this.stopBits = stopBits;
+    this.parity = parity;
+    return true;
   }
 
 }
