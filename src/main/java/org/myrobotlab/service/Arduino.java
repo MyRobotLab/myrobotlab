@@ -26,8 +26,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -240,6 +238,8 @@ public class Arduino extends AbstractMicrocontroller
   transient private VirtualArduino virtual;
 
   int mrlCommBegin = 0;
+
+  long syncStartTypeTs = System.currentTimeMillis();
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -466,19 +466,18 @@ public class Arduino extends AbstractMicrocontroller
     int pin = getAddress(servo.getPin());
     // targetOutput is ALWAYS ALWAYS degrees
     double targetOutput = servo.getTargetOutput();
-    double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
+    double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
 
     // add a device to our deviceList
-    DeviceMapping dm = attachDevice(servo, new Object[] { pin, targetOutput, velocity });
+    DeviceMapping dm = attachDevice(servo, new Object[] { pin, targetOutput, speed });
 
     if (isConnected()) {
       int uS = degreeToMicroseconds(servo.getTargetOutput());
-      msg.servoAttach(dm.getId(), pin, uS, (int) velocity, servo.getName());
+      msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName());
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
     }
-
     servo.attach(this);
   }
 
@@ -487,14 +486,15 @@ public class Arduino extends AbstractMicrocontroller
    * @param dm
    */
   public void reattach(DeviceMapping dm) {
+    
     Attachable attachable = dm.getDevice();
     if (attachable instanceof Servo) {
       Servo servo = (Servo) attachable;
       int uS = degreeToMicroseconds(servo.getTargetOutput());
-      double velocity = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
+      double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
-      log.info("================ {} {} {} ================", servo.getName(), dm.getId(), pin);
-      msg.servoAttach(dm.getId(), pin, uS, (int) velocity, servo.getName());
+      log.info("================ re-attaching {} {} {} ================", servo.getName(), dm.getId(), pin);
+      msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName()); // 
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
@@ -604,7 +604,15 @@ public class Arduino extends AbstractMicrocontroller
    * sync our device list with mrlcomm
    */
   public void sync() {
+    long now = System.currentTimeMillis();
+    if (now - syncStartTypeTs < 5000) {
+      log.error("===== we are in the middle of synching ... ==== talk to us in {} ms", 5000 - (now - syncStartTypeTs));
+      return;
+    }
+    syncStartTypeTs = System.currentTimeMillis();
+    log.warn("================================ sync !!! ==============================");
     try {
+      
       for (DeviceMapping device : deviceList.values()) {
         reattach(device);
       }
@@ -619,8 +627,6 @@ public class Arduino extends AbstractMicrocontroller
     } catch (Exception e) {
       log.error("sync threw", e);
     }
-    // lets see what MrlComm has to say
-    // sendBoardInfoRequest(); not needed
   }
 
   // > customMsg/[] msg
