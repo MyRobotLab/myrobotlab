@@ -1255,10 +1255,6 @@ public class Arduino extends AbstractMicrocontroller
     if (msg == null) {
       serial = (Serial) startPeer("serial");
       msg = new Msg(this, serial);
-      // FIXME - dynamically additive - if codec key has never been used - add
-      // key
-      // serial.getOutbox().setBlocking(true);
-      // inbox.setBlocking(true);
       serial.addByteListener(this);
     }
   }
