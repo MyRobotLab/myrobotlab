@@ -44,6 +44,7 @@ import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
+import org.myrobotlab.framework.Heartbeat;
 import org.myrobotlab.framework.HelloRequest;
 import org.myrobotlab.framework.HelloResponse;
 import org.myrobotlab.framework.Instantiator;
@@ -424,8 +425,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           repo.install(fullTypeName);
         }
       }
-      
-      
+
       // create an instance
       Object newService = Instantiator.getThrowableNewInstance(null, fullTypeName, name, id);
       log.debug("returning {}", fullTypeName);
@@ -531,6 +531,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           // setting the singleton security
           security = Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
+
+          // we are alive - start our process heartbeat
+          runtime.addTask(2000, "heartbeat");
+
           extract(); // FIXME - too overkill - do by checking version of re
         }
       }
@@ -558,6 +562,46 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   static public List<String> getJvmArgs() {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     return runtimeMxBean.getInputArguments();
+  }
+
+  /**
+   * Heartbeat of this process - runtime starts this heartbeat, and any
+   * connections will automatically get heartbeats sent. Other services and
+   * processes can subscribe to this method, but in order to reduce logic
+   * chaining in remote processes (ie requiring them to make subscriptions) we
+   * automatically send heartbeats through all our connectsion. This logic can
+   * change in the future to be less promiscuous, but first lets get
+   * super-worky.
+   * 
+   * @return
+   */
+  public Heartbeat heartbeat() {
+    try {
+      Heartbeat heartbeat = new Heartbeat(getName(), getId(), getServiceList());
+      
+      
+      // send heartbeats out over all connections
+      Set<String> cs = connections.keySet();
+      for (String gateway : cs) {
+        Map<String, Object> c = connections.get(gateway);
+        String id = (String)c.get("id");
+        if (id == null) {
+          log.error("gateway %s has null id!", gateway);
+          continue;
+        }
+        String remoteRuntime = String.format("runtime@%s", id);
+        Message msg = Message.createMessage("runtime@" + getId(), remoteRuntime, "onHeartbeat", heartbeat);
+        send(msg);
+      }
+      return heartbeat;
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    // bad heartbeat - should we go to hospital ?
+    return null;
+
   }
 
   /**
@@ -803,13 +847,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     String[] ret = new String[si.size()];
     for (int i = 0; i < ret.length; ++i) {
       ServiceInterface s = si.get(i);
-      
+
       if (s.getId().contentEquals(Platform.getLocalInstance().getId())) {
         ret[i] = s.getName();
       } else {
         ret[i] = s.getFullName();
       }
-      
+
       // ret[i] = s.getFullName();
     }
     return ret;
@@ -1222,7 +1266,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public final static synchronized Registration register(Registration registration) {
 
     try {
-      
+
       // TODO - have rules on what registrations to accept - dependent on
       // security, desire, re-broadcasting configuration etc.
 
@@ -1232,12 +1276,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         return registration;
       }
 
-      log.info("{}@{} registering at {} of type {}",registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
+      log.info("{}@{} registering at {} of type {}", registration.getName(), registration.getId(), Platform.getLocalInstance().getId(), registration.getTypeKey());
 
       if (!registration.isLocal(Platform.getLocalInstance().getId())) {
         // de-serialize
         registration.service = Runtime.createService(registration.getName(), registration.getTypeKey(), registration.getId());
-        
+
         copyShallowFrom(registration.service, CodecUtils.fromJson(registration.getState(), Class.forName(registration.getTypeKey())));
         // registration.service.startService(); // <-- this auto registers WARN
         // if you 'start' it you'll have to put it in the registry first
@@ -1421,7 +1465,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   public static void shutdown() {
     log.info("mrl shutdown");
-    
+
     if (runtime != null) {
       runtime.stopInteractiveMode();
     }
@@ -1433,7 +1477,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     for (ServiceInterface service : getServices()) {
       service.save();
     }
-    
 
     try {
       releaseAll();
@@ -1490,13 +1533,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     return ret;
   }
- 
-  
+
   // FIXME - NO STATICS !!!
   // FIXME - should be a map of remotes ?
   static Client clientRemote = new Client();
   static InProcessCli stdInClient = null;
-  
 
   public void connect() throws IOException {
     connect("ws://localhost:8887/api/messages");
@@ -1508,8 +1549,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   /**
-   * FIXME - can this be renamed back to attach ?
-   * jump to another process using the cli
+   * FIXME - can this be renamed back to attach ? jump to another process using
+   * the cli
    * 
    * @param id
    * @return
@@ -1679,8 +1720,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         // verify I'm the appropriate gateway
         Endpoint endpoint = (Endpoint) retCon.get("c-endpoint");
         if (endpoint != null) {
-        // FIXME - double encode parameters ?
-        endpoint.socket.fire(CodecUtils.toJson(retMsg));
+          // FIXME - double encode parameters ?
+          endpoint.socket.fire(CodecUtils.toJson(retMsg));
         } else {
           log.warn("client endpoint c-endpoint null for uuid {}", retUuid);
         }
@@ -2049,7 +2090,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   // start cli commands ----
-  // FIXME - CD AND PWD ARE "ALWAYS" LOCAL - the represent a state change associated with direct input (typically stdin)
+  // FIXME - CD AND PWD ARE "ALWAYS" LOCAL - the represent a state change
+  // associated with direct input (typically stdin)
   // so they are property of the InProcessCli ***NOT*** Runtime
   /**
    * change working directory to new path FIXME - implement ???? it really has
@@ -2058,25 +2100,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @param path
    */
-  /* FIXME -- ALWAYS LOCAL !!!!
-  public String cd(String path) {
-    // cliCwd = path.trim();
-    if (stdInClient != null) {
-      if (path != null) {
-        path = path.trim();
-      }
-      stdInClient.setPrefix(path);
-    }
-    return path;
-  }
-  
-  public String pwd() {
-    if (stdInClient != null) {      
-      return stdInClient.getCwd();
-    }
-    return null;
-  }
-  */
+  /*
+   * FIXME -- ALWAYS LOCAL !!!! public String cd(String path) { // cliCwd =
+   * path.trim(); if (stdInClient != null) { if (path != null) { path =
+   * path.trim(); } stdInClient.setPrefix(path); } return path; }
+   * 
+   * public String pwd() { if (stdInClient != null) { return
+   * stdInClient.getCwd(); } return null; }
+   */
 
   /**
    * list the contents of the current working directory
@@ -2133,16 +2164,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       ServiceInterface si = Runtime.getService(parts[1]);
       return si.getDeclaredMethodNames();
       /*
-    } else if (parts.length == 3 && !absPath.endsWith("/")) {
-      // execute 0 parameter function ???
-      return Runtime.getService(parts[1]);
-      */
+       * } else if (parts.length == 3 && !absPath.endsWith("/")) { // execute 0
+       * parameter function ??? return Runtime.getService(parts[1]);
+       */
     } else if (parts.length == 3) {
       ServiceInterface si = Runtime.getService(parts[1]);
       MethodCache cache = MethodCache.getInstance();
       List<MethodEntry> me = cache.query(si.getType(), parts[2]);
-      return me; //si.getMethodMap().get(parts[2]);
-    }  
+      return me; // si.getMethodMap().get(parts[2]);
+    }
     return ret;
   }
 
@@ -2853,13 +2883,13 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     HelloResponse response = new HelloResponse();
     response.status = Status.success("Ahoy!");
-    
+
     try {
       Map<String, Object> connection = getConnection(uuid);
       if (uuid == null) {
         log.error("uuid could not be found in known connections {}", uuid);
       }
-      
+
       log.info("Hello {} I am {} !", hello.id, getId());
       if (getId().equals(hello.id)) {
         log.warn("incoming request was for my own id {} - loopback not supported - removing connection", getId());
@@ -2867,7 +2897,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         response.status = Status.error("loopback not supported");
         return response;
       }
-      
+
       response.id = getId();
       // this.uuid = uuid;
       response.request = hello;
@@ -2904,7 +2934,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       for (int i = 0; i < list.length; ++i) {
         String fullname = list[i];
         ServiceInterface si = registry.get(fullname);
-        
+
         // TODO - surface configuration for security, policy, broadcasting,
         // re-broadcasting and other filtering
         // TODO - configuration here has to be SYNC'd with onRegistration for
@@ -3406,6 +3436,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         System.out.println("null");
         return;
       }
+      
+      boolean filterHeartBeatsFromCli = true;
+      if (filterHeartBeatsFromCli && msg.method.equals("onHeartbeat")) {
+        return;
+      }
+      
       // should really "always" be a single item in the array since its a return
       // msg
       // but just in case ...

@@ -46,14 +46,14 @@ servo01.setAutoDisable(True)
 
 # speed changes
 print("speed changes")
-servo01.setVelocity(20) ## Low velocity
+servo01.setSpeed(20) ## Low speed
 servo01.moveToBlocking(90) # moveToBlocking will wait for finished move
 
-servo01.setVelocity(50) ## medium velocity
+servo01.setSpeed(50) ## medium speed
 servo01.moveToBlocking(180) # moveToBlocking will wait for finished move
 
-servo01.setVelocity(-1.0) ## max velocity ( no more speed conytol )
-servo01.moveTo(0) # we cannot use moveToBlocking if servo velocity is set to -1 ( max ) !!
+servo01.unsetSpeed() ## max speed ( no more speed conytol )
+servo01.moveTo(0) # we cannot use moveToBlocking if servo speed is set to -1 ( max ) !!
 sleep(2)
 
 
@@ -69,7 +69,7 @@ servo01.stop()
 print("servo position :{}".format(servo01.getPos()))
 print("servo pin :{}".format(servo01.getPin()))
 print("servo rest position :{}".format(servo01.getRest()))
-print("servo velocity :{}".format(servo01.getVelocity()))
+print("servo speed :{}".format(servo01.getSpeed()))
 print("servo is inverted :{}".format(servo01.isInverted()))
 print("servo min :{}".format(servo01.getMin()))
 print("servo max :{}".format(servo01.getMax()))

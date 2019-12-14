@@ -62,3 +62,6 @@ audioFile.track("beepTrack")
 # stop the beep track
 audioFile.stop()
 
+print('silencing all')
+# silence all 
+audioFile.silence()
