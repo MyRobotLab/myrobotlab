@@ -167,6 +167,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
+    this.name = servo.getName();
     positions = Positions.getInstance();
     Double p = positions.getPosition(servo.getName());
     if (p != null) {
@@ -197,8 +198,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
     // leave if timets > endMoveTs or if canceled with new move
     // while()
     now = beginMoveTs;
-    name = servo.getName();
-
+    
     if (autoProcess) { // vs buffer ?
       processTrajectory(name);
     }
@@ -358,6 +358,12 @@ public class TimeEncoder implements Runnable, EncoderControl {
   @Override
   public Double getPos() {
     return estimatedPos;
+  }
+
+  @Override
+  public void setPos(Double pos) {
+    beginPos = targetPos = estimatedPos = pos;
+    positions.setPosition(name, estimatedPos);
   }
 
 }
