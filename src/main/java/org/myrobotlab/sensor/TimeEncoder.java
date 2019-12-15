@@ -117,7 +117,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       while (running) {
         try {
           Thread.sleep(2000);
-          log.info("saving {} positions of {} servos", filename, positions.size());
+          log.debug("saving {} positions of {} servos", filename, positions.size());
           FileIO.toFile(filename, CodecUtils.toJson(positions).getBytes());
         } catch (Exception e) {
           log.error("could not save servo positions", e);
@@ -144,7 +144,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       }
     }
 
-    public void setPos(String name, double pos) {
+    public void setPosition(String name, double pos) {
       positions.put(name, pos);
     }
 
@@ -247,6 +247,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
           // log.info(String.format("new pos %.2f", estimatedPos)); helpful to
           // debug
           EncoderData d = new EncoderData(name, null, estimatedPos);
+
+          positions.setPosition(name, estimatedPos);
           servo.onEncoderData(d);
           Service.sleep(sampleIntervalMs);
         }
@@ -255,7 +257,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
         // log.info("finished moved");
         EncoderData d = new EncoderData(name, null, estimatedPos);
         servo.onEncoderData(d);
-        positions.setPos(name, estimatedPos);
+        positions.setPosition(name, estimatedPos);
       }
     } catch (InterruptedException e) {
       log.info("stopping TimeEncoder Timer ...");
