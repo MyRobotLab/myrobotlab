@@ -388,7 +388,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * remove speed control
    */
-  public void unsetSpeed();
+  public void disableSpeedControl();
 
   Double getTargetPos();
 

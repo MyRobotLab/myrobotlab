@@ -238,6 +238,11 @@ public abstract class AbstractServo extends Service implements ServoControl {
     // create our default TimeEncoder
     if (encoder == null) {
       encoder = new TimeEncoder(this);
+      // if the encoder has a current value - we initialize the
+      // servo with that value
+      if (encoder.getPos() != null) {
+        currentPos = targetPos = encoder.getPos();
+      }
     }
   }
 
@@ -990,7 +995,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   }
   
   @Override
-  public void unsetSpeed() {
+  public void disableSpeedControl() {
     log.info("disabling speed control");
     speed = null;
     if (controller != null) {
@@ -1003,7 +1008,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
   @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
-      unsetSpeed();
+      disableSpeedControl();
       return;
     }
 

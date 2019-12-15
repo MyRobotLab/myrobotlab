@@ -106,4 +106,9 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   public EncoderData publishEncoderData(EncoderData data) {
     return data;
   }
+
+  @Override
+  public Double getPos() {
+    return lastPosition;
+  }
 }
