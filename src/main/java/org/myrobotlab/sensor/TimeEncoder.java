@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
@@ -88,7 +89,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   static class Positions implements Runnable {
 
     static Positions instance = null;
-    Map<String, Double> positions = new HashMap<>();
+    Map<String, Double> positions = new ConcurrentHashMap<>();
     transient private Thread worker;
     transient boolean running = false;
     String filename = null;
@@ -105,7 +106,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       } catch (Exception e) {
       }
       if (json != null) {
-        positions = CodecUtils.fromJson(json, HashMap.class);
+        positions = CodecUtils.fromJson(json, ConcurrentHashMap.class);
       }
     }
 
