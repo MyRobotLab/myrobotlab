@@ -23,8 +23,6 @@ public interface EncoderControl extends Attachable {
    * @return data
    */
   public EncoderData publishEncoderData(EncoderData data);
-  
- 
 
   /**
    * return the state of streaming encoder data
@@ -38,8 +36,5 @@ public interface EncoderControl extends Attachable {
    * @return
    */
   public Double getPos();
-  
-  
-  public void setPos(Double pos);
 
 }

@@ -956,7 +956,8 @@ public abstract class AbstractServo extends Service implements ServoControl {
   public void setPosition(Double pos) {
     currentPos = targetPos = pos;
     if (encoder != null) {
-      encoder.setPos(pos);
+      if (encoder instanceof TimeEncoder )
+      ((TimeEncoder)encoder).setPos(pos);
     }
     broadcastState();
   }
