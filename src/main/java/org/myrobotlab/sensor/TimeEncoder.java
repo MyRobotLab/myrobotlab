@@ -360,7 +360,6 @@ public class TimeEncoder implements Runnable, EncoderControl {
     return estimatedPos;
   }
 
-  @Override
   public void setPos(Double pos) {
     beginPos = targetPos = estimatedPos = pos;
     positions.setPosition(name, estimatedPos);
