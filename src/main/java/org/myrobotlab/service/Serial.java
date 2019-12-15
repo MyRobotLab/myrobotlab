@@ -211,17 +211,25 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   transient Map<String, SerialDataListener> listeners = new HashMap<>();
 
-  /*
+  /**
    * conversion utility TODO - support endianess
    * 
+   * @param bytes - bytes to convert
+   * @param offset - offset into bytes
+   * @param length - length of data to convert
+   * @return
    */
   public static int bytesToInt(int[] bytes, int offset, int length) {
     return (int) bytesToLong(bytes, offset, length);
   }
 
-  /*
+  /**
    * conversion utility TODO - support endianess
    * 
+   * @param bytes
+   * @param offset
+   * @param length
+   * @return
    */
   public static long bytesToLong(int[] bytes, int offset, int length) {
 
@@ -237,7 +245,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return retVal;
   }
 
-  /*
+  /**
    * Static list of third party dependencies for this service. The list will be
    * consumed by Ivy to download and manage the appropriate resources
    */
@@ -251,9 +259,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       formats.add("hex");
       formats.add("dec");
     }
-    // refresh();
-    // outbox.setBlocking(true);
-    // outbox.maxQueue = 1;
     getPortNames();
   }
 
@@ -261,16 +266,17 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     addByteListener(listener.getName());
   }
 
-  /*
-   * awesome method - which either sets up the pub/sub remote or assigns a local
+  /**
+   * Method which either sets up the pub/sub remote or assigns a local
    * reference from the publishing thread
    * 
-   * good pattern in that all logic is in this method which uses a string "name"
-   * parameter - addByteListener(SerialDataListener listener) will call this
-   * method too rather than implementing its own local logic
+   * FIXME - this is no longer a "Good" pattern - the framework now does this auto-magically, where local pub/sub listeners
+   * will "directly" be invoked, and remote pub/sub listeners will be sent remotely
    * 
-   * FIXME - DO THIS STUFF (AND THE PUBLISHING/TESTING) IN THE FRAMEWORK
+   * FIXME - this now violates the good pattern.  A good pattern simply lets the framework handle the details of local/remote
+   * and this function should definitely NOT get a direct reference to the service
    * 
+   * @param name
    */
   public void addByteListener(String name) {
     ServiceInterface si = Runtime.getService(name);
@@ -978,26 +984,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public List<String> getFormats() {
     return formats;
   }
-
-  /*
-   * force refreshing ports
-   * 
-   * @return
-   */
-  /*
-   * public List<String> refresh() {
-   * 
-   * // all current ports portNames.addAll(ports.keySet());
-   * 
-   * // plus hardware ports SerialControl portSource = getPortSource(); if
-   * (portSource != null) { List<String> osPortNames =
-   * portSource.getPortNames(); for (int i = 0; i < osPortNames.size(); ++i) {
-   * portNames.add(osPortNames.get(i)); } } List<String> ports = new
-   * ArrayList<String>(portNames);
-   * 
-   * invoke("publishPortNames", ports); broadcastState(); // FIXME - REMOVE !!!
-   * publishPortNames should be used ! return ports; }
-   */
 
   public void removeByteListener(SerialDataListener listener) {
     removeByteListener(listener.getName());

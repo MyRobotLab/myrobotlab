@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
 
 import jssc.SerialPort;
@@ -32,23 +31,15 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 
   transient SerialPort port = null;
 
-  public boolean debug = true;
-  public boolean debugTX = true;
-  public boolean debugRX = false;
-
   public PortJSSC() {
     super();
   }
 
   public PortJSSC(String portName, int rate, int dataBits, int stopBits, int parity) throws IOException {
     super(portName, rate, dataBits, stopBits, parity);
-    // commPortId = CommPortIdentifier.getPortIdentifier(portName);
   }
 
-  /*
-   * public int available() throws IOException { port. return in.available(); }
-   */
-
+  @Override
   public boolean isOpen() {
     if (port != null) {
       return port.isOpened();
@@ -56,23 +47,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     return false;
   }
 
-  public int getBaudRate() {
-    return rate;
-  }
-
-  public int getDataBits() {
-    return dataBits;
-  }
-
-  @Override
-  public String getName() {
-    return portName;
-  }
-
-  public int getParity() {
-    return parity;
-  }
-
+  // FIXME - better way to handle this across all port types
   @Override
   public List<String> getPortNames() {
 
@@ -84,21 +59,25 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
         log.info(portNames[i]);
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("getPortNames threw", e);
     }
     return ret;
   }
 
-  public int getStopBits() {
-    return stopBits;
+  public boolean isCTS() {
+    try {
+      return port.isCTS();
+    } catch (SerialPortException e) { /* don't care */
+    }
+    return false;
   }
 
-  public boolean isCTS() throws SerialPortException {
-    return port.isCTS();
-  }
-
-  public boolean isDSR() throws SerialPortException {
-    return port.isDSR();
+  public boolean isDSR() {
+    try {
+      return port.isDSR();
+    } catch (SerialPortException e) {/* don't care */
+    }
+    return false;
   }
 
   @Override
@@ -107,16 +86,22 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       port = new SerialPort(portName);
       port.openPort();
       port.setParams(rate, dataBits, stopBits, parity);
+      // TODO - add self as a event listener, and listen to MASK_RXCHAR
+      // it would probably be a good idea to register for "all" then filter on
+      // the SerialEvent - then
+      // it would be easier to get notified on other events besides just serial
+      // reads .. eg. dtr etc..
+      port.addEventListener(this, SerialPort.MASK_RXCHAR);
     } catch (Exception e) {
       throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
   }
 
+  @Override
   public void close() {
     try {
 
       listening = false;
-      readingThread = null;// is dead anyway
 
       port.closePort();
       // FIXME - JSSC issue (IMHO)
@@ -124,20 +109,30 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       // port.removeEventListener();
       // port.notifyOnDataAvailable(false);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("close threw", e);
     }
     port = null;
   }
 
-  // / FIXME KLUDGY !!!!!
-
+  /**
+   * FIXME - the "int read()" should provide a timeout to be supplied ! This
+   * needs refactoring in the interface
+   */
   @Override
   public int read() throws Exception {
-    int data = port.readIntArray(1)[0];
-    if (debug && debugRX) {
-      log.info("Read : {}", data);
-    }
-    return data;
+    return read(1, 20000)[0];
+  }
+
+  /**
+   * FIXME - this more powerful read should be propegated up to the interface
+   * 
+   * @param numbytes
+   * @param timeout
+   * @return
+   * @throws Exception
+   */
+  public int[] read(int numbytes, int timeout) throws Exception {
+    return port.readIntArray(numbytes, timeout);
   }
 
   @Override
@@ -145,13 +140,13 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     try {
       port.setDTR(state);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("setDTR threw", e);
     }
   }
 
   @Override
   public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
-    log.debug("setSerialPortParams {} {} {} {}", rate, dataBits, stopBits, parity);
+    super.setParams(rate, dataBits, stopBits, parity);
     try {
       if (port == null || !port.isOpened()) {
         log.error("port not opened or is null");
@@ -168,8 +163,13 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     try {
       port.setRTS(state);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("setRTS threw", e);
     }
+  }
+
+  @Override
+  public void run() {
+    log.info("PortJSSC started - will be using jssc library thread to push serial events");
   }
 
   @Override
@@ -177,8 +177,11 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port.writeInt(data);
   }
 
-  // FIXME - check to make sure these are the same as InputStream &
-  // OutputStream
+  /**
+   * Java made a mistake having InputStream and OutputStream abstract
+   * classes vs interfaces - perhaps a PortInputStream and PortOutputStream can
+   * be created in the future....
+   */
   public void write(int[] data) throws Exception {
     // use the writeIntArray method to batch this operation.
     if (debug && debugTX) {
@@ -200,40 +203,36 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   }
 
   /**
-   * rxtxlib's "serial event handling" - would be more simple if they just
-   * implemented InputStream correctly :P
+   * This is call back from jssc library - pushing serial data
+   * 
    */
   @Override
   public void serialEvent(SerialPortEvent event) {
-    log.info("rxtx event on port {}", portName);
+    // FYI - if you want more events processed here - you need to register them
+    // in setParams
+    if (event.isRXCHAR()) {// If data is available
 
-    Integer newByte = -1;
+      log.debug("Serial Receive Event fired.");
+      byte[] buffer = null;
+      try {
+        buffer = this.port.readBytes(event.getEventValue());
+        for (int i = 0; i < buffer.length; i++) {
 
-    try {
-      while (listening && ((newByte = read()) > -1)) {
-        // listener.onByte(newByte); // <-- FIXME ?? onMsg() < ???
-        for (String key : listeners.keySet()) {
-          listeners.get(key).onByte(newByte);
+          for (String key : listeners.keySet()) {
+            listeners.get(key).onByte((int) (buffer[i] & 0xFF));
+          }
+          ++stats.total;
+          if (stats.total % stats.interval == 0) {
+            stats.ts = System.currentTimeMillis();
+            log.info("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, stats.ts - stats.lastTS,
+                8 * stats.interval / (stats.ts - stats.lastTS));
+            // publishQueueStats(stats);
+            stats.lastTS = stats.ts;
+          }
         }
-        ++stats.total;
-        if (stats.total % stats.interval == 0) {
-          stats.ts = System.currentTimeMillis();
-          log.error("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, stats.ts - stats.lastTS,
-              8 * stats.interval / (stats.ts - stats.lastTS));
-          // publishQueueStats(stats);
-          stats.lastTS = stats.ts;
-        }
-        // log.info(String.format("%d",newByte));
-        // rxtx leave whenever it has no new data to delver with a -1
-        // which is not what an Java InputStream is supposed to do..
+      } catch (Exception e) {
+        log.error("serialEvent readBytes threw", e);
       }
-
-      log.info("{}", newByte);
-    } catch (Exception e) {
-      ++rxErrors;
-      Logging.logError(e);
     }
-
   }
-
 }
