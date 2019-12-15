@@ -111,4 +111,11 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   public Double getPos() {
     return lastPosition;
   }
+
+  @Override
+  public void setPos(Double offset) {
+    // FIXME - should this set an offset to angle ?
+    // e.g. angle + offset
+    
+  }
 }
