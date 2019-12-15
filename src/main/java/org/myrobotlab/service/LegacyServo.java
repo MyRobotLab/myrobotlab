@@ -691,7 +691,7 @@ public class LegacyServo extends Service implements ServoControl {
   }
   
   @Override
-  public void unsetSpeed() {
+  public void disableSpeedControl() {
     log.info("disabling speed control");
     velocity = null;
     broadcastState();
