@@ -31,4 +31,10 @@ public interface EncoderControl extends Attachable {
    */
   public Boolean isEnabled();
 
+  /**
+   * the position of the encoder in degrees or cm for linear encoder ?
+   * @return
+   */
+  public Double getPos();
+
 }
