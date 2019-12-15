@@ -41,7 +41,7 @@
     {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
     <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span>
     <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span>
-    <span ng-show="boardInfo != null">heartbeat {{boardInfo.receiveTs}}</span>
+    <span ng-show="boardInfo != null">ts {{boardInfo.receiveTs}}</span>
     <span ng-show="boardInfo != null">heartbeat {{boardInfo.heartbeatMs}}</span>
     <br/>
     <span ng-repeat="device in boardInfo.deviceSummary">
