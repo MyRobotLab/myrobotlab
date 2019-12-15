@@ -148,7 +148,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * for promoting portability and good pathing
    */
-  transient protected String fs = File.separator;
+  transient protected static String fs = File.separator;
 
   /**
    * for promoting portability and good pathing
@@ -782,14 +782,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getHomeDir() {
     return System.getProperty("user.home");
   }
-
-  public String getDataDir() {
-    String dataDir = Runtime.getOptions().dataDir + fs + getClass().getSimpleName();
+  
+  static public String getDataDir(String typeName) {
+    String dataDir = Runtime.getOptions().dataDir + fs + typeName;
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().dataDir + fs + getClass().getSimpleName();
+    return Runtime.getOptions().dataDir + fs + typeName;
+  }
+
+  public String getDataDir() {
+    return getDataDir(getClass().getSimpleName());
   }
 
   public String getDataInstanceDir() {
