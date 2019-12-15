@@ -74,7 +74,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   long endMoveTs;
 
   // our estimated position
-  double estimatedPos;
+  Double estimatedPos = null;
 
   // current time
   long now;
