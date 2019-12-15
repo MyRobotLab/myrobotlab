@@ -311,7 +311,7 @@ public abstract class AbstractServo extends Service implements ServoControl {
 
     // update speed if non-null value supplied
     if (speed != null) {
-      setVelocity(speed);
+      setSpeed(speed);
     }
 
     if (acceleration != null) {

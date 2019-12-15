@@ -7,6 +7,9 @@
 		
 		# fast build
 		mvn -DskipTests -Dbuild.number=180 compile package -o
+		
+		# javadoc check
+		mvn -q javadoc:javadoc
 	
 	 -->	
 	<modelVersion>4.0.0</modelVersion>
