@@ -8,7 +8,7 @@
 */
 
 angular.module('mrlapp.mrl', []).provider('mrl', [function() {
-    console.log('mrl.js - starting')
+    console.debug('mrl.js - begin')
 
     // TODO - get 'real' platform info - browser type - node version - etc
     let platform = {
@@ -229,7 +229,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         let registration = msg.data[0]
         let fullname = registration.name + '@' + registration.id
-        console.log("onRegistered " + fullname)
+        console.log("--> onRegistered " + fullname)
 
         let simpleTypeName = _self.getSimpleName(registration.typeKey)
 
@@ -245,6 +245,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // now add a panel - with the function it registered
         // _self.addServicePanel(service)
         _self.addService(service)
+
+        //        deferred.resolve('onRegistered - we have a new service !')
     }
 
     /**
@@ -255,7 +257,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * with details of state info
      */
     this.getHelloResponse = function(request) {
-        console.log('getHelloResponse:')
+        console.log('--> got getHelloResponse: and set jsRuntimeMethodCallbackMap')
         let hello = JSON.parse(request.data[1])
 
         // FIXME - remove this - there aren't 1 remoteId there are many !
@@ -279,7 +281,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.subscribe(fullname, 'released')
 
         // FIXME - remove the over-complicated promise
-
+        console.log('--> got getHelloResponse: end')
     }
 
     /**
@@ -305,7 +307,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
                 //console.log('--> ' + msg.msgId + ' ' + msg.msgType)
                 // console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
-                console.log('---> ' + msg.name + '.' + msg.method)
+                console.warn('---> ' + msg.name + '.' + msg.method)
 
                 // handle blocking 'R'eturn msgs here - FIXME - timer to clean old errored msg ?
                 // the blocking call removes any msg resolved
@@ -364,6 +366,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.onTransportFailure = function(errorMsg, request) {
+        console.error('mrl.onTransportFailure')
         if (window.EventSource) {
             request.fallbackTransport = "sse"
         } else {
@@ -379,7 +382,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.onClose = function(response) {
         connected = false
-        console.log('websocket, onclose')
+        console.error('mrl.onClose')
         // I doubt the following is correct or needed
         // just because the connection to the WebGui service fails
         // does not mean callbacks should be removed ...
@@ -470,7 +473,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.addService = function(service) {
-        registry[_self.getFullName(service.name)] = service
+        registry[_self.getFullName(service)] = service
     }
 
     this.removeService = function(name) {
@@ -555,11 +558,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         this.serviceListeners.push(callback)
     }
     this.onOpen = function(response) {
+        console.debug('mrl.onOpen begin')
 
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
         connecting = false
-        deferred.resolve('connected !')
+        //        deferred.resolve('connected !')
 
         // connected = true
         // this.connected = true mrl.isConnected means data
@@ -571,6 +575,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             uuid: _self.uuid,
             platform: platform
         }
+
+        console.log('mrl.onOpen: connectedCallbacks ' + connectedCallbacks.length)
 
         angular.forEach(connectedCallbacks, function(value, key) {
             value(connected)
@@ -584,7 +590,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // var msg = _self.createMessage('runtime', "getHelloResponse", "fill-uuid", hello)
         // msg.msgType = 'B' // no timeout - simple 'B'locking expects a resturn msg
         // _self.sendMessage(msg)
+        console.debug('sending getHelloResponse to host runtime with hello ' + JSON.stringify(hello) )
+
         _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
+
+        console.debug('mrl.onOpen begin')
 
     }
 
@@ -606,7 +616,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // panelSvc begin -----------------------------------
 
         // var run = function() {
-        $log.info('mrl.js $get')
+        console.debug('mrl.js $get')
         var lastPosY = -40
 
         $http.get('service/tab-header.html').then(function(response) {
@@ -648,7 +658,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         // TODO - implement
         _self.savePanels = function() {
-            $log.info("here")
+            console.debug("here")
         }
         /**
          * panelSvc (PanelData) --to--> MRL
@@ -707,14 +717,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             return panels[fullname]
         }
         _self.addService = function(service) {
+            console.debug('mrl.addService ' + service.name)
 
             var name = _self.getFullName(service)
             var type = service.simpleName
             //first load & parse the controller,    //js
             //then load and save the template       //html
-            $log.info('lazy-loading:', type)
+            $log.debug('lazy-loading:', service.name, type)
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
-                $log.info('lazy-loading successful:', type)
+                $log.debug('lazy-loading successful:', service.name, type)
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
@@ -738,7 +749,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.releasePanel = function(inName) {
             //remove a service and it's panels
             let name = mrl.getFullName(inName)
-            $log.info('removing service', name)
+            console.debug('removing service', name)
             //remove panels
             if (name in panels) {
                 delete panels[name]
@@ -755,7 +766,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //WARNING: DO NOT ABUSE THIS !!!
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
-            $log.info('registering controllers scope', name, scope)
+            console.debug('registering controllers scope', name, scope)
             if ('scope'in panels[name]) {
                 $log.warn('replacing an existing scope for ' + name)
             }
@@ -764,7 +775,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         _self.putPanelZIndexOnTop = function(name) {
             //panel requests to be put on top of the other panels
-            $log.info('putPanelZIndexOnTop', name)
+            console.debug('putPanelZIndexOnTop', name)
             zIndex++
             panels[name].zIndex = zIndex
             panels[name].notifyZIndexChanged()
@@ -772,7 +783,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         _self.movePanelToList = function(name, panelname, list) {
             //move panel to specified list
-            $log.info('movePanelToList', name, panelname, list)
+            console.debug('movePanelToList', name, panelname, list)
             panels[name].list = list
             notifyAllOfUpdate()
         }
@@ -785,7 +796,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.setPanel = function(newPanel) {
 
             if (!(newPanel.name in panels)) {
-                $log.info('service ' + newPanel.name + ' currently does not exist yet')
+                console.debug('service ' + newPanel.name + ' currently does not exist yet')
                 return
             }
 
@@ -838,7 +849,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         function showAll(show) {
             //hide or show all panels
-            $log.info('showAll', show)
+            console.debug('showAll', show)
             angular.forEach(panels, function(value, key) {
                 value.hide = !show
                 _self.savePanel(key)
@@ -847,7 +858,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         this.connect = function(url, proxy) {
             if (connected) {
-                $log.info("aleady connected")
+                console.debug("aleady connected")
                 return this
             }
             // TODO - use proxy for connectionless testing
@@ -856,24 +867,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             connecting = true
-
             socket = atmosphere.subscribe(this.request)
-            deferred = $q.defer()
-            deferred.promise.then(function(result) {
-                $log.info("connect deferred - result success")
-                var result = result
-            }, function(error) {
-                $log.error("connect deferred - result error")
-                var error = error
-            })
 
-            // - not needed ? - just mrl.init() - return deferred.promise // added to resolve in ui-route
         }
 
         this.onError = function(response) {
             $log.error('onError, can not connect')
-            deferred.reject('onError, can not connect')
-            return deferred.promise
         }
 
         // the Angular service interface object
@@ -1062,6 +1061,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getPossibleServices: function() {
                 return serviceTypes
             },
+            setPossibleServices: function(types) {
+                serviceTypes = types;
+            },
             getRuntime: function() {
                 // FIXME - this is wrong mrl.js is a js runtime service - this is just the runtime its connected to
                 return runtime
@@ -1076,34 +1078,36 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.log('mrl.init()')
+                console.debug('mrl.init()')
                 if (connected) {
-                    console.log('mrl.init() connected')
+                    console.debug('mrl.init() connected')
                     return true
                 }
                 if (connecting) {
-                    console.log('mrl.init() connecting')
+                    console.debug('mrl.init() connecting')
                     return false
                 }
 
                 _self.connect()
-                return deferred.promise
+                // return deferred.promise
             },
             isConnected: function() {
                 return connected
             },
 
             noWorky: function(userId) {
-                $log.info('mrl-noWorky', userId)
+                console.debug('mrl-noWorky', userId)
                 _self.sendTo(runtime.name + '@' + _self.remoteId, "noWorky", userId)
             },
             getRegistry: function() {
                 return registry
             },
             getServices: function() {
+
                 var arrayOfServices = Object.keys(registry).map(function(key) {
                     return registry[key]
                 })
+                console.debug('mrl.getServices returned ' + arrayOfServices.length)
                 return arrayOfServices
             },
 
@@ -1125,9 +1129,92 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             createMessage: _self.createMessage
         }
 
+        let jsRuntime = {
+            "creationCount": 0,
+            "platform": {
+                "os": "linux",
+                "arch": "x86",
+                "osBitness": 0,
+                "jvmBitness": 64,
+                "lang": "java",
+                "vmName": "OpenJDK 64-Bit Server VM",
+                "vmVersion": "1.8",
+                "mrlVersion": "1.1.86",
+                "isVirtual": true,
+                "id": "local",
+                "branch": "more_cli_fixes",
+                "pid": "0",
+                "hostname": "ctnal7a61203006",
+                "commit": "da9bc9972307d58f9692187694d6f5446c895d74",
+                "motd": "resistance is futile, we have cookies and robots ...",
+                "startTime": "2019-12-10 16:10:37.605",
+                "manifest": {
+                    "Archiver-Version": "Plexus Archiver",
+                    "Build-Host": "null",
+                    "Build-Jdk": "1.8.0_192",
+                    "Build-Time": "2019-06-20T13:26:29Z",
+                    "Build-User": "root",
+                    "Build-Version": "13",
+                    "Built-By": "root",
+                    "Created-By": "Apache Maven 3.6.0",
+                    "GitBranch": "more_cli_fixes",
+                    "GitBuildTime": "2019-06-20T06:26:31-0700",
+                    "GitBuildUserEmail": "",
+                    "GitBuildUserName": "",
+                    "GitBuildVersion": "0.0.1-SNAPSHOT",
+                    "GitClosestTagCommitCount": "",
+                    "GitClosestTagName": "",
+                    "GitCommitId": "da9bc9972307d58f9692187694d6f5446c895d74",
+                    "GitCommitIdAbbrev": "da9bc99",
+                    "GitCommitIdDescribe": "da9bc99",
+                    "GitCommitIdDescribeShort": "da9bc99",
+                    "GitCommitIdFull": "null",
+                    "GitCommitTime": "2019-06-20T06:25:37-0700",
+                    "GitCommitUserEmail": "grog@myrobotlab.org",
+                    "GitCommitUserName": "GroG",
+                    "GitDirty": "false",
+                    "GitRemoteOriginUrl": "https://github.com/MyRobotLab/myrobotlab.git",
+                    "GitTags": "",
+                    "Implementation-Version": "1.1.86",
+                    "Main-Class": "org.myrobotlab.service.Agent",
+                    "Major-Version": "1.1.13",
+                    "Manifest-Version": "1.0"
+                }
+            },
+            "resources": {
+                "totalPhysicalMemory": 0,
+                "totalMemory": 240,
+                "freeMemory": 225,
+                "maxMemory": 3543
+            },
+            "jvmArgs": ["-agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:37551", "-javaagent:/lhome/grperry/Downloads/eclipse-jee-2019-06-R-linux-gtk-x86_64/eclipse/configuration/org.eclipse.osgi/405/0/.cp/lib/javaagent-shaded.jar", "-Dfile.encoding=UTF-8"],
+            "args": ["--interactive", "--id", "local", "-s", "python", "Python", "--invoke", "python", "execFile", "./InMoov/InMoov.py"],
+            "locale": "en-us",
+            "serviceType": {
+                "name": "org.myrobotlab.service.Runtime",
+                "simpleName": "Runtime"
+            },
+            "name": "runtime",
+            "id": "webgui-client-1234-5678",
+            "simpleName": "Runtime",
+            "serviceClass": "org.myrobotlab.service.Runtime",
+            "isRunning": true,
+            "interfaceSet": {
+                "org.myrobotlab.client.Client$RemoteMessageHandler": "org.myrobotlab.client.Client$RemoteMessageHandler",
+                "org.myrobotlab.framework.interfaces.MessageListener": "org.myrobotlab.framework.interfaces.MessageListener",
+                "org.myrobotlab.service.interfaces.Gateway": "org.myrobotlab.service.interfaces.Gateway"
+            },
+            "statusBroadcastLimitMs": 1000,
+            "isVirtual": false,
+            "ready": true
+        }
+
+        _self.addService(jsRuntime)
+
         service.init()
         return service
     }
+    // END OF SERVICE !!!! --------------------------
 
     // assign callbacks
     this.request.onOpen = this.onOpen
@@ -1150,5 +1237,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     methodCallbackMap['onHelloResponse'].push(_self.onHelloResponse)
 
     // set callback for subscribeNameMethod["runtime@webgui-client-1234-5678"] = _self.onRegistered
+    console.debug('mrl.js - end')
 }
 ])

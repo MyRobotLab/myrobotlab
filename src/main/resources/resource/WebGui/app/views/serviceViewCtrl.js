@@ -11,6 +11,7 @@ angular.module('mrlapp.mrl')
 
                 //service-panel(s) & update-routine
                 var panelsUpdated = function (panels) {
+                    console.debug('serviceViewCtrl.panelsUpdated ')
                     $scope.panels = panels;
                     $timeout(function () {
                         var temp;

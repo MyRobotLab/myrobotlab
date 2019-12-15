@@ -25,8 +25,9 @@
                         <form class="navbar-form">
                             <div class="input-group">
                                 <div class="input-group-btn">
-                                    <input class="form-control" type="text" ng-model="example" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-                                    <button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(example.name)">load</button>
+                                    <!-- input class="form-control" type="text" ng-model="example" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html" -->
+                                    <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in getPossibleServices() | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
+                                    <button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(newType.name.substring(23))">load</button>
                                 </div>
                             </div>
                         </form>
