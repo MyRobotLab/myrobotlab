@@ -1,5 +1,5 @@
 angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function($scope, $log, mrl, $timeout) {
-    $log.info('RuntimeGuiCtrl')
+    console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -18,8 +18,9 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.cmd = ""
     $scope.registry = {}
     $scope.connections = {}
-    $scope.newName = null;
-    $scope.newType = null;
+    $scope.newName = null
+    $scope.newType = null
+    $scope.heartbeatTs = null
 
     var msgKeys = {}
 
@@ -100,7 +101,8 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 msg.method = parts[2].trim()
 
                 // FIXME - to encode or not to encode that is the question ...
-                if (parts.length > 3) {// WTF ? 0 length array has something in it ?
+                if (parts.length > 3) {
+                    // WTF ? 0 length array has something in it ?
                     payload = [parts.length - 3]
                     for (var i = 3; i < parts.length; ++i) {
                         payload[i - 3] = parts[i]
@@ -148,6 +150,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onServiceTypes':
             {
                 $scope.possibleServices = inMsg.data[0]
+                mrl.setPossibleServices($scope.possibleServices)
                 break
             }
         case 'onRegistered':
@@ -185,7 +188,35 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
         case 'onReleased':
             {
-                $log.info("runtime - onRelease" + inMsg.data[0])
+                console.info("runtime - onRelease" + inMsg.data[0])
+                break
+            }
+        case 'onHeartbeat':
+            {
+                let heartbeat = inMsg.data[0]
+                let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
+                $scope.heartbeatTs = heartbeat.ts
+                $scope.$apply()
+
+                for (let i in heartbeat.serviceList) {
+                    let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id 
+                    hb += serviceName + ' '
+
+                    // FIXME - 'merge' ie remove missing services
+
+                    // FIXME - want to maintain "local" registry ???
+                    // currently maintaining JS process registry - should the RuntimeGui also maintain
+                    // its 'own' sub-registry ???
+                    if (!serviceName in mrl.getRegistry()) { // 
+                        console.warn(serviceName + ' not defined in registry - sending registration request');
+                    } // else already registered
+                }
+
+                console.info(hb)
+
+                // CHECK REGISTRY
+                // SYNC SERVICES
+                // REQUEST REGISTRATIONS !!!!
                 break
             }
         default:

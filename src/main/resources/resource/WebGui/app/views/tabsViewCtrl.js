@@ -23,11 +23,13 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
 
     //service-panels & update-routine
     var panelsUpdated = function(panels) {
+        console.debug('tabsViewCtrl.panelsUpdated ' + panels.length)
         $scope.panels = panels;
         $timeout(function() {
+            console.debug('tabsViewCtrl.$timeout ' + $scope.panels.length)
             $scope.panels = $filter('panellist')($scope.panels, 'main');
 
-            $log.info('panels-main', $scope.panels);
+            $log.info('tab-panels-post filter', $scope.panels.length, $scope.panels);
             if ($scope.view_tab == 'default' && !isUndefinedOrNull($scope.panels) && !isUndefinedOrNull($scope.panels[0])) {
                 $scope.view_tab = $scope.panels[0].name;
             }
