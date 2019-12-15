@@ -117,6 +117,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       while (running) {
         try {
           Thread.sleep(2000);
+          log.info("saving {} positions of {} servos", filename, positions.size());
           FileIO.toFile(filename, CodecUtils.toJson(positions).getBytes());
         } catch (Exception e) {
           log.error("could not save servo positions", e);
@@ -149,22 +150,29 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
     public static Positions getInstance() {
       if (instance == null) {
-        synchronized (instance) {
-          if (instance == null) {
-            instance = new Positions();
-          }
-        }
+        instance = new Positions();
       }
       return instance;
     }
+
+    public Double getPosition(String name) {
+      if (positions.containsKey(name)) {
+        return positions.get(name);
+      }
+      return null;
+    }
   }
 
-  static Positions positions = Positions.getInstance();
+  Positions positions = null;
 
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
+    positions = Positions.getInstance();
+    Double p = positions.getPosition(servo.getName());
+    if (p != null) {
+      beginPos = targetPos = estimatedPos = p;
+    }
     enable();
-    positions.start();
   }
 
   // TODO - cool this works deprecate other
@@ -326,10 +334,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   @Override
   public void enable() {
+    positions.start();
     if (myThread == null) {
       myThread = new Thread(this, String.format("%s.%s.time-encoder", servo.getName(), getName()));
       myThread.start();
-      positions.start();
     }
   }
 
@@ -347,8 +355,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   @Override
   public Double getPos() {
-    // TODO Auto-generated method stub
-    return null;
+    return estimatedPos;
   }
 
 }
