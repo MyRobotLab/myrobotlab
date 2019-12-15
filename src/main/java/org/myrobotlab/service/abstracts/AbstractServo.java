@@ -240,7 +240,9 @@ public abstract class AbstractServo extends Service implements ServoControl {
       encoder = new TimeEncoder(this);
       // if the encoder has a current value - we initialize the
       // servo with that value
-      if (encoder.getPos() != null) {
+      Double savedPos = encoder.getPos();
+      if (savedPos != null) {
+        log.info("found previous values for {} setting initial position to {}", getName(), savedPos );
         currentPos = targetPos = encoder.getPos();
       }
     }
