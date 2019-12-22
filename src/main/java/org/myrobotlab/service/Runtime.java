@@ -532,8 +532,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           security = Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
 
-          // we are alive - start our process heartbeat
-          runtime.addTask(2000, "heartbeat");
+          // startHeartbeat();
 
           extract(); // FIXME - too overkill - do by checking version of re
         }
@@ -3402,6 +3401,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   @Override
   public Map<String, Map<String, Object>> getClients() {
     return getConnections(getName());
+  }
+  
+  public void startHeartbeat() {
+    // we are alive - start our process heartbeat
+    runtime.addTask(2000, "heartbeat");
+  }
+  
+  public void stopHeartbeat() {
+    purgeTask("heartbeat");
   }
 
   // FIXME - remove if not using ...

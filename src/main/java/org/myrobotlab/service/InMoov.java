@@ -34,6 +34,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.data.AudioData;
@@ -324,7 +325,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return opencv.isCapturing();
     return false;
   }
-  
+
   // TODO:change -> isOpenNiCapturing
   @Deprecated
   public boolean RobotIsOpenNiCapturing() {
@@ -351,17 +352,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.leftElbow.getAngleXY())) {
             if (skeleton.leftElbow.getAngleXY() >= 0) {
-              leftArm.bicep.moveTo((double)skeleton.leftElbow.getAngleXY());
+              leftArm.bicep.moveTo((double) skeleton.leftElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleXY())) {
             if (skeleton.leftShoulder.getAngleXY() >= 0) {
-              leftArm.omoplate.moveTo((double)skeleton.leftShoulder.getAngleXY());
+              leftArm.omoplate.moveTo((double) skeleton.leftShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.leftShoulder.getAngleYZ())) {
             if (skeleton.leftShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              leftArm.shoulder.moveTo((double)skeleton.leftShoulder.getAngleYZ() - 50);
+              leftArm.shoulder.moveTo((double) skeleton.leftShoulder.getAngleYZ() - 50);
             }
           }
         }
@@ -370,17 +371,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           if (!Double.isNaN(skeleton.rightElbow.getAngleXY())) {
             if (skeleton.rightElbow.getAngleXY() >= 0) {
-              rightArm.bicep.moveTo((double)skeleton.rightElbow.getAngleXY());
+              rightArm.bicep.moveTo((double) skeleton.rightElbow.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleXY())) {
             if (skeleton.rightShoulder.getAngleXY() >= 0) {
-              rightArm.omoplate.moveTo((double)skeleton.rightShoulder.getAngleXY());
+              rightArm.omoplate.moveTo((double) skeleton.rightShoulder.getAngleXY());
             }
           }
           if (!Double.isNaN(skeleton.rightShoulder.getAngleYZ())) {
             if (skeleton.rightShoulder.getAngleYZ() + openNiShouldersOffset >= 0) {
-              rightArm.shoulder.moveTo((double)skeleton.rightShoulder.getAngleYZ() - 50);
+              rightArm.shoulder.moveTo((double) skeleton.rightShoulder.getAngleYZ() - 50);
             }
           }
         }
@@ -606,7 +607,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     } else {
       log.info("Starting gesture : {}", nameOfGesture);
       gestureAlreadyStarted = true;
-      RobotCanMoveRandom = false;      
+      RobotCanMoveRandom = false;
     }
   }
 
@@ -728,38 +729,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-    if (leftHand != null) {
-      attached |= leftHand.isAttached();
-    }
-
-    if (leftArm != null) {
-      attached |= leftArm.isAttached();
-    }
-
-    if (rightHand != null) {
-      attached |= rightHand.isAttached();
-    }
-
-    if (rightArm != null) {
-      attached |= rightArm.isAttached();
-    }
-
-    if (head != null) {
-      attached |= head.isAttached();
-    }
-
-    if (torso != null) {
-      attached |= torso.isAttached();
-    }
-
-    if (eyelids != null) {
-      attached |= eyelids.isAttached();
-    }
-    return attached;
-  }
-
   public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmSpeed %s does not exist", which);
@@ -789,7 +758,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   }
 
   public void moveHead(double neck, double rothead) {
-      moveHead(neck, rothead, null);
+    moveHead(neck, rothead, null);
   }
 
   public void moveHead(Double neck, Double rothead, Double rollNeck) {
@@ -1170,7 +1139,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     long lastActivityTime = getLastActivityTime();
     long now = System.currentTimeMillis();
     long inactivitySeconds = (now - lastActivityTime) / 1000;
-    if (inactivitySeconds > maxInactivityTimeSeconds && isAttached()) {
+    if (inactivitySeconds > maxInactivityTimeSeconds) {
       // speakBlocking("%d seconds have passed without activity",
       // inactivitySeconds);
       powerDown();
@@ -1355,9 +1324,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
   public List<AudioData> speakBlocking(String toSpeak) {
     if (mouth == null) {
-      mouth = (SpeechSynthesis)startPeer("mouth");
+      mouth = (SpeechSynthesis) startPeer("mouth");
     }
-      
+
     if (mouth == null) {
       log.error("speakBlocking is called, but my mouth is NULL...");
       return null;
@@ -1525,8 +1494,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     if (vision.openCVenabled) {
       // test for a worky opencv with hardware
-      // TODO: revisit this test method.  , maybe it should go away or be done differently?
-      // It forces capture 
+      // TODO: revisit this test method. , maybe it should go away or be done
+      // differently?
+      // It forces capture
       if (vision.test()) {
         broadcastState();
         return true;
@@ -1534,7 +1504,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
         speakAlert(languagePack.get("OPENCVNOWORKY"));
         return false;
       }
-    } 
+    }
     return false;
   }
 
@@ -1771,10 +1741,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public void saveCalibration() {
     saveCalibration(CALIBRATION_FILE);
   }
-  
-  
 
-  
   public void saveCalibration(String calibrationFilename) {
 
     File calibFile = new File(calibrationFilename);
@@ -1806,15 +1773,18 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           } else {
             calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
           }
+          
+          Mapper mapper = s.getMapper();
 
-          s.map(s.getMin(), s.getMax(), s.getMinOutput(), s.getMaxOutput());
+          
           // save the servo map
-          calibrationWriter.write(s.getName() + ".map(" + s.getMin() + "," + s.getMax() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
+          calibrationWriter.write(s.getName() + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
           // if there's a controller reattach it at rest
-          if (s.getControllerName() != null) {
-            String controller = s.getControllerName();
+
+          for (String controller : s.getControllers()) {
             calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
           }
+
           if (s.getAutoDisable()) {
             calibrationWriter.write(s.getName() + ".setAutoDisable(True)\n");
           }
@@ -1829,7 +1799,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return;
     }
   }
-  
 
   // vinmoov cosmetics and optional vinmoov monitor idea ( poc i know nothing
   // about jme...)
@@ -2219,17 +2188,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public void onJointAngles(Map<String, Double> angleMap) {
     // TODO Auto-generated method stub
     log.info("onJointAngles {}", angleMap);
-    
+
     // here we can make decisions on what ik sets we want to use and
     // what body parts are to move
-    
+
     for (String name : angleMap.keySet()) {
       ServiceInterface si = Runtime.getService(name);
       if (si instanceof Servo) {
-        ((Servo)si).moveTo(angleMap.get(name));
+        ((Servo) si).moveTo(angleMap.get(name));
       }
     }
-    
+
   }
 
   public void startIK3d() throws Exception {
@@ -2265,31 +2234,37 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    
+
     boolean done = true;
-    
-    
+
+    Runtime.main(new String[] { "--interactive", "--id", "admin" });
     Platform.setVirtual(true);
 
-    Runtime.start("gui", "SwingGui");
-    Python python = (Python)Runtime.start("python", "Python");
-    String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
-    python.exec(script);
-    
+    // Runtime.start("gui", "SwingGui");
+    Python python = (Python) Runtime.start("python", "Python");
+    python.loadServiceScript("InMoov");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.setPort(8887);
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+
+    // webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
+
     if (done) {
       return;
     }
 
+    String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
+    python.exec(script);
+
     String leftPort = "COM3";
     String rightPort = "COM4";
-    
- 
+
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
     i01.setLanguage("en-US");
     i01.startMouth();
     i01.startEar();
-    
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+
     webgui.autoStartBrowser(false);
     webgui.startService();
     webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
@@ -2325,7 +2300,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
 
     // disable the frustrating servo events ...
- //    Servo.eventsEnabledDefault(false);
+    // Servo.eventsEnabledDefault(false);
 
     // ========== gael's calibrations begin ======================
     jme.setRotation("i01.head.jaw", "x");
@@ -2352,7 +2327,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.head.neck", 0, 180, 20, -20);
     jme.setMapper("i01.head.rollNeck", 0, 180, 30, -30);
     jme.setMapper("i01.head.eyeY", 0, 180, 40, 140);
-    jme.setMapper("i01.head.eyeX", 0, 180, -10, 70); //HERE there need to be two eyeX (left and right?)
+    jme.setMapper("i01.head.eyeX", 0, 180, -10, 70); // HERE there need to be
+                                                     // two eyeX (left and
+                                                     // right?)
     jme.setMapper("i01.rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper("i01.leftArm.bicep", 0, 180, 0, -150);
 
@@ -2373,7 +2350,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     // ========== gael's calibrations end ======================
 
     // ========== 3 joint finger mapping and attaching begin ===
-    
+
     // ========== Requires VinMoov5.j3o ========================
 
     jme.attach("i01.leftHand.thumb", "i01.leftHand.thumb1", "i01.leftHand.thumb2", "i01.leftHand.thumb3");
@@ -2400,7 +2377,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.leftHand.pinky", "x");
     jme.setRotation("i01.leftHand.pinky2", "x");
     jme.setRotation("i01.leftHand.pinky3", "x");
-    
+
     // left hand mapping complexities of the fingers
     jme.setMapper("i01.leftHand.index", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.index2", 0, 180, -110, -179);
@@ -2409,7 +2386,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.leftHand.majeure", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.majeure2", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.majeure3", 0, 180, -110, -179);
-  
+
     jme.setMapper("i01.leftHand.ringFinger", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.ringFinger2", 0, 180, -110, -179);
     jme.setMapper("i01.leftHand.ringFinger3", 0, 180, -110, -179);
@@ -2421,14 +2398,14 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.leftHand.thumb1", 0, 180, -30, -100);
     jme.setMapper("i01.leftHand.thumb2", 0, 180, 80, 20);
     jme.setMapper("i01.leftHand.thumb3", 0, 180, 80, 20);
-    
+
     // right hand
-    
+
     jme.attach("i01.rightHand.thumb", "i01.rightHand.thumb1", "i01.rightHand.thumb2", "i01.rightHand.thumb3");
     jme.setRotation("i01.rightHand.thumb1", "y");
     jme.setRotation("i01.rightHand.thumb2", "x");
     jme.setRotation("i01.rightHand.thumb3", "x");
-    
+
     jme.attach("i01.rightHand.index", "i01.rightHand.index", "i01.rightHand.index2", "i01.rightHand.index3");
     jme.setRotation("i01.rightHand.index", "x");
     jme.setRotation("i01.rightHand.index2", "x");
@@ -2448,11 +2425,11 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setRotation("i01.rightHand.pinky", "x");
     jme.setRotation("i01.rightHand.pinky2", "x");
     jme.setRotation("i01.rightHand.pinky3", "x");
-    
+
     jme.setMapper("i01.rightHand.index", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.index2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.index3", 0, 180, 70, -10);
-      
+
     jme.setMapper("i01.rightHand.majeure", 0, 180, 65, -10);
     jme.setMapper("i01.rightHand.majeure2", 0, 180, 70, -10);
     jme.setMapper("i01.rightHand.majeure3", 0, 180, 70, -10);
@@ -2481,18 +2458,15 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
      */
 
     // creating a virtual inmoov with virtual servo controller
-    ServoController sc = jme.getServoController();
-    InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-    i01.startHead(sc);
-    i01.startArm("left", sc);
-    i01.startArm("right", sc);
-    i01.startHand("left", sc);
-    i01.startHand("right", sc);
-    i01.startTorso(sc);
-    i01.startMouth();
-    i01.startMouthControl();
-    
-    i01.rest();
+    /*
+     * ServoController sc = jme.getServoController(); InMoov i01 = (InMoov)
+     * Runtime.start("i01", "InMoov"); i01.startHead(sc); i01.startArm("left",
+     * sc); i01.startArm("right", sc); i01.startHand("left", sc);
+     * i01.startHand("right", sc); i01.startTorso(sc); i01.startMouth();
+     * i01.startMouthControl();
+     * 
+     * i01.rest();
+     */
 
   }
 

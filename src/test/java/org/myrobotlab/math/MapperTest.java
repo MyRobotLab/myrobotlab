@@ -20,14 +20,6 @@ public class MapperTest extends AbstractTest {
   }
 
   @Test
-  public void testGetMaxOutput() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
-    double testValue = 180;
-    Mapper myMapper = new Mapper(10, 18, 100, testValue);
-    assertEquals("getMaxOutput should return fourth parameter", myMapper.getMaxOutput(), testValue, 3);
-  }
-
-  @Test
   public void testGetMaxX() {
     if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     double testValue = 18;
@@ -43,13 +35,6 @@ public class MapperTest extends AbstractTest {
     assertEquals("getMaxY should return fourth parameter", myMapper.getMaxY(), testValue, 3);
   }
 
-  @Test
-  public void testGetMinOutput() {
-    if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
-    double testValue = 100;
-    Mapper myMapper = new Mapper(10, 18, testValue, 180);
-    assertEquals("getMinOutput should return third parameter", myMapper.getMinOutput(), testValue, 3);
-  }
 
   @Test
   public void testGetMinX() {

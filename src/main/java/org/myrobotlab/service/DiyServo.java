@@ -47,7 +47,6 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -330,11 +329,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     pid.setSampleTime(pidKey, sampleTime); // Sets the sample time
     pid.setSetpoint(pidKey, setPoint);
     pid.startService();
-  }
-
-  @Override
-  public void attach(ServoDataListener service) {
-    addListener("publishServoEvent", service.getName(), "onServoEvent");
   }
 
   /**
@@ -657,12 +651,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.encoderControl = encoder;
   }
 
-  public void attach(String pinArrayControlName, Integer pin) throws Exception {
+  public void attach(String pinArrayControlName, Integer pin) {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
   }
 
-  public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
+  public void attach(PinArrayControl pinArrayControl, int pin) {
     this.pinArrayControl = pinArrayControl;
     if (pinArrayControl != null) {
       pinControlName = pinArrayControl.getName();

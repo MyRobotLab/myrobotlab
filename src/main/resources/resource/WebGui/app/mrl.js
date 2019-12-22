@@ -398,7 +398,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.getShortName = function(name) {
         if (name.includes('@')) {
-            name.substring(0, name.indexOf("@"))
+            return name.substring(0, name.indexOf("@"))
         } else {
             return name
         }
@@ -413,7 +413,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
                     console.error('string supplied name did not have remoteId - this will be a problem !')
-                    return service + '@' + _self.id
+                    return service + '@' + _self.remoteId
                 } else {
                     return service
                 }
@@ -688,6 +688,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 simpleName: _self.getSimpleName(service.serviceClass),
                 //serviceType (e.g. Runtime, Python, ...)
                 name: fullname,
+                displayName: _self.getShortName(fullname),
                 // service.name,
                 //name of the service instance (e.g. runtime, python, rt, pyt, ...)
                 templatestatus: service.templatestatus,
@@ -801,6 +802,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }

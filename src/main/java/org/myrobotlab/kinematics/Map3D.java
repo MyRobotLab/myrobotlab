@@ -6,7 +6,6 @@ package org.myrobotlab.kinematics;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.myrobotlab.jme3.Jme3Servo;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.openni.OpenNiData;

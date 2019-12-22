@@ -8,18 +8,16 @@
 # although this script is very short you can still
 # do voice control of a FingerStarter or hand
 # It uses WebkitSpeechRecognition, so you need to use Chrome as your default browser for this script to work
-## virtual = True
 
+# set the system to "virtual" - this will simulate actual hardware
+Platform.setVirtual(True)
+
+# set the ports of the micro-controllers
 rightPort = "COM8"
 leftPort = "COM10"
 
+# start the main service - it will start others
 i01 = Runtime.start("i01", "InMoov")
-
-if ('virtual' in globals() and virtual):
-    leftPortvirtualArduino = Runtime.start("leftPortvirtualArduino", "VirtualArduino")
-    leftPortvirtualArduino.connect(leftPort)
-    rightPortvirtualArduino = Runtime.start("rightPortvirtualArduino", "VirtualArduino")
-    rightPortvirtualArduino.connect(rightPort)
 
 # starting parts
 i01.setLanguage("en-US")
@@ -36,7 +34,7 @@ i01.startAll(leftPort,rightPort)
 ##i01.chatBot.attach(i01.ear)
 ##i01.startBrain();
 
-if ('virtual' in globals() and virtual):i01.startVinMoov()
+i01.startVinMoov()
 
 # Start the WebGui service without starting the browser
 WebGui = Runtime.create("webgui","WebGui")
@@ -46,9 +44,7 @@ WebGui.startService()
 WebGui.startBrowser("http://localhost:8888/#/service/i01.ear")
 
 # verbal commands
-ear = i01.ear
-setAutoListen=True
-i01.ear.setAutoListen(setAutoListen)
+i01.ear.setAutoListen(True)
 
 ear.addCommand("attach right hand", "i01.rightHand", "attach")
 ear.addCommand("disconnect right hand", "i01.rightHand", "detach")

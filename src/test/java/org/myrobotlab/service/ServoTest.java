@@ -243,7 +243,7 @@ public class ServoTest extends AbstractTest {
     // detach the servo.
     // ard2.detach(s);
     s.detach(arduino01);
-    assertFalse(s.isAttached());
+   
 
     //
     s.attach(arduino01, 10, 1.0);
@@ -252,7 +252,7 @@ public class ServoTest extends AbstractTest {
     assertFalse(s.isEnabled());
 
     s.detach(arduino01);
-    assertFalse(s.isAttached());
+  
 
   }
 

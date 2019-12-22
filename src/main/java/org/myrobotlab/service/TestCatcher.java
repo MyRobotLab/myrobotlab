@@ -41,8 +41,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -52,7 +50,7 @@ import org.slf4j.Logger;
  * @author GroG
  *
  */
-public class TestCatcher extends Service implements SerialDataListener, HttpDataListener, ServoDataListener {
+public class TestCatcher extends Service implements SerialDataListener, HttpDataListener {
 
   private static final long serialVersionUID = 1L;
 
@@ -405,13 +403,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return p0;
   }
   
-
-  public ServoDataListener invokeTest(ServoDataListener p0) {
-    log.info("invokeTest(ServoDataListener)");
-    return p0;
-  }
-  
-  
   public SerialDataListener invokeTest(SerialDataListener p0) {
     log.info("invokeTest(SerialDataListener)");
     return p0;
@@ -430,11 +421,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public void onHttpData(HttpData data) {
     // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public void onServoData(ServoData se) {
-    log.info("onServoData {}", se);
   }
 
   public void onPitch(Integer i) {

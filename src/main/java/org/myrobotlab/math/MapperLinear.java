@@ -109,6 +109,7 @@ public final class MapperLinear implements Serializable, Mapper {
     return this.max;
   }
 
+  /*
   @Override
   public void setLimits(Double min, Double max) {
     if (min != null && max != null && max < min) {
@@ -119,7 +120,8 @@ public final class MapperLinear implements Serializable, Mapper {
     this.min = min;
     this.max = max;
   }
-
+  */
+  
   public String toString() {
     return String.format(" map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f %b", minX, maxX, minY, maxY, min, max, inverted);
   }
@@ -175,8 +177,6 @@ public final class MapperLinear implements Serializable, Mapper {
     this.maxX = maxX;
     this.minY = minY;
     this.maxY = maxY;
-
-    setLimits(minY, maxY);
   }
 
   /**

@@ -805,7 +805,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
-  public String getResourceRoot() {
+  static public String getResourceRoot() {
     // FIXME - should "this" be the test ?
     // If so it should be its own static function...
 
@@ -826,8 +826,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getResourceDir() {
+    return getResourceDir(getClass().getSimpleName());
+  }
+  
+  static public String getResourceDir(String serviceType) {
 
-    String resourceDir = getResourceRoot() + fs + getClass().getSimpleName();
+    String resourceDir = getResourceRoot() + fs + serviceType;
     File f = new File(resourceDir);
     if (!f.exists()) {
       f.mkdirs();
@@ -872,10 +876,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
-  /*
-   * public Service(String reservedKey) { this(reservedKey, null); }
+ 
+  /**
+   * Constructor of service, reservedkey typically is a services name and inId will be its process id
+   * @param reservedKey
+   * @param inId
    */
-
   public Service(String reservedKey, String inId) {
     // necessary for serialized transport\
     if (inId == null) {
@@ -983,10 +989,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-    if (outbox.notifyList.containsKey(listener.topicMethod.toString())) {
+    if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
       boolean found = false;
-      ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod.toString());
+      ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
       for (int i = 0; i < nes.size(); ++i) {
         MRLListener entry = nes.get(i);
         if (entry.equals(listener)) {
@@ -1003,9 +1009,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
       notifyList.add(listener);
       log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
-      outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
+      outbox.notifyList.put(listener.topicMethod, notifyList);
     }
   }
+  
+  public boolean hasSubscribed(String listener, String topicMethod) {
+    ArrayList<MRLListener> nes = outbox.notifyList.get(topicMethod);
+    for (MRLListener ne : nes) {
+      if (ne.callbackName.contentEquals(listener)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 
   public void addTask(long intervalMs, String method) {
     addTask(intervalMs, method, new Object[] {});
@@ -1936,10 +1953,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void setThisThread(Thread thisThread) {
     this.thisThread = thisThread;
-  }
-
-  public void startHeartbeat() {
-    // getComm().
   }
 
   public ServiceInterface startPeer(String reservedKey) {

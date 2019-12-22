@@ -635,36 +635,17 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
 
-        double minOutputTmp = servo.getMinOutput();
-        double maxOutputTmp = servo.getMaxOutput();
-
-        if (servo.isInverted()) {
-          minOutputTmp = servo.getMaxOutput();
-          maxOutputTmp = servo.getMinOutput();
-        }
-
-        if (servo.getMinOutput() < mapOutputSliderMinValue) {
-          mapOutputSliderMinValue = servo.getMinOutput().intValue();
-          mapOutputSlider.setMinimum(mapOutputSliderMinValue);
-        }
-
-        if (servo.getMaxOutput() > mapOutputSliderMaxValue) {
-          mapOutputSliderMaxValue = servo.getMaxOutput().intValue();
-          mapOutputSlider.setMaximum(mapOutputSliderMaxValue);
-        }
+      
 
         mapOutputSlider.setInverted(servo.isInverted());
 
         minInput.setText(servo.getMin() + "");
         maxInput.setText(servo.getMax() + "");
-        minOutput.setText(minOutputTmp + "");
-        maxOutput.setText(maxOutputTmp + "");
+  
 
         mapInputSlider.setLowValue(servo.getMin().intValue());
         mapInputSlider.setHighValue(servo.getMax().intValue());
-        mapOutputSlider.setLowValue(servo.getMinOutput().intValue());
-        mapOutputSlider.setHighValue(servo.getMaxOutput().intValue());
-
+      
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
         } else {

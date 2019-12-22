@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.framework.Instantiator;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -33,7 +34,6 @@ import org.myrobotlab.jme3.HudText;
 import org.myrobotlab.jme3.Interpolator;
 import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
-import org.myrobotlab.jme3.Jme3ServoController;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
 import org.myrobotlab.jme3.Search;
@@ -44,6 +44,7 @@ import org.myrobotlab.math.Mapper;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
@@ -111,7 +112,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements ActionListener, Simulator, IKJointAngleListener {
+public class JMonkeyEngine extends Service implements Gateway, ServoController, ActionListener, Simulator, IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
@@ -119,7 +120,11 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   
   
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
-
+  
+  
+  @Deprecated /*came from jme3ServoController... */
+  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
+  
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -162,6 +167,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   }
 
   boolean altLeftPressed = false;
+  
+  double defaultServoSpeed = 60;
 
   transient AnalogListener analog = null;
 
@@ -240,8 +247,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   int selectIndex = 0;
 
-  transient Jme3ServoController servoController;
-
   transient AppSettings settings;
 
   boolean shiftLeftPressed = false;
@@ -257,6 +262,8 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
   transient ViewPort viewPort;
 
   int width = 1024;
+  
+  private String guiId;
 
   List<Jme3Msg> history = new ArrayList<Jme3Msg>();
   boolean saveHistory = false;
@@ -268,7 +275,14 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
     interpolator = new Interpolator(this, util);
-    servoController = new Jme3ServoController(this);
+  
+    guiId = "jme-" + getName() + "-" + getId();
+    
+    // setup the virtual reflection
+    try {
+      connect("jme://local/messages");
+    } catch (Exception e) {
+    }
   }
 
   public void addNode(String name) {
@@ -383,30 +397,25 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
 
-  public void attach(String serviceName, String... nodeNames) throws Exception {
+  public void attach(String name, String... nodeNames) throws Exception {
+    
+    Runtime runtime = Runtime.getInstance();
+    ServiceInterface service = runtime.getService(name);
 
     if (nodeNames != null) {
-      multiMapped.put(serviceName, nodeNames);
+      multiMapped.put(name, nodeNames);
     }
-
-    ServiceInterface service = Runtime.getService(serviceName);
-
-    if (service == null) {
-      log.info("late binding with service {}", serviceName);
-      return;
-    }
-
-    // app.attach(service);
-
-    // Cv Publisher ..
-    // FIXME - send type in a string ...
-    if (service instanceof AbstractComputerVision) {
+    
+    // We do type evaluation and routing based on string values vs instance values
+    // this is to support future (non-Java) classes that cannot be instantiated and
+    // are subclassed in a proxy class with getType() overloaded for to identify
+    if (service.getType().equals("org.myrobotlab.service.OpenCV")) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
       subscribe(service.getName(), "publishCvData");
     }
 
-    if (service instanceof ServoControl) {
-      servoController.attach(service);
+    if (service.getType().equals("org.myrobotlab.service.Servo")) {
+      subscribe(name, "publishServoMoveTo");
     }
 
     // backward attach ?
@@ -968,14 +977,6 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
 
   public Spatial getSelected() {
     return selectedForView;
-  }
-
-  /**
-   * get the servo controller - that belongs to the servo (name)
-   */
-  @Override
-  public ServoController getServoController() {
-    return servoController;
   }
 
   public AppSettings getSettings() {
@@ -2067,8 +2068,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     sleep(sleepMs);
   }
 
-  // FIXME - Possible to have a "default" simple servo app - with default
-  // service script
+ 
   public SimpleApplication start() {
     return start(defaultAppType, defaultAppType);
   }
@@ -2231,28 +2231,39 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
     }
   }
 
-  public void setDefaultServoSpeed(Double speed) {
-    servoController.setDefaultServoSpeed(speed);
-  }
-
   public static void main(String[] args) {
     try {
 
+      
       // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo
       // etc.
       // FIXME - node/userdata can have a Map<String, String> of
       // reservedRotations from different controllers
       // FIXME - make "load" work ..
-      Platform.setVirtual(true);
+      
+      
       LoggingFactory.init("info");
+      
+      Platform.setVirtual(true);
+      Runtime.main(new String[] { "--interactive", "--id", "admin"});
+      
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.setPort(8887);
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
 
       // Arduino left = (Arduino) Runtime.start("i01.left", "Arduino");
       // left.connect("COM4");
 
-      Servo i01_head_jaw = (Servo) Runtime.start("i01.head.jaw", "Servo");
+      Runtime.start("i01.head.jaw", "Servo");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       for (int i = 0; i < 100; ++i) {
         jme.rotateOnAxis("i01.head.jaw", "x", 100);
@@ -2273,7 +2284,7 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429,
       // 47.488);
 
-      Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
+      //Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
       // FIXME WRONG WAY -
       // setting controllers axis - FIXME - do in more general way
       // jme.setRotation sets a "node"
@@ -2349,43 +2360,143 @@ public class JMonkeyEngine extends Service implements ActionListener, Simulator,
       log.error("main threw", e);
     }
   }
-  
-  
-  /**
-   * Simulators like Network Adapters are gateways to interoperate with remote services.
-   * Here subscriptions are maintained from 
-   */
-  
-  // @Override
-  /*
-  public boolean preProcessHook(Message m) {
-    // FIXME - problem with collisions of this service's methods
-    // and dialog methods ?!?!?
 
-    // if the method name is == to a method in the SwingGui
-    // FIXME - correct way would be with "foreign address" servo@jme-simulator 
-    if (methodSet.contains(m.method)) {
-      // process the message like a regular service
-      return true;
-    }
+  @Override
+  public void connect(String uri) throws Exception {
+    // easy single client support
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("gateway", getName());
+    attributes.put("c-type", getSimpleName());
+    attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
+    String uuid = java.util.UUID.randomUUID().toString();
+    attributes.put("uuid", uuid);
+    Runtime.getInstance().addConnection(uuid, attributes);
+    Runtime.updateRoute(guiId, uuid);
+  }
 
-    // otherwise send the message to the dialog with the senders name
-    // key is now for callback is {name}.method
-    String key = String.format("%s.%s", m.sender, m.method);
-    List<ServiceGui> sgs = nameMethodCallbackMap.get(key);
-    if (sgs == null) {
-      log.error("attempting to update derived ServiceGui with - callback " + key + " not available in map " + getName());
-    } else {
-      // FIXME - NORMALIZE - Instantiator or Service - not both !!!
-      // Instantiator.invokeMethod(serviceGuiMap.get(m.sender), m.method,
-      // m.data);
-      for (int i = 0; i < sgs.size(); ++i) {
-        ServiceGui sg = sgs.get(i);
-        invokeOn(sg, m.method, m.data);
-      }
-    }
+  @Override
+  public List<String> getClientIds() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
+  @Override
+  public Map<String, Map<String, Object>> getClients() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void sendRemote(Message msg) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public boolean isLocal(Message msg) {
+    // TODO Auto-generated method stub
     return false;
   }
-*/
+
+  @Override
+  public Message getDefaultMsg(String connId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
+  public void setDefaultServoSpeed(Double speed) {
+    defaultServoSpeed = speed;
+  }
+  /*
+  THERE IS ALSO THE OPTION TO LISTEN TO WHATEVER ENCODER THE SERVO HAS
+  @Override
+  public void onEncoderData(EncoderData data) {
+    String name = data.source;
+   
+    String axis = rotationMap.get(name);
+
+    String[] multi = multiMapped.get(name);
+    if (multi != null) {
+      for (String nodeName : multi) {
+        jme.rotateOnAxis(nodeName, axis, data.value, velocity);
+      }
+    } else {
+      jme.rotateOnAxis(name, axis, servo.getPos(), velocity);
+    }
+    
+  }*/
+
+  
+  /**
+   * parameter is not an interface to allow it to be remotely invoked with the MethodCache
+   */
+  @Override
+  public void onServoMoveTo(ServoControl servo) {
+    String name = servo.getName();
+    /*
+    if (!servos.containsKey(name)) {
+      log.error("servoMoveTo({})", servo);
+      return;
+    }
+    */
+    double velocity = servo.getSpeed();
+    if (velocity == -1) {
+      velocity = (float)defaultServoSpeed;
+    }
+
+    //String axis = rotationMap.get(name);
+
+    String[] multi = multiMapped.get(name);
+    if (multi != null) {
+      for (String nodeName : multi) {
+        rotateOnAxis(nodeName, null, servo.getTargetPos(), velocity); // was getPos()
+      }
+    } else {
+      rotateOnAxis(name, null, servo.getTargetPos(), velocity);
+    }
+  }
+
+  @Override
+  public void attach(ServoControl servo, int pinOrAddress) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onServoStop(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onServoSetSpeed(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onServoEnable(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onServoDisable(ServoControl servo) {
+    // TODO Auto-generated method stub
+    
+  }
+  
+ 
 }

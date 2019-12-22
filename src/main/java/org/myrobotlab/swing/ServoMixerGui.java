@@ -169,14 +169,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       log.info("{} moveTo {}", slider.getName(), slider.getValue());
       // At this point we need to get the servo and move it to the new value
       ServoControl s = (ServoControl) Runtime.getService(slider.getName());
-      if (s.isAttached() && s.isEnabled()) {
-        // TODO: how to handle the autoenable/disable mojo..
+    
         s.moveTo((double)slider.getValue());
-      } else {
-        // servo isn't attached don't bother
-        log.info("ServoControl not attached or enabled.");
-        s.moveTo((double)slider.getValue());
-      }
+      
     }
   }
 

@@ -42,6 +42,7 @@ import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -1208,6 +1209,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     LoggingFactory.init(Level.INFO);
 
     try {
+      
+      //Platform.setVirtual(true);
 
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
       Runtime.main(new String[] { "--interactive", "--id", "admin"});
@@ -1230,9 +1233,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       */
 
       
-      Runtime.start("arduino", "Arduino");
-      Runtime.start("servo01", "Servo");
-      Runtime.start("servo02", "Servo");
+      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Servo pan = (Servo)Runtime.start("pan", "Servo");
+      Servo tilt = (Servo)Runtime.start("tilt", "Servo");
+      pan.setPin(3);
+      tilt.setPin("D4");
+      
+      
+      arduino.attach(pan);
+      arduino.attach(tilt);
+      
+      //arduino.connect("/dev/ttyACM0");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
