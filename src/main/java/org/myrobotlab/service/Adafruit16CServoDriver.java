@@ -432,25 +432,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     setPWM(pin, 0, pulseWidthOff);
   }
 
-  /**
-   * this would have been nice to have Java 8 and a default implementation in
-   * this interface which does Servo sweeping in the Servo (already implemented)
-   * and only if the controller can does it do sweeping on the "controller"
-   * 
-   * For example MrlComm can sweep internally (or it used to be implemented)
-   */
   @Override
-  public void servoSweepStart(ServoControl servo) {
-    log.info("Adafruit16C can not do sweeping on the controller - sweeping must be done in ServoControl");
-  }
-
-  @Override
-  public void servoSweepStop(ServoControl servo) {
-    log.info("Adafruit16C can not do sweeping on the controller - sweeping must be done in ServoControl");
-  }
-
-  @Override
-  public void servoMoveTo(ServoControl servo) {
+  public void onServoMoveTo(ServoControl servo) {
     ServoData servoData = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
       setPWMFreq(servoData.pin, defaultPwmFreq);
@@ -479,7 +462,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void servoWriteMicroseconds(ServoControl servo, int uS) {
+  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     ServoData servoData = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
       setPWMFreq(servoData.pin, defaultPwmFreq);
@@ -680,16 +663,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void servoSetVelocity(ServoControl servo) {
+  public void onServoSetSpeed(ServoControl servo) {
     ServoData servoData = servoMap.get(servo.getName());
     servoData.velocity = servo.getSpeed();
-  }
-
-  @Override
-  public void servoSetAcceleration(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
-    servoData.acceleration = servo.getAcceleration();
-
   }
 
   public List<PinDefinition> getPinList() {
@@ -952,12 +928,12 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   
   @Override
-  public void servoEnable(ServoControl servo) {
+  public void onServoEnable(ServoControl servo) {
     
   }
  
   @Override
-  public void servoDisable(ServoControl servo) {
+  public void onServoDisable(ServoControl servo) {
     ServoData servoData = servoMap.get(servo.getName());
     if (servoData == null) {
       log.error("servo data {} could not get servo from map", servo.getName());
@@ -998,7 +974,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   // FIXME - implement - if there is speed control 
   // "stopping" should stop the servo
   @Override
-  public void servoStop(ServoControl servo) {
+  public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
     
   }

@@ -49,26 +49,6 @@ public interface Mapper {
    */
   void merge(Mapper other);
 
-  /**
-   * <pre>
-   * setLimits sets the output limits of the Mapper.  If an input is calculated
-   * outside the limits it will be "clipped" to the max or min output depending on the input.
-   * 
-   *   mapper.map(minX, maxX, minY, maxY) will automatically set the limits to minY, maxY
-   *   
-   *   you can later adjust the map set limits by calling this method explicitly
-   *   mapper.setLimits(-3, 3)
-   *   
-   *   or remove the limits
-   *   mapper.setLimits(null, null)
-   * 
-   * 
-   * </pre>
-   * 
-   * @param minOutput
-   * @param maxOutput
-   */
-  void setLimits(Double minOutput, Double maxOutput);
 
   /**
    * returns if the mapper is currently inverted

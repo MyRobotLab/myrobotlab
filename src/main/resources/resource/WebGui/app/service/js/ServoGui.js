@@ -18,6 +18,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.properties = []
     $scope.speed = null
 
+    // mode is either "status" or "control"
+    // in status mode we take updates by the servo and its events
+    // in control mode we take updates by the user
+    $scope.mode = "status";
+
     $scope.showProperties = false
 
     // TODO - should be able to build this based on
@@ -52,10 +57,29 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
-                msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
+                $scope.setMinMax()
+                //msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
             },
             onEnd: function() {}
         }
+    }
+
+    $scope.setMinMax = function() {
+        if ($scope.mode == 'control') {
+            msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
+        }
+    }
+
+    $scope.changeMode = function() {
+        $scope.mode = ($scope.mode == 'status') ? 'control' : 'status'
+        if ($scope.mode == 'status') {
+            $scope.pos.options.disabled = true;
+            $scope.limits.options.disabled = true;
+        } else {
+            $scope.pos.options.disabled = false;
+            $scope.limits.options.disabled = false;
+        }
+
     }
 
     $scope.setSpeed = function(speed) {
@@ -88,8 +112,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
-        $scope.limits.minValue = service.mapper.minX
-        $scope.limits.maxValue = service.mapper.maxX
+        $scope.limits.minValue = service.min
+        $scope.limits.maxValue = service.max
         $scope.pinList = service.pinList
     }
 
@@ -163,9 +187,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         // FIXME - there needs to be some updates to handle the complexity of taking updates from the servo vs
         // taking updates from the UI ..  some of this would be clearly solved with a (control/status) button
 
-        let pos = $scope.pos.value; // currently taken from the slider's value :P - not good if the slider's value is not good :(
-        
-        msg.send('attach', $scope.possibleController, $scope.pin, pos) // $scope.rest) <-- previously used rest which is (not good)
+        let pos = $scope.pos.value;
+        // currently taken from the slider's value :P - not good if the slider's value is not good :(
+
+        msg.send('attach', $scope.possibleController, $scope.pin, pos)
+        // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }
 
@@ -219,7 +245,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     this.setProperties = function(service) {
 
         let flat = this.flatten(service)
-        console.table(flat)
+        // console.table(flat) -  very cool logging, but to intensive
 
         $scope.properties = [];
 

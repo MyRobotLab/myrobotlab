@@ -37,30 +37,46 @@ public interface ServoController extends Attachable {
    */
   void attach(ServoControl servo, int pinOrAddress) throws Exception;
 
-  void servoSweepStart(ServoControl servo);
-
-  void servoSweepStop(ServoControl servo);
-
-  void servoMoveTo(ServoControl servo);
+  /**
+   * The main function of the servo controller is to move the servo
+   * The ServoControl is passed as a parameter such that the controller can get
+   * all the necessary information to process the move correctly
+   * @param servo
+   */
+  void onServoMoveTo(ServoControl servo);
   
-  void servoStop(ServoControl servo);
+  /**
+   * Stop the servo regardless of where it is in its move
+   * @param servo
+   */
+  void onServoStop(ServoControl servo);
 
-  void servoWriteMicroseconds(ServoControl servo, int uS);
+  /**
+   * A direct call using micro-seconds instead of degrees
+   * 
+   * @param servo
+   * @param uS
+   */
+  void onServoWriteMicroseconds(ServoControl servo, int uS);
 
-  void servoSetVelocity(ServoControl servo);
+ 
+  /**
+   * set the speed of the servo
+   * @param servo
+   */
+  void onServoSetSpeed(ServoControl servo);
 
-  void servoSetAcceleration(ServoControl servo);
 
   /**
    * enable the pwm to a servo
    * @param servo - the servo to enable
    */
-  void servoEnable(ServoControl servo);
+  void onServoEnable(ServoControl servo);
 
   /**
    * disable the pwm to a servo
    * @param servo - the servo to disable
    */
-  void servoDisable(ServoControl servo);
+  void onServoDisable(ServoControl servo);
 
 }

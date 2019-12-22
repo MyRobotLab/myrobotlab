@@ -1055,7 +1055,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
   @Override
   public List<String> getClientIds() {
-    // TODO Auto-generated method stub
     return null;
   }
 

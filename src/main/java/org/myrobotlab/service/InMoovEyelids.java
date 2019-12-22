@@ -171,15 +171,6 @@ public class InMoovEyelids extends Service {
     return String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= eyelidleft.isAttached();
-    attached |= eyelidright.isAttached();
-
-    return attached;
-  }
-
   public void moveTo(double eyelidleftPos, double eyelidrightPos) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {}", getName(), eyelidleftPos, eyelidrightPos);

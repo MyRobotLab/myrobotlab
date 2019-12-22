@@ -145,19 +145,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   @Override
-  public void servoSweepStart(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void servoSweepStop(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void servoMoveTo(ServoControl servo) {
+  public void onServoMoveTo(ServoControl servo) {
     // # <ch> P <pw> ​S​​<spd>​​T​<time> <cr>
     log.info("servoMove {}", servo.getTargetOutput());
     StringBuilder sb = new StringBuilder();
@@ -184,7 +172,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   }
 
   @Override
-  public void servoWriteMicroseconds(ServoControl servo, int uS) {
+  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     StringBuilder sb = new StringBuilder();
     sb.append("#").append(servo.getPin());
     sb.append("P").append(uS);
@@ -198,15 +186,9 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   
   @Override
-  public void servoSetVelocity(ServoControl servo) {
+  public void onServoSetSpeed(ServoControl servo) {
     // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public void servoSetAcceleration(ServoControl servo) {
-    // probably a noop - as it can be pulled from the
-    // servo controller when the servo is moved.
   }
 
   /**
@@ -385,20 +367,20 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Integer, java.lang.Integer)
    */
   @Override
-  public void servoEnable(ServoControl servo) {
+  public void onServoEnable(ServoControl servo) {
     // TODO Auto-generated method stub
 
   }
 
   
   @Override
-  public void servoDisable(ServoControl servo) {
+  public void onServoDisable(ServoControl servo) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void servoStop(ServoControl servo) {
+  public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
     
   }

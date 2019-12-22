@@ -105,6 +105,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   String controllerName;
 
+  Double min = null;
+
+  Double max = null;
+
   public AbstractMotor(String n, String id) {
     super(n, id);
     subscribeToRuntime("registered");
@@ -168,8 +172,9 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   // ---- Servo begin ---------
-  public void setMinMaxOutput(double min, double max) {
-    mapper.setLimits(min, max);
+  public void setMinMax(double min, double max) {
+    this.min = min;
+    this.max = max;
     broadcastState();
   }
 

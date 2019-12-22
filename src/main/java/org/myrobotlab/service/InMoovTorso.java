@@ -218,15 +218,6 @@ public class InMoovTorso extends Service {
     return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= topStom.isAttached();
-    attached |= midStom.isAttached();
-    attached |= lowStom.isAttached();
-
-    return attached;
-  }
 
   public void moveTo(double topStom, double midStom, double lowStom) {
     if (log.isDebugEnabled()) {

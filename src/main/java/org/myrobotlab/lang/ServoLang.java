@@ -1,5 +1,6 @@
 package org.myrobotlab.lang;
 
+import org.myrobotlab.math.Mapper;
 import org.myrobotlab.service.Servo;
 
 public class ServoLang extends LangUtils {
@@ -23,9 +24,11 @@ public class ServoLang extends LangUtils {
       sb.append("# " + name + ".setPin(" + s.getPin() + ")\n");
     }
 
-    s.map(s.getMin(), s.getMax(), s.getMinOutput(), s.getMaxOutput());
+    Mapper mapper = s.getMapper();
+    
+    
     // save the servo map
-    sb.append(name + ".map(" + s.getMin() + "," + s.getMax() + "," + s.getMinOutput() + "," + s.getMaxOutput() + ")\n");
+    sb.append(name + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
     // if there's a controller reattach it at rest
     // FIXME - there is the initial position vs rest - they potentially are very different
     /*

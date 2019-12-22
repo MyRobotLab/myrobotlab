@@ -187,8 +187,6 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     i01.cameraOff();
     Assert.assertFalse("Camera should be off!", i01.isCameraOn());
 
-    // if anyhting is attached, this is true.
-    i01.isAttached();
 
     Assert.assertTrue("InMoov should be mute!", i01.isMute());
 

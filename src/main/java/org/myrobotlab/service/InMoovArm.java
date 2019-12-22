@@ -251,17 +251,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return side;
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= bicep.isAttached();
-    attached |= rotate.isAttached();
-    attached |= shoulder.isAttached();
-    attached |= omoplate.isAttached();
-
-    return attached;
-  }
-
   public void moveTo(double bicep, double rotate, double shoulder, double omoplate) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {} {}", getName(), bicep, rotate, shoulder, omoplate);

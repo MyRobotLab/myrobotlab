@@ -1,7 +1,6 @@
 package org.myrobotlab.sensor;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +12,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.EncoderListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
