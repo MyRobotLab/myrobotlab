@@ -865,7 +865,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
   }
 
-  @Deprecated
+  
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmSpeed %s does not exist", which);
@@ -874,6 +874,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
   }
 
+  @Deprecated
   public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     if (!arms.containsKey(which)) {
       error("setArmVelocity %s does not exist", which);
@@ -1427,8 +1428,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     try {
       chatBot.savePredicates();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+     log.error("saving predicates threw", e);
     }
     // start session based on last recognized person
     if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {

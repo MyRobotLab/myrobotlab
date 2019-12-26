@@ -50,6 +50,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.id = null
 
+    let remotePlatform = null
+
     // FIXME - must be "multiple" remoteIds... - although there is only 1 connected runtime
     this.remoteId = null
 
@@ -260,6 +262,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         console.log('--> got getHelloResponse: and set jsRuntimeMethodCallbackMap')
         let hello = JSON.parse(request.data[1])
 
+        remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
         _self.remoteId = hello.id
 
@@ -1056,6 +1059,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             },
             getRemoteId: function() {
                 return _self.remoteId
+            },
+            getRemotePlatform: function() {
+                return remotePlatform
             },
             getId: function() {
                 return _self.id

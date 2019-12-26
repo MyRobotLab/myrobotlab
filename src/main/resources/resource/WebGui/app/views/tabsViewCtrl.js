@@ -1,11 +1,14 @@
-angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', function($scope, $log, $filter, $timeout, mrl, $state) {
+angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
     $log.info('tabsViewCtrl');
+     $log.info('tabsViewCtrl');
 
     var isUndefinedOrNull = function(val) {
         return angular.isUndefined(val) || val === null;
     }
 
     $scope.view_tab = 'default';
+
+    $scope.servicename = $stateParams.servicename;
 
     $scope.noworky = function() {
         noWorkySvc.openNoWorkyModal($scope.panel.name);
@@ -32,6 +35,10 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
             $log.info('tab-panels-post filter', $scope.panels.length, $scope.panels);
             if ($scope.view_tab == 'default' && !isUndefinedOrNull($scope.panels) && !isUndefinedOrNull($scope.panels[0])) {
                 $scope.view_tab = $scope.panels[0].name;
+            }
+
+            if ($scope.servicename){
+                $scope.changeTab(mrl.getFullName($scope.servicename));
             }
         });
     };
