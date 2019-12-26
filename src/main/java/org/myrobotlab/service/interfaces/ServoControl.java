@@ -428,5 +428,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param uS
    */
   void writeMicroseconds(int uS);
+  
+  // for instance attachment 
+  void attachServoController(String sc, Integer pin, Double pos, Double speed);
 
 }

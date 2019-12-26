@@ -103,11 +103,11 @@ import com.simsilica.lemur.style.BaseStyles;
 /**
  * A simulator built on JMonkey 3 Engine.
  * 
- * FIXME - use gateway analogy !
- * A simulator should be treated as a gateway, the service "twins" that are represented inside are
- * "remote".   Some services like UIs (webgui and swinggui) dynamically create "remote" services and
- * allow the current process to interact with them the same way they would with other remote (networked)
- * services.
+ * FIXME - use gateway analogy ! A simulator should be treated as a gateway, the
+ * service "twins" that are represented inside are "remote". Some services like
+ * UIs (webgui and swinggui) dynamically create "remote" services and allow the
+ * current process to interact with them the same way they would with other
+ * remote (networked) services.
  * 
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
@@ -117,14 +117,12 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
   private static final long serialVersionUID = 1L;
-  
-  
+
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
-  
-  
-  @Deprecated /*came from jme3ServoController... */
+
+  @Deprecated /* came from jme3ServoController... */
   Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
-  
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -167,7 +165,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   }
 
   boolean altLeftPressed = false;
-  
+
   double defaultServoSpeed = 60;
 
   transient AnalogListener analog = null;
@@ -179,8 +177,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   String assetsDir = getDataDir() + File.separator + "assets";
 
   boolean autoAttach = true;
-
-  boolean autoAttachAll = true;
 
   // transient BulletAppState bulletAppState;
 
@@ -262,7 +258,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   transient ViewPort viewPort;
 
   int width = 1024;
-  
+
   private String guiId;
 
   List<Jme3Msg> history = new ArrayList<Jme3Msg>();
@@ -275,13 +271,29 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     util = new Jme3Util(this);
     analog = new AnalogHandler(this);
     interpolator = new Interpolator(this, util);
-  
+
     guiId = "jme-" + getName() + "-" + getId();
-    
+
     // setup the virtual reflection
+    // this will "connect" to our mrl instance 
+    // and part of the connection is the mrl instance
+    // sending a series of registrations ... including self
+    // still a race condition ?
     try {
       connect("jme://local/messages");
     } catch (Exception e) {
+    }
+
+    // process existing registrations
+
+    Runtime runtime = Runtime.getInstance();
+    for (Registration registration : runtime.getServiceList()) {
+      try {
+        onRegistered(registration);
+      } catch (Exception e) {
+        error(e);
+      }
+
     }
   }
 
@@ -398,16 +410,17 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
 
   public void attach(String name, String... nodeNames) throws Exception {
-    
-    Runtime runtime = Runtime.getInstance();
-    ServiceInterface service = runtime.getService(name);
+
+    ServiceInterface service = Runtime.getService(name);
 
     if (nodeNames != null) {
       multiMapped.put(name, nodeNames);
     }
-    
-    // We do type evaluation and routing based on string values vs instance values
-    // this is to support future (non-Java) classes that cannot be instantiated and
+
+    // We do type evaluation and routing based on string values vs instance
+    // values
+    // this is to support future (non-Java) classes that cannot be instantiated
+    // and
     // are subclassed in a proxy class with getType() overloaded for to identify
     if (service.getType().equals("org.myrobotlab.service.OpenCV")) {
       AbstractComputerVision cv = (AbstractComputerVision) service;
@@ -415,7 +428,9 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     }
 
     if (service.getType().equals("org.myrobotlab.service.Servo")) {
-      subscribe(name, "publishServoMoveTo");
+      // what to do here - there are several options 
+      ServoControl sc = (ServoControl)Runtime.getService(name);
+      sc.attachServoController(getName(), null, null, sc.getMaxSpeed());
     }
 
     // backward attach ?
@@ -1449,10 +1464,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       log.info("here");
     }
     if (autoAttach) {
-      if (autoAttachAll) {
-        // spin through all apps - attempt to attach
-      }
-      attach(registration.service);
+      attach(registration.getFullName());
     }
   }
 
@@ -1922,7 +1934,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
 
     // FIXME - should be moved under ./data/JMonkeyEngine/
-    assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
+    //assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
+    assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
     /**
@@ -2068,7 +2081,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     sleep(sleepMs);
   }
 
- 
   public SimpleApplication start() {
     return start(defaultAppType, defaultAppType);
   }
@@ -2234,32 +2246,33 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   public static void main(String[] args) {
     try {
 
-      
       // FIXME - fix menu input system - use jme.rotate/rotateTo/move/moveTo
       // etc.
       // FIXME - node/userdata can have a Map<String, String> of
       // reservedRotations from different controllers
       // FIXME - make "load" work ..
-      
-      
+
       LoggingFactory.init("info");
-      
+
       Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "admin"});
-      
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.setPort(8887);
       webgui.autoStartBrowser(false);
       webgui.startService();
 
       // Runtime.start("gui", "SwingGui");
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
 
       // Arduino left = (Arduino) Runtime.start("i01.left", "Arduino");
       // left.connect("COM4");
 
       Runtime.start("i01.head.jaw", "Servo");
       
+
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
+      jme.setRotation("i01.head.jaw", "x");
+
       boolean done = true;
       if (done) {
         return;
@@ -2267,7 +2280,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
       for (int i = 0; i < 100; ++i) {
         jme.rotateOnAxis("i01.head.jaw", "x", 100);
-        jme.rotateOnAxis("i01.head.jaw", "x", 20);        
+        jme.rotateOnAxis("i01.head.jaw", "x", 20);
       }
 
       // FIXME - fix what you have broken but deprecate sc related rotation info
@@ -2284,7 +2297,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       // jme.setTransform(CAMERA, 0.217, 2.508, 1.352, 149.630, -15.429,
       // 47.488);
 
-      //Jme3ServoController sc = (Jme3ServoController) jme.getServoController();
+      // Jme3ServoController sc = (Jme3ServoController)
+      // jme.getServoController();
       // FIXME WRONG WAY -
       // setting controllers axis - FIXME - do in more general way
       // jme.setRotation sets a "node"
@@ -2389,7 +2403,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   @Override
   public void sendRemote(Message msg) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -2409,53 +2423,48 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   public void setDefaultServoSpeed(Double speed) {
     defaultServoSpeed = speed;
   }
   /*
-  THERE IS ALSO THE OPTION TO LISTEN TO WHATEVER ENCODER THE SERVO HAS
-  @Override
-  public void onEncoderData(EncoderData data) {
-    String name = data.source;
-   
-    String axis = rotationMap.get(name);
+   * THERE IS ALSO THE OPTION TO LISTEN TO WHATEVER ENCODER THE SERVO HAS
+   * 
+   * @Override public void onEncoderData(EncoderData data) { String name =
+   * data.source;
+   * 
+   * String axis = rotationMap.get(name);
+   * 
+   * String[] multi = multiMapped.get(name); if (multi != null) { for (String
+   * nodeName : multi) { jme.rotateOnAxis(nodeName, axis, data.value, velocity);
+   * } } else { jme.rotateOnAxis(name, axis, servo.getPos(), velocity); }
+   * 
+   * }
+   */
 
-    String[] multi = multiMapped.get(name);
-    if (multi != null) {
-      for (String nodeName : multi) {
-        jme.rotateOnAxis(nodeName, axis, data.value, velocity);
-      }
-    } else {
-      jme.rotateOnAxis(name, axis, servo.getPos(), velocity);
-    }
-    
-  }*/
-
-  
   /**
-   * parameter is not an interface to allow it to be remotely invoked with the MethodCache
+   * parameter is not an interface to allow it to be remotely invoked with the
+   * MethodCache
    */
   @Override
   public void onServoMoveTo(ServoControl servo) {
     String name = servo.getName();
     /*
-    if (!servos.containsKey(name)) {
-      log.error("servoMoveTo({})", servo);
-      return;
-    }
-    */
+     * if (!servos.containsKey(name)) { log.error("servoMoveTo({})", servo);
+     * return; }
+     */
     double velocity = servo.getSpeed();
     if (velocity == -1) {
-      velocity = (float)defaultServoSpeed;
+      velocity = (float) defaultServoSpeed;
     }
 
-    //String axis = rotationMap.get(name);
+    // String axis = rotationMap.get(name);
 
     String[] multi = multiMapped.get(name);
     if (multi != null) {
       for (String nodeName : multi) {
-        rotateOnAxis(nodeName, null, servo.getTargetPos(), velocity); // was getPos()
+        rotateOnAxis(nodeName, null, servo.getTargetPos(), velocity); // was
+                                                                      // getPos()
       }
     } else {
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
@@ -2465,38 +2474,37 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   @Override
   public void attach(ServoControl servo, int pinOrAddress) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoSetSpeed(ServoControl servo) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoEnable(ServoControl servo) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void onServoDisable(ServoControl servo) {
     // TODO Auto-generated method stub
-    
+
   }
-  
- 
+
 }

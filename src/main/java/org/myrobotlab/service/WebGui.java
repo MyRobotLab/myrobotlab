@@ -1243,6 +1243,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       arduino.attach(pan);
       arduino.attach(tilt);
       
+      Runtime.start("jme", "JMonkeyEngine");
+      
       //arduino.connect("/dev/ttyACM0");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");

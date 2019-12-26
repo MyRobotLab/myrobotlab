@@ -220,6 +220,25 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * limit max - no "input" will be allowed to move the servo above this value
    */
   Double max = 180.0;
+  
+  // TODO - implement !!! 
+  
+  /**
+   * if true - a single moveTo command will be published for servo controllers or other
+   * services which implement their own speed contrl
+   * 
+   * if false - many moveTo commands will be published by TimeEncoder to provided speed control using
+   * incremental moves at appropriate times to approximate appropriate speed
+   * 
+   * defaulted to true - here is a list of controllers which provide their own speed control
+   * 
+   *       * Arduino/MrlComm
+   *       * Adafruit16CServoController
+   *       * JMonkeyEngine / Interpolator
+   * 
+   */
+  boolean useServoControllerSpeedControl = true;
+  
 
   public AbstractServo(String n, String id) {
     super(n, id);
@@ -326,7 +345,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * complexity service should use NAME not a direct reference to
    * ServoController !!!!
    */
-  private void attachServoController(String sc, Integer pin, Double pos, Double speed) {
+  public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
 
     // update pin if non-null value supplied
     if (pin != null) {
@@ -617,6 +636,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       // log.info("encoder data says -> stopped");
     } else {
       isMoving = true;
+      if (useServoControllerSpeedControl) {
+        invoke("publishMoveTo", this);
+      }
+      // FIXME - is this necessary ?
       invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }

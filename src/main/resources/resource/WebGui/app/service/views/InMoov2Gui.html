@@ -1,0 +1,61 @@
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <tr>
+                <td></td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">configure</button>
+                    <button class="btn btn-default" ng-click="msg.startSimulator()">simulator</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="../InMoovHead.png"/>
+                </td>
+                <td>
+                    <button class="btn btn-default"  ng-click="msg.startHead()">start head</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start head tracking</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start eye tracking</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start ear</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start mouth</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start brain</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="../InMoovArm.png"/>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.disable()">start gestures</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start left arm</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start right arm</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="../InMoovHand.png"/>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.disable()">start left hand</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">start right hand</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <img src="../InMoovTorso.png"/>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.disable()">start torso</button>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <button ng-class="active" ng-click="msg.startHead()">b1 button</button>
+                    <button class="btn btn-primary active" ng-click="msg.disable()">primary active button</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
