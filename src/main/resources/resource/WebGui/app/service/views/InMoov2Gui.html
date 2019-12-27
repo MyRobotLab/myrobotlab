@@ -1,20 +1,45 @@
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-12">
+
+     <table class="table table-striped">
+            <tr>
+                <td>
+                    <label for="sel1">configurations:</label>
+                    <button class="btn btn-default" ng-click="msg.disable()">configure</button>
+                    <button class="btn btn-default" ng-click="msg.disable()">save configuration</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <select multiple class="form-control" id="sel2">
+                            <option>default</option>
+                            <option>sim-only</option>
+                            <option>new config</option>
+                            <option>old config</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        
         <table class="table table-striped">
             <tr>
                 <td></td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
-                    <button class="btn btn-default" ng-click="msg.disable()">configure</button>
                     <button class="btn btn-default" ng-click="msg.startSimulator()">simulator</button>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <img src="../InMoovHead.png"/>
+                    <a href="#/tabs/i02.head">
+                        <img src="../InMoovHead.png"/>
+                    </a>
                 </td>
                 <td>
-                    <button class="btn btn-default"  ng-click="msg.startHead()">start head</button>
+                    <button class="btn btn-default" ng-click="msg.startHead()">start head</button>
                     <button class="btn btn-default" ng-click="msg.disable()">start head tracking</button>
                     <button class="btn btn-default" ng-click="msg.disable()">start eye tracking</button>
                     <button class="btn btn-default" ng-click="msg.disable()">start ear</button>
@@ -57,5 +82,6 @@
                 </td>
             </tr>
         </table>
+       
     </div>
 </div>
