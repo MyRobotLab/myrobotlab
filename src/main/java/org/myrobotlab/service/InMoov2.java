@@ -1,6 +1,10 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -49,6 +53,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
 
   boolean autoStartBrowser = false;
+  
+  String currentConfigurationName = "default";
 
   transient public SpeechRecognizer ear;
   
@@ -86,12 +92,45 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient public JMonkeyEngine simulator;
+  
+  
+  Set<String> configs = null;
 
  
   public InMoov2(String n, String id) {
     super(n, id);
+    listConfigFiles();
   }
   
+  
+  public Set<String> listConfigFiles(){
+    
+    configs = new HashSet<>();
+    
+    // data list
+    String configDir = getResourceDir() + fs + "config";
+    File f = new File(configDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
+    String[] files = f.list();
+    for (String config : files) {
+      configs.add(config);
+    }
+    
+    // data list
+    configDir = getDataDir() + fs + "config";
+    f = new File(configDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
+    files = f.list();
+    for (String config : files) {
+      configs.add(config);
+    }
+    
+    return configs;
+  }
   
   @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
@@ -596,13 +635,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   }
 
-  public void startWebGui() {
-    webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.setPort(8887);
-    webgui.autoStartBrowser(autoStartBrowser);
-    webgui.startService();
-  }
-  
   public void waitTargetPos() {
     if (head != null)
       head.waitTargetPos();
@@ -625,9 +657,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
 
-      InMoov2 i02 = (InMoov2)Runtime.start("i02", "InMoov2");
-      
-      i02.startWebGui();
+      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+      Runtime.start("python", "Python");
+      Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
