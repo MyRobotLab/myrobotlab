@@ -498,6 +498,7 @@ public class Python extends Service {
    * publishing method when a script is finished
    */
   public void finishedExecutingScript() {
+    log.info("finishedExecutingScript");
   }
 
   /**

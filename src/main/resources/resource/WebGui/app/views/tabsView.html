@@ -7,7 +7,7 @@
      <div class="row">  
         <!--1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right-->
         <!--migrate to Angular UI Bootstrap when they offer one-->
-        <div class="tabbable"> <!-- col-md-1 col-lg-1 col-md-1 * -->
+        <div class="tabbable col-md-1 col-lg-1 col-md-1"> <!-- col-md-1 col-lg-1 col-md-1 * -->
             <ul class="nav nav-tabs nav-stacked nav-pills" role="tablist">
                 <li ng-repeat="panel in panels | orderBy:getName | filter:searchText" ng-class="{'active': view_tab == panel.name}">
                     <!--maybe move this to somewhere general? - seperate from tabs first-->

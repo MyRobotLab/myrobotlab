@@ -69,6 +69,36 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
                 return mrl.init();
             }
         }
+    }).state('tabs2', {
+        url: "/tabs",
+        template: "<div ui-view></div>",
+        controller: 'mainCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('tabs2 calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
+    }).state('tabs2.main', {
+        views: {
+            '': {
+                templateUrl: 'main/main.html'
+            },
+            'navbar@tabs2.main': {
+                templateUrl: 'nav/nav.html',
+                controller: 'navCtrl'
+            },
+            'content@tabs2.main': {
+                templateUrl: 'views/tabsView.html',
+                controller: 'tabsViewCtrl'
+            }
+        },
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('tabs2.main calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
     }).state('tabs', {
         url: "/tabs/:servicename",
         template: "<div ui-view></div>",

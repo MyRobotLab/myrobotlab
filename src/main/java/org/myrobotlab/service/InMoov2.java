@@ -3,14 +3,24 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.inmoov.LanguagePack;
+import org.myrobotlab.inmoov.Utils;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -23,7 +33,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
+  // FIXME - why
+  static boolean RobotCanMoveRandom = true;
+
   private static final long serialVersionUID = 1L;
+  static String speechRecognizer = "WebkitSpeechRecognition";
+
+  // FIXME - WTH ?
+  static String speechService = "MarySpeech";
 
   /**
    * This static method returns all the details of the class without it having
@@ -38,8 +55,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     ServiceType meta = new ServiceType(InMoov2.class);
     meta.addDescription("InMoov2 Service");
     meta.addCategory("robot");
-    
-    
+
     meta.addPeer("head", "InMoov2Head", "head");
     meta.addPeer("torso", "InMoov2Torso", "torso");
     // meta.addPeer("eyelids", "InMoovEyelids", "eyelids");
@@ -47,97 +63,143 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("leftHand", "InMoov2Hand", "left hand");
     meta.addPeer("rightArm", "InMoov2Arm", "right arm");
     meta.addPeer("rightHand", "InMoov2Hand", "right hand");
-    
+
+    meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
+
+    meta.addPeer("mouth", speechService, "InMoov speech service");
+
+    // Global - undecorated by self name
+    meta.addRootPeer("python", "Python", "shared Python service");
+
     return meta;
   }
-  
+
+  public static void main(String[] args) {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      Runtime.start("python", "Python");
+      Runtime.start("log", "Log");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
   boolean autoStartBrowser = false;
-  
-  String currentConfigurationName = "default";
 
-  transient public SpeechRecognizer ear;
-  
-  transient public InMoovEyelids eyelids;
-  
-  transient public Tracking eyesTracking;
- 
-  transient public InMoov2Head head;
-  
-  transient public Tracking headTracking;
-  
-  Long lastPirActivityTime;
- 
-  transient public InMoov2Arm leftArm;
-  
-  transient public InMoovHand leftHand;
-  
-  int maxInactivityTimeSeconds = 120;
-  
-  transient public SpeechSynthesis mouth;
- 
-  boolean muted;
-  
-  transient public Pid pid;
-  
-  transient public Python python;
-  
-  transient public InMoov2Arm rightArm;
-  
-  transient public InMoovHand rightHand;
- 
-  transient public InMoovTorso torso;
-  
-  transient public WebGui webgui;
-  
-  // TODO - refactor into a Simulator interface when more simulators are borgd
-  transient public JMonkeyEngine simulator;
-  
-  
+  transient ProgramAB brain;
+
   Set<String> configs = null;
 
- 
+  // transient InMoovEyelids eyelids; they are in the head
+
+  String currentConfigurationName = "default";
+
+  transient SpeechRecognizer ear;
+
+  transient Tracking eyesTracking;
+
+  // waiting controable threaded gestures we warn user
+  boolean gestureAlreadyStarted = false;
+
+  // FIXME - what the hell is this for ?
+  Set<String> gesturesList = new TreeSet<String>();
+
+  transient InMoov2Head head;
+
+  transient Tracking headTracking;
+
+  // TODO - refactor into a Simulator interface when more simulators are borgd
+  transient JMonkeyEngine jme;
+
+  String language;
+
+  transient LanguagePack languagePack = new LanguagePack();
+
+  LinkedHashMap<String, String> languages = new LinkedHashMap<>();
+
+  String lastGestureExecuted;
+
+  Long lastPirActivityTime;
+
+  transient InMoov2Arm leftArm;
+
+  transient InMoov2Hand leftHand;
+
+  transient
+
+  int maxInactivityTimeSeconds = 120;
+
+  transient SpeechSynthesis mouth;
+
+  // FIXME - remove all direct references
+  // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
+
+  boolean mute = false;
+
+  boolean muted;
+
+  transient Pid pid;
+
+  transient ImageDisplay imageDisplay;
+
+  transient Python python;
+
+  transient InMoov2Arm rightArm;
+
+  transient InMoov2Hand rightHand;
+
+  transient InMoov2Torso torso;
+
+  transient WebGui webgui;
+
   public InMoov2(String n, String id) {
     super(n, id);
+
+    // TODO : use locale it-IT,fi-FI
+    languages.put("en-US", "English - United States");
+    languages.put("fr-FR", "French - France");
+    languages.put("es-ES", "Spanish - Spain");
+    languages.put("de-DE", "German - Germany");
+    languages.put("nl-NL", "Dutch - Netherlands");
+    languages.put("ru-RU", "Russian");
+    languages.put("hi-IN", "Hindi - India");
+    languages.put("it-IT", "Italian - Italia");
+    languages.put("fi-FI", "Finnish - Finland");
+    languages.put("pt-PT", "Portuguese - Portugal");
+
+    language = getLanguage();
+    python = (Python) startPeer("python");
+    languagePack.load(language);
+
+    // get events of new services and shutdown
+    Runtime r = Runtime.getInstance();
+    subscribe(r.getName(), "shutdown");
+
     listConfigFiles();
+
+    // FIXME - Framework should auto-magically auto-start peers AFTER
+    // construction - unless explicitly told not to
+    // peers to start on construction
+    imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
-  
-  
-  public Set<String> listConfigFiles(){
-    
-    configs = new HashSet<>();
-    
-    // data list
-    String configDir = getResourceDir() + fs + "config";
-    File f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    String[] files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-    
-    // data list
-    configDir = getDataDir() + fs + "config";
-    f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-    
-    return configs;
-  }
-  
+
   @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
     // CORRECT WAY ! - no direct reference - just use the name in a subscription
     addListener("publishText", service.getName());
   }
-  
+
+  public void attachTextPublisher(String name) {
+    subscribe(name, "publishText");
+  }
+
   public void beginCheckingOnInactivity() {
     beginCheckingOnInactivity(maxInactivityTimeSeconds);
   }
@@ -166,7 +228,30 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return lastActivityTime;
   }
-  
+
+  public void cycleGestures() {
+    // if not loaded load -
+    // FIXME - this needs alot of "help" :P
+    // WHY IS THIS DONE ?
+    if (gesturesList.size() == 0) {
+      loadGestures();
+    }
+
+    for (String gesture : gesturesList) {
+      try {
+        String methodName = gesture.substring(0, gesture.length() - 3);
+        speakBlocking(methodName);
+        log.info("executing gesture {}", methodName);
+        python.eval(methodName + "()");
+
+        // wait for finish - or timeout ?
+
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+  }
+
   public void disable() {
     if (head != null) {
       head.disable();
@@ -185,9 +270,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     if (torso != null) {
       torso.disable();
-    }
-    if (eyelids != null) {
-      eyelids.disable();
     }
   }
 
@@ -210,35 +292,97 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso != null) {
       torso.enable();
     }
-    if (eyelids != null) {
-      eyelids.enable();
+  }
+
+  /**
+   * This method will try to launch a python command with error handling
+   */
+  public String execGesture(String gesture) {
+
+    lastGestureExecuted = gesture;
+    if (python == null) {
+      log.warn("execGesture : No jython engine...");
+      return null;
+    }
+    subscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+    startedGesture(lastGestureExecuted);
+    return python.evalAndWait(gesture);
+  }
+
+  public void finishedGesture() {
+    finishedGesture("unknown");
+  }
+
+  public void finishedGesture(String nameOfGesture) {
+    if (gestureAlreadyStarted) {
+      waitTargetPos();
+      RobotCanMoveRandom = true;
+      gestureAlreadyStarted = false;
+      log.info("gesture : {} finished...", nameOfGesture);
     }
   }
 
   public void fullSpeed() {
     if (head != null) {
-      head.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      head.fullSpeed();
     }
     if (rightHand != null) {
-      rightHand.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      rightHand.fullSpeed();
     }
     if (leftHand != null) {
-      leftHand.setVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+      leftHand.fullSpeed();
     }
     if (rightArm != null) {
-      rightArm.setSpeed(-1.0, -1.0, -1.0, -1.0);
+      rightArm.fullSpeed();
     }
     if (leftArm != null) {
-      leftArm.setSpeed(-1.0, -1.0, -1.0, -1.0);
+      leftArm.fullSpeed();
     }
     if (torso != null) {
-      torso.setVelocity(-1.0, -1.0, -1.0);
-    }
-    if (eyelids != null) {
-      eyelids.setVelocity(-1.0, -1.0);
+      torso.fullSpeed();
     }
   }
-  
+
+  public InMoov2Arm getArm(String side) {
+    if ("left".equals(side)) {
+      return leftArm;
+    } else if ("right".equals(side)) {
+      return rightArm;
+    } else {
+      log.error("can not get arm {}", side);
+    }
+    return null;
+  }
+
+  public InMoov2Hand getHand(String side) {
+    if ("left".equals(side)) {
+      return leftHand;
+    } else if ("right".equals(side)) {
+      return rightHand;
+    } else {
+      log.error("can not get arm {}", side);
+    }
+    return null;
+  }
+
+  /**
+   * get current language
+   */
+  public String getLanguage() {
+    if (this.language == null) {
+      // check if default locale supported by inmoov
+      if (languages.containsKey(Locale.getDefault().toLanguageTag())) {
+        this.language = Locale.getDefault().toLanguageTag();
+      } else {
+        this.language = "en-US";
+      }
+    }
+    // to be sure runtime == inmoov language
+    if (!Locale.getDefault().toLanguageTag().equals(this.language)) {
+      setLanguage(this.language);
+    }
+    return this.language;
+  }
 
   /**
    * finds most recent activity
@@ -272,9 +416,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso != null) {
       lastActivityTime = Math.max(lastActivityTime, torso.getLastActivityTime());
     }
-    if (eyelids != null) {
-      lastActivityTime = Math.max(lastActivityTime, eyelids.getLastActivityTime());
-    }
 
     if (lastPirActivityTime != null) {
       lastActivityTime = Math.max(lastActivityTime, lastPirActivityTime);
@@ -287,17 +428,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     return lastActivityTime;
   }
-  
+
   public void halfSpeed() {
     if (head != null) {
-      head.setVelocity(25.0, 25.0, 25.0, 25.0, -1.0, 25.0);
+      head.setSpeed(25.0, 25.0, 25.0, 25.0, -1.0, 25.0);
     }
 
     if (rightHand != null) {
-      rightHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+      rightHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
     if (leftHand != null) {
-      leftHand.setVelocity(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
+      leftHand.setSpeed(30.0, 30.0, 30.0, 30.0, 30.0, 30.0);
     }
     if (rightArm != null) {
       rightArm.setSpeed(25.0, 25.0, 25.0, 25.0);
@@ -306,35 +447,204 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       leftArm.setSpeed(25.0, 25.0, 25.0, 25.0);
     }
     if (torso != null) {
-      torso.setVelocity(20.0, 20.0, 20.0);
+      torso.setSpeed(20.0, 20.0, 20.0);
     }
-    if (eyelids != null) {
-      eyelids.setVelocity(30.0, 30.0);
-    }
+
   }
 
   public boolean isMute() {
     return muted;
   }
 
+  public Set<String> listConfigFiles() {
+
+    configs = new HashSet<>();
+
+    // data list
+    String configDir = getResourceDir() + fs + "config";
+    File f = new File(configDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
+    String[] files = f.list();
+    for (String config : files) {
+      configs.add(config);
+    }
+
+    // data list
+    configDir = getDataDir() + fs + "config";
+    f = new File(configDir);
+    if (!f.exists()) {
+      f.mkdirs();
+    }
+    files = f.list();
+    for (String config : files) {
+      configs.add(config);
+    }
+
+    return configs;
+  }
+
+  // FIXME - what is this for ???
+  public void loadGestures() {
+    loadGestures(getResourceDir() + fs + "gestures");
+  }
+
+  /**
+   * This blocking method will look at all of the .py files in a directory. One
+   * by one it will load the files into the python interpreter. A gesture python
+   * file should contain 1 method definition that is the same as the filename.
+   * 
+   * @param directory
+   *          - the directory that contains the gesture python files.
+   */
+  public boolean loadGestures(String directory) {
+    speakBlocking("loading gestures"); // FIXME - make polyglot
+
+    // iterate over each of the python files in the directory
+    // and load them into the python interpreter.
+    String extension = "py";
+    Integer totalLoaded = 0;
+    Integer totalError = 0;
+    File dir = Utils.makeDirectory(directory);
+    if (dir.exists()) {
+      for (File f : dir.listFiles()) {
+        if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
+          if (Utils.loadFile(f.getAbsolutePath()) == true) {
+            totalLoaded += 1;
+            gesturesList.add(f.getName());
+          } else {
+            error("could not load %s", f.getName());
+            totalError += 1;
+          }
+        } else {
+          log.info("{} is not a {} file", f.getAbsolutePath(), extension);
+        }
+      }
+    }
+    info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
+    if (totalError > 0) {
+      speakAlert(languagePack.get("GESTURE_ERROR"));
+      return false;
+    }
+    return true;
+  }
+
+  public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
+    InMoov2Arm arm = getArm(which);
+    arm.moveTo(bicep, rotate, shoulder, omoplate);
+  }
+
+  public void moveEyelids(double eyelidleftPos, double eyelidrightPos) {
+    if (head != null) {
+      head.moveEyelidsTo(eyelidleftPos, eyelidrightPos);
+    } else {
+      log.warn("moveEyelids - I have a null head");
+    }
+  }
+
+  public void moveEyes(double eyeX, double eyeY) {
+    if (head != null) {
+      head.moveTo(null, null, eyeX, eyeY, null, null);
+    } else {
+      log.warn("moveEyes - I have a null head");
+    }
+  }
+
+  public void moveHand(String which, double thumb, double index, double majeure, double ringFinger, double pinky) {
+    moveHand(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    InMoov2Hand hand = getHand(which);
+    hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void moveHead(double neck, double rothead) {
+    moveHead(neck, rothead, null);
+  }
+
+  public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
+    moveHead(neck, rothead, eyeX, eyeY, jaw, null);
+  }
+
+  public void moveHead(Double neck, Double rothead, Double rollNeck) {
+    moveHead(neck, rothead, null, null, null, rollNeck);
+  }
+
+  public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
+    if (head != null) {
+      head.moveTo(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } else {
+      log.error("I have a null head");
+    }
+  }
+
+  public void moveHeadBlocking(double neck, double rothead) {
+    moveHeadBlocking(neck, rothead, null);
+  }
+
+  public void moveHeadBlocking(double neck, double rothead, Double rollNeck) {
+    moveHeadBlocking(neck, rothead, null, null, null, rollNeck);
+  }
+
+  public void moveHeadBlocking(double neck, double rothead, Double eyeX, Double eyeY, Double jaw) {
+    moveHeadBlocking(neck, rothead, eyeX, eyeY, jaw, null);
+  }
+
+  public void moveHeadBlocking(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
+    if (head != null) {
+      head.moveToBlocking(neck, rothead, eyeX, eyeY, jaw, rollNeck);
+    } else {
+      log.error("I have a null head");
+    }
+  }
+
+  public void moveTorso(double topStom, double midStom, double lowStom) {
+    if (torso != null) {
+      torso.moveTo(topStom, midStom, lowStom);
+    } else {
+      log.error("moveTorso - I have a null torso");
+    }
+  }
+
+  public void moveTorsoBlocking(double topStom, double midStom, double lowStom) {
+    if (torso != null) {
+      torso.moveToBlocking(topStom, midStom, lowStom);
+    } else {
+      log.error("moveTorsoBlocking - I have a null torso");
+    }
+  }
+
+  public void onGestureStatus(Status status) {
+    if (!status.equals(Status.success()) && !status.equals(Status.warn("Python process killed !"))) {
+      error("I cannot execute %s, please check logs", lastGestureExecuted);
+    }
+    finishedGesture(lastGestureExecuted);
+    unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
+  }
 
   @Override
   public void onJoystickInput(JoystickData input) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
- 
   @Override
   public void onText(String text) {
-    invoke("publishText", text);
+    // FIXME - we should be able to "re"-publish text but text is coming from
+    // different sources
+    // some might be coming from the ear - some from the mouth ... - there has
+    // to be a distinction
+    log.info("onText - {}", text);
+    // invoke("publishText", text);
   }
 
   // TODO FIX/CHECK this, migrate from python land
   public void powerDown() {
 
     rest();
-    purgeTasks(); 
+    purgeTasks();
     disable();
 
     if (ear != null) {
@@ -348,7 +658,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void powerUp() {
     enable();
     rest();
-    
+
     if (ear != null) {
       ear.clearLock();
     }
@@ -365,9 +675,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public String publishText(String text) {
     return text;
   }
-  
+
+  // FIXME NO DIRECT REFERENCES - publishRest --> (onRest) --> rest
   public void rest() {
-    log.info("InMoov Native Rest Gesture Called");
+    log.info("InMoov2.rest()");
     if (head != null) {
       head.rest();
     }
@@ -386,141 +697,376 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso != null) {
       torso.rest();
     }
-    if (eyelids != null) {
-      eyelids.rest();
+  }
+
+  @Deprecated
+  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    InMoov2Arm arm = getArm(which);
+    arm.setVelocity(bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
+    setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    InMoov2Hand hand = getHand(which);
+    hand.setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
+    setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  @Deprecated
+  public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, wrist);
+  }
+
+  @Deprecated
+  public void setHeadSpeed(Double rothead, Double neck) {
+    setHeadSpeed(rothead, neck, null, null, null);
+  }
+
+  @Deprecated
+  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+    if (head != null) {
+      head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
+    } else {
+      log.warn("setHeadSpeed - I have no head");
     }
   }
-  
-  public void startAll(String leftPort, String rightPort) throws Exception {
-    /*
-    startMouth();
-    startHead(leftPort);
-    startOpenCV();
-    startEar();
-    startMouthControl(head.jaw, mouth);
-    startLeftHand(leftPort);
-    startRightHand(rightPort);
-    // startEyelids(rightPort);
-    startLeftArm(leftPort);
-    startRightArm(rightPort);
-    startTorso(leftPort);
-    startHeadTracking();
-    startEyesTracking();
-    // TODO LP
-    speakBlocking("startup sequence completed");
-    */
+
+  public void setHeadVelocity(Double rothead, Double neck) {
+    setHeadVelocity(rothead, neck, null, null, null, null);
   }
-  
-  public void startHead()
-      {
-    // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
-    // ???   SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
-    if (head == null) {
-      head = (InMoov2Head) startPeer("head");
+
+  ///// begin blah
+
+  public void setHeadVelocity(Double rothead, Double neck, Double rollNeck) {
+    setHeadVelocity(rothead, neck, null, null, null, rollNeck);
+  }
+
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
+    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+  }
+
+  @Deprecated
+  public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
+    if (head != null) {
+      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
+    } else {
+      log.warn("setHeadVelocity - I have no head");
     }
-
   }
 
-  public ProgramAB startBrain() {
+  /**
+   * TODO : use system locale set language for InMoov service used by chatbot +
+   * ear + mouth
+   * 
+   * @param l
+   *          - format : java Locale
+   */
+  public boolean setLanguage(String l) {
+    if (languages.containsKey(l)) {
+      this.language = l;
+      info("Set language to %s", languages.get(l));
+      Runtime runtime = Runtime.getInstance();
+      runtime.setLocale(l);
+      languagePack.load(language);
+      broadcastState();
+      return true;
+    } else {
+      error("InMoov not yet support %s", l);
+      return false;
+    }
+  }
 
-    try {
+  public void setMute(boolean mute) {
+    info("Set mute to %s", mute);
+    this.mute = mute;
+  }
 
-      ProgramAB chatBot = (ProgramAB) Runtime.start("brain", "ProgramAB");
+  @Deprecated
+  public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
+    if (torso != null) {
+      torso.setSpeed(topStom, midStom, lowStom);
+    } else {
+      log.warn("setTorsoSpeed - I have no torso");
+    }
+  }
 
-      this.attach(chatBot);
-      // FIXME - deal with language
-      // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
-      chatBot.repetitionCount(10);
-      chatBot.setPath("InMoov/chatBot");
-      // FIXME - deal with language chatBot.startSession("default",
-      // getLanguage());
-      // reset some parameters to default...
-      chatBot.setPredicate("topic", "default");
-      chatBot.setPredicate("questionfirstinit", "");
-      chatBot.setPredicate("tmpname", "");
-      chatBot.setPredicate("null", "");
-      // load last user session
-      if (!chatBot.getPredicate("name").isEmpty()) {
-        if (chatBot.getPredicate("lastUsername").isEmpty() || chatBot.getPredicate("lastUsername").equals("unknown")) {
-          chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
-        }
-      }
-      chatBot.setPredicate("parameterHowDoYouDo", "");
+  public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
+    if (torso != null) {
+      torso.setVelocity(topStom, midStom, lowStom);
+    } else {
+      log.warn("setTorsoVelocity - I have no torso");
+    }
+  }
+
+  public List<AudioData> speak(String toSpeak) {
+    if (mouth == null) {
+      log.error("Speak is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
       try {
-        chatBot.savePredicates();
-      } catch (IOException e) {
-        log.error("saving predicates threw", e);
+        return mouth.speak(toSpeak);
+      } catch (Exception e) {
+        Logging.logError(e);
       }
-      // start session based on last recognized person
-      if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
-        chatBot.startSession(chatBot.getPredicate("lastUsername"));
-      }
-
-      HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-      chatBot.addTextListener(htmlFilter);
-      htmlFilter.addListener("publishText", getName(), "speak");
-
-      return chatBot;
-    } catch (Exception e) {
-      error(e);
     }
     return null;
   }
-  
+
+  public List<AudioData> speakAlert(String toSpeak) {
+    speakBlocking(languagePack.get("ALERT"));
+    return speakBlocking(toSpeak);
+  }
+
+  // FIXME - publish text regardless if mouth exists ...
+  public List<AudioData> speakBlocking(String toSpeak) {
+
+    // FIXME - publish onText when listening
+    invoke("publishText", toSpeak);
+
+    if (mouth == null) {
+      mouth = (SpeechSynthesis) startPeer("mouth");
+    }
+
+    if (mouth == null) {
+      log.error("speakBlocking is called, but my mouth is NULL...");
+      return null;
+    }
+    if (!mute) {
+      try {
+        return mouth.speakBlocking(toSpeak);
+      } catch (Exception e) {
+        log.error("speakBlocking threw", e);
+      }
+    }
+    return null;
+  }
+
+  public void startAll() throws Exception {
+    startMouth();
+    startBrain();
+
+    // startHeadTracking();
+    // startEyesTracking();
+    // startOpenCV();
+    startEar();
+
+    startServos();
+    // startMouthControl(head.jaw, mouth);
+
+    speakBlocking("startup sequence completed");
+  }
+
+  public void startBrain() {
+
+    brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+
+    // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
+    attachTextPublisher(brain.getName());
+
+    // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
+    // FIXME - deal with language
+    // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
+    brain.repetitionCount(10);
+    brain.setPath("InMoov/chatBot");
+    // FIXME - deal with language chatBot.startSession("default",
+    // getLanguage());
+    // reset some parameters to default...
+    brain.setPredicate("topic", "default");
+    brain.setPredicate("questionfirstinit", "");
+    brain.setPredicate("tmpname", "");
+    brain.setPredicate("null", "");
+    // load last user session
+    if (!brain.getPredicate("name").isEmpty()) {
+      if (brain.getPredicate("lastUsername").isEmpty() || brain.getPredicate("lastUsername").equals("unknown")) {
+        brain.setPredicate("lastUsername", brain.getPredicate("name"));
+      }
+    }
+    brain.setPredicate("parameterHowDoYouDo", "");
+    try {
+      brain.savePredicates();
+    } catch (IOException e) {
+      log.error("saving predicates threw", e);
+    }
+    // start session based on last recognized person
+    if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
+      brain.startSession(brain.getPredicate("lastUsername"));
+    }
+
+    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    brain.addTextListener(htmlFilter);
+    htmlFilter.addListener("publishText", getName(), "speak");
+  }
+
+  public SpeechRecognizer startEar() {
+
+    if (ear == null) {
+      ear = (SpeechRecognizer) startPeer("ear");
+    }
+
+    if (brain != null) {
+      brain.attach((Attachable) ear);
+    }
+    speakBlocking(languagePack.get("STARTINGEAR"));
+
+    return ear;
+  }
+
+  /// end blah
+
+  public void startedGesture() {
+    startedGesture("unknown");
+  }
+
+  public void startedGesture(String nameOfGesture) {
+    if (gestureAlreadyStarted) {
+      warn("Warning 1 gesture already running, this can break spacetime and lot of things");
+    } else {
+      log.info("Starting gesture : {}", nameOfGesture);
+      gestureAlreadyStarted = true;
+      RobotCanMoveRandom = false;
+    }
+  }
+
+  public void startHead() {
+    // log.warn(InMoov.buildDNA(myKey, serviceClass))
+    // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
+    // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
+    if (head == null) {
+      speakBlocking(languagePack.get("STARTINGHEAD"));
+      head = (InMoov2Head) startPeer("head");
+    }
+  }
+
+  public void startLeftArm() {
+    // log.warn(InMoov.buildDNA(myKey, serviceClass))
+    // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
+    // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
+    if (leftArm == null) {
+      speakBlocking(languagePack.get("STARTINGLEFTARM"));
+      leftArm = (InMoov2Arm) startPeer("leftArm");
+    }
+  }
+
+  public void startLeftHand() {
+    if (leftHand == null) {
+      speakBlocking(languagePack.get("STARTINGLEFTHAND"));
+      leftHand = (InMoov2Hand) startPeer("leftHand");
+    }
+  }
+
+  public SpeechSynthesis startMouth() {
+    if (mouth == null) {
+      mouth = (SpeechSynthesis) startPeer("mouth");
+    }
+    // this.attach((Attachable) mouth);
+    // if (ear != null) ....
+    speakBlocking(languagePack.get("STARTINGMOUTH"));
+    speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
+
+    return mouth;
+  }
+
+  public void startRightArm() {
+    if (rightArm == null) {
+      speakBlocking(languagePack.get("STARTINGLEFTARM"));
+      rightArm = (InMoov2Arm) startPeer("rightArm");
+    }
+  }
+
+  public void startRightHand() {
+    if (rightHand == null) {
+      speakBlocking(languagePack.get("STARTINGRIGHTHAND"));
+      rightHand = (InMoov2Hand) startPeer("rightHand");
+    }
+  }
+
+  public void startServos() throws Exception {
+    startHead();
+    startLeftArm();
+    startLeftHand();
+    startRightArm();
+    startRightHand();
+    startTorso();
+  }
+
   public void startSimulator() throws Exception {
 
-    if (simulator == null) {
-      simulator = (JMonkeyEngine)Runtime.start("simulator", "JMonkeyEngine");
+    if (jme == null) {
+      speakBlocking("starting simulator");
+      jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
+    }
+
+    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();// +
+                                                                                   // fs
+                                                                                   // +
+                                                                                   // "assets"
+                                                                                   // +
+                                                                                   // fs
+                                                                                   // +
+                                                                                   // "Models";
+
+    File check = new File(assetPath);
+    log.info("loading assets from {}", assetPath);
+    if (!check.exists()) {
+      log.warn("%s does not exist");
     }
 
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
+    jme.loadModels(assetPath);
 
     // ========== gael's calibrations begin ======================
-    simulator.setRotation(getName() + ".head.jaw", "x");
-    simulator.setRotation(getName() + ".head.neck", "x");
-    simulator.setRotation(getName() + ".head.rothead", "y");
-    simulator.setRotation(getName() + ".head.rollNeck", "z");
-    simulator.setRotation(getName() + ".head.eyeY", "x");
-    simulator.setRotation(getName() + ".head.eyeX", "y");
-    simulator.setRotation(getName() + ".torso.topStom", "z");
-    simulator.setRotation(getName() + ".torso.midStom", "y");
-    simulator.setRotation(getName() + ".torso.lowStom", "x");
-    simulator.setRotation(getName() + ".rightArm.bicep", "x");
-    simulator.setRotation(getName() + ".leftArm.bicep", "x");
-    simulator.setRotation(getName() + ".rightArm.shoulder", "x");
-    simulator.setRotation(getName() + ".leftArm.shoulder", "x");
-    simulator.setRotation(getName() + ".rightArm.rotate", "y");
-    simulator.setRotation(getName() + ".leftArm.rotate", "y");
-    simulator.setRotation(getName() + ".rightArm.omoplate", "z");
-    simulator.setRotation(getName() + ".leftArm.omoplate", "z");
-    simulator.setRotation(getName() + ".rightHand.wrist", "y");
-    simulator.setRotation(getName() + ".leftHand.wrist", "y");
+    jme.setRotation(getName() + ".head.jaw", "x");
+    jme.setRotation(getName() + ".head.neck", "x");
+    jme.setRotation(getName() + ".head.rothead", "y");
+    jme.setRotation(getName() + ".head.rollNeck", "z");
+    jme.setRotation(getName() + ".head.eyeY", "x");
+    jme.setRotation(getName() + ".head.eyeX", "y");
+    jme.setRotation(getName() + ".torso.topStom", "z");
+    jme.setRotation(getName() + ".torso.midStom", "y");
+    jme.setRotation(getName() + ".torso.lowStom", "x");
+    jme.setRotation(getName() + ".rightArm.bicep", "x");
+    jme.setRotation(getName() + ".leftArm.bicep", "x");
+    jme.setRotation(getName() + ".rightArm.shoulder", "x");
+    jme.setRotation(getName() + ".leftArm.shoulder", "x");
+    jme.setRotation(getName() + ".rightArm.rotate", "y");
+    jme.setRotation(getName() + ".leftArm.rotate", "y");
+    jme.setRotation(getName() + ".rightArm.omoplate", "z");
+    jme.setRotation(getName() + ".leftArm.omoplate", "z");
+    jme.setRotation(getName() + ".rightHand.wrist", "y");
+    jme.setRotation(getName() + ".leftHand.wrist", "y");
 
-    simulator.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
-    simulator.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
-    simulator.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
-    simulator.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
-    simulator.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need to be
-                                                     // two eyeX (left and
-                                                     // right?)
-    simulator.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
-    simulator.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
+    jme.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
+    jme.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
+    jme.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
+    jme.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
+    jme.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need
+                                                              // to be
+    // two eyeX (left and
+    // right?)
+    jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
+    jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 
-    simulator.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
-    simulator.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
-    simulator.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
-    simulator.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
-    simulator.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
-    simulator.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
+    jme.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
+    jme.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
+    jme.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
+    jme.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
+    jme.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
+    jme.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
 
-    simulator.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
-    simulator.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
+    jme.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
+    jme.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
 
-    simulator.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
-    simulator.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
-    simulator.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
+    jme.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
+    jme.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
+    jme.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
 
     // ========== gael's calibrations end ======================
 
@@ -528,143 +1074,144 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // ========== Requires VinMoov5.j3o ========================
 
-    simulator.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
-    simulator.setRotation(getName() + ".leftHand.thumb1", "y");
-    simulator.setRotation(getName() + ".leftHand.thumb2", "x");
-    simulator.setRotation(getName() + ".leftHand.thumb3", "x");
+    jme.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
+    jme.setRotation(getName() + ".leftHand.thumb1", "y");
+    jme.setRotation(getName() + ".leftHand.thumb2", "x");
+    jme.setRotation(getName() + ".leftHand.thumb3", "x");
 
-    simulator.attach(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
-    simulator.setRotation(getName() + ".leftHand.index", "x");
-    simulator.setRotation(getName() + ".leftHand.index2", "x");
-    simulator.setRotation(getName() + ".leftHand.index3", "x");
+    jme.attach(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
+    jme.setRotation(getName() + ".leftHand.index", "x");
+    jme.setRotation(getName() + ".leftHand.index2", "x");
+    jme.setRotation(getName() + ".leftHand.index3", "x");
 
-    simulator.attach(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
-    simulator.setRotation(getName() + ".leftHand.majeure", "x");
-    simulator.setRotation(getName() + ".leftHand.majeure2", "x");
-    simulator.setRotation(getName() + ".leftHand.majeure3", "x");
+    jme.attach(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
+    jme.setRotation(getName() + ".leftHand.majeure", "x");
+    jme.setRotation(getName() + ".leftHand.majeure2", "x");
+    jme.setRotation(getName() + ".leftHand.majeure3", "x");
 
-    simulator.attach(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
-    simulator.setRotation(getName() + ".leftHand.ringFinger", "x");
-    simulator.setRotation(getName() + ".leftHand.ringFinger2", "x");
-    simulator.setRotation(getName() + ".leftHand.ringFinger3", "x");
+    jme.attach(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
+    jme.setRotation(getName() + ".leftHand.ringFinger", "x");
+    jme.setRotation(getName() + ".leftHand.ringFinger2", "x");
+    jme.setRotation(getName() + ".leftHand.ringFinger3", "x");
 
-    simulator.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
-    simulator.setRotation(getName() + ".leftHand.pinky", "x");
-    simulator.setRotation(getName() + ".leftHand.pinky2", "x");
-    simulator.setRotation(getName() + ".leftHand.pinky3", "x");
+    jme.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
+    jme.setRotation(getName() + ".leftHand.pinky", "x");
+    jme.setRotation(getName() + ".leftHand.pinky2", "x");
+    jme.setRotation(getName() + ".leftHand.pinky3", "x");
 
     // left hand mapping complexities of the fingers
-    simulator.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
 
-    simulator.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
 
-    simulator.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
 
-    simulator.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
-    simulator.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
+    jme.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
 
-    simulator.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
-    simulator.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
-    simulator.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
+    jme.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
+    jme.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
+    jme.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
 
     // right hand
 
-    simulator.attach(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
-    simulator.setRotation(getName() + ".rightHand.thumb1", "y");
-    simulator.setRotation(getName() + ".rightHand.thumb2", "x");
-    simulator.setRotation(getName() + ".rightHand.thumb3", "x");
+    jme.attach(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
+    jme.setRotation(getName() + ".rightHand.thumb1", "y");
+    jme.setRotation(getName() + ".rightHand.thumb2", "x");
+    jme.setRotation(getName() + ".rightHand.thumb3", "x");
 
-    simulator.attach(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
-    simulator.setRotation(getName() + ".rightHand.index", "x");
-    simulator.setRotation(getName() + ".rightHand.index2", "x");
-    simulator.setRotation(getName() + ".rightHand.index3", "x");
+    jme.attach(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
+    jme.setRotation(getName() + ".rightHand.index", "x");
+    jme.setRotation(getName() + ".rightHand.index2", "x");
+    jme.setRotation(getName() + ".rightHand.index3", "x");
 
-    simulator.attach(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
-    simulator.setRotation(getName() + ".rightHand.majeure", "x");
-    simulator.setRotation(getName() + ".rightHand.majeure2", "x");
-    simulator.setRotation(getName() + ".rightHand.majeure3", "x");
+    jme.attach(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
+    jme.setRotation(getName() + ".rightHand.majeure", "x");
+    jme.setRotation(getName() + ".rightHand.majeure2", "x");
+    jme.setRotation(getName() + ".rightHand.majeure3", "x");
 
-    simulator.attach(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
-    simulator.setRotation(getName() + ".rightHand.ringFinger", "x");
-    simulator.setRotation(getName() + ".rightHand.ringFinger2", "x");
-    simulator.setRotation(getName() + ".rightHand.ringFinger3", "x");
+    jme.attach(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
+    jme.setRotation(getName() + ".rightHand.ringFinger", "x");
+    jme.setRotation(getName() + ".rightHand.ringFinger2", "x");
+    jme.setRotation(getName() + ".rightHand.ringFinger3", "x");
 
-    simulator.attach(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
-    simulator.setRotation(getName() + ".rightHand.pinky", "x");
-    simulator.setRotation(getName() + ".rightHand.pinky2", "x");
-    simulator.setRotation(getName() + ".rightHand.pinky3", "x");
+    jme.attach(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
+    jme.setRotation(getName() + ".rightHand.pinky", "x");
+    jme.setRotation(getName() + ".rightHand.pinky2", "x");
+    jme.setRotation(getName() + ".rightHand.pinky3", "x");
 
-    simulator.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
+    jme.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
 
-    simulator.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
+    jme.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
 
-    simulator.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
+    jme.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
 
-    simulator.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
-    simulator.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
-    simulator.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
+    jme.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
+    jme.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
+    jme.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
 
-    simulator.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
-    simulator.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
-    simulator.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
+    jme.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
+    jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
+    jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
 
     // additional experimental mappings
     /*
-     * simulator.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.index2");
-     * simulator.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.index3");
-     * simulator.setRotation(getName() + ".leftHand.index2", "x");
-     * simulator.setRotation(getName() + ".leftHand.index3", "x");
-     * simulator.setMapper(getName() + ".leftHand.index", 0, 180, -90, -270);
-     * simulator.setMapper(getName() + ".leftHand.index2", 0, 180, -90, -270);
-     * simulator.setMapper(getName() + ".leftHand.index3", 0, 180, -90, -270);
+     * simulator.attach(getName() + ".leftHand.pinky", getName() +
+     * ".leftHand.index2"); simulator.attach(getName() + ".leftHand.thumb",
+     * getName() + ".leftHand.index3"); simulator.setRotation(getName() +
+     * ".leftHand.index2", "x"); simulator.setRotation(getName() +
+     * ".leftHand.index3", "x"); simulator.setMapper(getName() +
+     * ".leftHand.index", 0, 180, -90, -270); simulator.setMapper(getName() +
+     * ".leftHand.index2", 0, 180, -90, -270); simulator.setMapper(getName() +
+     * ".leftHand.index3", 0, 180, -90, -270);
      */
 
+  }
 
+  public void startTorso() {
+    if (torso == null) {
+      speakBlocking(languagePack.get("STARTINGTORSO"));
+      torso = (InMoov2Torso) startPeer("torso");
+    }
+  }
+
+  public void stopGesture() {
+    Python p = (Python) Runtime.getService("python");
+    p.stop();
   }
 
   public void waitTargetPos() {
-    if (head != null)
-      head.waitTargetPos();
-    if (eyelids != null)
-      eyelids.waitTargetPos();
-    if (leftArm != null)
-      leftArm.waitTargetPos();
-    if (rightArm != null)
-      rightArm.waitTargetPos();
-    if (leftHand != null)
-      leftHand.waitTargetPos();
-    if (rightHand != null)
-      rightHand.waitTargetPos();
-    if (torso != null)
-      torso.waitTargetPos();
+    head.waitTargetPos();
+    leftArm.waitTargetPos();
+    rightArm.waitTargetPos();
+    leftHand.waitTargetPos();
+    rightHand.waitTargetPos();
+    torso.waitTargetPos();
+  }
+  
+  public void closeAllImages() {
+    imageDisplay.closeAll();
   }
 
-  public static void main(String[] args) {
+  public void displayFullScreen(String src) {
     try {
-
-      LoggingFactory.init(Level.INFO);
-
-      InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
-      Runtime.start("python", "Python");
-      Runtime.start("webgui", "WebGui");
-
+      imageDisplay.displayFullScreen(src);
     } catch (Exception e) {
-      log.error("main threw", e);
+      error("could not display picture %s", src);
     }
   }
-  
-  
+
 }

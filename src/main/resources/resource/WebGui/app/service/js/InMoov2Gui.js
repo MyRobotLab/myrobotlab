@@ -5,9 +5,14 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.servos = []
     $scope.sliders = []
 
+    // text published from InMoov2 service
+    $scope.onText = null
+    $scope.languageSelected = null
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        $scope.languageSelected = service.language
     }
 
     $scope.toggle = function(servo) {
@@ -30,13 +35,19 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     }
 
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0];
+
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
+            $scope.$apply()
+            break
+        case 'onText':
+            $scope.onText = data;
             $scope.$apply()
             break
         case 'onServoData':
-            var data = inMsg.data[0];
+            
             $scope.sliders[data.name].value = data.pos;
             $scope.$apply()
             break
@@ -85,6 +96,8 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     // msg.subscribe('getServoNames')
     // msg.send('getServoNames')
+
+    msg.send('publishText')
     msg.subscribe(this)
 }
 ])

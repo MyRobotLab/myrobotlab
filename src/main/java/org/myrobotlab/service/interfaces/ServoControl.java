@@ -56,11 +56,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void disable();
 
   /**
-   * remove speed control
-   */
-  public void disableSpeedControl();
-
-  /**
    * enable the PWM pulses/power to the servo
    */
   @Config
@@ -87,16 +82,16 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   EncoderControl getEncoder();
 
-
   /**
    * The last time the servo was asked to move (system current time in ms?)
    * 
    * @return
    */
   long getLastActivityTime();
-  
+
   /**
    * get this servos mapper
+   * 
    * @return
    */
   Mapper getMapper();
@@ -108,7 +103,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   Double getMax();
 
- 
   /**
    * returns max speed if set
    * 
@@ -122,7 +116,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return min x
    */
   Double getMin();
-
 
   /**
    * configuration method - a method the controller will call when the servo is
@@ -255,12 +248,20 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return true (why?)
    */
   Double moveToBlocking(Double pos);
-  
+
   /**
    * moveToBlocking with a timeout blocking calling thread until either move has
    * been completed, or timeout reached
    */
   Double moveToBlocking(Double pos, Long timeoutMs);
+
+  /**
+   * publishing servo's move
+   * 
+   * @param sc
+   * @return
+   */
+  ServoControl publishMoveTo(ServoControl sc);
 
   /**
    * 
@@ -269,12 +270,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return
    */
   ServoData publishServoData(ServoStatus eventType, Double currentPosUs);
-  
-  public ServoControl publishServoSetSpeed(ServoControl sc);
-  
-  public ServoControl publishServoEnable(ServoControl sc);
-  
-  public ServoControl publishServoDisable(ServoControl sc);
+
+  ServoControl publishServoSetSpeed(ServoControl sc);
+
+  ServoControl publishServoEnable(ServoControl sc);
+
+  ServoControl publishServoDisable(ServoControl sc);
 
   /**
    * control message publishing moveTo
@@ -290,10 +291,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param sc
    * @return
    */
-  public ServoControl publishServoStop(ServoControl sc);
-  
-  
-  public ServoControl publishServoStopped(ServoControl sc);
+  ServoControl publishServoStop(ServoControl sc);
+
+  ServoControl publishServoStopped(ServoControl sc);
 
   /**
    * command to move to the rest position
@@ -368,12 +368,13 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          servo.rest() is called
    */
   void setRest(Double rest);
-  
+
   /**
    * set the speed of the servo
+   * 
    * @param d
    */
-  public void setSpeed(Double d);
+  void setSpeed(Double d);
 
   /**
    * @param speed
@@ -428,8 +429,13 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param uS
    */
   void writeMicroseconds(int uS);
-  
-  // for instance attachment 
+
+  // for instance attachment
   void attachServoController(String sc, Integer pin, Double pos, Double speed);
+
+  /**
+   * remove speed control
+   */
+  void fullSpeed();
 
 }
