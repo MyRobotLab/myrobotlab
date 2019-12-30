@@ -2457,9 +2457,9 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
      * if (!servos.containsKey(name)) { log.error("servoMoveTo({})", servo);
      * return; }
      */
-    double velocity = servo.getSpeed();
-    if (velocity == -1) {
-      velocity = (float) defaultServoSpeed;
+    Double velocity = servo.getSpeed();
+    if (velocity == null || velocity == -1) {
+      velocity = defaultServoSpeed;
     }
 
     // String axis = rotationMap.get(name);
