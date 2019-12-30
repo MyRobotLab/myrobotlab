@@ -55,6 +55,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     ServiceType meta = new ServiceType(InMoov2.class);
     meta.addDescription("InMoov2 Service");
     meta.addCategory("robot");
+    
+    meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
 
     meta.addPeer("head", "InMoov2Head", "head");
     meta.addPeer("torso", "InMoov2Torso", "torso");
@@ -63,6 +65,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("leftHand", "InMoov2Hand", "left hand");
     meta.addPeer("rightArm", "InMoov2Arm", "right arm");
     meta.addPeer("rightHand", "InMoov2Hand", "right hand");
+    meta.addPeer("mouthControl", "MouthControl", "MouthControl");
+    
 
     meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
 
@@ -70,6 +74,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // Global - undecorated by self name
     meta.addRootPeer("python", "Python", "shared Python service");
+    
 
     return meta;
   }
@@ -92,6 +97,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   boolean autoStartBrowser = false;
+  
+  // FIXME ugh - new MouthControl service that uses AudioFile output
+  transient public MouthControl mouthControl;
 
   transient ProgramAB brain;
 
@@ -115,6 +123,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient Tracking headTracking;
 
+  transient ImageDisplay imageDisplay;
+
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine jme;
 
@@ -136,18 +146,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   int maxInactivityTimeSeconds = 120;
 
-  transient SpeechSynthesis mouth;
-
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
+
+  transient SpeechSynthesis mouth;
 
   boolean mute = false;
 
   boolean muted;
 
   transient Pid pid;
-
-  transient ImageDisplay imageDisplay;
 
   transient Python python;
 
@@ -229,6 +237,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return lastActivityTime;
   }
 
+  public void closeAllImages() {
+    imageDisplay.closeAll();
+  }
+
   public void cycleGestures() {
     // if not loaded load -
     // FIXME - this needs alot of "help" :P
@@ -270,6 +282,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     if (torso != null) {
       torso.disable();
+    }
+  }
+
+  public void displayFullScreen(String src) {
+    try {
+      imageDisplay.displayFullScreen(src);
+    } catch (Exception e) {
+      error("could not display picture %s", src);
     }
   }
 
@@ -702,7 +722,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   @Deprecated
   public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
-    arm.setVelocity(bicep, rotate, shoulder, omoplate);
+    arm.setSpeed(bicep, rotate, shoulder, omoplate);
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
@@ -714,21 +734,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     hand.setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
+  @Deprecated
   public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
-    setHandVelocity(which, thumb, index, majeure, ringFinger, pinky, null);
+    setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
+  
   @Deprecated
   public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
-  @Deprecated
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
   }
 
-  @Deprecated
+  
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
     if (head != null) {
       head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
@@ -737,27 +758,33 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
+    if (head != null) {
+      head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
+    } else {
+      log.warn("setHeadVelocity - I have no head");
+    }
+  }
+  
+  @Deprecated
   public void setHeadVelocity(Double rothead, Double neck) {
-    setHeadVelocity(rothead, neck, null, null, null, null);
+    setHeadSpeed(rothead, neck, null, null, null, null);
   }
 
-  ///// begin blah
-
+  
+  @Deprecated
   public void setHeadVelocity(Double rothead, Double neck, Double rollNeck) {
-    setHeadVelocity(rothead, neck, null, null, null, rollNeck);
+    setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
 
+  @Deprecated
   public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
-    setHeadVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
+    setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
   }
 
   @Deprecated
   public void setHeadVelocity(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
-    if (head != null) {
-      head.setVelocity(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
-    } else {
-      log.warn("setHeadVelocity - I have no head");
-    }
+    setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
   /**
@@ -863,6 +890,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking("startup sequence completed");
   }
 
+  /// end blah
+
   public void startBrain() {
 
     brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
@@ -918,8 +947,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return ear;
   }
 
-  /// end blah
-
   public void startedGesture() {
     startedGesture("unknown");
   }
@@ -941,6 +968,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (head == null) {
       speakBlocking(languagePack.get("STARTINGHEAD"));
       head = (InMoov2Head) startPeer("head");
+    }
+    
+    if (mouthControl == null) {
+      speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
+      mouthControl = (MouthControl) startPeer("mouthControl");
+      mouthControl.attach(head.jaw);
+      mouthControl.attach((Attachable) mouth);
+      mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for config !!!
     }
   }
 
@@ -1187,7 +1222,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso = (InMoov2Torso) startPeer("torso");
     }
   }
-
+  
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
     p.stop();
@@ -1200,18 +1235,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     leftHand.waitTargetPos();
     rightHand.waitTargetPos();
     torso.waitTargetPos();
-  }
-  
-  public void closeAllImages() {
-    imageDisplay.closeAll();
-  }
-
-  public void displayFullScreen(String src) {
-    try {
-      imageDisplay.displayFullScreen(src);
-    } catch (Exception e) {
-      error("could not display picture %s", src);
-    }
   }
 
 }
