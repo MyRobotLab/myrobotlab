@@ -382,6 +382,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * disables and detaches from all controllers
    */
   public void detach() {
+    disable();
     for (String sc : controllers) {
       detach(sc);
     }
@@ -424,9 +425,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     invoke("publishServoDisable", this);
     broadcastState();
   }
-
-  @Override
-  public void disableSpeedControl() {
+  
+  public void fullSpeed() {
     log.info("disabling speed control");
     speed = null;
     invoke("publishServoSetSpeed", this);
@@ -644,6 +644,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }
   }
+  
+  /**
+   * moveTo requests are published through this publishing point
+   */
+  public ServoControl publishMoveTo(ServoControl sc) {
+    return sc;
+  }
 
   public void onRegistered(Registration s) {
     refreshControllers();
@@ -680,6 +687,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // working use .lock()
     // which is part of the motor command set ... once you lock a motor you
     // can't do anything until you unlock it
+    
+    if (newPos == null) {
+      log.info("{} processing a null move - will not move", getName());
+      return;
+    }
+    
 
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
@@ -992,7 +1005,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
-      disableSpeedControl();
+      fullSpeed();
       return;
     }
 

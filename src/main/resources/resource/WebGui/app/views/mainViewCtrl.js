@@ -10,7 +10,8 @@ angular.module('mrlapp.mrl').controller('mainViewCtrl', ['$scope', '$log', '$fil
         });
     };
     //panelsUpdated(mrl.getPanelsList());
-    mrl.subscribeToUpdates(panelsUpdated);
     
+    panelsUpdated(mrl.getPanelsList());
+    mrl.subscribeToUpdates(panelsUpdated);
 }
 ]);

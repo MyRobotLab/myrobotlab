@@ -412,6 +412,10 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   public void attach(String name, String... nodeNames) throws Exception {
 
     ServiceInterface service = Runtime.getService(name);
+    if (service == null) {
+      log.error("{} not found in registry", name);
+      return;
+    }
 
     if (nodeNames != null) {
       multiMapped.put(name, nodeNames);

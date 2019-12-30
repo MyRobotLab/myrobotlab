@@ -19,6 +19,13 @@ import org.slf4j.Logger;
  * InMoovArm - This is the Arm sub-service for the InMoov Robot. It consists of
  * 4 Servos: bicep, rotate,shoulder,omoplate It uses Arduino to control the
  * servos.
+ * 
+ * TODO - make this service responsible for setting up pub subs - and on any new
+ * registration look for attach capablities
+ * 
+ * Null checking is not necessary for this "group" of servos - its assumed the
+ * user would want the entire group initialized on creation and that is what
+ * startPeers() does
  *
  */
 public class InMoov2Arm extends Service implements IKJointAngleListener {
@@ -27,105 +34,28 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2Arm.class);
 
-
   /**
-   * peer services
-   * FIXME - framework should always - startPeers() unless configured not to
+   * peer services FIXME - framework should always - startPeers() unless
+   * configured not to
    */
   transient public ServoControl bicep;
   transient public ServoControl rotate;
   transient public ServoControl shoulder;
   transient public ServoControl omoplate;
 
-  String side;
-
   public InMoov2Arm(String n, String id) throws Exception {
     super(n, id);
-  }
 
-  public void setAutoDisable(Boolean idleTimeoutMs) {
-    if (bicep != null) {
-      bicep.setAutoDisable(idleTimeoutMs);
-    }
+    // FIXME - future will just be pub/sub attach/detach subscriptions
+    // and there will be no need this service.
+    // Config will be managed by LangUtils
 
-    if (rotate != null) {
-      rotate.setAutoDisable(idleTimeoutMs);
-    }
-    if (shoulder != null) {
-      shoulder.setAutoDisable(idleTimeoutMs);
-    }
-    if (omoplate != null) {
-      omoplate.setAutoDisable(idleTimeoutMs);
-    }
-  }
-
-  @Override
-  public void broadcastState() {
-    super.broadcastState();
-    
-    if (bicep != null) {
-      bicep.broadcastState();
-    }
-
-    if (rotate != null) {
-      rotate.broadcastState();
-    }
-
-    if (shoulder != null) {
-      shoulder.broadcastState();
-    }
-
-    if (omoplate != null) {
-      omoplate.broadcastState();
-    }
-  }
-
-  /*
-  public boolean connect(String port) throws Exception {
-
-    // if the servos haven't been started already.. fire them up!
     startPeers();
-    controller = (ServoController) startPeer("arduino");
-    // set defaults for the servos
-    initServoDefaults();
-    // we need a default controller
 
-    if (controller == null) {
-      error("controller is invalid");
-      return false;
-    }
-
-    if (controller instanceof PortConnector) {
-      PortConnector arduino = (PortConnector) controller;
-      arduino.connect(port);
-
-      if (!arduino.isConnected()) {
-        error("arm %s could not connect on port %s", getName(), port);
-      }
-    }
-
-    bicep.attach(controller);
-    rotate.attach(controller);
-    shoulder.attach(controller);
-    omoplate.attach(controller);
-
-    enableAutoEnable(true);
-
-    broadcastState();
-    return true;
-  }
-
-  // SHOULD SIMPLY BE PART OF DEFAULT SCRIPT !!!
-  /*
-  private void initServoDefaults() {
-    if (bicep.getPin() == null)
-      bicep.setPin(DEFAULT_BICEP_PIN);
-    if (rotate.getPin() == null)
-      rotate.setPin(DEFAULT_ROTATE_PIN);
-    if (shoulder.getPin() == null)
-      shoulder.setPin(DEFAULT_SHOULDER_PIN);
-    if (omoplate.getPin() == null)
-      omoplate.setPin(DEFAULT_OMOPLATE_PIN);
+    bicep.setPin(8);
+    rotate.setPin(9);
+    shoulder.setPin(10);
+    omoplate.setPin(11);
 
     bicep.setMinMax(5.0, 90.0);
     rotate.setMinMax(40.0, 180.0);
@@ -133,53 +63,46 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     omoplate.setMinMax(10.0, 80.0);
 
     bicep.setRest(5.0);
-    bicep.setPosition(5.0);
     rotate.setRest(90.0);
-    rotate.setPosition(90.0);
     shoulder.setRest(30.0);
-    shoulder.setPosition(30.0);
     omoplate.setRest(10.0);
+
+    bicep.setPosition(5.0);
+    shoulder.setPosition(30.0);
+    rotate.setPosition(90.0);
     omoplate.setPosition(10.0);
 
-    setVelocity(20.0, 20.0, 20.0, 20.0);
+    setSpeed(20.0, 20.0, 20.0, 20.0);
   }
-  */
 
-  /* this is for ServoControllers ....
   @Deprecated
-  public void detach() {
-    if (bicep != null) {
-      bicep.detach();
-      sleep(InMoov.attachPauseMs);
-    }
-    if (rotate != null) {
-      rotate.detach();
-      sleep(InMoov.attachPauseMs);
-    }
-    if (shoulder != null) {
-      shoulder.detach();
-      sleep(InMoov.attachPauseMs);
-    }
-    if (omoplate != null) {
-      omoplate.detach();
-    }
-  }*/
+  public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {
+    setSpeed(bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setAutoDisable(Boolean idleTimeoutMs) {
+    bicep.setAutoDisable(idleTimeoutMs);
+    rotate.setAutoDisable(idleTimeoutMs);
+    shoulder.setAutoDisable(idleTimeoutMs);
+    omoplate.setAutoDisable(idleTimeoutMs);
+  }
+
+  @Override
+  public void broadcastState() {
+    super.broadcastState();
+    bicep.broadcastState();
+    rotate.broadcastState();
+    shoulder.broadcastState();
+    omoplate.broadcastState();
+  }
 
   public void disable() {
-    if (bicep != null) {
-      bicep.disable();
-    }
-    if (rotate != null) {
-      rotate.disable();
-    }
-    if (shoulder != null) {
-      shoulder.disable();
-    }
-    if (omoplate != null) {
-      omoplate.disable();
-    }
+    bicep.disable();
+    rotate.disable();
+    shoulder.disable();
+    omoplate.disable();
   }
-  
+
   public ServoControl getBicep() {
     return bicep;
   }
@@ -198,9 +121,11 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   public ServoControl getRotate() {
     return rotate;
   }
-  
+
   @Deprecated /* use UtilLang classes */
   public String getScript(String inMoovServiceName) {
+    // FIXME - this is cheesy
+    String side = inMoovServiceName.contains("left") ? "left" : "right";
     return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(),
         omoplate.getPos());
   }
@@ -209,18 +134,14 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return shoulder;
   }
 
-  public String getSide() {
-    return side;
-  }
-
-  public void moveTo(double bicep, double rotate, double shoulder, double omoplate) {
+  public void moveTo(double bicepPos, double rotatePos, double shoulderPos, double omoplatePos) {
     if (log.isDebugEnabled()) {
-      log.debug("{} moveTo {} {} {} {}", getName(), bicep, rotate, shoulder, omoplate);
+      log.debug("{} moveTo {} {} {} {}", getName(), bicepPos, rotatePos, shoulderPos, omoplatePos);
     }
-    this.bicep.moveTo(bicep);
-    this.rotate.moveTo(rotate);
-    this.shoulder.moveTo(shoulder);
-    this.omoplate.moveTo(omoplate);
+    bicep.moveTo(bicepPos);
+    rotate.moveTo(rotatePos);
+    shoulder.moveTo(shoulderPos);
+    omoplate.moveTo(omoplatePos);
   }
 
   public void moveToBlocking(double bicep, double rotate, double shoulder, double omoplate) {
@@ -279,7 +200,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   public void setOmoplate(ServoControl omoplate) {
     this.omoplate = omoplate;
   }
-  
+
   public void setRotate(ServoControl rotate) {
     this.rotate = rotate;
   }
@@ -288,12 +209,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     this.shoulder = shoulder;
   }
 
-  public void setSide(String side) {
-    this.side = side;
-  }
-
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    log.warn("setspeed deprecated please use setvelocity");
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);
     this.shoulder.setSpeed(shoulder);
@@ -303,7 +219,8 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   @Override
   public void startService() {
     super.startService();
-    // starting peers should be done by framework auto-magically (unless configured 
+    // starting peers should be done by framework auto-magically (unless
+    // configured
     if (bicep == null) {
       bicep = (ServoControl) startPeer("bicep");
     }
@@ -317,7 +234,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
       omoplate = (ServoControl) startPeer("omoplate");
     }
   }
-  
 
   public void enable() {
     sleep(InMoov.attachPauseMs);
@@ -481,6 +397,13 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
     return meta;
+  }
+
+  public void fullSpeed() {
+    bicep.fullSpeed();
+    rotate.fullSpeed();
+    shoulder.fullSpeed();
+    omoplate.fullSpeed();
   }
 
 }

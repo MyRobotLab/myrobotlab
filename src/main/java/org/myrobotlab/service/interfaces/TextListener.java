@@ -1,7 +1,8 @@
 package org.myrobotlab.service.interfaces;
 
-public interface TextListener {
-  public String getName();
+import org.myrobotlab.framework.interfaces.NameProvider;
 
+public interface TextListener extends NameProvider {
+  
   public void onText(String text);
 }
