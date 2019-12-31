@@ -15,9 +15,6 @@
                 <td>
                     {{service.language}}              
                     
-                    
-                    
-                    
                     <div class="form-group">
                         <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
                             <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
@@ -32,6 +29,8 @@
                 <td>
                     <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
                     <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+                    <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
+                    <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
                     <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
                     <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
                     <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
