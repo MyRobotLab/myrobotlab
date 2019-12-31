@@ -3,13 +3,21 @@
         <table class="table table-striped">
             <tr>
                 <td>
-                    <label for="sel1">onText:</label>
-                    {{onText}}               
-                
+                    <label for="sel1">onText</label>
+                </td>
+                <td>{{onText}}    
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="sel1">language</label>
                 </td>
                 <td>
-                    <label for="sel1">language:</label>
-                    {{service.language}}      
+                    {{service.language}}              
+                    
+                    
+                    
+                    
                     <div class="form-group">
                         <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
                             <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
@@ -19,12 +27,26 @@
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">configurations:</label>
-                    <button class="btn btn-default" ng-click="msg.disable()">configure</button>
-                    <button class="btn btn-default" ng-click="msg.disable()">save configuration</button>
+                    <label>servos</label>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+                    <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
+                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                    <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+                    <button class="btn btn-default" type="button" ng-click="msg.stop()">
+                        <span>
+                            <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                        </span>
+                    </button>
+                    <button class="btn btn-default" ng-click="msg.disable()">disable</button>
                 </td>
             </tr>
             <tr>
+                <td>
+                    <label for="sel1">configurations</label>
+                </td>
                 <td>
                     <div class="form-group">
                         <select multiple class="form-control" id="sel2">
@@ -36,15 +58,13 @@
                     </div>
                 </td>
             </tr>
-        </table>
-        <table class="table table-striped">
             <tr>
-                <td></td>
                 <td>
-                    <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
-                    <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
-                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
-                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                    <label for="sel1">gestures</label>
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
+                    <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
                 </td>
             </tr>
             <tr>

@@ -47,23 +47,18 @@ public class InMoov2Head extends Service {
     jaw.setMinMax(10.0, 25.0);
     jaw.setRest(10.0);
 
-  
     eyeX.setMinMax(60.0, 120.0);
     eyeX.setRest(90.0);
 
-    
     eyeY.setMinMax(60.0, 120.0);
     eyeY.setRest(90.0);
 
-    
     rollNeck.setMinMax(20.0, 160.0);
     rollNeck.setRest(90.0);
 
-    
     neck.setMinMax(20.0, 160.0);
     neck.setRest(90.0);
 
-    
     rothead.setMinMax(20.0, 160.0);
     rothead.setRest(90.0);
 
@@ -151,8 +146,19 @@ public class InMoov2Head extends Service {
     eyelidRight.broadcastState();
   }
 
-  public void disable() {
+  public void stop() {
+    rothead.stop();
+    neck.stop();
+    eyeX.stop();
+    eyeY.stop();
+    jaw.stop();
+    rollNeck.stop();
+    eyelidLeft.stop();
+    eyelidRight.stop();
+  }
 
+  public void disable() {
+    stop();
     rothead.disable();
     neck.disable();
     eyeX.disable();
@@ -221,6 +227,7 @@ public class InMoov2Head extends Service {
 
   /**
    * Move servos of the head - null is a none move
+   * 
    * @param neckPos
    * @param rotheadPos
    * @param eyeXPos
@@ -352,7 +359,7 @@ public class InMoov2Head extends Service {
     jaw.setSpeed(rollNeckSpeed);
 
   }
-  
+
   public void fullSpeed() {
     rothead.fullSpeed();
     neck.fullSpeed();
@@ -406,10 +413,9 @@ public class InMoov2Head extends Service {
     meta.addPeer("neck", "Servo", "Head tilt servo");
     meta.addPeer("rollNeck", "Servo", "rollNeck Mod servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    
+
     meta.addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     meta.addPeer("eyelidRight", "Servo", "Eyelid right servo");
-
 
     return meta;
   }

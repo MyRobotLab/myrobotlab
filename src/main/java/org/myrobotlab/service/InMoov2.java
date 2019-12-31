@@ -66,15 +66,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("rightArm", "InMoov2Arm", "right arm");
     meta.addPeer("rightHand", "InMoov2Hand", "right hand");
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
-    
-
     meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
-
     meta.addPeer("mouth", speechService, "InMoov speech service");
 
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
-    
+    meta.addRootPeer("python", "Python", "shared Python service");   
 
     return meta;
   }
@@ -117,7 +113,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean gestureAlreadyStarted = false;
 
   // FIXME - what the hell is this for ?
-  Set<String> gesturesList = new TreeSet<String>();
+  Set<String> gestures = new TreeSet<String>();
 
   transient InMoov2Head head;
 
@@ -245,11 +241,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // if not loaded load -
     // FIXME - this needs alot of "help" :P
     // WHY IS THIS DONE ?
-    if (gesturesList.size() == 0) {
+    if (gestures.size() == 0) {
       loadGestures();
     }
 
-    for (String gesture : gesturesList) {
+    for (String gesture : gestures) {
       try {
         String methodName = gesture.substring(0, gesture.length() - 3);
         speakBlocking(methodName);
@@ -261,6 +257,27 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (Exception e) {
         error(e);
       }
+    }
+  }
+  
+  public void stop() {
+    if (head != null) {
+      head.stop();
+    }
+    if (rightHand != null) {
+      rightHand.stop();
+    }
+    if (leftHand != null) {
+      leftHand.stop();
+    }
+    if (rightArm != null) {
+      rightArm.stop();
+    }
+    if (leftArm != null) {
+      leftArm.stop();
+    }
+    if (torso != null) {
+      torso.stop();
     }
   }
 
@@ -532,7 +549,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
           if (Utils.loadFile(f.getAbsolutePath()) == true) {
             totalLoaded += 1;
-            gesturesList.add(f.getName());
+            String methodName = f.getName().substring(0, f.getName().length() - 3) + "()";
+            gestures.add(methodName);
           } else {
             error("could not load %s", f.getName());
             totalError += 1;
@@ -543,6 +561,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       }
     }
     info("%s Gestures loaded, %s Gestures with error", totalLoaded, totalError);
+    broadcastState();
     if (totalError > 0) {
       speakAlert(languagePack.get("GESTURE_ERROR"));
       return false;
@@ -846,13 +865,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return null;
   }
 
-  public List<AudioData> speakAlert(String toSpeak) {
+  public void speakAlert(String toSpeak) {
     speakBlocking(languagePack.get("ALERT"));
-    return speakBlocking(toSpeak);
+    speakBlocking(toSpeak);
   }
 
   // FIXME - publish text regardless if mouth exists ...
-  public List<AudioData> speakBlocking(String toSpeak) {
+  public void speakBlocking(String toSpeak) {
+    
+    if (toSpeak == null) {
+      return;
+    }
 
     // FIXME - publish onText when listening
     invoke("publishText", toSpeak);
@@ -863,16 +886,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     if (mouth == null) {
       log.error("speakBlocking is called, but my mouth is NULL...");
-      return null;
+      return;
     }
     if (!mute) {
       try {
-        return mouth.speakBlocking(toSpeak);
+        mouth.speakBlocking(toSpeak);
       } catch (Exception e) {
         log.error("speakBlocking threw", e);
       }
     }
-    return null;
   }
 
   public void startAll() throws Exception {

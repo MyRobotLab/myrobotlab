@@ -218,4 +218,11 @@ public class InMoov2Torso extends Service {
     midStom.fullSpeed();
     lowStom.fullSpeed();
   }
+
+  public void stop() {
+    topStom.stop();
+    midStom.stop();
+    lowStom.stop();
+  }
+
 }
