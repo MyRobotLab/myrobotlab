@@ -485,7 +485,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    log.warn("setspeed deprecated please use setvelocity");
+    
     this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);
     this.majeure.setSpeed(majeure);
@@ -496,6 +496,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   @Deprecated
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    log.warn("setspeed deprecated please use setSpeed");
     setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 

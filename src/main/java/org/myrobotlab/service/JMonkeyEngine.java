@@ -1426,7 +1426,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
    * @param data
    */
   public void onCvData(CvData data) {
-    onPointCloud(data.getPointCloud());
+    // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
+    // FIXME - do something interesting ... :)
   }
 
   public void onPointCloud(PointCloud pc) {
