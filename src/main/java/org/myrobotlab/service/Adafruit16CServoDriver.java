@@ -828,7 +828,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     attachServoControl(servo);
   }
 
-  public void attachServoControl(ServoControl servo) throws Exception {
+  @Override
+  public void attachServoControl(ServoControl servo) {
     if (isAttachedServoControl(servo)) {
       log.info("servo {} already attached", servo.getName());
       return;

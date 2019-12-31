@@ -458,8 +458,10 @@ public class Arduino extends AbstractMicrocontroller
     motor.attachMotorController(this);
   }
 
-  public void attachServoControl(ServoControl servo) throws Exception {
+  @Override
+  public void attachServoControl(ServoControl servo) {
     if (isAttached(servo)) {
+      log.info("servo {} already attached", servo.getName());
       return;
     }
 
