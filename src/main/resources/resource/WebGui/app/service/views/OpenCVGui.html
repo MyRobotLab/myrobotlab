@@ -3,6 +3,23 @@
     <div class="col-md-1">
         <button ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()">capture</button>
         <button ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">stop capture</button>
+        <button class="btn btn-default" ng-click="msg.setDisplay(true)">display</button>
+
+
+        <label for="sel1">camera index</label>
+
+                      <div class="form-group">
+                        <select class="form-control" ng-model="cameraIndexSelected" ng-change="msg.setCameraIndex(cameraIndexSelected)" id="cameraIndexSelected">
+                            <option>0</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                        </select>
+                    </div>
     </div>
     <div class="col-md-5">
         <img class="responsive-img" src="../../OpenCV/cv-20382.png"/>
@@ -38,8 +55,10 @@
     <div class="col-md-1"></div>
     <div class="col-md-1"></div>
 </div>
+<!-- handle non stream without broken image
 <div>
     Video Widget <a href="http://localhost:9090/input">Here</a>
     <br/>
     <img ng-src="{{imgSource}}"/>
 </div>
+-->
