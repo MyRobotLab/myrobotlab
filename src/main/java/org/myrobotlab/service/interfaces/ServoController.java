@@ -35,7 +35,18 @@ public interface ServoController extends Attachable {
    * @param pinOrAddress
    * @throws Exception
    */
+  @Deprecated /* use attachServo(ServoControl sc) */
   void attach(ServoControl servo, int pinOrAddress) throws Exception;
+  
+  /**
+   * preferred method to attach a ServoControl to a ServoController 
+   * previous attach function is deprecated - ServoController "should not" be calling any functions on ServoControl except possibly 
+   * ServoContro.attach(ServoController sc)
+   * 
+   * @param sc
+   */
+  void attachServoControl(ServoControl sc);
+  
 
   /**
    * The main function of the servo controller is to move the servo

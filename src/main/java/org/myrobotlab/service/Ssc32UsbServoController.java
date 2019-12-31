@@ -234,7 +234,8 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
    * Single parameter attach{type}({type}) - this is where the "real" attach
    * logic is for this service.
    */
-  public void attachServoControl(ServoControl servo) throws Exception {
+  @Override
+  public void attachServoControl(ServoControl servo) {
     if (isAttached(servo)) {
       return;
     }

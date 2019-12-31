@@ -2511,4 +2511,10 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   }
 
+  @Override
+  public void attachServoControl(ServoControl sc) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

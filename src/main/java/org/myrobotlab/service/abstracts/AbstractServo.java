@@ -220,25 +220,25 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * limit max - no "input" will be allowed to move the servo above this value
    */
   Double max = 180.0;
-  
-  // TODO - implement !!! 
-  
+
+  // TODO - implement !!!
+
   /**
-   * if true - a single moveTo command will be published for servo controllers or other
-   * services which implement their own speed contrl
+   * if true - a single moveTo command will be published for servo controllers
+   * or other services which implement their own speed contrl
    * 
-   * if false - many moveTo commands will be published by TimeEncoder to provided speed control using
-   * incremental moves at appropriate times to approximate appropriate speed
+   * if false - many moveTo commands will be published by TimeEncoder to
+   * provided speed control using incremental moves at appropriate times to
+   * approximate appropriate speed
    * 
-   * defaulted to true - here is a list of controllers which provide their own speed control
+   * defaulted to true - here is a list of controllers which provide their own
+   * speed control
    * 
-   *       * Arduino/MrlComm
-   *       * Adafruit16CServoController
-   *       * JMonkeyEngine / Interpolator
+   * * Arduino/MrlComm * Adafruit16CServoController * JMonkeyEngine /
+   * Interpolator
    * 
    */
   boolean useServoControllerSpeedControl = true;
-  
 
   public AbstractServo(String n, String id) {
     super(n, id);
@@ -336,8 +336,16 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   // @Override
+  // FIXME - decide how attach will work or wont with extra parameters
   public void attach(String controllerName, Integer pin, Double pos, Double speed) {
-    attach(controllerName, pin, pos, speed);
+    try {
+      setPin(pin);
+      setPosition(pos);
+      setSpeed(speed);
+      attach(controllerName);
+    } catch (Exception e) {
+      error(e);
+    }
   }
 
   /**
@@ -347,6 +355,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
 
+    if (controllers.contains(sc)) {
+      log.info("{} already attached", sc);
+      return;
+    }
+    
     // update pin if non-null value supplied
     if (pin != null) {
       setPin(pin);
@@ -374,6 +387,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     controllers.add(sc);
     enabled = true; // <-- how to deal with this ? "real" controllers usually
                     // need an enable/energize command
+    
+    // FIXME sc NEEDS TO BE FULL NAME !!!
+    send(sc, "attachServoControl", this);
 
     broadcastState();
   }
@@ -425,7 +441,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     invoke("publishServoDisable", this);
     broadcastState();
   }
-  
+
   public void fullSpeed() {
     log.info("disabling speed control");
     speed = null;
@@ -644,7 +660,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }
   }
-  
+
   /**
    * moveTo requests are published through this publishing point
    */
@@ -687,12 +703,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // working use .lock()
     // which is part of the motor command set ... once you lock a motor you
     // can't do anything until you unlock it
-    
+
     if (newPos == null) {
       log.info("{} processing a null move - will not move", getName());
       return;
     }
-    
 
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
@@ -877,12 +892,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sc;
   }
 
-
   @Override
   public ServoControl publishServoStopped(ServoControl sc) {
     return sc;
   }
-  
+
   public List<String> refreshControllers() {
     List<String> cs = Runtime.getServiceNamesFromInterface(ServoController.class);
     return cs;
