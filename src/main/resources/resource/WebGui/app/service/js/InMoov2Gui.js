@@ -9,6 +9,8 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.onText = null
     $scope.languageSelected = null
 
+    $scope.selectedGesture = null
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
@@ -26,6 +28,11 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     }
 
     $scope.active = ["btn", "btn-default", "active"]
+
+
+    $scope.executeGesture = function(gesture){
+        msg.send('execGesture', gesture);
+    }
 
     $scope.setActive = function(val) {
         var index = array.indexOf(5);
@@ -97,7 +104,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     // msg.subscribe('getServoNames')
     // msg.send('getServoNames')
 
-    msg.send('publishText')
+    msg.subscribe('publishText')
     msg.subscribe(this)
 }
 ])

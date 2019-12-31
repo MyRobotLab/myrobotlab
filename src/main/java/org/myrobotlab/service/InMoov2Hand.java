@@ -25,26 +25,83 @@ import org.slf4j.Logger;
  */
 public class InMoov2Hand extends Service implements LeapDataListener, PinArrayListener {
 
-  private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(InMoov2Hand.class);
 
+  private static final long serialVersionUID = 1L;
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(InMoov2Hand.class.getCanonicalName());
+    meta.addDescription("an easier way to create gestures for InMoov");
+    meta.addCategory("robot");
+
+    meta.addPeer("thumb", "Servo", "Thumb servo");
+    meta.addPeer("index", "Servo", "Index servo");
+    meta.addPeer("majeure", "Servo", "Majeure servo");
+    meta.addPeer("ringFinger", "Servo", "RingFinger servo");
+    meta.addPeer("pinky", "Servo", "Pinky servo");
+    meta.addPeer("wrist", "Servo", "Wrist servo");
+    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
+
+    return meta;
+  }
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+
+    try {
+
+      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+      i01.startRightHand("COM15");
+
+      ServoController controller = (ServoController) Runtime.getService("i01.right");
+      // arduino.pinMode(13, ServoController.OUTPUT);
+      // arduino.digitalWrite(13, 1);
+
+      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
+      Runtime.createAndStart("gui", "SwingGui");
+
+      Runtime.createAndStart("webgui", "WebGui");
+      // rightHand.connect("COM12"); TEST RECOVERY !!!
+      rightHand.close();
+      rightHand.open();
+      rightHand.openPinch();
+      rightHand.closePinch();
+      rightHand.rest();
+      /*
+       * SwingGui gui = new SwingGui("gui"); gui.startService();
+       */
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+  transient public ServoControl index;
   /**
    * peer services
    */
   transient public LeapMotion leap;
-  transient public ServoControl thumb;
-  transient public ServoControl index;
   transient public ServoControl majeure;
-  transient public ServoControl ringFinger;
   transient public ServoControl pinky;
-  transient public ServoControl wrist;
+  transient public ServoControl ringFinger;
 
   // The pins for the finger tip sensors
   public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
-  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
   // public int[] sensorLastValues = new int[] {0,0,0,0,0};
   public boolean sensorsEnabled = false;
+  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
+
+  transient public ServoControl thumb;
+
+  transient public ServoControl wrist;
 
   public InMoov2Hand(String n, String id) {
     super(n, id);
@@ -85,22 +142,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   }
 
-  public boolean enable() {
-
-    thumb.enable();
-
-    index.enable();
-
-    majeure.enable();
-
-    ringFinger.enable();
-
-    pinky.enable();
-
-    wrist.enable();
-    return true;
-  }
-
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
   }
@@ -135,22 +176,33 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     five();
   }
 
+  public void devilHorns() {
+    moveTo(150.0, 0.0, 180.0, 180.0, 0.0, 90.0);
+  }
+
   public void disable() {
-
     thumb.disable();
-
     index.disable();
-
     majeure.disable();
-
     ringFinger.disable();
     pinky.disable();
     wrist.disable();
-
   }
 
-  @Deprecated
-  public void enableAutoEnable(Boolean param) {
+  public boolean enable() {
+
+    thumb.enable();
+
+    index.enable();
+
+    majeure.enable();
+
+    ringFinger.enable();
+
+    pinky.enable();
+
+    wrist.enable();
+    return true;
   }
 
   @Deprecated
@@ -158,17 +210,8 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     setAutoDisable(param);
   }
 
-  public void setAutoDisable(Boolean param) {
-    thumb.setAutoDisable(param);
-    index.setAutoDisable(param);
-    majeure.setAutoDisable(param);
-    ringFinger.setAutoDisable(param);
-    pinky.setAutoDisable(param);
-    wrist.setAutoDisable(param);
-  }
-
-  public void devilHorns() {
-    moveTo(150.0, 0.0, 180.0, 180.0, 0.0, 90.0);
+  @Deprecated
+  public void enableAutoEnable(Boolean param) {
   }
 
   public void five() {
@@ -177,6 +220,27 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void four() {
     moveTo(150.0, 0.0, 0.0, 0.0, 0.0, 90.0);
+  }
+
+  public void fullSpeed() {
+    thumb.fullSpeed();
+    index.fullSpeed();
+    majeure.fullSpeed();
+    ringFinger.fullSpeed();
+    pinky.fullSpeed();
+    wrist.fullSpeed();
+  }
+
+  /**
+   * this method returns the analog pins that the hand is listening to. The
+   * InMoovHand listens on analog pins A0-A4 for the finger tip sensors.
+   * 
+   */
+  @Override
+  public String[] getActivePins() {
+    // TODO Auto-generated method stub
+    // for the InMoov hand, we're just going to say A0 - A4 ... for now..
+    return sensorPins;
   }
 
   public long getLastActivityTime() {
@@ -240,15 +304,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     log.info("end {} moveToBlocking ", getName());
   }
 
-  public void waitTargetPos() {
-    thumb.waitTargetPos();
-    index.waitTargetPos();
-    majeure.waitTargetPos();
-    ringFinger.waitTargetPos();
-    pinky.waitTargetPos();
-    wrist.waitTargetPos();
-  }
-
   public void ok() {
     moveTo(150.0, 180.0, 0.0, 0.0, 0.0, 90.0);
   }
@@ -301,176 +356,8 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return data;
   }
 
-  public void open() {
-    rest();
-  }
-
-  public void openPinch() {
-    moveTo(0, 0, 180, 180, 180);
-  }
-
   // ----- initialization end --------
   // ----- movements begin -----------
-
-  public void release() {
-    disable();
-  }
-
-  public void rest() {
-    thumb.rest();
-    index.rest();
-    majeure.rest();
-    ringFinger.rest();
-    pinky.rest();
-    wrist.rest();
-  }
-
-  public void fullSpeed() {
-    thumb.fullSpeed();
-    index.fullSpeed();
-    majeure.fullSpeed();
-    ringFinger.fullSpeed();
-    pinky.fullSpeed();
-    wrist.fullSpeed();
-  }
-
-  @Override
-  public boolean save() {
-    super.save();
-    thumb.save();
-    index.save();
-    majeure.save();
-    ringFinger.save();
-    pinky.save();
-    wrist.save();
-    return true;
-  }
-
-  public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
-    log.info("setPins {} {} {} {} {} {}", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin);
-    thumb.setPin(thumbPin);
-    index.setPin(indexPin);
-    majeure.setPin(majeurePin);
-    ringFinger.setPin(ringFingerPin);
-    pinky.setPin(pinkyPin);
-    wrist.setPin(wristPin);
-  }
-
-  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
-    setRest(thumb, index, majeure, ringFinger, pinky, null);
-  }
-
-  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
-    log.info("setRest {} {} {} {} {} {}", thumb, index, majeure, ringFinger, pinky, wrist);
-    this.thumb.setRest(thumb);
-    this.index.setRest(index);
-    this.majeure.setRest(majeure);
-    this.ringFinger.setRest(ringFinger);
-    this.pinky.setRest(pinky);
-    if (wrist != null) {
-      this.wrist.setRest(wrist);
-    }
-  }
-
-  public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    log.warn("setspeed deprecated please use setvelocity");
-    this.thumb.setSpeed(thumb);
-    this.index.setSpeed(index);
-    this.majeure.setSpeed(majeure);
-    this.ringFinger.setSpeed(ringFinger);
-    this.pinky.setSpeed(pinky);
-    this.wrist.setSpeed(wrist);
-  }
-
-  // FIXME - if multiple systems are dependent on the ServoControl map and
-  // limits to be a certain value
-  // leap should change its output, and leave the map and limits here alone
-  // FIXME !!! - should not have LeapMotion defined here at all - it should be
-  // pub/sub !!!
-  public void startLeapTracking() throws Exception {
-    if (leap == null) {
-      leap = (LeapMotion) startPeer("leap");
-    }
-    this.index.map(90.0, 0.0, this.index.getMin(), this.index.getMax());
-    this.thumb.map(90.0, 50.0, this.thumb.getMin(), this.thumb.getMax());
-    this.majeure.map(90.0, 0.0, this.majeure.getMin(), this.majeure.getMax());
-    this.ringFinger.map(90.0, 0.0, this.ringFinger.getMin(), this.ringFinger.getMax());
-    this.pinky.map(90.0, 0.0, this.pinky.getMin(), this.pinky.getMax());
-    leap.addLeapDataListener(this);
-    leap.startTracking();
-    return;
-  }
-
-  // FIXME !!! - should not have LeapMotion defined here at all - it should be
-  // pub/sub !!!
-  public void stopLeapTracking() {
-    leap.stopTracking();
-    this.index.map(this.index.getMin(), this.index.getMax(), this.index.getMin(), this.index.getMax());
-    this.thumb.map(this.thumb.getMin(), this.thumb.getMax(), this.thumb.getMin(), this.thumb.getMax());
-    this.majeure.map(this.majeure.getMin(), this.majeure.getMax(), this.majeure.getMin(), this.majeure.getMax());
-    this.ringFinger.map(this.ringFinger.getMin(), this.ringFinger.getMax(), this.ringFinger.getMin(), this.ringFinger.getMax());
-    this.pinky.map(this.pinky.getMin(), this.pinky.getMax(), this.pinky.getMin(), this.pinky.getMax());
-    this.rest();
-    return;
-  }
-
-  public void test() {
-    thumb.moveTo(thumb.getPos() + 2);
-    index.moveTo(index.getPos() + 2);
-    majeure.moveTo(majeure.getPos() + 2);
-    ringFinger.moveTo(ringFinger.getPos() + 2);
-    pinky.moveTo(pinky.getPos() + 2);
-    wrist.moveTo(wrist.getPos() + 2);
-
-    info("test completed");
-  }
-
-  public void three() {
-    moveTo(150.0, 0.0, 0.0, 0.0, 180.0, 90.0);
-  }
-
-  public void thumbsUp() {
-    moveTo(0.0, 180.0, 180.0, 180.0, 180.0, 90.0);
-  }
-
-  public void two() {
-    victory();
-  }
-
-  public void victory() {
-    moveTo(150.0, 0.0, 0.0, 180.0, 180.0, 90.0);
-  }
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoov2Hand.class.getCanonicalName());
-    meta.addDescription("an easier way to create gestures for InMoov");
-    meta.addCategory("robot");
-
-    meta.addPeer("thumb", "Servo", "Thumb servo");
-    meta.addPeer("index", "Servo", "Index servo");
-    meta.addPeer("majeure", "Servo", "Majeure servo");
-    meta.addPeer("ringFinger", "Servo", "RingFinger servo");
-    meta.addPeer("pinky", "Servo", "Pinky servo");
-    meta.addPeer("wrist", "Servo", "Wrist servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
-
-    return meta;
-  }
-
-  @Deprecated
-  public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
-  }
 
   // FIXME - use pub/sub attach to set this up without having this method !
   @Override
@@ -518,16 +405,72 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
   }
 
-  /**
-   * this method returns the analog pins that the hand is listening to. The
-   * InMoovHand listens on analog pins A0-A4 for the finger tip sensors.
-   * 
-   */
+  public void open() {
+    rest();
+  }
+
+  public void openPinch() {
+    moveTo(0, 0, 180, 180, 180);
+  }
+
+  public void release() {
+    disable();
+  }
+
+  public void rest() {
+    thumb.rest();
+    index.rest();
+    majeure.rest();
+    ringFinger.rest();
+    pinky.rest();
+    wrist.rest();
+  }
+
   @Override
-  public String[] getActivePins() {
-    // TODO Auto-generated method stub
-    // for the InMoov hand, we're just going to say A0 - A4 ... for now..
-    return sensorPins;
+  public boolean save() {
+    super.save();
+    thumb.save();
+    index.save();
+    majeure.save();
+    ringFinger.save();
+    pinky.save();
+    wrist.save();
+    return true;
+  }
+
+  public void setAutoDisable(Boolean param) {
+    thumb.setAutoDisable(param);
+    index.setAutoDisable(param);
+    majeure.setAutoDisable(param);
+    ringFinger.setAutoDisable(param);
+    pinky.setAutoDisable(param);
+    wrist.setAutoDisable(param);
+  }
+
+  public void setPins(int thumbPin, int indexPin, int majeurePin, int ringFingerPin, int pinkyPin, int wristPin) {
+    log.info("setPins {} {} {} {} {} {}", thumbPin, indexPin, majeurePin, ringFingerPin, pinkyPin, wristPin);
+    thumb.setPin(thumbPin);
+    index.setPin(indexPin);
+    majeure.setPin(majeurePin);
+    ringFinger.setPin(ringFingerPin);
+    pinky.setPin(pinkyPin);
+    wrist.setPin(wristPin);
+  }
+
+  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
+    setRest(thumb, index, majeure, ringFinger, pinky, null);
+  }
+
+  public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky, Double wrist) {
+    log.info("setRest {} {} {} {} {} {}", thumb, index, majeure, ringFinger, pinky, wrist);
+    this.thumb.setRest(thumb);
+    this.index.setRest(index);
+    this.majeure.setRest(majeure);
+    this.ringFinger.setRest(ringFinger);
+    this.pinky.setRest(pinky);
+    if (wrist != null) {
+      this.wrist.setRest(wrist);
+    }
   }
 
   /**
@@ -541,35 +484,96 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     this.sensorPins = pins;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+  public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    log.warn("setspeed deprecated please use setvelocity");
+    this.thumb.setSpeed(thumb);
+    this.index.setSpeed(index);
+    this.majeure.setSpeed(majeure);
+    this.ringFinger.setSpeed(ringFinger);
+    this.pinky.setSpeed(pinky);
+    this.wrist.setSpeed(wrist);
+  }
 
-    try {
+  @Deprecated
+  public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
+    setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
+  }
 
-      InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
-      i01.startRightHand("COM15");
-
-      ServoController controller = (ServoController) Runtime.getService("i01.right");
-      // arduino.pinMode(13, ServoController.OUTPUT);
-      // arduino.digitalWrite(13, 1);
-
-      InMoov2Hand rightHand = (InMoov2Hand) Runtime.start("r01", "InMoov2Hand");// InMoovHand("r01");
-      Runtime.createAndStart("gui", "SwingGui");
-
-      Runtime.createAndStart("webgui", "WebGui");
-      // rightHand.connect("COM12"); TEST RECOVERY !!!
-      rightHand.close();
-      rightHand.open();
-      rightHand.openPinch();
-      rightHand.closePinch();
-      rightHand.rest();
-      /*
-       * SwingGui gui = new SwingGui("gui"); gui.startService();
-       */
-
-    } catch (Exception e) {
-      log.error("main threw", e);
+  // FIXME - if multiple systems are dependent on the ServoControl map and
+  // limits to be a certain value
+  // leap should change its output, and leave the map and limits here alone
+  // FIXME !!! - should not have LeapMotion defined here at all - it should be
+  // pub/sub !!!
+  public void startLeapTracking() throws Exception {
+    if (leap == null) {
+      leap = (LeapMotion) startPeer("leap");
     }
+    this.index.map(90.0, 0.0, this.index.getMin(), this.index.getMax());
+    this.thumb.map(90.0, 50.0, this.thumb.getMin(), this.thumb.getMax());
+    this.majeure.map(90.0, 0.0, this.majeure.getMin(), this.majeure.getMax());
+    this.ringFinger.map(90.0, 0.0, this.ringFinger.getMin(), this.ringFinger.getMax());
+    this.pinky.map(90.0, 0.0, this.pinky.getMin(), this.pinky.getMax());
+    leap.addLeapDataListener(this);
+    leap.startTracking();
+    return;
+  }
+
+  public void stop() {
+    thumb.stop();
+    index.stop();
+    majeure.stop();
+    ringFinger.stop();
+    pinky.stop();
+    wrist.stop();
+  }
+
+  // FIXME !!! - should not have LeapMotion defined here at all - it should be
+  // pub/sub !!!
+  public void stopLeapTracking() {
+    leap.stopTracking();
+    this.index.map(this.index.getMin(), this.index.getMax(), this.index.getMin(), this.index.getMax());
+    this.thumb.map(this.thumb.getMin(), this.thumb.getMax(), this.thumb.getMin(), this.thumb.getMax());
+    this.majeure.map(this.majeure.getMin(), this.majeure.getMax(), this.majeure.getMin(), this.majeure.getMax());
+    this.ringFinger.map(this.ringFinger.getMin(), this.ringFinger.getMax(), this.ringFinger.getMin(), this.ringFinger.getMax());
+    this.pinky.map(this.pinky.getMin(), this.pinky.getMax(), this.pinky.getMin(), this.pinky.getMax());
+    this.rest();
+    return;
+  }
+
+  public void test() {
+    thumb.moveTo(thumb.getPos() + 2);
+    index.moveTo(index.getPos() + 2);
+    majeure.moveTo(majeure.getPos() + 2);
+    ringFinger.moveTo(ringFinger.getPos() + 2);
+    pinky.moveTo(pinky.getPos() + 2);
+    wrist.moveTo(wrist.getPos() + 2);
+
+    info("test completed");
+  }
+
+  public void three() {
+    moveTo(150.0, 0.0, 0.0, 0.0, 180.0, 90.0);
+  }
+
+  public void thumbsUp() {
+    moveTo(0.0, 180.0, 180.0, 180.0, 180.0, 90.0);
+  }
+
+  public void two() {
+    victory();
+  }
+
+  public void victory() {
+    moveTo(150.0, 0.0, 0.0, 180.0, 180.0, 90.0);
+  }
+  
+  public void waitTargetPos() {
+    thumb.waitTargetPos();
+    index.waitTargetPos();
+    majeure.waitTargetPos();
+    ringFinger.waitTargetPos();
+    pinky.waitTargetPos();
+    wrist.waitTargetPos();
   }
 
 }
