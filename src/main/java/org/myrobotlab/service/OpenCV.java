@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -60,9 +60,6 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
-import org.bytedeco.opencv.opencv_java;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
@@ -87,7 +84,6 @@ import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.FrameFileRecorder;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
-import org.myrobotlab.opencv.OpenCVFilterFaceDetect;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
@@ -139,6 +135,8 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
 public class OpenCV extends AbstractComputerVision {
 
   int vpId = 0;
+  
+  transient CanvasFrame canvasFrame = null;
 
   class VideoProcessor implements Runnable {
 
@@ -481,9 +479,15 @@ public class OpenCV extends AbstractComputerVision {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     LoggingFactory.init("info");
 
-    Runtime.start("gui", "SwingGui");
+   //  Runtime.start("gui", "SwingGui");
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+
+    // cv.capture();
+    // cv.setDisplay(true);
 
     // cv.setGrabberType("OpenKinect");
     // cv.setStreamerEnabled(true);
@@ -829,6 +833,8 @@ public class OpenCV extends AbstractComputerVision {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
+
+  boolean display = true;
 
   static String DATA_DIR;
 
@@ -1437,9 +1443,9 @@ public class OpenCV extends AbstractComputerVision {
     putText("frame: %d", frameIndex);
     putText("time:  %d", frameStartTs);
 
-    BufferedImage display = data.getDisplay();
-    if (display != null) {
-      Graphics2D g2d = display.createGraphics();
+    BufferedImage displayImage = data.getDisplay();
+    if (displayImage != null) {
+      Graphics2D g2d = displayImage.createGraphics();
 
       if (g2d != null) {
         // we have a display...
@@ -1464,6 +1470,17 @@ public class OpenCV extends AbstractComputerVision {
          */
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
+        
+        if (display) {
+          if (canvasFrame == null) {
+            canvasFrame = new CanvasFrame("display");
+          }
+          canvasFrame.showImage(b);
+        } else if (!display && canvasFrame != null) {
+          canvasFrame.dispose();
+          canvasFrame = null;
+        }
+
       }
     }
 
@@ -1477,7 +1494,8 @@ public class OpenCV extends AbstractComputerVision {
 
     // future publishing (same as BoofCv !)
     invoke("publishCvData", data);
-
+    
+ 
     // FIXME - TODO
     // data.prepareToSerialize();
     // invoke("publishVideoData", data);
@@ -2061,6 +2079,10 @@ public class OpenCV extends AbstractComputerVision {
     else
       f.enable();
     broadcastState();
+  }
+  
+  public void setDisplay(boolean b) {
+    display = b;
   }
 
 }
