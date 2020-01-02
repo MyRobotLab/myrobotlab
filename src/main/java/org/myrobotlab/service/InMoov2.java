@@ -74,6 +74,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
     meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
     meta.addPeer("mouth", speechService, "InMoov speech service");
+    meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
 
     meta.addPeer("headTracking", "Tracking", "Head tracking system");
 
@@ -94,7 +95,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
-      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
 
