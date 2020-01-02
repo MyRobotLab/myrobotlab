@@ -94,7 +94,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      // InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
 
@@ -103,9 +103,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
        * cv.setCameraIndex(2);
        */
       // i01.startSimulator();
-
+      /*
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       mega.connect("/dev/ttyACM0");
+      */
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
