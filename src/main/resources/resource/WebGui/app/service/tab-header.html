@@ -1,51 +1,56 @@
-<div class="col-md-12">
+<div class="col-md-11">
     <h3 class="panel-title">
         <div uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
-         <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu">
+            <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu">
                 <i uib-dropdown-toggle class="glyphicon glyphicon-list"></i>
             </span>
             <img ng-src="{{::service.simpleName}}.png" alt="" width="32">
             &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}@{{::service.id}}&nbsp;&nbsp
-           
             <ul uib-dropdown-menu>
                 <li>
                     <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
                         <i class="glyphicon glyphicon-question-sign"></i>
                         &nbsp;&nbsp;help
+                    
+                    
                     </a>
                 </li>
                 <li>
                     <a href="" ng-click="servicemenuDropdownOpen = false;msg.releaseService()">
                         <i class="glyphicon glyphicon-remove"></i>
                         &nbsp;&nbsp;release                    
+                    
+                    
                     </a>
                 </li>
-                
-
-
                 <li>
                     <a href="" ng-click="servicemenuDropdownOpen = false;msg.broadcastState()">
                         <i class="glyphicon glyphicon-remove"></i>
                         &nbsp;&nbsp;refresh                    
+                    
+                    
                     </a>
                 </li>
-
                 <li>
-                  
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
-                        &nbsp;&nbsp;virtualize                    
-                        <span>
-                        <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
-                        </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
+                    &nbsp;&nbsp;virtualize                    
+                        
                     
+                    <span>
+                        <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
+                    </span>
                 </li>
                 <li>
                     <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">
                         <i class="glyphicon glyphicon-list-alt"></i>
                         &nbsp;&nbsp;list methods
                     
+                    
+                    
                     </a>
                     <script type="text/ng-template" id="listMethodsPopoverTemplate.html">
+                        
+                        
                         
                                 <table class="table">
                                     <thead>
@@ -64,6 +69,8 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                    
+                    
                     </script>
                 </li>
                 <li>
@@ -71,15 +78,25 @@
                         <i class="glyphicon glyphicon-list-alt"></i>
                         &nbsp;&nbsp;show json
                     
+                    
+                    
                     </a>
                     <!--TODO - remove this comment: @grog: Is this what you were trying to achieve?-->
-                    <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">                        
+                    <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">
+                        
+                                                
                                 <button class="btn btn-default" clipboard text="servicedatajson"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
                                 <div><pre>{{servicedatajson}}</pre></div>
                             
+                    
+                    
                     </script>
                 </li>
             </ul>
         </div>
     </h3>
+</div>
+<div class="col-md-1">
+    <button ng-show="statusControlMode=='status'" ng-click="changeMode()" type="button" class="btn btn-primary">status</button>
+    <button ng-show="statusControlMode!='status'" ng-click="changeMode()" type="button" class="btn btn-warning">control</button>
 </div>

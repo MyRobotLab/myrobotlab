@@ -849,7 +849,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
       /// servo.attach((ServoDataListener) catcher);
 
-      Runtime.exportAll("export.py");
+      catcher.exportAll("export.py");
 
       // FIXME - junit for testing return values of moveTo when a blocking call
       // is in progress
