@@ -1003,13 +1003,20 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return super.isReady();
   }
 
+  @Deprecated /* use setMute */
   public void mute() {
     this.mute = true;
   }
 
+  @Deprecated /* use setMute */
   public void unmute() {
     this.mute = false;
   }
+  
+  public void setMute(boolean b) {
+    this.mute = b;
+  }
+  
   
   public Boolean setBlocking(Boolean b) {
     blocking = b;

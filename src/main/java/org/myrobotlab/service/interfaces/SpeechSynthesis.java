@@ -99,12 +99,20 @@ public interface SpeechSynthesis extends NameProvider {
   /**
    * silence the service
    */
+  @Deprecated /* use setMute */
   public void mute();
 
   /**
    * un-silence the service
    */
+  @Deprecated /* use setMute */
   public void unmute();
+  
+  /**
+   * mute or unmute 
+   * @param mute
+   */
+  public void setMute(boolean mute);
 
   // FIXME - not needed in interface
   // public String getLocalFileName(SpeechSynthesis provider, String toSpeak)
