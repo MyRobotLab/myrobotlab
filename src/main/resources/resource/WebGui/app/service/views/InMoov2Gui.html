@@ -32,8 +32,7 @@
                 </td>
                 <td>
                     {{service.language}}              
-                    
-                    
+                                
                     <div class="form-group">
                         <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
                             <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
@@ -95,6 +94,7 @@
                     <button class="btn btn-default" ng-click="msg.startEyeTracking()">start eye tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
                     <button class="btn btn-default" ng-click="msg.startMouth()">start mouth</button>
+                     <button class="btn btn-default" ng-click="msg.startEye()">start eye</button>
                     <button class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
                 </td>
             </tr>

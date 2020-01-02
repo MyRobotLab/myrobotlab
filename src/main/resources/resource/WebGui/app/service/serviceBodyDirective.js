@@ -58,6 +58,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         mrl.sendTo(scope.panel.name, 'setVirtual', virtual)
                     }
 
+                    newscope.export = function() {
+                        mrl.sendTo(scope.panel.name, 'exportAll')
+                    }
+
                     var header = $templateCache.get('service/tab-header.html');
                     var content = $templateCache.get(scope.panel.simpleName + 'Gui.html');
                     // var footer = $templateCache.get('service/tab-footer.html');

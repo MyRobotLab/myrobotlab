@@ -2588,19 +2588,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String export() throws IOException {
-    String python = LangUtils.toPython(getName());
     // FIXME - interaction with user if file exists ?
+    String filename = getRootDataDir() + fs + getName() + ".py";
     return export(getDataDir() + fs + getName() + ".py", getName());
   }
 
   public String exportAll() throws IOException {
     // FIXME - interaction with user if file exists ?
-    return exportAll(getDataDir() + fs + "all.py");
+    return exportAll(getRootDataDir() + fs +  getId() + ".py");
   }
   
   public String export(String filename, String names) throws IOException {
     String python = LangUtils.toPython(names);
     Files.write(Paths.get(filename), python.toString().getBytes());
+    info("saved %s to %s", getName(), filename);
     return python;
   }
 
@@ -2608,6 +2609,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // currently only support python - maybe in future we'll support js too
     String python = LangUtils.toPython();
     Files.write(Paths.get(filename), python.toString().getBytes());
+    info("saved %s to %s", getName(), filename);
     return python;
   }
 
