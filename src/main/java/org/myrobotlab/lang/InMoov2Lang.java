@@ -49,10 +49,6 @@ public class InMoov2Lang extends LangUtils {
       sb.append(name + ".startTorso()\n");
     }
 
-    if (inmoov2.getHead() != null) {
-      sb.append(name + ".startHead()\n");
-    }
-
     return sb.toString();
   }
 

@@ -102,7 +102,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
        * OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
        * cv.setCameraIndex(2);
        */
-      i01.startSimulator();
+      // i01.startSimulator();
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       mega.connect("/dev/ttyACM0");

@@ -17,6 +17,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
+import org.myrobotlab.service.MarySpeech;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
@@ -1013,6 +1014,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public Boolean setBlocking(Boolean b) {
     blocking = b;
     return b;
+  }
+  
+  public boolean isMute() {
+    return mute;
   }
 
   static public ServiceType getMetaData(String serviceType) {
