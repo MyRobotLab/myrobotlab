@@ -64,7 +64,6 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -577,13 +576,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public Heartbeat heartbeat() {
     try {
       Heartbeat heartbeat = new Heartbeat(getName(), getId(), getServiceList());
-      
-      
+
       // send heartbeats out over all connections
       Set<String> cs = connections.keySet();
       for (String gateway : cs) {
         Map<String, Object> c = connections.get(gateway);
-        String id = (String)c.get("id");
+        String id = (String) c.get("id");
         if (id == null) {
           log.error("gateway %s has null id!", gateway);
           continue;
@@ -2848,19 +2846,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
   }
 
-  public static String export(String filename, String names) throws IOException {
-    String python = LangUtils.toPython(names);
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    return python;
-  }
-
-  public static String exportAll(String filename) throws IOException {
-    // currently only support python - maybe in future we'll support js too
-    String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    return python;
-  }
-
   public static Runtime getInstance(String[] args2) {
     Runtime.main(args2);
     return Runtime.getInstance();
@@ -3402,12 +3387,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public Map<String, Map<String, Object>> getClients() {
     return getConnections(getName());
   }
-  
+
   public void startHeartbeat() {
     // we are alive - start our process heartbeat
     runtime.addTask(2000, "heartbeat");
   }
-  
+
   public void stopHeartbeat() {
     purgeTask("heartbeat");
   }
@@ -3444,12 +3429,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         System.out.println("null");
         return;
       }
-      
+
       boolean filterHeartBeatsFromCli = true;
       if (filterHeartBeatsFromCli && msg.method.equals("onHeartbeat")) {
         return;
       }
-      
+
       // should really "always" be a single item in the array since its a return
       // msg
       // but just in case ...

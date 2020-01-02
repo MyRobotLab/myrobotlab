@@ -10,40 +10,6 @@
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">language</label>
-                </td>
-                <td>
-                    {{service.language}}              
-                    
-                    <div class="form-group">
-                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
-                            <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
-                        </select>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>servos</label>
-                </td>
-                <td>
-                    <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
-                    <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
-                    <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
-                    <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
-                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
-                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
-                    <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
-                    <button class="btn btn-default" type="button" ng-click="msg.stop()">
-                        <span>
-                            <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
-                        </span>
-                    </button>
-                    <button class="btn btn-default" ng-click="msg.disable()">disable</button>
-                </td>
-            </tr>
-            <tr>
-                <td>
                     <label for="sel1">configurations</label>
                 </td>
                 <td>
@@ -55,6 +21,57 @@
                             <option>old config</option>
                         </select>
                     </div>
+                    <button class="btn btn-default" ng-click="msg.export()">save</button>
+                    <button class="btn btn-default" ng-click="msg.exportAll()">save all</button>
+                    <button class="btn btn-default" ng-click="msg.load()">load</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="sel1">language</label>
+                </td>
+                <td>
+                    {{service.language}}              
+                    
+                    
+                    <div class="form-group">
+                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
+                            <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td><label>simulator</label><br><img src="../JMonkeyEngine.png"/></td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
+                </td>
+            </tr>
+           <tr>
+                <td><label>tracking</label><br><img src="../Tracking.png"/></td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startHeadTracking()">start head tracking</button>
+                    <button class="btn btn-default" ng-click="msg.startEyesTracking()">start eyes tracking</button>
+                </td>
+            </tr>
+             <tr>
+                <td>
+                    <label>servos</label>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+                    <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+                    <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
+                    <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
+                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                    <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+                    <button class="btn btn-default" type="button" ng-click="msg.stop()">
+                        <span>
+                            <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                        
+                        </span>
+                    </button>
+                    <button class="btn btn-default" ng-click="msg.disable()">disable</button>
                 </td>
             </tr>
             <tr>

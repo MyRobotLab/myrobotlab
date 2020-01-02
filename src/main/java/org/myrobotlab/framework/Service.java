@@ -59,6 +59,7 @@ import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
@@ -782,7 +783,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getHomeDir() {
     return System.getProperty("user.home");
   }
-  
+
   static public String getDataDir(String typeName) {
     String dataDir = Runtime.getOptions().dataDir + fs + typeName;
     File f = new File(dataDir);
@@ -828,7 +829,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getResourceDir() {
     return getResourceDir(getClass().getSimpleName());
   }
-  
+
   static public String getResourceDir(String serviceType) {
 
     String resourceDir = getResourceRoot() + fs + serviceType;
@@ -876,9 +877,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
- 
   /**
-   * Constructor of service, reservedkey typically is a services name and inId will be its process id
+   * Constructor of service, reservedkey typically is a services name and inId
+   * will be its process id
+   * 
    * @param reservedKey
    * @param inId
    */
@@ -1012,7 +1014,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       outbox.notifyList.put(listener.topicMethod, notifyList);
     }
   }
-  
+
   public boolean hasSubscribed(String listener, String topicMethod) {
     ArrayList<MRLListener> nes = outbox.notifyList.get(topicMethod);
     for (MRLListener ne : nes) {
@@ -1022,7 +1024,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return false;
   }
-
 
   public void addTask(long intervalMs, String method) {
     addTask(intervalMs, method, new Object[] {});
@@ -2585,4 +2586,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void setId(String id) {
     this.id = id;
   }
+
+  public String export() throws IOException {
+    String python = LangUtils.toPython(getName());
+    // FIXME - interaction with user if file exists ?
+    return export(getDataDir() + fs + getName() + ".py", getName());
+  }
+
+  public String exportAll() throws IOException {
+    // FIXME - interaction with user if file exists ?
+    return exportAll(getDataDir() + fs + "all.py");
+  }
+  
+  public String export(String filename, String names) throws IOException {
+    String python = LangUtils.toPython(names);
+    Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
+  }
+
+  public String exportAll(String filename) throws IOException {
+    // currently only support python - maybe in future we'll support js too
+    String python = LangUtils.toPython();
+    Files.write(Paths.get(filename), python.toString().getBytes());
+    return python;
+  }
+
+
 }

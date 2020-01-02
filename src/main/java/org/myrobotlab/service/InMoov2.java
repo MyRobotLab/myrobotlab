@@ -20,9 +20,11 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
+import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -55,8 +57,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     ServiceType meta = new ServiceType(InMoov2.class);
     meta.addDescription("InMoov2 Service");
     meta.addCategory("robot");
-    
+
     meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
+
+    meta.addPeer("eye", "OpenCV", "eye");
+
+    meta.addPeer("brain", "ProgramAB", "brain");
 
     meta.addPeer("head", "InMoov2Head", "head");
     meta.addPeer("torso", "InMoov2Torso", "torso");
@@ -69,8 +75,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
     meta.addPeer("mouth", speechService, "InMoov speech service");
 
+    meta.addPeer("headTracking", "Tracking", "Head tracking system");
+
+    meta.sharePeer("headTracking.opencv", "eye", "OpenCV", "shared head OpenCV");
+    // meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head
+    // Arduino"); NO !!!!
+    meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
+    meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
+
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");   
+    meta.addRootPeer("python", "Python", "shared Python service");
 
     return meta;
   }
@@ -83,14 +97,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
-      
-      OpenCV cv = (OpenCV)Runtime.start("cv", "OpenCV");
-      cv.setCameraIndex(2);
+
+      /*
+       * OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+       * cv.setCameraIndex(2);
+       */
       i01.startSimulator();
-      
-      Arduino mega = (Arduino)Runtime.start("mega", "Arduino");
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       mega.connect("/dev/ttyACM0");
-      
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
@@ -101,19 +117,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   boolean autoStartBrowser = false;
-  
-  // FIXME ugh - new MouthControl service that uses AudioFile output
-  transient public MouthControl mouthControl;
 
   transient ProgramAB brain;
 
   Set<String> configs = null;
 
-  // transient InMoovEyelids eyelids; they are in the head
-
   String currentConfigurationName = "default";
 
   transient SpeechRecognizer ear;
+
+  // transient InMoovEyelids eyelids; they are in the head
+
+  transient OpenCV eye;
 
   transient Tracking eyesTracking;
 
@@ -146,14 +161,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient InMoov2Hand leftHand;
 
-  transient
-
   int maxInactivityTimeSeconds = 120;
+
+  transient SpeechSynthesis mouth;
 
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
-  transient SpeechSynthesis mouth;
+  // FIXME ugh - new MouthControl service that uses AudioFile output
+  transient public MouthControl mouthControl;
 
   boolean mute = false;
 
@@ -265,27 +281,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       } catch (Exception e) {
         error(e);
       }
-    }
-  }
-  
-  public void stop() {
-    if (head != null) {
-      head.stop();
-    }
-    if (rightHand != null) {
-      rightHand.stop();
-    }
-    if (leftHand != null) {
-      leftHand.stop();
-    }
-    if (rightArm != null) {
-      rightArm.stop();
-    }
-    if (leftArm != null) {
-      leftArm.stop();
-    }
-    if (torso != null) {
-      torso.stop();
     }
   }
 
@@ -410,6 +405,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return null;
   }
 
+  public InMoov2Head getHead() {
+    return head;
+  }
+
   /**
    * get current language
    */
@@ -472,6 +471,26 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
 
     return lastActivityTime;
+  }
+
+  public InMoov2Arm getLeftArm() {
+    return leftArm;
+  }
+
+  public InMoov2Hand getLeftHand() {
+    return leftHand;
+  }
+
+  public InMoov2Arm getRightArm() {
+    return rightArm;
+  }
+
+  public InMoov2Hand getRightHand() {
+    return rightHand;
+  }
+
+  public InMoov2Torso getTorso() {
+    return torso;
   }
 
   public void halfSpeed() {
@@ -677,6 +696,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   }
 
+  public OpenCVData onOpenCVData(OpenCVData data) {
+    return data;
+  }
+
   @Override
   public void onText(String text) {
     // FIXME - we should be able to "re"-publish text but text is coming from
@@ -766,7 +789,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, null);
   }
 
-  
   @Deprecated
   public void setHandVelocity(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setHandSpeed(which, thumb, index, majeure, ringFinger, pinky, wrist);
@@ -776,13 +798,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     setHeadSpeed(rothead, neck, null, null, null);
   }
 
-  
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
-    if (head != null) {
-      head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed);
-    } else {
-      log.warn("setHeadSpeed - I have no head");
-    }
+    setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, null);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
@@ -792,13 +809,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.warn("setHeadVelocity - I have no head");
     }
   }
-  
+
   @Deprecated
   public void setHeadVelocity(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null, null);
   }
 
-  
   @Deprecated
   public void setHeadVelocity(Double rothead, Double neck, Double rollNeck) {
     setHeadSpeed(rothead, neck, null, null, null, rollNeck);
@@ -839,6 +855,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void setMute(boolean mute) {
     info("Set mute to %s", mute);
     this.mute = mute;
+    if (mouth != null) {
+      if (mute) {
+        mouth.mute();
+      } else {
+        mouth.unmute();
+      }
+    }
   }
 
   @Deprecated
@@ -878,9 +901,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(toSpeak);
   }
 
+  /// end blah
+
   // FIXME - publish text regardless if mouth exists ...
   public void speakBlocking(String toSpeak) {
-    
+
     if (toSpeak == null) {
       return;
     }
@@ -909,7 +934,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     startMouth();
     startBrain();
 
-    // startHeadTracking();
+    startHeadTracking();
     // startEyesTracking();
     // startOpenCV();
     startEar();
@@ -920,50 +945,51 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking("startup sequence completed");
   }
 
-  /// end blah
-
   public void startBrain() {
 
-    brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+    if (brain == null) {
 
-    // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-    attachTextPublisher(brain.getName());
+      brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
 
-    // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
-    // FIXME - deal with language
-    // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
-    brain.repetitionCount(10);
-    brain.setPath("InMoov/chatBot");
-    // FIXME - deal with language chatBot.startSession("default",
-    // getLanguage());
-    // reset some parameters to default...
-    brain.setPredicate("topic", "default");
-    brain.setPredicate("questionfirstinit", "");
-    brain.setPredicate("tmpname", "");
-    brain.setPredicate("null", "");
-    // load last user session
-    if (!brain.getPredicate("name").isEmpty()) {
-      if (brain.getPredicate("lastUsername").isEmpty() || brain.getPredicate("lastUsername").equals("unknown")) {
-        brain.setPredicate("lastUsername", brain.getPredicate("name"));
+      // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
+      attachTextPublisher(brain.getName());
+
+      // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
+      // FIXME - deal with language
+      // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
+      brain.repetitionCount(10);
+      brain.setPath("InMoov/chatBot");
+      // FIXME - deal with language chatBot.startSession("default",
+      // getLanguage());
+      // reset some parameters to default...
+      brain.setPredicate("topic", "default");
+      brain.setPredicate("questionfirstinit", "");
+      brain.setPredicate("tmpname", "");
+      brain.setPredicate("null", "");
+      // load last user session
+      if (!brain.getPredicate("name").isEmpty()) {
+        if (brain.getPredicate("lastUsername").isEmpty() || brain.getPredicate("lastUsername").equals("unknown")) {
+          brain.setPredicate("lastUsername", brain.getPredicate("name"));
+        }
       }
-    }
-    brain.setPredicate("parameterHowDoYouDo", "");
-    try {
-      brain.savePredicates();
-    } catch (IOException e) {
-      log.error("saving predicates threw", e);
-    }
-    // start session based on last recognized person
-    if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
-      brain.startSession(brain.getPredicate("lastUsername"));
-    }
+      brain.setPredicate("parameterHowDoYouDo", "");
+      try {
+        brain.savePredicates();
+      } catch (IOException e) {
+        log.error("saving predicates threw", e);
+      }
+      // start session based on last recognized person
+      if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
+        brain.startSession(brain.getPredicate("lastUsername"));
+      }
 
-    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    brain.addTextListener(htmlFilter);
-    htmlFilter.addListener("publishText", getName(), "speak");
+      HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+      brain.addTextListener(htmlFilter);
+      htmlFilter.addListener("publishText", getName(), "speak");
+    }
   }
 
-  public SpeechRecognizer startEar() {
+  public void startEar() {
 
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
@@ -974,7 +1000,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     speakBlocking(languagePack.get("STARTINGEAR"));
 
-    return ear;
   }
 
   public void startedGesture() {
@@ -991,6 +1016,26 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  // FIXME - universal (good) way of handling all exceptions - ie - reporting
+  // back to the user the problem in a short concise way but have
+  // expandable detail in appropriate places
+  public void startEye() throws Exception {
+    if (eye == null) {
+      speakBlocking(languagePack.get("STARTINGOPENCV"));
+      eye = (OpenCV) startPeer("eye", "OpenCV");
+      subscribeTo(eye.getName(), "publishOpenCVData");
+    }
+  }
+
+  public void startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
+    if (eye == null) {
+      startEye();
+    }
+    speakBlocking(languagePack.get("TRACKINGSTARTED"));
+    eyesTracking = (Tracking) this.startPeer("eyesTracking");
+    eyesTracking.connect(eye, head.eyeX, head.eyeY);
+  }
+
   public void startHead() {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
@@ -999,13 +1044,30 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       speakBlocking(languagePack.get("STARTINGHEAD"));
       head = (InMoov2Head) startPeer("head");
     }
-    
+
     if (mouthControl == null) {
       speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
       mouthControl = (MouthControl) startPeer("mouthControl");
       mouthControl.attach(head.jaw);
       mouthControl.attach((Attachable) mouth);
-      mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for config !!!
+      mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
+                                    // config !!!
+    }
+  }
+
+  public void startHeadTracking() throws Exception {
+    if (eye == null) {
+      startEye();
+    }
+
+    if (head == null) {
+      startHead();
+    }
+
+    if (headTracking == null) {
+      speakBlocking(languagePack.get("TRACKINGSTARTED"));
+      headTracking = (Tracking) this.startPeer("headTracking");
+      headTracking.connect(this.eye, head.rothead, head.neck);
     }
   }
 
@@ -1029,6 +1091,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public SpeechSynthesis startMouth() {
     if (mouth == null) {
       mouth = (SpeechSynthesis) startPeer("mouth");
+      if (mute) {
+        mouth.mute();
+      }
     }
     // this.attach((Attachable) mouth);
     // if (ear != null) ....
@@ -1036,6 +1101,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
 
     return mouth;
+  }
+
+  @Deprecated /* use start eye */
+  public void startOpenCV() throws Exception {
+    startEye();
   }
 
   public void startRightArm() {
@@ -1061,6 +1131,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     startTorso();
   }
 
+  // FIXME .. externalize in a json file included in InMoov2
   public void startSimulator() throws Exception {
 
     if (jme == null) {
@@ -1068,14 +1139,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
     }
 
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();// +
-                                                                                   // fs
-                                                                                   // +
-                                                                                   // "assets"
-                                                                                   // +
-                                                                                   // fs
-                                                                                   // +
-                                                                                   // "Models";
+    // adding InMoov2 asset path to the jonkey simulator
+    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -1252,7 +1317,28 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso = (InMoov2Torso) startPeer("torso");
     }
   }
-  
+
+  public void stop() {
+    if (head != null) {
+      head.stop();
+    }
+    if (rightHand != null) {
+      rightHand.stop();
+    }
+    if (leftHand != null) {
+      leftHand.stop();
+    }
+    if (rightArm != null) {
+      rightArm.stop();
+    }
+    if (leftArm != null) {
+      leftArm.stop();
+    }
+    if (torso != null) {
+      torso.stop();
+    }
+  }
+
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
     p.stop();

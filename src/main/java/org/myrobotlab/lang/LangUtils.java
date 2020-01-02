@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -25,6 +27,8 @@ public class LangUtils {
   enum CodePart {
     create, configure, start, attach, subscribe;
   }
+  
+  Set<String> suppressExportOfTypes = new TreeSet<>();
 
   public CodeMeta toMeta(List<ServiceInterface> si) {
     return null;
@@ -96,9 +100,11 @@ public class LangUtils {
 
     sb.append("##############################################################\n");
     sb.append("## imports ####\n");
+    sb.append("import time\n");
     sb.append("import org.myrobotlab.framework.Platform as Platform\n");
+    sb.append("import org.myrobotlab.service.Runtime as Runtime\n");
     sb.append("\n");
-    sb.append((Platform.isVirtual()?"Platform.setVirtual(True)\n":"# Platform.setVirtual(True)\\n"));
+    sb.append((Platform.isVirtual()?"Platform.setVirtual(True)\n":"# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
 
     // from current running system - vs something uncreated passed in ....
     List<ServiceInterface> allServices = Runtime.getServices();
