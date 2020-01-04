@@ -1,37 +1,50 @@
-<div>
-  Start Time: {{service.serviceStartTime}}<br /> <br />
-  <!--  TODO: allow the user to upgrade ?
-	<p id="info_upgrade">Web Speech API is not supported by this browser.
-     Upgrade to <a href="//www.google.com/chrome">Chrome</a>
-     version 25 or later.</p>  -->
-  <br /> 
-  Language: {{service.language}} <br />
-  Current Language: {{current_language}} <br />
-  lang selected id: {{lang.selectedOption.id}} <br />
-  Recognition Language: {{recognition.lang}} <br />
+<div ng-show="{{!state.webkitSupport}}">
+    <h3>
+        WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
+        versions 25 or later.
+    </h3>
+</div>
+<div ng-show="state.webkitSupport" class="col-md-3">
+    <table class="table table-striped">
+        <tr>
+            <td>status</td>
+            <td>
+                <img ng-src="{{state.img}}" width="150"/>
+                {{state.status}}
 
-  Status: {{status}} <br />
-  <form>
-    <input class="form-control" ng-model="utterance" name="utterance"
-      id="utterance" />
-    <button id="startListening" class="btn btn-default"
-      ng-click="startRecognition()"
-      ng-init="listenbuttonimg ='service/img/mic.png'"
-      ng-src="listenbuttonimg">
-      <img ng-src="{{listenbuttonimg}}" />
-    </button>
-  </form>
-  <br />
-  <div class="center">
-    <div class="center">
-      <div id="div_language">
-        <select class="form-control" id="select_language"
-          ng-model="lang.selectedOption" ng-change="updateLanguage()"
-          ng-options="option.name for option in lang.availableOptions track by option.id"></select>
-      </div>
-    </div>
-  </div>
-  <br /> 
-  Recognition Results: {{current_text}} 
-  <br />
+                     <div class="alert alert-danger" ng-show="state.errorText" role="alert">{{state.errorText}}</div>
+            </td>
+        </tr>
+        <tr>
+            <td>start time</td>
+            <td>{{startTimestamp}}</td>
+        </tr>
+        <tr>
+            <td>recognizing</td>
+            <td>{{state.recognizing}}</td>
+        </tr>
+        <tr>
+            <td>language</td>
+            <td>
+                <select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <button class="btn btn-default" ng-click="setState('start')">start listening</button>
+                <button class="btn btn-default" ng-click="setState('stop')">stop listening</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div id="results">
+                    <span id="final_span" class="final"></span>
+                    <span id="interim_span" class="interim"></span>
+                    <p>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+    </table>
 </div>
