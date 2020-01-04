@@ -279,7 +279,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.start("gui", "SwingGui");
+   //  Runtime.start("gui", "SwingGui");
     WebkitSpeechRecognition webkitspeechrecognition = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);

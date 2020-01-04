@@ -1,238 +1,230 @@
 angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('WebkitSpeechRecognitionGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('WebkitSpeechRecognitionGuiCtrl');
+    console.log('WebkitSpeechRecognitionGuiCtrl')
 
-    var _self = this;
-    var msg = this.msg;
-    getLanguage = [];
+    var _self = this
+    var msg = this.msg
 
-    continuous = true;
-    clickedFromWebGui = false;
-    this.updateState = function(service) {
-        $scope.service = service;
-
-        getLanguage = service.languagesList;
-
-        $scope.lang = {
-            availableOptions: [],
-            selectedOption: {}
-        };
-        for (var key in getLanguage) {
-            $scope.lang.availableOptions.push({
-                id: key,
-                name: getLanguage[key]
-            });
-        }
-        $scope.lang.selectedOption.id = service.currentWebkitLanguage;
-        $scope.current_language = service.currentWebkitLanguage;
-        continuous = service.continuous;
-
-        if ($scope.service.listening != $scope.recognizing) {
-            $log.info("Change listening state!");
-            // huh!? not initialized  yet?!
-            if (!angular.isUndefined($scope.recognizing)) {
-                // update the recognizing state of the gui.
-                // TODO: fix me. it doesn't handle the stop listening case (likely)
-                if ((!$scope.recognizing && $scope.service.listening) || !clickedFromWebGui) {
-                    // TODO: start Recognition is actually a toggle.. not start.
-                    $scope.startRecognition();
-                }
-            }
-            ;
-        } else {
-            $log.info("State did not change.");
-        }
+    $scope.languages = {
+        "Afrikaans": "af-ZA",
+        "Bahasa Indonesia": "id-ID",
+        "Bahasa Melayu": "ms-MY",
+        "Català": "ca-ES",
+        "Dansk": "da-DK",
+        "Deutsch": "de-DE",
+        "English - Australia": "en-AU",
+        "English - Canada": "en-CA",
+        "English - India": "en-IN",
+        "English - New Zealand": "en-NZ",
+        "English - South Africa": "en-ZA",
+        "English - United Kingdom": "en-GB",
+        "English - United States": "en-US",
+        "Español - Argentina": "es-AR",
+        "Español - Bolivia": "es-BO",
+        "Español - Chile": "es-CL",
+        "Español - Colombia": "es-CO",
+        "Español - Costa Rica": "es-CR",
+        "Español - Ecuador": "es-EC",
+        "Español - El Salvador": "es-SV",
+        "Español - España": "es-ES",
+        "Español - Estados Unidos": "es-US",
+        "Español - Guatemala": "es-GT",
+        "Español - Honduras": "es-HN",
+        "Español - México": "es-MX",
+        "Español - Nicaragua": "es-NI",
+        "Español - Panamá": "es-PA",
+        "Español - Paraguay": "es-PY",
+        "Español - Perú": "es-PE",
+        "Español - Puerto Rico": "es-PR",
+        "Español - República Dominicana": "es-DO",
+        "Español - Uruguay": "es-UY",
+        "Español - Venezuela": "es-VE",
+        "Euskara": "eu-ES",
+        "Filipino": "fil-PH",
+        "Français": "fr-FR",
+        "Galego": "gl-ES",
+        "Hindi - हिंदी": "hi-IN",
+        "Hrvatski": "hr_HR",
+        "IsiZulu": "zu-ZA",
+        "Italiano - Italia": "it-IT",
+        "Italiano - Svizzera": "it-CH",
+        "Lietuvių": "lt-LT",
+        "Magyar": "hu-HU",
+        "Nederlands": "nl-NL",
+        "Norsk bokmål": "nb-NO",
+        "Polski": "pl-PL",
+        "Português - Brasil": "pt-BR",
+        "Português - Portugal": "pt-PT",
+        "Pусский": "ru-RU",
+        "Română": "ro-RO",
+        "Slovenčina": "sk-SK",
+        "Slovenščina": "sl-SI",
+        "Suomi": "fi-FI",
+        "Svenska": "sv-SE",
+        "Tiếng Việt": "vi-VN",
+        "Türkçe": "tr-TR",
+        "Íslenska": "is-IS",
+        "Čeština": "cs-CZ",
+        "Ελληνικά": "el-GR",
+        "Српски": "sr-RS",
+        "Українська": "uk-UA",
+        "български": "bg-BG",
+        "ภาษาไทย": "th-TH",
+        "中文 - 中文 (台灣)": "cmn-Hant-TW",
+        "中文 - 普通话 (中国大陆)": "cmn-Hans-CN",
+        "中文 - 普通话 (香港)": "cmn-Hans-HK",
+        "中文 - 粵語 (香港)": "yue-Hant-HK",
+        "日本語": "ja-JP",
+        "한국어": "ko-KR",
     }
-    ;
-    // when to use $scope or anything?!
-    $scope.currResponse = '';
-    $scope.utterance = '';
-    $scope.current_text = '';
-    // start info status
-    $scope.status = 'Click on the microphone icon and begin speaking.[init]';
-    $scope.rows = [];
-    // current state for the button i guess?
-    $scope.recognizing = false;
 
-    // webkit $scope.recognition google speech
-    // Check if webkitSpeechRecognition exists
+    let finalTranscript = ''
+    let recognizer = null
+    let wakeWord = null
+
+    $scope.selectedLanguage = "en-US"
+    $scope.startTimestamp = null
+    $scope.stopRequested = false
+    $scope.errorText = null;
+
+    $scope.state = {
+        recognizing: false,
+        status: null,
+        img: '../WebkitSpeechRecognition/mic.png',
+        webkitSupport: true
+    }
+
+    $scope.setState = function(statusKey) {
+        console.log('status ' + statusKey)
+        $scope.state.status = statusKey
+        switch (statusKey) {
+        case 'onstart':
+            $scope.state.recognizing = true
+            $scope.state.img = '../WebkitSpeechRecognition/mic-animate.gif'
+            $scope.errorText = null
+            console.log('speak now')
+            $scope.$apply()
+            break
+        case 'onend':
+            $scope.state.recognizing = true
+            $scope.state.img = '../WebkitSpeechRecognition/mic-slash.png'
+            $scope.$apply()
+            break
+        case 'stop':
+            $scope.stopRequested = true
+            recognizer.stop()
+            break
+        case 'start':
+            $scope.stopRequested = false
+            if ($scope.state.recognizing) {
+                recognizer.stop()
+            }
+            finalTranscript = ''
+            recognizer.lang = $scope.selectedLanguage
+            recognizer.start()
+            $scope.errorText = null
+
+            final_span.innerHTML = ''
+            interim_span.innerHTML = ''
+
+            $scope.startTimestamp = new Date().getTime()
+            break
+        default:
+            console.error("unhandled status" + s)
+            break
+        }
+
+    }
+
     if (!('webkitSpeechRecognition'in window)) {
-        $scope.wkavailable = false;
-        $log.info('WebkitSpeechRecognition', 'not available');
-        $scope.status = 'WebkitSpeechRecognition not available. Need to use Chrome on a supported platform.';
+        webkitSupport = false
     } else {
-        $scope.wkavailable = true;
-        $scope.recognition = new webkitSpeechRecognition();
-        // config properties on the webkit speech stuff.
-        $scope.recognition.continuous = true;
-        $scope.recognition.interimResults = true;
-        msg.send("startListening");
-        // called when $scope.recognition starts.
-        $scope.recognition.onstart = function() {
-            $scope.started = true;
-            $scope.recognizing = true;
-            $scope.status = 'Speak now.';
-            $scope.listenbuttonimg = 'service/img/mic-animate.gif';
-            $scope.$apply();
-            msg.send("listeningEvent", "true");
-        }
-    }
-    ;if ($scope.wkavailable) {
-        // called when there's an error (handles a few cases)
-        $scope.recognition.onerror = function(event) {
-            if (event.error == 'no-speech') {
-                $scope.listenbuttonimg = 'service/img/mic.png';
-                // force listen ? why not
-                $scope.status = 'No speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>.';
-                ignore_onend = true;
-                $scope.$apply();
-                msg.send("startListening");
-            }
-            ;if (event.error == 'audio-capture') {
-                $scope.listenbuttonimg = 'service/img/mic.png';
-                $scope.status = 'No microphone was found. Ensure that a microphone is installed and that<a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a> are configured correctly.';
-                ignore_onend = true;
-                $scope.$apply();
-            }
-            ;if (event.error == 'not-allowed') {
-                if (event.timeStamp - start_timestamp < 100) {
-                    $scope.status = 'Permission to use microphone is blocked. To change, go to chrome://settings/contentExceptions#media-stream';
-                    $scope.$apply();
-                } else {
-                    $scope.status = 'Permission to use microphone was denied.';
-                    $scope.$apply();
-                }
-                ;ignore_onend = true;
-            }
-            ;
-        }
-        ;
+        // chrome is being used
+        console.info('creating new recognizer')
+        recognizer = new webkitSpeechRecognition()
+        recognizer.continuous = true
+        recognizer.interimResults = true
 
-        // called when $scope.recognition finishes.
-        $scope.recognition.onend = function() {
-            msg.send("stopListening");
-            $scope.recognizing = false;
-            $scope.$apply();
-            if (ignore_onend) {
-                return;
+        recognizer.onstart = function() {
+            $scope.setState('onstart')
+        }
+
+        recognizer.onerror = function(event) {
+            console.error('onerror - ' + event.error)
+            $scope.setState('onerror')
+            $scope.errorText = event.error
+        }
+
+        recognizer.onend = function() {
+            $scope.setState('onend')
+
+            if (!$scope.stopRequested) {
+                recognizer.start()
             }
-            ;$scope.listenbuttonimg = 'service/img/mic.png';
-            $scope.$apply();
-            if (!final_transcript) {
-                $scope.status = 'Click on the microphone icon and begin speaking.[stop]';
-                $scope.$apply();
-                return;
-            }
-            ;
 
         }
-        ;
 
-        // called when a result is returned from $scope.recognition
-        $scope.recognition.onresult = function(event) {
-            // build up a string of the current utterance
-            var interim_transcript = '';
+        recognizer.onresult = function(event) {
+            console.log('onresult')
+            var interim_transcript = ''
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    final_transcript += event.results[i][0].transcript;
-
-                    $scope.utterance = final_transcript;
-                    $scope.$apply();
-
-                    $scope.current_text = $scope.current_text.trim();
-
-                    $log.info("Recognized Text Time to publish " + $scope.current_text);
-                    //$scope.service = mrl.getService($scope.service.name);
-                    msg.send("publishText", $scope.current_text);
-
-                    final_transcript = '';
-                    interm_transcript = '';
+                    finalTranscript += event.results[i][0].transcript
                 } else {
-                    // we're not at the boundry of speech detection
-                    // append this fragment. 
-                    interim_transcript += event.results[i][0].transcript;
+                    interim_transcript += event.results[i][0].transcript
                 }
-                ;
             }
-            ;$scope.current_text = interim_transcript;
-            $scope.$apply();
-            if (final_transcript || interim_transcript) {
-                // TODO: fix this? do we care?
-                $log.info("show buttons should be called here for inline-block");
+            // finalTranscript = capitalize(finalTranscript)
+            final_span.innerHTML = finalTranscript
+            interim_span.innerHTML = interim_transcript
+            if (finalTranscript || interim_transcript) {
+                // showButtons('inline-block')
+                console.log('inline-block')
             }
-            ;
         }
-        ;
-    }
-    // End of ($scope.wkavailable)
-
-    $scope.updateLanguage = function() {
-        $log.info('WEBKIT Update Language');
-        // Here we need to update the language that we're recognizing.. and probably 
-        // publish it back down to the java service.
-        msg.send("setcurrentWebkitLanguage", $scope.lang.selectedOption.id);
     }
 
-    // toggle type of button for starting/stopping speech $scope.recognition.
-    $scope.startRecognition = function() {
-        clickedFromWebGui = true;
-        $log.info("Start Recognition clicked.");
-        if ($scope.recognizing) {
-            $log.info("Stoppping recognition");
-            $scope.recognition.stop();
-            return;
+    $scope.setLanguage = function() {
+        recognizer.lang = $scope.selectedLanguage
+        if ($scope.state.recognizing) {
+            recognizer.stop()
         }
-        ;// init the current text.
-        final_transcript = '';
-        $scope.recognition.lang = $scope.lang.selectedOption.id;
-        // start the recognizer
-        if (!$scope.recognizing) {
-            $scope.recognition.start();
-        }
-        ignore_onend = false;
-        $scope.listenbuttonimg = 'service/img/mic-slash.png';
-        // start_img.src = 'service/img/mic-slash.gif';
-        $scope.status = 'Click the "Allow" button above to enable your microphone.';
-        start_timestamp = event.timeStamp;
-        // $scope.$apply();
     }
-    ;
+
+    this.updateState = function(service) {
+        $scope.service = service
+    }
 
     this.onMsg = function(msg) {
-
-        $scope.recognition.continuous = continuous;
-        clickedFromWebGui = false;
-        $log.info("Webkit Speech Msg !");
-        $log.info(msg.method);
+        console.log("webkit msg " + msg.method)
         switch (msg.method) {
         case 'onState':
-            _self.updateState(msg.data[0]);
-            $scope.$apply();
-            break;
+            _self.updateState(msg.data[0])
+            $scope.$apply()
+            break
         case 'onOnStartSpeaking':
-            $log.info("Started speaking, stop listening.");
-            if (!$scope.recognizing) {
-                $scope.startRecognition();
-            }
-            break;
+            console.log("Started speaking, stop listening.")
+            $scope.startRecognition()
+            break
         case 'onOnEndSpeaking':
-            $log.info("Stopped speaking, start listening.");
-            if (!$scope.recognizing) {
-                $scope.startRecognition();
+            console.log("Stopped speaking, start listening.")
+            if (!$scope.state.recognizing) {
+                $scope.startRecognition()
             }
-            break;
+            break
         default:
-            $log.info("Unknown Message recieved." + msg.method);
-            break;
+            console.log("Unknown Message recieved." + msg.method)
+            break
         }
-        ;
-    }
-    ;
 
-    msg.subscribe('onStartSpeaking');
-    msg.subscribe('onEndSpeaking');
-    msg.subscribe('onStartListening');
-    msg.subscribe('onStopListening');
-    msg.subscribe(this);
+    }
+
+    /*
+    msg.subscribe('onStartSpeaking')
+    msg.subscribe('onEndSpeaking')
+    msg.subscribe('onStartListening')
+    msg.subscribe('onStopListening')
+    */
+    msg.subscribe(this)
 
 }
-]);
+])
