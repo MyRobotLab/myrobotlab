@@ -77,11 +77,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         "한국어": "ko-KR",
     }
 
-    
     let recognizer = null
     let wakeWord = null
 
     $scope.finalTranscript = ''
+    $scope.publishedText = ''
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
@@ -106,8 +106,19 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.$apply()
             break
         case 'onend':
-            $scope.state.recognizing = true
+            $scope.state.recognizing = false
             $scope.state.img = '../WebkitSpeechRecognition/mic-slash.png'
+            if (!$scope.stopRequested) {
+                recognizer.start()
+            }
+
+            $scope.publishedText = $scope.finalTranscript.trim()
+            $scope.finalTranscript = ''
+            // publish results
+            if ($scope.publishedText.length > 0) {
+                msg.send('publishRecognized', $scope.publishedText);
+            }
+
             $scope.$apply()
             break
         case 'stop':
@@ -157,11 +168,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
         recognizer.onend = function() {
             $scope.setState('onend')
-
-            if (!$scope.stopRequested) {
-                recognizer.start()
-            }
-
         }
 
         recognizer.onresult = function(event) {
@@ -174,7 +180,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
                     interim_transcript += event.results[i][0].transcript
                 }
             }
-            
+
             final_span.innerHTML = $scope.finalTranscript
             interim_span.innerHTML = interim_transcript
             if ($scope.finalTranscript || interim_transcript) {
