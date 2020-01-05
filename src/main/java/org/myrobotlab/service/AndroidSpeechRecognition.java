@@ -321,7 +321,7 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
             broadcastState();
             if (heartBeatFirstMessage) {
               heartBeatFirstMessage = false;
-              setAutoListen(autoListen);
+              //setAutoListen(autoListen);
             }
             client.getOut().writeObject("heartBeat");
           } catch (IOException e) {
@@ -438,12 +438,6 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
   }
 
   @Override
-  public void lockOutAllGrammarExcept(String lockPhrase) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public void clearLock() {
     // TODO Auto-generated method stub
 
@@ -454,20 +448,6 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
     sendToClient("pauseListening");
   }
 
-  @Override
-  public void setAutoListen(boolean autoListen) {
-    this.autoListen = autoListen;
-    if (autoListen) {
-      sendToClient("setAutoListenTrue");
-    } else {
-      sendToClient("setAutoListenFalse");
-    }
-    broadcastState();
-  }
-
-  public void setContinuous(boolean b) {
-    // TODO Auto-generated method stub
-  }
 
   @Override
   public boolean isListening() {
@@ -485,6 +465,24 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
       commands = new HashMap<String, Command>();
     }
     commands.put(actionPhrase, new Command(name, method, params));
+  }
+
+  @Override
+  public void startRecognizer() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void stopRecognizer() {
+    // TODO Auto-generated method stub
+    
+  }
+  
+  public void lockOutAllGrammarExcept(String lockPhrase) {
+    log.info("Ear locked now, please use command " + lockPhrase + " to unlock");
+    lockOutAllGrammar = true;
+    this.lockPhrase = lockPhrase;
   }
 
 }

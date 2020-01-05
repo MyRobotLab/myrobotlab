@@ -1,12 +1,11 @@
 package org.myrobotlab.service;
 
+import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.test.AbstractTest;
-import org.junit.ClassRule;
-import org.junit.Ignore;
 
 /**
  * A base generic test class that can start a service, call a test method on it,
