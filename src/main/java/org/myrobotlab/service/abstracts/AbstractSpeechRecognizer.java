@@ -56,11 +56,13 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * prevents execution of command unless a lock out phrase is recognized
    */
+  @Deprecated /* use wake word */
   protected boolean lockOutAllGrammar = false;
 
   /**
    * phrase to unlock commands such as "power up"
    */
+  @Deprecated /* use wake word */
   protected String lockPhrase = "";
 
   protected boolean lowerCase = true;
@@ -213,6 +215,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
   
   @Override
+  @Deprecated /* use wake word */
   public void clearLock() {
     log.warn("Ear unlocked by " + lockPhrase);
     lockOutAllGrammar = false;
@@ -259,6 +262,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
   
   @Override
+  @Deprecated /* use wake word */
   public void lockOutAllGrammarExcept(String lockPhrase) {
     log.info("Ear locked now, please use command " + lockPhrase + " to unlock");
     lockOutAllGrammar = true;
@@ -382,6 +386,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       }
     }
     this.wakeWord = word;
+    broadcastState();
   }
   
   /**

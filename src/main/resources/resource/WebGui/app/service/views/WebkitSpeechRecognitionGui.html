@@ -2,17 +2,40 @@
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.  
-    
     </h3>
 </div>
 <div ng-show="state.webkitSupport" class="col-md-8">
     <table class="table table-striped">
         <tr>
-            <td>status</td>
-            <td>
-                <img ng-src="{{state.img}}" width="150"/>
+            <td colspan="2">
+                <button ng-click="changeListeningState()">
+                    <span>
+                        <img ng-src="{{state.img}}" width="150"/>
+                    </span>
+                </button>
                 {{state.status}}
                 <div class="alert alert-danger" role="alert">{{errorText}}</div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>published</td>
+            <td>{{publishedText}}</td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" class="form-control" placeholder="Hey Robot" ng-model="wakeWord"/>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="msg.setWakeWord(wakeWord)">set wake word</button>
+                <button class="btn btn-default" ng-click="msg.unsetWakeWord()">unset wake word</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"><!--
+                <button class="btn btn-default" ng-click="setState('start')">start listening</button>
+                <button class="btn btn-default" ng-click="setState('stop')">stop listening</button> -->
+                <button class="btn btn-default" ng-click="!enableLog">enable log</button>
             </td>
         </tr>
         <tr>
@@ -36,24 +59,37 @@
             <td>{{finalTranscript}}</td>
         </tr>
         <tr>
-            <td>published</td>
-            <td>{{publishedText}}</td>
-        </tr>
-        <tr>
             <td>language</td>
             <td>
                 <select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
             </td>
         </tr>
         <tr>
-            <td></td>
-            <td>
-                <button class="btn btn-default" ng-click="setState('start')">start listening</button>
-                <button class="btn btn-default" ng-click="setState('stop')">stop listening</button>
+            <td colspan="2">
+                <span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
+                <div ng-show="showProperties">
+                    <table class="table table-striped">
+                        <tr ng-repeat="(key, value) in properties">
+                            <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
+                            <td>{{value[0]}}</td>
+                            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
+                            <td ng-show="statusControlMode!='status'">
+                                <input type="text" class="form-control" value="{{value[1]}}"/>
+                            </td>
+                            <td>
+                            <!-- units -->
+                            </td>
+                            <td>
+                            <!-- info -->
+                            {{value[2]}}
+                    </td>
+                        </tr>
+                    </table>
+                </div>
             </td>
         </tr>
-        <tr>
-            <td colspan="2">log {{log}}</td>
+        <tr ng-repeat="entry in log track by $index">
+            <td colspan="2">{{entry}}</td>
         </tr>
     </table>
 </div>
