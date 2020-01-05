@@ -1,23 +1,19 @@
 <div ng-show="{{!state.webkitSupport}}">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
-        versions 25 or later.
+        versions 25 or later.  
+    
     </h3>
 </div>
-<div ng-show="state.webkitSupport" class="col-md-4">
+<div ng-show="state.webkitSupport" class="col-md-8">
     <table class="table table-striped">
         <tr>
             <td>status</td>
             <td>
                 <img ng-src="{{state.img}}" width="150"/>
                 {{state.status}}
-
-                     <div class="alert alert-danger" ng-show="state.errorText" role="alert">{{state.errorText}}</div>
+                <div class="alert alert-danger" role="alert">{{errorText}}</div>
             </td>
-        </tr>
-        <tr>
-            <td>published</td>
-            <td>{{publishedText}}</td>
         </tr>
         <tr>
             <td>start time</td>
@@ -26,6 +22,22 @@
         <tr>
             <td>recognizing</td>
             <td>{{state.recognizing}}</td>
+        </tr>
+        <tr>
+            <td>restarts</td>
+            <td>{{restartCnt}}</td>
+        </tr>
+        <tr>
+            <td>interim</td>
+            <td>{{interimTranscript}}</td>
+        </tr>
+        <tr>
+            <td>final transcript</td>
+            <td>{{finalTranscript}}</td>
+        </tr>
+        <tr>
+            <td>published</td>
+            <td>{{publishedText}}</td>
         </tr>
         <tr>
             <td>language</td>
@@ -41,13 +53,7 @@
             </td>
         </tr>
         <tr>
-            <td colspan="2">log &nbsp;
-                <div id="results">
-                    <span id="final_span" class="final"></span>
-                    <span id="interim_span" class="interim"></span>
-                    <p>
-                </div>
-            </td>
+            <td colspan="2">log {{log}}</td>
         </tr>
     </table>
 </div>

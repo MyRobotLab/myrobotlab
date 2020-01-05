@@ -80,12 +80,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     let recognizer = null
     let wakeWord = null
 
+    $scope.restartCnt = 0
+    $scope.interimTranscript = ''
     $scope.finalTranscript = ''
     $scope.publishedText = ''
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
     $scope.errorText = null;
+    $scope.log = ''
 
     $scope.state = {
         recognizing: false,
@@ -101,7 +104,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         case 'onstart':
             $scope.state.recognizing = true
             $scope.state.img = '../WebkitSpeechRecognition/mic-animate.gif'
-            $scope.errorText = null
+            // $scope.errorText = null
+            $scope.startTimestamp = new Date().getTime()
             console.log('speak now')
             $scope.$apply()
             break
@@ -109,17 +113,24 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.state.recognizing = false
             $scope.state.img = '../WebkitSpeechRecognition/mic-slash.png'
             if (!$scope.stopRequested) {
+                $scope.restartCnt += 1
                 recognizer.start()
             }
 
-            $scope.publishedText = $scope.finalTranscript.trim()
-            $scope.finalTranscript = ''
+            $scope.finalTranscript = $scope.finalTranscript.trim()
+            $scope.log += ' ' + $scope.finalTranscript
+
             // publish results
-            if ($scope.publishedText.length > 0) {
+            if ($scope.finalTranscript.length > 0) {
+                $scope.publishedText = $scope.finalTranscript
                 msg.send('publishRecognized', $scope.publishedText);
             }
 
+            $scope.finalTranscript = ''
             $scope.$apply()
+            break
+        case 'onerror':
+            console.error('onerror - ' + $scope.errorText)
             break
         case 'stop':
             $scope.stopRequested = true
@@ -135,13 +146,9 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             recognizer.start()
             $scope.errorText = null
 
-            final_span.innerHTML = ''
-            interim_span.innerHTML = ''
-
-            $scope.startTimestamp = new Date().getTime()
             break
         default:
-            console.error("unhandled status" + statusKey)
+            console.error("unhandled status " + statusKey)
             break
         }
 
@@ -161,7 +168,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
         recognizer.onerror = function(event) {
-            console.error('onerror - ' + event.error)
             $scope.setState('onerror')
             $scope.errorText = event.error
         }
@@ -172,18 +178,18 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
         recognizer.onresult = function(event) {
             console.log('onresult')
-            var interim_transcript = ''
+            $scope.interimTranscript = ''
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     $scope.finalTranscript += event.results[i][0].transcript
                 } else {
-                    interim_transcript += event.results[i][0].transcript
+                    $scope.interimTranscript += event.results[i][0].transcript
                 }
             }
 
-            final_span.innerHTML = $scope.finalTranscript
-            interim_span.innerHTML = interim_transcript
-            if ($scope.finalTranscript || interim_transcript) {
+            // final_span.innerHTML = $scope.finalTranscript
+            // interim_span.innerHTML = $scope.interimTranscript
+            if ($scope.finalTranscript || $scope.interimTranscript) {
                 // showButtons('inline-block')
                 console.log('inline-block')
             }
@@ -222,7 +228,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             console.log("Unknown Message recieved." + msg.method)
             break
         }
-
     }
 
     // $scope.setState('start')
