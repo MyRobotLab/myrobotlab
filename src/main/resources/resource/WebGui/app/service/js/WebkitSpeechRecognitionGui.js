@@ -87,14 +87,24 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
-    $scope.errorText = null;
-    $scope.log = ''
+    $scope.errorText = null
+    $scope.wakeWord = null
+    $scope.log = []
 
     $scope.state = {
         recognizing: false,
         status: null,
         img: '../WebkitSpeechRecognition/mic.png',
         webkitSupport: true
+    }
+
+    
+    $scope.changeListeningState = function(){
+        if (!$scope.state.recognizing){
+            $scope.setState('start')
+        } else {
+            $scope.setState('stop')
+        }
     }
 
     $scope.setState = function(statusKey) {
@@ -118,11 +128,12 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             }
 
             $scope.finalTranscript = $scope.finalTranscript.trim()
-            $scope.log += ' ' + $scope.finalTranscript
+            
 
             // publish results
             if ($scope.finalTranscript.length > 0) {
                 $scope.publishedText = $scope.finalTranscript
+                $scope.log.unshift($scope.publishedText)
                 msg.send('publishRecognized', $scope.publishedText);
             }
 
@@ -153,6 +164,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
     }
+
 
     if (!('webkitSpeechRecognition'in window)) {
         webkitSupport = false
@@ -209,9 +221,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     this.onMsg = function(msg) {
         console.log("webkit msg " + msg.method)
+        let data = msg.data[0]
         switch (msg.method) {
         case 'onState':
-            _self.updateState(msg.data[0])
+            _self.updateState(data)
+            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         case 'onOnStartSpeaking':
