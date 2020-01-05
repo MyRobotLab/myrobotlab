@@ -4,7 +4,7 @@
         versions 25 or later.
     </h3>
 </div>
-<div ng-show="state.webkitSupport" class="col-md-3">
+<div ng-show="state.webkitSupport" class="col-md-4">
     <table class="table table-striped">
         <tr>
             <td>status</td>
@@ -14,6 +14,10 @@
 
                      <div class="alert alert-danger" ng-show="state.errorText" role="alert">{{state.errorText}}</div>
             </td>
+        </tr>
+        <tr>
+            <td>published</td>
+            <td>{{publishedText}}</td>
         </tr>
         <tr>
             <td>start time</td>
@@ -37,14 +41,13 @@
             </td>
         </tr>
         <tr>
-            <td colspan="2">
+            <td colspan="2">log &nbsp;
                 <div id="results">
                     <span id="final_span" class="final"></span>
                     <span id="interim_span" class="interim"></span>
                     <p>
                 </div>
             </td>
-            <td></td>
         </tr>
     </table>
 </div>

@@ -24,6 +24,11 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     String text;
   }
   
+  /**
+   * generalized list of languages and their codes - if useful
+   */
+  static protected Map<String, String> languages = new HashMap<>();
+  
   private static final long serialVersionUID = 1L;
   
   /**
@@ -32,21 +37,16 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   protected Set<String> attached = new TreeSet<>();
   
   protected HashMap<String, Message> commands = new HashMap<>();
-  
+
   /**
    * status of listening
    */
   protected boolean isListening = false;
-
+  
   /**
    * current language code for recognition
    */
   protected String language = "en-US";
-  
-  /**
-   * generalized list of languages and their codes - if useful
-   */
-  static protected Map<String, String> languages = new HashMap<>();
   
   @Deprecated /* remove ! - is from webkit - should be handled in js */
   protected long lastAutoListenEvent = System.currentTimeMillis();
@@ -219,13 +219,21 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
+   * get a referencee to 
+   * @return
+   */
+  public Map<String,String> getLanguages(){
+    return languages;
+  }
+
+  /**
    * Get the current wake word
    * @return
    */
   public String getWakeWord() {
     return wakeWord;
   }
-
+  
   public boolean isAttached(Attachable attachable) {
     return isAttached(attachable.getName());
   }
@@ -241,7 +249,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public boolean isListening() {
     return isListening;
   }
-  
+
   @Override
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event) {
@@ -249,7 +257,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
     return;
   }
-
+  
   @Override
   public void lockOutAllGrammarExcept(String lockPhrase) {
     log.info("Ear locked now, please use command " + lockPhrase + " to unlock");
@@ -257,6 +265,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     this.lockPhrase = lockPhrase;
   }
   
+
   /**
    * Default implementation of onEndSpeaking event from a SpeechSythesis service is to
    * start listening when speaking
@@ -269,7 +278,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     startListening();
   }
   
-
   @Override
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
@@ -277,40 +285,39 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     this.speaking = true;
     stopListening();
   }
+
   
   @Override
   @Deprecated /* uset stopListening() and startListening() */
   public void pauseListening() {
     stopListening();
   }
-
   
+
   @Override
   public boolean publishListening(boolean listening) {
     this.isListening = listening;
     return listening;
   }
-  
+
 
   @Override
   public String publishRecognized(String text) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-
-  @Override
-  public RecognizedResult publishRecognizedResult(RecognizedResult result) {
-    // TODO Auto-generated method stub
-    return null;
+    invoke("publishText", text);
+    return text;
   }
   
+  @Override
+  public RecognizedResult publishRecognizedResult(RecognizedResult result) {
+    return result;
+  }
+  
+
   @Override
   public String publishText(String text) {
     return text;
   }
   
-
   @Override
   @Deprecated /* use standard publishRecognized to setup subscriptions */
   public String recognized(String text) {
@@ -353,11 +360,11 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     language = languageCode;
     broadcastState();
   }
-  
+
   public void setLowerCase(boolean b) {
     lowerCase  = b;
   }
-
+  
   /**
    * setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
@@ -386,7 +393,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public void setWakeWordTimeout(long timeoutMs) {
     wakeWordIdleTimeoutMs = timeoutMs;
   }
-  
+
   @Override
   public void startListening() {
     log.debug("Start listening event seen.");
@@ -434,21 +441,13 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     stopListening();
     stopRecognizer();
   }
-
+  
   /**
    * Stop wake word functionality .. after being called
    * stop and start
    */
   public void unsetWakeWord() {
     wakeWord = null;
-  }
-  
-  /**
-   * get a referencee to 
-   * @return
-   */
-  public Map<String,String> getLanguages(){
-    return languages;
   }
 
 }
