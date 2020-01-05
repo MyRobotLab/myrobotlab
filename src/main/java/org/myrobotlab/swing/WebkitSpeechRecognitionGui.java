@@ -158,6 +158,7 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
       @Override
       public void run() {
         removeListeners();
+        /*
         onRecognized.setText(WebkitSpeechRecognition.lastThingRecognized);
         if (WebkitSpeechRecognition.getautoListen()) {
           autoListen.setText("Auto Listening ON");
@@ -182,10 +183,12 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
           micro.setIcon(new ImageIcon(microOff));
           listeningStatus = false;
         }
-        for (Entry<String, String> e : WebkitSpeechRecognition.languagesList.entrySet()) {
-          comboLanguage.addItem(e.getKey());
-        }
-        comboLanguage.setSelectedItem(WebkitSpeechRecognition.currentWebkitLanguage);
+        //for (Entry<String, String> e : WebkitSpeechRecognition.languages.entrySet()) {
+         // comboLanguage.addItem(e.getKey());
+        //}
+        // comboLanguage.setSelectedItem(WebkitSpeechRecognition.language);
+         * 
+         */
         restoreListeners();
       }
     });

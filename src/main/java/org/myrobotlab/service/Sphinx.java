@@ -685,16 +685,23 @@ public class Sphinx extends AbstractSpeechRecognizer {
     return meta;
   }
 
-  @Override
-  public void setAutoListen(boolean autoListen) {
-    // TODO Auto-generated method stub
-
-  }
 
   @Override
   public boolean isListening() {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void startRecognizer() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void stopRecognizer() {
+    // TODO Auto-generated method stub
+    
   }
 
 }

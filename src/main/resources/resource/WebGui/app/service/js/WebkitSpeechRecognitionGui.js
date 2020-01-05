@@ -77,10 +77,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         "한국어": "ko-KR",
     }
 
-    let finalTranscript = ''
+    
     let recognizer = null
     let wakeWord = null
 
+    $scope.finalTranscript = ''
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
@@ -118,7 +119,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             if ($scope.state.recognizing) {
                 recognizer.stop()
             }
-            finalTranscript = ''
+            $scope.finalTranscript = ''
             recognizer.lang = $scope.selectedLanguage
             recognizer.start()
             $scope.errorText = null
@@ -129,7 +130,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.startTimestamp = new Date().getTime()
             break
         default:
-            console.error("unhandled status" + s)
+            console.error("unhandled status" + statusKey)
             break
         }
 
@@ -141,7 +142,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         // chrome is being used
         console.info('creating new recognizer')
         recognizer = new webkitSpeechRecognition()
-        recognizer.continuous = true
+        recognizer.continuous = false
         recognizer.interimResults = true
 
         recognizer.onstart = function() {
@@ -168,15 +169,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             var interim_transcript = ''
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript
+                    $scope.finalTranscript += event.results[i][0].transcript
                 } else {
                     interim_transcript += event.results[i][0].transcript
                 }
             }
-            // finalTranscript = capitalize(finalTranscript)
-            final_span.innerHTML = finalTranscript
+            
+            final_span.innerHTML = $scope.finalTranscript
             interim_span.innerHTML = interim_transcript
-            if (finalTranscript || interim_transcript) {
+            if ($scope.finalTranscript || interim_transcript) {
                 // showButtons('inline-block')
                 console.log('inline-block')
             }
@@ -217,6 +218,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
     }
+
+    // $scope.setState('start')
 
     /*
     msg.subscribe('onStartSpeaking')
