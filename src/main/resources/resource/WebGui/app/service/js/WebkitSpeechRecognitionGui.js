@@ -141,6 +141,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.$apply()
             break
         case 'onerror':
+            let errorTs = new Date().getTime()
+            if ((errorTs - $scope.startTimestamp) < 100) {
+                $scope.errorText += ' - high error rate - check other tabs for an active webkit speech recognizer, and close it'
+                $scope.$apply()
+            }
             console.error('onerror - ' + $scope.errorText)
             break
         case 'stop':
@@ -180,8 +185,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
         recognizer.onerror = function(event) {
-            $scope.setState('onerror')
             $scope.errorText = event.error
+            $scope.setState('onerror')
         }
 
         recognizer.onend = function() {
@@ -252,6 +257,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     msg.subscribe('onStartListening')
     msg.subscribe('onStopListening')
     */
+    $scope.setState('start')
     msg.subscribe(this)
 
 }
