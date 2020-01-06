@@ -1,4 +1,4 @@
-<div class="col-md-12">
+<div class="col-md-12" ng-show="viewType != 'min'">
     <h3 class="panel-title">
         <div uib-dropdown dropdown-append-to-body auto-close="outsideClick" is-open="servicemenuDropdownOpen">
             <span style="cursor: pointer;" tooltip-placement="right" uib-tooltip="Menu">
@@ -12,6 +12,7 @@
                         <i class="glyphicon glyphicon-question-sign"></i>
                         &nbsp;&nbsp;help
                     
+                    
                     </a>
                 </li>
                 <li>
@@ -19,6 +20,7 @@
                         <i class="glyphicon glyphicon-remove"></i>
                         &nbsp;&nbsp;release                    
                
+                    
                     </a>
                 </li>
                 <li>
@@ -26,15 +28,12 @@
                         <i class="glyphicon glyphicon-remove"></i>
                         &nbsp;&nbsp;refresh                    
                     
+                    
                     </a>
                 </li>
                 <li>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
-                    &nbsp;&nbsp;virtualize                    
-                        
-                    
-                    
-                    
+                    &nbsp;&nbsp;virtualize  
                     
                     <span>
                         <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
@@ -44,13 +43,8 @@
                     <a href="" uib-popover-template="'listMethodsPopoverTemplate.html'" popover-title="Methods of this Service" popover-placement="right-top">
                         <i class="glyphicon glyphicon-list-alt"></i>
                         &nbsp;&nbsp;list methods
-                    
-                    
-                    
                     </a>
                     <script type="text/ng-template" id="listMethodsPopoverTemplate.html">
-                        
-                        
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -67,10 +61,7 @@
                                             <td>{{value.returnTypeName}}</td>
                                         </tr>
                                     </tbody>
-                                </table>
-                    
-                                    
-                    
+                                </table> 
                     </script>
                 </li>
                 <li>
@@ -79,35 +70,34 @@
                         &nbsp;&nbsp;show json
                     
                     
+                    
                     </a>
                     <!--TODO - remove this comment: @grog: Is this what you were trying to achieve?-->
                     <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">
                         
+                        
                                 <button class="btn btn-default" clipboard text="servicedatajson"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
                                 <div><pre>{{servicedatajson}}</pre></div>
+                    
                     </script>
                 </li>
             </ul>
         </div>
     </h3>
-
-<div class="btn-group pull-right" role="group" aria-label="Basic example">
-    <button ng-show="statusControlMode=='status'" ng-click="changeMode()" type="button" class="btn btn-primary btn-xs" uib-tooltip="Current mode is status, press to change to control mode">status</button>
-    <button ng-show="statusControlMode!='status'" ng-click="changeMode()" type="button" class="btn btn-warning btn-xs" uib-tooltip="Current mode is control, press to change to status mode">control</button>
-    <button ng-click="export()" type="button" class="btn btn-xs" uib-tooltip="Save current configuration for this service">
-        <span>
-            save <i class="glyphicon glyphicon-save-file"></i>
-        </span>
-    </button>
-    <button ng-click="changeMode()" type="button" class="btn btn-xs" uib-tooltip="Find more information at a service page">
-        <span>
-            <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank">
-                <i class="glyphicon glyphicon-question-sign"></i>
-            </a>
-        </span>
-    </button>
+    <div class="btn-group pull-right" role="group" aria-label="Basic example">
+        <button ng-show="statusControlMode=='status'" ng-click="changeMode()" type="button" class="btn btn-primary btn-xs" uib-tooltip="Current mode is status, press to change to control mode">status</button>
+        <button ng-show="statusControlMode!='status'" ng-click="changeMode()" type="button" class="btn btn-warning btn-xs" uib-tooltip="Current mode is control, press to change to status mode">control</button>
+        <button ng-click="export()" type="button" class="btn btn-xs" uib-tooltip="Save current configuration for this service">
+            <span>
+                save <i class="glyphicon glyphicon-save-file"></i>
+            </span>
+        </button>
+        <button ng-click="changeMode()" type="button" class="btn btn-xs" uib-tooltip="Find more information at a service page">
+            <span>
+                <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank">
+                    <i class="glyphicon glyphicon-question-sign"></i>
+                </a>
+            </span>
+        </button>
+    </div>
 </div>
-    
-</div>
-
-

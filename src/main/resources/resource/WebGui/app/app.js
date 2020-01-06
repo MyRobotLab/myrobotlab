@@ -28,7 +28,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js - starting');
-    $urlRouterProvider.otherwise("/tabs");
+    $urlRouterProvider.otherwise("/service");
     $stateProvider.state('loading', {
         url: "/loading",
         templateUrl: "main/loading.html",
@@ -70,7 +70,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
             }
         }
     }).state('tabs2', {
-        url: "/tabs",
+        url: "/service",
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
@@ -100,12 +100,13 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
             }
         }
     }).state('tabs', {
-        url: "/tabs/:servicename",
+        url: "/service/:servicename",
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
             test: function($stateParams, mrl) {
                 console.log('tabs calling mrl.init() from router')
+                mrl.setViewType('min')
                 return mrl.init();
             }
         }
@@ -130,7 +131,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
             }
         }
     }).state('serviceView', {
-        url: '/service/:servicename',
+        url: '/old/:servicename',
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
