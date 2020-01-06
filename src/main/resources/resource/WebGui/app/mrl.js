@@ -713,6 +713,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
 
+        _self.setViewType = function(viewType){
+            _self.viewType = viewType
+        }
+
+         _self.getViewType = function(){
+            return _self.viewType
+        }
+
         /**
          * return a flattened sorted array of properties for input service
          * TODO - add exclude replacement and info parameters
@@ -870,6 +878,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             scope.showProperties = false
             scope.properties = []
             scope.statusControlMode = 'status'
+            scope.viewType = _self.viewType
+
+
+
             // status or control - mode of properties
             scope.changeMode = function() {
                 scope.statusControlMode = (scope.statusControlMode == 'status') ? 'control' : 'status'
@@ -1246,6 +1258,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage,
+            setViewType:_self.setViewType,
+            getViewType:_self.getViewType,
             createMessage: _self.createMessage
         }
 

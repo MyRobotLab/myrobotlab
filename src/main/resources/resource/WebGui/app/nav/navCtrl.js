@@ -11,6 +11,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.infoCount = 0
     // platform of webgui
     $scope.remotePlatform = null
+    $scope.viewType = mrl.getViewType()
 
     mrl.subscribeConnected(function(connected) {
         $log.info('nav:connection update', connected)

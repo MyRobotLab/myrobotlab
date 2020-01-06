@@ -1,10 +1,10 @@
-<div ng-show="{{!state.webkitSupport}}">
+<div ng-show="{{!state.webkitSupport}}" class="row">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.  
     </h3>
 </div>
-<div ng-show="state.webkitSupport" class="col-md-8">
+<div ng-show="state.webkitSupport" class="row">
     <table class="table table-striped">
         <tr>
             <td colspan="2">
