@@ -92,6 +92,12 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         isFinal: false
     };
 
+    $scope.publishedResult = {
+        text: null,
+        confidence: 0.0,
+        isFinal: false
+    };
+
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
@@ -134,15 +140,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.interimTranscript = ''
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 let data = event.results[i][0]
-                let result = {
-                    text: data.transcript,
-                    confidence: data.confidence,
-                    isFinal: true
-                }
-
+               
                 if (event.results[i].isFinal) {
+
+                    $scope.publishedResult.text = data.transcript
+                    $scope.publishedResult.confidence = (Math.round(data.confidence * 100) / 100).toFixed(2) 
+                    $scope.publishedResult.isFinal = true
                     $scope.finalTranscript += data.transcript
-                    msg.send('processResults', [result])
+
+                    msg.send('processResults', [$scope.publishedResult])
                 } else {
                     $scope.interimTranscript += data.transcript
                 }
