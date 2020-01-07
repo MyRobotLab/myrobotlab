@@ -105,33 +105,30 @@ public interface SpeechRecognizer extends NameProvider {
   public void resumeListening();
 
   /**
-   * Start listening is a command to make the Speech Recognizer begin listening
-   * - however, in preferred implementation this "really" means - start
-   * publishing recogized events. When it is desired to completely stop
-   * listening - stopRecognizer should be used or stop/release the service
+   * Start listening begins listening and initially starts recognizing unless a wake word is used.  
+   * If a wake word is used - listening starts but recognizing is prevented from publishing until the wake word is recognized
    */
   public void startListening();
 
   /**
-   * recognizer may still be active, and possibly looking for wake word - but no events will be published
-   * until start listening is called by user or automatically after recognizing wake word
+   * Stop listening stops the recording and and any possibility of recognizing incoming audio
    */
   public void stopListening();
+
   
   /**
-   * start recognizer so wake word can be recognized, or recogized event can potentially be published
-   * - requires startListening for events to be published
+   * Start recognizing allows recognized events to be published
    */
-  public void startRecognizer();
+  public void startRecognizing();
 
   /**
-   * shut down recognizer - no events will be published, no audio will be captured
+   * Stop recognizing continues listening and recording audio, but will not publish recognized events
    */
-  public void stopRecognizer();
+  public void stopRecognizing();
 
-
+  
   /**
-   * setting the wake word - wake word behaves as a switch to turn on "active
+   * Setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
    * 
    * @param word

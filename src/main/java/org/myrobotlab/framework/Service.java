@@ -1983,10 +1983,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return si;
   }
 
-  public void startRecording() {
-    invoke("startRecording", new Object[] { null });
-  }
-
+  
   @Override
   public void loadAndStart() {
     load();

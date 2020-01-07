@@ -1,19 +1,20 @@
-<div ng-show="{{!state.webkitSupport}}" class="row">
+<div ng-show="{{!service.webkitSupport}}" class="row">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.  
+    
     </h3>
 </div>
-<div ng-show="state.webkitSupport" class="row">
+<div ng-show="service.webkitSupport" class="row">
     <table class="table table-striped">
         <tr>
             <td colspan="2">
                 <button ng-click="changeListeningState()">
                     <span>
-                        <img ng-src="{{state.img}}" width="150"/>
+                        <img ng-src="{{service.img}}" width="150"/>
                     </span>
                 </button>
-                {{state.status}}
+                {{service.status}}
                 <div class="alert alert-danger" role="alert">{{errorText}}</div>
             </td>
             <td></td>
@@ -24,15 +25,25 @@
         </tr>
         <tr>
             <td>
-                <input type="text" class="form-control" placeholder="Hey Robot" ng-model="wakeWord"/>
+                <input type="text" class="form-control" placeholder="Hey Robot" ng-model="service.wakeWord"/>
             </td>
             <td>
-                <button class="btn btn-default" ng-click="msg.setWakeWord(wakeWord)">set wake word</button>
+                <button class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">set wake word</button>
                 <button class="btn btn-default" ng-click="msg.unsetWakeWord()">unset wake word</button>
             </td>
         </tr>
         <tr>
-            <td colspan="2"><!--
+            <td>
+                <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
+            
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <!--
                 <button class="btn btn-default" ng-click="setState('start')">start listening</button>
                 <button class="btn btn-default" ng-click="setState('stop')">stop listening</button> -->
                 <button class="btn btn-default" ng-click="!enableLog">enable log</button>
@@ -43,8 +54,12 @@
             <td>{{startTimestamp}}</td>
         </tr>
         <tr>
+            <td>listening</td>
+            <td>{{service.isListening}}</td>
+        </tr>
+        <tr>
             <td>recognizing</td>
-            <td>{{state.recognizing}}</td>
+            <td>{{service.isRecognizing}}</td>
         </tr>
         <tr>
             <td>restarts</td>
@@ -57,7 +72,7 @@
         <tr>
             <td>language</td>
             <td>
-                <select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
+                <select class="form-control" id="select_language" ng-model="service.language" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
             </td>
         </tr>
         <tr>

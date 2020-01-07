@@ -14,6 +14,21 @@ import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * mic image
+   */
+  String img = "../WebkitSpeechRecognition/mic.png";
+  
+  /**
+   * if currently running chrome
+   */
+  Boolean webkitSupport = true;
+  
+  /**
+   * current status of the webkit recognizer
+   */
+  String status = null;
 
   /**
    * This static method returns all the details of the class without it having
@@ -35,11 +50,16 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     LoggingFactory.init(Level.INFO);
 
     // Runtime.start("gui", "SwingGui");
-    WebkitSpeechRecognition webkitspeechrecognition = (WebkitSpeechRecognition) Runtime.start("webkitspeechrecognition", "WebkitSpeechRecognition");
+    WebkitSpeechRecognition webkit = (WebkitSpeechRecognition) Runtime.start("webkit", "WebkitSpeechRecognition");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
-    webgui.startBrowser("http://localhost:8888/#/tabs/webkitspeechrecognition");
+    
+    // webkit.stopRecognizing();
+    // webkit.stopListening();
+    
+    
+    // webgui.startBrowser("http://localhost:8888/#/service/webkitspeechrecognition");
 
   }
 
@@ -48,8 +68,6 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Deprecated /* doesn't belong here - should be in a text processor */
   boolean stripAccents = false;
-
-  boolean startRecognizer = true;
 
   public WebkitSpeechRecognition(String n, String id) {
     super(n, id);
@@ -64,7 +82,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
   public boolean isStripAccents() {
     return stripAccents;
   }
-
+  
   /**
    * If setContinuous is False, this speedup recognition processing If
    * setContinuous is True, you have some time to speak again, in case of error
@@ -80,24 +98,6 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     this.stripAccents = stripAccents;
   }
 
-  /**
-   * for webkit - startRecognizer consists of setting a property and
-   * broadcasting self to the webgui
-   */
-  @Override
-  public void startRecognizer() {
-    startRecognizer = true;
-    broadcastState();
-  }
-
-  /**
-   * for webkit - startRecognizer consists of setting a property and
-   * broadcasting self to the webgui
-   */
-  @Override
-  public void stopRecognizer() {
-    startRecognizer = false;
-    broadcastState();
-  }
+  
 
 }

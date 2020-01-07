@@ -165,6 +165,11 @@ public class MethodCache {
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
 
+      // extremely useful for debugging cache      
+      // if (m.getName().equals("processResults") && m.getParameterTypes().length == 1) {
+      //   log.info("here");
+      // }
+      
 
       String key = getMethodKey(object, m);
       String ordinalKey = getMethodOrdinalKey(object, m);
@@ -178,12 +183,6 @@ public class MethodCache {
       // if (excludeMethods.contains(m.getName())) {
       // continue;
       // }
-      
-/*      
-      if (m.getName().equals("subscribe") && m.getParameterTypes().length == 2) {
-        log.info("here");
-      }
-      */
         
 
       // search for interfaces in parameters - if there are any the method is
@@ -250,7 +249,7 @@ public class MethodCache {
     // within in-process
     // python binding, using a reference to an interface is preferred
     for (Class<?> paramType : paramTypes) {
-      if (paramType.isInterface()) {
+      if (paramType.isInterface() && !paramType.getName().equals(List.class.getCanonicalName()) && !paramType.getName().equals(Map.class.getCanonicalName())) {
         // skipping not applicable for remote invoking
         hasInterfaceInParamList = true;
         break;
