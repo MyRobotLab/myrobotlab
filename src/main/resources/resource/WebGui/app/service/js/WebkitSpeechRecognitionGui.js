@@ -78,83 +78,128 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     }
 
     let recognizer = null
-    let wakeWord = null
 
     $scope.restartCnt = 0
     $scope.interimTranscript = ''
     $scope.finalTranscript = ''
     $scope.publishedText = ''
+
+    // corresponds to internal RecognizedResult class
+    // in AbstractSpeechREcognizer
+    recognizedResult = {
+        text: null,
+        confidence: 0.0,
+        isFinal: false
+    };
+
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
     $scope.errorText = null
-    $scope.wakeWord = null
     $scope.log = []
 
-    $scope.state = {
-        recognizing: false,
+    // this is really a js service
+    // and this is the initial service state we want
+    $scope.service = {
+        isListening: false,
         status: null,
         img: '../WebkitSpeechRecognition/mic.png',
         webkitSupport: true
     }
 
-    
-    $scope.changeListeningState = function(){
-        if (!$scope.state.recognizing){
+    $scope.changeListeningState = function() {
+        if (!$scope.service.isListening) {
             $scope.setState('start')
         } else {
             $scope.setState('stop')
         }
     }
 
-    $scope.setState = function(statusKey) {
+    $scope.setState = function(statusKey, event) {
         console.log('status ' + statusKey)
-        $scope.state.status = statusKey
+
+        $scope.service.status = statusKey
+
         switch (statusKey) {
         case 'onstart':
-            $scope.state.recognizing = true
-            $scope.state.img = '../WebkitSpeechRecognition/mic-animate.gif'
+            $scope.service.isListening = true
+            $scope.service.img = '../WebkitSpeechRecognition/mic-animate.gif'
             // $scope.errorText = null
             $scope.startTimestamp = new Date().getTime()
             console.log('speak now')
             $scope.$apply()
             break
+
+        case 'onresult':
+            $scope.interimTranscript = ''
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                let data = event.results[i][0]
+                let result = {
+                    text: data.transcript,
+                    confidence: data.confidence,
+                    isFinal: true
+                }
+
+                if (event.results[i].isFinal) {
+                    $scope.finalTranscript += data.transcript
+                    msg.send('processResults', [result])
+                } else {
+                    $scope.interimTranscript += data.transcript
+                }
+            }
+
+            // final_span.innerHTML = $scope.finalTranscript
+            // interim_span.innerHTML = $scope.interimTranscript
+            if ($scope.finalTranscript || $scope.interimTranscript) {
+                // showButtons('inline-block')
+                console.log('inline-block')
+            }
+            break
+
         case 'onend':
-            $scope.state.recognizing = false
-            $scope.state.img = '../WebkitSpeechRecognition/mic-slash.png'
+            $scope.service.isListening = false
+            $scope.service.img = '../WebkitSpeechRecognition/mic-slash.png'
             if (!$scope.stopRequested) {
                 $scope.restartCnt += 1
                 recognizer.start()
             }
 
             $scope.finalTranscript = $scope.finalTranscript.trim()
-            
 
             // publish results
             if ($scope.finalTranscript.length > 0) {
                 $scope.publishedText = $scope.finalTranscript
                 $scope.log.unshift($scope.publishedText)
-                msg.send('publishRecognized', $scope.publishedText);
             }
 
             $scope.finalTranscript = ''
             $scope.$apply()
             break
+
         case 'onerror':
+            $scope.errorText = event.error
             let errorTs = new Date().getTime()
             if ((errorTs - $scope.startTimestamp) < 100) {
                 $scope.errorText += ' - high error rate - check other tabs for an active webkit speech recognizer, and close it'
                 $scope.$apply()
             }
-            console.error('onerror - ' + $scope.errorText)
+            if ($scope.errorText == 'no-speech') {
+                console.info('onerror - ' + $scope.errorText)
+            } else {
+                console.error('onerror - ' + $scope.errorText)
+            }
+
             break
+
         case 'stop':
+            // TODO - rename stopListeningRequest
             $scope.stopRequested = true
             recognizer.stop()
             break
+
         case 'start':
             $scope.stopRequested = false
-            if ($scope.state.recognizing) {
+            if ($scope.service.isListening) {
                 recognizer.stop()
             }
             $scope.finalTranscript = ''
@@ -170,7 +215,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     }
 
-
     if (!('webkitSpeechRecognition'in window)) {
         webkitSupport = false
     } else {
@@ -185,8 +229,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
         recognizer.onerror = function(event) {
-            $scope.errorText = event.error
-            $scope.setState('onerror')
+            $scope.setState('onerror', event)
         }
 
         recognizer.onend = function() {
@@ -194,33 +237,29 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         }
 
         recognizer.onresult = function(event) {
-            console.log('onresult')
-            $scope.interimTranscript = ''
-            for (var i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    $scope.finalTranscript += event.results[i][0].transcript
-                } else {
-                    $scope.interimTranscript += event.results[i][0].transcript
-                }
-            }
-
-            // final_span.innerHTML = $scope.finalTranscript
-            // interim_span.innerHTML = $scope.interimTranscript
-            if ($scope.finalTranscript || $scope.interimTranscript) {
-                // showButtons('inline-block')
-                console.log('inline-block')
-            }
+            $scope.setState('onresult', event)
         }
     }
 
     $scope.setLanguage = function() {
         recognizer.lang = $scope.selectedLanguage
-        if ($scope.state.recognizing) {
+        if ($scope.service.isListening) {
             recognizer.stop()
         }
     }
 
     this.updateState = function(service) {
+        // $scope.service is old data
+        // service is new data
+
+        if ($scope.service.isListening && !service.isListening) {
+            $scope.setState('stop')
+        }
+        if (!$scope.service.isListening && service.isListening) {
+            $scope.setState('start')
+        }
+
+        // update un-mass
         $scope.service = service
     }
 
@@ -239,7 +278,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             break
         case 'onOnEndSpeaking':
             console.log("Stopped speaking, start listening.")
-            if (!$scope.state.recognizing) {
+            if (!$scope.service.isListening) {
                 $scope.startRecognition()
             }
             break
@@ -257,6 +296,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     msg.subscribe('onStartListening')
     msg.subscribe('onStopListening')
     */
+    // msg.send('processResults', [{ text:"worky !!!!", confidence:0.9999 }])
+
     $scope.setState('start')
     msg.subscribe(this)
 

@@ -20,39 +20,50 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * text and confidence (and any additional meta data) to be published
    */
   public static class RecognizedResult {
-    Double confidence;
-    String text;
+    public Double confidence;
+    public boolean isFinal = false;
+    public String text;
   }
-  
+
   /**
    * generalized list of languages and their codes - if useful
    */
   static protected Map<String, String> languages = new HashMap<>();
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   /**
    * all currently attached services
    */
   protected Set<String> attached = new TreeSet<>();
-  
+
   protected HashMap<String, Message> commands = new HashMap<>();
 
   /**
    * status of listening
    */
   protected boolean isListening = false;
-  
+
+  /**
+   * status when wake word is used and is ready to publish recognized events
+   */
+  protected boolean isAwake = false;
+
+  /**
+   * status of publishing recognized text
+   */
+  protected boolean isRecognizing = false;
+
   /**
    * current language code for recognition
    */
   protected String language = "en-US";
-  
+
   @Deprecated /* remove ! - is from webkit - should be handled in js */
   protected long lastAutoListenEvent = System.currentTimeMillis();
 
   protected String lastThingRecognized = null;
-  
+
   /**
    * prevents execution of command unless a lock out phrase is recognized
    */
@@ -66,22 +77,32 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   protected String lockPhrase = "";
 
   protected boolean lowerCase = true;
-  
+
   /**
    * Used in conjunction with a SpeechSythesis
    */
-  protected boolean speaking = false;
+  // FIXME - probably not needed - what needs to happen is SpeechSynthesis
+  // should "only" affect recognizing NOT listening
+  // and an end user affect listening ...
+  // protected boolean speaking = false;
 
   /**
-   * Wake word functionality is activated when it is set (ie not null)
-   * This means recognizing events will be processed "after" it hears the wake word.
-   * It will continue to publish events until a idle timeout period is reached.  It can continue
-   * to listen after this, but it will not publish.  It fact, it 'must' keep listening since in this idle
-   * state it needs to search for the wake word
+   * Wake word functionality is activated when it is set (ie not null) This
+   * means recognizing events will be processed "after" it hears the wake word.
+   * It will continue to publish events until a idle timeout period is reached.
+   * It can continue to listen after this, but it will not publish. It fact, it
+   * 'must' keep listening since in this idle state it needs to search for the
+   * wake word
    */
   protected String wakeWord = null;
 
-  protected Long wakeWordIdleTimeoutMs = 3000L;
+  /**
+   * number of seconds of silence after the initial wake word is used that it
+   * the wake word will be needed to activate again null == unlimited
+   */
+  protected Integer wakeWordIdleTimeoutSeconds = 10;
+
+  protected Long lastWakeWordTs = null;
 
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
@@ -178,7 +199,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public void addTextListener(TextListener service) {
-    
+
   }
 
   /**
@@ -213,7 +234,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public void attachTextListener(TextListener service) {
     addListener("publishText", service.getName());
   }
-  
+
   @Override
   @Deprecated /* use wake word */
   public void clearLock() {
@@ -222,29 +243,31 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
-   * get a referencee to 
+   * get a referencee to
+   * 
    * @return
    */
-  public Map<String,String> getLanguages(){
+  public Map<String, String> getLanguages() {
     return languages;
   }
 
   /**
    * Get the current wake word
+   * 
    * @return
    */
   public String getWakeWord() {
     return wakeWord;
   }
-  
+
   public boolean isAttached(Attachable attachable) {
     return isAttached(attachable.getName());
   }
-  
+
   public boolean isAttached(String attachable) {
     return attached.contains(attachable);
   }
-  
+
   /**
    * track the state of listening process
    */
@@ -260,7 +283,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
     return;
   }
-  
+
   @Override
   @Deprecated /* use wake word */
   public void lockOutAllGrammarExcept(String lockPhrase) {
@@ -268,35 +291,90 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     lockOutAllGrammar = true;
     this.lockPhrase = lockPhrase;
   }
-  
 
   /**
-   * Default implementation of onEndSpeaking event from a SpeechSythesis service is to
-   * start listening when speaking
+   * Default implementation of onEndSpeaking event from a SpeechSythesis service
+   * is to start listening when speaking
    */
   @Override
   public void onEndSpeaking(String utterance) {
     // need to subscribe to this in the webgui
     // so we can resume listening.
-    this.speaking = false;
-    startListening();
+    // this.speaking = false;
+    // startListening(); - user controls "listening" - SpeechSynthesis can
+    // affect "recognizing"
+
+    // start publishing recognized events
+    startRecognizing();
   }
-  
+
   @Override
   public void onStartSpeaking(String utterance) {
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
-    this.speaking = true;
-    stopListening();
+    // this.speaking = true;
+    // stopListening();
+    // - user controls "listening" - SpeechSynthesis can affect "recognizing"
+    // stop publishing recognized events
+    stopRecognizing();
   }
 
-  
   @Override
-  @Deprecated /* uset stopListening() and startListening() */
+  @Deprecated /*
+               * uset stopListening() and startListening() or stopRecognizing
+               * startRecognizing
+               */
   public void pauseListening() {
-    stopListening();
+    stopRecognizing();
   }
-  
+
+  public RecognizedResult[] processResults(RecognizedResult[] results) {
+    // at the moment its simply invoking other methods, but if a new speech
+    // recognizer is created - it might need more processing
+
+    for (int i = 0; i < results.length; ++i) {
+      RecognizedResult result = results[i];
+      if (result.isFinal) {
+
+        if (!isRecognizing && (wakeWord == null || !result.text.equalsIgnoreCase(wakeWord))) {
+          log.info("got recognized results - but currently isRecognizing false - not publishing");
+          return results;
+        }
+        if (wakeWord == null) {
+          invoke("publishRecognized", result.text);
+          invoke("publishText", result.text);
+          invoke("publishRecognizedResult", result);
+        } else {
+          if (wakeWord.equalsIgnoreCase(result.text)) {
+            info("wake word match on %s, idle timer starts", result.text);
+            purgeTask("wakeWordIdleTimeoutSeconds");
+            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
+            lastWakeWordTs = System.currentTimeMillis();
+          }
+
+          long now = System.currentTimeMillis();
+          if (lastWakeWordTs == null) {
+            lastWakeWordTs = now;
+          }
+          if (now - lastWakeWordTs < (wakeWordIdleTimeoutSeconds * 1000)) {
+            lastWakeWordTs = System.currentTimeMillis();
+            isAwake = true;
+            invoke("publishRecognized", result.text);
+            invoke("publishText", result.text);
+            invoke("publishRecognizedResult", result);
+            purgeTask("wakeWordIdleTimeoutSeconds");
+            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
+          } else {
+            info("ignoring \"%s\" - because it's not the wake word \"%s\"", result.text, wakeWord);
+            isAwake = false;
+          }
+        }
+        lastThingRecognized = result.text;
+      }
+    }
+
+    return results;
+  }
 
   @Override
   public boolean publishListening(boolean listening) {
@@ -304,24 +382,22 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     return listening;
   }
 
-
   @Override
   public String publishRecognized(String text) {
     invoke("publishText", text);
     return text;
   }
-  
+
   @Override
   public RecognizedResult publishRecognizedResult(RecognizedResult result) {
     return result;
   }
-  
 
   @Override
   public String publishText(String text) {
     return text;
   }
-  
+
   @Override
   @Deprecated /* use standard publishRecognized to setup subscriptions */
   public String recognized(String text) {
@@ -329,13 +405,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     // invoke("publishText", text); - we don't even need to do this
     // because the WebkitSpeechRecognition.js calls publishText
 
-    String cleanedText = (lowerCase)?text.toLowerCase().trim():text;
-    /* should not be done here ...
-    if (isStripAccents()) {
-      cleanedText = StringUtil.removeAccents(cleanedText);
-    }
-    */
-    
+    String cleanedText = (lowerCase) ? text.toLowerCase().trim() : text;
+    /*
+     * should not be done here ... if (isStripAccents()) { cleanedText =
+     * StringUtil.removeAccents(cleanedText); }
+     */
+
     if (text.equalsIgnoreCase(lockPhrase)) {
       clearLock();
     }
@@ -353,22 +428,22 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     }
     return "";
   }
-  
+
   @Override
-  @Deprecated /*use stopListening() and startListening()*/
+  @Deprecated /* use stopListening() and startListening() */
   public void resumeListening() {
     startListening();
   }
-  
+
   public void setLanguage(String languageCode) {
     language = languageCode;
     broadcastState();
   }
 
   public void setLowerCase(boolean b) {
-    lowerCase  = b;
+    lowerCase = b;
   }
-  
+
   /**
    * setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
@@ -388,15 +463,16 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     this.wakeWord = word;
     broadcastState();
   }
-  
+
   /**
    * length of idle time or silence until the wake word is needed to activate
    * again
    * 
-   * @param timeoutMs
+   * @param wakeWordTimeoutSeconds
    */
-  public void setWakeWordTimeout(long timeoutMs) {
-    wakeWordIdleTimeoutMs = timeoutMs;
+  public void setWakeWordTimeout(Integer wakeWordTimeoutSeconds) {
+    wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;
+    broadcastState();
   }
 
   @Override
@@ -406,53 +482,56 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  /**
+   * for webkit - startRecognizer consists of setting a property and
+   * broadcasting self to the webgui
+   */
+  @Override
+  public void startRecognizing() {
+    isRecognizing = true;
+    broadcastState();
+  }
+
   public void startService() {
     super.startService();
-    startRecognizer();
+    startRecognizing();
     startListening();
   }
 
   /**
-   *  This will prevent publishing of recognized events, to shutdown listening of audio or releasing the microphone use
-   *  stopRecognizer
+   * This will prevent audio from being recorded
    */
   @Override
   public void stopListening() {
-    log.debug("Stop listening event seen.");
-    boolean commError = false;
-    if (!this.speaking) {
+    log.debug("stopListening()");
+    isListening = false;
+    broadcastState();
+  }
 
-      if (System.currentTimeMillis() - lastAutoListenEvent > 300) {
-        startListening();
-      } else {
-        // loop if there is multiple chrome tabs OR no internet...
-        if (isListening) {
-          error("Please close zombie tabs and check Internet connection");
-          commError = true;
-        }
-      }
-      lastAutoListenEvent = System.currentTimeMillis();
-    } else {
-      log.debug("micNotListening");
-      isListening = false;
-    }
-    if (!commError) {
-      broadcastState();
-    }
+  /**
+   * prevents the publishing of recognized events - does NOT prevent audio being
+   * recorded and processed for webkit - startRecognizer consists of setting a
+   * property and broadcasting self to the webgui
+   */
+  @Override
+  public void stopRecognizing() {
+    isRecognizing = false;
+    broadcastState();
   }
 
   public void stopService() {
     super.stopService();
     stopListening();
-    stopRecognizer();
+    stopRecognizing();
   }
-  
+
   /**
-   * Stop wake word functionality .. after being called
-   * stop and start
+   * Stop wake word functionality .. after being called stop and start
    */
   public void unsetWakeWord() {
     wakeWord = null;
+    purgeTask("wakeWordIdleTimeoutSeconds");
+    broadcastState();
   }
 
 }

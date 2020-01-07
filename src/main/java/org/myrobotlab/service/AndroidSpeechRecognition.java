@@ -468,13 +468,13 @@ public class AndroidSpeechRecognition extends AbstractSpeechRecognizer {
   }
 
   @Override
-  public void startRecognizer() {
+  public void startRecognizing() {
     // TODO Auto-generated method stub
     
   }
 
   @Override
-  public void stopRecognizer() {
+  public void stopRecognizing() {
     // TODO Auto-generated method stub
     
   }
