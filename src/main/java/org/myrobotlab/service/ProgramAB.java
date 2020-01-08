@@ -858,6 +858,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     LoggingFactory.init("INFO");
     Runtime.start("gui", "SwingGui");
     Runtime.start("brain", "ProgramAB");
+    WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
   }
 
 }

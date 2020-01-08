@@ -114,14 +114,10 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     thumb.setPin(2);
     index.setPin(3);
-    ;
     majeure.setPin(4);
-    ;
     ringFinger.setPin(5);
     pinky.setPin(6);
-    ;
     wrist.setPin(7);
-    ;
 
     // TOOD: what are the initial velocities?
     // Initial rest positions?

@@ -62,6 +62,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     meta.addPeer("eye", "OpenCV", "eye");
 
+    // the two legacy controllers .. :(
+    meta.addPeer("left", "Arduino", "legacy controller");
+    meta.addPeer("right", "Arduino", "legacy controller");
+
     meta.addPeer("brain", "ProgramAB", "brain");
 
     meta.addPeer("head", "InMoov2Head", "head");
@@ -96,6 +100,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      i01.startBrain();
+      i01.startAll("COM3","COM4");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
 
@@ -105,9 +111,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
        */
       // i01.startSimulator();
       /*
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("/dev/ttyACM0");
-      */
+       * Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+       * mega.connect("/dev/ttyACM0");
+       */
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -933,6 +939,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void startAll() throws Exception {
+    startAll(null, null);
+  }
+
+  public void startAll(String leftPort, String rightPort) throws Exception {
     startMouth();
     startBrain();
 
@@ -941,10 +951,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // startOpenCV();
     startEar();
 
-    startServos();
+    startServos(leftPort, rightPort);
     // startMouthControl(head.jaw, mouth);
 
     speakBlocking("startup sequence completed");
+  }
+
+  public InMoov2Head startHead(String port) throws Exception {
+    return startHead(port, null, null, null, null, null, null, null);
   }
 
   public void startBrain() {
@@ -952,6 +966,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (brain == null) {
 
       brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      
+      speakBlocking(languagePack.get("CHATBOTACTIVATED"));
 
       // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
       attachTextPublisher(brain.getName());
@@ -1038,14 +1054,43 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     eyesTracking.connect(eye, head.eyeX, head.eyeY);
   }
 
-  public void startHead() {
+  public InMoov2Head startHead() throws Exception {
+    return startHead(null, null, null, null, null, null, null, null);
+  }
+
+  // legacy inmoov head exposed pins
+  public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
     if (head == null) {
       speakBlocking(languagePack.get("STARTINGHEAD"));
+
       head = (InMoov2Head) startPeer("head");
-    }
+
+      if (headYPin != null) {
+        head.setPins(headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
+      }
+
+      // lame assumption - port is specified - it must be an Arduino :(
+      if (port != null) {
+        try {
+          speakBlocking(languagePack.get(port));
+          Arduino arduino = (Arduino) startPeer("left", "Arduino");
+          arduino.connect(port);
+
+          arduino.attach(head.neck);
+          arduino.attach(head.rothead);
+          arduino.attach(head.eyeX);
+          arduino.attach(head.eyeY);
+          arduino.attach(head.jaw);
+          arduino.attach(head.rollNeck);
+
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    } // if head null
 
     if (mouthControl == null) {
       speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
@@ -1055,6 +1100,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
                                     // config !!!
     }
+    return head;
   }
 
   public void startHeadTracking() throws Exception {
@@ -1073,7 +1119,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  public void startLeftArm() {
+  public InMoov2Arm startLeftArm() {
+    return startLeftArm(null);
+  }
+
+  public InMoov2Arm startLeftArm(String port) {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
@@ -1081,20 +1131,60 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       speakBlocking(languagePack.get("STARTINGLEFTARM"));
       leftArm = (InMoov2Arm) startPeer("leftArm");
     }
+
+    if (port != null) {
+      try {
+        speakBlocking(port);
+        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        arduino.connect(port);
+
+        arduino.attach(leftArm.bicep);
+        arduino.attach(leftArm.omoplate);
+        arduino.attach(leftArm.rotate);
+        arduino.attach(leftArm.shoulder);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return leftArm;
   }
 
-  public void startLeftHand() {
+  public InMoov2Hand startLeftHand() {
+    return startLeftHand(null);
+  }
+
+  public InMoov2Hand startLeftHand(String port) {
     if (leftHand == null) {
       speakBlocking(languagePack.get("STARTINGLEFTHAND"));
       leftHand = (InMoov2Hand) startPeer("leftHand");
     }
+
+    if (port != null) {
+      try {
+        speakBlocking(port);
+        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        arduino.connect(port);
+
+        arduino.attach(leftHand.thumb);
+        arduino.attach(leftHand.index);
+        arduino.attach(leftHand.majeure);
+        arduino.attach(leftHand.ringFinger);
+        arduino.attach(leftHand.pinky);
+        arduino.attach(leftHand.wrist);
+
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    return leftHand;
   }
 
   public SpeechSynthesis startMouth() {
     if (mouth == null) {
       mouth = (SpeechSynthesis) startPeer("mouth");
       if (mute) {
-        mouth.mute();
+        mouth.setMute(true);
       }
     }
     // this.attach((Attachable) mouth);
@@ -1110,27 +1200,70 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     startEye();
   }
 
-  public void startRightArm() {
+  public InMoov2Arm startRightArm() {
+    return startRightArm(null);
+  }
+
+  public InMoov2Arm startRightArm(String port) {
     if (rightArm == null) {
       speakBlocking(languagePack.get("STARTINGLEFTARM"));
       rightArm = (InMoov2Arm) startPeer("rightArm");
     }
+    if (port != null) {
+      try {
+        speakBlocking(port);
+        Arduino arduino = (Arduino)startPeer("right", "Arduino");
+        arduino.connect(port);
+
+        arduino.attach(rightArm.bicep);
+        arduino.attach(rightArm.omoplate);
+        arduino.attach(rightArm.rotate);
+        arduino.attach(rightArm.shoulder);
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    return rightArm;
   }
 
-  public void startRightHand() {
+  public InMoov2Hand startRightHand() {
+    return rightHand;
+  }
+
+  public InMoov2Hand startRightHand(String port) {
     if (rightHand == null) {
       speakBlocking(languagePack.get("STARTINGRIGHTHAND"));
       rightHand = (InMoov2Hand) startPeer("rightHand");
     }
+
+    if (port != null) {
+      try {
+        speakBlocking(port);
+        Arduino arduino = (Arduino)startPeer("right", "Arduino");
+        arduino.connect(port);
+
+        arduino.attach(rightHand.thumb);
+        arduino.attach(rightHand.index);
+        arduino.attach(rightHand.majeure);
+        arduino.attach(rightHand.ringFinger);
+        arduino.attach(rightHand.pinky);
+        arduino.attach(rightHand.wrist);
+
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+    return rightHand;
   }
 
-  public void startServos() throws Exception {
-    startHead();
-    startLeftArm();
-    startLeftHand();
-    startRightArm();
-    startRightHand();
-    startTorso();
+  public void startServos(String leftPort, String rightPort) throws Exception {
+    startHead(leftPort);
+    startLeftArm(leftPort);
+    startLeftHand(leftPort);
+    startRightArm(rightPort);
+    startRightHand(rightPort);
+    startTorso(leftPort);
   }
 
   // FIXME .. externalize in a json file included in InMoov2
@@ -1313,10 +1446,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   }
 
-  public void startTorso() {
+  public void startTorso(String port) {
     if (torso == null) {
       speakBlocking(languagePack.get("STARTINGTORSO"));
       torso = (InMoov2Torso) startPeer("torso");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino left = (Arduino) startPeer("left");
+          left.connect(port);
+          left.attach(torso.lowStom);
+          left.attach(torso.midStom);
+          left.attach(torso.topStom);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
     }
   }
 
