@@ -100,7 +100,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
       i01.startBrain();
+      boolean done = true;
+      if (done) {
+        return;
+      }
       i01.startAll("COM3","COM4");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
@@ -115,9 +124,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
        * mega.connect("/dev/ttyACM0");
        */
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
+  
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -976,9 +983,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // FIXME - deal with language
       // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
       brain.repetitionCount(10);
-      brain.setPath("InMoov/chatBot");
-      // FIXME - deal with language chatBot.startSession("default",
-      // getLanguage());
+      brain.setPath(getResourceDir() + fs + "chatBot");
+      brain.startSession("default", getLanguage());
       // reset some parameters to default...
       brain.setPredicate("topic", "default");
       brain.setPredicate("questionfirstinit", "");
