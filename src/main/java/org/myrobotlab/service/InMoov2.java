@@ -928,19 +928,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // FIXME - publish onText when listening
     invoke("publishText", toSpeak);
 
-    if (mouth == null) {
-      mouth = (SpeechSynthesis) startPeer("mouth");
-    }
-
-    if (mouth == null) {
-      log.error("speakBlocking is called, but my mouth is NULL...");
-      return;
-    }
     if (!mute) {
+
+      if (mouth == null) {
+        info(toSpeak);
+        return;
+      }
+
       try {
         mouth.speakBlocking(toSpeak);
       } catch (Exception e) {
-        log.error("speakBlocking threw", e);
+        error("could not speak ", e.getMessage());
       }
     }
   }
@@ -983,7 +981,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // FIXME - deal with language
       // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
       brain.repetitionCount(10);
-      brain.setPath(getResourceDir() + fs + "chatBot");
+      brain.setPath(getResourceDir() + fs + "chatbot");
       brain.startSession("default", getLanguage());
       // reset some parameters to default...
       brain.setPredicate("topic", "default");

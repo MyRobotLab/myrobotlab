@@ -32,13 +32,17 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     this.onMsg = function(inMsg) {
         $log.info("Program AB Msg !")
+        let data = inMsg.data[0]
+
         switch (inMsg.method) {
+        
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
+            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         case 'onRequest':
-            var textData = inMsg.data[0]
+            var textData = data
             $scope.rows.unshift({
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
@@ -47,7 +51,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
             $scope.$apply()
             break
         case 'onText':
-            var textData = inMsg.data[0]
+            var textData = data
             $scope.rows.unshift({
                 name: $scope.currentBotName,
                 text: $sce.trustAsHtml(textData)
@@ -56,7 +60,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
             $scope.$apply()
             break
         case 'onOOBText':
-            var textData = inMsg.data[0]
+            var textData = data
             $scope.rows.unshift({
                 name: " > oob <",
                 text: $sce.trustAsHtml(textData)
