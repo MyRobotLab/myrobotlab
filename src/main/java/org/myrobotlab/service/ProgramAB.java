@@ -99,6 +99,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   boolean visualDebug = true;
   // TODO: if true, AIML is written back to disk on shutdown of this service.
   public boolean writeOnExit = true;
+  
+  /**
+   * list of available bots - populated on startup 
+   */
+  HashSet<String> availableBots = new HashSet<>();
 
   /**
    * Default constructor for the program ab service.
@@ -109,6 +114,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public ProgramAB(String n, String id) {
     super(n, id);
+    availableBots = getBots();
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
   }
 
