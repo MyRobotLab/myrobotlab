@@ -81,22 +81,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     $scope.restartCnt = 0
     $scope.interimTranscript = ''
-    $scope.finalTranscript = ''
     $scope.publishedText = ''
 
     // corresponds to internal RecognizedResult class
     // in AbstractSpeechREcognizer
-    recognizedResult = {
+    $scope.recognizedResult = {
         text: null,
-        confidence: 0.0,
+        confidence: null,
         isFinal: false
-    };
-
-    $scope.publishedResult = {
-        text: null,
-        confidence: 0.0,
-        isFinal: false
-    };
+    }
 
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
@@ -138,27 +131,26 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
         case 'onresult':
             $scope.interimTranscript = ''
+
+            console.log('onresult has ' + event.results.length + ' results')
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 let data = event.results[i][0]
-               
+                
+                $scope.recognizedResult = {
+                    text: data.transcript,
+                    confidence: (Math.round(data.confidence * 100) / 100).toFixed(2),
+                    isFinal: false
+                }
+
                 if (event.results[i].isFinal) {
-
-                    $scope.publishedResult.text = data.transcript
-                    $scope.publishedResult.confidence = (Math.round(data.confidence * 100) / 100).toFixed(2) 
-                    $scope.publishedResult.isFinal = true
-                    $scope.finalTranscript += data.transcript
-
-                    msg.send('processResults', [$scope.publishedResult])
+                    $scope.recognizedResult.isFinal = true
+                    msg.send('processResults', [$scope.recognizedResult])
+                    $scope.log.unshift($scope.recognizedResult)
+                    $scope.$apply()
                 } else {
+                    // weird handling of this ... FIXME - just pubish it all and set the correct final ..
                     $scope.interimTranscript += data.transcript
                 }
-            }
-
-            // final_span.innerHTML = $scope.finalTranscript
-            // interim_span.innerHTML = $scope.interimTranscript
-            if ($scope.finalTranscript || $scope.interimTranscript) {
-                // showButtons('inline-block')
-                console.log('inline-block')
             }
             break
 
@@ -169,17 +161,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
                 $scope.restartCnt += 1
                 recognizer.start()
             }
-
-            $scope.finalTranscript = $scope.finalTranscript.trim()
-
-            // publish results
-            if ($scope.finalTranscript.length > 0) {
-                $scope.publishedText = $scope.finalTranscript
-                $scope.log.unshift($scope.publishedText)
-            }
-
-            $scope.finalTranscript = ''
-            $scope.$apply()
             break
 
         case 'onerror':
@@ -208,7 +189,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             if ($scope.service.isListening) {
                 recognizer.stop()
             }
-            $scope.finalTranscript = ''
             recognizer.lang = $scope.selectedLanguage
             recognizer.start()
             $scope.errorText = null
@@ -265,7 +245,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.setState('start')
         }
 
-        // update un-mass
+        // update en-mass
         $scope.service = service
     }
 
@@ -304,7 +284,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     */
     // msg.send('processResults', [{ text:"worky !!!!", confidence:0.9999 }])
 
-    $scope.setState('start')
+    // $scope.setState('start')
     msg.subscribe(this)
 
 }

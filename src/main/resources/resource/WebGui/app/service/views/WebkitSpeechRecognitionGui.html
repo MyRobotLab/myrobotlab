@@ -1,8 +1,7 @@
 <div ng-show="{{!service.webkitSupport}}" class="row">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
-        versions 25 or later.  
-    
+        versions 25 or later.
     </h3>
 </div>
 <div ng-show="service.webkitSupport" class="row">
@@ -21,7 +20,7 @@
         </tr>
         <tr>
             <td>published</td>
-            <td>{{publishedResult.confidence}} {{publishedResult.text}}</td>
+            <td>{{recognizedResult.text}} &nbsp;&nbsp;&nbsp;{{recognizedResult.confidence}}</td>
         </tr>
         <tr>
             <td>
@@ -35,7 +34,6 @@
         <tr>
             <td>
                 <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
-            
             </td>
             <td>
                 <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
@@ -43,9 +41,7 @@
         </tr>
         <tr>
             <td colspan="2">
-                <!--
-                <button class="btn btn-default" ng-click="setState('start')">start listening</button>
-                <button class="btn btn-default" ng-click="setState('stop')">stop listening</button> -->
+                <!-- FIXME - make a universal toggle button -->
                 <button class="btn btn-default" ng-click="!enableLog">enable log</button>
             </td>
         </tr>
@@ -64,10 +60,6 @@
         <tr>
             <td>restarts</td>
             <td>{{restartCnt}}</td>
-        </tr>
-        <tr>
-            <td>final transcript</td>
-            <td>{{finalTranscript}}</td>
         </tr>
         <tr>
             <td>language</td>
@@ -99,8 +91,14 @@
                 </div>
             </td>
         </tr>
+        <tr>
+            <td colspan="2">
+                <h4>log</h4>
+            </td>
+        </tr>
         <tr ng-repeat="entry in log track by $index">
-            <td colspan="2">{{entry}}</td>
+            <td>{{entry.confidence}}</td>
+            <td>{{entry.text}}</td>
         </tr>
     </table>
 </div>

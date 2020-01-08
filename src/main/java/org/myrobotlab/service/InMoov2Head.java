@@ -412,7 +412,7 @@ public class InMoov2Head extends Service {
     meta.addPeer("rothead", "Servo", "Head pan servo");
     meta.addPeer("neck", "Servo", "Head tilt servo");
     meta.addPeer("rollNeck", "Servo", "rollNeck Mod servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    // meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
     meta.addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     meta.addPeer("eyelidRight", "Servo", "Eyelid right servo");
@@ -457,6 +457,15 @@ public class InMoov2Head extends Service {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void setPins(Integer neckPin, Integer rotheadPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
+    neck.setPin(neckPin);
+    rothead.setPin(rotheadPin);
+    eyeX.setPin(eyeXPin);
+    eyeY.setPin(eyeYPin);
+    jaw.setPin(jawPin);
+    rollNeck.setPin(rollNeckPin);
   }
 
 }

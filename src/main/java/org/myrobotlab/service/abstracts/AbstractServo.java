@@ -987,6 +987,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   @Config // default - if pin is different - output servo.setPin()
   public void setPin(Integer pin) {
+    if (pin == null) {
+      log.info("{}.setPin(null) as pin is not a valid pin value", pin);
+      return;
+    }
     setPin(pin + "");
   }
 
@@ -995,6 +999,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   @Override
   public void setPin(String pin) {
+    if (pin == null) {
+      log.info("{}.setPin(null) as pin is not a valid pin value", pin);
+      return;
+    }
     this.pin = pin;
     broadcastState();
   }

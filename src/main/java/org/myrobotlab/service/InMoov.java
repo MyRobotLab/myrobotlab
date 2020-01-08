@@ -167,12 +167,13 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     LoggingFactory.init(Level.INFO);
 
-    boolean done = true;
+    boolean done = false;
 
     Runtime.main(new String[] { "--interactive", "--id", "admin" });
     Platform.setVirtual(true);
 
     // Runtime.start("gui", "SwingGui");
+    
     Python python = (Python) Runtime.start("python", "Python");
     python.loadServiceScript("InMoov");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -186,13 +187,14 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return;
     }
 
-    String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
-    python.exec(script);
+ //   String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
+ //   python.exec(script);
 
     String leftPort = "COM3";
     String rightPort = "COM4";
 
     InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
+    i01.startAll(leftPort, rightPort);
     i01.setLanguage("en-US");
     i01.startMouth();
     i01.startEar();
