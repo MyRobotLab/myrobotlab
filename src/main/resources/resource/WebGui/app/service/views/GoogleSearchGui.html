@@ -1,0 +1,46 @@
+<div class="col-md-6" class="row">
+    <input class="form-control" type="text" ng-model="searchText" name="searchText" id="searchText" ng-init="" press-enter="search()" placeholder="type here"/>
+    <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="search()">Search</button>
+    </span>
+    <!--  the conversation history/log table -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th width="200">Search Log:</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="rowContent in rows track by $index">
+                <td>{{rowContent}} 
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<!--
+  <button type="button" ng-click="msg.getCategories('abc','def','ghi')" >test</button>
+  <button type="button" ng-click="test('abc')" >send</button>
+  -->
+<!-- TODO - MAKE THIS A GLOBAL SERVICE WITH FORMATED -->
+<!-- <pre>{{service}}</pre> -->
+<span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
+<div ng-show="showProperties">
+    <table class="table table-striped">
+        <tr ng-repeat="(key, value) in properties">
+            <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
+            <td>{{value[0]}}</td>
+            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
+            <td ng-show="statusControlMode!='status'">
+                <input type="text" class="form-control" value="{{value[1]}}"/>
+            </td>
+            <td>
+            <!-- units -->
+            </td>
+            <td>
+            <!-- info -->
+            {{value[2]}}
+                    </td>
+        </tr>
+    </table>
+</div>

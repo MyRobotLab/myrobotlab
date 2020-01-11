@@ -40,6 +40,10 @@ public class InMoov2Lang extends LangUtils {
     if (inmoov2.getLeftArm() != null) {
       sb.append(name + ".startLeftArm()\n");
     }
+    
+    if (inmoov2.getSimulator() != null) {
+      sb.append(name + ".startSimulator()\n");
+    }
 
     if (inmoov2.getRightArm() != null) {
       sb.append(name + ".getRightArm()\n");

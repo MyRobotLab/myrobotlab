@@ -31,7 +31,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     
     this.onMsg = function(inMsg) {
-        $log.info("Program AB Msg !")
+        $log.info("ProgramABGui.onMsg(" + inMsg.method +')')
         let data = inMsg.data[0]
 
         switch (inMsg.method) {

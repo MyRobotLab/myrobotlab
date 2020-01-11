@@ -10,6 +10,9 @@
 		
 		# javadoc check
 		mvn -q javadoc:javadoc
+		
+		# proxy
+		-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 	
 	 -->	
 	<modelVersion>4.0.0</modelVersion>
