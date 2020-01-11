@@ -97,6 +97,35 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return meta;
   }
 
+  /**
+   * This method will load a python file into the python interpreter.
+   */
+  public static boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
+  }
+
   public static void main(String[] args) {
     try {
 
@@ -144,11 +173,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   Set<String> configs = null;
 
   String currentConfigurationName = "default";
-
-  transient SpeechRecognizer ear;
   
-  @Deprecated
-  public Vision vision;
+  transient SpeechRecognizer ear;
 
   // transient InMoovEyelids eyelids; they are in the head
 
@@ -208,6 +234,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient InMoov2Hand rightHand;
 
   transient InMoov2Torso torso;
+
+  @Deprecated
+  public Vision vision;
 
   transient WebGui webgui;
 
@@ -511,6 +540,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public InMoov2Hand getRightHand() {
     return rightHand;
+  }
+
+  public Simulator getSimulator() {
+    return jme;
   }
 
   public InMoov2Torso getTorso() {
@@ -908,6 +941,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  /// end blah
+
   public List<AudioData> speak(String toSpeak) {
     if (mouth == null) {
       log.error("Speak is called, but my mouth is NULL...");
@@ -927,8 +962,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(languagePack.get("ALERT"));
     speakBlocking(toSpeak);
   }
-
-  /// end blah
 
   // FIXME - publish text regardless if mouth exists ...
   public void speakBlocking(String toSpeak) {
@@ -974,15 +1007,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking("startup sequence completed");
   }
 
-  public InMoov2Head startHead(String port) throws Exception {
-    return startHead(port, null, null, null, null, null, null, null);
-  }
-
-  public void startBrain() {
+  public ProgramAB startBrain() {
 
     if (brain == null) {
 
-      brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      brain = (ProgramAB)startPeer("brain");
       
       speakBlocking(languagePack.get("CHATBOTACTIVATED"));
 
@@ -1021,9 +1050,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       brain.addTextListener(htmlFilter);
       htmlFilter.addListener("publishText", getName(), "speak");
     }
+    
+    return brain;
   }
 
-  public void startEar() {
+  public SpeechRecognizer startEar() {
 
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
@@ -1033,7 +1064,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       brain.attach((Attachable) ear);
     }
     speakBlocking(languagePack.get("STARTINGEAR"));
-
+    return ear;
   }
 
   public void startedGesture() {
@@ -1049,31 +1080,46 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       RobotCanMoveRandom = false;
     }
   }
+  
+ 
 
   // FIXME - universal (good) way of handling all exceptions - ie - reporting
   // back to the user the problem in a short concise way but have
   // expandable detail in appropriate places
-  public void startEye() throws Exception {
+  public OpenCV startEye() throws Exception {
     if (eye == null) {
       speakBlocking(languagePack.get("STARTINGOPENCV"));
       eye = (OpenCV) startPeer("eye", "OpenCV");
       subscribeTo(eye.getName(), "publishOpenCVData");
     }
+    return eye;
   }
 
-  public void startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
+  public Tracking startEyesTracking() throws Exception {
+    if (head == null) {
+      startHead();
+    }
+    return startHeadTracking(head.eyeX, head.eyeY);
+  }
+  
+  public Tracking startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
     if (eye == null) {
       startEye();
     }
     speakBlocking(languagePack.get("TRACKINGSTARTED"));
     eyesTracking = (Tracking) this.startPeer("eyesTracking");
     eyesTracking.connect(eye, head.eyeX, head.eyeY);
+    return eyesTracking;
   }
 
   public InMoov2Head startHead() throws Exception {
     return startHead(null, null, null, null, null, null, null, null);
   }
 
+  public InMoov2Head startHead(String port) throws Exception {
+    return startHead(port, null, null, null, null, null, null, null);
+  }
+  
   // legacy inmoov head exposed pins
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
@@ -1133,6 +1179,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       headTracking = (Tracking) this.startPeer("headTracking");
       headTracking.connect(this.eye, head.rothead, head.neck);
     }
+  }
+
+  public Tracking startHeadTracking(ServoControl rothead, ServoControl neck) throws Exception {
+    if (eye == null) {
+      startEye();
+    }
+
+    if (headTracking == null) {
+      speakBlocking(languagePack.get("TRACKINGSTARTED"));
+      headTracking = (Tracking) this.startPeer("headTracking");
+      headTracking.connect(this.eye, rothead, neck);
+    }
+    return headTracking;
   }
 
   public InMoov2Arm startLeftArm() {
@@ -1283,7 +1342,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   // FIXME .. externalize in a json file included in InMoov2
-  public void startSimulator() throws Exception {
+  public Simulator startSimulator() throws Exception {
 
     if (jme == null) {
       speakBlocking("starting simulator");
@@ -1459,10 +1518,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
      * ".leftHand.index2", 0, 180, -90, -270); simulator.setMapper(getName() +
      * ".leftHand.index3", 0, 180, -90, -270);
      */
-
+    return jme;
   }
+  
 
-  public void startTorso(String port) {
+  public InMoov2Torso startTorso(String port) {
     if (torso == null) {
       speakBlocking(languagePack.get("STARTINGTORSO"));
       torso = (InMoov2Torso) startPeer("torso");
@@ -1480,6 +1540,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         }
       }
     }
+    return torso;
   }
 
   public void stop() {
@@ -1502,36 +1563,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.stop();
     }
   }
-  
-
-  /**
-   * This method will load a python file into the python interpreter.
-   */
-  public static boolean loadFile(String file) {
-    File f = new File(file);
-    Python p = (Python) Runtime.getService("python");
-    log.info("Loading  Python file {}", f.getAbsolutePath());
-    if (p == null) {
-      log.error("Python instance not found");
-      return false;
-    }
-    String script = null;
-    try {
-      script = FileIO.toString(f.getAbsolutePath());
-    } catch (IOException e) {
-      log.error("IO Error loading file : ", e);
-      return false;
-    }
-    // evaluate the scripts in a blocking way.
-    boolean result = p.exec(script, true);
-    if (!result) {
-      log.error("Error while loading file {}", f.getAbsolutePath());
-      return false;
-    } else {
-      log.debug("Successfully loaded {}", f.getAbsolutePath());
-    }
-    return true;
-  }
 
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
@@ -1545,10 +1576,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     leftHand.waitTargetPos();
     rightHand.waitTargetPos();
     torso.waitTargetPos();
-  }
-
-  public Simulator getSimulator() {
-    return jme;
   }
 
 }
