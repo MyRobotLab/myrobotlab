@@ -1280,6 +1280,14 @@ public class OpenCV extends AbstractComputerVision {
     broadcastState(); // restarting/enabled filters ?? wth?
     return grabber;
   }
+  
+  public void setWidth(int width) {
+    this.width = width;
+  }
+  
+  public void setHeight(int height) {
+    this.height = height;
+  }
 
   public String getGrabberType() {
     return grabberType;
