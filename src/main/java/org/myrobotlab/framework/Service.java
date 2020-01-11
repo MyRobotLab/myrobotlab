@@ -2592,7 +2592,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public String exportAll() throws IOException {
     // FIXME - interaction with user if file exists ?
-    return exportAll(getRootDataDir() + fs +  getId() + ".py");
+    return exportAll(getRootDataDir() + fs +  "export.py");
   }
   
   public String export(String filename, String names) throws IOException {

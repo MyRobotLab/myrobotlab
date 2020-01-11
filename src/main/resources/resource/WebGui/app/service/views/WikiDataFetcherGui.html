@@ -1,0 +1,25 @@
+<div class="row">
+ 
+</div>
+<div class="row">
+    <span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
+    <div ng-show="showProperties">
+        <table class="table table-striped">
+            <tr ng-repeat="(key, value) in properties">
+                <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
+                <td>{{value[0]}}</td>
+                <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
+                <td ng-show="statusControlMode!='status'">
+                    <input type="text" class="form-control" value="{{value[1]}}"/>
+                </td>
+                <td>
+                <!-- units -->
+                </td>
+                <td>
+                <!-- info -->
+                {{value[2]}}
+                    </td>
+            </tr>
+        </table>
+    </div>
+</div>

@@ -725,6 +725,14 @@ public class Python extends Service {
   }
   
   
+  @Override
+  public String exportAll() throws IOException {
+    String filename = getRootDataDir() + fs +  getId() + ".py";
+    String script = super.exportAll(filename);
+    openScript(filename, script);
+    return script;
+  }
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

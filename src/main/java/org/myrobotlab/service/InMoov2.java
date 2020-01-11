@@ -10,12 +10,14 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.inmoov.LanguagePack;
-import org.myrobotlab.inmoov.Utils;
+import org.myrobotlab.inmoov.Vision;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -25,6 +27,7 @@ import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -98,6 +101,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     try {
 
       LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(true);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
       
@@ -105,11 +109,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       webgui.autoStartBrowser(false);
       webgui.startService();
       
-      i01.startBrain();
       boolean done = true;
       if (done) {
         return;
       }
+      
+      i01.startBrain();
+     
       i01.startAll("COM3","COM4");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
@@ -140,6 +146,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   String currentConfigurationName = "default";
 
   transient SpeechRecognizer ear;
+  
+  @Deprecated
+  public Vision vision;
 
   // transient InMoovEyelids eyelids; they are in the head
 
@@ -585,11 +594,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     String extension = "py";
     Integer totalLoaded = 0;
     Integer totalError = 0;
-    File dir = Utils.makeDirectory(directory);
+    
+    File dir = new File(directory);
+    dir.mkdirs();
+    
     if (dir.exists()) {
       for (File f : dir.listFiles()) {
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
-          if (Utils.loadFile(f.getAbsolutePath()) == true) {
+          if (loadFile(f.getAbsolutePath()) == true) {
             totalLoaded += 1;
             String methodName = f.getName().substring(0, f.getName().length() - 3) + "()";
             gestures.add(methodName);
@@ -1490,6 +1502,36 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.stop();
     }
   }
+  
+
+  /**
+   * This method will load a python file into the python interpreter.
+   */
+  public static boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
+  }
 
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
@@ -1503,6 +1545,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     leftHand.waitTargetPos();
     rightHand.waitTargetPos();
     torso.waitTargetPos();
+  }
+
+  public Simulator getSimulator() {
+    return jme;
   }
 
 }
