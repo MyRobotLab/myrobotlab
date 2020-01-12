@@ -126,8 +126,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     addListener("publishResponse", service.getName(), "onResponse");
   }
 
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName(), "onText");
+    addTextListener(service);
   }
 
   public void addTextListener(SpeechSynthesis service) {
@@ -867,6 +868,24 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     webgui.startService();
+  }
+
+  @Override /* FIXME - just do this once in abstract */
+  public void attachTextListener(TextListener service) {
+    if (service == null) {
+      log.warn("{}.attachTextListener(null)");
+      return;
+    }
+    addListener("publishText", service.getName());
+  }
+
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
 }

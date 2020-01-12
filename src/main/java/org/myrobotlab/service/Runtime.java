@@ -375,7 +375,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * Setting the runtime virtual will set the platform virtual too. All
    * subsequent services will be virtual
    */
-  public void setVirtual(boolean b) {
+  public boolean setVirtual(boolean b) {
     Platform.setVirtual(true);
     for (ServiceInterface si : getServices()) {
       if (!si.isRuntime()) {
@@ -384,6 +384,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     this.isVirtual = b;
     broadcastState();
+    return b;
   }
 
   static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {

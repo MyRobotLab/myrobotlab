@@ -8,6 +8,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     // text published from InMoov2 service
     $scope.onText = null
     $scope.languageSelected = null
+    $scope.speakText = null
 
     $scope.selectedGesture = null
 

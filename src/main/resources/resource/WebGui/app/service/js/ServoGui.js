@@ -15,7 +15,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.possibleController = null
     $scope.testTime = 300
     $scope.sliderEnabled = false
-    
+
     $scope.speed = null
 
     // mode is either "status" or "control"
@@ -68,20 +68,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
     }
 
-    /*
-    $scope.changeMode = function() {
-        $scope.statusControlMode = ($scope.statusControlMode == 'status') ? 'control' : 'status'
-        if ($scope.statusControlMode == 'status') {
-            $scope.pos.options.disabled = true;
-            $scope.limits.options.disabled = true;
-        } else {
-            $scope.pos.options.disabled = false;
-            $scope.limits.options.disabled = false;
-        }
-
-    }
-    */
-
     $scope.setSpeed = function(speed) {
         if (speed == null || speed.trim().length == 0) {
             msg.send("unsetSpeed")
@@ -130,8 +116,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             // but perhaps its come to mean
             // feedback from the service.moveTo
         case 'onServoData':
-            $scope.service.currentPos = data.pos
-            $scope.$apply()
+            if ($scope.statusControlMode == 'status') {
+                $scope.service.currentPos = data.pos
+                $scope.$apply()
+            }
             break
         case 'onStatus':
             $scope.status = data
@@ -142,6 +130,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             $log.info("Add listener called")
             $scope.status = data
             $scope.$apply()
+            break
+        case 'onMoveTo':
+            // FIXME - whole servo is sent ? - maybe not a bad thing, but there should probably be more
+            // granularity and selectiveness on what data is published when ...
+
             break
         default:
             $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)

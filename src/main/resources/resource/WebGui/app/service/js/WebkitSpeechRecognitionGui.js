@@ -115,7 +115,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     }
 
     $scope.setState = function(statusKey, event) {
-        console.log('status ' + statusKey)
+        console.debug('status ' + statusKey)
 
         $scope.service.status = statusKey
 
@@ -125,14 +125,14 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.service.img = '../WebkitSpeechRecognition/mic-animate.gif'
             // $scope.errorText = null
             $scope.startTimestamp = new Date().getTime()
-            console.log('speak now')
+            console.debug('speak now')
             $scope.$apply()
             break
 
         case 'onresult':
             $scope.interimTranscript = ''
 
-            console.log('onresult has ' + event.results.length + ' results')
+            console.debug('onresult has ' + event.results.length + ' results')
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 let data = event.results[i][0]
                 
@@ -171,7 +171,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
                 $scope.$apply()
             }
             if ($scope.errorText == 'no-speech') {
-                console.info('onerror - ' + $scope.errorText)
+                console.debug('onerror - ' + $scope.errorText)
             } else {
                 console.error('onerror - ' + $scope.errorText)
             }

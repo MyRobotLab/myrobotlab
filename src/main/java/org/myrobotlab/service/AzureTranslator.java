@@ -106,6 +106,11 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName(), "onText");
   }
+  
+  @Override
+  public void attachTextListener(TextListener service) {
+    addListener("publishText", service.getName());
+  }
 
   @Override
   public void onText(String text) {
@@ -116,6 +121,15 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     } catch (Exception e) {
       log.error("Unable to translate text! {} {}", text, e);
     }
+  }
+  
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
 }
