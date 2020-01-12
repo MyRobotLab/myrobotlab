@@ -320,10 +320,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
     if (afterSpeakingPauseMs > 0) {
       // remove previous one shot - because we are "sliding" the window of stopping the publishing of recognized words
-      purgeTask("setSpeeking");
-      addTaskOneShot(afterSpeakingPauseMs, "setSpeeking", new Object[] {false});
+      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] {false});
+      log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
     } else {
-      isSpeaking = false;
+      setSpeaking(false);
     }
   }
   
@@ -333,7 +333,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 // start publishing recognized events
 // startRecognizing();
 
-  public void setSpeeking(boolean b) {
+  public void setSpeaking(boolean b) {
     
     isSpeaking = b;
     if (isSpeaking) {
@@ -341,20 +341,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     } else {
       log.warn("======================= stopped speaking - started listening  =======================================");
     }
-      
   }
 
   @Override
   public void onStartSpeaking(String utterance) {
-    
-    // at this point we should subscribe to this in the webgui
-    // so we can pause listening.
-    // this.speaking = true;
-    // stopListening();
-    // - user controls "listening" - SpeechSynthesis can affect "recognizing"
-    // stop publishing recognized events
-
-    isSpeaking = true;
+    // remove any currently pending "no longer listening" delay tasks, because
+    // we started a new isSpeaking = true, so the pause window after has moved
+    purgeTask("setSpeaking");
+    // isSpeaking = true;
+    setSpeaking(true);
     // stopRecognizing();
   }
 
@@ -376,7 +371,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
       RecognizedResult result = results[i];
       
       if (isSpeaking) {
-        log.warn("===== not publishing recognized \"{}\" since we are speaking ======", result.text);
+        log.warn("===== NOT publishing recognized \"{}\" since we are speaking ======", result.text);
         continue;
       }
 
