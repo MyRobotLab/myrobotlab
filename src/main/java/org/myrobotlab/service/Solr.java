@@ -57,6 +57,7 @@ import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -1046,6 +1047,15 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       }
     }
 
+  }
+  
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
   @Override

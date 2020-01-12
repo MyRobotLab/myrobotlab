@@ -8,6 +8,23 @@
                 <td>{{onText}}    
                 </td>
             </tr>
+                        <tr>
+                <td>
+                    <label for="sel1">speak</label>
+                    <input class="form-control" type="text" id="speakText" ng-model="speakText">
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.speakBlocking(speakText)">speak</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="sel1">virtual</label>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.send('setVirtual', true)">set virtual</button>
+                </td>
+            </tr>
             <tr>
                 <td>
                     <label for="sel1">configurations</label>
@@ -33,6 +50,8 @@
                 <td>
                     {{service.language}}              
                                 
+                    
+                    
                     <div class="form-group">
                         <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
                             <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
@@ -41,19 +60,27 @@
                 </td>
             </tr>
             <tr>
-                <td><label>simulator</label><br><img src="../JMonkeyEngine.png"/></td>
+                <td>
+                    <label>simulator</label>
+                    <br>
+                    <img src="../JMonkeyEngine.png"/>
+                </td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
                 </td>
             </tr>
-           <tr>
-                <td><label>tracking</label><br><img src="../Tracking.png"/></td>
+            <tr>
+                <td>
+                    <label>tracking</label>
+                    <br>
+                    <img src="../Tracking.png"/>
+                </td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.startHeadTracking()">start head tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEyesTracking()">start eyes tracking</button>
                 </td>
             </tr>
-             <tr>
+            <tr>
                 <td>
                     <label>servos</label>
                 </td>
@@ -67,6 +94,8 @@
                     <button class="btn btn-default" type="button" ng-click="msg.stop()">
                         <span>
                             <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                        
+                        
                         
                         </span>
                     </button>
@@ -94,7 +123,7 @@
                     <button class="btn btn-default" ng-click="msg.startEyeTracking()">start eye tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
                     <button class="btn btn-default" ng-click="msg.startMouth()">start mouth</button>
-                     <button class="btn btn-default" ng-click="msg.startEye()">start eye</button>
+                    <button class="btn btn-default" ng-click="msg.startEye()">start eye</button>
                     <button class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
                 </td>
             </tr>

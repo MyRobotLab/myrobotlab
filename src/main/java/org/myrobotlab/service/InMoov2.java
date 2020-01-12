@@ -46,7 +46,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // FIXME - WTH ?
   static String speechService = "MarySpeech";
-
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -68,6 +67,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // the two legacy controllers .. :(
     meta.addPeer("left", "Arduino", "legacy controller");
     meta.addPeer("right", "Arduino", "legacy controller");
+    
+    meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
     meta.addPeer("brain", "ProgramAB", "brain");
 
@@ -96,7 +97,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     return meta;
   }
-
   /**
    * This method will load a python file into the python interpreter.
    */
@@ -125,7 +125,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
-
   public static void main(String[] args) {
     try {
 
@@ -133,19 +132,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       i01.startBrain();
-     
-      i01.startAll("COM3","COM4");
+
+      i01.startAll("COM3", "COM4");
       Runtime.start("python", "Python");
       // Runtime.start("log", "Log");
 
@@ -159,40 +158,56 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
        * mega.connect("/dev/ttyACM0");
        */
 
-  
-
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
-
+  
   boolean autoStartBrowser = false;
-
+  
   transient ProgramAB brain;
-
+  
+  transient HtmlFilter htmlFilter;
+  
   Set<String> configs = null;
-
+  
   String currentConfigurationName = "default";
   
   transient SpeechRecognizer ear;
-
-  // transient InMoovEyelids eyelids; they are in the head
-
+  
   transient OpenCV eye;
-
   transient Tracking eyesTracking;
-
   // waiting controable threaded gestures we warn user
   boolean gestureAlreadyStarted = false;
-
   // FIXME - what the hell is this for ?
   Set<String> gestures = new TreeSet<String>();
-
+  
   transient InMoov2Head head;
-
+  
+  transient NeoPixel neopixel;
+ 
   transient Tracking headTracking;
-
+  
   transient ImageDisplay imageDisplay;
+  
+  /**
+   * a variety of state variables for scripts
+   */
+  boolean isEyeLidsActivated = false;
+  
+  boolean isHeadActivated = false;
+
+  boolean isLeftArmActivated = false;
+
+  boolean isLeftHandActivated = false;
+
+  boolean isNeopixelActivated = false;
+
+  boolean isRightArmActivated = false;
+
+  boolean isRightHandActivated = false;
+
+  boolean isTorsoActivated = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine jme;
@@ -200,6 +215,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   String language;
 
   transient LanguagePack languagePack = new LanguagePack();
+
+  // transient InMoovEyelids eyelids; they are in the head
 
   LinkedHashMap<String, String> languages = new LinkedHashMap<>();
 
@@ -214,9 +231,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   int maxInactivityTimeSeconds = 120;
 
   transient SpeechSynthesis mouth;
-
-  // FIXME - remove all direct references
-  // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
   // FIXME ugh - new MouthControl service that uses AudioFile output
   transient public MouthControl mouthControl;
@@ -237,6 +251,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   @Deprecated
   public Vision vision;
+
+  // FIXME - remove all direct references
+  // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
   transient WebGui webgui;
 
@@ -573,8 +590,40 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   }
 
+  public boolean isEyeLidsActivated() {
+    return isEyeLidsActivated;
+  }
+
+  public boolean isHeadActivated() {
+    return isHeadActivated;
+  }
+
+  public boolean isLeftArmActivated() {
+    return isLeftArmActivated;
+  }
+
+  public boolean isLeftHandActivated() {
+    return isLeftHandActivated;
+  }
+
   public boolean isMute() {
     return muted;
+  }
+
+  public boolean isNeopixelActivated() {
+    return isNeopixelActivated;
+  }
+
+  public boolean isRightArmActivated() {
+    return isRightArmActivated;
+  }
+
+  public boolean isRightHandActivated() {
+    return isRightHandActivated;
+  }
+
+  public boolean isTorsoActivated() {
+    return isTorsoActivated;
   }
 
   public Set<String> listConfigFiles() {
@@ -627,10 +676,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     String extension = "py";
     Integer totalLoaded = 0;
     Integer totalError = 0;
-    
+
     File dir = new File(directory);
     dir.mkdirs();
-    
+
     if (dir.exists()) {
       for (File f : dir.listFiles()) {
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
@@ -683,6 +732,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void moveHand(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
+    if (hand == null) {
+      log.warn("{} hand does not exist");
+      return;
+    }
     hand.moveTo(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
@@ -832,6 +885,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   @Deprecated
   public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
+    if (arm == null) {
+      warn("%s hand not started", which);
+      return;
+    }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
   }
 
@@ -841,6 +898,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     InMoov2Hand hand = getHand(which);
+    if (hand == null) {
+      warn("%s hand not started", which);
+      return;
+    }
     hand.setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
@@ -863,11 +924,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed, Double rollNeckSpeed) {
-    if (head != null) {
-      head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
-    } else {
-      log.warn("setHeadVelocity - I have no head");
+    if (head == null) {
+      warn("setHeadSpeed - head not started");
+      return;
     }
+    head.setSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
   }
 
   @Deprecated
@@ -917,14 +978,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     this.mute = mute;
     if (mouth != null) {
       if (mute) {
-        mouth.mute();
+        mouth.setMute(true);
       } else {
-        mouth.unmute();
+        mouth.setMute(false);
       }
     }
   }
 
-  @Deprecated
+  public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
+    if (neopixel != null /* && neopixelArduino != null */) {
+      neopixel.setAnimation(animation, red, green, blue, speed);
+    } else {
+      warn("No Neopixel attached");
+    }
+  }
+
+  
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setSpeed(topStom, midStom, lowStom);
@@ -933,6 +1002,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  @Deprecated
   public void setTorsoVelocity(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setVelocity(topStom, midStom, lowStom);
@@ -941,7 +1011,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  /// end blah
+  /**
+   * overridden setVirtual for InMoov sets "all" services to virtual
+   */
+  public boolean setVirtual(boolean virtual) {
+    super.setVirtual(virtual);
+    Platform.setVirtual(virtual);
+    return virtual;
+  }
 
   public List<AudioData> speak(String toSpeak) {
     if (mouth == null) {
@@ -976,7 +1053,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (!mute) {
 
       if (mouth == null) {
-        info(toSpeak);
+        info("mouth not started, speaking, \"" + toSpeak + "\"");
         return;
       }
 
@@ -1011,13 +1088,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     if (brain == null) {
 
-      brain = (ProgramAB)startPeer("brain");
-      
+      brain = (ProgramAB) startPeer("brain");
+
       speakBlocking(languagePack.get("CHATBOTACTIVATED"));
 
       // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-      attachTextPublisher(brain.getName());
+      // attachTextPublisher(brain.getName());
 
+      /* not necessary - ear needs to be attached to mouth not brain
+      if (ear != null) {
+        ear.attachTextListener(brain);
+      }
+      */
+      
+      brain.attachTextPublisher(ear);
+      
+     
       // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
       // FIXME - deal with language
       // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
@@ -1046,11 +1132,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         brain.startSession(brain.getPredicate("lastUsername"));
       }
 
-      HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-      brain.addTextListener(htmlFilter);
-      htmlFilter.addListener("publishText", getName(), "speak");
+      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter", "HtmlFilter");
+      brain.attachTextListener(htmlFilter);
+      htmlFilter.attachTextListener(mouth);
+     
     }
-    
+
     return brain;
   }
 
@@ -1059,10 +1146,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
     }
+    
+    ear.attachSpeechSynthesis(mouth);
+    ear.attachTextListener(brain);
 
-    if (brain != null) {
-      brain.attach((Attachable) ear);
-    }
     speakBlocking(languagePack.get("STARTINGEAR"));
     return ear;
   }
@@ -1080,8 +1167,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       RobotCanMoveRandom = false;
     }
   }
-  
- 
 
   // FIXME - universal (good) way of handling all exceptions - ie - reporting
   // back to the user the problem in a short concise way but have
@@ -1101,7 +1186,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return startHeadTracking(head.eyeX, head.eyeY);
   }
-  
+
   public Tracking startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
     if (eye == null) {
       startEye();
@@ -1119,14 +1204,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Head startHead(String port) throws Exception {
     return startHead(port, null, null, null, null, null, null, null);
   }
-  
+
   // legacy inmoov head exposed pins
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
+    
+   
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
     if (head == null) {
       speakBlocking(languagePack.get("STARTINGHEAD"));
+      
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
 
       head = (InMoov2Head) startPeer("head");
 
@@ -1204,6 +1295,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
     if (leftArm == null) {
       speakBlocking(languagePack.get("STARTINGLEFTARM"));
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
       leftArm = (InMoov2Arm) startPeer("leftArm");
     }
 
@@ -1231,6 +1325,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Hand startLeftHand(String port) {
     if (leftHand == null) {
       speakBlocking(languagePack.get("STARTINGLEFTHAND"));
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
       leftHand = (InMoov2Hand) startPeer("leftHand");
     }
 
@@ -1262,6 +1359,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         mouth.setMute(true);
       }
     }
+      
+      mouth.attachSpeechRecognizer(ear);
+      // mouth.attach(htmlFilter); // same as brain  not needed
+    
     // this.attach((Attachable) mouth);
     // if (ear != null) ....
     speakBlocking(languagePack.get("STARTINGMOUTH"));
@@ -1281,13 +1382,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public InMoov2Arm startRightArm(String port) {
     if (rightArm == null) {
-      speakBlocking(languagePack.get("STARTINGLEFTARM"));
+      speakBlocking(languagePack.get("STARTINGRIGHTARM"));
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
       rightArm = (InMoov2Arm) startPeer("rightArm");
     }
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino)startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right", "Arduino");
         arduino.connect(port);
 
         arduino.attach(rightArm.bicep);
@@ -1309,13 +1413,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Hand startRightHand(String port) {
     if (rightHand == null) {
       speakBlocking(languagePack.get("STARTINGRIGHTHAND"));
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
       rightHand = (InMoov2Hand) startPeer("rightHand");
     }
 
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino)startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right", "Arduino");
         arduino.connect(port);
 
         arduino.attach(rightHand.thumb);
@@ -1520,11 +1627,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
      */
     return jme;
   }
-  
 
   public InMoov2Torso startTorso(String port) {
     if (torso == null) {
       speakBlocking(languagePack.get("STARTINGTORSO"));
+      
+      if (Platform.isVirtual()) {
+        speakBlocking("in virtual hardware mode");
+      }
+
       torso = (InMoov2Torso) startPeer("torso");
 
       if (port != null) {
@@ -1570,12 +1681,35 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void waitTargetPos() {
-    head.waitTargetPos();
-    leftArm.waitTargetPos();
-    rightArm.waitTargetPos();
-    leftHand.waitTargetPos();
-    rightHand.waitTargetPos();
-    torso.waitTargetPos();
+    if (head != null) {
+      head.waitTargetPos();
+    }
+    if (leftArm != null) {
+      leftArm.waitTargetPos();
+    }
+    if (rightArm != null) {
+      rightArm.waitTargetPos();
+    }
+    if (leftHand != null) {
+      leftHand.waitTargetPos();
+    }
+    if (rightHand != null) {
+      rightHand.waitTargetPos();
+    }
+    if (torso != null) {
+      torso.waitTargetPos();
+    }
+  }
+  
+  
+  @Override
+  public void attachTextListener(TextListener service) {
+    addListener("publishText", service.getName());
+  }
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

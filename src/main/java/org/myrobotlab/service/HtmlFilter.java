@@ -49,7 +49,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
   }
 
   public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName(), "onText");
+    attachTextListener(service);
   }
 
   public String getPostHtmlTag() {
@@ -136,6 +136,24 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     meta.addDependency("org.jsoup", "jsoup", "1.8.3");
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     return meta;
+  }
+
+  @Override
+  public void attachTextListener(TextListener service) {
+    if (service == null) {
+      log.warn("{}.attachTextListener(null)");
+      return;
+    }
+    addListener("publishText", service.getName());
+  }
+  
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
 }

@@ -399,6 +399,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public void attachSpeechRecognizer(SpeechRecognizer recognizer) {
+    if (recognizer == null) {
+      log.warn("{}.attachSpeechRecognizer(null)", getName());
+      return;
+    }
     addListener("publishStartSpeaking", recognizer.getName(), "onStartSpeaking");
     addListener("publishEndSpeaking", recognizer.getName(), "onEndSpeaking");
   }

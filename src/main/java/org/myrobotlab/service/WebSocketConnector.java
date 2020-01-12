@@ -35,6 +35,7 @@ public class WebSocketConnector extends Service implements TextPublisher {
     super(n, id);
   }
 
+  @Deprecated /* use attachTextListener */
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName(), "onText");
   }
@@ -152,5 +153,10 @@ public class WebSocketConnector extends Service implements TextPublisher {
     public void sendMessage(String message) {
       this.userSession.getAsyncRemote().sendText(message);
     }
+  }
+
+  @Override
+  public void attachTextListener(TextListener service) {
+    addListener("publishText", service.getName());
   }
 }

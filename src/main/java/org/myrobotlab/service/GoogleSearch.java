@@ -115,11 +115,17 @@ public class GoogleSearch extends Service implements TextPublisher {
   }
 
   @Override
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName());
     
   }
-
+  
+  @Override
+  public void attachTextListener(TextListener service) {
+    addListener("publishText", service.getName());
+  }
+  
   public static void main(String[] args) {
     try {
 

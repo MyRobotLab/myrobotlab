@@ -1033,8 +1033,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     addTask(method, intervalMs, 0, method, params);
   }
 
-  public void addTaskOneShot(int delay, String method, Object... params) {
-    addTask(method, 0, delay, method, params);
+  public void addTaskOneShot(long delayMs, String method, Object... params) {
+    addTask(method, 0, delayMs, method, params);
   }
 
   /**
@@ -1044,14 +1044,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          task name
    * @param intervalMs
    *          how frequent in milliseconds
-   * @param delay
+   * @param delayMs
    *          the delay
    * @param method
    *          the method
    * @param params
    *          the params to pass
    */
-  synchronized public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
+  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
       return;
@@ -1059,7 +1059,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
     Message msg = Message.createMessage(getName(), getName(), method, params);
     Task task = new Task(this, taskName, intervalMs, msg);
-    timer.schedule(task, delay);
+    timer.schedule(task, delayMs);
     tasks.put(taskName, timer);
   }
 
@@ -2489,8 +2489,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     info(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
-  public void setVirtual(boolean b) {
+  public boolean setVirtual(boolean b) {
     this.isVirtual = b;
+    return isVirtual;
   }
 
   public boolean isVirtual() {

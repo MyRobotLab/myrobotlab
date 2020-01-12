@@ -13,7 +13,7 @@ import org.slf4j.Logger;
  * speech should implement.
  * 
  */
-public interface SpeechSynthesis extends NameProvider {
+public interface SpeechSynthesis extends NameProvider, TextListener {
 
   public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 
@@ -132,5 +132,13 @@ public interface SpeechSynthesis extends NameProvider {
    * @return
    */
   public Boolean setBlocking(Boolean b);
+
+  /**
+   * This attach subscribes the the SpeechRecognizer to the SpeechSynthesizer so the bot won't incorrectly
+   * recognize itself when its speaking ... otherwise silly things can happen when talking to self...
+   * 
+   * @param ear
+   */
+  public void attachSpeechRecognizer(SpeechRecognizer ear);
 
 }

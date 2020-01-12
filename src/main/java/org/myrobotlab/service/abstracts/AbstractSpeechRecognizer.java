@@ -12,9 +12,8 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher;
 
-public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer, TextPublisher {
+public abstract class AbstractSpeechRecognizer extends Service implements SpeechRecognizer {
 
   /**
    * text and confidence (and any additional meta data) to be published
@@ -103,6 +102,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   protected Integer wakeWordIdleTimeoutSeconds = 10;
 
   protected Long lastWakeWordTs = null;
+
+  protected boolean isSpeaking = false;
+
+  private long afterSpeakingPauseMs = 8000;
 
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
@@ -221,17 +224,26 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * @param mouth
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
+    if (mouth == null) {
+      log.warn("{}.attachSpeechSynthesis(null)", getName());
+      return;
+    }
+
     if (isAttached(mouth.getName())) {
       log.info("{} already attached", mouth.getName());
     }
     subscribe(mouth.getName(), "publishStartSpeaking");
     subscribe(mouth.getName(), "publishEndSpeaking");
 
-    mouth.addEar(this);
+    // mouth.attachSpeechRecognizer(ear);
     attached.add(mouth.getName());
   }
 
   public void attachTextListener(TextListener service) {
+    if (service == null) {
+      log.warn("{}.attachTextListener(null)");
+      return;
+    }
     addListener("publishText", service.getName());
   }
 
@@ -298,25 +310,52 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public void onEndSpeaking(String utterance) {
+    
     // need to subscribe to this in the webgui
     // so we can resume listening.
     // this.speaking = false;
     // startListening(); - user controls "listening" - SpeechSynthesis can
     // affect "recognizing"
+    // FIXME - add a deta time after ...
 
-    // start publishing recognized events
-    startRecognizing();
+    if (afterSpeakingPauseMs > 0) {
+      // remove previous one shot - because we are "sliding" the window of stopping the publishing of recognized words
+      purgeTask("setSpeeking");
+      addTaskOneShot(afterSpeakingPauseMs, "setSpeeking", new Object[] {false});
+    } else {
+      isSpeaking = false;
+    }
+  }
+  
+  
+  
+
+// start publishing recognized events
+// startRecognizing();
+
+  public void setSpeeking(boolean b) {
+    
+    isSpeaking = b;
+    if (isSpeaking) {
+      log.warn("======================= started speaking - stopped listening  =======================================");
+    } else {
+      log.warn("======================= stopped speaking - started listening  =======================================");
+    }
+      
   }
 
   @Override
   public void onStartSpeaking(String utterance) {
+    
     // at this point we should subscribe to this in the webgui
     // so we can pause listening.
     // this.speaking = true;
     // stopListening();
     // - user controls "listening" - SpeechSynthesis can affect "recognizing"
     // stop publishing recognized events
-    stopRecognizing();
+
+    isSpeaking = true;
+    // stopRecognizing();
   }
 
   @Override
@@ -331,9 +370,16 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public RecognizedResult[] processResults(RecognizedResult[] results) {
     // at the moment its simply invoking other methods, but if a new speech
     // recognizer is created - it might need more processing
-
+    
+   
     for (int i = 0; i < results.length; ++i) {
       RecognizedResult result = results[i];
+      
+      if (isSpeaking) {
+        log.warn("===== not publishing recognized \"{}\" since we are speaking ======", result.text);
+        continue;
+      }
+
       if (result.isFinal) {
 
         if (!isRecognizing && (wakeWord == null || !result.text.equalsIgnoreCase(wakeWord))) {
@@ -341,11 +387,9 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
           return results;
         }
         if (wakeWord == null) {
-          invoke("publishRecognized", result.text);
-          invoke("publishText", result.text);
           invoke("publishRecognizedResult", result);
         } else {
-          if (wakeWord.equalsIgnoreCase(result.text)) {
+          if (wakeWord != null && wakeWord.equalsIgnoreCase(result.text)) {
             info("wake word match on %s, idle timer starts", result.text);
             purgeTask("wakeWordIdleTimeoutSeconds");
             addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
@@ -359,8 +403,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
           if (now - lastWakeWordTs < (wakeWordIdleTimeoutSeconds * 1000)) {
             lastWakeWordTs = System.currentTimeMillis();
             isAwake = true;
-            invoke("publishRecognized", result.text);
-            invoke("publishText", result.text);
+
             invoke("publishRecognizedResult", result);
             purgeTask("wakeWordIdleTimeoutSeconds");
             addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
@@ -384,12 +427,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public String publishRecognized(String text) {
-    invoke("publishText", text);
     return text;
   }
 
   @Override
   public RecognizedResult publishRecognizedResult(RecognizedResult result) {
+    log.warn("<===== publishing recognized \"{}\" !!!! ======", result.text);
+    invoke("publishRecognized", result.text);
+    invoke("publishText", result.text);
     return result;
   }
 
