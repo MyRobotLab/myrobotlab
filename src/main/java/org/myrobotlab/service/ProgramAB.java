@@ -128,7 +128,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
-    addTextListener(service);
+    attachTextListener(service);
   }
 
   public void addTextListener(SpeechSynthesis service) {
