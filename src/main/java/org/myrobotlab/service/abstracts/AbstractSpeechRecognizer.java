@@ -105,7 +105,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   protected boolean isSpeaking = false;
 
-  private long afterSpeakingPauseMs = 8000;
+  /**
+   * wait for 1 sec after my speaking has ended
+   */
+  protected long afterSpeakingPauseMs = 1000;
 
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
@@ -563,6 +566,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     super.stopService();
     stopListening();
     stopRecognizing();
+  }
+  
+  public long setAfterSpeakingPause(long ms) {
+    afterSpeakingPauseMs = ms;
+    return afterSpeakingPauseMs;
+  }
+  
+  public long getAfterSpeakingPause() {
+    return afterSpeakingPauseMs;
   }
 
   /**

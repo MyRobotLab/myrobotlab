@@ -1,11 +1,11 @@
 <!--
 thanks - https://developers.google.com/web/updates/2013/01/Voice-Driven-Web-Apps-Introduction-to-the-Web-Speech-API
 -->
-
 <div ng-show="{{!service.webkitSupport}}" class="row">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.
+    
     </h3>
 </div>
 <div ng-show="service.webkitSupport" class="row">
@@ -37,7 +37,16 @@ thanks - https://developers.google.com/web/updates/2013/01/Voice-Driven-Web-Apps
         </tr>
         <tr>
             <td>
+                <input type="text" class="form-control" ng-model="service.afterSpeakingPauseMs"/>
+            </td>
+            <td>
+                <button class="btn btn-default" ng-click="msg.setAfterSpeakingPause(service.afterSpeakingPauseMs)">set after speaking pause ms</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
                 <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
+            
             </td>
             <td>
                 <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
