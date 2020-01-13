@@ -1479,7 +1479,7 @@ public class OpenCV extends AbstractComputerVision {
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
         
-        if (display) {
+        if (display && !isHeadless()) {
           if (canvasFrame == null) {
             canvasFrame = new CanvasFrame("display");
           }
