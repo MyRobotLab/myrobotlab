@@ -441,9 +441,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     controllers.remove(sc);
     
     disable();
-    
+   
     send(sc, "detach", getName());
-
+    sleep(500);
+    
     broadcastState();
   }
 
@@ -917,12 +918,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * will disable then detach this servo from all controllers
    */
-  public void releaseService() {
-    super.releaseService();
+  public void releaseService() {    
     if (encoder != null) {
       encoder.disable();
     }
     detach();
+    super.releaseService();
   }
 
   @Override
