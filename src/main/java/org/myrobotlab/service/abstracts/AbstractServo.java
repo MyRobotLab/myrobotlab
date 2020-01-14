@@ -404,6 +404,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
   }
 
+  public boolean isAttached(Attachable attachable) {
+    return controllers.contains(attachable.getName());
+  }
+
   public boolean isAttached(String name) {
     return controllers.contains(name);
   }
@@ -419,6 +423,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   public void detach(String sc) {
+    
+    if (!controllers.contains(sc)) {
+      log.info("{} already detached from {}", getName(), sc);
+      return;
+    }
 
     // the subscribes .... or addListeners in this case ...
     removeListener("publishServoMoveTo", sc);
@@ -430,7 +439,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     removeListener("publishServoDisable", sc);
 
     controllers.remove(sc);
-    // probably should not disable it ... right ?
+    
+    disable();
+    
+    send(sc, "detach", getName());
 
     broadcastState();
   }
