@@ -91,7 +91,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // Runtime.setLogLevel("debug");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     
-    Runtime.start("gui", "SwingGui");
+//    Runtime.start("gui", "SwingGui");
     
     // arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
     
@@ -490,6 +490,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // notify and process releasing itself from attached
     // services
     servo.releaseService();
+
     assertFalse(arduino01.getAttached().contains(servo.getName()));
     assertFalse(servo.isAttached(arduino01));
   }
