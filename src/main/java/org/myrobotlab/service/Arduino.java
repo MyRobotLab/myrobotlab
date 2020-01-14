@@ -298,6 +298,7 @@ public class Arduino extends AbstractMicrocontroller
   public void attach(Attachable service) throws Exception {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       attachServoControl((ServoControl) service);
+      ((ServoControl) service).attach(this);
       return;
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);

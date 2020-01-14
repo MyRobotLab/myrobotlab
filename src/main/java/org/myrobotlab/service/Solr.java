@@ -15,12 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.imageio.ImageIO;
-import javax.swing.WindowConstants;
-import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import org.bytedeco.opencv.opencv_core.IplImage;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
@@ -37,6 +34,7 @@ import org.apache.solr.core.CoreContainer;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter.ToIplImage;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.ProcessingStatus;
 import org.myrobotlab.framework.Inbox;
@@ -56,6 +54,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.service.ProgramAB.Response;
 import org.myrobotlab.service.interfaces.DocumentListener;
+import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -811,8 +810,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     recognizer.addTextListener(this);
   }
 
-  public void attach(Sphinx recognizer) {
-    recognizer.addTextListener(this);
+  public void attach(SpeechRecognizer recognizer) {
+    recognizer.attachTextListener(this);
   }
 
   @Override
