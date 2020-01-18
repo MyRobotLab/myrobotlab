@@ -1,6 +1,6 @@
 package org.myrobotlab.lang;
 
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Servo;
 
 public class ServoLang extends LangUtils {

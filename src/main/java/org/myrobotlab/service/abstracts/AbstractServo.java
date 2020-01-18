@@ -13,7 +13,8 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
@@ -142,7 +143,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * input mapper
    */
-  protected Mapper mapper = new Mapper(0, 180, 0, 180);
+  protected Mapper mapper = new MapperLinear(0, 180, 0, 180);
 
   /**
    * maximum speed default is 500 degrees per second or operating speed of 60
@@ -212,18 +213,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   boolean validMoveRequest = false;
 
   /**
-   * limit min - no "input" will be allowed to move the servo below this value
-   */
-  Double min = 0.0;
-
-  /**
-   * limit max - no "input" will be allowed to move the servo above this value
-   */
-  Double max = 180.0;
-
-  // TODO - implement !!!
-
-  /**
    * if true - a single moveTo command will be published for servo controllers
    * or other services which implement their own speed contrl
    * 
@@ -258,6 +247,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
     currentPos = targetPos = rest;
+    
+    mapper.setMinMax(0, 180);
 
     // create our default TimeEncoder
     if (encoder == null) {
@@ -496,7 +487,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getMax() {
-    return mapper.getMaxX();
+    return mapper.getMax();
   }
 
   @Override
@@ -506,7 +497,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getMin() {
-    return mapper.getMinX();
+    return mapper.getMin();
   }
 
   @Override
@@ -587,7 +578,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void map(Double minX, Double maxX, Double minY, Double maxY) {
-    mapper = new Mapper(minX, maxX, minY, maxY);
+    mapper = new MapperLinear(minX, maxX, minY, maxY);
     broadcastState();
   }
 
@@ -736,15 +727,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       return;
     }
 
-    if (newPos < min) {
-      newPos = min;
-    }
-
-    if (newPos > max) {
-      newPos = max;
-    }
-
-    targetPos = newPos;// = mapper.calcOutput(newPos);
+    targetPos = mapper.calcOutput(newPos);
 
     // work on confused info below
     if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know
@@ -992,8 +975,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   // SEE - http://myrobotlab.org/content/servo-limits
   public void setMinMax(Double min, Double max) {
-    this.min = min;
-    this.max = max;
+    mapper.setMinMax(min, max);
     broadcastState();
   }
 
@@ -1092,13 +1074,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   public void sweep(Double min, Double max, Double speed) {
     if (min == null) {
-      sweepMin = mapper.getMinInput();
+      sweepMin = mapper.getMin();
     } else {
       sweepMin = min;
     }
 
     if (max == null) {
-      sweepMax = mapper.getMaxInput();
+      sweepMax = mapper.getMax();
     } else {
       sweepMax = max;
     }

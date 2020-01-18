@@ -18,7 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinDefinition;
 
@@ -87,7 +88,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   boolean initialized = false;
   
   // mapper to provide auto-scaling
-  Mapper pinMapper = new Mapper(0, 1, 0, 1);
+  Mapper pinMapper = new MapperLinear(0, 1, 0, 1);
 
   boolean newMinOrMax = false;
 
@@ -347,7 +348,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     }
     
     if (newMinOrMax) {
-      pinMapper = new Mapper(min, max, 0, yMaxDelta);
+      pinMapper = new MapperLinear(min, max, 0.0, (double)yMaxDelta);
     }
     
     avg = ((cnt - 1) * avg + pinData.value)/cnt;

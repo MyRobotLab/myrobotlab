@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
 
