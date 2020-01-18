@@ -40,9 +40,10 @@ import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
@@ -868,7 +869,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
     float result = rawAngle;
     if (data.mapper != null) {
-      result = (float) data.mapper.calcInput(rawAngle);
+      result = data.mapper.calcInput((double)rawAngle).floatValue();
     }
     return result;
   }
@@ -1778,7 +1779,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       error("setMapper %s does not exist", name);
       return null;
     }
-    node.mapper = new Mapper(minx, maxx, miny, maxy);
+    node.mapper = new MapperLinear(minx, maxx, miny, maxy);
     return node.mapper;
   }
 

@@ -37,7 +37,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
@@ -213,7 +213,7 @@ public class Arduino extends AbstractMicrocontroller
                * use attachables like everything else - power mapping should be
                * inside the motorcontrol
                */
-  Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
+  Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public transient Msg msg;
 

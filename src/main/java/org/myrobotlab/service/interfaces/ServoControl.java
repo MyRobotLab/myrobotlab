@@ -30,7 +30,7 @@ import java.util.Set;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 

@@ -10,11 +10,11 @@ import org.myrobotlab.genetic.Genetic;
 import org.myrobotlab.genetic.GeneticAlgorithm;
 import org.myrobotlab.kinematics.CollisionDectection.CollisionResults;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
-import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.slf4j.Logger;
 
@@ -707,7 +707,7 @@ public class IMEngine extends Thread implements Genetic {
           decodedGenome.add(link.servoMin);
           continue;
         } else {
-          map = new Mapper(0, 8191, link.servoMin, link.servoMax);
+          map = new MapperLinear(0.0, 8191.0, link.servoMin, link.servoMax);
         }
         Double value = 0.0;
         for (int i = pos; i < chromosome.getGenome().length() && i < pos + 13; i++) {

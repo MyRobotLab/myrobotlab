@@ -9,7 +9,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;
@@ -63,7 +64,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
   int sampleCount = 0;
-  Mapper mapper = new Mapper(-1.0f, 1.0f, -127.0f, 127.0f);
+  Mapper mapper = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
   float leftMotorPower = 0.0f;
 
   float rightMotorPower = 0.0f;
@@ -175,13 +176,13 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     return ret;
   }
 
-  public void go(float left, float right) throws Exception {
+  public void go(double left, double right) throws Exception {
     log.info("go {} {}", left, right);
-    int l = mapper.calcOutputInt(left);
+    int l = mapper.calcOutput(left).intValue();
     if (l > 127) {
       l = 128 - l;
     }
-    int r = mapper.calcOutputInt(right);
+    int r = mapper.calcOutput(right).intValue();
     if (r > 127) {
       r = 128 - r;
     }

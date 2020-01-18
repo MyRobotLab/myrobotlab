@@ -26,8 +26,9 @@ import org.myrobotlab.kinematics.TestJmeIMModel;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -112,7 +113,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
 
   private transient IntegratedMovementInterface jmeApp = null;
 
-  private HashMap<String, Mapper> maps = new HashMap<String, Mapper>();
+  private HashMap<String, Mapper> maps = new HashMap<>();
   public transient GravityCenter cog = new GravityCenter(this);
 
   /**
@@ -574,7 +575,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       engine.setDHRobotArm(dhArm);
       engines.put(arm, engine);
       // servo.subscribe(getName(), "publishAngles", servo.getName(), "onIMAngles");
-      Mapper map = new Mapper(servo.getMin(), servo.getMax(), minAngle, maxAngle);
+      Mapper map = new MapperLinear(servo.getMin(), servo.getMax(), minAngle, maxAngle);
       maps.put(servo.getName(), map);
     } else {
       log.error("Unknow DH arm {}", arm);
@@ -779,7 +780,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   public void setMinMaxAngles(String partName, double min, double max) {
     if (maps.containsKey(partName)) {
       Mapper map = maps.get(partName);
-      map = new Mapper(map.getMinX(), map.getMaxX(), min, max);
+      map = new MapperLinear(map.getMinX(), map.getMaxX(), min, max);
       maps.put(partName, map);
       for (IMEngine engine : engines.values()) {
         for (DHLink link : engine.getDHRobotArm().getLinks()) {
