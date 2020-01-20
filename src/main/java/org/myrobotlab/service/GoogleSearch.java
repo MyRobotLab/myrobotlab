@@ -3,9 +3,13 @@ package org.myrobotlab.service;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,11 +35,40 @@ public class GoogleSearch extends Service implements TextPublisher {
 
   boolean saveSearchToFile = true;
 
-  private static Pattern patternDomainName;
-  private Matcher matcher;
+  transient private static Pattern patternDomainName;
+
+  transient private Matcher matcher;
+
+  Integer maxImageWidth = null;
+
+  int maxImages = 3;
+
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
+
   static {
     patternDomainName = Pattern.compile(DOMAIN_NAME_PATTERN);
+  }
+
+  // FIXME me have a more universal description of SearchResults
+  // urls ? confidence ?
+  public class SearchResults {
+
+    public String searchText;
+    public String errorText;
+    public List<String> text = new ArrayList<>();
+    public List<String> images = new ArrayList<>();
+
+    public SearchResults(String searchText) {
+      this.searchText = searchText;
+    }
+
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      for (String t : text) {
+        sb.append(t);
+      }
+      return sb.toString();
+    }
   }
 
   public GoogleSearch(String n, String id) {
@@ -59,43 +92,105 @@ public class GoogleSearch extends Service implements TextPublisher {
     return meta;
   }
 
-  public String search(String searchText) throws IOException {
+  public SearchResults search(String searchText) throws IOException {
 
-    StringBuilder sb = new StringBuilder();
+    SearchResults results = new SearchResults(searchText);
 
-    String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
+    try {
+      StringBuilder sb = new StringBuilder();
 
-    String request = "https://google.com/search?q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
 
-    // Fetch the page
-    Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
+      String request = "https://google.com/search?q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
 
-    if (saveSearchToFile) {
-      FileOutputStream fos = new FileOutputStream(getDataDir() + fs + encodedSearch + ".html");
-      fos.write(doc.toString().getBytes());
-      fos.close();
-    }
+      // Fetch the page
+      Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
+      /*
+       * String safe = Jsoup.clean(unsafe, Whitelist.basic() .addTags("img")
+       * .addAttributes("img", "height", "src", "width") .addProtocols("img",
+       * "src", "http", "https", "data"));
+       */
 
-    // Traverse the results
-    // for (Element result : doc.select("h2.r > span")) {
-    for (Element header : doc.select("h2")) {
-      String title = header.text();
-      if (title.equals("Description")) {
-        Element parent = header.parent();
-        Elements spans = parent.select("span");
-
-        for (Element span : spans) {
-          log.info("description - {} ", span.text());
-          // String url = header.attr("href");
-          sb.append(span.text());
-        }
-
+      if (saveSearchToFile) {
+        FileOutputStream fos = new FileOutputStream(getDataDir() + fs + encodedSearch + ".html");
+        fos.write(doc.toString().getBytes());
+        fos.close();
       }
-    }
-    
-    invoke("publishText", sb.toString());
 
-    return sb.toString();
+      /**
+       * get description
+       */
+      for (Element header : doc.select("h2")) {
+        String title = header.text();
+        if (title.equals("Description")) {
+          Element parent = header.parent();
+          Elements spans = parent.select("span");
+
+          for (Element span : spans) {
+            log.info("description - {} ", span.text());
+            // String url = header.attr("href");
+            sb.append(span.text());
+            results.text.add(span.text());
+          }
+
+        }
+      }
+
+      invoke("publishText", sb.toString());
+
+      results.images = imageSearch(searchText);
+
+      invoke("publishResults", results);
+    } catch (Exception e) {
+      results.errorText = e.getMessage();
+      error(e);
+    }
+
+    return results;
+  }
+
+  // FIXME - use gson not simpl json
+  public List<String> imageSearch(String searchText) {
+    // can only grab first 100 results
+    String userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";
+    String url = "https://www.google.com/search?site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+
+    List<String> resultUrls = new ArrayList<String>();
+
+    try {
+      Document doc = Jsoup.connect(url).userAgent(userAgent).referrer("https://www.google.com/").get();
+
+      Elements elements = doc.select("div.rg_meta");
+
+      int imgCnt = 0;
+
+      JSONObject jsonObject;
+      for (Element element : elements) {
+        if (element.childNodeSize() > 0) {
+          jsonObject = (JSONObject) new JSONParser().parse(element.childNode(0).toString());
+          if (imgCnt > maxImages) {
+            break;
+          }
+          resultUrls.add((String) jsonObject.get("ou"));
+          ++imgCnt;
+        }
+      }
+
+      System.out.println("number of results: " + resultUrls.size());
+
+      for (String imageUrl : resultUrls) {
+
+        invoke("publishImage", imageUrl);
+        // System.out.println(imageUrl);
+      }
+
+      invoke("publishImages", resultUrls);
+
+    } catch (Exception e) {
+      error("parsing image threw", e);
+    }
+
+    return resultUrls;
   }
 
   public String getDomainName(String url) {
@@ -111,42 +206,64 @@ public class GoogleSearch extends Service implements TextPublisher {
 
   @Override
   public String publishText(String text) {
-   return text;
+    return text;
+  }
+
+  public SearchResults publishResults(SearchResults results) {
+    return results;
+  }
+
+  public String publishImage(String image) {
+    return image;
+  }
+
+  public List<String> publishImages(List<String> images) {
+    return images;
   }
 
   @Override
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
     addListener("publishText", service.getName());
-    
+
   }
-  
+
+  public int setMaxImages(int cnt) {
+    maxImages = cnt;
+    return cnt;
+  }
+
   @Override
   public void attachTextListener(TextListener service) {
     addListener("publishText", service.getName());
   }
-  
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Runtime.start("webgui", "WebGui");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.setPort(8887);
+      webgui.autoStartBrowser(false);
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      
+      webgui.startService();
+
       boolean isDone = true;
       if (isDone) {
         return;
       }
-      
-      String response = google.search("what is new caledonia");
-      log.info("response - \n{}", response);
-      response = google.search("what is a giraffe");
-      log.info("response - \n{}", response);
-      response = google.search("what is a cat");
-      log.info("response - \n{}", response);
-      response = google.search("how tall is the empire state building");
-      log.info("response - \n{}", response);
-      
+
+      SearchResults results = google.search("gorilla");
+
+      log.info("response - \n{}", results);
+      results = google.search("what is a giraffe");
+      log.info("response - \n{}", results);
+      results = google.search("what is a cat");
+      log.info("response - \n{}", results);
+      results = google.search("how tall is the empire state building");
+      log.info("response - \n{}", results);
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
