@@ -337,7 +337,7 @@ public class CodecUtils {
   }
 
   public static final String getSafeReferenceName(String name) {
-    return name.replaceAll("[/ .-]", "_");
+    return name.replaceAll("[@/ .-]", "_");
   }
 
   public static String toPrettyJson(Object ret) {
