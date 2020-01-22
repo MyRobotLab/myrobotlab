@@ -1,5 +1,6 @@
 package org.myrobotlab.service.abstracts;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -480,7 +481,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   public void detach() {
     disable();
-    for (String sc : controllers) {
+    Set<String> copy = new HashSet<>(controllers);
+    for (String sc : copy) {
       detach(sc);
     }
   }

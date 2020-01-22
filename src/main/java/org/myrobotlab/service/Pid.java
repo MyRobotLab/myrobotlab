@@ -317,7 +317,7 @@ public class Pid extends Service {
   public void setOutputRange(String key, double min, double max) {
     PidData piddata = data.get(key);
     if (min >= max) {
-      error("min {} >= max {}", min, max);
+      error("min %.2f >= max %.2f", min, max);
       return;
     }
 
