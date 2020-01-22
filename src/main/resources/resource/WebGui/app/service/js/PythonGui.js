@@ -41,7 +41,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             // we want to call the same method - and if it was inline that
             // would make a mess
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         case 'onStdOut':            

@@ -308,9 +308,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     return
                 }
 
-                //console.log('--> ' + msg.msgId + ' ' + msg.msgType)
-                // console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
-                console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
+                // GREAT FOR DEBUGGING INCOMING MSGS
+                // console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
 
                 // handle blocking 'R'eturn msgs here - FIXME - timer to clean old errored msg ?
                 // the blocking call removes any msg resolved
@@ -873,6 +872,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             // hanging 'all service' related properties on the instance scope
             scope.showProperties = false
+            scope.showMethods = false
             scope.properties = []
             scope.statusControlMode = 'status'
             scope.viewType = _self.viewType

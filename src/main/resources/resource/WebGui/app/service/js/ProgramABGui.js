@@ -38,7 +38,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
         
         case 'onState':
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         case 'onRequest':

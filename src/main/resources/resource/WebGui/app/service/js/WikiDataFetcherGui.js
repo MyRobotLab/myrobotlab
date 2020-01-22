@@ -14,7 +14,6 @@ angular.module('mrlapp.service.WikiDataFetcherGui', []).controller('WikiDataFetc
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         default:
