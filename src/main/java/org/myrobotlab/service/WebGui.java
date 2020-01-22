@@ -42,6 +42,7 @@ import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -1238,11 +1239,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
        * Runtime.start("clock03", "Clock"); Runtime.start("clock04", "Clock");
        * Runtime.start("clock05", "Clock");
        */
+      Platform.setVirtual(true);
 
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       Servo pan = (Servo) Runtime.start("pan", "Servo");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       pan.setPin(3);
+      pan.setMinMax(30.0, 70.0);
       tilt.setPin("D4");
 
       arduino.attach(pan);
@@ -1254,9 +1257,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.setSsl(true);
+      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8000);
+      webgui.setPort(8888);
       webgui.startService();
 
       // Runtime.start("arduino", "Arduino");

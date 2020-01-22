@@ -32,7 +32,6 @@ angular.module('mrlapp.service.GoogleSearchGui', []).controller('GoogleSearchGui
 
         case 'onState':
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
 

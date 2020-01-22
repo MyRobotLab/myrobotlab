@@ -401,6 +401,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param sc
    */
   void unsync(ServoControl sc);
+  
+  /**
+   * uset speed - speed control is removed
+   */
+  void unsetSpeed();
 
   /**
    * waitTargetPos is used by a global moveToBlocking command - pos usually is 0

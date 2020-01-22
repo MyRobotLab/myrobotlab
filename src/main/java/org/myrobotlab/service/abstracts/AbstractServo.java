@@ -58,6 +58,79 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   private static final long serialVersionUID = 1L;
 
+  public static void main(String[] args) throws InterruptedException {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      Platform.setVirtual(true);
+
+      Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("COM7");
+      // mega.setBoardMega();
+
+      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
+
+      double pos = 78;
+      servo03.setPosition(pos);
+
+      double min = 3;
+      double max = 170;
+      double speed = 5; // degree/s
+
+      servo03.attach(mega, 8, 38.0);
+
+      // servo03.sweep(min, max, speed);
+
+      /*
+       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
+       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
+       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
+       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
+       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
+       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
+       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
+       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
+       * Runtime.start("servo12", "Servo");
+       */
+      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
+
+      /*
+       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
+       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
+       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
+       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
+       * servo12.attach(mega, 12, 38.0);
+       */
+
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
+      // "TestCatcher");
+      // servo03.attach((ServoDataListener)catcher);
+
+      // servo.setPin(12);
+
+      /*
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       */
+
+      // servo.sweepDelay = 3;
+      // servo.save();
+      // servo.load();
+      // servo.save();
+      // log.info("sweepDely {}", servo.sweepDelay);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
   /**
    * The automatic disabling of the servo in idleTimeout ms This de-energizes
    * the servo
@@ -207,12 +280,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   protected Double targetPos;
 
   /**
-   * weather a move request was successful. The cases it would be false is no
-   * controller or calling moveTo when blocking is in process
-   */
-  boolean validMoveRequest = false;
-
-  /**
    * if true - a single moveTo command will be published for servo controllers
    * or other services which implement their own speed contrl
    * 
@@ -228,6 +295,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * 
    */
   boolean useServoControllerSpeedControl = true;
+
+  /**
+   * weather a move request was successful. The cases it would be false is no
+   * controller or calling moveTo when blocking is in process
+   */
+  boolean validMoveRequest = false;
 
   public AbstractServo(String n, String id) {
     super(n, id);
@@ -258,7 +331,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       Double savedPos = encoder.getPos();
       if (savedPos != null) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
-        currentPos = targetPos = encoder.getPos();
+        currentPos = targetPos = savedPos;
       }
     }
   }
@@ -395,14 +468,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
   }
 
-  public boolean isAttached(Attachable attachable) {
-    return controllers.contains(attachable.getName());
-  }
-
-  public boolean isAttached(String name) {
-    return controllers.contains(name);
-  }
-
   @Override
   public void detach(Attachable service) {
     detach(service.getName());
@@ -446,17 +511,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     broadcastState();
   }
 
-  public void fullSpeed() {
-    log.info("disabling speed control");
-    speed = null;
-    invoke("publishServoSetSpeed", this);
-    broadcastState();
-  }
-
   @Override
   public void enable() {
     enabled = true;
     invoke("publishServoEnable", this);
+    broadcastState();
+  }
+
+  public void fullSpeed() {
+    log.info("disabling speed control");
+    speed = null;
+    invoke("publishServoSetSpeed", this);
     broadcastState();
   }
 
@@ -550,6 +615,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public void idleDisable() {
     idleDisabled = true;
     disable();
+  }
+
+  public boolean isAttached(Attachable attachable) {
+    return controllers.contains(attachable.getName());
+  }
+
+  public boolean isAttached(String name) {
+    return controllers.contains(name);
   }
 
   @Override
@@ -663,13 +736,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }
-  }
-
-  /**
-   * moveTo requests are published through this publishing point
-   */
-  public ServoControl publishMoveTo(ServoControl sc) {
-    return sc;
   }
 
   public void onRegistered(Registration s) {
@@ -832,6 +898,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return data;
   }
 
+  /**
+   * moveTo requests are published through this publishing point
+   */
+  public ServoControl publishMoveTo(ServoControl sc) {
+    return sc;
+  }
+
   @Override
   @Deprecated /*
                * not used nor wanted - subscribers should be either
@@ -857,6 +930,16 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sd;
   }
 
+  @Override
+  public ServoControl publishServoDisable(ServoControl sc) {
+    return sc;
+  }
+
+  @Override
+  public ServoControl publishServoEnable(ServoControl sc) {
+    return sc;
+  }
+
   /**
    * BEHOLD THE NEW PUBLISHING INTERFACE POINTS !!!!! Subscribers can now
    * subscribe to servo command events, which allows the ability for the
@@ -870,16 +953,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public ServoControl publishServoSetSpeed(ServoControl sc) {
-    return sc;
-  }
-
-  @Override
-  public ServoControl publishServoEnable(ServoControl sc) {
-    return sc;
-  }
-
-  @Override
-  public ServoControl publishServoDisable(ServoControl sc) {
     return sc;
   }
 
@@ -1103,6 +1176,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
+  public void unsetSpeed() {
+    speed = null;
+    
+  }
+
+  @Override
   public void unsync(ServoControl sc) {
     if (sc == null) {
       log.error("{}.unsync(null)", getName());
@@ -1110,6 +1189,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     syncedServos.remove(sc.getName());
   }
 
+  
   @Override
   public void waitTargetPos() {
     //
@@ -1120,81 +1200,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   }
 
+  
   public void writeMicroseconds(int uS) {
     invoke("publishServoWriteMicroseconds", this, uS);
-  }
-
-  public static void main(String[] args) throws InterruptedException {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-
-      Runtime.start("gui", "SwingGui");
-      // Runtime.start("python", "Python");
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("COM7");
-      // mega.setBoardMega();
-
-      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
-
-      double pos = 78;
-      servo03.setPosition(pos);
-
-      double min = 3;
-      double max = 170;
-      double speed = 5; // degree/s
-
-      servo03.attach(mega, 8, 38.0);
-
-      // servo03.sweep(min, max, speed);
-
-      /*
-       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
-       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
-       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
-       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
-       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
-       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
-       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
-       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
-       * Runtime.start("servo12", "Servo");
-       */
-      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
-
-      /*
-       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
-       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
-       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
-       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
-       * servo12.attach(mega, 12, 38.0);
-       */
-
-      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
-      // "TestCatcher");
-      // servo03.attach((ServoDataListener)catcher);
-
-      // servo.setPin(12);
-
-      /*
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       */
-
-      // servo.sweepDelay = 3;
-      // servo.save();
-      // servo.load();
-      // servo.save();
-      // log.info("sweepDely {}", servo.sweepDelay);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
   }
 
 }

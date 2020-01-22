@@ -255,7 +255,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         switch (msg.method) {
         case 'onState':
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
         case 'onOnStartSpeaking':

@@ -69,7 +69,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     }
 
     $scope.setSpeed = function(speed) {
-        if (speed == null || speed.trim().length == 0) {
+        if (speed == null || ((typeof speed == 'string') && (speed.trim().length == 0))) {
             msg.send("unsetSpeed")
         } else {
             msg.send("setSpeed", speed)
@@ -98,8 +98,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
-        $scope.limits.minValue = service.min
-        $scope.limits.maxValue = service.max
+        $scope.limits.minValue = service.mapper.minIn
+        $scope.limits.maxValue = service.mapper.maxIn
         $scope.pinList = service.pinList
     }
 
@@ -108,7 +108,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(data)
-            $scope.properties = mrl.getProperties(data)
             $scope.$apply()
             break
             // servo event in the past 
@@ -188,7 +187,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         // msg.attach($scope.controller, $scope.pin, 90)
     }
 
-    msg.subscribe("publishMoveTo")
+    // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
     msg.subscribe(this)
 
