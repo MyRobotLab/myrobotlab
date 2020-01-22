@@ -205,7 +205,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public void addTextListener(TextListener service) {
-
+    attachTextListener(service);
   }
 
   /**
