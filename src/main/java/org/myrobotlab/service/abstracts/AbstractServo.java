@@ -130,12 +130,29 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.error("main threw", e);
     }
   }
+  
+  // FIXME - should be renamed - autoDisableDefault
+  // FIXME - setAutoDisableDefault should be used and this should be protected
+  static public boolean autoDisableDefault = false;
+  
+  @Deprecated /* use setAutoDisableDefault */
+  static public boolean enableAutoDisable(boolean b) {
+    autoDisableDefault = b;
+    return b;
+  }
+  
+  static public boolean setAutoDisableDefault(boolean b) {
+    autoDisableDefault = b;
+    return b;
+  }
 
   /**
    * The automatic disabling of the servo in idleTimeout ms This de-energizes
    * the servo
+   * 
+   * FIXME - poorly named enableAutoDisable
    */
-  protected Boolean autoDisable = false;
+  protected Boolean autoDisable = autoDisableDefault;
 
   /**
    * set of currently subscribed servo controllers
