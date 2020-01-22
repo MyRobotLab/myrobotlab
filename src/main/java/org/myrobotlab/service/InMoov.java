@@ -2160,6 +2160,21 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     if (jme == null) {
       jme = (JMonkeyEngine) startPeer("jme");
     }
+    
+    
+    // adding InMoov2 asset path to the jonkey simulator
+    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName() + fs + JMonkeyEngine.class.getSimpleName();
+
+    File check = new File(assetPath);
+    log.info("loading assets from {}", assetPath);
+    if (!check.exists()) {
+      log.warn("%s does not exist");
+    }
+
+    // disable the frustrating servo events ...
+    // Servo.eventsEnabledDefault(false);
+    jme.loadModels(assetPath);
+
 
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
