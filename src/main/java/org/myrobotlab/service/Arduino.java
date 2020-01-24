@@ -1868,6 +1868,9 @@ public class Arduino extends AbstractMicrocontroller
   @Override
   public void releaseService() {
     super.releaseService();
+    if (virtual != null) {
+      virtual.releaseService();
+    }
     sleep(300);
     disconnect();
   }
