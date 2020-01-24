@@ -338,6 +338,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
   @Override
   public void disable() {
     isRunning = false;
+    if (myThread != null) {
+      myThread.interrupt();
+    }
     positions.release();
   }
 
