@@ -8,21 +8,33 @@
                 <td>{{onText}}    
                 </td>
             </tr>
-                        <tr>
+            <tr>
                 <td>
                     <label for="sel1">speak</label>
                     <input class="form-control" type="text" id="speakText" ng-model="speakText">
                 </td>
                 <td>
-                    <button class="btn btn-default" ng-click="msg.speakBlocking(speakText)">speak</button>
+                    <button class="btn btn-default" ng-click="speak()">speak</button>
+                    <span ng-show="mouth == null">
+                        <button class="btn btn-default" ng-click="startMouth()">start mouth</button>
+                    </span>
+                    <span ng-show="mouth != null">
+                        <button class="btn btn-default" ng-click="releaseMouth()">release mouth</button>
+                    </span>
+                    <select class="form-control" ng-model="speechTypeSelected" id="language-select" ng-change="msg.setSpeechType(speechTypeSelected)">
+                        <option ng-repeat="speechType in speechTypes" value="{{speechType}}">{{(speechType.substring(speechType.lastIndexOf(".") + 1))}}</option>
+                    </select>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">virtual</label>
+                    <label for="sel1">simulator</label>
+                    <br>
+                    <img src="../JMonkeyEngine.png"/>
                 </td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.send('setVirtual', true)">set virtual</button>
+                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
                 </td>
             </tr>
             <tr>
@@ -52,21 +64,12 @@
                                 
                     
                     
+                    
                     <div class="form-group">
                         <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
                             <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
                         </select>
                     </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>simulator</label>
-                    <br>
-                    <img src="../JMonkeyEngine.png"/>
-                </td>
-                <td>
-                    <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
                 </td>
             </tr>
             <tr>
@@ -89,11 +92,10 @@
                     <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
                     <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
                     <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
-                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
-                    <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
                     <button class="btn btn-default" type="button" ng-click="msg.stop()">
                         <span>
                             <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                        
                         
                         
                         
@@ -108,6 +110,10 @@
                 </td>
                 <td>
                     <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
+                    
+                    <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+                    <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                   
                     <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
                 </td>
             </tr>
@@ -122,7 +128,6 @@
                     <button class="btn btn-default" ng-click="msg.startHeadTracking()">start head tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEyeTracking()">start eye tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
-                    <button class="btn btn-default" ng-click="msg.startMouth()">start mouth</button>
                     <button class="btn btn-default" ng-click="msg.startEye()">start eye</button>
                     <button class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
                 </td>
