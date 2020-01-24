@@ -4,7 +4,9 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
@@ -109,6 +111,15 @@ public class AbstractTest {
     if (threadSetStart == null) {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
+  }
+  
+  static public List<String> getThreadNames(){
+    List <String> ret = new ArrayList<>();
+    Set<Thread> tds = Thread.getAllStackTraces().keySet();
+    for (Thread t : tds ) {
+      ret.add(t.getName());
+    }
+    return ret;
   }
 
   static public void sleep(int sleepMs) {
