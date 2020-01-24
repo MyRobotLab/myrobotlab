@@ -278,7 +278,7 @@ public class ServoTest extends AbstractTest {
     sleep(100);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     servo01.setAutoDisable(false);
-    servo01.setSpeed(10.0);
+    servo01.setSpeed(50.0);
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
     servo01.setAutoDisable(true);
     log.warn("thread list {}", getThreadNames());
