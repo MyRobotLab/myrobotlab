@@ -184,7 +184,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   }
 
   // TODO - cool this works deprecate other
-  public void calculateTrajectory(double inBeginPos, double inTargetPos, Double inSpeed) {
+  public long calculateTrajectory(double inBeginPos, double inTargetPos, Double inSpeed) {
     // find current distance - // make a plan ...
     beginPos = inBeginPos;
     targetPos = inTargetPos;
@@ -209,6 +209,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
     if (autoProcess) { // vs buffer ?
       processTrajectory(name);
     }
+    
+    long lengthOfMoveMs = ((endMoveTs - beginMoveTs) < 0 )?0:endMoveTs - beginMoveTs;
+    
+    return lengthOfMoveMs;
   }
 
   // TODO - processTrajectory()

@@ -64,8 +64,6 @@ public class Emoji extends Service
     super(n, id);
     
     startPeer("fsm");
-    startPeer("fsm");
-    startPeer("fsm");
     
   }
 
@@ -98,6 +96,7 @@ public class Emoji extends Service
     // subscribing to errors
     subscribe("*", "publishStatus");
   }
+  
 
   public void onStatus(org.myrobotlab.framework.Status status) {
     if (status.isError()) {
