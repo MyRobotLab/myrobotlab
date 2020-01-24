@@ -1353,21 +1353,22 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public SpeechSynthesis startMouth() {
+    if (mouth == null) {
+      mouth = (SpeechSynthesis) startPeer("mouth");
+      if (mute) {
+        mouth.setMute(true);
+      }
 
-    mouth = (SpeechSynthesis) startPeer("mouth");
-    if (mute) {
-      mouth.setMute(true);
+      mouth.attachSpeechRecognizer(ear);
+      // mouth.attach(htmlFilter); // same as brain not needed
+
+      // this.attach((Attachable) mouth);
+      // if (ear != null) ....
+      speakBlocking(languagePack.get("STARTINGMOUTH"));
+      speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
+
+      broadcastState();
     }
-
-    mouth.attachSpeechRecognizer(ear);
-    // mouth.attach(htmlFilter); // same as brain not needed
-
-    // this.attach((Attachable) mouth);
-    // if (ear != null) ....
-    speakBlocking(languagePack.get("STARTINGMOUTH"));
-    speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
-
-    broadcastState();
     return mouth;
   }
 
@@ -1698,6 +1699,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     if (torso != null) {
       torso.waitTargetPos();
+    }
+  }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
     }
   }
 

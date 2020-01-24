@@ -2495,6 +2495,17 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       headTracking.trackPoint();
     }
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public void waitTargetPos() {
     if (head != null)

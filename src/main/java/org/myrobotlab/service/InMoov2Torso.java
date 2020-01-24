@@ -56,6 +56,17 @@ public class InMoov2Torso extends Service {
     setVelocity(5.0, 5.0, 5.0);
 
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public void enable() {
     topStom.enable();

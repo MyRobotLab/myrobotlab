@@ -288,6 +288,16 @@ public class InMoov2Head extends Service {
     disable();
   }
 
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
   public void rest() {
     // initial positions
     // setSpeed(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);

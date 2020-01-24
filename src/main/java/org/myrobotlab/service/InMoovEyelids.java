@@ -56,6 +56,17 @@ public class InMoovEyelids extends Service {
       }
     }
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public void test() {
     if (controller == null) {
