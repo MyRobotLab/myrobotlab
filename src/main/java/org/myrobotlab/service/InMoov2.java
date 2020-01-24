@@ -46,6 +46,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // FIXME - WTH ?
   static String speechService = "MarySpeech";
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -67,7 +68,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // the two legacy controllers .. :(
     meta.addPeer("left", "Arduino", "legacy controller");
     meta.addPeer("right", "Arduino", "legacy controller");
-    
+
     meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
     meta.addPeer("brain", "ProgramAB", "brain");
@@ -97,6 +98,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     return meta;
   }
+
   /**
    * This method will load a python file into the python interpreter.
    */
@@ -125,6 +127,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
+
   public static void main(String[] args) {
     try {
 
@@ -162,39 +165,39 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.error("main threw", e);
     }
   }
-  
+
   boolean autoStartBrowser = false;
-  
+
   transient ProgramAB brain;
-  
+
   transient HtmlFilter htmlFilter;
-  
+
   Set<String> configs = null;
-  
+
   String currentConfigurationName = "default";
-  
+
   transient SpeechRecognizer ear;
-  
+
   transient OpenCV eye;
   transient Tracking eyesTracking;
   // waiting controable threaded gestures we warn user
   boolean gestureAlreadyStarted = false;
   // FIXME - what the hell is this for ?
   Set<String> gestures = new TreeSet<String>();
-  
+
   transient InMoov2Head head;
-  
+
   transient NeoPixel neopixel;
- 
+
   transient Tracking headTracking;
-  
+
   transient ImageDisplay imageDisplay;
-  
+
   /**
    * a variety of state variables for scripts
    */
   boolean isEyeLidsActivated = false;
-  
+
   boolean isHeadActivated = false;
 
   boolean isLeftArmActivated = false;
@@ -993,7 +996,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
     if (torso != null) {
       torso.setSpeed(topStom, midStom, lowStom);
@@ -1095,15 +1097,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
       // attachTextPublisher(brain.getName());
 
-      /* not necessary - ear needs to be attached to mouth not brain
-      if (ear != null) {
-        ear.attachTextListener(brain);
-      }
-      */
-      
+      /*
+       * not necessary - ear needs to be attached to mouth not brain if (ear !=
+       * null) { ear.attachTextListener(brain); }
+       */
+
       brain.attachTextPublisher(ear);
-      
-     
+
       // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
       // FIXME - deal with language
       // speakBlocking(languagePack.get("CHATBOTACTIVATED"));
@@ -1132,10 +1132,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         brain.startSession(brain.getPredicate("lastUsername"));
       }
 
-      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter", "HtmlFilter");
+      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
+                                                        // "HtmlFilter");
       brain.attachTextListener(htmlFilter);
       htmlFilter.attachTextListener(mouth);
-     
+
     }
 
     return brain;
@@ -1146,7 +1147,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
     }
-    
+
     ear.attachSpeechSynthesis(mouth);
     ear.attachTextListener(brain);
 
@@ -1207,14 +1208,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // legacy inmoov head exposed pins
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
-    
-   
+
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(languagePack.get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
     if (head == null) {
       speakBlocking(languagePack.get("STARTINGHEAD"));
-      
+
       if (Platform.isVirtual()) {
         speakBlocking("in virtual hardware mode");
       }
@@ -1353,21 +1353,21 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public SpeechSynthesis startMouth() {
-    if (mouth == null) {
-      mouth = (SpeechSynthesis) startPeer("mouth");
-      if (mute) {
-        mouth.setMute(true);
-      }
+
+    mouth = (SpeechSynthesis) startPeer("mouth");
+    if (mute) {
+      mouth.setMute(true);
     }
-      
-      mouth.attachSpeechRecognizer(ear);
-      // mouth.attach(htmlFilter); // same as brain  not needed
-    
+
+    mouth.attachSpeechRecognizer(ear);
+    // mouth.attach(htmlFilter); // same as brain not needed
+
     // this.attach((Attachable) mouth);
     // if (ear != null) ....
     speakBlocking(languagePack.get("STARTINGMOUTH"));
     speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
 
+    broadcastState();
     return mouth;
   }
 
@@ -1631,7 +1631,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Torso startTorso(String port) {
     if (torso == null) {
       speakBlocking(languagePack.get("STARTINGTORSO"));
-      
+
       if (Platform.isVirtual()) {
         speakBlocking("in virtual hardware mode");
       }
@@ -1700,16 +1700,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.waitTargetPos();
     }
   }
-  
-  
+
+  public String setSpeechType(String speechType) {
+    InMoov2.speechService = speechType;
+    // getMetaData().addPeer("mouth", speechService, "InMoov speech service");
+    setPeer("mouth", speechType);
+    return speechType;
+  }
+
   @Override
   public void attachTextListener(TextListener service) {
     addListener("publishText", service.getName());
   }
+
   @Override
   public void attachTextPublisher(TextPublisher service) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

@@ -530,6 +530,10 @@ public class MethodCache {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
+    
+    if (clazz == null) {
+      log.error("cannot query method cache for null class");
+    }
     // get templates
     // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);

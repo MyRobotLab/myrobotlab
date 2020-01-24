@@ -69,6 +69,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
@@ -875,6 +876,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return ret;
   }
 
+  /**
+   * 
+   * @param interfaze
+   * @return
+   * @throws ClassNotFoundException
+   */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     if (!interfaze.contains(".")) {
       interfaze = "org.myrobotlab.service.interfaces." + interfaze;
@@ -882,14 +889,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
-  /*
-   * param interfaceName
+  /**
    * 
-   * @return service names which match
+   * @param interfaze
+   * @return
    */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
-    ArrayList<String> ret = new ArrayList<String>();
-    ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
+    List<String> ret = new ArrayList<String>();
+    List<ServiceInterface> services = getServicesFromInterface(interfaze);
     for (int i = 0; i < services.size(); ++i) {
       ret.add(services.get(i).getName());
     }
@@ -917,11 +924,64 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return list;
   }
 
-  /*
-   * @return services which match
+  /**
+   * 
+   * @param interfaze
+   * @return
    */
-  public static synchronized ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
-    ArrayList<ServiceInterface> ret = new ArrayList<ServiceInterface>();
+  public ServiceTypeNameResults getServiceTypeNamesFromInterface(String interfaze) {
+    ServiceTypeNameResults results = new ServiceTypeNameResults(interfaze);
+    try {
+
+      if (!interfaze.contains(".")) {
+        interfaze = "org.myrobotlab.service.interfaces." + interfaze;
+      }
+
+      ServiceData sd = ServiceData.getLocalInstance();
+
+      List<ServiceType> sts = sd.getServiceTypes();
+
+
+      for (ServiceType st : sts) {
+        if (st.getSimpleName().equals("Polly")) {
+          log.info("here");
+        }
+        
+        Set<Class<?>> ancestry = new HashSet<Class<?>>();
+        Class<?> targetClass = Class.forName(st.getName()); // this.getClass();
+
+        while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+          ancestry.add(targetClass);
+          targetClass = targetClass.getSuperclass();
+        }
+        
+        for (Class<?> c : ancestry) {
+          Class<?>[] interfaces = Class.forName(c.getName()).getInterfaces();
+          for (Class<?> inter : interfaces) {
+            if (interfaze.equals(inter.getName())) {
+              results.serviceTypes.add(st.getName());
+              break;
+            }
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      error("could not find interfaces for %s", interfaze);
+    }
+
+    return results;
+  }
+
+  /**
+   * return a list of services which are currently running and implement a
+   * specific interface
+   * 
+   * @param interfaze
+   * @return
+   */
+  public static synchronized List<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
+    List<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
     Iterator<String> it = registry.keySet().iterator();
     String serviceName;
@@ -2454,7 +2514,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
   }
 
-  public static ArrayList<Status> getErrors() {
+  public static List<Status> getErrors() {
     ArrayList<Status> stati = new ArrayList<Status>();
     for (ServiceInterface si : getLocalServices().values()) {
       Status status = si.getLastError();
