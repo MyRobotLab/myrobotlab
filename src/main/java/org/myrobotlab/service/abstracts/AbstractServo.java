@@ -721,7 +721,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     if (equal) {
       synchronized (this) {
         this.notifyAll();
-        isBlocking = false;
       }
       isMoving = false;
 
@@ -885,10 +884,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // movement
     // usually knowing about encoder type is "bad" but the timer encoder is the
     // default native encoder
+    Long blockingTimeMs = null;
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
 
     invoke("publishServoMoveTo", this);
@@ -897,12 +897,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached
-      synchronized (this) {
-        try {
-          this.wait();
-        } catch (InterruptedException e) {/* don't care */
-        }
-      }
+      sleep(blockingTimeMs);
+      isBlocking = false;
     }
     return;
   }
