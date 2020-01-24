@@ -92,6 +92,17 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       log.error("main threw", e);
     }
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public InMoovHand(String n, String id) {
     super(n, id);

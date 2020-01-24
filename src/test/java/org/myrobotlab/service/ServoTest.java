@@ -263,11 +263,14 @@ public class ServoTest extends AbstractTest {
       // Runtime.start("gui", "SwingGui");
       // Runtime.start("gui", "WebGui");
     }
+    
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    servo01.releaseService();
 
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
 
-    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
     

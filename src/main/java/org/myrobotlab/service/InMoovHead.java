@@ -45,6 +45,17 @@ public class InMoovHead extends Service {
     initServoDefaults();
   }
   
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  
   public List<String> getServoNames() {
     List<String> servos = new ArrayList<>();
     

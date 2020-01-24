@@ -54,6 +54,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     return meta;
   }
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -159,6 +160,17 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void closePinch() {
     moveTo(130, 140, 180, 180, 180);
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public void count() {
     one();
