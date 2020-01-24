@@ -223,7 +223,7 @@ public abstract class MapperBase implements Serializable, Mapper {
 
   /**
    * set limits which will clip input to these values if setMinMax (-1.0, 1.0)
-   * values sent through the calcOutput(value) if > max or < min will be set to
+   * values sent through the calcOutput(value) if &gt; max or &lt; min will be set to
    * max and min respectively
    */
   @Override
