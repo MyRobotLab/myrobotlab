@@ -21,7 +21,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.interfaces.TextPublisher; 
 import org.slf4j.Logger;
 
 public class GoogleSearch extends Service implements TextPublisher, SearchPublisher {
