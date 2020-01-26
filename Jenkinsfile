@@ -42,8 +42,8 @@ node ('ubuntu') {  // use labels to direct build
       // **       in the global configuration.           
       mvnHome = tool 'M3'
       
-      env.JAVA_HOME="${tool 'Java8'}"
-      env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+      // env.JAVA_HOME="${tool 'Java8'}"
+      // env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
       sh 'java -version'
       echo sh(script: 'env|sort', returnStdout: true)
    }
