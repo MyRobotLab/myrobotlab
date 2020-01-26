@@ -19,11 +19,12 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class GoogleSearch extends Service implements TextPublisher {
+public class GoogleSearch extends Service implements TextPublisher, SearchPublisher {
 
   private static final long serialVersionUID = 1L;
 
@@ -92,6 +93,7 @@ public class GoogleSearch extends Service implements TextPublisher {
     return meta;
   }
 
+  @Override
   public SearchResults search(String searchText) throws IOException {
 
     SearchResults results = new SearchResults(searchText);
@@ -150,6 +152,7 @@ public class GoogleSearch extends Service implements TextPublisher {
   }
 
   // FIXME - use gson not simpl json
+  @Override
   public List<String> imageSearch(String searchText) {
     // can only grab first 100 results
     String userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";
@@ -209,14 +212,17 @@ public class GoogleSearch extends Service implements TextPublisher {
     return text;
   }
 
+  @Override
   public SearchResults publishResults(SearchResults results) {
     return results;
   }
 
+  @Override
   public String publishImage(String image) {
     return image;
   }
 
+  @Override
   public List<String> publishImages(List<String> images) {
     return images;
   }
@@ -228,6 +234,7 @@ public class GoogleSearch extends Service implements TextPublisher {
 
   }
 
+  @Override
   public int setMaxImages(int cnt) {
     maxImages = cnt;
     return cnt;
@@ -246,7 +253,7 @@ public class GoogleSearch extends Service implements TextPublisher {
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.setPort(8887);
       webgui.autoStartBrowser(false);
-      GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
+      SearchPublisher google = (SearchPublisher) Runtime.start("google", "GoogleSearch");
       webgui.startService();
 
       boolean isDone = true;

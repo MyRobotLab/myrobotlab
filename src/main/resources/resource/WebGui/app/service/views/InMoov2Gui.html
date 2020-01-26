@@ -10,16 +10,20 @@
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">speak</label>
-                    <input class="form-control" type="text" id="speakText" ng-model="speakText">
+                    <img src="../Speech.png"/>
                 </td>
                 <td>
+                    <label>speech</label>
+                    <input class="form-control" type="text" id="speakText" ng-model="speakText">
                     <button class="btn btn-default" ng-click="speak()">speak</button>
                     <span ng-show="mouth == null">
                         <button class="btn btn-default" ng-click="startMouth()">start mouth</button>
+                       
                     </span>
+                     mute
+                     <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)"></toggle>
                     <span ng-show="mouth != null">
-                        <button class="btn btn-default" ng-click="releaseMouth()">release mouth</button>
+                        <button class="btn btn-default" ng-click="msg.stopMouth()">stop mouth</button>
                     </span>
                     <select class="form-control" ng-model="speechTypeSelected" id="language-select" ng-change="msg.setSpeechType(speechTypeSelected)">
                         <option ng-repeat="speechType in speechTypes" value="{{speechType}}">{{(speechType.substring(speechType.lastIndexOf(".") + 1))}}</option>
@@ -27,21 +31,58 @@
                 </td>
             </tr>
             <tr>
+                <td></td>
                 <td>
-                    <label for="sel1">simulator</label>
-                    <br>
+                    <label for="sel1">language</label>
+                    {{service.language}}            
+                     <div class="form-group">
+                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
+                            <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#/tabs/i02.head">
+                        <img src="../Ear.png"/>
+                    </a>
+                </td>
+                <td>
+                    <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a href="#/tabs/i02.head">
+                        <img src="../Brain.png"/>
+                    </a>
+                </td>
+                <td>
+                       <!-- FIXME stopPeer('brain') startPeer is a bit more complicated as it requires setting up subscriptions -->
+                    <button ng-show="!getPeer('brain')" class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
+                    <button ng-show="getPeer('brain')" class="btn btn-default" ng-click="msg.stopBrain()">stop brain</button>
+                     <button ng-show="!getPeer('search')" class="btn btn-default" ng-click="msg.startSearch()">start search</button>
+                    <button ng-show="getPeer('search')" class="btn btn-default" ng-click="msg.stopSearch()">stop search</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <img src="../JMonkeyEngine.png"/>
                 </td>
                 <td>
+                    <label for="sel1">simulator</label>
+                    <br/>
                     <button class="btn btn-default" ng-click="msg.send('setVirtual', true)">set virtual</button>
                     <button class="btn btn-default" ng-click="msg.startSimulator()">start simulator</button>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">configurations</label>
+                   
                 </td>
                 <td>
+                 <label for="sel1">configurations</label>
                     <div class="form-group">
                         <select multiple class="form-control" id="sel2">
                             <option>default</option>
@@ -57,37 +98,20 @@
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">language</label>
-                </td>
-                <td>
-                    {{service.language}}              
-                                
-                    
-                    
-                    
-                    <div class="form-group">
-                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
-                            <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
-                        </select>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label>tracking</label>
-                    <br>
                     <img src="../Tracking.png"/>
                 </td>
                 <td>
+                <label>tracking</label>
                     <button class="btn btn-default" ng-click="msg.startHeadTracking()">start head tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEyesTracking()">start eyes tracking</button>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label>servos</label>
+                   <img src="../Servo.png"/>
                 </td>
                 <td>
+                         <label>servos</label>
                     <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
                     <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
                     <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
@@ -96,9 +120,6 @@
                         <span>
                             <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
                         
-                        
-                        
-                        
                         </span>
                     </button>
                     <button class="btn btn-default" ng-click="msg.disable()">disable</button>
@@ -106,14 +127,13 @@
             </tr>
             <tr>
                 <td>
-                    <label for="sel1">gestures</label>
+                   <img src="../Gestures.png"/>
                 </td>
                 <td>
+                 <label for="sel1">gestures</label>
                     <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
-                    
                     <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
                     <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
-                   
                     <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
                 </td>
             </tr>
@@ -125,11 +145,8 @@
                 </td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.startHead()">start head</button>
-                    <button class="btn btn-default" ng-click="msg.startHeadTracking()">start head tracking</button>
-                    <button class="btn btn-default" ng-click="msg.startEyeTracking()">start eye tracking</button>
                     <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
                     <button class="btn btn-default" ng-click="msg.startEye()">start eye</button>
-                    <button class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
                 </td>
             </tr>
             <tr>

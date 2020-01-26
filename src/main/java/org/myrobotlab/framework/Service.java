@@ -703,7 +703,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void setPeer(String peerName, String peerType) {
     String fullKey = String.format("%s.%s", getName(), peerName);
-    ServiceReservation sr = new ServiceReservation(fullKey, peerName, peerType, null);
+    // ServiceReservation sr = new ServiceReservation(fullKey, peerName,
+    // peerType, null);
+    ServiceReservation sr = new ServiceReservation(fullKey, fullKey, peerType, null); // CHANGED
+                                                                                      // -
+                                                                                      // 01/24/20
     dnaPool.put(fullKey, sr);
   }
 
@@ -1641,7 +1645,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * peers - it should fufill the request
    */
   @Override
-  synchronized public void releasePeers() {
+  public void releasePeers() {
+    releasePeers(null);
+  }
+
+  // FIXME - startPeers sets fields - this method should "unset" fieldss !!!
+  synchronized private void releasePeers(String peerName) {
     log.info("dna - {}", dnaPool.toString());
     String myKey = getName();
     log.info("releasePeers ({}, {})", myKey, serviceClass);
@@ -1652,12 +1661,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ServiceType serviceType = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
       for (String s : peers.keySet()) {
-        Runtime.release(getPeerKey(s));
+        if (peerName == null) {
+          Runtime.release(getPeerKey(s));
+        } else if (peerName != null && peerName.equals(s))
+          Runtime.release(getPeerKey(s));
       }
 
     } catch (Exception e) {
       log.debug("{} does not have a getPeers", serviceClass);
     }
+  }
+
+  public void releasePeer(String peerName) {
+    releasePeers(peerName);
   }
 
   /**
@@ -1850,6 +1866,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return true;
   }
 
+  public ServiceInterface getPeer(String peerName) {
+    return Runtime.getService(String.format("%s.%s", getName(), peerName));
+  }
+
   public boolean save(String cfgFileName, String data) {
     // saves user data in the .myrobotlab directory
     // with the file naming convention of name.<cfgFileName>
@@ -1864,6 +1884,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void send(String name, String method) {
     send(name, method, (Object[]) null);
+  }
+
+  public void sendToPeer(String peerName, String method) {
+    send(String.format("%s.%s", name, peerName), method, (Object[]) null);
+  }
+  
+  public Object invokePeer(String peerName, String method) {
+    return invokeOn(getPeer(peerName), method, (Object[])null);
+  }
+
+
+  public Object invokePeer(String peerName, String method, Object...data) {
+    return invokeOn(getPeer(peerName), method, data);
+  }
+
+
+  public void sendToPeer(String peerName, String method, Object... data) {
+    send(String.format("%s.%s", name, peerName), method, data);
   }
 
   public void send(String name, String method, Object... data) {
@@ -1983,7 +2021,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return si;
   }
 
-  
   @Override
   public void loadAndStart() {
     load();
@@ -2593,9 +2630,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public String exportAll() throws IOException {
     // FIXME - interaction with user if file exists ?
-    return exportAll(getRootDataDir() + fs +  "export.py");
+    return exportAll(getRootDataDir() + fs + "export.py");
   }
-  
+
   public String export(String filename, String names) throws IOException {
     String python = LangUtils.toPython(names);
     Files.write(Paths.get(filename), python.toString().getBytes());
@@ -2610,6 +2647,5 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     info("saved %s to %s", getName(), filename);
     return python;
   }
-
 
 }

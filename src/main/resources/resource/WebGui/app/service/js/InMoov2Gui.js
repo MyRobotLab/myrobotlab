@@ -20,6 +20,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     this.updateState = function(service) {
         $scope.service = service
         $scope.languageSelected = service.language
+
         $scope.mouth = mrl.getService(service.name + '.mouth')
         $scope.$apply()
     }
@@ -36,8 +37,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     $scope.active = ["btn", "btn-default", "active"]
 
-
-    $scope.executeGesture = function(gesture){
+    $scope.executeGesture = function(gesture) {
         msg.send('execGesture', gesture);
     }
 
@@ -48,13 +48,24 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
         }
     }
 
-    $scope.startMouth = function(){
-        msg.send('setSpeechType',$scope.speechTypeSelected)
+    $scope.getStyle = function(bool) {
+        // return ['btn', 'btn-default', 'active']
+        return 'active';
+        // return mrl.getStyle(bool)
+    }
+
+    $scope.getPeer = function(peerName) {
+        let s = mrl.getService($scope.service.name + '.' + peerName)
+        return s
+    }
+
+    $scope.startMouth = function() {
+        msg.send('setSpeechType', $scope.speechTypeSelected)
         msg.send('startMouth')
     }
 
-    $scope.speak = function(){
-        if ($scope.mouth == null){
+    $scope.speak = function() {
+        if ($scope.mouth == null) {
             $scope.startMouth()
         }
         msg.send('speakBlocking', $scope.speakText)
@@ -77,7 +88,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
             $scope.$apply()
             break
         case 'onServoData':
-            
+
             $scope.sliders[data.name].value = data.pos;
             $scope.$apply()
             break
@@ -137,7 +148,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     // FIXME FIXME FIXME - single simple subscribeTo(name, method) !!!
     mrl.subscribe(mrl.getRuntime().name, 'getServiceTypeNamesFromInterface');
     mrl.subscribeToServiceMethod(_self.onMsg, mrl.getRuntime().name, 'getServiceTypeNamesFromInterface');
-    
+
     msg.subscribe('publishText')
     msg.sendTo(mrl.getRuntime().name, 'getServiceTypeNamesFromInterface', 'SpeechSynthesis')
     msg.subscribe(this)
