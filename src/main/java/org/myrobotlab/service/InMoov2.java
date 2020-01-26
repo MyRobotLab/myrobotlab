@@ -233,14 +233,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   int maxInactivityTimeSeconds = 120;
 
-  transient SpeechSynthesis mouth;
+  transient SpeechSynthesis mouthx;
 
   // FIXME ugh - new MouthControl service that uses AudioFile output
   transient public MouthControl mouthControl;
 
   boolean mute = false;
-
-  boolean muted;
 
   transient Pid pid;
 
@@ -610,7 +608,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public boolean isMute() {
-    return muted;
+    return mute;
   }
 
   public boolean isNeopixelActivated() {
@@ -979,13 +977,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void setMute(boolean mute) {
     info("Set mute to %s", mute);
     this.mute = mute;
-    if (mouth != null) {
-      if (mute) {
-        mouth.setMute(true);
-      } else {
-        mouth.setMute(false);
-      }
-    }
+    sendToPeer("mouth", "setMute", mute);
   }
 
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
@@ -1022,19 +1014,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return virtual;
   }
 
-  public List<AudioData> speak(String toSpeak) {
-    if (mouth == null) {
-      log.error("Speak is called, but my mouth is NULL...");
-      return null;
-    }
-    if (!mute) {
-      try {
-        return mouth.speak(toSpeak);
-      } catch (Exception e) {
-        Logging.logError(e);
-      }
-    }
-    return null;
+  public void speak(String toSpeak) {
+    sendToPeer("mouth", "speak", toSpeak);
   }
 
   public void speakAlert(String toSpeak) {
@@ -1053,20 +1034,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     invoke("publishText", toSpeak);
 
     if (!mute) {
-
-      if (mouth == null) {
-        info("mouth not started, speaking, \"" + toSpeak + "\"");
-        return;
-      }
-
-      try {
-        mouth.speakBlocking(toSpeak);
-      } catch (Exception e) {
-        error("could not speak ", e.getMessage());
-      }
+      // sendToPeer("mouth", "speakBlocking", toSpeak);
+      invokePeer("mouth", "speakBlocking", toSpeak);
     }
   }
-
+  
   public void startAll() throws Exception {
     startAll(null, null);
   }
@@ -1135,20 +1107,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
                                                         // "HtmlFilter");
       brain.attachTextListener(htmlFilter);
-      htmlFilter.attachTextListener(mouth);
-
+      htmlFilter.attachTextListener((TextListener)getPeer("mouth"));
     }
 
     return brain;
   }
 
+  
   public SpeechRecognizer startEar() {
 
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
     }
 
-    ear.attachSpeechSynthesis(mouth);
+    ear.attachSpeechSynthesis((SpeechSynthesis)getPeer("mouth"));
     ear.attachTextListener(brain);
 
     speakBlocking(languagePack.get("STARTINGEAR"));
@@ -1249,7 +1221,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       speakBlocking(languagePack.get("STARTINGMOUTHCONTROL"));
       mouthControl = (MouthControl) startPeer("mouthControl");
       mouthControl.attach(head.jaw);
-      mouthControl.attach((Attachable) mouth);
+      mouthControl.attach((Attachable) getPeer("mouth"));
       mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
                                     // config !!!
     }
@@ -1352,24 +1324,31 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return leftHand;
   }
 
+  // TODO - general objective "might" be to reduce peers down to something
+  // that does not need a reference - where type can be switched before creation
+  // and the onnly thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
-    if (mouth == null) {
-      mouth = (SpeechSynthesis) startPeer("mouth");
-      if (mute) {
-        mouth.setMute(true);
-      }
 
-      mouth.attachSpeechRecognizer(ear);
-      // mouth.attach(htmlFilter); // same as brain not needed
-
-      // this.attach((Attachable) mouth);
-      // if (ear != null) ....
-      speakBlocking(languagePack.get("STARTINGMOUTH"));
-      speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
-
-      broadcastState();
+    SpeechSynthesis mouth = (SpeechSynthesis)startPeer("mouth");
+    if (mute) {
+      mouth.setMute(true);
     }
+
+    mouth.attachSpeechRecognizer(ear);
+    // mouth.attach(htmlFilter); // same as brain not needed
+
+    // this.attach((Attachable) mouth);
+    // if (ear != null) ....
+    speakBlocking(languagePack.get("STARTINGMOUTH"));
+    speakBlocking(languagePack.get("WHATISTHISLANGUAGE"));
+
+    broadcastState();
+
     return mouth;
+  }
+
+  public void stopMouth() {
+    releasePeer("mouth");
   }
 
   @Deprecated /* use start eye */
@@ -1701,12 +1680,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.waitTargetPos();
     }
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
@@ -1715,6 +1694,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public String setSpeechType(String speechType) {
     InMoov2.speechService = speechType;
     // getMetaData().addPeer("mouth", speechService, "InMoov speech service");
+    // setPeer(peerName, peerType);
     setPeer("mouth", speechType);
     return speechType;
   }

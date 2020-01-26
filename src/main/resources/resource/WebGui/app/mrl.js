@@ -406,6 +406,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
     }
 
+    this.getStyle = function(bool) {
+        if (bool){
+            return ['btn', 'btn-default', 'active']
+        } else {
+            return ['btn', 'btn-default']
+        }
+    }
+
     this.getFullName = function(service) {
 
         if ((typeof service) == "string") {
@@ -1245,6 +1253,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
+            getStyle: _self.getStyle,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,
             subscribeToService: _self.subscribeToService,

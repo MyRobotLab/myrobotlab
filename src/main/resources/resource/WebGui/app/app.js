@@ -17,6 +17,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'checklist-model', // checklists
 'angular-intro', // intro
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
+'ui.toggle', // toggle buttons
 'nvd3ChartDirectives', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
