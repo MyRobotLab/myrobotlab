@@ -3,18 +3,31 @@ package org.myrobotlab.programab;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import org.alicebot.ab.Chat;
 import org.alicebot.ab.Sraix;
 import org.alicebot.ab.SraixHandler;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 public class MrlSraixHandler implements SraixHandler {
   transient public final static Logger log = LoggerFactory.getLogger(MrlSraixHandler.class);
+
+  private ProgramAB programab = null;
+
+  public MrlSraixHandler() {
+
+  }
+
+  public MrlSraixHandler(ProgramAB programab) {
+    this.programab = programab;
+  }
 
   @Override
   public String sraix(Chat chatSession, String input, String defaultResponse, String hint, String host, String botid, String apiKey, String limit, Locale locale) {
@@ -24,6 +37,16 @@ public class MrlSraixHandler implements SraixHandler {
     if (containsOOB(input)) {
       String response = processInlineOOB(input);
       return response;
+    } else if (programab != null && programab.getPeer("search") != null) {
+      try {
+        SearchPublisher search = (SearchPublisher) programab.getPeer("search");
+        SearchResults results = search.search(input);
+
+        return results.getText();
+
+      } catch (Exception e) {
+        return "sorry, I cannot search now " + e.getMessage();
+      }
     } else {
       // fall back to default behavior of pannous / pandorabots?
       // TODO: expose pandora bots here if botid is set?

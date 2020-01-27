@@ -19,9 +19,10 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.SearchResults;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
-import org.myrobotlab.service.interfaces.TextPublisher; 
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 public class GoogleSearch extends Service implements TextPublisher, SearchPublisher {
@@ -48,28 +49,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   static {
     patternDomainName = Pattern.compile(DOMAIN_NAME_PATTERN);
-  }
-
-  // FIXME me have a more universal description of SearchResults
-  // urls ? confidence ?
-  public class SearchResults {
-
-    public String searchText;
-    public String errorText;
-    public List<String> text = new ArrayList<>();
-    public List<String> images = new ArrayList<>();
-
-    public SearchResults(String searchText) {
-      this.searchText = searchText;
-    }
-
-    public String toString() {
-      StringBuilder sb = new StringBuilder();
-      for (String t : text) {
-        sb.append(t);
-      }
-      return sb.toString();
-    }
   }
 
   public GoogleSearch(String n, String id) {

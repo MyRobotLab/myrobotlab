@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import java.io.IOException;
 import java.util.List;
 
-import org.myrobotlab.service.GoogleSearch.SearchResults;
+import org.myrobotlab.service.data.SearchResults;
 
 public interface SearchPublisher extends TextPublisher {
 
