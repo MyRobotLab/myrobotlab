@@ -9,6 +9,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -18,8 +19,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * text and confidence (and any additional meta data) to be published
    */
-  public static class RecognizedResult {
+  public static class ListeningEvent {
+    public long ts;
     public Double confidence;
+    public boolean isSpeaking = false;
+    public boolean isListening = false;
+    public boolean isRecording = false;
     public boolean isFinal = false;
     public String text;
   }
@@ -27,7 +32,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * generalized list of languages and their codes - if useful
    */
-  static protected Map<String, String> languages = new HashMap<>();
+  protected Map<String, Locale> locales = new HashMap<>();
 
   private static final long serialVersionUID = 1L;
 
@@ -46,17 +51,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /**
    * status when wake word is used and is ready to publish recognized events
    */
-  protected boolean isAwake = false;
+  protected boolean isAwake = true;
 
   /**
    * status of publishing recognized text
    */
-  protected boolean isRecognizing = false;
-
-  /**
-   * current language code for recognition
-   */
-  protected String language = "en-US";
+  protected boolean isRecording = false;
 
   @Deprecated /* remove ! - is from webkit - should be handled in js */
   protected long lastAutoListenEvent = System.currentTimeMillis();
@@ -68,6 +68,11 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Deprecated /* use wake word */
   protected boolean lockOutAllGrammar = false;
+
+  /**
+   * the current locale this service is set to e.g. en-US it-IT fr etc...
+   */
+  protected Locale locale;
 
   /**
    * phrase to unlock commands such as "power up"
@@ -112,82 +117,10 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
-    languages.put("en-US", "English - United States");
-    languages.put("en-GB", "English - British");
-    languages.put("af-ZA", "Afrikaans");
-    languages.put("id-ID", "Bahasa Indonesia");
-    languages.put("ms-MY", "Bahasa Melayu");
-    languages.put("ca-ES", "Català");
-    languages.put("cs-CZ", "Čeština");
-    languages.put("da-DK", "Dansk");
-    languages.put("de-DE", "Deutsch");
-    languages.put("en-AU", "English - Australia");
-    languages.put("en-CA", "English - Canada");
-    languages.put("en-IN", "English - India");
-    languages.put("en-NZ", "English - New Zealand");
-    languages.put("en-ZA", "English - South Africa");
-    languages.put("en-GB", "English - United Kingdom");
-    languages.put("en-US", "English - United States");
-    languages.put("es-AR", "Español - Argentina");
-    languages.put("es-BO", "Español - Bolivia");
-    languages.put("es-CL", "Español - Chile");
-    languages.put("es-CO", "Español - Colombia");
-    languages.put("es-CR", "Español - Costa Rica");
-    languages.put("es-EC", "Español - Ecuador");
-    languages.put("es-SV", "Español - El Salvador");
-    languages.put("es-ES", "Español - España");
-    languages.put("es-US", "Español - Estados Unidos");
-    languages.put("es-GT", "Español - Guatemala");
-    languages.put("es-HN", "Español - Honduras");
-    languages.put("es-MX", "Español - México");
-    languages.put("es-NI", "Español - Nicaragua");
-    languages.put("es-PA", "Español - Panamá");
-    languages.put("es-PY", "Español - Paraguay");
-    languages.put("es-PE", "Español - Perú");
-    languages.put("es-PR", "Español - Puerto Rico");
-    languages.put("es-DO", "Español - República Dominicana");
-    languages.put("es-UY", "Español - Uruguay");
-    languages.put("es-VE", "Español - Venezuela");
-    languages.put("eu-ES", "Euskara");
-    languages.put("fil-PH", "Filipino");
-    languages.put("fr-FR", "Français");
-    languages.put("gl-ES", "Galego");
-    languages.put("hi-IN", "Hindi - हिंदी");
-    languages.put("hr_HR", "Hrvatski");
-    languages.put("zu-ZA", "IsiZulu");
-    languages.put("is-IS", "Íslenska");
-    languages.put("it-IT", "Italiano - Italia");
-    languages.put("it-CH", "Italiano - Svizzera");
-    languages.put("lt-LT", "Lietuvių");
-    languages.put("hu-HU", "Magyar");
-    languages.put("nl-NL", "Nederlands");
-    languages.put("nb-NO", "Norsk bokmål");
-    languages.put("pl-PL", "Polski");
-    languages.put("pt-BR", "Português - Brasil");
-    languages.put("pt-PT", "Português - Portugal");
-    languages.put("ro-RO", "Română");
-    languages.put("sl-SI", "Slovenščina");
-    languages.put("sk-SK", "Slovenčina");
-    languages.put("fi-FI", "Suomi");
-    languages.put("sv-SE", "Svenska");
-    languages.put("vi-VN", "Tiếng Việt");
-    languages.put("tr-TR", "Türkçe");
-    languages.put("el-GR", "Ελληνικά");
-    languages.put("bg-BG", "български");
-    languages.put("ru-RU", "Pусский");
-    languages.put("sr-RS", "Српски");
-    languages.put("uk-UA", "Українська");
-    languages.put("ko-KR", "한국어");
-    languages.put("cmn-Hans-CN", "中文 - 普通话 (中国大陆)");
-    languages.put("cmn-Hans-HK", "中文 - 普通话 (香港)");
-    languages.put("cmn-Hant-TW", "中文 - 中文 (台灣)");
-    languages.put("yue-Hant-HK", "中文 - 粵語 (香港)");
-    languages.put("ja-JP", "日本語");
-    languages.put("th-TH", "ภาษาไทย");
-
-    language = Runtime.getInstance().getLanguage();
-    if (!languages.containsKey(language)) {
-      language = "en-US";
+    locales = getLocales();
+    locale = Runtime.getInstance().getLocale();
+    if (!locales.containsKey(locale.toString())) {
+      locale = new Locale("en-US");
     }
   }
 
@@ -258,15 +191,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
-   * get a referencee to
-   * 
-   * @return
-   */
-  public Map<String, String> getLanguages() {
-    return languages;
-  }
-
-  /**
    * Get the current wake word
    * 
    * @return
@@ -313,7 +237,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Override
   public void onEndSpeaking(String utterance) {
-    
+
     // need to subscribe to this in the webgui
     // so we can resume listening.
     // this.speaking = false;
@@ -322,28 +246,35 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     // FIXME - add a deta time after ...
 
     if (afterSpeakingPauseMs > 0) {
-      // remove previous one shot - because we are "sliding" the window of stopping the publishing of recognized words
-      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] {false});
+      // remove previous one shot - because we are "sliding" the window of
+      // stopping the publishing of recognized words
+      addTaskOneShot(afterSpeakingPauseMs, "setSpeaking", new Object[] { false });
       log.warn("isSpeaking = false will occur in {} ms", afterSpeakingPauseMs);
     } else {
       setSpeaking(false);
     }
   }
-  
-  
-  
 
-// start publishing recognized events
-// startRecognizing();
+  // start publishing recognized events
+  // startRecognizing();
 
-  public void setSpeaking(boolean b) {
-    
+  public boolean setSpeaking(boolean b) {
+
     isSpeaking = b;
+
+    ListeningEvent event = new ListeningEvent();
+    event.isSpeaking = isSpeaking;
+    event.isListening = isListening;
+    event.isRecording = isRecording;
+    event.ts = System.currentTimeMillis();
+    invoke("publishListeningEvent", event);
+
     if (isSpeaking) {
       log.warn("======================= started speaking - stopped listening  =======================================");
     } else {
       log.warn("======================= stopped speaking - started listening  =======================================");
     }
+    return b;
   }
 
   @Override
@@ -362,35 +293,38 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
                * startRecognizing
                */
   public void pauseListening() {
-    stopRecognizing();
+    stopListening();
   }
 
-  public RecognizedResult[] processResults(RecognizedResult[] results) {
+  public ListeningEvent[] processResults(ListeningEvent[] results) {
     // at the moment its simply invoking other methods, but if a new speech
     // recognizer is created - it might need more processing
-    
-   
+
     for (int i = 0; i < results.length; ++i) {
-      RecognizedResult result = results[i];
-      
+      ListeningEvent event = results[i];
+      event.isSpeaking = isSpeaking;
+      event.isListening = isListening;
+      event.isRecording = isRecording;
+      event.ts = System.currentTimeMillis();
+
       if (isSpeaking) {
-        log.warn("===== NOT publishing recognized \"{}\" since we are speaking ======", result.text);
+        log.warn("===== NOT publishing recognized \"{}\" since we are speaking ======", event.text);
         continue;
       }
 
-      if (result.isFinal) {
+      if (event.isFinal) {
 
-        if (!isRecognizing && (wakeWord == null || !result.text.equalsIgnoreCase(wakeWord))) {
+        if (!isRecording && (wakeWord == null || !event.text.equalsIgnoreCase(wakeWord))) {
           log.info("got recognized results - but currently isRecognizing false - not publishing");
           return results;
         }
         if (wakeWord == null) {
-          invoke("publishRecognizedResult", result);
+          invoke("publishListeningEvent", event);
         } else {
-          if (wakeWord != null && wakeWord.equalsIgnoreCase(result.text)) {
-            info("wake word match on %s, idle timer starts", result.text);
+          if (wakeWord != null && wakeWord.equalsIgnoreCase(event.text)) {
+            info("wake word match on %s, idle timer starts", event.text);
             purgeTask("wakeWordIdleTimeoutSeconds");
-            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
+            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopListening");
             lastWakeWordTs = System.currentTimeMillis();
           }
 
@@ -402,15 +336,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
             lastWakeWordTs = System.currentTimeMillis();
             isAwake = true;
 
-            invoke("publishRecognizedResult", result);
+            invoke("publishListeningEvent", event);
             purgeTask("wakeWordIdleTimeoutSeconds");
-            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopRecognizing");
+            addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "stopListening");
           } else {
-            info("ignoring \"%s\" - because it's not the wake word \"%s\"", result.text, wakeWord);
+            info("ignoring \"%s\" - because it's not the wake word \"%s\"", event.text, wakeWord);
             isAwake = false;
           }
         }
-        lastThingRecognized = result.text;
+        lastThingRecognized = event.text;
       }
     }
 
@@ -429,10 +363,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public RecognizedResult publishRecognizedResult(RecognizedResult result) {
+  public ListeningEvent publishListeningEvent(ListeningEvent result) {
     log.warn("<===== publishing recognized \"{}\" !!!! ======", result.text);
-    invoke("publishRecognized", result.text);
-    invoke("publishText", result.text);
+    if (result.text != null) {
+      invoke("publishRecognized", result.text);
+      invoke("publishText", result.text);
+    }
     return result;
   }
 
@@ -476,11 +412,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   @Deprecated /* use stopListening() and startListening() */
   public void resumeListening() {
     startListening();
-  }
-
-  public void setLanguage(String languageCode) {
-    language = languageCode;
-    broadcastState();
   }
 
   public void setLowerCase(boolean b) {
@@ -530,19 +461,21 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * broadcasting self to the webgui
    */
   @Override
-  public void startRecognizing() {
-    isRecognizing = true;
+  public void startRecording() {
+    isRecording = true;
     broadcastState();
   }
 
   public void startService() {
     super.startService();
-    startRecognizing();
+    startRecording();
     startListening();
   }
 
   /**
-   * This will prevent audio from being recorded
+   * prevents the publishing of recognized events - does NOT prevent audio being
+   * recorded and processed for webkit - startRecognizer consists of setting a
+   * property and broadcasting self to the webgui
    */
   @Override
   public void stopListening() {
@@ -552,27 +485,26 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
-   * prevents the publishing of recognized events - does NOT prevent audio being
-   * recorded and processed for webkit - startRecognizer consists of setting a
-   * property and broadcasting self to the webgui
+   * This will prevent audio from being recorded
    */
+
   @Override
-  public void stopRecognizing() {
-    isRecognizing = false;
+  public void stopRecording() {
+    isRecording = false;
     broadcastState();
   }
 
   public void stopService() {
     super.stopService();
     stopListening();
-    stopRecognizing();
+    stopRecording();
   }
-  
+
   public long setAfterSpeakingPause(long ms) {
     afterSpeakingPauseMs = ms;
     return afterSpeakingPauseMs;
   }
-  
+
   public long getAfterSpeakingPause() {
     return afterSpeakingPauseMs;
   }
@@ -584,6 +516,22 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     wakeWord = null;
     purgeTask("wakeWordIdleTimeoutSeconds");
     broadcastState();
+  }
+
+  @Override
+  public String setLocale(String code) {
+    locale = new Locale(code);
+    return locale.toString();
+  }
+
+  @Override
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  @Override
+  public Locale getLocale() {
+    return locale;
   }
 
 }

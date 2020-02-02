@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.myrobotlab.service.data.SearchResults;
 
-public interface SearchPublisher extends TextPublisher {
+public interface SearchPublisher extends TextPublisher, LocaleProvider {
 
   SearchResults search(String searchText) throws IOException;
 
@@ -18,5 +18,6 @@ public interface SearchPublisher extends TextPublisher {
   List<String> publishImages(List<String> images);
 
   int setMaxImages(int cnt);
+  
 
 } 

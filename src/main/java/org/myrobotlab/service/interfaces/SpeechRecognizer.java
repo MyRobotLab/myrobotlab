@@ -1,9 +1,9 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.RecognizedResult;
+import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer.ListeningEvent;
 
-public interface SpeechRecognizer extends NameProvider, TextPublisher {
+public interface SpeechRecognizer extends NameProvider, TextPublisher, LocaleProvider {
 
   /**
    * This method should listen for Mouth events
@@ -96,7 +96,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher {
    * @param result
    * @return
    */
-  public RecognizedResult publishRecognizedResult(RecognizedResult result);
+  public ListeningEvent publishListeningEvent(ListeningEvent result);
 
   @Deprecated /* should use standard publishRecognized */
   public String recognized(String word);
@@ -105,26 +105,28 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher {
   public void resumeListening();
 
   /**
-   * Start listening begins listening and initially starts recognizing unless a wake word is used.  
-   * If a wake word is used - listening starts but recognizing is prevented from publishing until the wake word is recognized
+   * Start recognizing allows recognized events to be published
    */
   public void startListening();
 
+
   /**
-   * Stop listening stops the recording and and any possibility of recognizing incoming audio
+   * Stop recognizing continues listening and recording audio, but will not publish recognized events
    */
   public void stopListening();
 
   
   /**
-   * Start recognizing allows recognized events to be published
+   * Start recording begins recording and initially starts recognizing unless a wake word is used.  
+   * If a wake word is used - recording starts but listening and publishing recognized speech is prevented from publishing until the wake word is recognized
    */
-  public void startRecognizing();
+  public void startRecording();
 
+  
   /**
-   * Stop recognizing continues listening and recording audio, but will not publish recognized events
+   * Stop listening stops the recording and and any possibility of recognizing incoming audio
    */
-  public void stopRecognizing();
+  public void stopRecording();
 
   
   /**

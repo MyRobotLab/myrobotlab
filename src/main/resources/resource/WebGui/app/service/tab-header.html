@@ -5,7 +5,7 @@
             &nbsp;&nbsp {{::service.simpleName}}&nbsp;&nbsp;{{::service.name}}@{{::service.id}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-            <li class="dropdown-header">Dropdown header 1</li>
+            <li class="dropdown-header">service functions</li>
             <li>
                 <a href="http://myrobotlab.org/service/{{::service.simpleName}}" target="_blank" ng-click="servicemenuDropdownOpen = false">
                     <i class="glyphicon glyphicon-question-sign"></i>
@@ -26,7 +26,28 @@
                     &nbsp;&nbsp;refresh
                 </a>
             </li>
+             <li>
+                <a href="#">About Us</a>
+            </li>
             <li>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
+                &nbsp;&nbsp;virtualize      
+                
+                <span>
+                    <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
+                </span>
+            </li>
+            <li>
+                <a href="" target="_blank" ng-click="export()">
+                    <i class="glyphicon glyphicon-save-file"></i>
+                    &nbsp;&nbsp;export
+                
+                </a>
+            </li>
+          
+            <li class="divider"></li>
+            <li class="dropdown-header">json</li>
+                      <li>
                 <!-- a href="" target="_blank" ng-click="showProperties=!showProperties" -->
                 <a href="/api/service/{{::service.name}}" target="_blank">
                     <i class="glyphicon glyphicon-list-alt"></i>
@@ -47,45 +68,7 @@
                     &nbsp;&nbsp;subscriptions
                 </a>
             </li>
-            <li>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-chevron-down"></i>
-                &nbsp;&nbsp;virtualize      
-                
-                <span>
-                    <input type="checkbox" ng-model="service.isVirtual" ng-change="toggleVirtual(service.isVirtual)">
-                </span>
-            </li>
-            <li>
-                <a href="" target="_blank" ng-click="export()">
-                    <i class="glyphicon glyphicon-save-file"></i>
-                    &nbsp;&nbsp;export
-                
-                </a>
-            </li>
-            <!--
-            <li>
-                <a href="" ng-click="updateServiceData()" uib-popover-template="'listMethodsPopoverTemplate2.html'" popover-title="Service Data" popover-placement="right-top">
-                    <i class="glyphicon glyphicon-list-alt"></i>
-                    &nbsp;&nbsp;show json
-                
-                
-                </a>
-               
-                <script type="text/ng-template" id="listMethodsPopoverTemplate2.html">
-                    
-                    
-                <button class="btn btn-default" clipboard text="servicedatajson"><span class="glyphicon glyphicon-copy"></span>Copy</button> 
-                                <div><pre>{{servicedatajson}}</pre></div>
-                
-                
-                </script>
-            </li>
-            -->
-            <li class="divider"></li>
-            <li class="dropdown-header">Dropdown header 2</li>
-            <li>
-                <a href="#">About Us</a>
-            </li>
+           
         </ul>
     </div>
 </div>

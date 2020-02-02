@@ -36,8 +36,8 @@
                     <label for="sel1">language</label>
                     {{service.language}}            
                      <div class="form-group">
-                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLanguage(languageSelected)">
-                            <option ng-repeat="(langCode, description) in service.languages" value="{{langCode}}">{{langCode}} - {{description}}</option>
+                        <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
+                            <option ng-repeat="(key, value) in service.languages" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
                         </select>
                     </div>
                 </td>
@@ -50,6 +50,7 @@
                 </td>
                 <td>
                     <button class="btn btn-default" ng-click="msg.startEar()">start ear</button>
+                    <button class="btn btn-default" ng-click="msg.startEar()">stop ear</button>
                 </td>
             </tr>
             <tr>
@@ -62,8 +63,10 @@
                        <!-- FIXME stopPeer('brain') startPeer is a bit more complicated as it requires setting up subscriptions -->
                     <button ng-show="!getPeer('brain')" class="btn btn-default" ng-click="msg.startBrain()">start brain</button>
                     <button ng-show="getPeer('brain')" class="btn btn-default" ng-click="msg.stopBrain()">stop brain</button>
+                    <!--
                      <button ng-show="!getPeer('search')" class="btn btn-default" ng-click="msg.startSearch()">start search</button>
                     <button ng-show="getPeer('search')" class="btn btn-default" ng-click="msg.stopSearch()">stop search</button>
+                    -->
                 </td>
             </tr>
             <tr>
