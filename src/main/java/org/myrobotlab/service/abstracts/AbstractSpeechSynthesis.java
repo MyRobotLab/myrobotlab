@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -20,6 +19,7 @@ import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -41,6 +41,17 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * synthesis service
    */
   Map<String, String> substitutions = new HashMap<String, String>();
+  
+  /**
+   * generalized list of languages and their codes - if useful
+   */
+  protected Map<String, Locale> locales = new HashMap<>();
+  
+
+  /**
+   * the current locale this service is set to e.g. en-US it-IT fr etc...
+   */
+  protected Locale locale;
  
   /**
    * mute or unmute service
@@ -261,7 +272,26 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       genderIndex = new HashMap<String, List<Voice>>();
     }
     audioFile = (AudioFile) createPeer("audioFile");
+    
     getVoices();
+    
+    // loading supported locales
+    Map<String, Locale> l = new TreeMap<>();
+    for (Voice voice : voices.values()) {
+      if (voice.locale != null) {
+        locales.put(locale.toString(), voice.locale);
+      }
+    }
+    locale = Runtime.getInstance().getLocale();
+    if (!locales.containsKey(locale.toString())) {
+      // lame - but if all fails drop to en-US :(
+      locale = new Locale("en-US");
+    }
+  }
+  
+  @Override
+  public Map<String, Locale> getLocales() {
+    return locales;
   }
 
   /**
@@ -1028,6 +1058,23 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   
   public boolean isMute() {
     return mute;
+  }
+  
+
+  @Override
+  public String setLocale(String code) {
+    locale = new Locale(code);
+    return locale.toString();
+  }
+
+  @Override
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  @Override
+  public Locale getLocale() {
+    return locale;
   }
 
   static public ServiceType getMetaData(String serviceType) {

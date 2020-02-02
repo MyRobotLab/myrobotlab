@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -69,8 +68,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
@@ -104,7 +105,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway {
+public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -241,7 +242,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   static Set<String> networkPeers = null;
 
+  /**
+   * current locale e.g. "en", "en-Br", "fr", "fr-FR", ... etc..
+   */
   Locale locale;
+  
+  /**
+   * available Locales
+   */
+  Map<String, Locale> locales;
 
   /*
    * Returns the number of processors available to the Java virtual machine.
@@ -1979,6 +1988,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
 
     locale = Locale.getDefault();
+    locales = Locale.getDefaults();
 
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
@@ -2137,6 +2147,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("checking for updates");
   }
 
+  /**
+   * return the current locale
+   */
+  @Override
   public Locale getLocale() {
     return locale;
   }
@@ -2685,35 +2699,28 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     return r;
   }
+  
 
-  public static void setLanguage(String language) {
-    Runtime runtime = Runtime.getInstance();
-    runtime.setLocale(new Locale(language));
+  @Override
+  public String setLocale(String code) {
+    return setLocale(code, null);
+  }
+  
+  public String setLocale(String lang, String country) {
+    if (country == null) {
+      locale = new Locale(lang);
+    } else {
+      locale = new Locale(lang, country);
+    }
+    List<String> providers = getServiceNamesFromInterface(LocaleProvider.class);
+    for(String provider  : providers) {
+      send(provider, "setLanguage", runtime.getLanguage());
+      send(provider, "broadcastState");
+    }
+    return locale.getTag();
   }
 
-  public void setLocale(String language) {
-    setLocale(new Locale(language));
-  }
-
-  public void setLocale(String language, String country) {
-    setLocale(new Locale(language, country));
-  }
-
-  public void setLocale(String language, String country, String variant) {
-    setLocale(new Locale(language, country, variant));
-  }
-
-  public void setLocale(Locale locale) {
-    // the local field is used for display & serialization
-    this.locale = locale;
-    Locale.setDefault(locale);
-    /*
-     * I don't believe these are necessary System.setProperty("user.language",
-     * language); System.setProperty("user.country", country);
-     * System.setProperty("user.variant", variant);
-     */
-  }
-
+  @Override
   public String getLanguage() {
     return locale.getLanguage();
   }
@@ -2787,16 +2794,17 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * Return supported system languages
    */
-  public HashMap<String, String> getLanguages() {
-
-    Locale[] locales = Locale.getAvailableLocales();
-
-    HashMap<String, String> languagesList = new HashMap<String, String>();
-    for (int i = 0; i < locales.length; i++) {
-      log.info(locales[i].toLanguageTag());
-      languagesList.put(locales[i].toLanguageTag(), locales[i].getDisplayLanguage());
-    }
-    return languagesList;
+  public Map<String, Locale> getLanguages() {
+    return Locale.getAvailableLanguages();
+  }
+  
+  public Map<String, Locale> getLocales(){
+    return locales;
+  }
+  
+  public Map<String, Locale> setLocales(String... codes){
+    locales = Locale.getMap(codes);
+    return locales;
   }
 
   /**
@@ -2805,11 +2813,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   static public Security getSecurity() {
-    return Runtime.getInstance().security;
+    return Runtime.security;
   }
 
   public String getLocaleTag() {
-    return locale.toLanguageTag();
+    return locale.getTag();
   }
 
   public static Process exec(String... cmd) throws IOException {

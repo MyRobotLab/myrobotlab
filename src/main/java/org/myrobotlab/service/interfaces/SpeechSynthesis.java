@@ -13,7 +13,7 @@ import org.slf4j.Logger;
  * speech should implement.
  * 
  */
-public interface SpeechSynthesis extends NameProvider, TextListener {
+public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvider {
 
   public final static Logger log = LoggerFactory.getLogger(SpeechSynthesis.class);
 

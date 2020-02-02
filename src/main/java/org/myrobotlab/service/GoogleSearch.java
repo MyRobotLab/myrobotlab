@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,13 +20,15 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.SearchResults;
+import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class GoogleSearch extends Service implements TextPublisher, SearchPublisher {
+public class GoogleSearch extends Service implements TextPublisher, SearchPublisher, LocaleProvider {
 
   private static final long serialVersionUID = 1L;
 
@@ -51,8 +54,23 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     patternDomainName = Pattern.compile(DOMAIN_NAME_PATTERN);
   }
 
+  /**
+   * language of search and results
+   */
+  Locale locale = null;
+
   public GoogleSearch(String n, String id) {
     super(n, id);
+    Runtime runtime = Runtime.getInstance();
+    runtime.getLanguage();
+    locale = runtime.getLocale();
+  }
+
+  @Override
+  public String setLocale(String code) {
+    locale = new Locale(code);
+    log.info("language is {}", code);
+    return code;
   }
 
   /**
@@ -82,7 +100,8 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
 
-      String request = "https://google.com/search?q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      // not sure if locale is supported tag probably is ....
+      String request = "https://google.com/search?lr=lang_" + locale.getTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
 
       // Fetch the page
       Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
@@ -135,7 +154,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   public List<String> imageSearch(String searchText) {
     // can only grab first 100 results
     String userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";
-    String url = "https://www.google.com/search?site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+    String url = "https://www.google.com/search?lr=lang_\" + langCode +\"&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
 
     List<String> resultUrls = new ArrayList<String>();
 
@@ -254,5 +273,21 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       log.error("main threw", e);
     }
   }
+
+  @Override
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  @Override
+  public Locale getLocale() {
+    return locale;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return Locale.getAvailableLanguages();
+  }
+
 
 }

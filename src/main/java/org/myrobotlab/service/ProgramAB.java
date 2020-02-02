@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
@@ -27,6 +27,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -45,7 +48,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider {
   // Internal class for the program ab response.
   public static class Response {
     // FIXME - timestamps are usually longs System.currentTimeMillis()
@@ -109,6 +112,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   HashSet<String> availableBots = new HashSet<>();
   boolean peerSearch = true;
+  private Locale locale;
 
   /**
    * Default constructor for the program ab service.
@@ -647,7 +651,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    *          - The locale of the bot to ensure the aiml is loaded (mostly for
    *          Japanese support)
    */
-  public void startSession(String path, String userName, String botName, Locale locale) {
+  public void startSession(String path, String userName, String botName, java.util.Locale locale) {
     // if update the current user/bot name globally. (bring this bot/user
     // session to attention.)
     log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
@@ -879,6 +883,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return peerSearch;
   }
 
+  @Override
   public void startService() {
     super.startService();
     if (peerSearch) {
@@ -944,6 +949,31 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       return;
     }
     subscribe(service.getName(), "publishText");
+  }
+
+  public SearchPublisher getSearch() {
+    return (SearchPublisher)getPeer("search");
+  }
+
+  @Override
+  public String setLocale(String code) {
+   this.locale = new Locale(code);
+   return code;
+  }
+
+  @Override
+  public String getLanguage() {
+   return locale.getLanguage();
+  }
+
+  @Override
+  public Locale getLocale() {
+    return locale;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+   return Locale.getMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
   }
 
 }

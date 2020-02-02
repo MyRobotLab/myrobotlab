@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
@@ -10,6 +11,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
 /**
@@ -220,6 +222,13 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public String getTtsPath() {
     return ttsPath;
   }
+  
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return Locale.getMap("en-US");
+  }
+
 
   public static void main(String[] args) throws Exception {
 

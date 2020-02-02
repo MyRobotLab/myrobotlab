@@ -19,7 +19,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
-        $scope.languageSelected = service.language
+        $scope.languageSelected = service.locale.tag
 
         $scope.mouth = mrl.getService(service.name + '.mouth')
         $scope.$apply()
@@ -55,7 +55,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     }
 
     $scope.getPeer = function(peerName) {
-        let s = mrl.getService($scope.service.name + '.' + peerName)
+        let s = mrl.getService($scope.service.name + '.' + peerName + '@' + this.service.id)
         return s
     }
 

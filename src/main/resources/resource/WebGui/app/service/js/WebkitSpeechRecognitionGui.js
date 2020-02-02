@@ -4,6 +4,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     var _self = this
     var msg = this.msg
 
+
     $scope.languages = {
         "Afrikaans": "af-ZA",
         "Bahasa Indonesia": "id-ID",
@@ -96,21 +97,24 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.stopRequested = false
     $scope.errorText = null
     $scope.log = []
+    $scope.webkitSupport = true
+    $scope.micImage = '../WebkitSpeechRecognition/mic.png'
 
     // this is really a js service
     // and this is the initial service state we want
     $scope.service = {
-        isListening: false,
-        status: null,
-        img: '../WebkitSpeechRecognition/mic.png',
-        webkitSupport: true
+        isRecording: false,
+        status: null
     }
 
+    // control through the ui ?
     $scope.changeListeningState = function() {
-        if (!$scope.service.isListening) {
+        if (!$scope.isRecording) {
             $scope.setState('start')
+            // msg.send('startListening') 
         } else {
             $scope.setState('stop')
+            // msg.send('stopListening')
         }
     }
 
@@ -121,10 +125,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
         switch (statusKey) {
         case 'onstart':
-            $scope.service.isListening = true
-            $scope.service.img = '../WebkitSpeechRecognition/mic-animate.gif'
+            $scope.isRecording = true
+            $scope.micImage = '../WebkitSpeechRecognition/mic-animate.gif'
             // $scope.errorText = null
-            $scope.startTimestamp = new Date().getTime()
+            $scope.startTimestamp = new Date().getTime()    
             console.debug('speak now')
             $scope.$apply()
             break
@@ -135,7 +139,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             console.debug('onresult has ' + event.results.length + ' results')
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 let data = event.results[i][0]
-                
+
                 $scope.recognizedResult = {
                     text: data.transcript,
                     confidence: (Math.round(data.confidence * 100) / 100).toFixed(2),
@@ -145,7 +149,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
                 if (event.results[i].isFinal) {
                     $scope.recognizedResult.isFinal = true
                     msg.send('processResults', [$scope.recognizedResult])
-                    $scope.log.unshift($scope.recognizedResult)
+                    // $scope.log.unshift($scope.recognizedResult)
                     $scope.$apply()
                 } else {
                     // weird handling of this ... FIXME - just pubish it all and set the correct final ..
@@ -155,8 +159,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             break
 
         case 'onend':
-            $scope.service.isListening = false
-            $scope.service.img = '../WebkitSpeechRecognition/mic-slash.png'
+            $scope.isRecording = false
+            $scope.micImage = '../WebkitSpeechRecognition/mic-slash.png'
             if (!$scope.stopRequested) {
                 $scope.restartCnt += 1
                 recognizer.start()
@@ -169,6 +173,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             if ((errorTs - $scope.startTimestamp) < 100) {
                 $scope.errorText += ' - high error rate - check other tabs for an active webkit speech recognizer, and close it'
                 $scope.$apply()
+                if (event.error == 'aborted') {
+                    $scope.setState('stop')
+                }
+
             }
             if ($scope.errorText == 'no-speech') {
                 console.debug('onerror - ' + $scope.errorText)
@@ -179,14 +187,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             break
 
         case 'stop':
-            // TODO - rename stopListeningRequest
             $scope.stopRequested = true
             recognizer.stop()
+            msg.send('stopListening')
             break
 
         case 'start':
+            
             $scope.stopRequested = false
-            if ($scope.service.isListening) {
+            if ($scope.isRecording) {
                 recognizer.stop()
             }
             recognizer.lang = $scope.selectedLanguage
@@ -201,8 +210,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     }
 
-    if (!('webkitSpeechRecognition'in window)) {
-        webkitSupport = false
+    // ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) 
+    // if (!('webkitSpeechRecognition'in window)) {
+    if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+        $scope.webkitSupport = false
     } else {
         // chrome is being used
         console.info('creating new recognizer')
@@ -229,7 +240,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     $scope.setLanguage = function() {
         recognizer.lang = $scope.selectedLanguage
-        if ($scope.service.isListening) {
+        if ($scope.isRecording) {
             recognizer.stop()
         }
     }
@@ -238,10 +249,10 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         // $scope.service is old data
         // service is new data
 
-        if ($scope.service.isListening && !service.isListening) {
+        if ($scope.isRecording && !service.isRecording) {
             $scope.setState('stop')
         }
-        if (!$scope.service.isListening && service.isListening) {
+        if (!$scope.isRecording && service.isRecording) {
             $scope.setState('start')
         }
 
@@ -257,13 +268,18 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             _self.updateState(data)
             $scope.$apply()
             break
+        case 'onListeningEvent':
+            // $scope.log.unshift($scope.recognizedResult)
+            $scope.log.unshift(data)
+            $scope.$apply()
+            break
         case 'onOnStartSpeaking':
             console.log("Started speaking, stop listening.")
             $scope.startRecognition()
             break
         case 'onOnEndSpeaking':
             console.log("Stopped speaking, start listening.")
-            if (!$scope.service.isListening) {
+            if (!$scope.isRecording) {
                 $scope.startRecognition()
             }
             break
@@ -274,6 +290,8 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     }
 
     // $scope.setState('start')
+
+    msg.subscribe('publishListeningEvent')
 
     /*
     msg.subscribe('onStartSpeaking')

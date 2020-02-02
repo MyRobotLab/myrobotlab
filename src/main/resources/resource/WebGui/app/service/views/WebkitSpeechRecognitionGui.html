@@ -1,22 +1,24 @@
 <!--
 thanks - https://developers.google.com/web/updates/2013/01/Voice-Driven-Web-Apps-Introduction-to-the-Web-Speech-API
+security exceptions to get mic working - https://medium.com/@Carmichaelize/enabling-the-microphone-camera-in-chrome-for-local-unsecure-origins-9c90c3149339
 -->
-<div ng-show="{{!service.webkitSupport}}" class="row">
+<div ng-show="{{!webkitSupport}}" class="row">
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.
-    
     </h3>
 </div>
-<div ng-show="service.webkitSupport" class="row">
+<div ng-show="webkitSupport" class="row">
     <table class="table table-striped">
         <tr>
-            <td colspan="2">
+            <td>
                 <button ng-click="changeListeningState()">
                     <span>
-                        <img ng-src="{{service.img}}" width="150"/>
+                        <img ng-src="{{micImage}}" width="150"/>
                     </span>
                 </button>
+                <br>
+                <select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
                 {{service.status}}
                 <div class="alert alert-danger" role="alert">{{errorText}}</div>
             </td>
@@ -47,15 +49,10 @@ thanks - https://developers.google.com/web/updates/2013/01/Voice-Driven-Web-Apps
             <td>
                 <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
             
+            
             </td>
             <td>
                 <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <!-- FIXME - make a universal toggle button -->
-                <button class="btn btn-default" ng-click="!enableLog">enable log</button>
             </td>
         </tr>
         <tr>
@@ -67,51 +64,29 @@ thanks - https://developers.google.com/web/updates/2013/01/Voice-Driven-Web-Apps
             <td>{{service.isListening}}</td>
         </tr>
         <tr>
-            <td>recognizing</td>
-            <td>{{service.isRecognizing}}</td>
+            <td>recording</td>
+            <td>{{service.isRecording}}</td>
         </tr>
         <tr>
             <td>restarts</td>
             <td>{{restartCnt}}</td>
         </tr>
-        <tr>
-            <td>language</td>
-            <td>
-                <select class="form-control" id="select_language" ng-model="service.language" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
-                <div ng-show="showProperties">
-                    <table class="table table-striped">
-                        <tr ng-repeat="(key, value) in properties">
-                            <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
-                            <td>{{value[0]}}</td>
-                            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
-                            <td ng-show="statusControlMode!='status'">
-                                <input type="text" class="form-control" value="{{value[1]}}"/>
-                            </td>
-                            <td>
-                            <!-- units -->
-                            </td>
-                            <td>
-                            <!-- info -->
-                            {{value[2]}}
-                    </td>
-                        </tr>
-                    </table>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <h4>log</h4>
-            </td>
-        </tr>
-        <tr ng-repeat="entry in log track by $index">
-            <td>{{entry.confidence}}</td>
-            <td>{{entry.text}}</td>
-        </tr>
     </table>
-</div>
+    <label>log</label>
+    <table class="table table-striped"<tr>
+            <th>confidence</th>
+    <th>timestamp</th>
+    <th>recording</th>
+    <th>listening</th>
+    <th>speaking</th>
+    <th>recognized</th>
+</tr>
+<tr ng-repeat="entry in log track by $index">
+    <td>{{entry.confidence}}</td>
+    <td>{{entry.ts}}</td>
+    <td>{{entry.isRecording}}</td>
+    <td>{{entry.isListening}}</td>
+    <td>{{entry.isSpeaking}}</td>
+    <td>{{entry.text}}</td>
+</tr>
+</table></div>

@@ -422,7 +422,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             } else {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
-                    console.error('string supplied name did not have remoteId - this will be a problem !')
+                    console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
                     return service + '@' + _self.remoteId
                 } else {
                     return service

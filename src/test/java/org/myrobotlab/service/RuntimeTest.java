@@ -1,11 +1,9 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -13,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -78,21 +77,12 @@ public class RuntimeTest extends AbstractTest {
     Date d = new Date(curr);
 
     Runtime runtime = Runtime.getInstance();
-    runtime.setLocale("fr", "FR");
-    // TODO: how do i test this?
-
-    // you can't test default reliably
-    DateFormat formatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
-    String today = formatter.format(d);
-
-    // you cant test default reliably
-    // assertEquals("13 novembre 2016", today);
-
-    runtime.setLocale("en");
-    formatter = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault());
-    today = formatter.format(d);
-
-    assertEquals("November 13, 2016", today);
+    String  code = runtime.setLocale("fr", "FR");
+    assertTrue("expecting concat fr-FR", code.equals("fr-FR"));
+    
+    assertTrue(runtime.getLanguage().equals("fr"));
+    Locale l = runtime.getLocale();
+    assertTrue(l.toString().equals("fr-FR"));
 
   }
 
