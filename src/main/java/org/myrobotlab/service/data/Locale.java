@@ -1,6 +1,5 @@
 package org.myrobotlab.service.data;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -56,12 +55,16 @@ public class Locale {
       if (parts.length == 0) {
         return;
       }
+      // first part is always the "language" descriptor
       language = parts[0].toLowerCase();
       if (parts.length > 1) {
-        String p = parts[1].toUpperCase();
+        
+        // IETF - "last" part is country/region
+        String p = parts[parts.length - 1].toUpperCase();
         if (p.length() > 0) {
           country = p;
         }
+       // language = code.substring(0, code.lastIndexOf("-"));
       }
     } else {
       language = code;
@@ -87,8 +90,17 @@ public class Locale {
     this(((language == null) ? "" : language + ((country == null) ? "" : "-" + country)));
   }
 
-  public static Map<String, Locale> getMap(String... codes) {
-    Map<String, Locale> ret = new LinkedHashMap<>();
+  public static Map<String, Locale> getLocaleMap(String... codes) {
+    Map<String, Locale> ret = new TreeMap<>();
+    for (String code : codes) {
+      Locale l = new Locale(new java.util.Locale(code));
+      ret.put(l.getTag(), l);
+    }
+    return ret;
+  }
+  
+  public static Map<String, Locale> getLanguageMap(String... codes) {
+    Map<String, Locale> ret = new TreeMap<>();
     for (String code : codes) {
       Locale l = new Locale(new java.util.Locale(code));
       ret.put(l.language, l);

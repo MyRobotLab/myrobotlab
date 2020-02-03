@@ -297,7 +297,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2(String n, String id) {
     super(n, id);
 
-    locales = Locale.getMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
+    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
     locale = Runtime.getInstance().getLocale();
     
     python = (Python) startPeer("python");
@@ -1754,7 +1754,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   @Override
-  public String setLocale(String code) {
+  public void setLocale(String code) {
     // FIXME - error returned to user for language not supported
     /*
     if (languages.containsKey(l)) {
@@ -1784,7 +1784,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    load(locale.getTag());
     
    locale = new Locale(code);
-   return code;
   }
 
   @Override

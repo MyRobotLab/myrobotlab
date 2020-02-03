@@ -226,7 +226,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   @Override
   public Map<String, Locale> getLocales() {
-    return Locale.getMap("en-US");
+    return Locale.getLocaleMap("en-US");
   }
 
 

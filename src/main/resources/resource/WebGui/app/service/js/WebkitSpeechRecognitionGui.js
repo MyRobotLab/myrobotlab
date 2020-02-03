@@ -76,6 +76,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         "中文 - 粵語 (香港)": "yue-Hant-HK",
         "日本語": "ja-JP",
         "한국어": "ko-KR",
+        "zh-cmn-Hans-CN":"zh-cmn-Hans-CN"
     }
 
     let recognizer = null
@@ -164,7 +165,9 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             if (!$scope.stopRequested) {
                 $scope.restartCnt += 1
                 recognizer.start()
+                console.log('onend - but stop was not requested')
             }
+            $scope.$apply()
             break
 
         case 'onerror':

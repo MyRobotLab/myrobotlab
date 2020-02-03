@@ -18,7 +18,12 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
                     </span>
                 </button>
                 <br>
-                <select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select>
+                <!-- select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select -->
+
+                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()" >
+                    <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
+                </select>
+
                 {{service.status}}
                 <div class="alert alert-danger" role="alert">{{errorText}}</div>
             </td>

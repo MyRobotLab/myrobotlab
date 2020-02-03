@@ -2702,8 +2702,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   
 
   @Override
-  public String setLocale(String code) {
-    return setLocale(code, null);
+  public void setLocale(String code) {
+    setLocale(code, null);
   }
   
   public String setLocale(String lang, String country) {
@@ -2803,7 +2803,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
   
   public Map<String, Locale> setLocales(String... codes){
-    locales = Locale.getMap(codes);
+    locales = Locale.getLocaleMap(codes);
     return locales;
   }
 
