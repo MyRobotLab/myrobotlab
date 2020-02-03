@@ -67,10 +67,9 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   }
 
   @Override
-  public String setLocale(String code) {
+  public void setLocale(String code) {
     locale = new Locale(code);
     log.info("language is {}", code);
-    return code;
   }
 
   /**

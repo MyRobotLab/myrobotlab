@@ -956,9 +956,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   @Override
-  public String setLocale(String code) {
+  public void setLocale(String code) {
    this.locale = new Locale(code);
-   return code;
   }
 
   @Override
@@ -973,7 +972,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   @Override
   public Map<String, Locale> getLocales() {
-   return Locale.getMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
+   return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
   }
 
 }

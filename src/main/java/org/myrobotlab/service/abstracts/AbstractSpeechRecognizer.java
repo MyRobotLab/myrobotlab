@@ -519,9 +519,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public String setLocale(String code) {
+  public void setLocale(String code) {
     locale = new Locale(code);
-    return locale.toString();
   }
 
   @Override

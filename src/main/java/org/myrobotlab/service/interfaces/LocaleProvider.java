@@ -11,9 +11,8 @@ public interface LocaleProvider {
    * The code string accepts underscore or hyphens
    * en-US fr-FR or just "en" or "fr" is the country is not needed
    * @param code
-   * @return
    */
-  public String setLocale(String code);
+  public void setLocale(String code);
   
   /**
    * get the locale's language - this would be "en" if "en-US" is the locale, or "fr" if "fr-FR" is the locale

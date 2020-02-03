@@ -97,10 +97,10 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
   @Override
   public Map<String, Locale> getLocales() {
-    Map<String, Locale>  ret = Locale.getMap("en-US", "en-GB", "af-ZA", "id-ID", "ms-MY", "ca-ES", "cs-CZ", "da-DK", "de-DE", "en-AU", "en-CA", "en-IN", "en-NZ", "en-ZA", "en-GB", "en-US", "es-AR", "es-BO",
+    Map<String, Locale>  ret = Locale.getLocaleMap("en-US", "en-GB", "af-ZA", "id-ID", "ms-MY", "ca-ES", "cs-CZ", "da-DK", "de-DE", "en-AU", "en-CA", "en-IN", "en-NZ", "en-ZA", "en-GB", "en-US", "es-AR", "es-BO",
         "es-CL", "es-CO", "es-CR", "es-EC", "es-SV", "es-ES", "es-US", "es-GT", "es-HN", "es-MX", "es-NI", "es-PA", "es-PY", "es-PE", "es-PR", "es-DO", "es-UY", "es-VE", "eu-ES",
         "fil-PH", "fr-FR", "gl-ES", "hi-IN", "hr_HR", "zu-ZA", "is-IS", "it-IT", "it-CH", "lt-LT", "hu-HU", "nl-NL", "nb-NO", "pl-PL", "pt-BR", "pt-PT", "ro-RO", "sl-SI", "sk-SK",
-        "fi-FI", "sv-SE", "vi-VN", "tr-TR", "el-GR", "bg-BG", "ru-RU", "sr-RS", "uk-UA", "ko-KR", "ja-JP", "th-TH", "cmn-Hans-CN", "cmn-Hans-HK", "cmn-Hant-TW", "yue-Hant-HK", "zh-cmn-Hans-CN");
+        "fi-FI", "sv-SE", "vi-VN", "tr-TR", "el-GR", "bg-BG", "ru-RU", "sr-RS", "uk-UA", "ko-KR", "ja-JP", "th-TH", "zh-cmn-Hans-HK", "zh-cmn-Hant-TW", "zh-yue-Hant-HK", "zh-cmn-Hans-CN");
     return ret;
   }
 

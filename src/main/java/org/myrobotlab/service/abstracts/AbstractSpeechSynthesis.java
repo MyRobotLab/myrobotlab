@@ -275,18 +275,21 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     
     getVoices();
     
-    // loading supported locales
-    Map<String, Locale> l = new TreeMap<>();
-    for (Voice voice : voices.values()) {
-      if (voice.locale != null) {
-        locales.put(locale.toString(), voice.locale);
-      }
-    }
+ 
     locale = Runtime.getInstance().getLocale();
     if (!locales.containsKey(locale.toString())) {
       // lame - but if all fails drop to en-US :(
       locale = new Locale("en-US");
     }
+    
+    // loading supported locales
+    Map<String, Locale> l = new TreeMap<>();
+    for (Voice voice : voices.values()) {
+      if (voice.locale != null) {
+        locales.put(voice.locale.toString(), voice.locale);
+      }
+    }
+    
   }
   
   @Override
@@ -1062,9 +1065,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   
 
   @Override
-  public String setLocale(String code) {
+  public void setLocale(String code) {
     locale = new Locale(code);
-    return locale.toString();
   }
 
   @Override
