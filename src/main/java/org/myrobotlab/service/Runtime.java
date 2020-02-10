@@ -246,7 +246,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * current locale e.g. "en", "en-Br", "fr", "fr-FR", ... etc..
    */
   Locale locale;
-  
+
   /**
    * available Locales
    */
@@ -950,12 +950,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
       List<ServiceType> sts = sd.getServiceTypes();
 
-
       for (ServiceType st : sts) {
         if (st.getSimpleName().equals("Polly")) {
           log.info("here");
         }
-        
+
         Set<Class<?>> ancestry = new HashSet<Class<?>>();
         Class<?> targetClass = Class.forName(st.getName()); // this.getClass();
 
@@ -963,7 +962,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           ancestry.add(targetClass);
           targetClass = targetClass.getSuperclass();
         }
-        
+
         for (Class<?> c : ancestry) {
           Class<?>[] interfaces = Class.forName(c.getName()).getInterfaces();
           for (Class<?> inter : interfaces) {
@@ -2699,25 +2698,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     return r;
   }
-  
 
   @Override
   public void setLocale(String code) {
-    setLocale(code, null);
-  }
-  
-  public String setLocale(String lang, String country) {
-    if (country == null) {
-      locale = new Locale(lang);
-    } else {
-      locale = new Locale(lang, country);
-    }
-    List<String> providers = getServiceNamesFromInterface(LocaleProvider.class);
-    for(String provider  : providers) {
-      send(provider, "setLanguage", runtime.getLanguage());
-      send(provider, "broadcastState");
-    }
-    return locale.getTag();
+    locale = new Locale(code);
   }
 
   @Override
@@ -2797,12 +2781,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public Map<String, Locale> getLanguages() {
     return Locale.getAvailableLanguages();
   }
-  
-  public Map<String, Locale> getLocales(){
+
+  public Map<String, Locale> getLocales() {
     return locales;
   }
-  
-  public Map<String, Locale> setLocales(String... codes){
+
+  public Map<String, Locale> setLocales(String... codes) {
     locales = Locale.getLocaleMap(codes);
     return locales;
   }

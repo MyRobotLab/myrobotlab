@@ -61,8 +61,9 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * speech synthesis interface - to not listen while speaking
    * 
    * @param utterance
+   * @return TODO
    */
-  public void onStartSpeaking(String utterance);
+  public String onStartSpeaking(String utterance);
 
   /**
    * method to suppress recognition listening events This is important when a

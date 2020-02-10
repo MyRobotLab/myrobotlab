@@ -9,8 +9,8 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.onText = null
     $scope.languageSelected = null
     $scope.speakText = null
-
-    $scope.speechTypeSelected = 'org.myrobotlab.service.MarySpeech'
+    $scope.toggleValue = true
+    
     $scope.speechTypes = null
     $scope.mouth = null
 
@@ -23,6 +23,10 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
         $scope.mouth = mrl.getService(service.name + '.mouth')
         $scope.$apply()
+    }
+
+    $scope.getShortName = function(longName){
+        return longName.substring(longName.lastIndexOf(".") + 1)
     }
 
     $scope.toggle = function(servo) {
