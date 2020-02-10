@@ -3,82 +3,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
 
     var _self = this
     var msg = this.msg
-
-
-    $scope.languages = {
-        "Afrikaans": "af-ZA",
-        "Bahasa Indonesia": "id-ID",
-        "Bahasa Melayu": "ms-MY",
-        "Català": "ca-ES",
-        "Dansk": "da-DK",
-        "Deutsch": "de-DE",
-        "English - Australia": "en-AU",
-        "English - Canada": "en-CA",
-        "English - India": "en-IN",
-        "English - New Zealand": "en-NZ",
-        "English - South Africa": "en-ZA",
-        "English - United Kingdom": "en-GB",
-        "English - United States": "en-US",
-        "Español - Argentina": "es-AR",
-        "Español - Bolivia": "es-BO",
-        "Español - Chile": "es-CL",
-        "Español - Colombia": "es-CO",
-        "Español - Costa Rica": "es-CR",
-        "Español - Ecuador": "es-EC",
-        "Español - El Salvador": "es-SV",
-        "Español - España": "es-ES",
-        "Español - Estados Unidos": "es-US",
-        "Español - Guatemala": "es-GT",
-        "Español - Honduras": "es-HN",
-        "Español - México": "es-MX",
-        "Español - Nicaragua": "es-NI",
-        "Español - Panamá": "es-PA",
-        "Español - Paraguay": "es-PY",
-        "Español - Perú": "es-PE",
-        "Español - Puerto Rico": "es-PR",
-        "Español - República Dominicana": "es-DO",
-        "Español - Uruguay": "es-UY",
-        "Español - Venezuela": "es-VE",
-        "Euskara": "eu-ES",
-        "Filipino": "fil-PH",
-        "Français": "fr-FR",
-        "Galego": "gl-ES",
-        "Hindi - हिंदी": "hi-IN",
-        "Hrvatski": "hr_HR",
-        "IsiZulu": "zu-ZA",
-        "Italiano - Italia": "it-IT",
-        "Italiano - Svizzera": "it-CH",
-        "Lietuvių": "lt-LT",
-        "Magyar": "hu-HU",
-        "Nederlands": "nl-NL",
-        "Norsk bokmål": "nb-NO",
-        "Polski": "pl-PL",
-        "Português - Brasil": "pt-BR",
-        "Português - Portugal": "pt-PT",
-        "Pусский": "ru-RU",
-        "Română": "ro-RO",
-        "Slovenčina": "sk-SK",
-        "Slovenščina": "sl-SI",
-        "Suomi": "fi-FI",
-        "Svenska": "sv-SE",
-        "Tiếng Việt": "vi-VN",
-        "Türkçe": "tr-TR",
-        "Íslenska": "is-IS",
-        "Čeština": "cs-CZ",
-        "Ελληνικά": "el-GR",
-        "Српски": "sr-RS",
-        "Українська": "uk-UA",
-        "български": "bg-BG",
-        "ภาษาไทย": "th-TH",
-        "中文 - 中文 (台灣)": "cmn-Hant-TW",
-        "中文 - 普通话 (中国大陆)": "cmn-Hans-CN",
-        "中文 - 普通话 (香港)": "cmn-Hans-HK",
-        "中文 - 粵語 (香港)": "yue-Hant-HK",
-        "日本語": "ja-JP",
-        "한국어": "ko-KR",
-        "zh-cmn-Hans-CN":"zh-cmn-Hans-CN"
-    }
-
     let recognizer = null
 
     $scope.restartCnt = 0
@@ -174,18 +98,19 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.errorText = event.error
             let errorTs = new Date().getTime()
             if ((errorTs - $scope.startTimestamp) < 100) {
-                $scope.errorText += ' - high error rate - check other tabs for an active webkit speech recognizer, and close it'
-                $scope.$apply()
-                if (event.error == 'aborted') {
-                    $scope.setState('stop')
-                }
+                $scope.errorText += ' - high error rate - is another tab listening?'          
 
             }
-            if ($scope.errorText == 'no-speech') {
-                console.debug('onerror - ' + $scope.errorText)
+
+
+            if (event.error != 'no-speech') {
+                console.error('onerror - stopping- ' + $scope.errorText)
+                $scope.setState('stop')
             } else {
-                console.error('onerror - ' + $scope.errorText)
+                console.debug('onerror - ' + $scope.errorText)
             }
+
+            $scope.$apply()
 
             break
 
@@ -273,18 +198,29 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             break
         case 'onListeningEvent':
             // $scope.log.unshift($scope.recognizedResult)
+            if (data.isSpeaking && data.confidence){
+                data.text = "heard while speaking : " + data.text
+            } else if (data.isSpeaking){
+                data.text = "speaking : " + data.text
+            }
             $scope.log.unshift(data)
             $scope.$apply()
             break
         case 'onOnStartSpeaking':
             console.log("Started speaking, stop listening.")
-            $scope.startRecognition()
+             $scope.log.unshift({
+               ts: ts = new Date().getTime(),
+               text: "speaking : " + data
+            })
+            //$scope.startRecognition()
             break
         case 'onOnEndSpeaking':
             console.log("Stopped speaking, start listening.")
+           
+            /*
             if (!$scope.isRecording) {
                 $scope.startRecognition()
-            }
+            }*/
             break
         default:
             console.log("Unknown Message recieved." + msg.method)
@@ -295,6 +231,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     // $scope.setState('start')
 
     msg.subscribe('publishListeningEvent')
+    // msg.subscribe('onStartSpeaking')
 
     /*
     msg.subscribe('onStartSpeaking')

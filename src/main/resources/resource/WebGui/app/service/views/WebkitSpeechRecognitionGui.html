@@ -30,7 +30,7 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
             <td></td>
         </tr>
         <tr>
-            <td>published</td>
+            <td>recognized</td>
             <td>{{recognizedResult.text}} &nbsp;&nbsp;&nbsp;{{recognizedResult.confidence}}</td>
         </tr>
         <tr>
@@ -39,7 +39,6 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
             </td>
             <td>
                 <button class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">set wake word</button>
-                <button class="btn btn-default" ng-click="msg.unsetWakeWord()">unset wake word</button>
             </td>
         </tr>
         <tr>
@@ -65,10 +64,6 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
             <td>{{startTimestamp}}</td>
         </tr>
         <tr>
-            <td>listening</td>
-            <td>{{service.isListening}}</td>
-        </tr>
-        <tr>
             <td>recording</td>
             <td>{{service.isRecording}}</td>
         </tr>
@@ -77,13 +72,15 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
             <td>{{restartCnt}}</td>
         </tr>
     </table>
-    <label>log</label>
+    <label>listening event log</label>
     <table class="table table-striped"<tr>
             <th>confidence</th>
     <th>timestamp</th>
     <th>recording</th>
     <th>listening</th>
+    <th>awake</th>
     <th>speaking</th>
+    <th>published</th>
     <th>recognized</th>
 </tr>
 <tr ng-repeat="entry in log track by $index">
@@ -91,7 +88,9 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
     <td>{{entry.ts}}</td>
     <td>{{entry.isRecording}}</td>
     <td>{{entry.isListening}}</td>
+     <td>{{entry.isAwake}}</td>
     <td>{{entry.isSpeaking}}</td>
+      <td>{{entry.publishText}}</td>
     <td>{{entry.text}}</td>
 </tr>
 </table></div>
