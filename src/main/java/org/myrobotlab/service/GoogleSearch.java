@@ -47,6 +47,8 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   Integer maxImageWidth = null;
 
   int maxImages = 3;
+  
+  Boolean lowerCase = null;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
 
@@ -59,11 +61,35 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
    */
   Locale locale = null;
 
+  protected List<String> excludeTextFilter = new ArrayList<String>();
+
   public GoogleSearch(String n, String id) {
     super(n, id);
     Runtime runtime = Runtime.getInstance();
     runtime.getLanguage();
     locale = runtime.getLocale();
+    excludeTextFilter.add("Wikipedia");
+    setLowerCase();
+  }
+  
+  public void setLowerCase() {
+    lowerCase = true;
+  }
+  
+  public void setUpperCase() {
+    lowerCase = false;
+  }
+  
+  public void clearCase() {
+    lowerCase = null;
+  }
+  
+  public void addFilter(String filter) {
+    excludeTextFilter.add(filter);
+  }
+  
+  public void clearFilters() {
+    excludeTextFilter.clear();
   }
 
   @Override
@@ -128,8 +154,18 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
           for (Element span : spans) {
             log.info("description - {} ", span.text());
             // String url = header.attr("href");
-            sb.append(span.text());
-            results.text.add(span.text());
+            
+            String text = null;
+            if (lowerCase != null && lowerCase) {
+              text = span.text().toLowerCase();
+            } else if (lowerCase != null && !lowerCase) {
+              text = span.text().toUpperCase();
+            }
+            for (String filter : excludeTextFilter ) {
+              text = text.replace(filter.toLowerCase(), "");
+            }
+            sb.append(text);
+            results.text.add(text);
           }
 
         }

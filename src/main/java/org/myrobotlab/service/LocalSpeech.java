@@ -29,6 +29,25 @@ import org.slf4j.Logger;
  *         
  *         More Voices can be found for Windows at
  *         https://www.microsoft.com/en-us/download/details.aspx?id=3971
+ *         
+ *         ESPEAK - 
+ *            list voices :
+ *                espeak --voices  
+ *            use voice :
+ *                espeak  -v en "Hello world, how are you doing today?"
+ *                espeak  -v en-sc "Hello world, how are you doing today?"
+ *                
+ *            using mbrola voice
+ *            install voice :
+ *                sudo apt-get install mbrola mbrola-us3 mbrola-en1 ...
+ *            use voice :
+ *                espeak -v mb-en1 "Hello world"
+ *                espeak -v mb-en1 "Hello world" -w out.wav
+ *                espeak -f speak.txt -v mb-en1 -w out.wav
+ *                espeak  -v mb-us1 "Hello world, how are you doing today?"
+ *                
+ *                
+ *         MBROLA voices - https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
@@ -63,6 +82,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (filename == null) {
       return null;
     }
+    
     if (platform.isWindows()) {
       // GAH ! .. tts.exe isn't like a Linux app where -o means output file to
       // "exact" name ...
@@ -78,12 +98,18 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       String cmd = "say \"" + toSpeak + "\"" + "-o " + filename;
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
+      // ProcessBuilder pb = new ProcessBuilder()
       // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
       String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'",
       // "").replace("|",
       // "");
       // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
       // --tts");
+      
+      // apt install espeak 
+      // sudo apt-get install mbrola mbrola-en1
+      // espeak -f speak.txt -w out.wav 
+      // espeak -ven-sc -f speak.txt -w out.wav
       Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
       // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
       p.waitFor();
@@ -99,7 +125,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (fileTest.exists() && fileTest.length() > 0) {
       return new AudioData(localFileName);
     } else {
-      error("%s returned 0 byte file !!! - it may block you", getName());
+      if (platform.isLinux()) {
+        error("0 byte file - is festival installed?  apt install festival");
+      } else {
+        error("%s returned 0 byte file !!! - it may block you", getName());
+      }
       return null;
     }
   }

@@ -17,7 +17,6 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'checklist-model', // checklists
 'angular-intro', // intro
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
-'ui.toggle', // toggle buttons
 'nvd3ChartDirectives', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
@@ -26,6 +25,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
 'angularTreeview', // any server filesystem browsing
+'ui.toggle', // toggle buttons
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js - starting');

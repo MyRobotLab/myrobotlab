@@ -172,8 +172,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * 
    * @param text
    * @return
+   * @throws IOException 
    */
-  public Response getResponse(String text) {
+  public Response getResponse(String text) throws IOException {
     return getResponse(getCurrentUserName(), text);
   }
 
@@ -186,8 +187,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param text
    *          - the user that is sending the query
    * @return the response for a user from a bot given the input text.
+   * @throws IOException 
    */
-  public Response getResponse(String username, String text) {
+  public Response getResponse(String username, String text) throws IOException {
     return getResponse(username, getCurrentBotName(), text);
   }
 
@@ -199,8 +201,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param botName
    * @param text
    * @return
+   * @throws IOException 
    */
-  public Response getResponse(String userName, String botName, String text) {
+  public Response getResponse(String userName, String botName, String text) throws IOException {
     return getResponse(userName, botName, text, true);
   }
 
@@ -215,8 +218,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          (specify if the currentbot/currentuser name should be updated in
    *          the programab service.)
    * @return
+   * @throws IOException 
    */
-  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) {
+  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) throws IOException {
     // error check the input.
     log.info("Get Response for : user {} bot {} : {}", userName, botName, text);
     if (userName == null || botName == null || text == null) {
@@ -418,8 +422,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param delay
    *          - min amount of time that must have transpired since the last
    * @return the response
+   * @throws IOException 
    */
-  public Response getResponse(String userName, String text, Long delay) {
+  public Response getResponse(String userName, String text, Long delay) throws IOException {
     ChatData chatData = sessions.get(getCurrentBotName()).get(userName);
     long delta = System.currentTimeMillis() - chatData.lastResponseTime.getTime();
     if (delta > delay) {
@@ -471,7 +476,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   @Override
-  public void onText(String text) {
+  public void onText(String text) throws IOException {
     getResponse(text);
     // TODO: should we publish the response here?
   }
@@ -533,7 +538,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return text;
   }
 
-  public void reloadSession(String userName, String botName) {
+  public void reloadSession(String userName, String botName) throws IOException {
     reloadSession(getPath(), userName, botName);
   }
 
@@ -544,8 +549,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param path
    * @param userName
    * @param botName
+   * @throws IOException 
    */
-  public void reloadSession(String path, String userName, String botName) {
+  public void reloadSession(String path, String userName, String botName) throws IOException {
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       // TODO: will garbage collection clean up the bot now ?
@@ -621,19 +627,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     sessions.get(getCurrentBotName()).get(getCurrentUserName()).processOOB = processOOB;
   }
 
-  public void startSession() {
+  public void startSession() throws IOException {
     startSession(currentUserName);
   }
 
-  public void startSession(String username) {
+  public void startSession(String username) throws IOException {
     startSession(username, getCurrentBotName());
   }
 
-  public void startSession(String username, String botName) {
+  public void startSession(String username, String botName) throws IOException {
     startSession(getPath(), username, botName);
   }
 
-  public void startSession(String path, String userName, String botName) {
+  public void startSession(String path, String userName, String botName) throws IOException {
     startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
 
@@ -650,11 +656,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param locale
    *          - The locale of the bot to ensure the aiml is loaded (mostly for
    *          Japanese support)
+   * @throws IOException 
    */
-  public void startSession(String path, String userName, String botName, java.util.Locale locale) {
+  public void startSession(String path, String userName, String botName, java.util.Locale locale) throws IOException {
     // if update the current user/bot name globally. (bring this bot/user
     // session to attention.)
     log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
+    
+    File check = new File(path + fs + "bots" + fs + botName);
+    if (!check.exists() || !check.isDirectory()) {
+      String invalid = String.format("%s could not load aiml. %s is not a valid bot directory", getName(), check.getAbsolutePath());
+      error(invalid);
+      throw new IOException(invalid);
+    }
+    
     updateCurrentSession(userName, botName);
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -754,9 +769,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Use startSession instead.
+   * @throws IOException 
    */
   @Deprecated
-  public boolean setUsername(String username) {
+  public boolean setUsername(String username) throws IOException {
     startSession(getPath(), username, getCurrentBotName());
     return true;
   }

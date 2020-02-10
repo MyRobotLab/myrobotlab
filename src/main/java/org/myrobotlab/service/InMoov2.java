@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,6 +26,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.JoystickListener;
@@ -41,14 +43,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
+  public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
+
   // FIXME - why
   static boolean RobotCanMoveRandom = true;
-
   private static final long serialVersionUID = 1L;
-  static String speechRecognizer = "WebkitSpeechRecognition";
 
-  // FIXME - WTH ?
-  static String speechService = "MarySpeech";
+  static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
    * This static method returns all the details of the class without it having
@@ -64,7 +65,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addDescription("InMoov2 Service");
     meta.addCategory("robot");
 
-    meta.sharePeer("mouthControl.mouth", "mouth", speechService, "shared Speech");
+    meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 
     meta.addPeer("eye", "OpenCV", "eye");
 
@@ -75,6 +76,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
     meta.addPeer("brain", "ProgramAB", "brain");
+    meta.addPeer("simulator", "JMonkeyEngine", "simulator");
 
     meta.addPeer("head", "InMoov2Head", "head");
     meta.addPeer("torso", "InMoov2Torso", "torso");
@@ -85,7 +87,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("rightHand", "InMoov2Hand", "right hand");
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
     meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
-    meta.addPeer("mouth", speechService, "InMoov speech service");
+    meta.addPeer("mouth", "MarySpeech", "InMoov speech service");
     meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
 
     meta.addPeer("headTracking", "Tracking", "Head tracking system");
@@ -137,18 +139,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
-      
-      
+
       String[] langs = java.util.Locale.getISOLanguages();
-      log.info("{}",langs.length);
+      log.info("{}", langs.length);
       for (String l : langs) {
         log.info("iso " + l);
       }
-      
-      
-      
+
       java.util.Locale[] locales = java.util.Locale.getAvailableLocales();
-      log.info("{}",locales.length);
+      log.info("{}", locales.length);
       for (java.util.Locale l : locales) {
         log.info("------------------------");
         log.info(CodecUtils.toJson(l));
@@ -156,16 +155,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
         log.info(l.getLanguage());
         log.info(l.getCountry());
         log.info(l.getDisplayCountry());
-        
-        
+
         log.info(CodecUtils.toJson(new Locale(l)));
-        
+
         if (l.getLanguage().equals("en")) {
           log.info("here");
         }
       }
-      
-      
+
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -203,8 +200,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient ProgramAB brain;
 
-  transient HtmlFilter htmlFilter;
-
   Set<String> configs = null;
 
   String currentConfigurationName = "default";
@@ -212,23 +207,30 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient SpeechRecognizer ear;
 
   transient OpenCV eye;
+
   transient Tracking eyesTracking;
   // waiting controable threaded gestures we warn user
   boolean gestureAlreadyStarted = false;
   // FIXME - what the hell is this for ?
   Set<String> gestures = new TreeSet<String>();
-
   transient InMoov2Head head;
-
-  transient NeoPixel neopixel;
 
   transient Tracking headTracking;
 
-  transient ImageDisplay imageDisplay;
+  transient HtmlFilter htmlFilter;
 
+  transient ImageDisplay imageDisplay;
+  
   /**
-   * a variety of state variables for scripts
+   * simple booleans to determine peer state of existance
    */
+
+  boolean isBrainActivated = false;
+
+  boolean isEarActivated = false;
+
+  boolean isEyeActivated = false;
+
   boolean isEyeLidsActivated = false;
 
   boolean isHeadActivated = false;
@@ -237,27 +239,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   boolean isLeftHandActivated = false;
 
+  boolean isMouthActivated = false;
+
   boolean isNeopixelActivated = false;
 
   boolean isRightArmActivated = false;
 
   boolean isRightHandActivated = false;
 
+  boolean isSimulatorActivated = false;
+
   boolean isTorsoActivated = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine jme;
-
-  Locale locale;
-
-  //transient LanguagePack languagePack = new LanguagePack();
-
-  // transient InMoovEyelids eyelids; eyelids are in the head
-
-  /**
-   * supported locales
-   */
-  Map<String, Locale> locales = null;
 
   String lastGestureExecuted;
 
@@ -265,24 +260,40 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient InMoov2Arm leftArm;
 
+  // transient LanguagePack languagePack = new LanguagePack();
+
+  // transient InMoovEyelids eyelids; eyelids are in the head
+
   transient InMoov2Hand leftHand;
+
+  Locale locale;
+
+  /**
+   * supported locales
+   */
+  Map<String, Locale> locales = null;
 
   int maxInactivityTimeSeconds = 120;
 
-  transient SpeechSynthesis mouthx;
+  transient SpeechSynthesis mouth;
 
   // FIXME ugh - new MouthControl service that uses AudioFile output
   transient public MouthControl mouthControl;
 
   boolean mute = false;
 
-  transient Pid pid;
+  transient NeoPixel neopixel;
 
   transient Python python;
 
   transient InMoov2Arm rightArm;
 
   transient InMoov2Hand rightHand;
+
+  /**
+   * used to remember/serialize configuration the user's desired speech type
+   */
+  String speechService = "MarySpeech";
 
   transient InMoov2Torso torso;
 
@@ -292,14 +303,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
 
+  protected List<Voice> voices = null;
+
+  protected String voiceSelected;
+
   transient WebGui webgui;
 
   public InMoov2(String n, String id) {
     super(n, id);
 
-    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
+    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
     locale = Runtime.getInstance().getLocale();
-    
+
     python = (Python) startPeer("python");
     load(locale.getTag());
 
@@ -321,8 +336,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     addListener("publishText", service.getName());
   }
 
+  @Override
+  public void attachTextListener(TextListener service) {
+    addListener("publishText", service.getName());
+  }
+
   public void attachTextPublisher(String name) {
     subscribe(name, "publishText");
+  }
+
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    subscribe(service.getName(), "publishText");
   }
 
   public void beginCheckingOnInactivity() {
@@ -480,6 +505,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public String get(String param) {
+    if (lpVars.containsKey(param.toUpperCase())) {
+      return lpVars.get(param.toUpperCase());
+    }
+    return "not yet translated";
+
+  }
+
   public InMoov2Arm getArm(String side) {
     if ("left".equals(side)) {
       return leftArm;
@@ -566,6 +599,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return leftHand;
   }
 
+  @Override
+  public Locale getLocale() {
+    return locale;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return locales;
+  }
+
   public InMoov2Arm getRightArm() {
     return rightArm;
   }
@@ -603,6 +646,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.setSpeed(20.0, 20.0, 20.0);
     }
 
+  }
+
+  public boolean isCameraOn() {
+    if (eye != null) {
+      if (eye.isCapturing()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public boolean isEyeLidsActivated() {
@@ -670,6 +722,38 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return configs;
   }
 
+  /*
+   * iterate over each txt files in the directory
+   */
+  public void load(String locale) {
+    String extension = "lang";
+    File dir = Utils.makeDirectory(getResourceDir() + File.separator + "system" + File.separator + "languagePack" + File.separator + locale);
+    if (dir.exists()) {
+      lpVars.clear();
+      for (File f : dir.listFiles()) {
+        if (f.isDirectory()) {
+          continue;
+        }
+        if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
+          log.info("Inmoov languagePack load : {}", f.getName());
+          try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+              String[] parts = line.split("::");
+              if (parts.length > 1) {
+                lpVars.put(parts[0].toUpperCase(), parts[1]);
+              }
+            }
+          } catch (IOException e) {
+            log.error("LanguagePack : {}", e);
+          }
+        } else {
+          log.warn("{} is not a {} file", f.getAbsolutePath(), extension);
+        }
+      }
+    }
+  }
+
   // FIXME - what is this for ???
   public void loadGestures() {
     loadGestures(getResourceDir() + fs + "gestures");
@@ -722,6 +806,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     InMoov2Arm arm = getArm(which);
+    if (arm == null) {
+      info("%s arm not started", which);
+      return;
+    }
     arm.moveTo(bicep, rotate, shoulder, omoplate);
   }
 
@@ -874,6 +962,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return text;
   }
 
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
   // FIXME NO DIRECT REFERENCES - publishRest --> (onRest) --> rest
   public void rest() {
     log.info("InMoov2.rest()");
@@ -905,6 +1003,30 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       return;
     }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
+  }
+
+  public void setAutoDisable(Boolean param) {
+    if (head != null) {
+      head.setAutoDisable(param);
+    }
+    if (rightArm != null) {
+      rightArm.setAutoDisable(param);
+    }
+    if (leftArm != null) {
+      leftArm.setAutoDisable(param);
+    }
+    if (leftHand != null) {
+      leftHand.setAutoDisable(param);
+    }
+    if (rightHand != null) {
+      leftHand.setAutoDisable(param);
+    }
+    if (torso != null) {
+      torso.setAutoDisable(param);
+    }
+    /*
+     * if (eyelids != null) { eyelids.setAutoDisable(param); }
+     */
   }
 
   public void setHandSpeed(String which, Double thumb, Double index, Double majeure, Double ringFinger, Double pinky) {
@@ -973,59 +1095,49 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * @param l
    *          - format : java Locale
    */
-  @Deprecated /*use setLocale */
+  @Deprecated /* use setLocale */
   public String setLanguage(String code) {
     setLocale(code);
     return code;
   }
-  
-  public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-  /*
-   * iterate over each txt files in the directory
-   */
-  public void load(String locale) {
-    String extension = "lang";
-    File dir = Utils.makeDirectory(getResourceDir() + File.separator + "system" + File.separator + "languagePack" + File.separator + locale);
-    if (dir.exists()) {
-      lpVars.clear();
-      for (File f : dir.listFiles()) {
-        if (f.isDirectory()) {
-          continue;
-        }
-        if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
-          log.info("Inmoov languagePack load : {}", f.getName());
-          try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-              String[] parts = line.split("::");
-              if (parts.length > 1) {
-                lpVars.put(parts[0].toUpperCase(), parts[1]);
-              }
-            }
-          } catch (IOException e) {
-            log.error("LanguagePack : {}", e);
-          }
-        } else {
-          log.warn("{} is not a {} file", f.getAbsolutePath(), extension);
-        }
+  @Override
+  public void setLocale(String code) {
+
+    if (code == null) {
+      log.warn("setLocale null");
+      return;
+    }
+
+    // filter of the set of supported locales
+    if (!locales.containsKey(code)) {
+      error("InMooov does not support %s only %s", code, locales.keySet());
+      return;
+    }
+
+    locale = new Locale(code);
+
+    speakBlocking("setting language to %s", locale.getDisplayLanguage());
+
+    // attempt to set all other language providers to the same language as me
+    List<String> providers = Runtime.getServiceNamesFromInterface(LocaleProvider.class);
+    for (String provider : providers) {
+      if (!provider.equals(getName())) {
+        log.info("{} setting locale to %s", provider, code);
+        send(provider, "setLocale", code);
+        send(provider, "broadcastState");
       }
     }
-  }
 
-  public String get(String param) {
-    if (lpVars.containsKey(param.toUpperCase())) {
-      return lpVars.get(param.toUpperCase());
-    }
-    return "not yet translated";
+    load(locale.getTag());
 
   }
-  
 
   public void setMute(boolean mute) {
     info("Set mute to %s", mute);
     this.mute = mute;
     sendToPeer("mouth", "setMute", mute);
+    broadcastState();
   }
 
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
@@ -1034,6 +1146,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     } else {
       warn("No Neopixel attached");
     }
+  }
+
+  public String setSpeechType(String speechType) {
+    speechService = speechType;
+    setPeer("mouth", speechType);
+    return speechType;
   }
 
   public void setTorsoSpeed(Double topStom, Double midStom, Double lowStom) {
@@ -1062,6 +1180,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return virtual;
   }
 
+  public void setVoice(String name) {
+    if (mouth != null) {
+      mouth.setVoice(name);
+      voiceSelected = name;
+      speakBlocking("setting voice to %s", name);
+    }
+  }
+
   public void speak(String toSpeak) {
     sendToPeer("mouth", "speak", toSpeak);
   }
@@ -1071,11 +1197,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(toSpeak);
   }
 
+  public void speakBlocking(String speak) {
+    speakBlocking(speak, null);
+  }
+  
   // FIXME - publish text regardless if mouth exists ...
-  public void speakBlocking(String toSpeak) {
+  public void speakBlocking(String format, Object... args) {
 
-    if (toSpeak == null) {
+    if (format == null) {
       return;
+    }
+
+    String toSpeak = format;
+    if (args != null) {
+      toSpeak = String.format(format, args);
     }
 
     // FIXME - publish onText when listening
@@ -1108,57 +1243,67 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public ProgramAB startBrain() {
 
-    brain = (ProgramAB) startPeer("brain");
-    
-    speakBlocking(get("CHATBOTACTIVATED"));
-
-    // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-    // attachTextPublisher(brain.getName());
-
-    /*
-     * not necessary - ear needs to be attached to mouth not brain if (ear !=
-     * null) { ear.attachTextListener(brain); }
-     */
-
-    brain.attachTextPublisher(ear);
-
-    // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
-    // FIXME - deal with language
-    // speakBlocking(get("CHATBOTACTIVATED"));
-    brain.repetitionCount(10);
-    brain.setPath(getResourceDir() + fs + "chatbot");
-    brain.startSession("default", getLanguage());
-    // reset some parameters to default...
-    brain.setPredicate("topic", "default");
-    brain.setPredicate("questionfirstinit", "");
-    brain.setPredicate("tmpname", "");
-    brain.setPredicate("null", "");
-    // load last user session
-    if (!brain.getPredicate("name").isEmpty()) {
-      if (brain.getPredicate("lastUsername").isEmpty() || brain.getPredicate("lastUsername").equals("unknown")) {
-        brain.setPredicate("lastUsername", brain.getPredicate("name"));
-      }
-    }
-    brain.setPredicate("parameterHowDoYouDo", "");
     try {
-      brain.savePredicates();
-    } catch (IOException e) {
-      log.error("saving predicates threw", e);
-    }
-    // start session based on last recognized person
-    if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
-      brain.startSession(brain.getPredicate("lastUsername"));
-    }
 
-    htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
-                                                      // "HtmlFilter");
-    brain.attachTextListener(htmlFilter);
-    htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
+      brain = (ProgramAB) startPeer("brain");
+      isBrainActivated = true;
 
+      speakBlocking(get("CHATBOTACTIVATED"));
+
+      // GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
+      // attachTextPublisher(brain.getName());
+
+      /*
+       * not necessary - ear needs to be attached to mouth not brain if (ear !=
+       * null) { ear.attachTextListener(brain); }
+       */
+
+      brain.attachTextPublisher(ear);
+
+      // this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
+      // FIXME - deal with language
+      // speakBlocking(get("CHATBOTACTIVATED"));
+      brain.repetitionCount(10);
+      brain.setPath(getResourceDir() + fs + "chatbot");
+      brain.startSession("default", locale.getTag());
+      // reset some parameters to default...
+      brain.setPredicate("topic", "default");
+      brain.setPredicate("questionfirstinit", "");
+      brain.setPredicate("tmpname", "");
+      brain.setPredicate("null", "");
+      // load last user session
+      if (!brain.getPredicate("name").isEmpty()) {
+        if (brain.getPredicate("lastUsername").isEmpty() || brain.getPredicate("lastUsername").equals("unknown")) {
+          brain.setPredicate("lastUsername", brain.getPredicate("name"));
+        }
+      }
+      brain.setPredicate("parameterHowDoYouDo", "");
+      try {
+        brain.savePredicates();
+      } catch (IOException e) {
+        log.error("saving predicates threw", e);
+      }
+      // start session based on last recognized person
+      if (!brain.getPredicate("default", "lastUsername").isEmpty() && !brain.getPredicate("default", "lastUsername").equals("unknown")) {
+        brain.startSession(brain.getPredicate("lastUsername"));
+      }
+
+      htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
+                                                        // "HtmlFilter");
+      brain.attachTextListener(htmlFilter);
+      htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
+    } catch (Exception e) {
+      speak("could not load brain");
+      error(e.getMessage());
+      speak(e.getMessage());
+    }
+    broadcastState();
     return brain;
   }
 
   public SpeechRecognizer startEar() {
+
+    isEarActivated = true;
 
     if (ear == null) {
       ear = (SpeechRecognizer) startPeer("ear");
@@ -1168,6 +1313,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     ear.attachTextListener(brain);
 
     speakBlocking(get("STARTINGEAR"));
+    broadcastState();
     return ear;
   }
 
@@ -1189,11 +1335,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // back to the user the problem in a short concise way but have
   // expandable detail in appropriate places
   public OpenCV startEye() throws Exception {
-    if (eye == null) {
-      speakBlocking(get("STARTINGOPENCV"));
-      eye = (OpenCV) startPeer("eye", "OpenCV");
-      subscribeTo(eye.getName(), "publishOpenCVData");
-    }
+    speakBlocking(get("STARTINGOPENCV"));
+    eye = (OpenCV) startPeer("eye", "OpenCV");
+    subscribeTo(eye.getName(), "publishOpenCVData");
+    isEyeActivated = true;
     return eye;
   }
 
@@ -1373,7 +1518,15 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // and the onnly thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
 
-    SpeechSynthesis mouth = (SpeechSynthesis) startPeer("mouth");
+    mouth = (SpeechSynthesis) startPeer("mouth");
+    voices = mouth.getVoices();
+    Voice voice = mouth.getVoice();
+    if (voice != null) {
+      voiceSelected = voice.getName();
+    }
+
+    isMouthActivated = true;
+
     if (mute) {
       mouth.setMute(true);
     }
@@ -1383,16 +1536,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // this.attach((Attachable) mouth);
     // if (ear != null) ....
-    speakBlocking(get("STARTINGMOUTH"));
-    speakBlocking(get("WHATISTHISLANGUAGE"));
 
     broadcastState();
 
-    return mouth;
-  }
+    speakBlocking(get("STARTINGMOUTH"));
+    speakBlocking(get("WHATISTHISLANGUAGE"));
 
-  public void stopMouth() {
-    releasePeer("mouth");
+    return mouth;
   }
 
   @Deprecated /* use start eye */
@@ -1475,10 +1625,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
 
-    if (jme == null) {
-      speakBlocking("starting simulator");
-      jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
+    speakBlocking("starting simulator");
+
+    if (jme != null) {
+      log.info("start called twice - starting simulator is reentrant");
+      return jme;
     }
+
+    jme = (JMonkeyEngine) startPeer("simulator");
+
+    isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jonkey simulator
     String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
@@ -1699,9 +1855,43 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
+  public void stopBrain() {
+    speakBlocking("stopping brain");
+    releasePeer("brain");
+    isBrainActivated = false;
+  }
+
+  public void stopEar() {
+    speakBlocking("stopping ear");
+    releasePeer("ear");
+    isEarActivated = false;
+    broadcastState();
+  }
+
+  public void stopEye() {
+    speakBlocking("stopping eye");
+    isEyeActivated = false;
+    releasePeer("eye");
+  }
+
   public void stopGesture() {
     Python p = (Python) Runtime.getService("python");
     p.stop();
+  }
+
+  public void stopMouth() {
+    speakBlocking("stopping mouth");
+    releasePeer("mouth");
+    // TODO - potentially you could set the field to null in releasePeer
+    mouth = null;
+    isMouthActivated = false;
+  }
+
+  public void stopSimulator() {
+    speakBlocking("stopping simulator");
+    releasePeer("simulator");
+    jme = null;
+    isSimulatorActivated = false;
   }
 
   public void waitTargetPos() {
@@ -1723,77 +1913,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso != null) {
       torso.waitTargetPos();
     }
-  }
-
-  public void releaseService() {
-    try {
-      disable();
-      releasePeers();
-      super.releaseService();
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
-  public String setSpeechType(String speechType) {
-    InMoov2.speechService = speechType;
-    // getMetaData().addPeer("mouth", speechService, "InMoov speech service");
-    // setPeer(peerName, peerType);
-    setPeer("mouth", speechType);
-    return speechType;
-  }
-
-  @Override
-  public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
-  }
-
-  @Override
-  public void attachTextPublisher(TextPublisher service) {
-    subscribe(service.getName(), "publishText");
-  }
-
-  @Override
-  public void setLocale(String code) {
-    // FIXME - error returned to user for language not supported
-    /*
-    if (languages.containsKey(l)) {
-      this.language = l;
-      info("Set language to %s", languages.get(l));
-      Runtime runtime = Runtime.getInstance();
-      runtime.setLocale(l);
-      runtime.getLanguage();
-      load(language);
-      
-      if (brain != null) {
-        SearchPublisher search = (SearchPublisher)brain.getSearch();
-        if (search != null) {
-          search.setLanguage(runtime.getLanguage());
-        }
-      }
-      
-      broadcastState();
-      return true;
-    } else {
-      error("InMoov not yet support %s", l);
-      return false;
-    }
-    */
-    
-    
-   load(locale.getTag());
-    
-   locale = new Locale(code);
-  }
-
-  @Override
-  public Locale getLocale() {
-     return locale;
-  }
-
-  @Override
-  public Map<String, Locale> getLocales() {
-    return locales;
   }
 
 }

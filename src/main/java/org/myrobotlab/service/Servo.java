@@ -91,7 +91,7 @@ public class Servo extends AbstractServo implements ServoControl {
       
       //Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      // Runtime.start("webgui", "WebGui");
+      Runtime.start("webgui", "WebGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       mega.connect("/dev/ttyACM0");
@@ -99,10 +99,15 @@ public class Servo extends AbstractServo implements ServoControl {
       
       Servo servo03 = (Servo) Runtime.start("tilt", "Servo");
       
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       log.info("servo pos {}", servo03.getPos());
       
-      double pos = 170;
-      servo03.setPosition(pos);
+      // double pos = 170;
+      // servo03.setPosition(pos);
       servo03.setPin(3);
       
       double min = 3;
@@ -131,7 +136,7 @@ public class Servo extends AbstractServo implements ServoControl {
       */
       // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
 
-      servo03.attach(mega, 8, 38.0);
+     // servo03.attach(mega, 8, 38.0);
       /*
       servo04.attach(mega, 4, 38.0);
       servo05.attach(mega, 5, 38.0);
