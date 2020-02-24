@@ -6,6 +6,8 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
     <h3>
         WebkitSpeechRecognition Service is only supported in <a href="https://www.google.com/chrome">Chrome</a>
         versions 25 or later.
+    
+    
     </h3>
 </div>
 <div ng-show="webkitSupport" class="row">
@@ -19,13 +21,27 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
                 </button>
                 <br>
                 <!-- select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select -->
-
-                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()" >
+                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
                     <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
                 </select>
-
                 {{service.status}}
-                <div class="alert alert-danger" role="alert">{{errorText}}</div>
+                
+                
+                <div ng-show="error != null" class="alert alert-danger" role="alert">
+                    {{error}}
+                    
+                    <p ng-show="error == 'audio-capture'">
+                        No microphone was found. Ensure that a microphone is installed and that
+                        <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>
+                        are configured correctly.  </p>
+                    <p ng-show="error == 'not-allowed'">
+                        Permission to use microphone is blocked. To change, go to
+                        <a href="chrome://settings/contentExceptions#media-stream">chrome://settings/content/microphone?search=microphone</a>
+                    </p>
+                     <p ng-show="error == 'aborted'">
+                        This speech recognizer can only run in one tab.  It is likely another tab has stopped this instance from running.
+                    </p>
+                </div>
             </td>
             <td></td>
         </tr>
@@ -54,18 +70,21 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
                 <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
             
             
+            
+            
             </td>
             <td>
                 <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
             </td>
         </tr>
-        <tr>
+        <!-- tr>
             <td>start time</td>
             <td>{{startTimestamp}}</td>
-        </tr>
+        </tr -->
         <tr>
             <td>recording</td>
-            <td>{{service.isRecording}}</td>
+            <!-- the $scopes isRecording vs service.isRecording -->
+            <td>{{isRecording}}</td>
         </tr>
         <tr>
             <td>restarts</td>
@@ -88,9 +107,9 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
     <td>{{entry.ts}}</td>
     <td>{{entry.isRecording}}</td>
     <td>{{entry.isListening}}</td>
-     <td>{{entry.isAwake}}</td>
+    <td>{{entry.isAwake}}</td>
     <td>{{entry.isSpeaking}}</td>
-      <td>{{entry.publishText}}</td>
+    <td>{{entry.publishText}}</td>
     <td>{{entry.text}}</td>
 </tr>
 </table></div>
