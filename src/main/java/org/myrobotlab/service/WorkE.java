@@ -96,8 +96,8 @@ public class WorkE extends Service implements StatusListener {
       // WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
 
       Runtime.start("gui", "SwingGui");
-      Runtime.start("worke", "WorkE");
-      Runtime.exportAll("worke.py");
+      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      worke.exportAll("worke.py");
 
     } catch (Exception e) {
       log.error("worke no worky !", e);

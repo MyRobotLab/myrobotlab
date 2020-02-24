@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.OrientationListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
@@ -30,13 +30,13 @@ public class OculusDiy extends Service implements OrientationListener {
   transient public Mpu6050 mpu6050;
 
   transient Orientation oculus = new Orientation();
-  Mapper mapperPitch = new Mapper(-180, 0, 0, 180);
-  Mapper mapperYaw = new Mapper(-180, 180, 0, 360);
+  Mapper mapperPitch = new MapperLinear(-180, 0, 0, 180);
+  Mapper mapperYaw = new MapperLinear(-180, 180, 0, 360);
 
   Integer lastrotheadvalue = 90;
   Integer lastValue = 30;
   Integer resetValue = 30;
-  Integer head = 90;
+  double head = 90.0;
   Integer rothead = 90;
   Integer offSet = 0;
   Integer centerValue = 200;
@@ -93,7 +93,7 @@ public class OculusDiy extends Service implements OrientationListener {
   public void computeAnglesAndroid(float yaw, float roll, float pitch) {
 
     // head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
-    head = (int) mapperPitch.calcOutput(pitch);
+    head =  mapperPitch.calcOutput((double)pitch);
     // headingint = (int) mapperYaw.calc(yaw);
     headingint = (int) yaw;
 

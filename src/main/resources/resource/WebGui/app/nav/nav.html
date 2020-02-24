@@ -1,4 +1,4 @@
-<div class="navbar navbar-inverse container-fluid" role="navigation">
+<div class="navbar navbar-inverse container-fluid" role="navigation" ng-show="viewType != 'min'">
     <!--Status (incl. LED)-->
     <ul class="nav navbar-nav navbar-left">
         <li>
@@ -14,37 +14,11 @@
         <li>
             <a href="http://myrobotlab.org">
             <!--{{platform.branch}}-->
-            {{id}} &lt;-&gt;{{remoteId}} - {{platform.arch}}.{{platform.bitness}}.{{platform.os}}
-				{{platform.mrlVersion}}
+            {{id}} &lt;-&gt; {{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}
+				{{remotePlatform.mrlVersion}}
 		</a>
         </li>
     </ul>
-    <!-- bad idea - it "assumes" single Runtime :(
-    <ul class="nav navbar-nav">
-        <li class="dropdown" dropdown="">
-            <a href="#" class="dropdown-toggle" dropdown-toggle="" data-toggle="dropdown">
-                New
-				Service<b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-                <li>
-                    <a href="#">Start a new service</a>
-                </li>
-                <li id="newService">
-                    <form class="navbar-form">
-                        <div class="input-group">
-                            <div class="input-group-btn">
-                                <input class="form-control" type="text" ng-model="newName" placeholder="name">
-                                <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
-                                <button class="btn btn-default" ng-click="start(newName, newType);">start</button>
-                            </div>
-                        </div>
-                    </form>
-                </li>
-            </ul>
-        </li>
-    </ul>
-    -->
     <span class="pull-right">
         <form class="navbar-form">
             <div class="btn-group pull-left" uib-dropdown>

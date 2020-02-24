@@ -1,7 +1,6 @@
 package org.myrobotlab.sensor;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +12,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.EncoderListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -89,7 +87,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   static class Positions implements Runnable {
 
     static Positions instance = null;
-    Map<String, Double> positions = new ConcurrentHashMap<>();
+    Map<String, Double> positions = null;
     transient private Thread worker;
     transient boolean running = false;
     String filename = null;
@@ -100,13 +98,21 @@ public class TimeEncoder implements Runnable, EncoderControl {
       // load previous positions
       String positionsDir = Service.getDataDir(Servo.class.getSimpleName());
       filename = positionsDir + File.separator + "positions.json";
-      String json = null;
-      try {
-        json = FileIO.toString(filename);
-      } catch (Exception e) {
-      }
-      if (json != null) {
-        positions = CodecUtils.fromJson(json, ConcurrentHashMap.class);
+      
+      if (positions == null) {
+        Map<String, Double> savedPositions = null;
+        try {
+          String json = FileIO.toString(filename);
+          if (json != null) {
+            savedPositions = CodecUtils.fromJson(json, ConcurrentHashMap.class);
+          }
+        } catch (Exception e) {
+        }
+        if (savedPositions != null) {
+          positions = savedPositions;
+        } else {
+          positions = new ConcurrentHashMap<>();
+        }
       }
     }
 
@@ -178,7 +184,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   }
 
   // TODO - cool this works deprecate other
-  public void calculateTrajectory(double inBeginPos, double inTargetPos, Double inSpeed) {
+  public long calculateTrajectory(double inBeginPos, double inTargetPos, Double inSpeed) {
     // find current distance - // make a plan ...
     beginPos = inBeginPos;
     targetPos = inTargetPos;
@@ -199,10 +205,14 @@ public class TimeEncoder implements Runnable, EncoderControl {
     // leave if timets > endMoveTs or if canceled with new move
     // while()
     now = beginMoveTs;
-    
+
     if (autoProcess) { // vs buffer ?
       processTrajectory(name);
     }
+    
+    long lengthOfMoveMs = ((endMoveTs - beginMoveTs) < 0 )?0:endMoveTs - beginMoveTs;
+    
+    return lengthOfMoveMs;
   }
 
   // TODO - processTrajectory()
@@ -332,6 +342,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
   @Override
   public void disable() {
     isRunning = false;
+    if (myThread != null) {
+      myThread.interrupt();
+    }
     positions.release();
   }
 

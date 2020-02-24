@@ -70,10 +70,6 @@ public class ArduinoChaosTest {
     Servo servo = (Servo) Runtime.createAndStart("servo", "Servo");
     // servo.setPin(13);
     // arduino.servoAttach(servo);
-    Thread.sleep(1000);
-    arduino.servoSweepStart(servo);
-    Thread.sleep(1000);
-    arduino.servoSweepStop(servo);
 
     Thread.sleep(1000);
     // TODO : this blows up

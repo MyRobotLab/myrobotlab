@@ -43,7 +43,7 @@ public class ArduinoLang extends LangUtils {
       Attachable s = devices.get(device).getDevice();
       if (ServoControl.class.isAssignableFrom(s.getClass())) {
         ServoControl sc = (ServoControl) s;
-        sb.append(String.format("%s.attach(\"%s\")\n",name,  safeRefName(sc.getName())));
+        sb.append(String.format("%s.attach(\"%s\")\n",name,  sc.getName()));
       }     
     }
     

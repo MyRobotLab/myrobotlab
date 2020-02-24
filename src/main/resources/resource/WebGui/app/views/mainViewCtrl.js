@@ -9,6 +9,8 @@ angular.module('mrlapp.mrl').controller('mainViewCtrl', ['$scope', '$log', '$fil
             $log.info('panels-main', $scope.panels);
         });
     };
+    //panelsUpdated(mrl.getPanelsList());
+    
     panelsUpdated(mrl.getPanelsList());
     mrl.subscribeToUpdates(panelsUpdated);
 }

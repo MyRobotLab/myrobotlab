@@ -38,10 +38,30 @@ public class WikiDataFetcher extends Service {
     LoggingFactory.init(Level.INFO);
 
     try {
-      WikiDataFetcher wiki = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
-      wiki.setWebSite("enwiki");
-      wiki.setLanguage("en");
+      WikiDataFetcher wdf = (WikiDataFetcher) Runtime.start("wikiDataFetcher", "WikiDataFetcher");
+      wdf.setWebSite("enwiki");
+      wdf.setLanguage("en");
+      
+      String start = wdf.grabStart("halloween").toLowerCase();
+      
+      String query = "halloween";
+      String desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
 
+      
+      query = "empire state building";
+      desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
+     
+      query = "the pyramids";
+      desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
+     
+      query = "dog";
+      desc = wdf.getDescription(query);
+      log.info(query + " is " + desc);
+     
+      
       EntityDocument doc = WikiDataFetcher.getWiki("Halloween");
 
       log.info(getData("united states", "P36"));

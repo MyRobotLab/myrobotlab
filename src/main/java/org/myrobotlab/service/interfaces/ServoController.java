@@ -35,32 +35,59 @@ public interface ServoController extends Attachable {
    * @param pinOrAddress
    * @throws Exception
    */
+  @Deprecated /* use attachServo(ServoControl sc) */
   void attach(ServoControl servo, int pinOrAddress) throws Exception;
-
-  void servoSweepStart(ServoControl servo);
-
-  void servoSweepStop(ServoControl servo);
-
-  void servoMoveTo(ServoControl servo);
   
-  void servoStop(ServoControl servo);
+  /**
+   * preferred method to attach a ServoControl to a ServoController 
+   * previous attach function is deprecated - ServoController "should not" be calling any functions on ServoControl except possibly 
+   * ServoContro.attach(ServoController sc)
+   * 
+   * @param sc
+   */
+  void attachServoControl(ServoControl sc);
+  
 
-  void servoWriteMicroseconds(ServoControl servo, int uS);
+  /**
+   * The main function of the servo controller is to move the servo
+   * The ServoControl is passed as a parameter such that the controller can get
+   * all the necessary information to process the move correctly
+   * @param servo
+   */
+  void onServoMoveTo(ServoControl servo);
+  
+  /**
+   * Stop the servo regardless of where it is in its move
+   * @param servo
+   */
+  void onServoStop(ServoControl servo);
 
-  void servoSetVelocity(ServoControl servo);
+  /**
+   * A direct call using micro-seconds instead of degrees
+   * 
+   * @param servo
+   * @param uS
+   */
+  void onServoWriteMicroseconds(ServoControl servo, int uS);
 
-  void servoSetAcceleration(ServoControl servo);
+ 
+  /**
+   * set the speed of the servo
+   * @param servo
+   */
+  void onServoSetSpeed(ServoControl servo);
+
 
   /**
    * enable the pwm to a servo
    * @param servo - the servo to enable
    */
-  void servoEnable(ServoControl servo);
+  void onServoEnable(ServoControl servo);
 
   /**
    * disable the pwm to a servo
    * @param servo - the servo to disable
    */
-  void servoDisable(ServoControl servo);
+  void onServoDisable(ServoControl servo);
 
 }

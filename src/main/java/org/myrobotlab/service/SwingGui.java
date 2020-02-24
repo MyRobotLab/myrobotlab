@@ -349,7 +349,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       String newFile = FileUtil.saveAsFileName(getFrame(), String.format("%s.py", tabName));
       try {
         if (newFile != null) {
-          Runtime.export(newFile, newFile);
+          export(newFile, newFile);
         }
       } catch (IOException e1) {
         log.error("could not export {} to {}", tabName, newFile);
@@ -360,7 +360,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       String newFile = FileUtil.saveAsFileName(getFrame(), "export.py");
       try {
         if (newFile != null) {
-          Runtime.exportAll(newFile);
+          exportAll(newFile);
         }
       } catch (IOException e1) {
         log.error("could not export all to {}", newFile);
@@ -1055,7 +1055,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
   @Override
   public List<String> getClientIds() {
-    // TODO Auto-generated method stub
     return null;
   }
 

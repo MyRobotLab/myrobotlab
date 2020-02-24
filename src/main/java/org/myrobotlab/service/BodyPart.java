@@ -159,16 +159,6 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     waitTargetPos(this.getIntanceName());
   }
 
-  /**
-   * Detect if every servo of the group are attached to a controller
-   */
-  public boolean isAttached() {
-    boolean attached = false;
-    for (int i = 0; i < getAcuators(this.getIntanceName()).size(); i++) {
-      attached |= getAcuators(this.getIntanceName()).get(i).isAttached();
-    }
-    return attached;
-  }
 
   /**
    * Electrize servos group

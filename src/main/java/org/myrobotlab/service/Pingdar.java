@@ -5,10 +5,11 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangingControl;
 import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -17,7 +18,7 @@ import org.slf4j.Logger;
  * module. The result is a sonar style range finding.
  *
  */
-public class Pingdar extends Service implements RangingControl, RangeListener, ServoDataListener {
+public class Pingdar extends Service implements RangingControl, RangeListener, EncoderListener {
 
   public static class Point {
 
@@ -120,6 +121,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
   }
 
   public void sweep(double sweepMin, double sweepMax) {
+    try {
     this.sweepMin = sweepMin;
     this.sweepMax = sweepMax;
     this.step = 1;
@@ -129,7 +131,7 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     servo = getServo();
 
     sensor.addRangeListener(this);
-    servo.attach((ServoDataListener)this);
+    servo.attach((EncoderListener)this);
 
     // servo.setSpeed(60);
     servo.setSpeed(30.0);
@@ -138,6 +140,9 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     sensor.startRanging();
     // STEP ???
     servo.sweep(sweepMin, sweepMax, 15.0);
+    } catch(Exception e) {
+      error(e);
+    }
   }
 
   /**
@@ -223,8 +228,9 @@ public class Pingdar extends Service implements RangingControl, RangeListener, S
     sensor.setUnitInches();
   }
 
+
   @Override
-  public void onServoData(ServoData se) {
+  public void onEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
     
   }

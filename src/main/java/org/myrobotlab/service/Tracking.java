@@ -267,13 +267,12 @@ public class Tracking extends Service {
   public void rest() {
     log.info("rest");
     for (TrackingServoData sc : servoControls.values()) {
-      if (sc.servoControl.isAttached()) {
-        // avoid dangerous moves
+   
         Double velocity = sc.servoControl.getSpeed();
         sc.servoControl.setSpeed(20.0);
         sc.servoControl.moveToBlocking(sc.servoControl.getRest());
         sc.servoControl.setSpeed(velocity);
-      }
+      
     }
   }
 

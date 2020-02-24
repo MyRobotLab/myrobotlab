@@ -59,6 +59,7 @@ import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
@@ -702,7 +703,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void setPeer(String peerName, String peerType) {
     String fullKey = String.format("%s.%s", getName(), peerName);
-    ServiceReservation sr = new ServiceReservation(fullKey, peerName, peerType, null);
+    // ServiceReservation sr = new ServiceReservation(fullKey, peerName,
+    // peerType, null);
+    ServiceReservation sr = new ServiceReservation(fullKey, fullKey, peerType, null); // CHANGED
+                                                                                      // -
+                                                                                      // 01/24/20
     dnaPool.put(fullKey, sr);
   }
 
@@ -782,7 +787,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getHomeDir() {
     return System.getProperty("user.home");
   }
-  
+
   static public String getDataDir(String typeName) {
     String dataDir = Runtime.getOptions().dataDir + fs + typeName;
     File f = new File(dataDir);
@@ -805,7 +810,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
-  public String getResourceRoot() {
+  static public String getResourceRoot() {
     // FIXME - should "this" be the test ?
     // If so it should be its own static function...
 
@@ -826,8 +831,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getResourceDir() {
+    return getResourceDir(getClass().getSimpleName());
+  }
 
-    String resourceDir = getResourceRoot() + fs + getClass().getSimpleName();
+  static public String getResourceDir(String serviceType) {
+
+    String resourceDir = getResourceRoot() + fs + serviceType;
     File f = new File(resourceDir);
     if (!f.exists()) {
       f.mkdirs();
@@ -872,10 +881,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
-  /*
-   * public Service(String reservedKey) { this(reservedKey, null); }
+  /**
+   * Constructor of service, reservedkey typically is a services name and inId
+   * will be its process id
+   * 
+   * @param reservedKey
+   * @param inId
    */
-
   public Service(String reservedKey, String inId) {
     // necessary for serialized transport\
     if (inId == null) {
@@ -983,10 +995,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public void addListener(String topicMethod, String callbackName, String callbackMethod) {
     MRLListener listener = new MRLListener(topicMethod, callbackName, callbackMethod);
-    if (outbox.notifyList.containsKey(listener.topicMethod.toString())) {
+    if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
       boolean found = false;
-      ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod.toString());
+      ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
       for (int i = 0; i < nes.size(); ++i) {
         MRLListener entry = nes.get(i);
         if (entry.equals(listener)) {
@@ -1003,8 +1015,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
       notifyList.add(listener);
       log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
-      outbox.notifyList.put(listener.topicMethod.toString(), notifyList);
+      outbox.notifyList.put(listener.topicMethod, notifyList);
     }
+  }
+
+  public boolean hasSubscribed(String listener, String topicMethod) {
+    ArrayList<MRLListener> nes = outbox.notifyList.get(topicMethod);
+    for (MRLListener ne : nes) {
+      if (ne.callbackName.contentEquals(listener)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void addTask(long intervalMs, String method) {
@@ -1015,8 +1037,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     addTask(method, intervalMs, 0, method, params);
   }
 
-  public void addTaskOneShot(int delay, String method, Object... params) {
-    addTask(method, 0, delay, method, params);
+  public void addTaskOneShot(long delayMs, String method, Object... params) {
+    addTask(method, 0, delayMs, method, params);
   }
 
   /**
@@ -1026,14 +1048,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          task name
    * @param intervalMs
    *          how frequent in milliseconds
-   * @param delay
+   * @param delayMs
    *          the delay
    * @param method
    *          the method
    * @param params
    *          the params to pass
    */
-  synchronized public void addTask(String taskName, long intervalMs, int delay, String method, Object... params) {
+  synchronized public void addTask(String taskName, long intervalMs, long delayMs, String method, Object... params) {
     if (tasks.containsKey(taskName)) {
       log.info("already have active task \"{}\"", taskName);
       return;
@@ -1041,7 +1063,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Timer timer = new Timer(String.format("%s.timer", String.format("%s.%s", getName(), taskName)));
     Message msg = Message.createMessage(getName(), getName(), method, params);
     Task task = new Task(this, taskName, intervalMs, msg);
-    timer.schedule(task, delay);
+    timer.schedule(task, delayMs);
     tasks.put(taskName, timer);
   }
 
@@ -1623,7 +1645,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * peers - it should fufill the request
    */
   @Override
-  synchronized public void releasePeers() {
+  public void releasePeers() {
+    releasePeers(null);
+  }
+
+  // FIXME - startPeers sets fields - this method should "unset" fieldss !!!
+  synchronized private void releasePeers(String peerName) {
     log.info("dna - {}", dnaPool.toString());
     String myKey = getName();
     log.info("releasePeers ({}, {})", myKey, serviceClass);
@@ -1634,12 +1661,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       ServiceType serviceType = (ServiceType) method.invoke(null);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
       for (String s : peers.keySet()) {
-        Runtime.release(getPeerKey(s));
+        if (peerName == null) {
+          Runtime.release(getPeerKey(s));
+        } else if (peerName != null && peerName.equals(s))
+          Runtime.release(getPeerKey(s));
       }
 
     } catch (Exception e) {
       log.debug("{} does not have a getPeers", serviceClass);
     }
+  }
+
+  public void releasePeer(String peerName) {
+    releasePeers(peerName);
   }
 
   /**
@@ -1832,6 +1866,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return true;
   }
 
+  public ServiceInterface getPeer(String peerName) {
+    return Runtime.getService(String.format("%s.%s", getName(), peerName));
+  }
+
   public boolean save(String cfgFileName, String data) {
     // saves user data in the .myrobotlab directory
     // with the file naming convention of name.<cfgFileName>
@@ -1846,6 +1884,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void send(String name, String method) {
     send(name, method, (Object[]) null);
+  }
+
+  public void sendToPeer(String peerName, String method) {
+    send(String.format("%s.%s", name, peerName), method, (Object[]) null);
+  }
+  
+  public Object invokePeer(String peerName, String method) {
+    return invokeOn(getPeer(peerName), method, (Object[])null);
+  }
+
+
+  public Object invokePeer(String peerName, String method, Object...data) {
+    return invokeOn(getPeer(peerName), method, data);
+  }
+
+
+  public void sendToPeer(String peerName, String method, Object... data) {
+    send(String.format("%s.%s", name, peerName), method, data);
   }
 
   public void send(String name, String method, Object... data) {
@@ -1938,10 +1994,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.thisThread = thisThread;
   }
 
-  public void startHeartbeat() {
-    // getComm().
-  }
-
   public ServiceInterface startPeer(String reservedKey) {
     ServiceInterface si = null;
     try {
@@ -1967,10 +2019,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     si.startService();
     return si;
-  }
-
-  public void startRecording() {
-    invoke("startRecording", new Object[] { null });
   }
 
   @Override
@@ -2478,8 +2526,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     info(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
-  public void setVirtual(boolean b) {
+  public boolean setVirtual(boolean b) {
     this.isVirtual = b;
+    return isVirtual;
   }
 
   public boolean isVirtual() {
@@ -2572,4 +2621,31 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void setId(String id) {
     this.id = id;
   }
+
+  public String export() throws IOException {
+    // FIXME - interaction with user if file exists ?
+    String filename = getRootDataDir() + fs + getName() + ".py";
+    return export(getDataDir() + fs + getName() + ".py", getName());
+  }
+
+  public String exportAll() throws IOException {
+    // FIXME - interaction with user if file exists ?
+    return exportAll(getRootDataDir() + fs + "export.py");
+  }
+
+  public String export(String filename, String names) throws IOException {
+    String python = LangUtils.toPython(names);
+    Files.write(Paths.get(filename), python.toString().getBytes());
+    info("saved %s to %s", getName(), filename);
+    return python;
+  }
+
+  public String exportAll(String filename) throws IOException {
+    // currently only support python - maybe in future we'll support js too
+    String python = LangUtils.toPython();
+    Files.write(Paths.get(filename), python.toString().getBytes());
+    info("saved %s to %s", getName(), filename);
+    return python;
+  }
+
 }

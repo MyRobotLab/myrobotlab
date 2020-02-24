@@ -37,7 +37,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
@@ -213,7 +213,7 @@ public class Arduino extends AbstractMicrocontroller
                * use attachables like everything else - power mapping should be
                * inside the motorcontrol
                */
-  Mapper motorPowerMapper = new Mapper(-1.0, 1.0, -255.0, 255.0);
+  Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public transient Msg msg;
 
@@ -298,6 +298,7 @@ public class Arduino extends AbstractMicrocontroller
   public void attach(Attachable service) throws Exception {
     if (ServoControl.class.isAssignableFrom(service.getClass())) {
       attachServoControl((ServoControl) service);
+      ((ServoControl) service).attach(this);
       return;
     } else if (MotorControl.class.isAssignableFrom(service.getClass())) {
       attachMotorControl((MotorControl) service);
@@ -458,8 +459,10 @@ public class Arduino extends AbstractMicrocontroller
     motor.attachMotorController(this);
   }
 
-  public void attachServoControl(ServoControl servo) throws Exception {
+  @Override
+  public void attachServoControl(ServoControl servo) {
     if (isAttached(servo)) {
+      log.info("servo {} already attached", servo.getName());
       return;
     }
 
@@ -1865,6 +1868,9 @@ public class Arduino extends AbstractMicrocontroller
   @Override
   public void releaseService() {
     super.releaseService();
+    if (virtual != null) {
+      virtual.releaseService();
+    }
     sleep(300);
     disconnect();
   }
@@ -1911,12 +1917,12 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   // > servoDetachPin/deviceId
-  public void servoDisable(ServoControl servo) {
+  public void onServoDisable(ServoControl servo) {
     msg.servoDetachPin(getDeviceId(servo));
   }
 
   @Override
-  public void servoEnable(ServoControl servo) {
+  public void onServoEnable(ServoControl servo) {
     Integer deviceId = getDeviceId(servo);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
@@ -1936,7 +1942,7 @@ public class Arduino extends AbstractMicrocontroller
    */
   @Override
   // > servoWrite/deviceId/target
-  public void servoMoveTo(ServoControl servo) {
+  public void onServoMoveTo(ServoControl servo) {
     Integer deviceId = getDeviceId(servo);
     if (deviceId == null) {
       log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", servo.getName());
@@ -1950,15 +1956,8 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   @Override
-  public void servoSetAcceleration(ServoControl servo) {
-    if (servo.getAcceleration() != null) {
-      msg.servoSetAcceleration(getDeviceId(servo), servo.getAcceleration().intValue());
-    }
-  }
-
-  @Override
   // > servoSetVelocity/deviceId/b16 velocity
-  public void servoSetVelocity(ServoControl servo) {
+  public void onServoSetSpeed(ServoControl servo) {
     int speed = -1;
     if (servo.getSpeed() != null) {
       speed = servo.getSpeed().intValue();
@@ -1972,23 +1971,6 @@ public class Arduino extends AbstractMicrocontroller
     msg.servoSetVelocity(i, speed);
   }
 
-  // FIXME - this needs fixing .. should be microseconds - but interface still
-  // needs
-  // to be in degrees & we don't want to pass double over serial lines
-  @Override
-  // > servoSweepStart/deviceId/min/max/step
-  public void servoSweepStart(ServoControl servo) {
-    int deviceId = getDeviceId(servo);
-    log.info("servoSweep {} id {} min {} max {} step {}", servo.getName(), deviceId, servo.getMin(), servo.getMax(), servo.getSpeed().intValue());
-    msg.servoSweepStart(deviceId, servo.getMin().intValue(), servo.getMax().intValue(), servo.getSpeed().intValue());
-  }
-
-  @Deprecated /* use servoStop */
-  @Override
-  // > servoSweepStop/deviceId
-  public void servoSweepStop(ServoControl servo) {
-    msg.servoSweepStop(getDeviceId(servo));
-  }
 
   /**
    * On standard servos a parameter value of 1000 is fully counter-clockwise,
@@ -1996,7 +1978,7 @@ public class Arduino extends AbstractMicrocontroller
    */
   @Override
   // > servoWriteMicroseconds/deviceId/b16 ms
-  public void servoWriteMicroseconds(ServoControl servo, int uS) {
+  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
     int deviceId = getDeviceId(servo);
     log.debug("writeMicroseconds {} {} id {}", servo.getName(), uS, deviceId);
     msg.servoMoveToMicroseconds(deviceId, uS);
@@ -2469,8 +2451,10 @@ public class Arduino extends AbstractMicrocontroller
    * stops the servo sweeping or moving with speed control
    */
   @Override
-  public void servoStop(ServoControl servo) {
+  public void onServoStop(ServoControl servo) {
     msg.servoStop(getDeviceId(servo));
   }
+  
+  
 
 }

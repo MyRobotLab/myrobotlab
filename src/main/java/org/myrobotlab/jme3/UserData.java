@@ -5,20 +5,17 @@ import java.io.IOException;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
 
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.jme3.material.Material;
-import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.Spatial.CullHint;
 
 public class UserData implements Savable {
   public final static Logger log = LoggerFactory.getLogger(UserData.class);

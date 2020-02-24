@@ -199,7 +199,11 @@ public class PythonProxy extends Service {
 
   /**
    * Execute method with params dat on the native service this class represents.
-   **/
+   * 
+   * @param method
+   * @param dat
+   * @return
+   */
   public Object exec(String method, Object[] dat) {
     // Create message
     Message msg = new Message();

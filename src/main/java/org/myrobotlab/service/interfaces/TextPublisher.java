@@ -6,6 +6,9 @@ public interface TextPublisher {
 
   public String publishText(String text);
 
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service);
+  
+  public void attachTextListener(TextListener service);
 
 }

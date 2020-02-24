@@ -498,6 +498,7 @@ public class Python extends Service {
    * publishing method when a script is finished
    */
   public void finishedExecutingScript() {
+    log.info("finishedExecutingScript");
   }
 
   /**
@@ -541,12 +542,13 @@ public class Python extends Service {
     }
     return null;
   }
-
-  /*
-   * load a script from the myrobotlab.jar - location of example scripts are
-   * /resource/Python/examples name of file to load
+  
+  
+  /**
+   * load a official "service" script maintained in myrobotlab
+   * @param serviceType
    */
-  public void loadPyRobotLabServiceScript(String serviceType) {
+  public void loadServiceScript(String serviceType) {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
     String serviceScript = null; 
     try {
@@ -556,6 +558,11 @@ public class Python extends Service {
       log.error("getting service file script example threw {}", e);
     }
     openScript(filename, serviceScript);
+  }
+
+  @Deprecated
+  public void loadPyRobotLabServiceScript(String serviceType) {
+    loadServiceScript(serviceType);
   }
 
   /*
@@ -716,7 +723,16 @@ public class Python extends Service {
     super.stopService();
     stop();// release the interpeter
   }
-
+  
+  
+  @Override
+  public String exportAll() throws IOException {
+    String filename = getRootDataDir() + fs +  getId() + ".py";
+    String script = super.exportAll(filename);
+    openScript(filename, script);
+    return script;
+  }
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -764,5 +780,6 @@ public class Python extends Service {
     }
 
   }
+
 
 }

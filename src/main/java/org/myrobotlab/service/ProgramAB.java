@@ -9,7 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
+
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
 import org.alicebot.ab.Bot;
@@ -26,6 +27,9 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
+import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
@@ -37,14 +41,14 @@ import org.slf4j.Logger;
  *
  * More Info at http://aitools.org/ProgramAB
  * 
- * The ProgramAB service is the host to many AIML based Bots.
- * Each bot can maintain a chat session with multiple users.
- * This association between a bot and a user
+ * The ProgramAB service is the host to many AIML based Bots. Each bot can
+ * maintain a chat session with multiple users. This association between a bot
+ * and a user
  * 
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider {
   // Internal class for the program ab response.
   public static class Response {
     // FIXME - timestamps are usually longs System.currentTimeMillis()
@@ -68,7 +72,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       str.append("Time:" + timestamp.getTime() + ", ");
       str.append("Bot:" + botName + ", ");
       str.append("User:" + userName + ", ");
-      str.append("Msg:"+msg + ", ");
+      str.append("Msg:" + msg + ", ");
       str.append("Payloads:[");
       if (payloads != null) {
         for (OOBPayload payload : payloads) {
@@ -82,33 +86,46 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   static final long serialVersionUID = 1L;
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-  // TODO: this path is really specific to each bot that is loaded.  
-  // right now there is a requirement that all active bots are loaded from the same directory. (defaulting to ProgramAB)
+  // TODO: this path is really specific to each bot that is loaded.
+  // right now there is a requirement that all active bots are loaded from the
+  // same directory. (defaulting to ProgramAB)
   private String path = "ProgramAB";
   // bots map is keyed off the lower case version of the bot name.
   private transient HashMap<String, Bot> bots = new HashMap<String, Bot>();
   // Mapping a bot to a username and chat session
   private transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
-  // TODO: ProgramAB default bot should be Alice-en_US we should name the rest of the language specific default bots.
+  // TODO: ProgramAB default bot should be Alice-en_US we should name the rest
+  // of the language specific default bots.
   // initial default values for the current bot/and user
   private String currentBotName = "en-US";
   // This is the default username that is chatting with the bot.
   private String currentUserName = "default";
   public int savePredicatesInterval = 300000; // every 5 minutes
-  // TODO: move the implementation from the gui to this class so it can be used across web and swing gui properly. 
+  // TODO: move the implementation from the gui to this class so it can be used
+  // across web and swing gui properly.
   boolean visualDebug = true;
   // TODO: if true, AIML is written back to disk on shutdown of this service.
   public boolean writeOnExit = true;
 
   /**
+   * list of available bots - populated on startup
+   */
+  HashSet<String> availableBots = new HashSet<>();
+  boolean peerSearch = true;
+  private Locale locale;
+
+  /**
    * Default constructor for the program ab service.
    * 
    * 
-   * @param n - service name
-   * @param id - process id
+   * @param n
+   *          - service name
+   * @param id
+   *          - process id
    */
   public ProgramAB(String n, String id) {
     super(n, id);
+    availableBots = getBots();
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
   }
 
@@ -120,8 +137,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     addListener("publishResponse", service.getName(), "onResponse");
   }
 
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName(), "onText");
+    attachTextListener(service);
   }
 
   public void addTextListener(SpeechSynthesis service) {
@@ -149,48 +167,60 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   /**
-   * This is the main method that will ask for the current bot's chat session to respond to
-   * It returns a Response object.
+   * This is the main method that will ask for the current bot's chat session to
+   * respond to It returns a Response object.
+   * 
    * @param text
    * @return
+   * @throws IOException 
    */
-  public Response getResponse(String text) {
+  public Response getResponse(String text) throws IOException {
     return getResponse(getCurrentUserName(), text);
   }
 
   /**
-   * This method has the side effect of switching which bot your are currently chatting with.
+   * This method has the side effect of switching which bot your are currently
+   * chatting with.
+   * 
    * @param username
    *          - the query string to the bot brain
    * @param text
    *          - the user that is sending the query
    * @return the response for a user from a bot given the input text.
+   * @throws IOException 
    */
-  public Response getResponse(String username, String text) {
+  public Response getResponse(String username, String text) throws IOException {
     return getResponse(username, getCurrentBotName(), text);
   }
 
   /**
-   * Full get response method .  Using this method will update the current user/bot name if different from the current session.
-   * @param userName
-   * @param botName
-   * @param text
-   * @return
-   */
-  public Response getResponse(String userName, String botName, String text) {
-    return getResponse(userName, botName, text, true);    
-  }
-
-  /**
-   * Gets a response and optionally update if this is the current bot session that's active globally.
+   * Full get response method . Using this method will update the current
+   * user/bot name if different from the current session.
    * 
    * @param userName
    * @param botName
    * @param text
-   * @param updateCurrentSession (specify if the currentbot/currentuser name should be updated in the programab service.)
    * @return
+   * @throws IOException 
    */
-  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) {
+  public Response getResponse(String userName, String botName, String text) throws IOException {
+    return getResponse(userName, botName, text, true);
+  }
+
+  /**
+   * Gets a response and optionally update if this is the current bot session
+   * that's active globally.
+   * 
+   * @param userName
+   * @param botName
+   * @param text
+   * @param updateCurrentSession
+   *          (specify if the currentbot/currentuser name should be updated in
+   *          the programab service.)
+   * @return
+   * @throws IOException 
+   */
+  public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) throws IOException {
     // error check the input.
     log.info("Get Response for : user {} bot {} : {}", userName, botName, text);
     if (userName == null || botName == null || text == null) {
@@ -198,7 +228,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       error(error);
       return new Response(userName, botName, error, null, new Date());
     }
-    // update the current session if we want to change which bot is at attention.
+    // update the current session if we want to change which bot is at
+    // attention.
     if (updateCurrentSession) {
       updateCurrentSession(userName, botName);
     }
@@ -209,7 +240,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       error(error);
       return new Response(userName, botName, error, null, new Date());
     }
-    // Auto start a new session from the current path that the programAB service is operating out of.
+    // Auto start a new session from the current path that the programAB service
+    // is operating out of.
     if (!sessions.containsKey(botName) || !sessions.get(botName).containsKey(userName)) {
       startSession(getPath(), userName, botName);
     }
@@ -253,21 +285,25 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   private void updateCurrentSession(String userName, String botName) {
-    // update the current user/bot name..  
+    // update the current user/bot name..
     if (!botName.equals(getCurrentBotName())) {
-      // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      // update which bot is in the front.. and honestly. we should also set
+      // which userName is currently talking to the bot.
       log.info("Setting {} as the current bot.", botName);
       this.setCurrentBotName(botName);
     }
     if (!userName.equals(getCurrentUserName())) {
-      // update which bot is in the front.. and honestly. we should also set which userName is currently talking to the bot.
+      // update which bot is in the front.. and honestly. we should also set
+      // which userName is currently talking to the bot.
       log.info("Setting {} user as the currnt user.", userName);
       this.setCurrentUserName(userName);
     }
   }
 
   /**
-   * This method specifics how many times the robot will respond with the same thing before forcing a different (default?) response instead.
+   * This method specifics how many times the robot will respond with the same
+   * thing before forcing a different (default?) response instead.
+   * 
    * @param val
    */
   public void repetitionCount(int val) {
@@ -320,9 +356,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Add a map / value for the current session
    * 
-   * @param mapName - the map name
-   * @param key - the key 
-   * @param value - the value
+   * @param mapName
+   *          - the map name
+   * @param key
+   *          - the key
+   * @param value
+   *          - the value
    */
   public void addToMap(String mapName, String key, String value) {
     // add an entry to the map.
@@ -376,12 +415,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   /**
    * Only respond if the last response was longer than delay ms ago
    * 
-   * @param userName - current username
-   * @param text - text to get a response
-   * @param delay - min amount of time that must have transpired since the last
+   * @param userName
+   *          - current username
+   * @param text
+   *          - text to get a response
+   * @param delay
+   *          - min amount of time that must have transpired since the last
    * @return the response
+   * @throws IOException 
    */
-  public Response getResponse(String userName, String text, Long delay) {
+  public Response getResponse(String userName, String text, Long delay) throws IOException {
     ChatData chatData = sessions.get(getCurrentBotName()).get(userName);
     long delta = System.currentTimeMillis() - chatData.lastResponseTime.getTime();
     if (delta > delay) {
@@ -433,7 +476,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
   }
 
   @Override
-  public void onText(String text) {
+  public void onText(String text) throws IOException {
     getResponse(text);
     // TODO: should we publish the response here?
   }
@@ -466,6 +509,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   /**
    * publish a response generated from a session in the programAB service.
+   * 
    * @param response
    * @return
    */
@@ -494,19 +538,20 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     return text;
   }
 
-  public void reloadSession(String userName, String botName) {
+  public void reloadSession(String userName, String botName) throws IOException {
     reloadSession(getPath(), userName, botName);
   }
 
   /**
-   * This method will close the current bot, and reload it from AIML
-   * It then will then re-establish only the session associated with userName.
+   * This method will close the current bot, and reload it from AIML It then
+   * will then re-establish only the session associated with userName.
    * 
    * @param path
    * @param userName
    * @param botName
+   * @throws IOException 
    */
-  public void reloadSession(String path, String userName, String botName) {
+  public void reloadSession(String path, String userName, String botName) throws IOException {
 
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
       // TODO: will garbage collection clean up the bot now ?
@@ -514,13 +559,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       sessions.get(botName).remove(userName);
       log.info("{} session removed", sessions);
     }
-    // reloading a session means to remove restart the bot and then start the session.
+    // reloading a session means to remove restart the bot and then start the
+    // session.
     bots.remove(botName.toLowerCase());
     startSession(path, userName, botName);
     // Set<String> userSessions = sessions.get(botName).keySet();
     // TODO: we should make sure we keep the same path as before.
     // for (String user : userSessions ) {
-    //   startSession(path, user, getCurrentBotName());
+    // startSession(path, user, getCurrentBotName());
     // }
   }
 
@@ -530,7 +576,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    */
   public void savePredicates() throws IOException {
     for (String botName : sessions.keySet()) {
-      // TODO: gael is seeing an exception here.. only was is if botName doesn't have any sessions.
+      // TODO: gael is seeing an exception here.. only was is if botName doesn't
+      // have any sessions.
       if (sessions.containsKey(botName)) {
         for (String userName : sessions.get(botName).keySet()) {
           savePredicates(botName, userName);
@@ -580,19 +627,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     sessions.get(getCurrentBotName()).get(getCurrentUserName()).processOOB = processOOB;
   }
 
-  public void startSession() {
+  public void startSession() throws IOException {
     startSession(currentUserName);
   }
 
-  public void startSession(String username) {
+  public void startSession(String username) throws IOException {
     startSession(username, getCurrentBotName());
   }
 
-  public void startSession(String username, String botName) {
+  public void startSession(String username, String botName) throws IOException {
     startSession(getPath(), username, botName);
   }
 
-  public void startSession(String path, String userName, String botName) {
+  public void startSession(String path, String userName, String botName) throws IOException {
     startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
 
@@ -600,15 +647,29 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
    * Load the AIML 2.0 Bot config and start a chat session. This must be called
    * after the service is created.
    * 
-   * @param path - he path to the ProgramAB directory where the bots aiml resides
-   * @param userName - The new user name
-   * @param botName - The name of the bot to load. (example: alice2)
-   * @param locale - The locale of the bot to ensure the aiml is loaded (mostly for
+   * @param path
+   *          - he path to the ProgramAB directory where the bots aiml resides
+   * @param userName
+   *          - The new user name
+   * @param botName
+   *          - The name of the bot to load. (example: alice2)
+   * @param locale
+   *          - The locale of the bot to ensure the aiml is loaded (mostly for
    *          Japanese support)
+   * @throws IOException 
    */
-  public void startSession(String path, String userName, String botName, Locale locale) {
-    // if update the current user/bot name globally. (bring this bot/user session to attention.)
+  public void startSession(String path, String userName, String botName, java.util.Locale locale) throws IOException {
+    // if update the current user/bot name globally. (bring this bot/user
+    // session to attention.)
     log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
+    
+    File check = new File(path + fs + "bots" + fs + botName);
+    if (!check.exists() || !check.isDirectory()) {
+      String invalid = String.format("%s could not load aiml. %s is not a valid bot directory", getName(), check.getAbsolutePath());
+      error(invalid);
+      throw new IOException(invalid);
+    }
+    
     updateCurrentSession(userName, botName);
     // Session is between a user and a bot. key is compound.
     if (sessions.containsKey(botName) && sessions.get(botName).containsKey(userName)) {
@@ -625,12 +686,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     if (bot == null) {
       // create a new bot if we haven't started it yet.
       bot = new Bot(botName, path, locale);
-      // Hijack all the SRAIX requests and implement them as a synchronous call to
+      // Hijack all the SRAIX requests and implement them as a synchronous call
+      // to
       // a service to return a string response for programab...
-      bot.setSraixHandler(new MrlSraixHandler());
-      // put the bot into the bots map/cache referenced by it's lowercase botName.
+      bot.setSraixHandler(new MrlSraixHandler(this));
+      // put the bot into the bots map/cache referenced by it's lowercase
+      // botName.
       bots.put(botName.toLowerCase(), bot);
-    } 
+    }
 
     // create a chat session from the bot.
     Chat chat = new Chat(bot);
@@ -643,7 +706,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
       HashMap<String, ChatData> newSet = new HashMap<String, ChatData>();
       sessions.put(botName, newSet);
     }
-    // put the current user session in the sessions map (overwrite if it was already there.
+    // put the current user session in the sessions map (overwrite if it was
+    // already there.
     sessions.get(botName).put(userName, new ChatData(chat));
     initializeChatSession(userName, botName, chat);
     // this.currentBotName = botName;
@@ -689,7 +753,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     // TODO: expose that / topic / filename?!
     int activationCnt = 0;
     String topic = "*";
-    // TODO: what is this used for?  can we tell the bot to only write out certain aiml files and leave the rest as
+    // TODO: what is this used for? can we tell the bot to only write out
+    // certain aiml files and leave the rest as
     // immutable
     String filename = "mrl_added.aiml";
     // clean the pattern
@@ -704,15 +769,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
 
   /**
    * Use startSession instead.
+   * @throws IOException 
    */
   @Deprecated
-  public boolean setUsername(String username) {
+  public boolean setUsername(String username) throws IOException {
     startSession(getPath(), username, getCurrentBotName());
     return true;
   }
 
   public void writeAIML() {
-    // TODO: revisit this method to make sure 
+    // TODO: revisit this method to make sure
     for (Bot bot : bots.values()) {
       if (bot != null) {
         bot.writeAIMLFiles();
@@ -828,6 +894,19 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     super.stopService();
   }
 
+  public boolean setPeerSearch(boolean b) {
+    peerSearch = b;
+    return peerSearch;
+  }
+
+  @Override
+  public void startService() {
+    super.startService();
+    if (peerSearch) {
+      startPeer("search");
+    }
+  }
+
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
@@ -840,14 +919,21 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
     meta.addCategory("intelligence");
-    // TODO: renamed the bots in the program-ab-data folder to prefix them so we know they are different than the inmoov bots. 
-    // each bot should have their own name, it's confusing that the inmoov bots are named en-US and so are the program ab bots.
+
+    // FIXME - add Wikipedia local search !!
+    meta.addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");
+
+    // TODO: renamed the bots in the program-ab-data folder to prefix them so we
+    // know they are different than the inmoov bots.
+    // each bot should have their own name, it's confusing that the inmoov bots
+    // are named en-US and so are the program ab bots.
     meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
     meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
     meta.addDependency("org.json", "json", "20090211");
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
-    // TODO: This is for CJK support in ProgramAB move this into the published POM for ProgramAB so they are pulled in transiently.
+    // TODO: This is for CJK support in ProgramAB move this into the published
+    // POM for ProgramAB so they are pulled in transiently.
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.7.1");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.7.1");
     meta.addCategory("ai", "control");
@@ -858,6 +944,51 @@ public class ProgramAB extends Service implements TextListener, TextPublisher {
     LoggingFactory.init("INFO");
     Runtime.start("gui", "SwingGui");
     Runtime.start("brain", "ProgramAB");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+  }
+
+  @Override /* FIXME - just do this once in abstract */
+  public void attachTextListener(TextListener service) {
+    if (service == null) {
+      log.warn("{}.attachTextListener(null)");
+      return;
+    }
+    addListener("publishText", service.getName());
+  }
+
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
+  }
+
+  public SearchPublisher getSearch() {
+    return (SearchPublisher)getPeer("search");
+  }
+
+  @Override
+  public void setLocale(String code) {
+   this.locale = new Locale(code);
+  }
+
+  @Override
+  public String getLanguage() {
+   return locale.getLanguage();
+  }
+
+  @Override
+  public Locale getLocale() {
+    return locale;
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+   return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
   }
 
 }

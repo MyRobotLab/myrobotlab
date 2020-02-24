@@ -29,6 +29,7 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
 
@@ -86,24 +87,39 @@ public class Servo extends AbstractServo implements ServoControl {
 
       Runtime.main(new String[] { "--interactive"});
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      // Platform.setVirtual(true);
       
       //Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      // Runtime.start("webgui", "WebGui");
+      Runtime.start("webgui", "WebGui");
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
-      mega.connect("COM7");
+      mega.connect("/dev/ttyACM0");
       // mega.setBoardMega();
       
-      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
+      Servo servo03 = (Servo) Runtime.start("tilt", "Servo");
       
-      double pos = 78;
-      servo03.setPosition(pos);
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
+      log.info("servo pos {}", servo03.getPos());
+      
+      // double pos = 170;
+      // servo03.setPosition(pos);
+      servo03.setPin(3);
       
       double min = 3;
       double max = 170;
       double speed = 60; // degree/s
+      
+      mega.attach(servo03);
+      // mega.attach(servo03,3);
+      
+      for (int i = 0; i < 100 ; ++i) {
+        servo03.moveTo(20.0);
+      }
       
       servo03.sweep(min, max, speed);
       
@@ -120,7 +136,7 @@ public class Servo extends AbstractServo implements ServoControl {
       */
       // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
 
-      servo03.attach(mega, 8, 38.0);
+     // servo03.attach(mega, 8, 38.0);
       /*
       servo04.attach(mega, 4, 38.0);
       servo05.attach(mega, 5, 38.0);
@@ -164,5 +180,6 @@ public class Servo extends AbstractServo implements ServoControl {
     }
   }
 
+  
 
 }

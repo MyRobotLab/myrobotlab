@@ -1,0 +1,252 @@
+<style>
+    div.inmoov-container {
+        background-image: url('../InMoov2/InMoovFront.png');
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+        background-position: 0px 0px;
+        min-height: 800px;
+    }
+
+    div.inmoov-part {
+        position: relative;
+        top: 60px;
+        left: 280px;
+    }
+
+    .fixed-bg {
+        background-image: url("../InMoov2/InMoovFront.png");
+        min-height: 500px;
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+<div class="inmoov-container">
+    <toggle style="position:absolute; top: 60px;left: 280px;" width="120" height="28" ng-model="service.isEyeActivated" ng-change="!service.isEyeActivated?msg.stopEye():msg.startEye()" on="eye active" off="eye inactive"/>
+    <toggle style="position:absolute; top: 90px;left: 280px;" width="120" height="28" ng-model="service.isBrainActivated" ng-change="!service.isBrainActivated?msg.stopBrain():msg.startBrain()" on="brain active" off="brain inactive"/>
+    <toggle style="position:absolute; top: 120px;left: 280px;" width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ear active" off="ear inactive"/>
+    <toggle style="position:absolute; top: 150px;left: 280px;" width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="head active" off="head inactive"/>
+    <toggle style="position:absolute; top: 350px;left: 280px;" width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="left arm active" off="left arm"/>
+    <toggle style="position:absolute; top: 350px;left: 20px;" width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="right arm active" off="right arm"/>
+    <toggle style="position:absolute; top: 150px;left: 20px;" width="120" height="28" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="mouth active" off="mouth inactive"/>
+    <div style="position:absolute; top: 180px;left: 20px;" width="120" height="28">
+        <select ng-show="!service.isMouthActivated" class="form-control" ng-model="service.speechService" id="language-select" ng-change="msg.setSpeechType(service.speechService)">
+            <option ng-repeat="speechType in speechTypes" value="{{getShortName(speechType)}}">{{getShortName(speechType)}}</option>
+        </select>
+    </div>
+    <div style="position:absolute; top: 180px;left: 20px;" width="120" height="28" ng-show="service.isMouthActivated">
+        <span ng-show="service.isMouthActivated && !service.mute" width="120" height="28">
+            <select class="form-control" ng-model="service.voiceSelected" id="language-select" ng-change="msg.setVoice(service.voiceSelected)" width="120" height="28">
+                <option ng-repeat="voice in service.voices" value="{{voice.name}}">{{voice.name}} {{voice.gender}} {{voice.locale.tag}}  {{voice.description}}</option>
+            </select>
+        </span>
+        <toggle ng-model="service.mute" ng-change="msg.setMute(service.mute)" width="120" height="28" on="muted" off="unmuted"></toggle>
+    </div>
+</div>
+<div class="col-md-6">
+    <table class="table table-striped">
+        <tr>
+            <td colspan="4">
+                <label for="sel1">onText</label>
+                {{onText}}
+                
+                
+                
+            
+            
+            
+            <td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <label>language</label>
+                {{service.language}}   
+                    
+                    
+                
+                
+                
+                <div class="form-group">
+                    <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
+                        <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
+                    </select>
+                </div>
+            </td>
+            <td colspan="2">
+                <label for="sel1">configurations</label>
+                <div class="form-group">
+                    <select multiple class="form-control" id="sel2">
+                        <option>default</option>
+                        <option>sim-only</option>
+                        <option>new config</option>
+                        <option>old config</option>
+                    </select>
+                </div>
+                <button class="btn btn-default" ng-click="msg.export()">save</button>
+                <button class="btn btn-default" ng-click="msg.exportAll()">save all</button>
+                <button class="btn btn-default" ng-click="msg.load()">load</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="../Speech.png"/>
+                <label>speech</label>
+                <br/>
+                <toggle ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="active" off="inactive" width="80" height="30" toggle-class="ios"></toggle>
+                <form class="form-inline">
+                    <span ng-show="service.isMouthActivated">
+                        <span ng-show="service.isMouthActivated && !service.mute">
+                            <input class="form-control" type="text" id="speakText" ng-model="speakText">
+                            <button class="btn btn-default form-control" ng-click="speak()">speak</button>
+                            <br>
+                            <select class="form-control" ng-model="service.voiceSelected" id="language-select" ng-change="msg.setVoice(service.voiceSelected)">
+                                <option ng-repeat="voice in service.voices" value="{{voice.name}}">{{voice.name}} {{voice.gender}} {{voice.locale.tag}}  {{voice.description}}</option>
+                            </select>
+                        </span>
+                        <toggle ng-model="service.mute" ng-change="msg.setMute(service.mute)" width="80" height="30" on="muted" off="unmuted"></toggle>
+                    </span>
+                </form>
+                <select ng-show="!service.isMouthActivated" class="form-control" ng-model="service.speechService" id="language-select" ng-change="msg.setSpeechType(service.speechService)">
+                    <option ng-repeat="speechType in speechTypes" value="{{getShortName(speechType)}}">{{getShortName(speechType)}}</option>
+                </select>
+            </td>
+            <td>
+                <a href="#/tabs/i02.brain">
+                    <img src="../Eye.png"/>
+                </a>
+                <label>eye</label>
+                <br/>
+                <toggle ng-model="service.isEyeActivated" style="background-image:url(../Eye.png);" ng-change="!service.isEyeActivated?msg.stopEye():msg.startEye()" width="160" height="48" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <a href="#/tabs/i02.brain">
+                    <img src="../Brain.png"/>
+                </a>
+                <label>brain</label>
+                <br/>
+                <toggle ng-model="service.isBrainActivated" ng-change="!service.isBrainActivated?msg.stopBrain():msg.startBrain()" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <a href="#/tabs/i02.simulator">
+                    <img src="../JMonkeyEngine.png"/>
+                </a>
+                <label>simulator</label>
+                <br/>
+                <toggle ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <a href="#/tabs/" +service.name+".ear">
+                    <img src="../Ear.png"/>
+                </a>
+                <label>ear</label>
+                <br/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="../Servo.png"/>
+                <label>servos</label>
+                <br/>
+                <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+                <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+                <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
+                <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
+                <button class="btn btn-default" type="button" ng-click="msg.stop()">
+                    <span>
+                        <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop
+                        
+                        
+                        
+                    
+                    
+                    
+                    </span>
+                </button>
+                <button class="btn btn-default" ng-click="msg.disable()">disable</button>
+            </td>
+            <td>
+                <img src="../Tracking.png"/>
+                <label>head tracking</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <img src="../Tracking.png"/>
+                <label>eye tracking</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <img src="../Gestures.png"/>
+                <label for="sel1">gestures</label>
+                <br/>
+                <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
+                <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+                <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td align="center">
+                <a href="#/tabs/i02.head">
+                    <img src="../InMoovHead.png"/>
+                </a>
+                <label>head</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <a href="#/tabs/i02.head">
+                    <img src="../InMoovHand.right.png"/>
+                </a>
+                <label>right hand</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <span style="white-space:nowrap">
+                    <a href="#/tabs/i02.head">
+                        <img src="../InMoovArm.right.png"/>
+                    </a>
+                    <label>right arm</label>
+                </span>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <a href="#/tabs/i02.head">
+                    <img src="../InMoovTorso.png"/>
+                </a>
+                <label>torso</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <a href="#/tabs/i02.head">
+                    <img src="../InMoovArm.png"/>
+                </a>
+                <label>left arm</label>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+            <td>
+                <span style="white-space:nowrap">
+                    <a href="#/tabs/i02.head">
+                        <img src="../InMoovHand.png"/>
+                    </a>
+                    <label>left hand</label>
+                </span>
+                <br/>
+                <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="active" off="inactive"></toggle>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>

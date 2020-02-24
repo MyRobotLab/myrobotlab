@@ -7,6 +7,7 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
         },
         link: function(scope, elem, attr) {
             scope.service = mrl.getService(scope.panel.name);
+
             var isUndefinedOrNull = function(val) {
                 return angular.isUndefined(val) || val === null;
             };
@@ -27,7 +28,9 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
                         elem.html(html).show();
                         $log.info("elem.contents")
                         $log.info(elem.contents())
+                        
                         $compile(elem.contents())(scope);
+                        
                     }, function(msg_) {
                         console.log('msgInterface-meh!');
                     });

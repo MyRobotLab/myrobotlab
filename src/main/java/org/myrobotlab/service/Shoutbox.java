@@ -3,6 +3,7 @@ package org.myrobotlab.service;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -198,7 +199,7 @@ public class Shoutbox extends Service {
     }
   }
 
-  private void chatWithChatbot(String foundName, Shout shout) {
+  private void chatWithChatbot(String foundName, Shout shout) throws IOException {
     // clean found name - we don't want to send @mrt etc to Alice 2.0
     String msg = shout.msg.replace(foundName, "");
     chatbot.getResponse(shout.from, msg);
@@ -341,7 +342,7 @@ public class Shoutbox extends Service {
   // EXCHANGE need "session-key" to do a - connection/session-key for user
   // FIXME NOT NORMALIZED with onXMPPMsg() !!!!
   // public void publishShout(WSMsg wsmsg) { is Message necessary here?
-  public Shout publishShout(Shout shout) throws NotConnectedException, XMPPException {
+  public Shout publishShout(Shout shout) throws NotConnectedException, XMPPException, IOException {
     log.info("publishShout {} {}", shout.from, shout.msg);
 
     String foundName = findChatBotName(shout.msg);
@@ -446,7 +447,7 @@ public class Shoutbox extends Service {
   }
 
   // TO PEER OR NOT TO PEER THAT IS THE QUESTION...
-  public void startChatBot() {
+  public void startChatBot() throws IOException {
     if (chatbot != null) {
       error("chatbot already started");
       return;

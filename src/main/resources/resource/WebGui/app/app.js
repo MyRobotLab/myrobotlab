@@ -25,17 +25,18 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
 'angularTreeview', // any server filesystem browsing
+'ui.toggle', // toggle buttons
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js - starting');
-    $urlRouterProvider.otherwise("/tabs");
+    $urlRouterProvider.otherwise("/service");
     $stateProvider.state('loading', {
         url: "/loading",
         templateUrl: "main/loading.html",
         controller: 'loadingCtrl',
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('state loading calling mrl.init() from router')
                 return mrl.init();
             }
         }
@@ -45,7 +46,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
         controller: 'mainCtrl',
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('state main calling mrl.init() from router')
                 return mrl.init();
             }
         }
@@ -65,17 +66,48 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
         },
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('main.main calling mrl.init() from router')
                 return mrl.init();
             }
         }
-    }).state('tabs', {
-        url: "/tabs",
+    }).state('tabs2', {
+        url: "/service",
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('tabs2 calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
+    }).state('tabs2.main', {
+        views: {
+            '': {
+                templateUrl: 'main/main.html'
+            },
+            'navbar@tabs2.main': {
+                templateUrl: 'nav/nav.html',
+                controller: 'navCtrl'
+            },
+            'content@tabs2.main': {
+                templateUrl: 'views/tabsView.html',
+                controller: 'tabsViewCtrl'
+            }
+        },
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('tabs2.main calling mrl.init() from router')
+                return mrl.init();
+            }
+        }
+    }).state('tabs', {
+        url: "/service/:servicename",
+        template: "<div ui-view></div>",
+        controller: 'mainCtrl',
+        resolve: {
+            test: function($stateParams, mrl) {
+                console.log('tabs calling mrl.init() from router')
+                mrl.setViewType('min')
                 return mrl.init();
             }
         }
@@ -95,17 +127,17 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
         },
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('tabs.main calling mrl.init() from router')
                 return mrl.init();
             }
         }
     }).state('serviceView', {
-        url: '/service/:servicename',
+        url: '/old/:servicename',
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('calling mrl.init() from router')
+                console.log('serviceView calling mrl.init() from router')
                 return mrl.init();
             }
         }
@@ -120,7 +152,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
                 controller: 'serviceViewCtrl',
                 resolve: {
                     test: function($stateParams, mrl) {
-                        console.log('calling mrl.init() from router')
+                        console.log('serviceView.main calling mrl.init() from router')
                         return mrl.init();
                     }
                 }

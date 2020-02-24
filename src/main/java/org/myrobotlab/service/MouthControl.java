@@ -23,7 +23,7 @@ public class MouthControl extends Service {
   // SpeechSynthesis
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(MouthControl.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(MouthControl.class);
   public int mouthClosedPos = 20;
   public int mouthOpenedPos = 4;
   public int delaytime = 75;
@@ -132,11 +132,6 @@ public class MouthControl extends Service {
     // } else {
     // jaw.map(opened, closed, opened, closed);
     // }
-  }
-
-  @Override
-  public void startService() {
-    super.startService();
   }
 
   /**

@@ -1,4 +1,4 @@
-angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc','noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
+angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter', '$timeout', '$location', '$anchorScroll', '$state', '$uibModal', 'mrl', 'statusSvc', 'noWorkySvc', 'Flash', function($scope, $log, $filter, $timeout, $location, $anchorScroll, $state, $uibModal, mrl, statusSvc, noWorkySvc, Flash) {
     //connection state LED
     $scope.connected = mrl.isConnected()
 
@@ -9,18 +9,33 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.errorCount = 0
     $scope.warningCount = 0
     $scope.infoCount = 0
+    // platform of webgui
+    $scope.remotePlatform = null
+    $scope.viewType = mrl.getViewType()
 
     mrl.subscribeConnected(function(connected) {
         $log.info('nav:connection update', connected)
         $timeout(function() {
             $scope.connected = connected
+
+            $scope.platform = mrl.getPlatform()
+            $scope.remotePlatform = mrl.getRemotePlatform()
+            $scope.id = mrl.getId()
+            $scope.platform.vmVersion
+            if ($scope.remotePlatform.vmVersion != '1.8') {
+                $scope.status = {
+                    level: "error",
+                    key: "BadJVM",
+                    detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
+                }
+            }
         })
     })
 
     // load type ahead service types
     $scope.possibleServices = Object.values(mrl.getPossibleServices())
     // get platform information for display
-    $scope.platform = mrl.getPlatform()
+
     // status info warn error
     $scope.statusList = statusSvc.getStatuses()
     statusSvc.subscribeToUpdates(function(status) {
@@ -38,17 +53,8 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         })
     })
 
-    $scope.showAll  = true // = panelSvc.showAll
-    $scope.remoteId = mrl.getRemoteId();
-    $scope.id = mrl.getId();
-    $scope.platform.vmVersion
-    if ($scope.platform.vmVersion != '1.8') {
-        $scope.status = {
-            level: "error",
-            key: "BadJVM",
-            detail: "unsupported Java " + $scope.platform.vmVersion + "- please uninstall and install Java 1.8"
-        }
-    }
+    $scope.showAll = true
+    // = panelSvc.showAll
 
     //service-panels & update-routine (also used for search)
     // populated for search
@@ -59,7 +65,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     }
 
     // maintains some for of subscription ... onRegistered I'd assume
-   // panelSvc.subscribeToUpdates(panelsUpdated)
+    // panelSvc.subscribeToUpdates(panelsUpdated)
 
     $scope.shutdown = function(type) {
         var modalInstance = $uibModal.open({
