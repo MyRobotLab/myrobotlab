@@ -243,7 +243,7 @@ public class ServoTest extends AbstractTest {
     // detach the servo.
     // ard2.detach(s);
     s.detach(arduino01);
-    assertFalse(s.isAttached());
+   
 
     //
     s.attach(arduino01, 10, 1.0);
@@ -252,7 +252,7 @@ public class ServoTest extends AbstractTest {
     assertFalse(s.isEnabled());
 
     s.detach(arduino01);
-    assertFalse(s.isAttached());
+  
 
   }
 
@@ -263,11 +263,14 @@ public class ServoTest extends AbstractTest {
       // Runtime.start("gui", "SwingGui");
       // Runtime.start("gui", "WebGui");
     }
+    
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    servo01.releaseService();
 
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
 
-    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
     
@@ -275,12 +278,15 @@ public class ServoTest extends AbstractTest {
     sleep(100);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     servo01.setAutoDisable(false);
-    servo01.setSpeed(10.0);
+    servo01.setSpeed(50.0);
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
     servo01.setAutoDisable(true);
+    log.warn("thread list {}", getThreadNames());
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
     servo01.moveTo(130.0);
+    log.warn("thread list {}", getThreadNames());
     sleep(8000); // waiting for disable
+    log.warn("thread list {}", getThreadNames());
     assertFalse("servo should have been disabled", servo01.isEnabled());
 
   }

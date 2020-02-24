@@ -30,8 +30,9 @@ public interface ServiceInterface
   /**
    * virtualize the service, in this mode the service should not use any "real" hardware
    * @param b
+   * @return 
    */
-  public void setVirtual(boolean b);
+  public boolean setVirtual(boolean b);
   
   /**
    * check to see if the service is running in a virtual mode

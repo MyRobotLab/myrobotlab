@@ -14,6 +14,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.openingScript = true
     $scope.dropdownIsOpen = true
     $scope.lastStatus = null
+    $scope.log = ''
 
     this.updateState = function(service) {
         $scope.service = service
@@ -30,6 +31,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     }
 
     this.onMsg = function(msg) {
+        let data = msg.data[0]
         switch (msg.method) {
             // FIXME - bury it ?
         case 'onState':
@@ -38,17 +40,15 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             // updates inline here - because when things are first initialized
             // we want to call the same method - and if it was inline that
             // would make a mess
-            _self.updateState(msg.data[0])
+            _self.updateState(data)
             $scope.$apply()
             break
-        case 'onStdOut':
-            $scope.output = $scope.output + msg.data[0]
-            var textarea = document.getElementById('output')
-            textarea.scrollTop = textarea.scrollHeight
+        case 'onStdOut':            
+            $scope.log = data + $scope.log
             $scope.$apply()
             break
         case 'onStatus':
-            $scope.lastStatus = msg.data[0]
+            $scope.lastStatus = data
             $scope.$apply()
             break
         default:
@@ -154,6 +154,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
 
     $scope.getPossibleServices = function(item) {
         return Object.values(mrl.getPossibleServices())
+    }
+
+    $scope.export = function(){
+        msg.send('exportAll')
     }
 
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())

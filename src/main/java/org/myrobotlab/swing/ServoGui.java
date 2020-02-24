@@ -72,7 +72,6 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
@@ -534,8 +533,11 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         // FIXME - Servo supports multiple controllers - the UI needs a
         // multi-select perhaps
-        String controllerName = servo.getControllerName();
-        lastController = controllerName;
+        String controllerName = null;
+        for (String controller : servo.getControllers()) {
+        lastController = controller;
+        controllerName = controller;
+        }
 
         moving.setVisible(servo.isMoving());
 
@@ -578,17 +580,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         if (servoPin != null)
           pinList.setSelectedItem(servoPin);
-        if (servo.isAttached()) {
-          attach.setText("detach");
-          controller.setEnabled(false);
-          pinList.setEnabled(false);
-          moveTo.setEnabled(true);
-        } else {
-          attach.setText("attach");
-          controller.setEnabled(true);
-          pinList.setEnabled(true);
-          moveTo.setEnabled(false);
-        }
+        
 
         if (servo.isEnabled()) {
           enable.setText("disable");
@@ -651,13 +643,6 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           mapInput.setHighValue(servo.getMax().intValue());
         }
 
-        double minOutputTmp = servo.getMinOutput();
-        double maxOutputTmp = servo.getMaxOutput();
-
-        if (servo.isInverted()) {
-          minOutputTmp = servo.getMaxOutput();
-          maxOutputTmp = servo.getMinOutput();
-        }
 
         // FIXME - invert gui components so the next moveTo will not go crazy
         // !!!
@@ -665,24 +650,14 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           mapOutput.setInverted(servo.isInverted());
         }
 
-        if (mapOutput.getLowValue() != servo.getMinOutput().intValue()) {
-          mapOutput.setLowValue(servo.getMinOutput().intValue());
-        }
-
-        if (mapOutput.getHighValue() != servo.getMaxOutput().intValue()) {
-          mapOutput.setHighValue(servo.getMaxOutput().intValue());
-        }
+      
 
         minPos.setText(String.format("%.1f", servo.getMin()));
         maxPos.setText(String.format("%.1f", servo.getMax()));
-        minOutput.setText(String.format("%.1f", minOutputTmp));
-        maxOutput.setText(String.format("%.1f", maxOutputTmp));
-
+       
         mapInput.setLowValue(servo.getMin().intValue());
         mapInput.setHighValue(servo.getMax().intValue());
-        mapOutput.setLowValue(servo.getMinOutput().intValue());
-        mapOutput.setHighValue(servo.getMaxOutput().intValue());
-
+       
         addListeners();
       }
     });
@@ -872,9 +847,9 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       // String python = LangUtils.toPython();
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
       TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-      servo.attach((ServoDataListener) catcher);
+      /// servo.attach((ServoDataListener) catcher);
 
-      Runtime.exportAll("export.py");
+      catcher.exportAll("export.py");
 
       // FIXME - junit for testing return values of moveTo when a blocking call
       // is in progress

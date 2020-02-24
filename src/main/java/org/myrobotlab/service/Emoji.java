@@ -26,6 +26,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.StateListener;
 import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
 // emotionListener
@@ -63,8 +64,6 @@ public class Emoji extends Service
     super(n, id);
     
     startPeer("fsm");
-    startPeer("fsm");
-    startPeer("fsm");
     
   }
 
@@ -97,6 +96,7 @@ public class Emoji extends Service
     // subscribing to errors
     subscribe("*", "publishStatus");
   }
+  
 
   public void onStatus(org.myrobotlab.framework.Status status) {
     if (status.isError()) {
@@ -530,6 +530,15 @@ public class Emoji extends Service
 
   public FiniteStateMachine getFsm() {
     return fsm;
+  }
+  
+  @Override
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
 }

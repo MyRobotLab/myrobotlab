@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.Set;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -17,6 +18,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
@@ -257,6 +259,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
+  
 
   public String setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
@@ -325,5 +328,9 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       Logging.logError(e);
     }
   }
+
+
+
+ 
 
 }

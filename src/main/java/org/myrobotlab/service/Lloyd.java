@@ -102,6 +102,7 @@ public class Lloyd extends Service {
 
   @Override
   public void startService() {
+    try {
     super.startService();
     // additional initialization here i guess?
     startBrain();
@@ -126,6 +127,9 @@ public class Lloyd extends Service {
     if (enableIK) {
       startIK();
     }
+    } catch(Exception e) {
+      log.error("startService threw", e);
+    }
   }
 
   public void startEar() {
@@ -136,7 +140,7 @@ public class Lloyd extends Service {
     mouth = (SpeechSynthesis) Runtime.start("mouth", "MarySpeech");
   }
 
-  public void startBrain() {
+  public void startBrain() throws IOException {
     brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
     // TODO: setup the AIML / chat bot directory for all of this.
     brain.startSession("ProgramAB", "person", "lloyd");

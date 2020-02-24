@@ -306,6 +306,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
     ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     root.detachAppender(this);
     isLogging = false;
+    purgeTasks();
   }
 
   public void stopService() {

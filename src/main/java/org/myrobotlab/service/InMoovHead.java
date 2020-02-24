@@ -45,6 +45,17 @@ public class InMoovHead extends Service {
     initServoDefaults();
   }
   
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  
   public List<String> getServoNames() {
     List<String> servos = new ArrayList<>();
     
@@ -228,18 +239,6 @@ public class InMoovHead extends Service {
         jaw.getPos(), rollNeck.getPos());
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= rothead.isAttached();
-    attached |= neck.isAttached();
-    attached |= eyeX.isAttached();
-    attached |= eyeY.isAttached();
-    attached |= jaw.isAttached();
-    attached |= rollNeck.isAttached();
-
-    return attached;
-  }
 
   public boolean isValid() {
     rothead.moveTo(rothead.getRest() + 2);
@@ -387,32 +386,6 @@ public class InMoovHead extends Service {
 
   @Deprecated
   public void enableAutoEnable(Boolean param) {
-  }
-
-  /*
-  public void setOverrideAutoDisable(Boolean param) {
-    rothead.setOverrideAutoDisable(param);
-    neck.setOverrideAutoDisable(param);
-    eyeX.setOverrideAutoDisable(param);
-    eyeY.setOverrideAutoDisable(param);
-    jaw.setOverrideAutoDisable(param);
-    rollNeck.setOverrideAutoDisable(param);
-  }
-  */
-
-  public void setAcceleration(Double headXSpeed, Double headYSpeed, Double rollNeckSpeed) {
-    rothead.setAcceleration(headXSpeed);
-    neck.setAcceleration(headYSpeed);
-    rollNeck.setAcceleration(rollNeckSpeed);
-  }
-
-  public void setAcceleration(Double speed) {
-    rothead.setAcceleration(speed);
-    neck.setAcceleration(speed);
-    eyeX.setAcceleration(speed);
-    eyeY.setAcceleration(speed);
-    jaw.setAcceleration(speed);
-    rollNeck.setAcceleration(speed);
   }
 
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,

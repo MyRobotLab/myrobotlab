@@ -56,6 +56,17 @@ public class InMoovEyelids extends Service {
       }
     }
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public void test() {
     if (controller == null) {
@@ -169,15 +180,6 @@ public class InMoovEyelids extends Service {
 
   public String getScript(String inMoovServiceName) {
     return String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
-  }
-
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= eyelidleft.isAttached();
-    attached |= eyelidright.isAttached();
-
-    return attached;
   }
 
   public void moveTo(double eyelidleftPos, double eyelidrightPos) {

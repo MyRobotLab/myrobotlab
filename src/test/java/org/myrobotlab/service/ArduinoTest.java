@@ -91,7 +91,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // Runtime.setLogLevel("debug");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     
-    Runtime.start("gui", "SwingGui");
+//    Runtime.start("gui", "SwingGui");
     
     // arduino01.setVirtual(false); // <-- useful for debugging "real" Arduino
     
@@ -447,7 +447,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     servo.rest();
     */
 
-    assertEquals(arduino01.getName(), servo.getControllerName());
+    assertTrue(servo.getControllers().contains(arduino01.getName()));
 
     servo.moveTo(0.0);
     // assertEquals(virtual.servoMoveTo(0));
@@ -460,12 +460,12 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     // detach
     servo.detach();
-    assertNull("detach did not nullify controller", servo.getControllerName());
-    assertNull("detach did not nullify controller name", servo.getControllerName());
+    assertTrue("detach did not remove controller", servo.getControllers().size() == 0);
+
     // assertEquals("servoDetach/7/0\n", uart.decode());
     arduino01.attach(servo);
-    log.error("{}", servo.getControllerName());
-    assertEquals("arduino did not attach to servo correctly", arduino01.getName(), servo.getControllerName());
+    log.info("{}", servo.getControllers());
+    assertTrue("arduino did not attach to servo correctly", servo.getControllers().contains(arduino01.getName()));
 
     servo.moveTo(10.0);
 
@@ -490,6 +490,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     // notify and process releasing itself from attached
     // services
     servo.releaseService();
+
     assertFalse(arduino01.getAttached().contains(servo.getName()));
     assertFalse(servo.isAttached(arduino01));
   }

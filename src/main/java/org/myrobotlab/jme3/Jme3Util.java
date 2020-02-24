@@ -160,7 +160,7 @@ public class Jme3Util {
     log.debug("rotateTo {}, degrees {} around axis {}", name, degrees, rotMask);
     // int angleIndex = getIndexFromUnitVector(rotMask);
     if (o.mapper != null) {
-      degrees = (float) o.mapper.calcOutput(degrees);
+      degrees = o.mapper.calcOutput(degrees);
       log.debug(String.format("rotateTo map %s, degrees %.2f", name, degrees));
     }
 

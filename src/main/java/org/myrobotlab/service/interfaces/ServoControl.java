@@ -25,10 +25,13 @@
 
 package org.myrobotlab.service.interfaces;
 
+import java.util.Set;
+
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
 
 public interface ServoControl extends AbsolutePositionControl, EncoderListener, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
@@ -38,14 +41,19 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @param listener
    */
-  void attach(ServoDataListener listener);
+  void attach(ServoController listener);
 
   /**
    * remove the listener
    * 
    * @param listener
    */
-  void detach(ServoDataListener listener);
+  void detach(ServoController listener);
+
+  /**
+   * disable the PWM pulses/power to the servo/motor
+   */
+  void disable();
 
   /**
    * enable the PWM pulses/power to the servo
@@ -54,23 +62,39 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void enable();
 
   /**
-   * disable the PWM pulses/power to the servo/motor
-   */
-  void disable();
-
-  /**
    * getAutoDisable return value set by setAutoDisable
    * 
    * @return Boolean
    */
-  Boolean getAutoDisable();
+  boolean getAutoDisable();
 
   /**
-   * name of the current controller - null if not set
+   * name of the current controllers - empty if not set
    * 
    * @return
    */
-  String getControllerName();
+  Set<String> getControllers();
+
+  /**
+   * returns the encoder attached to this ServoControl
+   * 
+   * @return - the Encoder
+   */
+  EncoderControl getEncoder();
+
+  /**
+   * The last time the servo was asked to move (system current time in ms?)
+   * 
+   * @return
+   */
+  long getLastActivityTime();
+
+  /**
+   * get this servos mapper
+   * 
+   * @return
+   */
+  Mapper getMapper();
 
   /**
    * gets the Max X of the mapper (input)
@@ -80,18 +104,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Double getMax();
 
   /**
-   * gets the Max applied after the output is calculated (clipping)
-   * 
-   * @return max y output
-   */
-  Double getMaxOutput();
-
-  /**
    * returns max speed if set
    * 
    * @return - speed
    */
-  // Double getMaxSpeed();
+  Double getMaxSpeed();
 
   /**
    * gets the min X of the mapper (input)
@@ -99,13 +116,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @return min x
    */
   Double getMin();
-
-  /**
-   * gets the Min applied after the output is calculated (clipping)
-   * 
-   * @return - min output value
-   */
-  Double getMinOutput();
 
   /**
    * configuration method - a method the controller will call when the servo is
@@ -156,13 +166,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Double getSpeed();
 
   /**
-   * acceleration of the servo
-   * 
-   * @return the acceleration
-   */
-  Double getAcceleration();
-
-  /**
    * This value is for the ServoController to consume.
    * 
    * The calculated mapper output for the servo - this is <b> ALWAYS ALWAYS in
@@ -178,12 +181,24 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   Double getTargetOutput();
 
+  Double getTargetPos();
+
+  @Deprecated
+  Double getVelocity();
+
   /**
-   * If currently attached to a controller
+   * When moveBlocking is in motion, not only should it block the calling thread
+   * until the end of the move, it should also prevent (cancel) other threads
+   * (even ones doing moveTo commands) until its done... conversely
+   * mutli-threaded moveTo commands are a free-for-all .. if you call a servo
+   * thats in process of a moveBlocking with a moveTo - your moveTo is canceled
+   * (not blocked) until the moveToBlocking is done. When a moveToBlocking is
+   * called from a different thread it should be blocked until the original is
+   * finished.
    * 
    * @return
    */
-  Boolean isAttached();
+  boolean isBlocking();
 
   /**
    * is the servo currently sending pwm position control
@@ -200,6 +215,13 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Boolean isInverted();
 
   /**
+   * Returns if the sevo is currently moving
+   * 
+   * @return
+   */
+  boolean isMoving();
+
+  /**
    * This sets the servo's mapper explicitly
    * 
    * @param minX
@@ -212,14 +234,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          - max output
    */
   void map(Double minX, Double maxX, Double minY, Double maxY);
-
-  void setMapper(Mapper m);
-
-  Mapper getMapper();
-
-  void setMaxSpeed(Double speed);
-
-  Double getMaxSpeed();
 
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
@@ -242,7 +256,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Double moveToBlocking(Double pos, Long timeoutMs);
 
   /**
-   * control message publishing moveTo
+   * publishing servo's move
    * 
    * @param sc
    * @return
@@ -257,25 +271,34 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   ServoData publishServoData(ServoStatus eventType, Double currentPosUs);
 
+  ServoControl publishServoSetSpeed(ServoControl sc);
+
+  ServoControl publishServoEnable(ServoControl sc);
+
+  ServoControl publishServoDisable(ServoControl sc);
+
+  /**
+   * control message publishing moveTo
+   * 
+   * @param sc
+   * @return
+   */
+  ServoControl publishServoMoveTo(ServoControl sc);
+
   /**
    * Publishing topic for a servo stop event - returns position
    * 
-   * @param pos
+   * @param sc
    * @return
    */
-  public Double publishServoStopped(Double pos);
+  ServoControl publishServoStop(ServoControl sc);
+
+  ServoControl publishServoStopped(ServoControl sc);
 
   /**
    * command to move to the rest position
    */
   void rest();
-
-  /**
-   * Set the acceleration of the servo
-   * 
-   * @param acceleration
-   */
-  void setAcceleration(Double acceleration);
 
   /**
    * setAutoDisable tell the servo to disable when position reached this make
@@ -295,6 +318,10 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          - true is to invert
    */
   void setInverted(Boolean invert);
+
+  void setMapper(Mapper m);
+
+  void setMaxSpeed(Double speed);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not
@@ -327,6 +354,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setPin(String pin);
 
   /**
+   * This method sets the position without "moving" the servo. Typically, this
+   * is useful for setting the initial position of the servo during startup
+   * 
+   * @param pos
+   */
+  void setPosition(Double pos);
+
+  /**
    * @param rest
    *          A default position for the servo. Defaulted to 90 unless
    *          explicitly set. Position the servo will move to when method
@@ -335,15 +370,19 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setRest(Double rest);
 
   /**
+   * set the speed of the servo
+   * 
+   * @param d
+   */
+  void setSpeed(Double d);
+
+  /**
    * @param speed
    *          degrees per second rotational speed cm per second linear
    * 
    */
   @Deprecated
   void setVelocity(Double speed);
-
-  @Deprecated
-  Double getVelocity();
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental
@@ -362,6 +401,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param sc
    */
   void unsync(ServoControl sc);
+  
+  /**
+   * uset speed - speed control is removed
+   */
+  void unsetSpeed();
 
   /**
    * waitTargetPos is used by a global moveToBlocking command - pos usually is 0
@@ -370,63 +414,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    */
   void waitTargetPos();
-
-  /**
-   * The last time the servo was asked to move (system current time in ms?)
-   * 
-   * @return
-   */
-  @Deprecated /* use an encoder ! */
-  long getLastActivityTime();
-
-  /**
-   * set the speed of the servo
-   * @param d
-   */
-  public void setSpeed(Double d);
-  
-  /**
-   * remove speed control
-   */
-  public void disableSpeedControl();
-
-  Double getTargetPos();
-
-  /**
-   * This method sets the position without "moving" the servo. Typically, this
-   * is useful for setting the initial position of the servo during startup
-   * 
-   * @param pos
-   */
-  void setPosition(Double pos);
-
-  /**
-   * returns the encoder attached to this ServoControl
-   * 
-   * @return - the Encoder
-   */
-  EncoderControl getEncoder();
-
-  /**
-   * When moveBlocking is in motion, not only should it block the calling thread
-   * until the end of the move, it should also prevent (cancel) other threads
-   * (even ones doing moveTo commands) until its done... conversely
-   * mutli-threaded moveTo commands are a free-for-all .. if you call a servo
-   * thats in process of a moveBlocking with a moveTo - your moveTo is canceled
-   * (not blocked) until the moveToBlocking is done. When a moveToBlocking is
-   * called from a different thread it should be blocked until the original is
-   * finished.
-   * 
-   * @return
-   */
-  boolean isBlocking();
-
-  /**
-   * Returns if the sevo is currently moving
-   * 
-   * @return
-   */
-  boolean isMoving();
 
   /**
    * Writes a value in microseconds (uS) to the servo, controlling the shaft
@@ -447,5 +434,13 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param uS
    */
   void writeMicroseconds(int uS);
+
+  // for instance attachment
+  void attachServoController(String sc, Integer pin, Double pos, Double speed);
+
+  /**
+   * remove speed control
+   */
+  void fullSpeed();
 
 }

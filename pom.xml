@@ -1,6 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<!-- 
+		# configure jvm and javac
+		sudo update-alternatives (minus minus) config java
+		sudo update-alternatives (minus minus) config javac 
+		export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+		export PATH=$JAVA_HOME/bin:$PATH
 
 		# shows system vars and env vars
 		mvn -DskipTests -Dbuild.number=71 help:system
@@ -9,7 +14,10 @@
 		mvn -DskipTests -Dbuild.number=180 compile package -o
 		
 		# javadoc check
-		mvn -q javadoc:javadoc
+		mvn -q javadoc:javadoc -o
+		
+		# proxy
+		-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 	
 	 -->	
 	<modelVersion>4.0.0</modelVersion>

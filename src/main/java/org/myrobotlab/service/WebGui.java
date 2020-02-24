@@ -42,6 +42,7 @@ import org.jboss.netty.handler.ssl.util.SelfSignedCertificate;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
@@ -165,7 +166,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // FIXME - move to security
   private static SSLContext createSSLContext2() {
     try {
-      InputStream keyStoreStream = new FileInputStream((Util.getResourceDir() + "/keys/selfsigned.jks"));
+      InputStream keyStoreStream = new FileInputStream((Util.getResourceDir() + "/keys/myrobotlab-keystore.jks"));
       char[] keyStorePassword = "changeit".toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(keyStoreStream, keyStorePassword);
@@ -180,7 +181,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       TrustManager[] trustManagers = new TrustManager[] { DUMMY_TRUST_MANAGER };
       SecureRandom secureRandom = new SecureRandom();
 
-      SSLContext sslContext = SSLContext.getInstance("TLS");
+      // SSLContext sslContext = SSLContext.getInstance("TLS");
+      // SSLContext sslContext = SSLContext.getInstance("TLSv1");
+      SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
       sslContext.init(keyManagers, trustManagers, secureRandom);
       return sslContext;
     } catch (Exception e) {
@@ -255,7 +258,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public String root = "root";
 
-  public Integer sslPort = null;
+  public boolean isSsl = false;
 
   public String startURL = "http://localhost:%d/#/tabs";
 
@@ -278,9 +281,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * In its current design, its in the middle where the javascript webgui has a
    * "single" id but it isn't the java's webgui name.
    * 
-   * MAKE NOTE !!! - if broadcastMode = false there is a bug since only 1 key is served
-   *                 although its a many to one relations ship with 1 id internally == webgui-client-1234-5678 
-   *                 sendRemote will ONLY SEND TO ONE CLIENT until this is fixed I'm leaving it in broadcastMode
+   * MAKE NOTE !!! - if broadcastMode = false there is a bug since only 1 key is
+   * served although its a many to one relations ship with 1 id internally ==
+   * webgui-client-1234-5678 sendRemote will ONLY SEND TO ONE CLIENT until this
+   * is fixed I'm leaving it in broadcastMode
    * 
    */
   private boolean broadcastMode = true;
@@ -320,12 +324,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // This API is only with 1.1 and up
           log.info("{} is closed by client", uuid);
         }
-        
-        // broadcasting - closing of a connection means removal of a connection and all associated services
-        // TODO - int the future perhaps do not be so destructive - mark the services as 'unknown' state 
 
-  
-        
+        // broadcasting - closing of a connection means removal of a connection
+        // and all associated services
+        // TODO - int the future perhaps do not be so destructive - mark the
+        // services as 'unknown' state
+
       }
     };
   }
@@ -377,11 +381,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void autoStartBrowser(boolean autoStartBrowser) {
     this.autoStartBrowser = autoStartBrowser;
   }
-  
+
   public boolean getAutoStartBrowser() {
     return autoStartBrowser;
   }
-
 
   /**
    * String broadcast to specific client
@@ -399,17 +402,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // TODO Auto-generated method stub
 
   }
-
-  SSLContext createSSLContext() {
-    try {
-      if (sslPort != null) {
-        return SSLContext.getInstance("TLS");
-      }
-    } catch (Exception e) {
-      log.warn("can not make ssl context", e);
-    }
-    return null;
-  }
+  /*
+   * SSLContext createSSLContext() { try { if (sslPort != null) { return
+   * SSLContext.getInstance("TLS"); } } catch (Exception e) {
+   * log.warn("can not make ssl context", e); } return null; }
+   */
 
   public void detach(String from, String to, String uri) {
     log.error("IMPLEMENT ME !");
@@ -449,10 +446,21 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     Config.Builder configBuilder = new Config.Builder();
     try {
-      if (sslPort != null) {
+      if (isSsl) {
+        // String cipherSuite = "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";
+        // String cipherSuite = "TLS_RSA_WITH_AES_256_CBC_SHA256";
+        String [] cipherSuite= {"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_DSS_WITH_AES_128_GCM_SHA256","TLS_DHE_DSS_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256","TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384","TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384","TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA","TLS_DHE_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_256_CBC_SHA256","TLS_DHE_DSS_WITH_AES_256_CBC_SHA","TLS_DHE_RSA_WITH_AES_256_CBC_SHA","TLS_RSA_WITH_AES_128_GCM_SHA256","TLS_RSA_WITH_AES_256_GCM_SHA384","TLS_RSA_WITH_AES_128_CBC_SHA256","TLS_RSA_WITH_AES_256_CBC_SHA256","TLS_RSA_WITH_AES_128_CBC_SHA","TLS_RSA_WITH_AES_256_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA256","TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA","TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA","TLS_SRP_SHA_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA","TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA","TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA","TLS_RSA_WITH_CAMELLIA_256_CBC_SHA","TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA","TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA","TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"};
+
+        cipherSuite = new String[] {"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"};
         SelfSignedCertificate ssc = new SelfSignedCertificate();
         SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
         configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
+        // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "SSLv3"});
+
+
+        // configBuilder.subProtocols("TLSv1.2");
+        //configBuilder.enabledCipherSuites(cipherSuite);
+        configBuilder.enabledCipherSuites(cipherSuite);
       }
     } catch (Exception e) {
       log.error("certificate creation threw", e);
@@ -511,13 +519,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     configBuilder.maxChunkContentLength(262144);
     configBuilder.maxWebSocketFrameSize(262144);
     // ips
-
+    
+    /*
     SSLContext sslContext = createSSLContext();
 
     if (sslContext != null) {
       configBuilder.sslContext(sslContext);
     }
     // SessionSupport ss = new SessionSupport();
+     * */
+     
 
     configBuilder.build();
     return configBuilder;
@@ -557,7 +568,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public Integer getPort() {
     return port;
   }
-  
+
   public String getAddress() {
     return address;
   }
@@ -648,7 +659,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // - we don't need to wait for a message from them with the outstream
         OutputStream out = r.getResponse().getOutputStream();
         Message msg = getDefaultMsg(uuid); // SEND BACK getHelloResponse(hello)
-// Service.sleep(1000);        
+        // Service.sleep(1000);
         log.info(String.format("new connection %s", request.getRequestURI()));
         out.write(CodecUtils.toJson(msg).getBytes());
         log.info(String.format("<-- %s", msg));
@@ -661,7 +672,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
 
         if (isLocal(msg)) {
-          String serviceName = msg.getFullName();//getName();
+          String serviceName = msg.getFullName();// getName();
           Class<?> clazz = Runtime.getClass(serviceName);
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
           msg.data = params;
@@ -700,7 +711,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // json
           // encoded parameters
 
-          String serviceName = msg.getFullName();//.getName();
+          String serviceName = msg.getFullName();// .getName();
           Class<?> clazz = Runtime.getClass(serviceName);
           if (clazz == null) {
             log.error("cannot derive local type from service {}", serviceName);
@@ -1032,12 +1043,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       String json = CodecUtils.toJson(msg);
       if (json.length() > 65536) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
-        /* debugging large msgs
-        try {
-          FileIO.toFile(String.format("too-big-%s-%d.json", msg.method, System.currentTimeMillis()), json);
-        } catch (Exception e) {
-        }
-        */
+        /*
+         * debugging large msgs try {
+         * FileIO.toFile(String.format("too-big-%s-%d.json", msg.method,
+         * System.currentTimeMillis()), json); } catch (Exception e) { }
+         */
       }
 
       if (broadcastMode) {
@@ -1209,8 +1219,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     try {
 
-      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "python", "Python", "--invoke", "python", "execFile", "start.py"});
-      Runtime.main(new String[] { "--interactive", "--id", "admin"});
+      // Platform.setVirtual(true);
+
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
+      // "python", "Python", "--invoke", "python", "execFile", "start.py"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin" });
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
@@ -1218,28 +1231,36 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.start("servo01", "Servo");
       // Runtime.start("servo02", "Servo");
       // Runtime.start("gui", "SwingGui");
-      
+
       // runtime.setVirtual(true);
       // Runtime.start("log", "Log");
       /*
-      Runtime.start("clock01", "Clock");
-      Runtime.start("clock02", "Clock");
-      Runtime.start("clock03", "Clock");
-      Runtime.start("clock04", "Clock");
-      Runtime.start("clock05", "Clock");
-      */
+       * Runtime.start("clock01", "Clock"); Runtime.start("clock02", "Clock");
+       * Runtime.start("clock03", "Clock"); Runtime.start("clock04", "Clock");
+       * Runtime.start("clock05", "Clock");
+       */
+      Platform.setVirtual(true);
 
-      
-      Runtime.start("arduino", "Arduino");
-      Runtime.start("servo01", "Servo");
-      Runtime.start("servo02", "Servo");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      pan.setPin(3);
+      pan.setMinMax(30.0, 70.0);
+      tilt.setPin("D4");
+
+      arduino.attach(pan);
+      arduino.attach(tilt);
+
+      // Runtime.start("jme", "JMonkeyEngine");
+
+      // arduino.connect("/dev/ttyACM0");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8887);
+      webgui.setPort(8888);
       webgui.startService();
-      
 
       // Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
@@ -1249,6 +1270,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void setSsl(boolean b) {
+    isSsl = b;
   }
 
   @Override

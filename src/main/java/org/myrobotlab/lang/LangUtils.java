@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -26,10 +28,12 @@ public class LangUtils {
     create, configure, start, attach, subscribe;
   }
 
+  Set<String> suppressExportOfTypes = new TreeSet<>();
+
   public CodeMeta toMeta(List<ServiceInterface> si) {
     return null;
   }
-  
+
   static public String escape(String v) {
     if (v == null) {
       return "None";
@@ -47,7 +51,6 @@ public class LangUtils {
     return "False";
   }
 
-
   // FIXME !! - no "." dots should be allowed in names - dots should always be a
   // network delinator
   // FIXME !! - no special characters host.mydomain.com/inmoov.leftArm.shoulder
@@ -55,20 +58,20 @@ public class LangUtils {
   static public String safeRefName(ServiceInterface si) {
     return CodecUtils.getSafeReferenceName(si.getName());
   }
-  
+
   static public String safeRefName(String si) {
     return CodecUtils.getSafeReferenceName(si);
   }
-  
+
   static public String toPython(String names) throws IOException {
     String[] nameFilters = names.split(",");
     return toPython(nameFilters, null, null);
   }
-  
+
   static public String toPython() throws IOException {
     return toPython(null, null, null);
   }
-  
+
   static public String toPython(Double value) {
     if (value == null) {
       return "None";
@@ -82,8 +85,8 @@ public class LangUtils {
     StringBuilder sb = new StringBuilder();
 
     // if use date ..
-    
-    // TODO - filename 
+
+    // TODO - filename
     sb.append("##############################################################\n");
     sb.append("# MyRobotLab configuration file\n");
     sb.append("# This file is generated from a running instance of MyRobotLab.\n");
@@ -96,59 +99,61 @@ public class LangUtils {
 
     sb.append("##############################################################\n");
     sb.append("## imports ####\n");
+    sb.append("import time\n");
     sb.append("import org.myrobotlab.framework.Platform as Platform\n");
+    sb.append("import org.myrobotlab.service.Runtime as Runtime\n");
     sb.append("\n");
-    sb.append((Platform.isVirtual()?"Platform.setVirtual(True)\n":"# Platform.setVirtual(True)\\n"));
+    sb.append((Platform.isVirtual() ? "Platform.setVirtual(True)\n" : "# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
 
     // from current running system - vs something uncreated passed in ....
     List<ServiceInterface> allServices = Runtime.getServices();
     List<ServiceInterface> services = new ArrayList<>();
     if (nameFilters != null) {
       for (String filter : nameFilters) {
-        for (ServiceInterface service: allServices) {
+        for (ServiceInterface service : allServices) {
           if (service.getName().equals(filter)) {
             services.add(service);
           }
         }
       }
     }
-    
+
     if (typeFilters != null) {
       for (String filter : typeFilters) {
-        for (ServiceInterface service: allServices) {
+        for (ServiceInterface service : allServices) {
           if (service.getSimpleName().equals(filter)) {
             services.add(service);
           }
         }
       }
     }
-    
+
     if (nameFilters == null && typeFilters == null) {
-      // no filters 
+      // no filters
       services = allServices;
     }
-    
+
     if (includeRuntime != null && includeRuntime) {
       services.add(Runtime.getInstance());
     }
-    
+
     sb.append("##############################################################\n");
     sb.append(String.format("## creating %d services ####\n", services.size()));
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
     sb.append("# substitute peers, types or references of other sub services before the service is \"started\"\n");
     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
     sb.append("# e.g. i01_left = Runtime.create('i01.left', 'Ssc32UsbServoController')\n");
-    
+
     // the easy start (start peers auto-magically creates peers)
     for (ServiceInterface si : services) {
       if (si.isRuntime()) {
         continue;
       }
-      sb.append(String.format("%s = Runtime.create('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
+      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
       // do peers with comments
       // top level peers - others commented out
     }
-    
+
     sb.append("\n");
 
     sb.append("##############################################################\n");
@@ -179,12 +184,10 @@ public class LangUtils {
       // do peers with comments
       // top level peers - others commented out
     }
-    
-    
+/**<pre>
     sb.append("##############################################################\n");
     sb.append(String.format("## starting %d services ####\n", services.size()));
 
-    // the easy start (start peers auto-magically creates peers)
     for (ServiceInterface si2 : services) {
       if (si2.isRuntime()) {
         continue;
@@ -193,7 +196,7 @@ public class LangUtils {
       // do peers with comments
       // top level peers - others commented out
     }
-
+*/
     // attach all ????
 
     // subscribe all ??? (really should be attach)

@@ -2,7 +2,7 @@ package org.myrobotlab.inmoov;
 
 import java.io.File;
 import java.io.IOException;
-import org.myrobotlab.framework.repo.ServiceData;
+
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Python;
@@ -41,7 +41,8 @@ public class Utils {
     }
     return true;
   }
-
+  
+ // WHY ???
   public static File makeDirectory(String directory) {
     File dir = new File(directory);
     dir.mkdirs();

@@ -92,6 +92,17 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       log.error("main threw", e);
     }
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public InMoovHand(String n, String id) {
     super(n, id);
@@ -329,17 +340,6 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     moveTo(0.0, 180.0, 180.0, 180.0, 0.0, 90.0);
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-    attached |= thumb.isAttached();
-    attached |= index.isAttached();
-    attached |= majeure.isAttached();
-    attached |= ringFinger.isAttached();
-    attached |= pinky.isAttached();
-    attached |= wrist.isAttached();
-    return attached;
-  }
-
   public void map(double minX, double maxX, double minY, double maxY) {
     thumb.map(minX, maxX, minY, maxY);
     index.map(minX, maxX, minY, maxY);
@@ -438,34 +438,6 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
         // return this hand isn't valid
         return data;
       }
-    }
-
-    // If the hand data came from a valid frame, update the finger postions.
-    // move all fingers
-    if (index != null && index.isAttached()) {
-      index.moveTo((double)h.index);
-    } else {
-      log.debug("Index finger isn't attached or is null.");
-    }
-    if (thumb != null && thumb.isAttached()) {
-      thumb.moveTo((double)h.thumb);
-    } else {
-      log.debug("Thumb isn't attached or is null.");
-    }
-    if (pinky != null && pinky.isAttached()) {
-      pinky.moveTo((double)h.pinky);
-    } else {
-      log.debug("Pinky finger isn't attached or is null.");
-    }
-    if (ringFinger != null && ringFinger.isAttached()) {
-      ringFinger.moveTo((double)h.ring);
-    } else {
-      log.debug("Ring finger isn't attached or is null.");
-    }
-    if (majeure != null && majeure.isAttached()) {
-      majeure.moveTo((double)h.middle);
-    } else {
-      log.debug("Middle(Majeure) finger isn't attached or is null.");
     }
 
     return data;

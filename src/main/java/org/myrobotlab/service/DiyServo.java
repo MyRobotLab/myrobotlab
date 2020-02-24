@@ -35,7 +35,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
@@ -47,7 +48,6 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
 import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoDataListener;
 import org.slf4j.Logger;
 
 /**
@@ -222,9 +222,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   public List<Integer> pinList = new ArrayList<Integer>();
 
-
   double currentVelocity = 0;
-
 
   /**
    * Round pos values based on this digit count useful later to compare target
@@ -256,7 +254,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   private double ki = 0.001; // 0.020;
   private double kd = 0.0; // 0.020;
   public double setPoint = 90.0; // Intial
- 
+
   /**
    * AD converter needs to be remapped to 0 - 180. D1024 is the default for the
    * Arduino
@@ -274,7 +272,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   double maxPower = 1.0;
   double minPower = -1.0;
 
-  Mapper powerMap = new Mapper(-1.0, 1.0, -255.0, 255.0);
+  Mapper powerMap = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public String disableDelayIfVelocity;
 
@@ -332,11 +330,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     pid.startService();
   }
 
-  @Override
-  public void attach(ServoDataListener service) {
-    addListener("publishServoEvent", service.getName(), "onServoEvent");
-  }
-
   /**
    * Equivalent to Arduino's Servo.detach() it de-energizes the servo
    */
@@ -365,7 +358,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public Double getMax() {
-    return mapper.getMaxX();
+    return mapper.getMax();
   }
 
   public Double getPos() {
@@ -394,13 +387,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public void map(double minX, double maxX, double minY, double maxY) {
-    if (mapper == null) {
-      mapper = new Mapper(0, 180, 0, 180);
-    }
-    if (minX != mapper.getMinX() || maxX != mapper.getMaxX() || minY != mapper.getMinY() || maxY != mapper.getMaxY()) {
-      mapper = new Mapper(minX, maxX, minY, maxY);
-      broadcastState();
-    }
+    mapper = new MapperLinear(minX, maxX, minY, maxY);
+    broadcastState();
   }
 
   /**
@@ -485,14 +473,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     super.releaseService();
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    if (mapper == null) {
-      mapper = new Mapper(0, 180, 0, 180);
-    }
-  }
-
   public void rest() {
     moveTo(rest);
   }
@@ -512,7 +492,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.rest = rest;
   }
 
-
   /*
    * (non-Javadoc)
    * 
@@ -520,18 +499,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   @Override
   public void stop() {
-    isSweeping = false;    
+    isSweeping = false;
     broadcastState();
-  }
-
-  public void sweep() {
-    double min = mapper.getMinX();
-    double max = mapper.getMaxX();
-    sweep(min, max, 50, 1.0);
-  }
-
-  public void sweep(double min, double max) {
-    sweep(min, max, 1, 1.0);
   }
 
   // FIXME - is it really speed control - you don't currently thread for
@@ -544,7 +513,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
     this.sweepMin = min;
     this.sweepMax = max;
-   
+
     if (isSweeping) {
       stop();
     }
@@ -657,12 +626,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.encoderControl = encoder;
   }
 
-  public void attach(String pinArrayControlName, Integer pin) throws Exception {
+  public void attach(String pinArrayControlName, Integer pin) {
     // myServo = (DiyServo) Runtime.getService(boundServiceName);
     attach((PinArrayControl) Runtime.getService(pinArrayControlName), (int) pin);
   }
 
-  public void attach(PinArrayControl pinArrayControl, int pin) throws Exception {
+  public void attach(PinArrayControl pinArrayControl, int pin) {
     this.pinArrayControl = pinArrayControl;
     if (pinArrayControl != null) {
       pinControlName = pinArrayControl.getName();
@@ -738,7 +707,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public ServoData publishServoData(Integer eventType, double currentPos) {
-    ServoData sd = new ServoData(ServoStatus.SERVO_POSITION_UPDATE, getName(), currentPos);    
+    ServoData sd = new ServoData(ServoStatus.SERVO_POSITION_UPDATE, getName(), currentPos);
     return sd;
   }
 
@@ -760,7 +729,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return isSweeping;
   }
 
-
   /**
    * getCurrentVelocity() - return Current velocity ( realtime / based on
    * frequency)
@@ -772,10 +740,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   /*
-  public boolean isMoving() {
-    return moving;
-  }
-  */
+   * public boolean isMoving() { return moving; }
+   */
 
   public void setDisableDelayGrace(int disableDelayGrace) {
     this.disableDelayGrace = disableDelayGrace;
@@ -854,7 +820,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
       Thread.sleep(1000);
       // let's start the encoder!!
-      Amt203Encoder encoder = (Amt203Encoder)Runtime.start("encoder", "Amt203Encoder"); // new Amt203Encoder("encoder");
+      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); // new
+                                                                                         // Amt203Encoder("encoder");
       encoder.setPin(3);
 
       arduino.attach(encoder);

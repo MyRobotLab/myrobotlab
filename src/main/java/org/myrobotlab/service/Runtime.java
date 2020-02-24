@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -64,13 +63,15 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.Appender;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
@@ -104,7 +105,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway {
+public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -241,7 +242,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   static Set<String> networkPeers = null;
 
+  /**
+   * current locale e.g. "en", "en-Br", "fr", "fr-FR", ... etc..
+   */
   Locale locale;
+
+  /**
+   * available Locales
+   */
+  Map<String, Locale> locales;
 
   /*
    * Returns the number of processors available to the Java virtual machine.
@@ -376,7 +385,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * Setting the runtime virtual will set the platform virtual too. All
    * subsequent services will be virtual
    */
-  public void setVirtual(boolean b) {
+  public boolean setVirtual(boolean b) {
     Platform.setVirtual(true);
     for (ServiceInterface si : getServices()) {
       if (!si.isRuntime()) {
@@ -385,6 +394,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
     this.isVirtual = b;
     broadcastState();
+    return b;
   }
 
   static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {
@@ -532,8 +542,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           security = Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
 
-          // we are alive - start our process heartbeat
-          runtime.addTask(2000, "heartbeat");
+          // startHeartbeat();
 
           extract(); // FIXME - too overkill - do by checking version of re
         }
@@ -578,13 +587,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public Heartbeat heartbeat() {
     try {
       Heartbeat heartbeat = new Heartbeat(getName(), getId(), getServiceList());
-      
-      
+
       // send heartbeats out over all connections
       Set<String> cs = connections.keySet();
       for (String gateway : cs) {
         Map<String, Object> c = connections.get(gateway);
-        String id = (String)c.get("id");
+        String id = (String) c.get("id");
         if (id == null) {
           log.error("gateway %s has null id!", gateway);
           continue;
@@ -877,6 +885,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return ret;
   }
 
+  /**
+   * 
+   * @param interfaze
+   * @return
+   * @throws ClassNotFoundException
+   */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {
     if (!interfaze.contains(".")) {
       interfaze = "org.myrobotlab.service.interfaces." + interfaze;
@@ -884,14 +898,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getServiceNamesFromInterface(Class.forName(interfaze));
   }
 
-  /*
-   * param interfaceName
+  /**
    * 
-   * @return service names which match
+   * @param interfaze
+   * @return
    */
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
-    ArrayList<String> ret = new ArrayList<String>();
-    ArrayList<ServiceInterface> services = getServicesFromInterface(interfaze);
+    List<String> ret = new ArrayList<String>();
+    List<ServiceInterface> services = getServicesFromInterface(interfaze);
     for (int i = 0; i < services.size(); ++i) {
       ret.add(services.get(i).getName());
     }
@@ -919,11 +933,63 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return list;
   }
 
-  /*
-   * @return services which match
+  /**
+   * 
+   * @param interfaze
+   * @return
    */
-  public static synchronized ArrayList<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
-    ArrayList<ServiceInterface> ret = new ArrayList<ServiceInterface>();
+  public ServiceTypeNameResults getServiceTypeNamesFromInterface(String interfaze) {
+    ServiceTypeNameResults results = new ServiceTypeNameResults(interfaze);
+    try {
+
+      if (!interfaze.contains(".")) {
+        interfaze = "org.myrobotlab.service.interfaces." + interfaze;
+      }
+
+      ServiceData sd = ServiceData.getLocalInstance();
+
+      List<ServiceType> sts = sd.getServiceTypes();
+
+      for (ServiceType st : sts) {
+        if (st.getSimpleName().equals("Polly")) {
+          log.info("here");
+        }
+
+        Set<Class<?>> ancestry = new HashSet<Class<?>>();
+        Class<?> targetClass = Class.forName(st.getName()); // this.getClass();
+
+        while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
+          ancestry.add(targetClass);
+          targetClass = targetClass.getSuperclass();
+        }
+
+        for (Class<?> c : ancestry) {
+          Class<?>[] interfaces = Class.forName(c.getName()).getInterfaces();
+          for (Class<?> inter : interfaces) {
+            if (interfaze.equals(inter.getName())) {
+              results.serviceTypes.add(st.getName());
+              break;
+            }
+          }
+        }
+      }
+
+    } catch (Exception e) {
+      error("could not find interfaces for %s", interfaze);
+    }
+
+    return results;
+  }
+
+  /**
+   * return a list of services which are currently running and implement a
+   * specific interface
+   * 
+   * @param interfaze
+   * @return
+   */
+  public static synchronized List<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
+    List<ServiceInterface> ret = new ArrayList<ServiceInterface>();
 
     Iterator<String> it = registry.keySet().iterator();
     String serviceName;
@@ -1921,6 +1987,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
 
     locale = Locale.getDefault();
+    locales = Locale.getDefaults();
 
     if (runtime.platform == null) {
       runtime.platform = Platform.getLocalInstance();
@@ -2079,6 +2146,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     log.info("checking for updates");
   }
 
+  /**
+   * return the current locale
+   */
+  @Override
   public Locale getLocale() {
     return locale;
   }
@@ -2456,7 +2527,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
   }
 
-  public static ArrayList<Status> getErrors() {
+  public static List<Status> getErrors() {
     ArrayList<Status> stati = new ArrayList<Status>();
     for (ServiceInterface si : getLocalServices().values()) {
       Status status = si.getLastError();
@@ -2628,34 +2699,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return r;
   }
 
-  public static void setLanguage(String language) {
-    Runtime runtime = Runtime.getInstance();
-    runtime.setLocale(new Locale(language));
+  @Override
+  public void setLocale(String code) {
+    locale = new Locale(code);
   }
 
-  public void setLocale(String language) {
-    setLocale(new Locale(language));
-  }
-
-  public void setLocale(String language, String country) {
-    setLocale(new Locale(language, country));
-  }
-
-  public void setLocale(String language, String country, String variant) {
-    setLocale(new Locale(language, country, variant));
-  }
-
-  public void setLocale(Locale locale) {
-    // the local field is used for display & serialization
-    this.locale = locale;
-    Locale.setDefault(locale);
-    /*
-     * I don't believe these are necessary System.setProperty("user.language",
-     * language); System.setProperty("user.country", country);
-     * System.setProperty("user.variant", variant);
-     */
-  }
-
+  @Override
   public String getLanguage() {
     return locale.getLanguage();
   }
@@ -2729,16 +2778,17 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * Return supported system languages
    */
-  public HashMap<String, String> getLanguages() {
+  public Map<String, Locale> getLanguages() {
+    return Locale.getAvailableLanguages();
+  }
 
-    Locale[] locales = Locale.getAvailableLocales();
+  public Map<String, Locale> getLocales() {
+    return locales;
+  }
 
-    HashMap<String, String> languagesList = new HashMap<String, String>();
-    for (int i = 0; i < locales.length; i++) {
-      log.info(locales[i].toLanguageTag());
-      languagesList.put(locales[i].toLanguageTag(), locales[i].getDisplayLanguage());
-    }
-    return languagesList;
+  public Map<String, Locale> setLocales(String... codes) {
+    locales = Locale.getLocaleMap(codes);
+    return locales;
   }
 
   /**
@@ -2747,11 +2797,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * @return
    */
   static public Security getSecurity() {
-    return Runtime.getInstance().security;
+    return Runtime.security;
   }
 
   public String getLocaleTag() {
-    return locale.toLanguageTag();
+    return locale.getTag();
   }
 
   public static Process exec(String... cmd) throws IOException {
@@ -2847,19 +2897,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } catch (Exception e) {
       log.error("backup threw", e);
     }
-  }
-
-  public static String export(String filename, String names) throws IOException {
-    String python = LangUtils.toPython(names);
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    return python;
-  }
-
-  public static String exportAll(String filename) throws IOException {
-    // currently only support python - maybe in future we'll support js too
-    String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    return python;
   }
 
   public static Runtime getInstance(String[] args2) {
@@ -3404,6 +3441,15 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return getConnections(getName());
   }
 
+  public void startHeartbeat() {
+    // we are alive - start our process heartbeat
+    runtime.addTask(2000, "heartbeat");
+  }
+
+  public void stopHeartbeat() {
+    purgeTask("heartbeat");
+  }
+
   // FIXME - remove if not using ...
   @Override
   public void sendRemote(Message msg) throws IOException {
@@ -3436,12 +3482,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         System.out.println("null");
         return;
       }
-      
+
       boolean filterHeartBeatsFromCli = true;
       if (filterHeartBeatsFromCli && msg.method.equals("onHeartbeat")) {
         return;
       }
-      
+
       // should really "always" be a single item in the array since its a return
       // msg
       // but just in case ...

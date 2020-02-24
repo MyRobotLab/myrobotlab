@@ -44,7 +44,8 @@ import org.myrobotlab.joystick.Component;
 import org.myrobotlab.joystick.Controller;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.Mapper;
+import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
 
@@ -165,7 +166,7 @@ public class Joystick extends Service {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = (float) mappers.get(id).calcOutput(input);
+              input = mappers.get(id).calcOutput((double)input).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);
@@ -285,7 +286,7 @@ public class Joystick extends Service {
   }
 
   public void map(String name, double x0, double x1, double y0, double y1) {
-    Mapper mapper = new Mapper(x0, x1, y0, y1);
+    Mapper mapper = new MapperLinear(x0, x1, y0, y1);
     mappers.put(name, mapper);
   }
 

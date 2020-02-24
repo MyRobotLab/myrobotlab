@@ -50,6 +50,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.id = null
 
+    let remotePlatform = null
+
     // FIXME - must be "multiple" remoteIds... - although there is only 1 connected runtime
     this.remoteId = null
 
@@ -260,6 +262,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         console.log('--> got getHelloResponse: and set jsRuntimeMethodCallbackMap')
         let hello = JSON.parse(request.data[1])
 
+        remotePlatform = hello.platform
         // FIXME - remove this - there aren't 1 remoteId there are many !
         _self.remoteId = hello.id
 
@@ -305,9 +308,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     return
                 }
 
-                //console.log('--> ' + msg.msgId + ' ' + msg.msgType)
-                // console.log('---> ' + msg.msgId + ' ' + msg.name + '.' + msg.method)
-                console.warn('---> ' + msg.name + '.' + msg.method)
+                // GREAT FOR DEBUGGING INCOMING MSGS
+                // console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
 
                 // handle blocking 'R'eturn msgs here - FIXME - timer to clean old errored msg ?
                 // the blocking call removes any msg resolved
@@ -398,9 +400,17 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     this.getShortName = function(name) {
         if (name.includes('@')) {
-            name.substring(0, name.indexOf("@"))
+            return name.substring(0, name.indexOf("@"))
         } else {
             return name
+        }
+    }
+
+    this.getStyle = function(bool) {
+        if (bool){
+            return ['btn', 'btn-default', 'active']
+        } else {
+            return ['btn', 'btn-default']
         }
     }
 
@@ -412,8 +422,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             } else {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
-                    console.error('string supplied name did not have remoteId - this will be a problem !')
-                    return service + '@' + _self.id
+                    console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
+                    return service + '@' + _self.remoteId
                 } else {
                     return service
                 }
@@ -590,7 +600,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // var msg = _self.createMessage('runtime', "getHelloResponse", "fill-uuid", hello)
         // msg.msgType = 'B' // no timeout - simple 'B'locking expects a resturn msg
         // _self.sendMessage(msg)
-        console.debug('sending getHelloResponse to host runtime with hello ' + JSON.stringify(hello) )
+        console.debug('sending getHelloResponse to host runtime with hello ' + JSON.stringify(hello))
 
         _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
 
@@ -636,6 +646,48 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             updateSubscribtions.push(callback)
         }
 
+        // lovely function - https://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
+        _self.flatten = function(data) {
+            var result = {};
+            function recurse(cur, prop) {
+                if (Object(cur) !== cur) {
+                    result[prop] = cur;
+                } else if (Array.isArray(cur)) {
+                    for (var i = 0, l = cur.length; i < l; i++)
+                        recurse(cur[i], prop + "[" + i + "]");
+                    if (l == 0)
+                        result[prop] = [];
+                } else {
+                    var isEmpty = true;
+                    for (var p in cur) {
+                        isEmpty = false;
+                        recurse(cur[p], prop ? prop + "." + p : p);
+                    }
+                    if (isEmpty && prop)
+                        result[prop] = {};
+                }
+            }
+            recurse(data, "");
+            return result;
+        }
+
+        _self.unflatten = function(data) {
+            "use strict";
+            if (Object(data) !== data || Array.isArray(data))
+                return data;
+            var regex = /\.?([^.\[\]]+)|\[(\d+)\]/g
+              , resultholder = {};
+            for (var p in data) {
+                var cur = resultholder, prop = "", m;
+                while (m = regex.exec(p)) {
+                    cur = cur[prop] || (cur[prop] = (m[2] ? [] : {}));
+                    prop = m[2] || m[1];
+                }
+                cur[prop] = data[p];
+            }
+            return resultholder[""] || resultholder;
+        }
+
         _self.unsubscribeFromUpdates = function(callback) {
             var index = updateSubscribtions.indexOf(callback)
             if (index != -1) {
@@ -667,6 +719,62 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.savePanel = function(name) {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
+
+        _self.setViewType = function(viewType){
+            _self.viewType = viewType
+        }
+
+         _self.getViewType = function(){
+            return _self.viewType
+        }
+
+        /**
+         * return a flattened sorted array of properties for input service
+         * TODO - add exclude replacement and info parameters
+         */
+        _self.getProperties = function(service) {
+            let flat = _self.flatten(service)
+            // console.table(flat) -  very cool logging, but to intensive
+
+            properties = []
+
+            let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
+
+            // FIXME - extract from javadoc !
+            let info = {
+                autoDisable: "servo will de-energize if no activity occurs in {idleTimeout} ms - saving the servo from unnecessary wear or damage",
+                idleTimeout: "number of milliseconds the servo will de-energize if no activity has occurred",
+                isSweeping: "servo is in sweep mode - which will make the servo swing back and forth at current speed between min and max values",
+                lastActivityTimeTs: "timestamp of last move servo did"
+            }
+
+            // Push each JSON Object entry in array by [key, value]
+            for (let i in flat) {
+
+                let o = flat[i]
+               
+                let excluded = false
+
+                for (let j = 0; j < exclude.length; j++) {
+                    if (i.startsWith(exclude[j])) {
+                        excluded = true
+                        break;
+                    }
+                }
+
+                if (excluded) {
+                    continue
+                }
+
+                let inf = (info[i] == null) ? '' : info[i]
+
+                properties.push([i, flat[i], inf])
+            }
+
+            // Run native sort function and returns sorted array.
+            return properties.sort()
+        }
+
         _self.getPanelsList = function() {
             return Object.keys(panels).map(function(key) {
                 return panels[key]
@@ -681,15 +789,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return panels[fullname]
             }
             lastPosY += 40
+            // FIXME - this did not work well
             var posY = lastPosY
             zIndex++
             //construct panel & add it to list
             panels[fullname] = {
                 simpleName: _self.getSimpleName(service.serviceClass),
-                //serviceType (e.g. Runtime, Python, ...)
                 name: fullname,
-                // service.name,
-                //name of the service instance (e.g. runtime, python, rt, pyt, ...)
+                displayName: _self.getShortName(fullname),
                 templatestatus: service.templatestatus,
                 //the state the loading of the template is in (loading, loaded, notfound)
                 list: 'main',
@@ -770,6 +877,31 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if ('scope'in panels[name]) {
                 $log.warn('replacing an existing scope for ' + name)
             }
+
+            // hanging 'all service' related properties on the instance scope
+            scope.showProperties = false
+            scope.showMethods = false
+            scope.properties = []
+            scope.statusControlMode = 'status'
+            scope.viewType = _self.viewType
+
+
+
+            // status or control - mode of properties
+            scope.changeMode = function() {
+                scope.statusControlMode = (scope.statusControlMode == 'status') ? 'control' : 'status'
+                /*
+                if (scope.statusControlMode == 'status') {
+                    $scope.pos.options.disabled = true;
+                    $scope.limits.options.disabled = true;
+                } else {
+                    $scope.pos.options.disabled = false;
+                    $scope.limits.options.disabled = false;
+                }
+                */
+
+            }
+
             panels[name].scope = scope
         }
 
@@ -801,6 +933,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             }
 
             panels[newPanel.name].name = newPanel.name
+            panels[newPanel.name].displayName = _self.getShortName(newPanel.name)
             if (newPanel.simpleName) {
                 panels[newPanel.name].simpleName = newPanel.simpleName
             }
@@ -937,7 +1070,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                 // FIXME - bury it ?
                             case 'onState':
                                 _self.updateState(msg.data[0])
-                                //                                $scope.$apply() scope is context related !!!
+                                //                                $apply() scope is context related !!!
                                 break
                             case 'onMethodMap':
                                 // console.log('onMethodMap Yay !!')
@@ -1055,6 +1188,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getRemoteId: function() {
                 return _self.remoteId
             },
+            getRemotePlatform: function() {
+                return remotePlatform
+            },
             getId: function() {
                 return _self.id
             },
@@ -1117,6 +1253,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
+            getStyle: _self.getStyle,
             subscribe: _self.subscribe,
             unsubscribe: _self.unsubscribe,
             subscribeToService: _self.subscribeToService,
@@ -1125,7 +1262,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeConnected: _self.subscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
+            getProperties: _self.getProperties,
             sendMessage: _self.sendMessage,
+            setViewType:_self.setViewType,
+            getViewType:_self.getViewType,
             createMessage: _self.createMessage
         }
 

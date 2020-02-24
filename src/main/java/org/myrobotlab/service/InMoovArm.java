@@ -54,6 +54,17 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   public boolean attach() {
     return enable();
   }
+  
+  public void releaseService() {
+    try {
+      disable();
+      releasePeers();
+      super.releaseService(); 
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
 
   public boolean enable() {
     sleep(InMoov.attachPauseMs);
@@ -251,17 +262,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return side;
   }
 
-  public boolean isAttached() {
-    boolean attached = false;
-
-    attached |= bicep.isAttached();
-    attached |= rotate.isAttached();
-    attached |= shoulder.isAttached();
-    attached |= omoplate.isAttached();
-
-    return attached;
-  }
-
   public void moveTo(double bicep, double rotate, double shoulder, double omoplate) {
     if (log.isDebugEnabled()) {
       log.debug("{} moveTo {} {} {} {}", getName(), bicep, rotate, shoulder, omoplate);
@@ -284,16 +284,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     rotate.waitTargetPos();
     shoulder.waitTargetPos();
     omoplate.waitTargetPos();
-  }
-
-  public void releaseService() {
-    try {
-      releasePeers();
-      super.releaseService();
-      disable();
-    } catch (Exception e) {
-      error(e);
-    }
   }
 
   public void rest() {

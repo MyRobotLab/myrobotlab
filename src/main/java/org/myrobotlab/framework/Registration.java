@@ -1,6 +1,7 @@
 package org.myrobotlab.framework;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
@@ -78,5 +79,9 @@ public class Registration {
 
   public String getState() {
     return state;
+  }
+
+  public String getFullName() {
+    return String.format("%s@%s", name, id);
   }
 }
