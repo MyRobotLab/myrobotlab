@@ -20,10 +20,11 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.selectedLanguage = "en-US"
     $scope.startTimestamp = null
     $scope.stopRequested = false
-    $scope.errorText = null
+    $scope.error = null // original error code
     $scope.log = []
     $scope.webkitSupport = true
     $scope.micImage = '../WebkitSpeechRecognition/mic.png'
+
 
     // this is really a js service
     // and this is the initial service state we want
@@ -52,9 +53,9 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         case 'onstart':
             $scope.isRecording = true
             $scope.micImage = '../WebkitSpeechRecognition/mic-animate.gif'
-            // $scope.errorText = null
             $scope.startTimestamp = new Date().getTime()    
             console.debug('speak now')
+            $scope.error = null
             $scope.$apply()
             break
 
@@ -95,19 +96,25 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             break
 
         case 'onerror':
-            $scope.errorText = event.error
+            
+            $scope.error = event.error
+            
+            /*
             let errorTs = new Date().getTime()
             if ((errorTs - $scope.startTimestamp) < 100) {
                 $scope.errorText += ' - high error rate - is another tab listening?'          
 
             }
-
+            */
 
             if (event.error != 'no-speech') {
-                console.error('onerror - stopping- ' + $scope.errorText)
+                console.error('onerror - stopping- ' + $scope.error)
+                
+                // requesting recording STOP - this will finalize stop
+                msg.send('stopRecording')
                 $scope.setState('stop')
             } else {
-                console.debug('onerror - ' + $scope.errorText)
+                console.debug('no-speech pending restart')
             }
 
             $scope.$apply()
@@ -128,8 +135,6 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             }
             recognizer.lang = $scope.selectedLanguage
             recognizer.start()
-            $scope.errorText = null
-
             break
         default:
             console.error("unhandled status " + statusKey)
