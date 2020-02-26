@@ -10,11 +10,55 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.languageSelected = null
     $scope.speakText = null
     $scope.toggleValue = true
-    
+
+    $scope.activePanel = 'settings'
+
     $scope.speechTypes = null
     $scope.mouth = null
 
     $scope.selectedGesture = null
+
+    // inmoov menu buttons
+    $scope.buttons = []
+
+    let addButton = function(name) {
+        let button = {
+            name: name,
+            translate: "0px,0px",
+            img: "../InMoov2/img/" + name + "_off.png",
+            hover: "../InMoov2/img/" + name + "_hover.png"
+        }
+        $scope.buttons.push(button)
+    }
+
+    let calculatButtonPos = function() {
+        let angle = 234.5 * (Math.PI / 180)// (360 - 90) * (Math.PI / 180)
+        let dangle = (360 / $scope.buttons.length) * (Math.PI / 180)
+        let centerX = 238
+        let centerY = 226
+        let radius = 230
+        for (i = 0; i < $scope.buttons.length; i++) {
+            angle += dangle
+            // $scope.buttons[i].rotate = angle + "deg"
+            var x = Math.round(centerX + radius * Math.cos(angle));
+            var y = Math.round(centerY + radius * Math.sin(angle));
+            $scope.buttons[i].translate = x +"px,"+ y + "px"
+        }
+    }
+
+    let highlightButton = function(name){
+        // FIXME - won't work - need to have a selected button that overlays !!!
+        for (i = 0; i < $scope.buttons.length; i++) {
+           if ($scope.buttons[i].name == name){
+               $scope.buttons[i].img = "../InMoov2/img/" + name + "_on.png"
+           } else {
+               // turn other buttons off
+               $scope.buttons[i].img = "../InMoov2/img/" + name + "_off.png"
+           }
+        }
+        // $scope.$apply()
+        console.info('here')
+    }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -25,7 +69,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
         $scope.$apply()
     }
 
-    $scope.getShortName = function(longName){
+    $scope.getShortName = function(longName) {
         return longName.substring(longName.lastIndexOf(".") + 1)
     }
 
@@ -73,6 +117,15 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
             $scope.startMouth()
         }
         msg.send('speakBlocking', $scope.speakText)
+    }
+
+    $scope.setPanel = function(panelName) {
+        $scope.activePanel = panelName
+        highlightButton(panelName)
+    }
+
+    $scope.showPanel = function(panelName) {
+        return $scope.activePanel == panelName
     }
 
     this.onMsg = function(inMsg) {
@@ -142,6 +195,19 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     // msg.subscribe('getServoNames')
     // msg.send('getServoNames')
     // mrl.subscribeToServiceMethod(_self.onMsg, mrl.getRuntime().name, 'getServiceTypeNamesFromInterface');
+
+    addButton('brain')
+    addButton('mouth')
+    addButton('head')
+    addButton('torso')
+    addButton('settings')
+    addButton('legs')
+    addButton('pir')
+    addButton('arm')
+    addButton('hand')
+    addButton('ear')
+
+    calculatButtonPos()
 
     /*
 
