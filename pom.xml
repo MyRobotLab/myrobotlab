@@ -1113,13 +1113,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>7.7.1</version>
+    <version>8.4.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>7.7.1</version>
+    <version>8.4.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1224,7 +1224,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.4.0</version>
+    <version>8.4.1</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1236,7 +1236,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>7.7.1</version>
+    <version>8.4.1</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1248,7 +1248,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>7.7.1</version>
+    <version>8.4.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
