@@ -934,8 +934,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     meta.addDependency("commons-io", "commons-io", "2.5");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "7.7.1");
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "7.7.1");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "8.4.1");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.4.1");
     meta.addCategory("ai", "control");
     return meta;
   }
