@@ -224,37 +224,31 @@
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta4</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.deeplearning4j</groupId>
-    <artifactId>deeplearning4j-ui_2.11</artifactId>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta4</version>
+    <version>1.0.0-beta6</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -264,39 +258,13 @@
     <scope>provided</scope>
   </dependency>
   
-  <!--  TODO: fix me these need to be updated for 1.5.1 javacpp stuffs -->
   <!-- https://mvnrepository.com/artifact/org.bytedeco/javacpp -->
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
     <scope>provided</scope>
-</dependency>
-  
-  <!-- https://mvnrepository.com/artifact/org.bytedeco.javacpp-presets/openblas -->
-  <!-- https://mvnrepository.com/artifact/org.bytedeco/openblas-platform -->
-<dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>openblas-platform</artifactId>
-    <version>0.3.6-1.5.1</version>
-    <scope>provided</scope>
-</dependency>
-<!-- https://mvnrepository.com/artifact/org.bytedeco/hdf5 -->
-<dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>hdf5</artifactId>
-    <version>1.10.5-1.5.1</version>
-    <scope>provided</scope>
-</dependency>
-<!-- https://mvnrepository.com/artifact/org.bytedeco/hdf5-platform -->
-<dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>hdf5-platform</artifactId>
-    <version>1.10.5-1.5.1</version>
-    <scope>provided</scope>
-</dependency>
-
-  
+</dependency> 
 <!-- Deeplearning4j end -->
 
 <!-- DocumentPipeline begin -->
@@ -971,13 +939,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1351,14 +1319,14 @@
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.0-1.5.1</version>
+    <version>4.1.0-1.5.2</version>
     <scope>provided</scope>
 </dependency>
 
 <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.0-1.5.1</version>
+    <version>4.1.0-1.5.2</version>
     <scope>provided</scope>
 </dependency>
 
