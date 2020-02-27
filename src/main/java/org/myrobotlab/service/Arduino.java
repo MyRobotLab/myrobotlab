@@ -213,7 +213,7 @@ public class Arduino extends AbstractMicrocontroller
                * use attachables like everything else - power mapping should be
                * inside the motorcontrol
                */
-  Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
+  transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public transient Msg msg;
 
