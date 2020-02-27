@@ -394,7 +394,7 @@ public class OpenCV extends AbstractComputerVision {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.5.1";
+    String javaCvVersion = "1.5.2";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
 
@@ -479,12 +479,12 @@ public class OpenCV extends AbstractComputerVision {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     LoggingFactory.init("info");
 
-   //  Runtime.start("gui", "SwingGui");
+   Runtime.start("gui", "SwingGui");
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
+ //   WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+ //   webgui.autoStartBrowser(false);
+ //   webgui.startService();
 
     // cv.capture();
     // cv.setDisplay(true);
