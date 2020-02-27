@@ -982,8 +982,6 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-nn", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
-    // TODO: which scala version?! for now 2.11
-    meta.addDependency("org.deeplearning4j", "deeplearning4j-ui_2.11", dl4jVersion);
     
     // the miniXCEPTION network / model for emotion detection on detected faces
     meta.addDependency("miniXCEPTION", "miniXCEPTION", "0.0", "zip");
