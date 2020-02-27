@@ -35,6 +35,7 @@ import org.datavec.image.transform.WarpImageTransform;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.deeplearning4j.datasets.iterator.MultipleEpochsIterator;
 import org.deeplearning4j.eval.Evaluation;
+import org.deeplearning4j.nn.api.Model;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
@@ -63,6 +64,7 @@ import org.deeplearning4j.util.ModelSerializer;
 import org.deeplearning4j.zoo.PretrainedType;
 import org.deeplearning4j.zoo.ZooModel;
 import org.deeplearning4j.zoo.model.Darknet19;
+import org.deeplearning4j.zoo.model.TextGenerationLSTM;
 import org.deeplearning4j.zoo.model.TinyYOLO;
 import org.deeplearning4j.zoo.model.VGG16;
 import org.deeplearning4j.zoo.util.ClassPrediction;
@@ -79,6 +81,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -147,6 +150,8 @@ public class Deeplearning4j extends Service {
   private TinyYOLO tinyYOLOModel = null;
 
   private ComputationGraph miniXCEPTION = null;
+  
+  private TextGenerationLSTM textGenLSTM = null;
   
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
   
@@ -484,6 +489,18 @@ public class Deeplearning4j extends Service {
     return new DenseLayer.Builder().name(name).nOut(out).biasInit(bias).dropOut(dropOut).dist(dist).build();
   }
 
+  public void loadTextGenLSTM() throws IOException {
+    textGenLSTM = TextGenerationLSTM.builder().build();
+    // textGenLSTM.
+    // TODO: we have to build a model.. and load it in mrl..
+    // there is no model available as far as i can tell.
+    Model m = textGenLSTM.initPretrained();
+    
+    // TODO: add all the good stuff here. and refactor it out into useful methods later.
+    System.out.println(m);
+    
+  }
+  
   // This is for the Model Zoo support to load in the VGG16 model.
   public void loadVGG16() throws IOException {
     log.info("Loading the VGG16 Model.  Download is large 500+ MB.. this will be cached after it downloads");
@@ -953,7 +970,7 @@ public class Deeplearning4j extends Service {
 
   static public ServiceType getMetaData() {
 
-    String dl4jVersion = "1.0.0-beta4";
+    String dl4jVersion = "1.0.0-beta6";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
@@ -967,17 +984,6 @@ public class Deeplearning4j extends Service {
     meta.addDependency("org.deeplearning4j", "deeplearning4j-modelimport", dl4jVersion);
     // TODO: which scala version?! for now 2.11
     meta.addDependency("org.deeplearning4j", "deeplearning4j-ui_2.11", dl4jVersion);
-    // pull in a newer one from opencv / tesseract.
-    //meta.exclude("org.bytedeco", "javacpp");
-    // force a newer version of javacpp for this.
-    // we need to force some newer versions of various javacpp packages to newer versions to avoid
-    // conflicts with opencv 1.5.1 ...
-    meta.addDependency("org.bytedeco", "javacpp", "1.5.1");
-    meta.addDependency("org.bytedeco", "openblas", "0.3.6-1.5.1");
-    meta.addDependency("org.bytedeco", "openblas-platform", "0.3.6-1.5.1");
-    meta.addDependency("org.bytedeco", "hdf5", "1.10.5-1.5.1");
-    meta.addDependency("org.bytedeco", "hdf5-platform", "1.10.5-1.5.1");
-    
     
     // the miniXCEPTION network / model for emotion detection on detected faces
     meta.addDependency("miniXCEPTION", "miniXCEPTION", "0.0", "zip");
@@ -991,8 +997,8 @@ public class Deeplearning4j extends Service {
       log.info("-------------------------------");
       // Use this if you want cuda 9.1 NVidia GPU support
       // TODO: figure out the cuDNN stuff.
-      meta.addDependency("org.nd4j", "nd4j-cuda-9.2-platform", dl4jVersion);
-      meta.addDependency("org.nd4j", "deeplearning4j-cuda-9.2", dl4jVersion);
+      meta.addDependency("org.nd4j", "nd4j-cuda-10.1-platform", dl4jVersion);
+      meta.addDependency("org.nd4j", "deeplearning4j-cuda-10.1", dl4jVersion);
     }
     // The default build of 1.0.0-alpha does not support the raspi, we built &
     // host the following dependencies.
@@ -1008,12 +1014,16 @@ public class Deeplearning4j extends Service {
   }
 
   public static void main(String[] args) throws IOException {
+    LoggingFactory.init("info");
+    
     Deeplearning4j dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
     // this is how many generations to iterate on training the dataset. larger
     // number means longer training time.
     // dl4j.loadDarknet();
-    dl4j.loadTinyYOLO();
-    // dl4j.classifyImageTinyYolo(iplImage);
+   // dl4j.loadTinyYOLO();
+    dl4j.loadTextGenLSTM();
+    System.out.println("done.");
+    // dl4j.classifyImageTinyYolo();
     // dl4j.epochs = 50;
     // dl4j.trainModel("test/resources/animals");
     // //dl4j.trainModel("training");
