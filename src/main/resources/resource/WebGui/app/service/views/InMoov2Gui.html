@@ -8,26 +8,35 @@
     #container {
         width: 620px;
         height: 588px;
+        /* border: 1px solid #000; */
         position: relative;
         background-image: url("../InMoov2/img/background.png");
+    }
+    #container-cell {
+        width: 620px;
     }
 
     .inmoov-menu-button {
         position: absolute;
     }
 </style>
-<table class="table table-striped">
+<table border="1" class="table table-striped">
     <tr>
         <td colspan="2">&nbsp;{{onText}} 
-        <td>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td id="container-cell">
             <!--inmoov map begin-->
+
             <div id="container">
+
+                <img class="inmoov-menu-button" ng-src="../InMoov2/img/InMoov_on.png" ng-click="setPanel('InMoov')" />
+                
                 <div class="inmoov-menu-button" ng-repeat="button in buttons" id="button.name +'Src'" ng-init="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-mouseover="imgSrc='../InMoov2/img/'+button.name+'_hover.png'" ng-mouseout="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-style="imgStyle='transform:translateX(300px)'">
                     <img ng-src="{{imgSrc}}" ng-click="setPanel(button.name)" style="transform: translate({{button.translate}})"/>
                 </div>
+                <img class="inmoov-menu-button" ng-src="{{selectedButton.img}}" ng-click="setPanel(selectedButton.name)" style="transform: translate({{selectedButton.translate}})" />
             </div>
         </td>
         <td>
@@ -73,7 +82,7 @@
                     <td>
                         <label>leftArm Activated:</label>
                         <td>
-                            <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="ON" off="OFF"/>
+                            <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="!service.isLeftArmActivated?msg.stopLeftArm():msg.startLeftArm()" width="120" height="30" on="ON" off="OFF"/>
                         </td>
                     </td>
                 </tr>
@@ -81,7 +90,7 @@
                         <td>
                             <label>rightArm Activated:</label>
                             <td>
-                                <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="ON" off="OFF"/>
+                                <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="!service.isRightArmActivated?msg.stopRightArm():msg.startRightArm()" width="120" height="30" on="ON" off="OFF"/>
                             </td>
                         </td>
                 </tr>
@@ -200,6 +209,7 @@
                 </tr>
                 <tr>
                     <td>
+                        <!-- toggle width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.startHead(!service.isHeadActivated)" width="80" height="30" on="head on" off="head off"/ -->
                         <label>vision Activated:</label>
                         <td>
                             <toggle width="80" height="30" ng-model="service.isOpenCVActivated" ng-change="!service.isOpenCVActivated?msg.stopOpenCV():msg.startOpenCV()" on="ON" off="OFF"/></toggle>
@@ -261,11 +271,11 @@
                 </tr>
             </table>
             <!------------------------ extra end ------------------------------>
-             <!------------------------ settings begin ------------------------------>
-            <table ng-show="showPanel('settings')" class="inmoov-sub-panel table table-striped">
+             <!------------------------ InMoov begin ------------------------------>
+            <table ng-show="showPanel('InMoov')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>settings</label>
+                        <label>InMoov</label>
                         <div class="form-group">
                             <select multiple class="form-control">
                                 <option>config-01</option>
@@ -298,7 +308,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="virtualize on" off="virtualize off"></toggle>
+                        <toggle width="120" height="28" ng-model="service.isVirtual" ng-change="!service.isVirtual?msg.setVirtual(false):msg.setVirtual(true)" on="virtualize on" off="virtualize off"></toggle>
                         <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator on" off="simulator off"></toggle>
                     </td>
                 </tr>
@@ -314,7 +324,7 @@
                     </td>
                 </tr>
             </table>
-            <!------------------------ settings end ------------------------------>
+            <!------------------------ panel end ------------------------------>
             <!-- panels end -->
         </td>
     </tr>
