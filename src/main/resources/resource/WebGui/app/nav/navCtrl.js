@@ -6,12 +6,17 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.warningStatus = null
     $scope.infoStatus = null
 
+
     $scope.errorCount = 0
     $scope.warningCount = 0
     $scope.infoCount = 0
     // platform of webgui
     $scope.remotePlatform = null
     $scope.viewType = mrl.getViewType()
+
+    $scope.displayImages = mrl.getDisplayImages()
+
+  
 
     mrl.subscribeConnected(function(connected) {
         $log.info('nav:connection update', connected)
@@ -32,6 +37,8 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
         })
     })
 
+
+
     // load type ahead service types
     $scope.possibleServices = Object.values(mrl.getPossibleServices())
     // get platform information for display
@@ -47,17 +54,13 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
                 $scope.warningStatus = status
                 $scope.warningCount += 1
             } else {
-                $scope.infoStatus = status;
+                $scope.infoStatus = status
                 $scope.infoCount += 1
             }
         })
     })
 
     $scope.showAll = true
-    // = panelSvc.showAll
-
-    //service-panels & update-routine (also used for search)
-    // populated for search
 
     var panelsUpdated = function(panels) {
         $scope.panels = panels
@@ -137,6 +140,39 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
             controller: 'aboutCtrl'
         })
     }
+
+/*
+    $scope.displayImage = function(ev) {
+        var modalInstance = $uibModal.open({
+            template: '<div ngsf-fullscreen><img class="fullscreen" src="https://static01.nyt.com/images/2020/02/13/world/13uk-plane/13uk-plane-articleLarge.jpg"/><button ngsf-toggle-fullscreen>Toggle fullscreen</button></div>',
+            //  templateUrl: 'view/sample.html',
+            // controller: 'testController',// a controller for modal instance
+            // controllerUrl: 'controller/test-controller', // can specify controller url path
+            controllerAs: 'ctrl',
+            //  controller as syntax
+            windowClass: 'clsPopup',
+            //  can specify the CSS class
+            keyboard: false,
+            // ESC key close enable/disable
+            size: "100%",
+            resolve: {
+                actualData: function() {
+                    return self.sampleData
+                }
+            }// data passed to the controller
+        }).result.then(function(data) {//do logic
+        }, function() {// action on popup dismissal.
+        })
+    }
+    */
+
+    $scope.displayImage = function(imgSrc) {
+        $scope.$apply()
+    }
+
+
+    // set the display callback function for webgui.display(x)
+    mrl.setDisplayCallback($scope.displayImage)
 
     $scope.stateGo = $state.go
 }

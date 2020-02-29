@@ -42,7 +42,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
             }
         })
     }
-    panelsUpdated(mrl.getPanelsList())
+    panelsUpdated(mrl.getPanelList())
     mrl.subscribeToUpdates(panelsUpdated)
 
     $scope.changeTab = function(tab) {
@@ -51,5 +51,6 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
             $scope.$broadcast('rzSliderForceRender')
         })
     }
+    
 }
 ])

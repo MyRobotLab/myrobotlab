@@ -104,3 +104,22 @@ table, th, td {
     /* background-color: #ccc; */
 }
 
+
+.modal-custom-lg .modal-dialog {
+    width: 100%;
+    height: 100%;
+}
+
+.modal-custom-lg .modal-content {
+    width: 100%;
+    height: 100%;
+}
+
+.fullscreen {
+    width: 100%;
+    height: 100%;
+}
+
+.absolute {
+    position:absolute;
+}

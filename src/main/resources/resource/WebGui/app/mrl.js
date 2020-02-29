@@ -23,10 +23,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // object containing all panels
     let panels = {}
 
+    // dictionary of images to display and their display properties
+    let displayImages = {}
+
+    // list of callback functions to display images
+    let displayCallbacks = []
+
     // global zIndex
     let zIndex = 0
-
-    // FIXME - make all instance variables and make a true singleton - half and half is a mess
 
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
@@ -81,6 +85,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     let deferred = null
     let msgInterfaces = {}
 
+    // configuration for atmosphere websockets
     // https://github.com/Atmosphere/atmosphere/wiki/jQuery.atmosphere.js-atmosphere.js-API
     // See the following link for all websocket configuration
     // https://raw.githubusercontent.com/Atmosphere/atmosphere-javascript/master/modules/javascript/src/main/webapp/javascript/atmosphere.js
@@ -407,7 +412,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.getStyle = function(bool) {
-        if (bool){
+        if (bool) {
             return ['btn', 'btn-default', 'active']
         } else {
             return ['btn', 'btn-default']
@@ -696,7 +701,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         var notifyAllOfUpdate = function() {
-            var panellist = _self.getPanelsList()
+            var panellist = _self.getPanelList()
             angular.forEach(updateSubscribtions, function(value, key) {
                 value(panellist)
             })
@@ -720,11 +725,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
 
-        _self.setViewType = function(viewType){
+        _self.setViewType = function(viewType) {
             _self.viewType = viewType
         }
 
-         _self.getViewType = function(){
+        _self.getViewType = function() {
             return _self.viewType
         }
 
@@ -752,7 +757,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             for (let i in flat) {
 
                 let o = flat[i]
-               
+
                 let excluded = false
 
                 for (let j = 0; j < exclude.length; j++) {
@@ -775,13 +780,31 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             return properties.sort()
         }
 
-        _self.getPanelsList = function() {
+        _self.getPanelList = function() {
             return Object.keys(panels).map(function(key) {
                 return panels[key]
             })
         }
 
-        var addPanel = function(service) {
+        _self.display = function(imageSrc, name) {
+            if (!name){
+                name = 'image-' +  Object.keys(displayImages).length
+            }
+            displayImages[name] = createPanel(name, name, 15, lastPosY, 800, 0, zIndex, imageSrc)
+            for (i = 0; i < displayCallbacks.length; ++i){
+                displayCallbacks[i](displayImages[name])
+            }
+        }
+
+        let setDisplayCallback = function(callback){
+            displayCallbacks.push(callback)
+        }
+
+        let getDisplayImages = function(){
+            return displayImages
+        }
+
+        let addPanel = function(service) {
             var fullname = _self.getFullName(service)
 
             if (panels.hasOwnProperty(fullname)) {
@@ -789,40 +812,44 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 return panels[fullname]
             }
             lastPosY += 40
-            // FIXME - this did not work well
-            var posY = lastPosY
             zIndex++
-            //construct panel & add it to list
-            panels[fullname] = {
-                simpleName: _self.getSimpleName(service.serviceClass),
+            //construct panel & add it to dictionary
+            panels[fullname] = createPanel(fullname, service.serviceClass, 15, lastPosY, 800, 0, zIndex)
+            return panels[fullname]
+        }
+
+        let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
+
+            panel = {
+                simpleName: _self.getSimpleName(type),
                 name: fullname,
                 displayName: _self.getShortName(fullname),
-                templatestatus: service.templatestatus,
-                //the state the loading of the template is in (loading, loaded, notfound)
-                list: 'main',
+
+                //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
+                templatestatus: null, // service.templatestatus,
                 // ???
-                //the list this panel belongs to (e.g. main, min, ...)
-                // panelname: 'main',
-                // TODO - rename as 'panelType'
+                list: 'main',
                 size: 'free',
-                // TODO - rename as 'panelType'
-                height: 0,
-                //the height of this panel
-                width: 800,
-                // TODO - getPreferredWidth
-                posX: 15,
-                posY: posY,
+
+                data: data,
+                
+                posX: x,
+                posY: y ,
+                width: width,
+                height: height,
                 zIndex: zIndex,
                 hide: false,
-                //if this panel should be hidden // TODO -load hide...
-                // a reference to the panelSvc
+               
+                // FIXME  - remove this use mrl panel methods
                 svc: _self,
                 hide: function() {
                     hide = true
                 }
             }
-            return panels[fullname]
+
+            return panel
         }
+
         _self.addService = function(service) {
             console.debug('mrl.addService ' + service.name)
 
@@ -884,8 +911,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             scope.properties = []
             scope.statusControlMode = 'status'
             scope.viewType = _self.viewType
-
-
 
             // status or control - mode of properties
             scope.changeMode = function() {
@@ -1248,8 +1273,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             },
 
             controllerscope: _self.controllerscope,
+            createMessage: _self.createMessage,
+            display: _self.display,
+            getDisplayImages: getDisplayImages,
+            setDisplayCallback: setDisplayCallback,
             subscribeToUpdates: _self.subscribeToUpdates,
-            getPanelsList: _self.getPanelsList,
+            getPanelList: _self.getPanelList,
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
@@ -1264,9 +1293,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage,
-            setViewType:_self.setViewType,
-            getViewType:_self.getViewType,
-            createMessage: _self.createMessage
+            setViewType: _self.setViewType,
+            getViewType: _self.getViewType
+
         }
 
         let jsRuntime = {

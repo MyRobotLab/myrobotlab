@@ -16,6 +16,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'sticky', //sticky elements
 'checklist-model', // checklists
 'angular-intro', // intro
+'angularScreenfull', // screenfull
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
 'nvd3ChartDirectives', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
