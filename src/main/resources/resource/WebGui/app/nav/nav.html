@@ -14,7 +14,7 @@
         <li>
             <a href="http://myrobotlab.org">
             <!--{{platform.branch}}-->
-            {{id}} &lt;-&gt; {{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}
+            {{id}} &lt;-&gt;{{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}
 				{{remotePlatform.mrlVersion}}
 		</a>
         </li>
@@ -33,12 +33,14 @@
                             <i class="glyphicon glyphicon-info-sign"></i>
                             &nbsp;&nbsp;About                 
                         
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="help()">
                             <i class="glyphicon glyphicon-question-sign"></i>
                             &nbsp;&nbsp;Help
+                        
                         
                         
                         </a>
@@ -49,12 +51,14 @@
                             &nbsp;&nbsp;No Worky !           
                         
                         
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="shutdown('shutdown')">
                             <i class="glyphicon glyphicon-off"></i>
                             &nbsp;&nbsp;Shutdown                   
+                        
                         </a>
                     </li>
                     <!--
@@ -99,3 +103,16 @@
         <span aria-hidden="true">&times;</span>
     </button>
 </div>
+<div ng-repeat="panel in displayImages">
+    <div class="panel-heading absolute" drag-directive name="name-01">
+        <h3 class="panel-title">
+            <b>WHAT A DRAG</b>
+        </h3>
+        <img ng-src="panel.data"/>
+    </div>
+</div>
+<!--
+
+<button ng-click="displayImage()">display image</button>
+
+-->
