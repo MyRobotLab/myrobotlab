@@ -29,6 +29,6 @@ angular.module('mrlapp.mrl')
                         $log.info('panel-serviceView', $scope.panel);
                     });
                 };
-                panelsUpdated(mrl.getPanelsList());
+                panelsUpdated(mrl.getPanelList());
                 mrl.subscribeToUpdates(panelsUpdated);
             }]);

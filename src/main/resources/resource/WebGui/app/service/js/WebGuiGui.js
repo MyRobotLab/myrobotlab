@@ -2,20 +2,28 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     $log.info('WebGuiGuiCtrl')
     var _self = this
     var msg = this.msg
+
+     // $scope.displayImages =  mrl.getDisplayImages()
+    
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
         $scope.port = service.port
     }
-    
-   
+
     // init scope variables
     $scope.pulseData = ''
     //$scope.saveP
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
         switch (inMsg.method) {
+        case 'display':
+            console.info('display - ' + data)
+            mrl.display(data)
+            $scope.$apply()
+            break
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             $scope.$apply()
             break
         case 'onShowAll':
@@ -27,15 +35,15 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         case 'onHide':
             // panelSvc.hide(inMsg.data[0]) TODO - fix
             break
-         case 'onPanel':
+        case 'onPanel':
             // panelSvc.setPanel(inMsg.data[0]) TODO - fix
-            break        
+            break
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
-    
+
     //mrl.subscribe($scope.service.name, 'pulse')
     msg.subscribe('publishShowAll')
     // msg.subscribe('publishHideAll') FIXME ? not symmetric

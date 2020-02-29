@@ -1,16 +1,16 @@
 package org.myrobotlab.service;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -47,7 +47,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   Integer maxImageWidth = null;
 
   int maxImages = 3;
-  
+
   Boolean lowerCase = null;
 
   private static final String DOMAIN_NAME_PATTERN = "([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,6}";
@@ -71,23 +71,23 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     excludeTextFilter.add("Wikipedia");
     setLowerCase();
   }
-  
+
   public void setLowerCase() {
     lowerCase = true;
   }
-  
+
   public void setUpperCase() {
     lowerCase = false;
   }
-  
+
   public void clearCase() {
     lowerCase = null;
   }
-  
+
   public void addFilter(String filter) {
     excludeTextFilter.add(filter);
   }
-  
+
   public void clearFilters() {
     excludeTextFilter.clear();
   }
@@ -154,14 +154,14 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
           for (Element span : spans) {
             log.info("description - {} ", span.text());
             // String url = header.attr("href");
-            
+
             String text = null;
             if (lowerCase != null && lowerCase) {
               text = span.text().toLowerCase();
             } else if (lowerCase != null && !lowerCase) {
               text = span.text().toUpperCase();
             }
-            for (String filter : excludeTextFilter ) {
+            for (String filter : excludeTextFilter) {
               text = text.replace(filter.toLowerCase(), "");
             }
             sb.append(text);
@@ -184,33 +184,61 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     return results;
   }
 
+  public byte[] cacheFile(String filename, String url) throws IOException {
+    Document doc = Jsoup.connect(url).userAgent(USER_AGENT).referrer("https://www.google.com/").get();
+    String html = doc.toString();
+    return saveFile("cachedFiles" + fs + filename + ".html", html);
+  }
+
+  public byte[] saveFile(String filename, String data) throws IOException {
+    if (data == null) {
+      return saveFile(filename, (byte[]) null);
+    } else {
+      return saveFile(filename, data.getBytes());
+    }
+  }
+
+  public byte[] saveFile(String filename, byte[] data) throws IOException {
+    if (filename == null) {
+      log.error("saveFile cannot have null filename");
+      return null;
+    }
+    filename = getDataDir() + fs + filename;
+    // normalize request with os file seperator
+    filename = filename.replace("\\", fs).replace("/", fs);
+    File f = new File(filename);
+    String parent = f.getParent();
+    if (parent != null && parent.length() != 0) {
+      File p = new File(parent);
+      p.mkdirs();
+    }
+
+    FileOutputStream fos = new FileOutputStream(f.getAbsolutePath());
+    fos.write(data);
+    fos.close();
+
+    return data;
+  }
+
   // FIXME - use gson not simpl json
   @Override
   public List<String> imageSearch(String searchText) {
-    // can only grab first 100 results
-    String userAgent = "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36";
-    String url = "https://www.google.com/search?lr=lang_\" + langCode +\"&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
 
     List<String> resultUrls = new ArrayList<String>();
 
     try {
-      Document doc = Jsoup.connect(url).userAgent(userAgent).referrer("https://www.google.com/").get();
+      // can only grab first 100 results
 
-      Elements elements = doc.select("div.rg_meta");
+      String url = "https://www.google.com/search?lr=lang_" + locale.getTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+      String filename = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString());
 
-      int imgCnt = 0;
+      // FIXME - check for cache ??? or useCache boolean config ?
+      // byte[] response = cacheFile(filename, url);
 
-      JSONObject jsonObject;
-      for (Element element : elements) {
-        if (element.childNodeSize() > 0) {
-          jsonObject = (JSONObject) new JSONParser().parse(element.childNode(0).toString());
-          if (imgCnt > maxImages) {
-            break;
-          }
-          resultUrls.add((String) jsonObject.get("ou"));
-          ++imgCnt;
-        }
-      }
+      Document doc = Jsoup.connect(url).userAgent(USER_AGENT).referrer("https://www.google.com/").get();
+      String html = doc.toString();
+
+      resultUrls = extractImageRefs(html);
 
       System.out.println("number of results: " + resultUrls.size());
 
@@ -283,16 +311,28 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       LoggingFactory.init(Level.INFO);
 
+      GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
+      // ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      // display.attachSearchPublisher(google);
+      //display.setAlwaysOnTop(true);
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.setPort(8887);
       webgui.autoStartBrowser(false);
-      SearchPublisher google = (SearchPublisher) Runtime.start("google", "GoogleSearch");
       webgui.startService();
-
+      
       boolean isDone = true;
       if (isDone) {
         return;
       }
+
+      List<String> htmlImagePage = google.imageSearch("gorilla");
+      for (String image : htmlImagePage) {
+        log.info(image);
+      }
+
+      // List<String> base64Images =
+      // google.extractImageRefs("/lhome/grperry/github/mrl.develop/myrobotlab/data/GoogleSearch/cachedFiles/gorilla.html");
 
       SearchResults results = google.search("gorilla");
 
@@ -304,9 +344,43 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       results = google.search("how tall is the empire state building");
       log.info("response - \n{}", results);
 
+    
+
+   
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public List<String> extractImageRefs(String data) throws IOException {
+    List<String> ret = new ArrayList<>();
+
+    // String data = FileIO.toString(filename);
+
+    int pos0 = 0;
+    int pos1 = 0;
+
+    // this is where the start of the "real" image references begin
+    pos0 = data.indexOf("b-GRID_STATE0");
+
+    if (pos0 > 0) {
+      pos0 = data.indexOf("jpg", pos0);
+      while (pos0 != -1) {
+        pos1 = data.lastIndexOf("\"", pos0);
+
+        if (pos1 > 0) {
+          String ref = data.substring(pos1 + 1, pos0 + 3);
+          ret.add(ref);
+          if (ret.size() == maxImages) {
+            return ret;
+          }
+        }
+        pos0 = data.indexOf("jpg", pos0 + 3);
+      }
+    }
+    return ret;
+
   }
 
   @Override
@@ -323,6 +397,5 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   public Map<String, Locale> getLocales() {
     return Locale.getAvailableLanguages();
   }
-
 
 }
