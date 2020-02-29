@@ -1570,7 +1570,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Hand startRightHand() {
-    return rightHand;
+    return startRightHand(null);
   }
 
   public InMoov2Hand startRightHand(String port) {
@@ -1882,13 +1882,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void stopRightArm() {
     speakBlocking("stopping right arm");
-    releasePeer("leftRight");
+    releasePeer("rightArm");
     isRightArmActivated = false;
   }
 
   public void stopRightHand() {
     speakBlocking("stopping right hand");
-    releasePeer("leftRight");
+    releasePeer("rightHand");
     isRightHandActivated = false;
   }
 
