@@ -100,6 +100,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // Global - undecorated by self name
     meta.addRootPeer("python", "Python", "shared Python service");
+    
+    // latest
+    meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
 
     return meta;
   }
@@ -138,6 +141,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
+     // Runtime.main(new String[] { "--install", "InMoov2" });
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
 
       String[] langs = java.util.Locale.getISOLanguages();
@@ -166,7 +170,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.setPort(8887);
       webgui.autoStartBrowser(false);
       webgui.startService();
 
@@ -220,7 +223,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient HtmlFilter htmlFilter;
 
   transient ImageDisplay imageDisplay;
-  
+
   /**
    * simple booleans to determine peer state of existance
    */
@@ -923,7 +926,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // some might be coming from the ear - some from the mouth ... - there has
     // to be a distinction
     log.info("onText - {}", text);
-    // invoke("publishText", text);
+    invoke("publishText", text);
   }
 
   // TODO FIX/CHECK this, migrate from python land
@@ -1200,7 +1203,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void speakBlocking(String speak) {
     speakBlocking(speak, null);
   }
-  
+
   // FIXME - publish text regardless if mouth exists ...
   public void speakBlocking(String format, Object... args) {
 
@@ -1292,6 +1295,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
                                                         // "HtmlFilter");
       brain.attachTextListener(htmlFilter);
       htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
+      brain.attachTextListener(this);
     } catch (Exception e) {
       speak("could not load brain");
       error(e.getMessage());
@@ -1303,11 +1307,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public SpeechRecognizer startEar() {
 
+    ear = (SpeechRecognizer) startPeer("ear");
     isEarActivated = true;
-
-    if (ear == null) {
-      ear = (SpeechRecognizer) startPeer("ear");
-    }
 
     ear.attachSpeechSynthesis((SpeechSynthesis) getPeer("mouth"));
     ear.attachTextListener(brain);
@@ -1373,47 +1374,41 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
-    if (head == null) {
-      speakBlocking(get("STARTINGHEAD"));
 
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
+    speakBlocking(get("STARTINGHEAD"));
 
-      head = (InMoov2Head) startPeer("head");
+    head = (InMoov2Head) startPeer("head");
 
-      if (headYPin != null) {
-        head.setPins(headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
-      }
-
-      // lame assumption - port is specified - it must be an Arduino :(
-      if (port != null) {
-        try {
-          speakBlocking(get(port));
-          Arduino arduino = (Arduino) startPeer("left", "Arduino");
-          arduino.connect(port);
-
-          arduino.attach(head.neck);
-          arduino.attach(head.rothead);
-          arduino.attach(head.eyeX);
-          arduino.attach(head.eyeY);
-          arduino.attach(head.jaw);
-          arduino.attach(head.rollNeck);
-
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    } // if head null
-
-    if (mouthControl == null) {
-      speakBlocking(get("STARTINGMOUTHCONTROL"));
-      mouthControl = (MouthControl) startPeer("mouthControl");
-      mouthControl.attach(head.jaw);
-      mouthControl.attach((Attachable) getPeer("mouth"));
-      mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
-                                    // config !!!
+    if (headYPin != null) {
+      head.setPins(headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     }
+
+    // lame assumption - port is specified - it must be an Arduino :(
+    if (port != null) {
+      try {
+        speakBlocking(get(port));
+        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        arduino.connect(port);
+
+        arduino.attach(head.neck);
+        arduino.attach(head.rothead);
+        arduino.attach(head.eyeX);
+        arduino.attach(head.eyeY);
+        arduino.attach(head.jaw);
+        arduino.attach(head.rollNeck);
+
+      } catch (Exception e) {
+        error(e);
+      }
+    }
+
+    speakBlocking(get("STARTINGMOUTHCONTROL"));
+    mouthControl = (MouthControl) startPeer("mouthControl");
+    mouthControl.attach(head.jaw);
+    mouthControl.attach((Attachable) getPeer("mouth"));
+    mouthControl.setmouth(10, 50);// <-- FIXME - not the right place for
+                                  // config !!!
+
     return head;
   }
 
@@ -1454,13 +1449,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // log.warn(InMoov.buildDNA(myKey, serviceClass))
     // speakBlocking(get("STARTINGHEAD") + " " + port);
     // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
-    if (leftArm == null) {
-      speakBlocking(get("STARTINGLEFTARM"));
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
-      leftArm = (InMoov2Arm) startPeer("leftArm");
-    }
+
+    speakBlocking(get("STARTINGLEFTARM"));
+    leftArm = (InMoov2Arm) startPeer("leftArm");
 
     if (port != null) {
       try {
@@ -1484,13 +1475,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Hand startLeftHand(String port) {
-    if (leftHand == null) {
-      speakBlocking(get("STARTINGLEFTHAND"));
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
-      leftHand = (InMoov2Hand) startPeer("leftHand");
-    }
+
+    speakBlocking(get("STARTINGLEFTHAND"));
+    leftHand = (InMoov2Hand) startPeer("leftHand");
+    isLeftHandActivated = true;
 
     if (port != null) {
       try {
@@ -1540,6 +1528,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     broadcastState();
 
     speakBlocking(get("STARTINGMOUTH"));
+    if (Platform.isVirtual()) {
+      speakBlocking("in virtual hardware mode");
+    }
     speakBlocking(get("WHATISTHISLANGUAGE"));
 
     return mouth;
@@ -1555,13 +1546,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Arm startRightArm(String port) {
-    if (rightArm == null) {
-      speakBlocking(get("STARTINGRIGHTARM"));
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
-      rightArm = (InMoov2Arm) startPeer("rightArm");
-    }
+
+    speakBlocking(get("STARTINGRIGHTARM"));
+
+    rightArm = (InMoov2Arm) startPeer("rightArm");
+
     if (port != null) {
       try {
         speakBlocking(port);
@@ -1585,13 +1574,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public InMoov2Hand startRightHand(String port) {
-    if (rightHand == null) {
-      speakBlocking(get("STARTINGRIGHTHAND"));
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
-      rightHand = (InMoov2Hand) startPeer("rightHand");
-    }
+
+    speakBlocking(get("STARTINGRIGHTHAND"));
+    rightHand = (InMoov2Hand) startPeer("rightHand");
 
     if (port != null) {
       try {
@@ -1812,10 +1797,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso == null) {
       speakBlocking(get("STARTINGTORSO"));
 
-      if (Platform.isVirtual()) {
-        speakBlocking("in virtual hardware mode");
-      }
-
       torso = (InMoov2Torso) startPeer("torso");
 
       if (port != null) {
@@ -1879,12 +1860,36 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     p.stop();
   }
 
+  public void stopLeftArm() {
+    speakBlocking("stopping left arm");
+    releasePeer("leftArm");
+    isLeftArmActivated = false;
+  }
+
+  public void stopLeftHand() {
+    speakBlocking("stopping left hand");
+    releasePeer("leftHand");
+    isLeftHandActivated = false;
+  }
+
   public void stopMouth() {
     speakBlocking("stopping mouth");
     releasePeer("mouth");
     // TODO - potentially you could set the field to null in releasePeer
     mouth = null;
     isMouthActivated = false;
+  }
+
+  public void stopRightArm() {
+    speakBlocking("stopping right arm");
+    releasePeer("leftRight");
+    isRightArmActivated = false;
+  }
+
+  public void stopRightHand() {
+    speakBlocking("stopping right hand");
+    releasePeer("leftRight");
+    isRightHandActivated = false;
   }
 
   public void stopSimulator() {

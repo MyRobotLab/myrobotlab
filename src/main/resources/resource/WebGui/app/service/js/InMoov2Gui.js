@@ -16,6 +16,8 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.speechTypes = null
     $scope.mouth = null
 
+    $scope.selectedButton = {}
+
     $scope.selectedGesture = null
 
     // inmoov menu buttons
@@ -47,14 +49,17 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     }
 
     let highlightButton = function(name){
+
         // FIXME - won't work - need to have a selected button that overlays !!!
         for (i = 0; i < $scope.buttons.length; i++) {
            if ($scope.buttons[i].name == name){
-               $scope.buttons[i].img = "../InMoov2/img/" + name + "_on.png"
-           } else {
-               // turn other buttons off
-               $scope.buttons[i].img = "../InMoov2/img/" + name + "_off.png"
-           }
+               // $scope.buttons[i].img = "../InMoov2/img/" + name + "_on.png"
+               $scope.selectedButton.name = name
+               $scope.selectedButton.translate = $scope.buttons[i].translate
+               $scope.selectedButton.img =  "../InMoov2/img/" + name + "_on.png"
+               break;
+               
+           } 
         }
         // $scope.$apply()
         console.info('here')
@@ -203,11 +208,13 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     addButton('settings')
     addButton('legs')
     addButton('pir')
-    addButton('arm')
-    addButton('hand')
+    addButton('arms')
+    addButton('hands')
     addButton('ear')
-
+    
     calculatButtonPos()
+
+    $scope.setPanel('settings')
 
     /*
 
