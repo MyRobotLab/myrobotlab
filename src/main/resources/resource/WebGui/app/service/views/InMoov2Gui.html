@@ -8,9 +8,8 @@
     #container {
         width: 620px;
         height: 588px;
-        border: 1px solid #000;
         position: relative;
-        background-image: url("../InMoov2/img/background.jpg");
+        background-image: url("../InMoov2/img/background.png");
     }
 
     .inmoov-menu-button {
@@ -37,109 +36,133 @@
             <table ng-show="showPanel('brain')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>brain</label>
+                        <label>brain Activated:</label>
+                        <td>
+                            <toggle width="70" height="30" ng-model="service.isBrainActivated" ng-change="!service.isBrainActivated?msg.stopBrain():msg.startBrain()" on="ON" off="OFF"/>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isBrainActivated" ng-change="!service.isBrainActivated?msg.stopBrain():msg.startBrain()" on="brain on" off="brain off"/>
-                    </td>
-                </tr>
-            </table>
-            <table ng-show="showPanel('arms')" class="inmoov-sub-panel table table-striped">
-                <tr>
-                    <td>
-                        <label>arms</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <br/>
-                        <toggle width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="left arm on" off="left arm"/>
-                        <br/>
-                        <toggle width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="right arm on" off="right arm"/>
-                        <br/>
+                        <label>chatBot</label>
+                        {{service.language}}   
+                        <div class="form-group">
+                            <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
+                                <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
+                            </select>
+                        </div>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <img src="../Servo.png"/>
-                        <label>servos</label>
-                        <br/>
-                        <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
-                        <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
-                        <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
-                        <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
-                        <button class="btn btn-default" type="button" ng-click="msg.stop()">
-                            <span>
-                                <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop 
-                            </span>
-                        </button>
-                        <button class="btn btn-default" ng-click="msg.disable()">disable</button>
+                        <!------needs FIXING-------------->
+                        <label>session</label> ( {{currentUserName}} )
+                        <!------end FIXING-------------->
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <img src="../Gestures.png"/>
-                        <label>gestures</label>
-                        <br/>
-                        <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
-                        <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
-                        <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
-                        <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
             <!------------------------ brain end ------------------------------>
+            <!------------------------ arm begin ------------------------------>
+            <table ng-show="showPanel('arm')" class="inmoov-sub-panel table table-striped">
+                <tr>
+                    <td>
+                        <label>leftArm Activated:</label>
+                        <td>
+                            <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="ON" off="OFF"/>
+                        </td>
+                    </td>
+                </tr>
+                <tr>
+                        <td>
+                            <label>rightArm Activated:</label>
+                            <td>
+                                <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="ON" off="OFF"/>
+                            </td>
+                        </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ arm end ------------------------------>
             <!------------------------ ear begin ------------------------------>
             <table ng-show="showPanel('ear')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>ear</label>
+                        <label>ear Activated:</label>
+                        <td>
+                            <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ear on" off="ear off"/>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
+            <!------------------------ torso begin ------------------------------>
             <table ng-show="showPanel('torso')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>torso</label>
+                        <label>torso Activated:</label>
+                        <td>
+                            <toggle width="120" height="28" ng-model="service.isTorsoActivated" ng-change="!service.isTorsoActivated?msg.stopTorso():msg.startTorso()" width="80" height="30" on="ON" off="OFF"/>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="torso on" off="torso off"/>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
-            <table ng-show="showPanel('hands')" class="inmoov-sub-panel table table-striped">
+            <!------------------------ torso end ------------------------------>
+            <!------------------------ hand begin ------------------------------>
+            <table ng-show="showPanel('hand')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>hands</label>
+                        <label>leftHand Activated:</label>
+                        <td>
+                            <toggle width="70" height="28" ng-model="service.isLeftHandActivated" ng-change="!service.isLeftHandActivated?msg.stopLeftHand():msg.startLeftHand()" width="120" height="30" on="ON" off="OFF"/>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isLeftHandActivated" ng-change="!service.isEarActivated?msg.stopLeftHand():msg.startLeftHand()" width="80" height="30" on="left hand on" off="left hand off"/>
-                        <toggle width="120" height="28" ng-model="service.isRightHandActivated" ng-change="!service.isEarActivated?msg.stopRightHand():msg.startRightHand()" width="80" height="30" on="right hand on" off="right hand off"/>
+                        <label>rightHand Activated:</label>
+                        <td>    
+                           <toggle width="70" height="28" ng-model="service.isRightHandActivated" ng-change="!service.isRightHandActivated?msg.stopRightHand():msg.startRightHand()" width="120" height="30" on="ON" off="OFF"/>
+                        </td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
-            <!------------------------ ear end ------------------------------>
+            <!------------------------ hand end ------------------------------>
             <!------------------------ mouth begin ------------------------------>
             <table ng-show="showPanel('mouth')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>mouth</label>
+                        <label>mouth Activated:</label>
+                        <td>
+                           <toggle width="70" height="30" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="ON" off="OFF"/>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="mouth on" off="mouth off"/>
+                        <label>speech Engine:</label>
                         <div width="120" height="28">
                             <select ng-show="!service.isMouthActivated" class="form-control" ng-model="service.speechService" id="language-select" ng-change="msg.setSpeechType(service.speechService)">
                                 <option ng-repeat="speechType in speechTypes" value="{{getShortName(speechType)}}">{{getShortName(speechType)}}</option>
@@ -151,11 +174,16 @@
                                     <option ng-repeat="voice in service.voices" value="{{voice.name}}">{{voice.name}} {{voice.gender}} {{voice.locale.tag}}  {{voice.description}}</option>
                                 </select>
                             </span>
-                            <toggle ng-model="service.mute" ng-change="msg.setMute(service.mute)" width="120" height="28" on="muted" off="unmuted"></toggle>
+                            <toggle ng-model="service.mute" ng-change="msg.setMute(service.mute)" width="80" height="28" on="muted" off="unmuted"></toggle>
                             <br/>
                             <input class="form-control" type="text" id="speakText" ng-model="speakText">
                             <button class="btn btn-default form-control" ng-click="speak()">speak</button>
                         </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
@@ -164,29 +192,76 @@
             <table ng-show="showPanel('head')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
-                        <label>head</label>
+                        <label>head Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="25" on="ON" off="OFF"/></toggle>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="30" on="head on" off="head off"/>
+                        <label>vision Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="service.isOpenCVActivated" ng-change="!service.isOpenCVActivated?msg.stopOpenCV():msg.startOpenCV()" on="ON" off="OFF"/></toggle>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <toggle width="120" height="28" ng-model="service.isEyeActivated" ng-change="!service.isEyeActivated?msg.stopEye():msg.startEye()" on="eye on" off="eye off"/>
+                        <label>eyeLids Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="service.isEyeLidsActivated" ng-change="!service.isEyeLidsActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+                        </td>    
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>eyeLidsLeft Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="EyeLidsLeftActivated" ng-change="!EyeLidsLeftActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+                        </td>    
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>eyeLidsRight Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="EyeLidsRightActivated" ng-change="!EyeLidsRightActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+                        </td>
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <img src="../Tracking.png"/>
-                        <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="head tracking on" off="head tracking off"></toggle>
-                        <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="120" height="30" on="eyes tracking on" off="eyes tracking off"></toggle>
+                        <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="140" height="30" on="head tracking on" off="head tracking off"></toggle>
+                        <toggle ng-model="service.mute" ng-change="msg.setMute(!service.mute)" width="140" height="30" on="eyes tracking on" off="eyes tracking off"></toggle>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
                     </td>
                 </tr>
             </table>
             <!------------------------ head end ------------------------------>
-            <!------------------------ settings begin ------------------------------>
+            <!------------------------ extra begin ------------------------------>
+            <table ng-show="showPanel('extra')" class="inmoov-sub-panel table table-striped">
+                <tr>
+                    <td>
+                        <label>neopixel Activated:</label>
+                        <td>
+                            <toggle width="80" height="30" ng-model="service.isNeopixelActivated" ng-change="!service.isNeopixelActivated?msg.stopNeopixel():msg.startNeopixel()" on="ON" off="OFF"/></toggle>
+                        </td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ extra end ------------------------------>
+             <!------------------------ settings begin ------------------------------>
             <table ng-show="showPanel('settings')" class="inmoov-sub-panel table table-striped">
                 <tr>
                     <td>
@@ -206,19 +281,36 @@
                 </tr>
                 <tr>
                     <td>
-                        <label>language</label>
-                        {{service.language}}   
-                        <div class="form-group">
-                            <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
-                                <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
-                            </select>
-                        </div>
+                        <img src="../InMoov.png"/>
+                        <label>services</label>
+                        <br/>
+                        <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+                        <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+                        <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
+                        <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
+                        <button class="btn btn-default" type="button" ng-click="msg.stop()">
+                            <span>
+                                <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop 
+                            </span>
+                        </button>
+                        <button class="btn btn-default" ng-click="msg.disable()">disable</button>
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="virtualize on" off="virtualize off"></toggle>
                         <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator on" off="simulator off"></toggle>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="../InMoovGestureCreator.png"/>
+                        <label>gestures</label>
+                        <br/>
+                        <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
+                        <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+                        <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+                        <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
                     </td>
                 </tr>
             </table>
