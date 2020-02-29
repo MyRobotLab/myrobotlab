@@ -101,8 +101,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // Global - undecorated by self name
     meta.addRootPeer("python", "Python", "shared Python service");
     
-    // latest
-    meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
+    // latest - not ready until repo is ready
+    // meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
 
     return meta;
   }
