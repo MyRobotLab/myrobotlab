@@ -27,6 +27,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
@@ -42,6 +43,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -285,6 +287,7 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     // scaling, and alpha changes
     // BUT animated gifs do not successfully convert to BufferedImages
     BufferedImage image = loadImage(src);
+    if (image == null)
 
     // FIXME - this will explode if image comes back null (which it will for
     // animated gifs)
@@ -594,6 +597,17 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     super.stopService();
     closeAll();
   }
+  
+  public void attachSearchPublisher(SearchPublisher search) {
+    subscribe(search.getName(), "publishImage");
+  }
+  
+  public String onImage(String urlRef) throws MalformedURLException, AWTException {
+    //display(urlRef);
+    setAlwaysOnTop(true);
+    displayFadeIn(urlRef);
+    return urlRef;
+  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -603,7 +617,15 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
       // FIXME - get gifs working
       display.setAlwaysOnTop(true);
-      display.displayFadeIn("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
+      // display.displayFadeIn("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
+      
+      display.displayFadeIn("https://www.ntchosting.com/images/png-compression-example.png");
+      
+      GoogleSearch search = (GoogleSearch)Runtime.start("google","GoogleSearch");
+      List<String> images = search.imageSearch("dogs");
+      for (String img : images) {
+        display.displayFadeIn(img);
+      }
      
       boolean done = true;
       if (done) {

@@ -280,7 +280,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     invoke("publishResponse", response);
     invoke("publishResponseText", response);
     invoke("publishText", response.msg);
-    info("to: %s - %s", userName, res);
+    info("to: {} - {}", userName, res);
     return response;
   }
 

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.GoogleSearchGui', []).controller('GoogleSearchGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', '$sce', '$compile', function($scope, $log, mrl, $uibModal, $sce, $compile) {
+angular.module('mrlapp.service.GoogleSearchGui', []).controller('GoogleSearchGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', '$sce', '$compile', '$uibModal', function($scope, $log, mrl, $uibModal, $sce, $compile, $uibModal) {
     // $modal ????
     $log.info('GoogleSearchGuiCtrl')
     // grab the self and message
@@ -56,6 +56,28 @@ angular.module('mrlapp.service.GoogleSearchGui', []).controller('GoogleSearchGui
         }
 
     }
+
+    $scope.showAdvanced = function(ev) {
+        var modalInstance = $uibModal.open({
+                         template: '<img src="https://static01.nyt.com/images/2020/02/13/world/13uk-plane/13uk-plane-articleLarge.jpg" width="100%" />',
+                    //  templateUrl: 'view/sample.html',
+                     // controller: 'testController',// a controller for modal instance
+                     // controllerUrl: 'controller/test-controller', // can specify controller url path
+                     controllerAs: 'ctrl', //  controller as syntax
+                     windowClass: 'clsPopup', //  can specify the CSS class
+                     keyboard: false, // ESC key close enable/disable
+                     resolve: {
+                         actualData: function () {
+                             return self.sampleData;
+                         }
+                     } // data passed to the controller
+                 }).result.then(function (data) {
+                     //do logic
+                 }, function () {
+                     // action on popup dismissal.
+                 });
+    }
+    ;
 
     // subscribe to the response from programab.
 

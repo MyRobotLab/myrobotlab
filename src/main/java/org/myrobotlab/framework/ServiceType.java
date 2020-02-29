@@ -228,8 +228,10 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void setCloudService(boolean b) {
     isCloudService = b;
   }
-
-  // TODO - without version is latest ?
+  public void addDependency(String groupId, String artifactId) {
+    addDependency(groupId, artifactId, null, null);
+  }
+  
   public void addDependency(String groupId, String artifactId, String version) {
     addDependency(groupId, artifactId, version, null);
   }
@@ -260,6 +262,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void addArtifact(String orgId, String classifierId) {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
   }
+
+  
 
  
 }
