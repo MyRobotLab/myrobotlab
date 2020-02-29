@@ -205,15 +205,9 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     addButton('mouth')
     addButton('head')
     addButton('torso')
-    /*
-    addButton('settings')
-    addButton('legs')
-    addButton('pir')
-    addButton('arms')
-    addButton('hands')
-    */
     addButton('extra')
     addButton('leg')
+//    addButton('InMoov')
     addButton('sensor')
     addButton('arm')
     addButton('hand')
