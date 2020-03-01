@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('InMoov2GuiCtrl')
+angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('InMoov2GuiCtrl')
     var _self = this
     var msg = this.msg
     $scope.servos = []
@@ -50,7 +50,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     let highlightButton = function(name){
 
-        if (name = 'InMoov'){
+        if (name == 'InMoov'){
             
         }
 
@@ -196,7 +196,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -219,7 +219,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     
     calculatButtonPos()
 
-    $scope.setPanel('settings')
+    $scope.setPanel('InMoov')
 
     /*
 

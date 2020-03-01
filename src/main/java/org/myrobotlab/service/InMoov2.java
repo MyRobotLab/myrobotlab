@@ -102,7 +102,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addRootPeer("python", "Python", "shared Python service");
     
     // latest - not ready until repo is ready
-    // meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
+    meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
 
     return meta;
   }
@@ -141,7 +141,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
-     // Runtime.main(new String[] { "--install", "InMoov2" });
+      Runtime.main(new String[] { "--install", "InMoov2" });
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
 
       String[] langs = java.util.Locale.getISOLanguages();
@@ -173,11 +180,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       webgui.autoStartBrowser(false);
       webgui.startService();
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
+   
       i01.startBrain();
 
       i01.startAll("COM3", "COM4");
@@ -225,7 +228,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient ImageDisplay imageDisplay;
 
   /**
-   * simple booleans to determine peer state of existance
+   * simple booleans to determine peer state of existence
+   * FIXME - should be an auto-peer variable 
    */
 
   boolean isBrainActivated = false;
