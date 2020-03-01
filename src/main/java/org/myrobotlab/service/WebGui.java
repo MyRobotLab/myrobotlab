@@ -1224,6 +1224,22 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "python", "Python", "--invoke", "python", "execFile", "start.py"});
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      
+      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
+      
+      for (int i = 0; i < 1000; ++i) {
+        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
+      }
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
@@ -1255,12 +1271,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // arduino.connect("/dev/ttyACM0");
 
-      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
-      webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
-      webgui.startService();
+ 
 
       // Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
@@ -1270,6 +1281,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public void display(String image) {
+    // FIXME
+    // http/https can be proxied if necessary or even fetched,
+    // but what about "local" files - should they be copied to a temp directory that has webgui access ?
+    // e.g. copied to /data/WebGui/temp ?
+    // send(getName(), "display", image);
+    Message msg = Message.createMessage(getName(), "webgui", "display", new Object[] {image});
+    sendRemote(msg);
   }
 
   public void setSsl(boolean b) {
