@@ -107,8 +107,25 @@
                     <td>
                         <label>ear Activated:</label>
                         <td>
-                            <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
+                            <toggle width="70" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
                         </td>
+                <!--<div ng-show="webkitSupport" class="row">
+                    <table class="table table-striped">
+                        <tr>-->
+                            <td>
+                                <button ng-click="changeListeningState()">
+                                    <span>
+                                        <img ng-src="../WebkitSpeechRecognition/mic-animate.gif" width="80"/>
+                                    </span>
+                                </button>
+                            </td>
+                            <br>
+                            <td>
+                                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                                    <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
+                                </select>
+                                {{service.status}}
+                            </td>
                     </td>
                 </tr>
                 <tr>
