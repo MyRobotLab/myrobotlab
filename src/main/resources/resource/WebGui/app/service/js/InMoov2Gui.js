@@ -50,6 +50,10 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     let highlightButton = function(name){
 
+        if (name = 'InMoov'){
+            
+        }
+
         // FIXME - won't work - need to have a selected button that overlays !!!
         for (i = 0; i < $scope.buttons.length; i++) {
            if ($scope.buttons[i].name == name){

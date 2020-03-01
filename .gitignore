@@ -79,3 +79,4 @@
 /myrobotlab*.jar
 /libbulletjme.so
 /liblwjgl64.so
+/copyToRaspi.sh
