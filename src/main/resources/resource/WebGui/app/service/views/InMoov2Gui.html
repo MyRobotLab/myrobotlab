@@ -39,6 +39,7 @@
         <td id="container-cell">
             <!--inmoov map begin-->
             <div id="container">
+            <!--
                 <div class="inmoov-menu-button" ng-repeat="button in buttons" id="button.name +'Src'" ng-init="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-mouseover="imgSrc='../InMoov2/img/'+button.name+'_hover.png'" ng-mouseout="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-style="imgStyle='transform:translateX(300px)'">
                     <img class="inmoov-menu-button" ng-src="{{imgSrc}}" ng-click="setPanel(button.name)" style="transform: translate({{button.translate}})"/>
                 </div>
@@ -47,6 +48,12 @@
                     <img ng-src="{{InMoovImg}}" ng-click="setPanel('InMoov')"/>
                 </div>
                 <img class="inmoov-main-menu-button" ng-src="{{InMoovImg.img}}" ng-click="setPanel('InMoov')"/>
+               -->
+                <div class="inmoov-menu-button" ng-repeat="button in buttons" id="button.name +'Src'" ng-init="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-mouseover="imgSrc='../InMoov2/img/'+button.name+'_hover.png'" ng-mouseout="imgSrc='../InMoov2/img/'+button.name+'_off.png'" ng-style="imgStyle='transform:translateX(300px)'">
+                    <img class="inmoov-menu-button" ng-src="{{imgSrc}}" ng-click="setPanel(button.name)" style="transform: translate({{button.translate}})"/>
+                </div>
+                <img class="inmoov-menu-button" ng-src="{{selectedButton.img}}" ng-click="setPanel(selectedButton.name)" style="transform: translate({{selectedButton.translate}})"/>
+               
             </div>
         </td>
         <td>
@@ -311,13 +318,7 @@
             <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
             <button class="btn btn-default" type="button" ng-click="msg.stop()">
                 <span>
-                    <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop 
-                            
-                
-                
-                
-                
-                </span>
+                    <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop </span>
             </button>
             <button class="btn btn-default" ng-click="msg.disable()">disable</button>
         </td>
