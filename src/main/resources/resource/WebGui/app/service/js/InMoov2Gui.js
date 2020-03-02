@@ -2,6 +2,14 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     console.info('InMoov2GuiCtrl')
     var _self = this
     var msg = this.msg
+
+    let numCircularButtons = 0
+    // this is circle center - it needs to be
+    // dynamically calculated from size of background and radius
+    let centerX = 238
+    let centerY = 226
+    let radius = 230
+
     $scope.servos = []
     $scope.sliders = []
 
@@ -22,68 +30,78 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     $scope.selectedGesture = null
 
-    // inmoov menu buttons
+    // inmoov "all" buttons
     $scope.buttons = []
 
-    let addButton = function(name) {
+    // add a generalized button
+    let addButton = function(name, type, x, y) {
+
         let button = {
             name: name,
+            type: type,
             translate: "0px,0px",
             img: "../InMoov2/img/" + name + "_off.png",
             hover: "../InMoov2/img/" + name + "_hover.png"
         }
+
+        if (type == 'absolute') {
+            button.translate = x + "px," + y +"px"
+        }
+
+        if (type == 'circular') {
+            numCircularButtons++
+        }
+
         $scope.buttons.push(button)
     }
 
-    $scope.filterPeers = function(peerName){
-        if (peerName){
-            mrl.search($scope.service.name + '.' + peerName)    
+    $scope.filterPeers = function(peerName) {
+        if (peerName) {
+            mrl.search($scope.service.name + '.' + peerName)
         } else {
             mrl.search("")
         }
     }
 
     let calculatButtonPos = function() {
-        let angle = 234.5 * (Math.PI / 180)// (360 - 90) * (Math.PI / 180)
-        let dangle = (360 / $scope.buttons.length) * (Math.PI / 180)
-        let centerX = 238
-        let centerY = 226
-        let radius = 230
+        let angle = 234.5 * (Math.PI / 180)
+        // (360 - 90) * (Math.PI / 180)
+        let dangle = (360 / numCircularButtons) * (Math.PI / 180)
         for (i = 0; i < $scope.buttons.length; i++) {
-            angle += dangle
-            // $scope.buttons[i].rotate = angle + "deg"
-            var x = Math.round(centerX + radius * Math.cos(angle));
-            var y = Math.round(centerY + radius * Math.sin(angle));
-            $scope.buttons[i].translate = x +"px,"+ y + "px"
+            if ($scope.buttons[i].type == 'circular') {
+                angle += dangle
+                // $scope.buttons[i].rotate = angle + "deg"
+                let x = Math.round(centerX + radius * Math.cos(angle));
+                let y = Math.round(centerY + radius * Math.sin(angle));
+                $scope.buttons[i].translate = x + "px," + y + "px"
+            }
         }
     }
 
-    let highlightButton = function(name){
-
-        if (name == 'InMoov'){
-            
-        }
-
-        // FIXME - won't work - need to have a selected button that overlays !!!
+    let buttonsOff = function() {
         for (i = 0; i < $scope.buttons.length; i++) {
-           if ($scope.buttons[i].name == name){
-               // $scope.buttons[i].img = "../InMoov2/img/" + name + "_on.png"
-               $scope.selectedButton.name = name
-               $scope.selectedButton.translate = $scope.buttons[i].translate
-               $scope.selectedButton.img =  "../InMoov2/img/" + name + "_on.png"
-               break;
-               
-           } 
+            $scope.selectedButton.name = name
+            $scope.selectedButton.translate = $scope.buttons[i].translate
+            $scope.selectedButton.img = "../InMoov2/img/" + name + "_off.png"
         }
-        // $scope.$apply()
-        console.info('here')
+    }
+
+    let buttonOn = function(name) {
+        buttonsOff()
+        for (i = 0; i < $scope.buttons.length; i++) {
+            if ($scope.buttons[i].name == name) {
+                $scope.selectedButton.name = name
+                $scope.selectedButton.translate = $scope.buttons[i].translate
+                $scope.selectedButton.img = "../InMoov2/img/" + name + "_on.png"
+                break
+            }
+        }
     }
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
         $scope.languageSelected = service.locale.tag
-
         $scope.mouth = mrl.getService(service.name + '.mouth')
         $scope.$apply()
     }
@@ -115,12 +133,6 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
         }
     }
 
-    $scope.getStyle = function(bool) {
-        // return ['btn', 'btn-default', 'active']
-        return 'active';
-        // return mrl.getStyle(bool)
-    }
-
     $scope.getPeer = function(peerName) {
         let s = mrl.getService($scope.service.name + '.' + peerName + '@' + this.service.id)
         return s
@@ -140,7 +152,7 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
 
     $scope.setPanel = function(panelName) {
         $scope.activePanel = panelName
-        highlightButton(panelName)
+        buttonOn(panelName)
     }
 
     $scope.showPanel = function(panelName) {
@@ -163,79 +175,30 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
             $scope.onText = data;
             $scope.$apply()
             break
-        case 'onServoData':
-
-            $scope.sliders[data.name].value = data.pos;
-            $scope.$apply()
-            break
-        case 'onServoNames':
-            // servos sliders are either in "tracking" or "control" state
-            // "tracking" they are moving from callback position info published by servos
-            // "control" they are sending control messages to the servos
-            $scope.servos = inMsg.data[0]
-            for (var servo of $scope.servos) {
-                // dynamically build sliders
-                $scope.sliders[servo] = {
-                    value: 0,
-                    tracking: true,
-                    options: {
-                        id: servo,
-                        floor: 0,
-                        ceil: 180,
-                        onStart: function(id) {},
-                        onChange: function(id) {
-                            _self.onSliderChange(id)
-                        },
-                        /*
-                        onChange: function() {
-                            if (!this.tracking) {
-                                // if not tracking then control
-                                msg.sendTo(servo, 'moveToX', sliders[servo].value)
-                            }
-                        },*/
-                        onEnd: function(id) {}
-                    }
-                }
-                // dynamically add callback subscriptions
-                // these are "intermediate" subscriptions in that they
-                // don't send a subscribe down to service .. yet 
-                // that must already be in place (and is in the case of Servo.publishServoData)
-                msg.subscribeTo(_self, servo, 'publishServoData')
-
-            }
-            $scope.$apply()
-            break
+            
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
 
-    // msg.subscribe('getServoNames')
-    // msg.send('getServoNames')
-    // mrl.subscribeToServiceMethod(_self.onMsg, mrl.getRuntime().name, 'getServiceTypeNamesFromInterface');
+    // circular main menu buttons
+    addButton('brain', 'circular')
+    addButton('mouth', 'circular')
+    addButton('head', 'circular')
+    addButton('torso', 'circular')
+    addButton('extra', 'circular')
+    addButton('leg', 'circular')
+    addButton('sensor', 'circular')
+    addButton('arm', 'circular')
+    addButton('hand', 'circular')
+    addButton('ear', 'circular')
 
-    addButton('brain')
-    addButton('mouth')
-    addButton('head')
-    addButton('torso')
-    addButton('extra')
-    addButton('leg')
-//    addButton('InMoov')
-    addButton('sensor')
-    addButton('arm')
-    addButton('hand')
-    addButton('ear')
-    
+    addButton('InMoov', 'absolute', 170, 164)
+
     calculatButtonPos()
 
     $scope.setPanel('InMoov')
-
-    /*
-
-    msg.subscribeTo(_self, mrl.getRuntime().name, 'getServiceTypeNamesFromInterface')
-    msg.subscribe('getServiceTypeNamesFromInterface')
-    */
 
     // FIXME FIXME FIXME - single simple subscribeTo(name, method) !!!
     mrl.subscribe(mrl.getRuntime().name, 'getServiceTypeNamesFromInterface');
