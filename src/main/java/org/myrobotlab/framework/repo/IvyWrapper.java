@@ -145,7 +145,7 @@ public class IvyWrapper extends Repo implements Serializable {
         }
         
         sb.append("  <dependency"); // conf="provided->master"
-        sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(), dependency.getVersion()==null?"latest.release":dependency.getVersion()));
+        sb.append(String.format(" org=\"%s\" name=\"%s\" rev=\"%s\"", dependency.getOrgId(), dependency.getArtifactId(), dependency.getVersion()==null?"latest.integration":dependency.getVersion()));
         
         List<ServiceExclude> excludes = dependency.getExcludes();
         boolean twoTags = dependency.getExt() != null || excludes != null & excludes.size() > 0;

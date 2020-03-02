@@ -32,6 +32,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // global zIndex
     let zIndex = 0
 
+    // search function - setting the nav search
+    let searchFunction = null
+
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
@@ -787,20 +790,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.display = function(imageSrc, name) {
-            if (!name){
-                name = 'image-' +  Object.keys(displayImages).length
+            if (!name) {
+                name = 'image-' + Object.keys(displayImages).length
             }
             displayImages[name] = createPanel(name, name, 15, lastPosY, 800, 0, zIndex, imageSrc)
-            for (i = 0; i < displayCallbacks.length; ++i){
+            for (i = 0; i < displayCallbacks.length; ++i) {
                 displayCallbacks[i](displayImages[name])
             }
         }
 
-        let setDisplayCallback = function(callback){
+        let setDisplayCallback = function(callback) {
             displayCallbacks.push(callback)
         }
 
-        let getDisplayImages = function(){
+        let getDisplayImages = function() {
             return displayImages
         }
 
@@ -826,20 +829,21 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 displayName: _self.getShortName(fullname),
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
-                templatestatus: null, // service.templatestatus,
+                templatestatus: null,
+                // service.templatestatus,
                 // ???
                 list: 'main',
                 size: 'free',
 
                 data: data,
-                
+
                 posX: x,
-                posY: y ,
+                posY: y,
                 width: width,
                 height: height,
                 zIndex: zIndex,
                 hide: false,
-               
+
                 // FIXME  - remove this use mrl panel methods
                 svc: _self,
                 hide: function() {
@@ -1031,6 +1035,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         this.onError = function(response) {
             $log.error('onError, can not connect')
+        }
+
+        _self.setSearchFunction = function(ref) {
+            searchFunction = ref
+        }
+
+        /**
+         * search panels using the nav search input
+         */
+        _self.search = function(text) {
+            if (searchFunction) {
+                searchFunction(text)
+            }
         }
 
         // the Angular service interface object
@@ -1273,6 +1290,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             },
 
             controllerscope: _self.controllerscope,
+            setSearchFunction: _self.setSearchFunction,
+            search: _self.search,
             createMessage: _self.createMessage,
             display: _self.display,
             getDisplayImages: getDisplayImages,
