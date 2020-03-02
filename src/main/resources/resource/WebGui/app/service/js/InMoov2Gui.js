@@ -5,6 +5,8 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
     $scope.servos = []
     $scope.sliders = []
 
+    $scope.mrl = mrl
+
     // text published from InMoov2 service
     $scope.onText = null
     $scope.languageSelected = null
@@ -31,6 +33,14 @@ angular.module('mrlapp.service.InMoov2Gui', []).controller('InMoov2GuiCtrl', ['$
             hover: "../InMoov2/img/" + name + "_hover.png"
         }
         $scope.buttons.push(button)
+    }
+
+    $scope.filterPeers = function(peerName){
+        if (peerName){
+            mrl.search($scope.service.name + '.' + peerName)    
+        } else {
+            mrl.search("")
+        }
     }
 
     let calculatButtonPos = function() {

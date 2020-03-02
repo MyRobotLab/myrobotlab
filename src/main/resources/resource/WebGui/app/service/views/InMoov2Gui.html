@@ -22,6 +22,7 @@
         position: absolute;
         z-index: 30;
     }
+
     .inmoov-main-menu-button {
         position: absolute;
         left: 170px;
@@ -42,12 +43,10 @@
                     <img class="inmoov-menu-button" ng-src="{{imgSrc}}" ng-click="setPanel(button.name)" style="transform: translate({{button.translate}})"/>
                 </div>
                 <img class="inmoov-menu-button" ng-src="{{selectedButton.img}}" ng-click="setPanel(selectedButton.name)" style="transform: translate({{selectedButton.translate}})"/>
-
-                            <div class="inmoov-main-menu-button" id="'InMoovImg'" ng-init="InMoovImg='../InMoov2/img/InMoov_off.png'" ng-mouseover="InMoovImg='../InMoov2/img/InMoov_hover.png'" ng-mouseout="InMoovImg='../InMoov2/img/InMoov_off.png'" ng-style="imgStyle='transform:translateX(300px)'">
-                <img ng-src="{{InMoovImg}}" ng-click="setPanel('InMoov')" />
-            </div>
-            <img class="inmoov-main-menu-button" ng-src="{{InMoovImg.img}}" ng-click="setPanel('InMoov')" />
-
+                <div class="inmoov-main-menu-button" id="'InMoovImg'" ng-init="InMoovImg='../InMoov2/img/InMoov_off.png'" ng-mouseover="InMoovImg='../InMoov2/img/InMoov_hover.png'" ng-mouseout="InMoovImg='../InMoov2/img/InMoov_off.png'" ng-style="imgStyle='transform:translateX(300px)'">
+                    <img ng-src="{{InMoovImg}}" ng-click="setPanel('InMoov')"/>
+                </div>
+                <img class="inmoov-main-menu-button" ng-src="{{InMoovImg.img}}" ng-click="setPanel('InMoov')"/>
             </div>
         </td>
         <td>
@@ -60,54 +59,55 @@
                     </td>
                     <td>
                         <toggle width="70" height="30" ng-model="service.isBrainActivated" ng-change="!service.isBrainActivated?msg.stopBrain():msg.startBrain()" on="ON" off="OFF"/>
+                        <img src="../peers.png" height="28" ng-click="filterPeers('brain')"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label>chatBot</label>
+                        {{service.language}}   
+                        
+                        <div class="form-group">
+                            <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
+                                <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
+                            </select>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <!------needs FIXING-------------->
+                        <label>session</label>
+                        ( {{currentUserName}} )
+                        
+                        <!------end FIXING-------------->
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ brain end ------------------------------>
+            <!------------------------ arm begin ------------------------------>
+            <table ng-show="showPanel('arm')" class="inmoov-sub-panel table table-striped">
+                <tr>
+                    <td>
+                        <label>leftArm Activated:</label>
+                    <td>
+                        <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="!service.isLeftArmActivated?msg.stopLeftArm():msg.startLeftArm()" width="120" height="30" on="ON" off="OFF"/>
+                        <img src="../peers.png" height="28" ng-click="filterPeers('leftArm')"/>
                     </td>
         </td>
     </tr>
     <tr>
         <td>
-            <label>chatBot</label>
-            {{service.language}}   
-                        
-            
-            <div class="form-group">
-                <select class="form-control" ng-model="languageSelected" id="language-select" ng-change="msg.setLocale(languageSelected)">
-                    <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{key}} - {{value.displayLanguage}}</option>
-                </select>
-            </div>
-        </td>
-    </tr>
-    <tr>
+            <label>rightArm Activated:</label>
         <td>
-            <!------needs FIXING-------------->
-            <label>session</label>
-            ( {{currentUserName}} )
-                        
-            
-            <!------end FIXING-------------->
+            <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="!service.isRightArmActivated?msg.stopRightArm():msg.startRightArm()" width="120" height="30" on="ON" off="OFF"/>
+            <img src="../peers.png" height="28" ng-click="filterPeers('rightArm')"/>
         </td>
-    </tr>
-    <tr>
-        <td>
-            <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
-        </td>
-    </tr>
-</table>
-<!------------------------ brain end ------------------------------>
-<!------------------------ arm begin ------------------------------>
-<table ng-show="showPanel('arm')" class="inmoov-sub-panel table table-striped">
-    <tr>
-        <td>
-            <label>leftArm Activated:</label>
-        <td>
-            <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="!service.isLeftArmActivated?msg.stopLeftArm():msg.startLeftArm()" width="120" height="30" on="ON" off="OFF"/>
-        </td>
-</td></tr>
-<tr>
-    <td>
-        <label>rightArm Activated:</label>
-    <td>
-        <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="!service.isRightArmActivated?msg.stopRightArm():msg.startRightArm()" width="120" height="30" on="ON" off="OFF"/>
-    </td>
 </td></tr>
 <tr>
     <td>
@@ -123,8 +123,8 @@
             <label>ear Activated:</label>
         <td>
             <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
+            <img src="../peers.png" height="28" ng-click="filterPeers('ear')"/>
         </td>
-        
 </td></tr>
 <tr>
     <td>
@@ -139,6 +139,7 @@
             <label>torso Activated:</label>
         <td>
             <toggle width="120" height="28" ng-model="service.isTorsoActivated" ng-change="!service.isTorsoActivated?msg.stopTorso():msg.startTorso()" width="80" height="30" on="ON" off="OFF"/>
+            <img src="../peers.png" height="28" ng-click="filterPeers('torso')"/>
         </td>
 </td></tr>
 <tr>
@@ -155,6 +156,7 @@
             <label>leftHand Activated:</label>
         <td>
             <toggle width="70" height="28" ng-model="service.isLeftHandActivated" ng-change="!service.isLeftHandActivated?msg.stopLeftHand():msg.startLeftHand()" width="120" height="30" on="ON" off="OFF"/>
+            <img src="../peers.png" height="28" ng-click="filterPeers('leftHand')"/>
         </td>
 </td></tr>
 <tr>
@@ -162,6 +164,7 @@
         <label>rightHand Activated:</label>
     <td>
         <toggle width="70" height="28" ng-model="service.isRightHandActivated" ng-change="!service.isRightHandActivated?msg.stopRightHand():msg.startRightHand()" width="120" height="30" on="ON" off="OFF"/>
+        <img src="../peers.png" height="28" ng-click="filterPeers('rightHand')"/>
     </td>
 </td></tr>
 <tr>
@@ -178,6 +181,7 @@
             <label>mouth Activated:</label>
         <td>
             <toggle width="70" height="30" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="ON" off="OFF"/>
+            <img src="../peers.png" height="28" ng-click="filterPeers('mouth')"/>
         </td>
 </td></tr>
 <tr>
@@ -214,7 +218,8 @@
         <td>
             <label>head Activated:</label>
         <td>
-            <toggle width="80" height="30" ng-model="service.isHeadActivated" ng-change="msg.setMute(!service.mute)" width="80" height="25" on="ON" off="OFF"/></toggle>
+            <toggle width="80" height="30" ng-model="service.isHeadActivated" ng-change="!service.isHeadActivated?msg.stopHead():msg.startHead()" width="80" height="25" on="ON" off="OFF"/></toggle>
+            <img src="../peers.png" height="28" ng-click="filterPeers('head')"/>
         </td>
 </td></tr>
 <tr>
@@ -280,7 +285,7 @@
 <table ng-show="showPanel('InMoov')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
-            <label>InMoov</label>
+            <label>InMoov</label>&nbsp;&nbsp;&nbsp;&nbsp;<img src="../peers.png" height="28" ng-click="filterPeers(null)"/>
             <div class="form-group">
                 <select multiple class="form-control">
                     <option>config-01</option>
@@ -308,6 +313,9 @@
                 <span>
                     <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop 
                             
+                
+                
+                
                 
                 </span>
             </button>

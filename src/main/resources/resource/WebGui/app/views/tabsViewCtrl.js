@@ -7,6 +7,17 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
 
     $scope.view_tab = 'default'
     $scope.viewType = mrl.getViewType()
+    $scope.searchText = {
+        name: ""
+    }
+
+    // setting callback method in service so other controllers
+    // can set searchText
+    $scope.setSearchText = function(text){
+        $scope.searchText.name = text
+    }
+
+    mrl.setSearchFunction($scope.setSearchText)
 
     $scope.servicename = $stateParams.servicename
 

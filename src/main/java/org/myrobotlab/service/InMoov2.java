@@ -86,7 +86,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     meta.addPeer("rightArm", "InMoov2Arm", "right arm");
     meta.addPeer("rightHand", "InMoov2Hand", "right hand");
     meta.addPeer("mouthControl", "MouthControl", "MouthControl");
-    meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
+    //meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
     meta.addPeer("mouth", "MarySpeech", "InMoov speech service");
     meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
 
@@ -141,15 +141,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
-      Runtime.main(new String[] { "--install", "InMoov2" });
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
+      // Runtime.main(new String[] { "--install", "InMoov2" });
       
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
+
 
       String[] langs = java.util.Locale.getISOLanguages();
       log.info("{}", langs.length);
@@ -179,6 +174,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
    
       i01.startBrain();
@@ -225,7 +226,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient HtmlFilter htmlFilter;
 
-  transient ImageDisplay imageDisplay;
+  // transient ImageDisplay imageDisplay;
 
   /**
    * simple booleans to determine peer state of existence
@@ -334,7 +335,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // FIXME - Framework should auto-magically auto-start peers AFTER
     // construction - unless explicitly told not to
     // peers to start on construction
-    imageDisplay = (ImageDisplay) startPeer("imageDisplay");
+    // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
 
   @Override /* local strong type - is to be avoided - use name string */
@@ -387,7 +388,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void closeAllImages() {
-    imageDisplay.closeAll();
+    //imageDisplay.closeAll();
+	  log.error("implement webgui.closeAllImages");
   }
 
   public void cycleGestures() {
@@ -436,7 +438,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void displayFullScreen(String src) {
     try {
-      imageDisplay.displayFullScreen(src);
+      // imageDisplay.displayFullScreen(src);
+	  log.error("implement webgui.displayFullScreen");
     } catch (Exception e) {
       error("could not display picture %s", src);
     }
