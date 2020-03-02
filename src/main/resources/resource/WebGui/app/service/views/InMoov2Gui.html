@@ -123,32 +123,77 @@
 </tr>
 </table>
 <!------------------------ arm end ------------------------------>
-<!------------------------ ear begin ------------------------------>
-<table ng-show="showPanel('ear')" class="inmoov-sub-panel table table-striped">
+<!------------------------ arm begin ------------------------------>
+<table ng-show="showPanel('arm')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
-            <label>ear Activated:</label>
-        <td>
-            <toggle width="120" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
-            <img src="../peers.png" height="28" ng-click="filterPeers('ear')"/>
+            <img src="../InMoovArm.png"/>
+            <label>leftArm Activated:</label>
+            <td>
+                <toggle width="70" height="28" ng-model="service.isLeftArmActivated" ng-change="!service.isLeftArmActivated?msg.stopLeftArm():msg.startLeftArm()" width="120" height="30" on="ON" off="OFF"/>
+            </td>
         </td>
-</td></tr>
+    </tr>
+    <tr>
+            <td>
+                <img src="../InMoovArm.right.png"/>
+                <label>rightArm Activated:</label>
+                <td>
+                    <toggle width="70" height="28" ng-model="service.isRightArmActivated" ng-change="!service.isRightArmActivated?msg.stopRightArm():msg.startRightArm()" width="120" height="30" on="ON" off="OFF"/>
+                </td>
+            </td>
+    </tr>
+    <tr>
+        <td>
+            <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+        </td>
+    </tr>
+</table>
+<!------------------------ arm end ------------------------------>
+<!------------------------ ear begin ------------------------------>
+<table ng-show="showPanel('ear')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../InMoov_ear.png"/>
+        <label>ear Activated:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.isEarActivated" ng-change="!service.isEarActivated?msg.stopEar():msg.startEar()" width="80" height="30" on="ON" off="OFF"/>
+        </td>
+    </td>
+</tr>
+    <td>
+        <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+            <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
+        </select>
+        {{service.status}}
+    </td>
+<tr>
+    <td>
+        <button ng-click="changeListeningState()">
+            <span>
+                <img ng-src="../WebkitSpeechRecognition/mic-animate.gif" width="80" src="../WebkitSpeechRecognition/mic-animate.gif">
+            </span>
+        </button>
+    </td>
+</tr>
 <tr>
     <td>
         <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
     </td>
 </tr>
 </table>
+<!------------------------ ear end ------------------------------>
 <!------------------------ torso begin ------------------------------>
 <table ng-show="showPanel('torso')" class="inmoov-sub-panel table table-striped">
-    <tr>
+<tr>
+    <td>
+        <img src="../InMoovTorso.png"/>
+        <label>torso Activated:</label>
         <td>
-            <label>torso Activated:</label>
-        <td>
-            <toggle width="120" height="28" ng-model="service.isTorsoActivated" ng-change="!service.isTorsoActivated?msg.stopTorso():msg.startTorso()" width="80" height="30" on="ON" off="OFF"/>
-            <img src="../peers.png" height="28" ng-click="filterPeers('torso')"/>
+            <toggle width="70" height="28" ng-model="service.isTorsoActivated" ng-change="!service.isTorsoActivated?msg.stopTorso():msg.startTorso()" width="80" height="30" on="ON" off="OFF"/>
         </td>
-</td></tr>
+    </td>
+</tr>
 <tr>
     <td>
         <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
@@ -158,22 +203,24 @@
 <!------------------------ torso end ------------------------------>
 <!------------------------ hand begin ------------------------------>
 <table ng-show="showPanel('hand')" class="inmoov-sub-panel table table-striped">
-    <tr>
-        <td>
-            <label>leftHand Activated:</label>
-        <td>
-            <toggle width="70" height="28" ng-model="service.isLeftHandActivated" ng-change="!service.isLeftHandActivated?msg.stopLeftHand():msg.startLeftHand()" width="120" height="30" on="ON" off="OFF"/>
-            <img src="../peers.png" height="28" ng-click="filterPeers('leftHand')"/>
-        </td>
-</td></tr>
 <tr>
     <td>
-        <label>rightHand Activated:</label>
-    <td>
-        <toggle width="70" height="28" ng-model="service.isRightHandActivated" ng-change="!service.isRightHandActivated?msg.stopRightHand():msg.startRightHand()" width="120" height="30" on="ON" off="OFF"/>
-        <img src="../peers.png" height="28" ng-click="filterPeers('rightHand')"/>
+        <img src="../InMoovHand.png"/>
+        <label>leftHand Activated:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.isLeftHandActivated" ng-change="!service.isLeftHandActivated?msg.stopLeftHand():msg.startLeftHand()" width="120" height="30" on="ON" off="OFF"/>
+        </td>
     </td>
-</td></tr>
+</tr>
+<tr>
+    <td>
+        <img src="../InMoovHand.right.png"/>
+        <label>rightHand Activated:</label>
+        <td>
+           <toggle width="70" height="28" ng-model="service.isRightHandActivated" ng-change="!service.isRightHandActivated?msg.stopRightHand():msg.startRightHand()" width="120" height="30" on="ON" off="OFF"/>
+        </td>
+    </td>
+</tr>
 <tr>
     <td>
         <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
@@ -183,14 +230,15 @@
 <!------------------------ hand end ------------------------------>
 <!------------------------ mouth begin ------------------------------>
 <table ng-show="showPanel('mouth')" class="inmoov-sub-panel table table-striped">
-    <tr>
+<tr>
+    <td>
+        <img src="../InMoov_mouth.png"/>
+        <label>mouth Activated:</label>
         <td>
-            <label>mouth Activated:</label>
-        <td>
-            <toggle width="70" height="30" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="ON" off="OFF"/>
-            <img src="../peers.png" height="28" ng-click="filterPeers('mouth')"/>
+           <toggle width="70" height="30" ng-model="service.isMouthActivated" ng-change="!service.isMouthActivated?msg.stopMouth():msg.startMouth()" on="ON" off="OFF"/>
         </td>
-</td></tr>
+    </td>
+</tr>
 <tr>
     <td>
         <label>speech Engine:</label>
@@ -205,6 +253,8 @@
                     <option ng-repeat="voice in service.voices" value="{{voice.name}}">{{voice.name}} {{voice.gender}} {{voice.locale.tag}}  {{voice.description}}</option>
                 </select>
             </span>
+            <!--<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">voices &nbsp;<span class="caret"></span>
+            </button>-->
             <toggle ng-model="service.mute" ng-change="msg.setMute(service.mute)" width="80" height="28" on="muted" off="unmuted"></toggle>
             <br/>
             <input class="form-control" type="text" id="speakText" ng-model="speakText">
@@ -221,43 +271,56 @@
 <!------------------------ mouth end ------------------------------>
 <!------------------------ head begin ------------------------------>
 <table ng-show="showPanel('head')" class="inmoov-sub-panel table table-striped">
-    <tr>
+<tr>
+    <td>
+        <img src="../InMoovHead.png"/>
+        <label>head Activated:</label>
         <td>
-            <label>head Activated:</label>
-        <td>
-            <toggle width="80" height="30" ng-model="service.isHeadActivated" ng-change="!service.isHeadActivated?msg.stopHead():msg.startHead()" width="80" height="25" on="ON" off="OFF"/></toggle>
-            <img src="../peers.png" height="28" ng-click="filterPeers('head')"/>
+            <toggle width="70" height="28" ng-model="service.isHeadActivated" ng-change="!service.isHeadActivated?msg.stopHead():msg.startHead()" on="ON" off="OFF"></toggle>
+
+            <img width="20" height="20" ng-click="searchText.name('head')" ng-src="../add.png" src="../add.png">
+            <!--<img class="inmoov-menu-button" ng-click="setPanel(selectedButton.name)" style="transform: translate(45px,15px)" ng-src="../add.png" src="../add.png">
+
+            <img width="20" height="20" src="../add.png"/>
+
+            <input type="text" class="form-control ng-valid ng-not-empty ng-dirty ng-valid-parse ng-touched" ng-model="searchText.name" placeholder="Search" typeahead-min-length="0" style="">-->
         </td>
-</td></tr>
+    </td>
+</tr>
 <tr>
     <td>
-        <!-- toggle width="120" height="28" ng-model="service.isHeadActivated" ng-change="msg.startHead(!service.isHeadActivated)" width="80" height="30" on="head on" off="head off"/ -->
+        <img src="../OpenCV.png"/>
         <label>vision Activated:</label>
-    <td>
-        <toggle width="80" height="30" ng-model="service.isOpenCVActivated" ng-change="!service.isOpenCVActivated?msg.stopOpenCV():msg.startOpenCV()" on="ON" off="OFF"/></toggle>
+        <td>
+            <toggle width="70" height="28" ng-model="service.isOpenCVActivated" ng-change="!service.isOpenCVActivated?msg.stopOpenCV():msg.startOpenCV()" on="ON" off="OFF"/></toggle>
+        </td>
     </td>
-</td></tr>
+</tr>
 <tr>
     <td>
+        <img src="../InMoovEyelids.png"/>
         <label>eyeLids Activated:</label>
-    <td>
-        <toggle width="80" height="30" ng-model="service.isEyeLidsActivated" ng-change="!service.isEyeLidsActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        <td>
+            <toggle width="70" height="28" ng-model="service.isEyeLidsActivated" ng-change="!service.isEyeLidsActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        </td>
     </td>
-</td></tr>
+</tr>
 <tr>
     <td>
         <label>eyeLidsLeft Activated:</label>
-    <td>
-        <toggle width="80" height="30" ng-model="EyeLidsLeftActivated" ng-change="!EyeLidsLeftActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        <td>
+            <toggle width="70" height="28" ng-model="EyeLidsLeftActivated" ng-change="!EyeLidsLeftActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        </td>
     </td>
-</td></tr>
+</tr>
 <tr>
     <td>
         <label>eyeLidsRight Activated:</label>
-    <td>
-        <toggle width="80" height="30" ng-model="EyeLidsRightActivated" ng-change="!EyeLidsRightActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        <td>
+            <toggle width="70" height="28" ng-model="EyeLidsRightActivated" ng-change="!EyeLidsRightActivated?msg.stopEyeLids():msg.startEyeLids()" on="ON" off="OFF"></toggle>
+        </td>
     </td>
-</td></tr>
+</tr>
 <tr>
     <td>
         <img src="../Tracking.png"/>
@@ -272,74 +335,438 @@
 </tr>
 </table>
 <!------------------------ head end ------------------------------>
-<!------------------------ extra begin ------------------------------>
-<table ng-show="showPanel('extra')" class="inmoov-sub-panel table table-striped">
-    <tr>
+<!------------------------ controller begin ------------------------------>
+<table ng-show="showPanel('controller')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../microcontroller_1.png"/>
+        <label>controller Right:</label>
         <td>
-            <label>neopixel Activated:</label>
-        <td>
-            <toggle width="80" height="30" ng-model="service.isNeopixelActivated" ng-change="!service.isNeopixelActivated?msg.stopNeopixel():msg.startNeopixel()" on="ON" off="OFF"/></toggle>
+            <toggle width="100" height="30" ng-model="service.MyRightPort" ng-change="MyRightPort" on="ON" off="COM select"/></toggle>
         </td>
-</td></tr>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../microcontroller_1.png"/>
+        <label>controller Left:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="MyLeftPort" ng-change="MyLeftPort" on="ON" off="COM select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../microcontroller_1.png"/>
+        <label>controller Extra 1:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="service.arduino3" ng-change="arduino3" on="ON" off="COM select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../microcontroller_1.png"/>
+        <label>controller Extra 2:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="service.arduino4" ng-change="arduino4" on="ON" off="COM select"/></toggle>
+        </td>
+    </td>
+</tr>
 <tr>
     <td>
         <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
     </td>
 </tr>
+<tr>
+    <td>
+        <img width="30" height="30" ng-click="setPanel('extra')" ng-src="../arrow_left_green.png" src="../arrow_left_green.png">
+    </td>
+</tr>
+</table>    
+<!------------------------ controller end ------------------------------>
+<!------------------------ neopixel begin ------------------------------>
+<table ng-show="showPanel('neopixel')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../neopixel.png"/>
+        <label>neopixel Activated:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.isNeopixelActivated" ng-change="!service.isNeopixelActivated?msg.stopNeopixel():msg.startNeopixel()" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>controller:</label>
+        <td>
+            <toggle width="100" height="28" ng-model="service.arduino3" ng-change="arduino3" on="ON" off="COM select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>NeopixelMaster:</label>
+        <td>
+            <toggle width="100" height="28" ng-model="service.NeopixelMaster" ng-change="NeopixelMaster" on="ON" off="left"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>NeopixelMasterPort:</label>
+        <td>
+            <toggle width="100" height="28" ng-model="service.NeopixelMasterPort" ng-change="NeopixelMasterPort" on="ON" off="Serial2"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>pin:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.pin" ng-change="pin" on="ON" off="2"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>number Of Pixel:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.numberOfPixel" ng-change="numberOfPixel" on="ON" off="16"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>boot_green:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.boot_green" ng-change="boot_green" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>downloadSomething_blue:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.downloadSomething_blue" ng-change="downloadSomething_blue" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>error_red:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.error_red" ng-change="error_red" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>flash_when_speak:</label>
+        <td>
+            <toggle width="70" height="28" ng-model="service.flash_when_speak" ng-change="flash_when_speak" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img width="30" height="30" ng-click="setPanel('extra')" ng-src="../arrow_left_green.png" src="../arrow_left_green.png">
+    </td>
+</tr>
+</table>    
+<!------------------------ neopixel end ------------------------------>    
+<!------------------------ extra begin ------------------------------>
+<table ng-show="showPanel('extra')" class="inmoov-sub-panel table table-striped">
+ <tr>
+    <td>
+        <img src="../microcontroller_1.png"/>
+        <label>controllers:</label>
+        <td>
+            <button class="btn btn-default" ng-click="setPanel('controller')">Settings</button>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../neopixel.png"/>
+        <label>neopixel:</label>
+        <td>
+            <button class="btn btn-default" ng-click="setPanel('neopixel')">Settings</button>
+        </td>
+    </td>
+</tr>
 </table>
 <!------------------------ extra end ------------------------------>
+<!------------------------ sensor begin ------------------------------>
+<table ng-show="showPanel('sensor')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../Pir.png"/>
+        <label>PIR</label>
+        <td>
+            <button class="btn btn-default" ng-click="setPanel('pir')">Settings</button>
+            <!--<img width="20" height="20" ng-click="setPanel('pir')" ng-src="../add.png" src="../add.png">-->
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../UltrasonicSensor.png"/>
+        <label>ultraSonic</label>
+        <td>
+            <button class="btn btn-default" ng-click="setPanel('ultraSonic')">Settings</button>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../kinect.png"/>
+        <label>Kinect</label>
+        <td>
+            <button class="btn btn-default" ng-click="setPanel('kinect')">Settings</button>
+        </td>
+    </td>
+</tr>
+</table>
+<!------------------------ sensor end ------------------------------>
+<!------------------------ pir begin ------------------------------>
+<table ng-show="showPanel('pir')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../Pir.png"/>
+        <label>PIR Activated:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.isPirActivated" ng-change="!service.isPirActivated?msg.stopPir():msg.startPir()" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>controller:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="PirControlerArduino" ng-change="PirControlerArduino" on="ON" off="select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>pin:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="PirPin" ng-change="PirPin" on="ON" off="23"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>    
+    <td>
+        <label>custom sounds if detection:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="PlayCurstomSoundIfDetection" ng-change="PlayCurstomSoundIfDetection" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img width="30" height="30" ng-click="setPanel('sensor')" ng-src="../arrow_left_green.png" src="../arrow_left_green.png">
+    </td>
+</tr>
+</table>
+<!------------------------ pir end ------------------------------>
+<!------------------------ ultraSonic begin ------------------------------>
+<table ng-show="showPanel('ultraSonic')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../UltrasonicSensor.png"/>
+        <label>UltraSonic Right Activated:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.isUltraSonicRightActivated" ng-change="!service.isUltraSonicRightActivated?msg.stopUltraSonicRight():msg.startUltraSonicRight()" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>  
+    <td>
+        <label>controller:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>trigPin:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="29"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>echoPin:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="33"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../UltrasonicSensor.png"/>
+        <label>UltraSonic Left Activated:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.isUltraSonicLeftActivated" ng-change="!service.isUltraSonicLeftActivated?msg.stopUltraSonicLeft():msg.startUltraSonicLeft()" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>controller:</label>
+        <td>
+            <toggle width="100" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="select"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>trigPin:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="29"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>echoPin:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="FIXME" ng-change="FIXME" on="ON" off="33"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img width="30" height="30" ng-click="setPanel('sensor')" ng-src="../arrow_left_green.png" src="../arrow_left_green.png">
+    </td>
+</tr>
+</table>
+<!------------------------ ultraSonic end ------------------------------>
+<!------------------------ kinect begin ------------------------------>
+<table ng-show="showPanel('kinect')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../kinect.png"/>
+        <label>kinect:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.isKinectActivated" ng-change="!service.isKinectActivated?msg.stopOpenNi():msg.startOpenNi()" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>ShouldersOffset:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="openNiShouldersOffset" ng-change="FIXME" on="ON" off="50"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>LeftShoulderInverted:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.openNiLeftShoulderInverted" ng-change="!service.isOpenNiActivated?msg.openNiLeftShoulderInverted" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <label>RightShoulderInverted:</label>
+        <td>
+            <toggle width="70" height="30" ng-model="service.openNiRightShoulderInverted" ng-change="!service.isOpenNiActivated?msg.openNiRightShoulderInverted" on="ON" off="OFF"/></toggle>
+        </td>
+    </td>
+</tr>
+<tr>
+    <td>
+        <button class="btn btn-default" ng-click="msg.export()">Save Config</button>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img width="30" height="30" ng-click="setPanel('sensor')" ng-src="../arrow_left_green.png" src="../arrow_left_green.png">
+    </td>
+</tr>
+</table>
+<!------------------------ kinect end ------------------------------>
 <!------------------------ InMoov begin ------------------------------>
 <table ng-show="showPanel('InMoov')" class="inmoov-sub-panel table table-striped">
-    <tr>
-        <td>
-            <label>InMoov</label>&nbsp;&nbsp;&nbsp;&nbsp;<img src="../peers.png" height="28" ng-click="filterPeers(null)"/>
-            <div class="form-group">
-                <select multiple class="form-control">
-                    <option>config-01</option>
-                    <option>default</option>
-                    <option>my-config-01</option>
-                    <option>my-config-02</option>
-                </select>
-            </div>
-            <button class="btn btn-default" ng-click="msg.export()">save</button>
-            <button class="btn btn-default" ng-click="msg.newConfig()">create new</button>
-            <button class="btn btn-default" ng-click="msg.exportAll()">save all</button>
-            <button class="btn btn-default" ng-click="msg.load()">load</button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img src="../InMoov.png"/>
-            <label>services</label>
-            <br/>
-            <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
-            <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
-            <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
-            <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
-            <button class="btn btn-default" type="button" ng-click="msg.stop()">
-                <span>
-                    <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop </span>
-            </button>
-            <button class="btn btn-default" ng-click="msg.disable()">disable</button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <toggle width="120" height="28" ng-model="service.isVirtual" ng-change="!service.isVirtual?msg.setVirtual(false):msg.setVirtual(true)" on="virtualize on" off="virtualize off"></toggle>
-            <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator on" off="simulator off"></toggle>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img src="../InMoovGestureCreator.png"/>
-            <label>gestures</label>
-            <br/>
-            <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
-            <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
-            <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
-            <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
-        </td>
-    </tr>
+<tr>
+    <td>
+        <img src="../InMoov_Icon.png"/>
+        <label>config</label>
+        <div class="form-group">
+            <select multiple class="form-control">
+                <option>config-01</option>
+                <option>default</option>
+                <option>my-config-01</option>
+                <option>my-config-02</option>
+            </select>
+        </div>
+        <button class="btn btn-default" ng-click="msg.export()">select config</button>
+        <button class="btn btn-default" ng-click="msg.exportAll()">create new</button>
+        <button class="btn btn-default" ng-click="msg.load()">load</button>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../InMoov.png"/>
+        <label>services</label>
+        <br/>
+        <button class="btn btn-default" ng-click="msg.startAll()">start all</button>
+        <button class="btn btn-default" ng-click="msg.startServos()">start servos</button>
+        <button class="btn btn-default" ng-click="msg.fullSpeed()">full speed</button>
+        <button class="btn btn-default" ng-click="msg.halfSpeed()">half speed</button>
+        <button class="btn btn-default" type="button" ng-click="msg.stop()">
+            <span>
+                <img src="../stop.png"/>&nbsp;&nbsp;&nbsp;&nbsp;stop 
+            </span>
+        </button>
+        <button class="btn btn-default" ng-click="msg.disable()">disable</button>
+        <!-- FIXME-PLEASE------------------------------------------------------>
+        <!--<button class="btn btn-default" type="button" ng-click="msg.setAutoDisable(!service.autoDisable)">autoDisable all 
+            <span class="ng-binding">off
+            </span>
+        </button>-->
+        <!--------------------------------------------------------------------->
+    </td>
+</tr>
+<tr>
+    <td>
+        <toggle width="120" height="28" ng-model="service.isVirtual" ng-change="!service.isVirtual?msg.setVirtual(false):msg.setVirtual(true)" on="virtualize on" off="virtualize off"></toggle>
+        <toggle width="120" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator on" off="simulator off"></toggle>
+    </td>
+</tr>
+<tr>
+    <td>
+        <img src="../InMoovGestureCreator.png"/>
+        <label>gestures</label>
+        <br/>
+        <input class="form-control" type="text" id="gesture" ng-model="selectedGesture" ng-readonly="isConnected" uib-typeahead="gesture for gesture in service.gestures | filter:$viewValue | limitTo:30" typeahead-min-length="0"/>
+        <button class="btn btn-default" ng-click="msg.loadGestures()">load gestures</button>
+        <button class="btn btn-default" ng-click="msg.cycleGestures()">cycle gestures</button>
+        <button class="btn btn-default" ng-click="executeGesture(selectedGesture)">execute</button>
+    </td>
+</tr>
 </table>
 <!------------------------ panel end ------------------------------>
 <!-- panels end -->
