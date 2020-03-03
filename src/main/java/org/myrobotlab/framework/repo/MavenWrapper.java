@@ -251,4 +251,10 @@ public class MavenWrapper extends Repo implements Serializable {
 
   }
 
+@Override
+public void installDependency(String location, ServiceDependency serviceTypes) {
+	// TODO Auto-generated method stub
+	
+}
+
 }
