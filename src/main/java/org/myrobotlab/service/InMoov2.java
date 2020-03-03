@@ -1642,7 +1642,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
-    jme.loadModels(assetPath);
+    // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into /resource/JMonkeyEngine/assets
 
     // ========== gael's calibrations begin ======================
     jme.setRotation(getName() + ".head.jaw", "x");
