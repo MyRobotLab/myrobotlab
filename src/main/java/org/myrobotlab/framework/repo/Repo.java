@@ -350,6 +350,27 @@ public abstract class Repo {
     }    
     install(location, types);
   }
+  
+  synchronized public void installDependency(String libraries, String[] installDependency) {
+		// unpack the --install-dependency options
+	  if (installDependency.length < 3) {
+		  error("format must be --install-dependency {groupId} {artifactId} [{version}|\"latest\"] [ext] ");
+		  return;
+	  }
+	  
+	  
+		  String organisation = installDependency[0];
+		  String artifactId = installDependency[1];
+		  String inV = installDependency[2];
+		  String version = (inV.equals("latest"))?"latest.integration":inV;
+		  String ext = (installDependency.length == 4)?installDependency[3]:null;
+		  ServiceDependency sd = new ServiceDependency(organisation, artifactId, version, ext);
+		  
+	  
+	  installDependency(libraries, sd);
+	}
+  
+  abstract public void installDependency(String location, ServiceDependency serviceTypes);
 
   abstract public void install(String location, String[] serviceTypes);
 

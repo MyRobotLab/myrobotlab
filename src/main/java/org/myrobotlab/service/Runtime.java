@@ -1249,6 +1249,16 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         shutdown();
         return;
       }
+      
+      if (options.installDependency != null) {
+          // we start the runtime so there is a status publisher which will
+          // display status updates from the repo install
+          Repo repo = getInstance().getRepo();
+          repo.installDependency(options.libraries, options.installDependency);
+          shutdown();
+          return;
+        }
+
 
       createAndStartServices(options.services);
 
@@ -1919,6 +1929,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
+    @Option(names = { "-d",
+    "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
+    public String installDependency[];
+    
     @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
