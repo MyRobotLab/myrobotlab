@@ -1185,9 +1185,18 @@ public class Agent extends Service {
       cmd.add(globalOptions.logLevel);
     }
 
+    // FIXME - shouldn't 'everything' simply be relayed on that doesn't
+    // directly affect Agent?
     if (pd.options.install != null) {
       cmd.add("--install");
       for (String serviceType : globalOptions.install) {
+        cmd.add(serviceType);
+      }
+    }
+    
+    if (pd.options.installDependency != null) {
+        cmd.add("--install-dependency");
+        for (String serviceType : globalOptions.installDependency) {
         cmd.add(serviceType);
       }
     }
