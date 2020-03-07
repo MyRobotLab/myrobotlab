@@ -820,7 +820,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // 1. if there is a src directory use it unless
     // 2. options say to override it
 
-    String resourceRoot = Runtime.getOptions().resourceDir;
+    String resourceRoot = (Runtime.getOptions() != null)?Runtime.getOptions().resourceDir:"resource";
     if ("resource".equals(resourceRoot)) {
       // allow default to be overriden by src if it exists
       File src = new File("src");
@@ -951,10 +951,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (versionFile.exists()) {
     	try {
     		String version = FileIO.toString(versionFile);
-    	if (version != null) {
-    		version = version.trim();
-    		serviceVersion = version;
-    	}
+	    	if (version != null) {
+	    		version = version.trim();
+	    		serviceVersion = version;
+	    	}
     	} catch(Exception e) {/* don't care */}
     }
 
