@@ -400,7 +400,8 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       @Override
       public void run() {
 
-        String name = sw.getFullName();// sw.getName();
+    	// FIXME - this will be an issue of name collision in distributed mrl !!!
+        String name = sw.getName();// sw.getFullName();// sw.getName();
 
         // change tab color based on name
         // it is better to add a new interfaced method I think ?
