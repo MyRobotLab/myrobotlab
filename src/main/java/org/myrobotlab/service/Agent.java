@@ -1047,10 +1047,10 @@ public class Agent extends Service {
     }
 
     if (options.services.size() == 0) {
-      options.services.add("log");
-      options.services.add("Log");
-      options.services.add("gui");
-      options.services.add("SwingGui");
+      // options.services.add("log");
+      // options.services.add("Log");
+      options.services.add("webgui");
+      options.services.add("WebGui");
       options.services.add("python");
       options.services.add("Python");
     }
