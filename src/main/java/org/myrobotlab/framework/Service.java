@@ -145,7 +145,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   transient protected Inbox inbox = null;
   transient protected Outbox outbox = null;
-
+  
+  protected String serviceVersion = null;
+  
   /**
    * for promoting portability and good pathing
    */
@@ -841,6 +843,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (!f.exists()) {
       f.mkdirs();
     }
+    
+    
     return resourceDir;
   }
 
@@ -897,6 +901,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       id = inId;
       log.info("creating remote proxy service for id {}", id);
     }
+    
+    
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
@@ -940,6 +946,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
+    
+    File versionFile = new File(getResourceDir() + fs + "version.txt");
+    if (versionFile.exists()) {
+    	try {
+    		String version = FileIO.toString(versionFile);
+    	if (version != null) {
+    		version = version.trim();
+    		serviceVersion = version;
+    	}
+    	} catch(Exception e) {/* don't care */}
+    }
 
     // register this service if local - if we are a foreign service, we probably
     // are being created in a
