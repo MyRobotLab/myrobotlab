@@ -471,22 +471,29 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
     // for access after extracting :(
+
+    configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
+
+    
     configBuilder.resource("./resource/WebGui/app");
     configBuilder.resource("./resource");
+    
 
     // for debugging
     // v- this makes http://localhost:8888/#/main worky
     configBuilder.resource("./src/main/resources/resource/WebGui/app");
+    // allow sub components to be served
     // v- this makes http://localhost:8888/react/index.html worky
     configBuilder.resource("./src/main/resources/resource/WebGui");
     // v- this makes http://localhost:8888/Runtime.png worky
     configBuilder.resource("./src/main/resources/resource");
-
+    
     // for future references of resource - keep the html/js reference to
     // "resource/x" not "/resource/x" which breaks moving the app
     // FUTURE !!!
     configBuilder.resource("./src/main/resources");
 
+    
     // can't seem to make this work .mappingPath("resource/")
 
     // TO SUPPORT LEGACY - BEGIN
