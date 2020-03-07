@@ -94,6 +94,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
   }
 
   public DockableTab(DockableTabPane tabPane, String title, Component display) {
+	  if (title.contains("@")) {
+		  title = title.substring(0, title.indexOf("@"));
+	  }
     this.title = new JLabel(title);
     this.tabPane = tabPane;
     this.display = display;
