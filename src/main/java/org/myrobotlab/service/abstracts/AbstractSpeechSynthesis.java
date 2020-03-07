@@ -591,6 +591,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
       if (!mute) {
         process(audioData, speak, blocking);
+      } else {
+    	log.info("not producing audio for {} - currently we are mute", speak);
       }
 
       // effect files are handled differently from generated audio

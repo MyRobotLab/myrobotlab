@@ -4,65 +4,90 @@ angular.module('mrlapp.service.WebkitSpeechSynthesisGui', []).controller('Webkit
     var msg = this.msg
 
     $scope.voiceToIndexMap = {}
-
-
+    $scope.voiceIndex = 0
+    $scope.voices = []
+    $scope.voiceSelected = null
+    $scope.text = ""
 
     this.updateState = function(service) {
-		$scope.service = service
-	}
+        $scope.service = service
+        $scope.voiceIndex = service.voiceIndex
+        if ($scope.voices.length == 0){
+            for (let i = 0; i < service.voiceList.length; ++i){
+            $scope.voices.push(service.voiceList[i])    
+            }
+        }
+        $scope.voiceSelected = service.voice.name
+        $scope.$apply()
+    }
 
-    // console.log('mary', $scope.service)
+    let webkitSpeak = function(text) {
+        $scope.text = text
+        $scope.$apply()
+        let synth = window.speechSynthesis;
+        let utterThis = new SpeechSynthesisUtterance(text);
+        utterThis.voice = $scope.voices[$scope.voiceIndex];
+        utterThis.pitch = 1.0
+        utterThis.rate = 1.0
+        synth.speak(utterThis)
+    }
 
     this.onMsg = function(inMsg) {
+        let data = inMsg.data[0]
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             $scope.$apply()
             break
-         case 'onVoiceIndex':
+        case 'onVoiceIndex':
+            $scope.voiceIndex = data
             break
-            
+
+        case 'onWebkitSpeak':
+            webkitSpeak(data)
+            break
+
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
-    
 
-    // I suspect speak is not "setup" like other functions and is not accessable like others in the
-    // theml e.g. msg.speak - so got to figure that out or temporarily create a $scope.speak kludge
-    $scope.speak = function(text){
-         if ('speechSynthesis'in window) {
-            // Synthesis support. Make your web apps talk!
-            var synth = window.speechSynthesis;
-
-            var utterThis = new SpeechSynthesisUtterance(text);
-            utterThis.voice = voices[2];
-            utterThis.pitch = 1.0
-            utterThis.rate = 1.0
-            synth.speak(utterThis)
-
+    let populateVoiceList = function() {
+        if (typeof speechSynthesis === 'undefined') {
+            console.info('no voices defined')
+            return;
         }
+
+        $scope.voices = speechSynthesis.getVoices();
+
+        for (let v = 0; v < $scope.voices.length; v++) {
+            let voice = $scope.voices[v];
+            console.info('found voice ' + v + ' ' + voice.name)
+            msg.send("addWebKitVoice", v, voice.name, voice.lang, voice.default)
+        }
+
+        msg.send('broadcastState')
     }
 
+    // sadly this does not work immediately - the voices will not get populated until the user clicks a button
+    // speechSynthesis.speak() without user activation is no longer allowed since M71, around December 2018. 
+    // See https://www.chromestatus.com/feature/5687444770914304 for more details speechSynthesisMessage    
+    populateVoiceList();
 
-    $scope.setVoice  = function(text){        
-        msg.send("setVoice", text.name)
+    $scope.setVoice = function(text) {
+        msg.send('setVoice', text)
+        msg.send('broadcastState')
     }
 
-     if ('speechSynthesis'in window) {
-            // Synthesis support. Make your web apps talk!
-            var synth = window.speechSynthesis;
+    $scope.setMute = function(mute) {
+        msg.send('setMute', mute)
+        populateVoiceList()
+    }
 
-            voices = synth.getVoices();
-            
-            for (var i = 0; i < voices.length; i++) {
-                console.log("Voice " + i.toString() + ' ' + voices[i].name + ' ' + voices[i].uri);
-                msg.send("addWebKitVoice", i, voices[i].name, voices[i].lang, voices[i].default)
-            }
-     }
-
+    msg.subscribe('webkitSpeak')
     msg.subscribe('publishVoiceIndex')
+    msg.send('setMute', true)
     msg.subscribe(this)
 }
 ])
