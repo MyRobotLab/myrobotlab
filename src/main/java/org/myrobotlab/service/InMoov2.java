@@ -142,15 +142,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       // Runtime.main(new String[] { "--install", "InMoov2" });
-      
+      // Runtime.main(new String[] { "--interactive", "--id", "inmoov", "--install-dependency","fr.inmoov", "inmoov2", "latest", "zip"});
       Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
 
 
       String[] langs = java.util.Locale.getISOLanguages();
-      log.info("{}", langs.length);
-      for (String l : langs) {
-        log.info("iso " + l);
-      }
 
       java.util.Locale[] locales = java.util.Locale.getAvailableLocales();
       log.info("{}", locales.length);
