@@ -1397,7 +1397,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             "ready": true
         }
 
-        _self.addService(jsRuntime)
+        // NOT READY FOR PRIMETIME - this needs to support js services in the future !
+        // _self.addService(jsRuntime)
 
         service.init()
         return service
