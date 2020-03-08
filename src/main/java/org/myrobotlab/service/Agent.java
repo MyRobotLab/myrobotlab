@@ -294,7 +294,10 @@ public class Agent extends Service {
   }
 
   public String getJarName(String branch, String version) {
-    return "myrobotlab-" + branch + "-" + version + ".jar";
+	// FIXME !!! branch name is completely unreliable :(
+	// version info which includes build number can distinguish for what we need
+	  return "myrobotlab-" + version + ".jar";
+    // return "myrobotlab-" + branch + "-" + version + ".jar";
     // return getDir(branch, version) + File.separator + "myrobotlab.jar";
   }
 
