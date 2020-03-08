@@ -472,7 +472,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
     if (!fullscreen) {
       frame.addWindowListener(this);
-      frame.setTitle("myrobotlab - " + Platform.getLocalInstance().getId() + " " + Runtime.getBranch() + " " + Runtime.getVersion().trim());
+      frame.setTitle("myrobotlab - " + Platform.getLocalInstance().getId() + " " + Runtime.getVersion().trim());
 
       frame.add(tabPanel);
       String logoFile = Util.getResourceDir() + File.separator + "mrl_logo_36_36.png";
