@@ -100,7 +100,7 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   @Override
   public IplImage createTestImage() {
     // let's use lena.png.
-    IplImage input = cvLoadImage(baseDirectory + "test/1.jpg");
+    IplImage input = cvLoadImage(baseDirectory + "Test/1.jpg");
     assertNotNull("bad input image", input);
     return input;
   }
