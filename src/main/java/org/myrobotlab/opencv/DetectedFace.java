@@ -23,7 +23,7 @@ public class DetectedFace {
   public void dePicaso() {
     if (mouth == null) {
       // NoOp
-      log.warn("Mouth was null.. can't dePicaso");
+      // log.warn("Mouth was null.. can't dePicaso");
       return;
     }
     // the face might be slightly scrambled. make sure the left eye
@@ -99,8 +99,10 @@ public class DetectedFace {
   public Rect faceWithBorder(int size, int cols, int rows) {
     int x = Math.max(0, face.x() - size / 2);
     int y = Math.max(0, face.y() - size / 2);
-    int w = Math.min(cols, face.width() + size / 2);
-    int h = Math.min(rows, face.height() + size / 2);
+    // make sure the cropped area doesn't exceed the borders of the original image.
+    int w = Math.min(cols-x, face.width() + size);
+    int h = Math.min(rows-y, face.height() + size);
+    
     if (x < 0 || y < 0 || w < 0 || h < 0) {
       // return new Rect(0,0,0,0);
       return null;
