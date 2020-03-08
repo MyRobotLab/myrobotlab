@@ -839,11 +839,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   static public String getResourceDir(String serviceType) {
 
     String resourceDir = getResourceRoot() + fs + serviceType;
+
+/*
     File f = new File(resourceDir);
+    
+    "get-ting" should not be "create-ing" !!    
     if (!f.exists()) {
       f.mkdirs();
     }
-    
+*/    
     
     return resourceDir;
   }
