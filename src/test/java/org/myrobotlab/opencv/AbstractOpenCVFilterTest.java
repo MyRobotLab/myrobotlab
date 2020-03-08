@@ -1,6 +1,7 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
@@ -36,6 +37,7 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
 
     OpenCVFilter filter = createFilter();
+    assertNotNull("Filter was null.", filter);
     IplImage input = createTestImage();
 
     if (debug) {
