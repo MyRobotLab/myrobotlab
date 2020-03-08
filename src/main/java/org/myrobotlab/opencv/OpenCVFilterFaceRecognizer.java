@@ -370,7 +370,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     ArrayList<DetectedFace> dFaces = extractDetectedFaces(bwImgMat);
     // Ok, for each of these detected faces we should try to classify them.
     for (DetectedFace dF : dFaces) {
-      log.info("Processing face.. {}", mode);
+      // log.info("Processing face.. {}", mode);
       if (dF.isGoodCandidate()) {
         // and array of 3 x,y points.
         // create the triangle from left->right->mouth center
@@ -504,7 +504,8 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // first lets pick up on the face. we'll assume the eyes and mouth are
     // inside.
     RectVector faces = detectFaces(bwImgMat);
-    log.info("Faces detected: {}",faces.size());
+    if (faces.size() > 0)
+      log.info("Faces detected: {}",faces.size());
     // For each detected face, we need to to find the eyes and mouths to make it
     // complete.
     for (int i = 0; i < faces.size(); i++) {
