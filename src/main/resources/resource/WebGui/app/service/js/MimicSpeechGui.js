@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.NaturalReaderSpeechGui', []).controller('NaturalReaderSpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
-    $log.info('NaturalReaderSpeechGuiCtrl');
+angular.module('mrlapp.service.MimicSpeechGui', []).controller('MimicSpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
+    $log.info('MimicSpeechGuiCtrl');
     var _self = this;
     var msg = this.msg;
 
