@@ -42,7 +42,6 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
