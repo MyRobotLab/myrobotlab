@@ -287,7 +287,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean mute = false;
 
   transient NeoPixel neopixel;
+	
+  transient Pir pir;
 
+  transient UltraSonicSensor ultraSonicSensor;
+	
   transient Python python;
 
   transient InMoov2Arm rightArm;
@@ -1798,6 +1802,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
      */
     return jme;
   }
+	
+  public InMoov2Torso startTorso() {
+    return startTorso(null);
+  }	
 
   public InMoov2Torso startTorso(String port) {
     if (torso == null) {
@@ -1820,6 +1828,31 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return torso;
   }
+	
+  public InMoov2Pir startPir() {
+    return startPir(null);
+  } 
+
+  public InMoov2Pir startPir(String port, Integer pirPin) {
+    if (pir == null) {
+      speakBlocking(get("STARTINGPIR"));
+      isPirActivated = true;
+
+      pir = (InMoov2Pir) startPeer("pir");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino right = (Arduino) startPeer("right");
+          right.connect(port);
+          right.attach(pir);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return pir;
+  }	
 
   public void stop() {
     if (head != null) {
