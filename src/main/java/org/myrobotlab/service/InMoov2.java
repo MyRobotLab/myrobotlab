@@ -245,8 +245,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   boolean isMouthActivated = false;
 
-  boolean isNeopixelActivated = false;
-
   boolean isRightArmActivated = false;
 
   boolean isRightHandActivated = false;
@@ -254,6 +252,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isSimulatorActivated = false;
 
   boolean isTorsoActivated = false;
+
+  boolean isNeopixelActivated = false;
+
+  boolean isPirActivated = false;
+
+  boolean isUltraSonicSensorActivated = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine jme;
@@ -701,6 +705,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public boolean isTorsoActivated() {
     return isTorsoActivated;
   }
+	
+  public boolean isPirActivated() {
+    return isPirActivated;
+  }
+
+  public boolean isUltraSonicSensorActivated() {
+    return isUltraSonicSensorActivated;
+  }	
 
   public Set<String> listConfigFiles() {
 
@@ -1384,7 +1396,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(get("STARTINGHEAD"));
 
     head = (InMoov2Head) startPeer("head");
-
+    isHeadActivated = true;
+	  
     if (headYPin != null) {
       head.setPins(headYPin, headXPin, eyeXPin, eyeYPin, jawPin, rollNeckPin);
     }
@@ -1458,6 +1471,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGLEFTARM"));
     leftArm = (InMoov2Arm) startPeer("leftArm");
+    isLeftArmActivated = true;	  
 
     if (port != null) {
       try {
@@ -1556,7 +1570,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     speakBlocking(get("STARTINGRIGHTARM"));
 
     rightArm = (InMoov2Arm) startPeer("rightArm");
-
+    isRightArmActivated = true;
+	  
     if (port != null) {
       try {
         speakBlocking(port);
@@ -1583,7 +1598,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGRIGHTHAND"));
     rightHand = (InMoov2Hand) startPeer("rightHand");
-
+    isRightHandActivated = true;
+	  
     if (port != null) {
       try {
         speakBlocking(port);
@@ -1802,7 +1818,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public InMoov2Torso startTorso(String port) {
     if (torso == null) {
       speakBlocking(get("STARTINGTORSO"));
-
+      isTorsoActivated = true;
+	    
       torso = (InMoov2Torso) startPeer("torso");
 
       if (port != null) {
@@ -1905,6 +1922,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     isSimulatorActivated = false;
   }
 
+  public void stopPir() {
+    speakBlocking("stopping p.i.r");
+    releasePeer("pir");
+    isPirActivated = false;
+  }
+
+  public void stopUltraSonicSensor() {
+    speakBlocking("stopping ultrasonic sensor");
+    releasePeer("ultraSonicSensor");
+    isPirActivated = false;
+  }	
   public void waitTargetPos() {
     if (head != null) {
       head.waitTargetPos();
