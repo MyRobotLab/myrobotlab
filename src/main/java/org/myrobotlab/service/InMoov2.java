@@ -1842,6 +1842,31 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return torso;
   }
 
+  public Pir startPir() {
+    return startPir(null);
+  } 
+
+  public Pir startPir(String port, Integer pirPin) {
+    if (pir == null) {
+      speakBlocking(get("STARTINGPIR"));
+      isPirActivated = true;
+
+      pir = (Pir) startPeer("pir");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino arduino = (Arduino) startPeer("right", "Arduino");
+          arduino.connect(port);
+          arduino.attach(pir);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return pir;
+  }	
+	
   public void stop() {
     if (head != null) {
       head.stop();
