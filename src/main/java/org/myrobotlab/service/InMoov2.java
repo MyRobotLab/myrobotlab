@@ -292,6 +292,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient NeoPixel neopixel;
 
+  transient Pir pir;
+
+  transient UltraSonicSensor ultraSonicSensor;
+
   transient Python python;
 
   transient InMoov2Arm rightArm;
@@ -1826,14 +1830,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	    
       torso = (InMoov2Torso) startPeer("torso");
 
-      if (port != null) {
+        if (port != null) {
         try {
           speakBlocking(port);
-          Arduino left = (Arduino) startPeer("left");
-          left.connect(port);
-          left.attach(torso.lowStom);
-          left.attach(torso.midStom);
-          left.attach(torso.topStom);
+          Arduino arduino = (Arduino) startPeer("left", "Arduino");
+          arduino.connect(port);
+          arduino.attach(torso.lowStom);
+          arduino.attach(torso.midStom);
+          arduino.attach(torso.topStom);
         } catch (Exception e) {
           error(e);
         }
@@ -1842,6 +1846,57 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return torso;
   }
 
+  public NeoPixel startNeoPixel() {
+    return startNeoPixel(null);
+  } 
+
+  public NeoPixel startNeoPixel(String port, Integer neopixelPin) {
+    if (neopixel == null) {
+      speakBlocking(get("STARTINGNEOPIXEL"));
+      isNeoPixelActivated = true;
+
+      neoPixel = (NeoPixel) startPeer("neoPixel");
+      
+      //---FIXME if user wants option: serial connection with Master Slave arduino
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino arduino3 = (Arduino) startPeer("arduino3");
+          arduino3.connect(port);
+          arduino3.attach(neopixel);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return neopixel;
+  }
+
+  public Pir startPir() {
+    return startPir(null);
+  } 
+
+  public Pir startPir(String port, Integer pirPin) {
+    if (pir == null) {
+      speakBlocking(get("STARTINGPIR"));
+      isPirActivated = true;
+
+      pir = (Pir) startPeer("pir");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino right = (Arduino) startPeer("right");
+          right.connect(port);
+          right.attach(pir);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return pir;
+  }	
+	
   public void stop() {
     if (head != null) {
       head.stop();
