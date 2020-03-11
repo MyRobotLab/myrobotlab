@@ -1632,7 +1632,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // FIXME .. externalize in a json file included in InMoov2
   public Simulator startSimulator() throws Exception {
 
-    speakBlocking("starting simulator");
+    speakBlocking(get("STARTINGVIRTUAL"));
 
     if (jme != null) {
       log.info("start called twice - starting simulator is reentrant");
@@ -1864,20 +1864,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void stopBrain() {
-    speakBlocking("stopping brain");
+    speakBlocking(get("STOPCHATBOT"));
     releasePeer("brain");
     isBrainActivated = false;
   }
 
   public void stopEar() {
-    speakBlocking("stopping ear");
+    speakBlocking(get("STOPEAR"));
     releasePeer("ear");
     isEarActivated = false;
     broadcastState();
   }
 
   public void stopEye() {
-    speakBlocking("stopping eye");
+    speakBlocking(get("STOPOPENCV"));
     isEyeActivated = false;
     releasePeer("eye");
   }
@@ -1888,19 +1888,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void stopLeftArm() {
-    speakBlocking("stopping left arm");
+    speakBlocking(get("STOPLEFTARM"));
     releasePeer("leftArm");
     isLeftArmActivated = false;
   }
 
   public void stopLeftHand() {
-    speakBlocking("stopping left hand");
+    speakBlocking(get("STOPLEFTHAND"));
     releasePeer("leftHand");
     isLeftHandActivated = false;
   }
 
   public void stopMouth() {
-    speakBlocking("stopping mouth");
+    speakBlocking(get("STOPMOUTH"));
     releasePeer("mouth");
     // TODO - potentially you could set the field to null in releasePeer
     mouth = null;
@@ -1908,32 +1908,38 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void stopRightArm() {
-    speakBlocking("stopping right arm");
+    speakBlocking(get("STOPRIGHTARM"));
     releasePeer("rightArm");
     isRightArmActivated = false;
   }
 
   public void stopRightHand() {
-    speakBlocking("stopping right hand");
+    speakBlocking(get("STOPRIGHTHAND"));
     releasePeer("rightHand");
     isRightHandActivated = false;
   }
 
+  public void stopTorso() {
+    speakBlocking(get("STOPTORSO"));
+    releasePeer("torso");
+    isTorsoActivated = false;
+  }
+
   public void stopSimulator() {
-    speakBlocking("stopping simulator");
+    speakBlocking(get("STOPVIRTUAL"));
     releasePeer("simulator");
     jme = null;
     isSimulatorActivated = false;
   }
 
   public void stopPir() {
-    speakBlocking("stopping p.i.r");
+    speakBlocking(get("STOPPIR"));
     releasePeer("pir");
     isPirActivated = false;
   }
 
   public void stopUltraSonicSensor() {
-    speakBlocking("stopping ultrasonic sensor");
+    speakBlocking(get("STOPULTRASONIC"));
     releasePeer("ultraSonicSensor");
     isPirActivated = false;
   }	
