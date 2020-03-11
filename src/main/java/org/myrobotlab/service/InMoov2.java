@@ -1814,6 +1814,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
      */
     return jme;
   }
+	
+  public InMoov2Torso startTorso() {
+    return startTorso(null);
+  }	
 
   public InMoov2Torso startTorso(String port) {
     if (torso == null) {
