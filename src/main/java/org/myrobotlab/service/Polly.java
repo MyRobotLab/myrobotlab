@@ -211,14 +211,14 @@ public class Polly extends AbstractSpeechSynthesis {
 
     ServiceType meta = AbstractSpeechSynthesis.getMetaData(Polly.class.getCanonicalName());
 
-    meta.addDescription("used as a general template");
+    meta.addDescription("Amazon speech synthesis - requires keys");
     meta.setAvailable(true); // false if you do not want it viewable in a
     // gui
     // add dependency if necessary
     meta.addCategory("speech", "sound");
 
     meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.9");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.10.1");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.10.3");
     meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.9");
     meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.512");
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");

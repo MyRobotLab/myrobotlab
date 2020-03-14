@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', '$timeout', function($scope, $log, mrl, $timeout) {
+angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl','statusSvc', '$timeout', function($scope, $log, mrl, statusSvc, $timeout) {
     console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -9,20 +9,49 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.service = service
     }
 
-    if ($scope.service == null) {
-        console.log('RuntimeGui $scope.service == null')
-    }
-
     $scope.platform = $scope.service.platform
     $scope.status = ""
     $scope.cmd = ""
     $scope.registry = {}
     $scope.connections = {}
     $scope.newName = null
-    $scope.newType = null
+    $scope.newType = ""
     $scope.heartbeatTs = null
 
+    $scope.category = {
+        selected: null
+    }
+
+    $scope.categoryServiceTypes = null
+
+    $scope.disabled = undefined;
+    $scope.person = {};
+
     var msgKeys = {}
+
+    let categoryServiceTypes = null
+
+    // $scope.categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
+
+    $scope.filterServices = function() {
+        var result = {};
+        console.info('$scope.category.selected is ' + $scope.category.selected)
+        const entries = Object.entries($scope.service.serviceData.serviceTypes)
+        for (const [fullTypeName,metaData] of entries) {
+            // if (metaData.simpleName.toLowerCase().includes($scope.newType)) {
+
+            if ($scope.category.selected != null){
+                categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
+            } else {
+                categoryServiceTypes = null
+            }
+
+            if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
+                result[fullTypeName] = metaData;
+            }
+        }
+        return result;
+    }
 
     // FIXME - should be a mrl service function ???
     $scope.sendToCli = function(cmd) {
@@ -49,7 +78,20 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         })
     }
 
+    $scope.setServiceType = function(serviceType){
+        $scope.newType = serviceType
+    }
+
     $scope.start = function() {
+
+        if ($scope.newName == null){
+            mrl.error("name of service is required")
+            return
+        }
+        if ($scope.newType == null){
+            mrl.error("type of service is required")
+            return
+        }
 
         if (typeof $scope.newType == 'object') {
             $scope.newType = $scope.newType.name
@@ -199,7 +241,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.$apply()
 
                 for (let i in heartbeat.serviceList) {
-                    let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id 
+                    let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
                     hb += serviceName + ' '
 
                     // FIXME - 'merge' ie remove missing services
@@ -207,9 +249,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                     // FIXME - want to maintain "local" registry ???
                     // currently maintaining JS process registry - should the RuntimeGui also maintain
                     // its 'own' sub-registry ???
-                    if (!serviceName in mrl.getRegistry()) { // 
+                    if (!serviceName in mrl.getRegistry()) {
+                        // 
                         console.warn(serviceName + ' not defined in registry - sending registration request');
-                    } // else already registered
+                    }
+                    // else already registered
                 }
 
                 console.info(hb)

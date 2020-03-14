@@ -27,7 +27,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
             $scope.remotePlatform = mrl.getRemotePlatform()
             $scope.id = mrl.getId()
             $scope.platform.vmVersion
-            if ($scope.remotePlatform.vmVersion != '1.8') {
+            if ($scope.remotePlatform && $scope.remotePlatform.vmVersion != '1.8') {
                 $scope.status = {
                     level: "error",
                     key: "BadJVM",
