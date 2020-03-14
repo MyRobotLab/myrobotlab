@@ -151,6 +151,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         methodCallbackMap[methodName].push(callback)
     }
 
+    _self.error = function(errorstr) {
+        var status = {}
+        status["level"] = "error" 
+        status["key"] = "webgui-client" 
+        status["detail"] = errorstr
+        var d = []
+        d.push(status)
+        msg = this.createMessage("mrl", "onStatus", d)
+        let cbs = methodCallbackMap[msg.method]
+        for (var i = 0; i < cbs.length; i++) {
+            cbs[i](msg)
+        }
+    }
+
     /**
      * FIXME - use a callback method like addServicePanel
      * registered is called when the subscribed remote runtime.registered is published and this
@@ -1291,6 +1305,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             controllerscope: _self.controllerscope,
             setSearchFunction: _self.setSearchFunction,
+            error:_self.error,
             search: _self.search,
             createMessage: _self.createMessage,
             display: _self.display,

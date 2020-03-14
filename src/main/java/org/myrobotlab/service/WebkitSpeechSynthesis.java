@@ -92,7 +92,7 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
 
 		ServiceType meta = AbstractSpeechSynthesis.getMetaData(WebkitSpeechSynthesis.class.getCanonicalName());
 
-		meta.addDescription("used as a general template");
+		meta.addDescription("Web speech api using Chrome or Firefox speech synthesis");
 		meta.setAvailable(true); // false if you do not want it viewable in a
 		// gui
 		// add dependency if necessary
@@ -136,31 +136,32 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
 			WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
 			webgui.autoStartBrowser(false);
 			webgui.startService();
-
-			WebkitSpeechSynthesis speech = (WebkitSpeechSynthesis) Runtime.start("speech", "WebkitSpeechSynthesis");
-
-			for (int i = 0; i < 1000; ++i) {
-				speech.setVoice("Google UK English Female");
-				speech.speak("how now brown cow");
-				speech.setVoice("Google UK English Male");
-				speech.speak("how now brown cow");
-				speech.setVoice("Google français");
-				speech.speak("Ah, la vache! Chercher la petite bête");
-				speech.setVoice("Google Deutsch");
-				speech.speak("Da liegt der Hund begraben.");
-				speech.setVoice("Google Nederlands");
-				speech.speak("Nu komt de aap uit de mouw");
-				speech.setVoice("Google Nederlands");
-				speech.speak("Nu komt de aap uit de mouw");				
-				speech.setVoice("Google italiano");
-				speech.speak("Ubriaco come una scimmia");
-								
-			}
+			
 			boolean done = true;
 			if (done) {
 				return;
 			}
 
+			WebkitSpeechSynthesis webkit = (WebkitSpeechSynthesis) Runtime.start("webkit", "WebkitSpeechSynthesis");
+
+			for (int i = 0; i < 1000; ++i) {
+				webkit.setVoice("Google UK English Female");
+				webkit.speak("how now brown cow");
+				webkit.setVoice("Google UK English Male");
+				webkit.speak("how now brown cow");
+				webkit.setVoice("Google français");
+				webkit.speak("Ah, la vache! Chercher la petite bête");
+				webkit.setVoice("Google Deutsch");
+				webkit.speak("Da liegt der Hund begraben.");
+				webkit.setVoice("Google Nederlands");
+				webkit.speak("Nu komt de aap uit de mouw");
+				webkit.setVoice("Google Nederlands");
+				webkit.speak("Nu komt de aap uit de mouw");				
+				webkit.setVoice("Google italiano");
+				webkit.speak("Ubriaco come una scimmia");
+								
+			}
+		
 		} catch (Exception e) {
 			log.error("main threw", e);
 		}
