@@ -63,7 +63,7 @@ public class VirtualMsg {
 
 	public static final int MAX_MSG_SIZE = 64;
 	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 63;
+	public static final int MRLCOMM_VERSION = 64;
 	
 	int ackMaxWaitMs = 1000;
   
@@ -85,7 +85,7 @@ public class VirtualMsg {
 	public boolean debug = false;
 	boolean invoke = true;
 	
-	boolean ackEnabled = false;
+	boolean ackEnabled = true;
 	
 	 public static class AckLock {
 	    // first is always true - since there

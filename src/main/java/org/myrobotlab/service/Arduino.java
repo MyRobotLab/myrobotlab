@@ -559,7 +559,7 @@ public class Arduino extends AbstractMicrocontroller
       // so we turn off ack'ing locally
 
       // TODO - can we re-enable acks ?
-      msg.enableAcks(false);
+      msg.enableAcks(true);
       long startBoardRequestTs = System.currentTimeMillis();
 
       // start the heartbeat

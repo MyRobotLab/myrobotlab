@@ -197,7 +197,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
     beginMoveTs = System.currentTimeMillis();
     endMoveTs = beginMoveTs + (long) moveTimeMs;
 
-    log.info("{}", this);
+    // log.debug("{}", this);
 
     estimatedPos = inBeginPos;
 
