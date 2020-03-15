@@ -114,6 +114,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   transient static public final TreeMap<String, ServiceReservation> dnaPool = new TreeMap<String, ServiceReservation>();
 
+  /**
+   * service type can override the location of its resource directory if specified on the command line
+   * --resource-override {ServiceType} {location} {ServiceType} {location} ...
+   */
+  static protected Map<String,String> resourceOverrides = new HashMap<>();
+  
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -837,18 +843,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   static public String getResourceDir(String serviceType) {
-
     String resourceDir = getResourceRoot() + fs + serviceType;
-
-/*
-    File f = new File(resourceDir);
-    
-    "get-ting" should not be "create-ing" !!    
-    if (!f.exists()) {
-      f.mkdirs();
+    if (resourceOverrides.containsKey(serviceType)) {
+    	resourceDir = resourceOverrides.get(serviceType);
     }
-*/    
-    
     return resourceDir;
   }
 
@@ -2274,6 +2272,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public Status warn(String format, Object... args) {
     Status status = Status.warn(format, args);
     status.name = getName();
+    log.warn(status.toString());
     invoke("publishStatus", status);
     return status;
   }

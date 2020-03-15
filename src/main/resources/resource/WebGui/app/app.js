@@ -27,6 +27,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.service', //Service & Co. (/service)
 'angularTreeview', // any server filesystem browsing
 'ui.toggle', // toggle buttons
+'ui.select', // select option with images
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js - starting');
