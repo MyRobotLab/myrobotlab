@@ -76,7 +76,7 @@ public class Servo extends AbstractServo implements ServoControl {
 
     ServiceType meta = new ServiceType(Servo.class);
     meta.addDescription("General hobby servo control with absolute positioning");
-    meta.addCategory("motor", "control");
+    meta.addCategory("motor", "control", "servo");
     meta.setAvailable(true);
 
     return meta;
@@ -85,43 +85,45 @@ public class Servo extends AbstractServo implements ServoControl {
   public static void main(String[] args) throws InterruptedException {
     try {
 
-      Runtime.main(new String[] { "--interactive"});
-      LoggingFactory.init(Level.INFO);
+      Runtime.main(new String[] { "--interactive", "--id", "servo"});
+      // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
       
       //Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
       Runtime.start("webgui", "WebGui");
-
+      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
-      mega.connect("/dev/ttyACM0");
-      // mega.setBoardMega();
-      
-      Servo servo03 = (Servo) Runtime.start("tilt", "Servo");
-      
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+
       boolean done = true;
       if (done) {
         return;
       }
+
+      mega.connect("/dev/ttyACM1");
+      // mega.setBoardMega();
+            
       
-      log.info("servo pos {}", servo03.getPos());
+      log.info("servo pos {}", tilt.getPos());
       
       // double pos = 170;
       // servo03.setPosition(pos);
-      servo03.setPin(3);
+      tilt.setPin(3);
       
       double min = 3;
       double max = 170;
       double speed = 60; // degree/s
       
-      mega.attach(servo03);
+      mega.attach(tilt);
       // mega.attach(servo03,3);
       
       for (int i = 0; i < 100 ; ++i) {
-        servo03.moveTo(20.0);
+        tilt.moveTo(20.0);
       }
       
-      servo03.sweep(min, max, speed);
+      tilt.sweep(min, max, speed);
       
       /*
       Servo servo04 = (Servo) Runtime.start("servo04", "Servo");

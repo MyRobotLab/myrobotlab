@@ -22,7 +22,7 @@ public class MarySpeechTest extends AbstractServiceTest {
     // TODO Auto-generated method stub
     MarySpeech speech = (MarySpeech)service;
     List<AudioData> result = speech.speakBlocking("hello world");
-    log.warn("Speaking result : {}", result);
+    log.info("Speaking result : {}", result);
     File f = new File(result.get(0).getFileName());
     Assert.assertTrue("Cached file doesn't exist. {}" , f.exists());
     Assert.assertTrue("Cached file was zero length. {}", f.length() > 0);

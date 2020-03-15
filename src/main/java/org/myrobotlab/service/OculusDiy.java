@@ -30,8 +30,8 @@ public class OculusDiy extends Service implements OrientationListener {
   transient public Mpu6050 mpu6050;
 
   transient Orientation oculus = new Orientation();
-  Mapper mapperPitch = new MapperLinear(-180, 0, 0, 180);
-  Mapper mapperYaw = new MapperLinear(-180, 180, 0, 360);
+  transient Mapper mapperPitch = new MapperLinear(-180, 0, 0, 180);
+  transient Mapper mapperYaw = new MapperLinear(-180, 180, 0, 360);
 
   Integer lastrotheadvalue = 90;
   Integer lastValue = 30;

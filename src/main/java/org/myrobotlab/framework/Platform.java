@@ -185,7 +185,7 @@ public class Platform implements Serializable {
       Map<String, String> manifest = getManifest();
       platform.manifest = manifest;
       platform.branch = get(manifest, "GitBranch", "unknownBranch");
-      platform.commit = get(manifest, "GitCommitId", "unknownCommit");
+      platform.commit = get(manifest, "GitCommitIdAbbrev", "unknownCommit");
       platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
 
       // motd
