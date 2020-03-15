@@ -10,6 +10,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -227,7 +228,11 @@ public class AudioProcessor extends Thread {
     } catch (Exception e) {
       log.error(e.getMessage(), e);
       if (audioFile != null) {
-        audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+    	if (e instanceof LineUnavailableException) {
+    		audioFile.error("line is not available");
+    	} else {
+    		audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+    	}
       }
     } finally {
       if (din != null) {
