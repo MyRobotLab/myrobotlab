@@ -86,7 +86,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
   static public ServiceType getMetaData() {
 
     ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
-    meta.addDescription("Hindi tts support");
+    meta.addDescription("Hindi text to speech support - requires keys");
     meta.setCloudService(true);
     meta.addCategory("speech");
     meta.setSponsor("moz4r");

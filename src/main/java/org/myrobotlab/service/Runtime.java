@@ -175,7 +175,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  transient private ServiceData serviceData = ServiceData.getLocalInstance();
+  private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -568,13 +568,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       } catch(Exception e) {/*don't care*/}
       boolean extract = (getVersion() == null)?true:!getVersion().equals(forceExtraction);
       FileIO.extractResources(extract);
-      if (extract){
-    	  try {
-	    	  FileOutputStream fos = new FileOutputStream(resourceDir + fs + "version.txt");
-	    	  fos.write(getVersion().getBytes());
-	    	  fos.close();
-    	  } catch(Exception e){/* don't care */}
-      }
       return true;
     } catch (Exception e) {
       log.error("extraction threw", e);
@@ -1246,6 +1239,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         if (options.services.size() == 0) {
           shutdown();
         }
+      }
+      
+      if (options.resourceOverride != null) {
+    	  Service.resourceOverrides = options.resourceOverride;
       }
 
       // FIXME TEST THIS !! 0 length, single service, multiple !
@@ -1943,6 +1940,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
 
+    @Option(names = { "-R",
+    "--resource-override" }, arity = "0..*", description = "service type can override the location of its resource directory, --resource-override {ServiceType} {location} {ServiceType} {location} ...")
+    public Map<String,String> resourceOverride = null;
+    
     @Option(names = { "-d",
     "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
     public String installDependency[];
