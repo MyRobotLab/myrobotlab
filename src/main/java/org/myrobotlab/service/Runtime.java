@@ -63,7 +63,7 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.logging.Appender;
+import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -1213,7 +1213,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // logging.addAppender(Appender.CONSOLE); // this is default of logger
       // setup :P - the parameter is not needed
       // } else {
-      logging.addAppender(Appender.FILE, String.format("%s.log", runtimeName));
+      logging.addAppender(AppenderType.FILE, String.format("%s.log", runtimeName));
       // }
 
       if (options.help) {
@@ -2504,7 +2504,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     Logging logging = LoggingFactory.getInstance();
     logging.removeAllAppenders();
     LoggingFactory.setLogFile(file);
-    logging.addAppender(Appender.FILE);
+    logging.addAppender(AppenderType.FILE);
     return file;
   }
 
