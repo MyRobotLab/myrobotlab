@@ -12,12 +12,20 @@ angular.module('mrlapp.service.ProgramABGui', [])
     $scope.currentBotName = ''
     $scope.utterance = ''
 
+    $scope.userNames = {}
+
     // grab defaults.
     $scope.newUserName = $scope.service.currentUserName
     $scope.newBotName = $scope.service.currentBotName
 
     // start info status
-    $scope.rows = []
+    $scope.chatLog = []
+
+    // start info status
+    $scope.log = []
+
+    $scope.hasSession = false
+
     
     // following the template.
     this.updateState = function(service) {
@@ -27,6 +35,18 @@ angular.module('mrlapp.service.ProgramABGui', [])
         $scope.currentUserName = service.currentUserName
         $scope.currentBotName = service.currentBotName
         $scope.service = service
+
+        $scope.userNames = {}
+
+        $scope.hasSession = Object.keys($scope.service.sessions).length > 0
+
+        for (let bot in $scope.service.sessions){
+            for (let username in $scope.service.sessions[bot]){
+                console.info(username)
+                $scope.userNames[username] = username
+            }
+        }
+
     }
     
     
@@ -42,25 +62,34 @@ angular.module('mrlapp.service.ProgramABGui', [])
             break
         case 'onRequest':
             var textData = data
-            $scope.rows.unshift({
+            $scope.chatLog.unshift({
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('currRequest', textData)
+            $log.info('onRequest', textData)
             $scope.$apply()
             break
         case 'onText':
             var textData = data
-            $scope.rows.unshift({
+            $scope.chatLog.unshift({
                 name: $scope.currentBotName,
                 text: $sce.trustAsHtml(textData)
             })
-            $log.info('currResponse', textData)
+            $log.info('onText', textData)
+            $scope.$apply()
+            break
+        case 'onLog':
+            var textData = data
+            $scope.log.unshift({
+                name: '',
+                text: $sce.trustAsHtml(textData)
+            })
+            //$log.info('currResponse', textData)
             $scope.$apply()
             break
         case 'onOOBText':
             var textData = data
-            $scope.rows.unshift({
+            $scope.chatLog.unshift({
                 name: " > oob <",
                 text: $sce.trustAsHtml(textData)
             })
@@ -108,7 +137,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     $scope.startSession = function(username, botname) {
         $scope.currentUserName = username
         $scope.currentBotName = botname
-    	$scope.rows.unshift("Reload Session for Bot " + botname)
+    	$scope.chatLog.unshift("Reload Session for Bot " + botname)
         $scope.startSessionLabel = 'Reload Session'
         msg.send("startSession", username, botname)
         startDialog.dismiss()
@@ -122,6 +151,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
     // subscribe to the response from programab.
     msg.subscribe('publishRequest')
     msg.subscribe('publishText')
+    msg.subscribe('publishLog')
     msg.subscribe('publishOOBText')
     msg.subscribe(this)
 }

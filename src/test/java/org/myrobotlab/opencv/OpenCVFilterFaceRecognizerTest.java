@@ -22,7 +22,7 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   @Before
   public void before() {
     debug = false;
-    LoggingFactory.init("DEBUG");
+    // LoggingFactory.init("DEBUG");
   }
 
   @Override

@@ -51,7 +51,7 @@ public class LoggingSLF4J extends Logging {
 
     // TODO - do layout ???
 
-    if (Appender.CONSOLE.equalsIgnoreCase(type)) {
+    if (AppenderType.CONSOLE.equalsIgnoreCase(type)) {
       ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
       console.setName(type);
       // console.setLayout(layout); ???
@@ -59,7 +59,7 @@ public class LoggingSLF4J extends Logging {
       console.setContext(lc);
       console.start();
       logger.addAppender(console);
-    } else if (Appender.FILE.equalsIgnoreCase(type)) {
+    } else if (AppenderType.FILE.equalsIgnoreCase(type)) {
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
       fileAppender.setName(type);
       fileAppender.setFile(LoggingFactory.getLogFileName());
@@ -68,7 +68,7 @@ public class LoggingSLF4J extends Logging {
       fileAppender.setAppend(false);
       fileAppender.start();
       logger.addAppender(fileAppender);
-    } else if (Appender.IS_AGENT.equalsIgnoreCase(type)) {
+    } else if (AppenderType.IS_AGENT.equalsIgnoreCase(type)) {
       // FROM_AGENT has only console - Agent has both console & file
       // appender
       /*
@@ -80,7 +80,7 @@ public class LoggingSLF4J extends Logging {
 
       // console
       ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
-      console.setName(String.format("%s.%s", Appender.IS_AGENT, Appender.CONSOLE));
+      console.setName(String.format("%s.%s", AppenderType.IS_AGENT, AppenderType.CONSOLE));
       // console.setLayout(layout); ???
       console.setEncoder(ple);
       console.setContext(lc);
@@ -89,7 +89,7 @@ public class LoggingSLF4J extends Logging {
       // grr DailyRollingFileAppender f = new DailyRollingFileAppender();
 
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
-      fileAppender.setName(String.format("%s.%s", Appender.IS_AGENT, Appender.FILE));
+      fileAppender.setName(String.format("%s.%s", AppenderType.IS_AGENT, AppenderType.FILE));
       // fileAppender.setFile(String.format("%s%smyrobotlabz.log",
       // System.getProperty("user.dir"), File.separator));
       fileAppender.setFile(LoggingFactory.getLogFileName());
@@ -103,7 +103,7 @@ public class LoggingSLF4J extends Logging {
       // going to keep it shutdown - so as not to not do too much logging
       logger.addAppender(fileAppender);
 
-    } else if (Appender.FROM_AGENT.equalsIgnoreCase(type)) {
+    } else if (AppenderType.FROM_AGENT.equalsIgnoreCase(type)) {
       // only has console because the console is relayed to the Agent
       // shorter layout than Agent - since everything will be
       // prepended to Agent's log prefix
@@ -117,7 +117,7 @@ public class LoggingSLF4J extends Logging {
 
       // console
       ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
-      console.setName(String.format("%s.%s", Appender.FROM_AGENT, Appender.CONSOLE));
+      console.setName(String.format("%s.%s", AppenderType.FROM_AGENT, AppenderType.CONSOLE));
       // console.setLayout(layout); ???
       console.setEncoder(ple);
       console.setContext(lc);
