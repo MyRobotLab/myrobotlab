@@ -50,7 +50,7 @@ public class YahooFinanceStockQuote extends HttpClient {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(YahooFinanceStockQuote.class.getCanonicalName());
     meta.addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
-    meta.addCategory("data", "finance");
+    meta.addCategory("filter", "finance");
     meta.setAvailable(false);
     return meta;
   }

@@ -132,7 +132,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
 
     ServiceType meta = new ServiceType(HtmlFilter.class.getCanonicalName());
     meta.addDescription("This service will strip html markup from the input text");
-    meta.addCategory("data", "filter");
+    meta.addCategory("filter");
     meta.addDependency("org.jsoup", "jsoup", "1.8.3");
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     return meta;

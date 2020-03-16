@@ -603,7 +603,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
     meta.addDescription("Solr Service - Open source search engine");
-    meta.addCategory("data", "search");
+    meta.addCategory("search");
     String solrVersion = "8.4.1";
     meta.addDependency("org.apache.solr", "solr-core", solrVersion);
     meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");

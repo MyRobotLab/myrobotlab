@@ -68,7 +68,7 @@ public class KafkaConnector extends Service {
   public static ServiceType getMetaData() {
     ServiceType meta = new ServiceType(KafkaConnector.class.getCanonicalName());
     meta.addDescription("Provides a string/string consumer for a kafka topic.");
-    meta.addCategory("connectivity", "cloud");
+    meta.addCategory("cloud");
     meta.addDependency("org.apache.kafka", "kafka-clients", "1.0.1");
     return meta;
   }

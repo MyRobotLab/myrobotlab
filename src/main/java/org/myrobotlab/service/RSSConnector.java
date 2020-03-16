@@ -138,7 +138,7 @@ public class RSSConnector extends AbstractConnector {
     ServiceType meta = new ServiceType(RSSConnector.class.getCanonicalName());
     meta.addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
     meta.setCloudService(true);
-    meta.addCategory("data");
+    meta.addCategory("cloud");
     // Tried to add this dependency, but no luck with defining the ivy.xml
     meta.addDependency("rome", "rome", "1.0");
     // meta.addDependency("feed4j", "feed4j", "1.0.0");

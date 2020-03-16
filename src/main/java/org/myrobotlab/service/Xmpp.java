@@ -101,7 +101,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Xmpp.class.getCanonicalName());
     meta.addDescription("xmpp service to access the jabber network");
-    meta.addCategory("connectivity");
+    meta.addCategory("cloud","network");
 
     meta.addDependency("org.igniterealtime.smack", "smack-java7", "4.1.6");
     meta.addDependency("org.igniterealtime.smack", "smack-tcp", "4.1.6");

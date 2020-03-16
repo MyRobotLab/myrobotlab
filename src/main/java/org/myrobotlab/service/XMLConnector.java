@@ -141,7 +141,7 @@ public class XMLConnector extends AbstractConnector {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(XMLConnector.class.getCanonicalName());
     meta.addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
-    meta.addCategory("data");
+    meta.addCategory("filter");
     // FIXME - make a service page, and /python/service example
     meta.setAvailable(false);
     return meta;
