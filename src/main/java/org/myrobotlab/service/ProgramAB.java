@@ -925,7 +925,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(ProgramAB.class.getCanonicalName());
     meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
-    meta.addCategory("intelligence");
+    meta.addCategory("ai");
 
     // FIXME - add Wikipedia local search !!
     meta.addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");

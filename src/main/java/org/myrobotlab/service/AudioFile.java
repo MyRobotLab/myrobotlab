@@ -524,7 +524,7 @@ public class AudioFile extends Service {
 
     ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
     meta.addDescription("can play audio files on multiple tracks");
-    meta.addCategory("sound");
+    meta.addCategory("sound","music");
 
     meta.addDependency("javazoom", "jlayer", "1.0.1");
     meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");

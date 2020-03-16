@@ -544,7 +544,7 @@ public class Shoutbox extends Service {
 
     ServiceType meta = new ServiceType(Shoutbox.class.getCanonicalName());
     meta.addDescription("shoutbox server");
-    meta.addCategory("connectivity");
+    meta.addCategory("cloud");
 
     return meta;
   }

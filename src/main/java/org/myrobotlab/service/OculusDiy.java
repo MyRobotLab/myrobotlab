@@ -30,8 +30,8 @@ public class OculusDiy extends Service implements OrientationListener {
   transient public Mpu6050 mpu6050;
 
   transient Orientation oculus = new Orientation();
-  transient Mapper mapperPitch = new MapperLinear(-180, 0, 0, 180);
-  transient Mapper mapperYaw = new MapperLinear(-180, 180, 0, 360);
+  Mapper mapperPitch = new MapperLinear(-180, 0, 0, 180);
+  Mapper mapperYaw = new MapperLinear(-180, 180, 0, 360);
 
   Integer lastrotheadvalue = 90;
   Integer lastValue = 30;
@@ -180,9 +180,9 @@ public class OculusDiy extends Service implements OrientationListener {
    * 
    */
   static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(OculusDiy.class.getCanonicalName());
+    ServiceType meta = new ServiceType(OculusDiy.class);
     meta.addDescription("Service to receive and compute data from a DIY Oculus");
-    meta.addCategory("video", "control", "sensor");
+    meta.addCategory("video", "control", "sensor", "telerobotics");
     meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
     meta.addPeer("mpu6050", "Mpu6050", "mpu6050");
     return meta;

@@ -152,7 +152,7 @@ public class ThingSpeak extends Service {
 
     ServiceType meta = new ServiceType(ThingSpeak.class.getCanonicalName());
     meta.addDescription("Service which can relay data to a ThingSpeak account");
-    meta.addCategory("connectivity", "cloud");
+    meta.addCategory("monitor","cloud");
     return meta;
   }
 

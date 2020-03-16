@@ -103,7 +103,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     meta.addDescription("VoiceRss speech synthesis service.");
     meta.addCategory("speech");
     meta.setSponsor("moz4r");
-    meta.addCategory("speech", "sound");
+    meta.addCategory("speech", "cloud");
     meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
     meta.setCloudService(true);
     meta.addDependency("com.voicerss", "tts", "1.0");
