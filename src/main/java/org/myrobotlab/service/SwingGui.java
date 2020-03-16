@@ -69,7 +69,7 @@ import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
-import org.myrobotlab.logging.Appender;
+import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -292,12 +292,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       unhideAll();
     } else if ("hide all".equals(cmd)) {
       hideAll();
-    } else if (cmd.equals(Appender.FILE)) {
+    } else if (cmd.equals(AppenderType.FILE)) {
       Logging logging = LoggingFactory.getInstance();
-      logging.addAppender(Appender.FILE);
-    } else if (cmd.equals(Appender.NONE)) {
+      logging.addAppender(AppenderType.FILE);
+    } else if (cmd.equals(AppenderType.NONE)) {
       Logging logging = LoggingFactory.getInstance();
-      logging.addAppender(Appender.NONE);
+      logging.addAppender(AppenderType.NONE);
     } else if ("explode".equals(cmd)) {
       explode();
     } else if ("collapse".equals(cmd)) {
