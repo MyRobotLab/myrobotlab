@@ -1,6 +1,6 @@
 package org.myrobotlab.logging;
 
-public class Appender {
+public class AppenderType {
 
   public static final String CONSOLE = "CONSOLE";
   public static final String REMOTE = "REMOTE";
