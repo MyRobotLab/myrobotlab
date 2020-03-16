@@ -67,7 +67,7 @@ public class TextTransform extends Service implements TextListener, TextPublishe
 
     ServiceType meta = new ServiceType(TextTransform.class.getCanonicalName());
     meta.addDescription("TextTransform");
-    meta.addCategory("data", "filter");
+    meta.addCategory("filter");
 
     // FIXME - this thing is at least 3 years old .. and does nothing I think :P
     meta.setAvailable(false);

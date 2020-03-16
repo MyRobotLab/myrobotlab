@@ -93,7 +93,7 @@ public class CleverBot extends Service {
 
     ServiceType meta = new ServiceType(CleverBot.class);
     meta.addDescription("chatbot service");
-    meta.addCategory("intelligence");
+    meta.addCategory("ai");
     meta.addDependency("ca.pjer", "chatter-bot-api", "2.0.1");
     meta.addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
     return meta;

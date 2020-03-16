@@ -445,7 +445,7 @@ public class WikiDataFetcher extends Service {
 
     ServiceType meta = new ServiceType(WikiDataFetcher.class.getCanonicalName());
     meta.addDescription("This service grab data from wikidata website");
-    meta.addCategory("intelligence");
+    meta.addCategory("ai");
     meta.setSponsor("beetlejuice");
     meta.addDependency("org.wikidata.wdtk", "wdtk-client", "0.8.0");
     meta.exclude("org.slf4j", "slf4j-log4j12");

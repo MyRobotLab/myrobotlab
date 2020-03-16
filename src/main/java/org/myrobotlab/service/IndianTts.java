@@ -88,7 +88,7 @@ public class IndianTts extends AbstractSpeechSynthesis {
     ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
     meta.addDescription("Hindi text to speech support - requires keys");
     meta.setCloudService(true);
-    meta.addCategory("speech");
+    meta.addCategory("speech","cloud");
     meta.setSponsor("moz4r");
     meta.addCategory("speech", "sound");
     meta.addPeer("httpClient", "HttpClient", "httpClient");

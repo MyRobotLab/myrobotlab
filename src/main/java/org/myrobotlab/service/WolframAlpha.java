@@ -200,7 +200,7 @@ public class WolframAlpha extends Service {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(WolframAlpha.class.getCanonicalName());
     meta.addDescription("Wolfram service");
-    meta.addCategory("intelligence", "data");
+    meta.addCategory("ai", "cloud");
     // TODO http should be removed as a dependency and added as a Peer
 
     meta.addDependency("WolframAlpha", "WolframAlpha", "1.1");

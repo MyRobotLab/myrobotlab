@@ -232,7 +232,7 @@ public class Polly extends AbstractSpeechSynthesis {
     // <dependency org="com.amazonaws" name="aws-java-sdk-polly"
     // rev="1.11.118"/>
 
-    meta.addCategory("speech");
+    meta.addCategory("speech","cloud");
     meta.setCloudService(true);
     return meta;
   }
