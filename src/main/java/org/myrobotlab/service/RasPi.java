@@ -90,7 +90,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     meta.addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
-    meta.addDependency("com.pi4j", "pi4j-core", "1.2-SNAPSHOT");
+    meta.addDependency("com.pi4j", "pi4j-core", "1.2");
     meta.addDependency("com.pi4j", "pi4j-native", "1.2");
     return meta;
   }
