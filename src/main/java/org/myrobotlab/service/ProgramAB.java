@@ -24,11 +24,13 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.ChatData;
 import org.myrobotlab.programab.MrlSraixHandler;
 import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.LogPublisher;
 import org.myrobotlab.service.interfaces.SearchPublisher;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
@@ -48,7 +50,7 @@ import org.slf4j.Logger;
  * @author kwatters
  *
  */
-public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider {
+public class ProgramAB extends Service implements TextListener, TextPublisher, LocaleProvider, LogPublisher {
   // Internal class for the program ab response.
   public static class Response {
     // FIXME - timestamps are usually longs System.currentTimeMillis()
@@ -93,7 +95,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   // bots map is keyed off the lower case version of the bot name.
   private transient HashMap<String, Bot> bots = new HashMap<String, Bot>();
   // Mapping a bot to a username and chat session
-  private transient HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
+  private HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
   // TODO: ProgramAB default bot should be Alice-en_US we should name the rest
   // of the language specific default bots.
   // initial default values for the current bot/and user
@@ -113,6 +115,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   HashSet<String> availableBots = new HashSet<>();
   boolean peerSearch = true;
   private Locale locale;
+  
+  transient SimpleLogPublisher logPublisher = null;
 
   /**
    * Default constructor for the program ab service.
@@ -127,6 +131,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     super(n, id);
     availableBots = getBots();
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
+    logPublisher = new SimpleLogPublisher(this); 
+    logPublisher.filterClasses(new String[]{ "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
+    logPublisher.start();
   }
 
   public void addOOBTextListener(TextListener service) {
@@ -988,7 +995,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   @Override
   public Map<String, Locale> getLocales() {
+	  // FIXME should be based on bots found ???
    return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN","it-IT", "fi-FI","pt-PT");
   }
+
+@Override
+public String publishLog(String msg) {
+	return msg;
+}
 
 }
