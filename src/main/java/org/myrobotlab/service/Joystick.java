@@ -412,7 +412,7 @@ public class Joystick extends Service {
 
     ServiceType meta = new ServiceType(Joystick.class.getCanonicalName());
     meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
-    meta.addCategory("control");
+    meta.addCategory("control","telerobotics");
     meta.addDependency("net.java.jinput", "jinput", "2.0.7");
     meta.addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
     // meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");

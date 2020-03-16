@@ -138,7 +138,7 @@ public class Mail extends Service {
 
     ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
     meta.addDescription("SMTP ssl/tls service used for sending things");
-    meta.addCategory("connectivity");
+    meta.addCategory("cloud");
 
     return meta;
   }

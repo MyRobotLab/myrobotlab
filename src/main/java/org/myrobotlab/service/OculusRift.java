@@ -509,9 +509,9 @@ public class OculusRift extends Service implements PointPublisher {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(OculusRift.class.getCanonicalName());
+    ServiceType meta = new ServiceType(OculusRift.class);
     meta.addDescription("The Oculus Rift Head Tracking Service");
-    meta.addCategory("video", "control", "sensor");
+    meta.addCategory("video", "control", "sensor", "telerobotics");
     // make sure the open cv instance share each others streamer..
     // meta.sharePeer("leftOpenCV.streamer", "streamer", "VideoStreamer",
     // "shared left streamer");

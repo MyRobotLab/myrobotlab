@@ -424,7 +424,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     ServiceType meta = new ServiceType(Mqtt.class);
     meta.addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");
-    meta.addCategory("connectivity", "cloud");
+    meta.addCategory("cloud","network");
     /*
      * <!--
      * https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.

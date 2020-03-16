@@ -13,7 +13,6 @@
 <div class="row">&nbsp;</div>
 <!-- service type selector begin -->
 <div class="row">
-<!-- {{category}} -->
     <div class="form-inline col-md-6">
 
         <ui-select ng-model="category.selected" theme="bootstrap" style="width: 600px;">
@@ -28,13 +27,9 @@
 
 
         <table class="table table-striped">
-            <tr ng-repeat="(fullTypename, metaData) in filterServices()">
-                <td>
-                    <!--span class="glyphicon glyphicon-play-circle" width="18"></span-->
-                    <!--img class="inmoov-menu-button" src="/play-blue.png" width="18" ng-click="setServiceType(metaData.simpleName)"/ -->
-                </td>
-                <td><span ng-click="setServiceType(metaData.simpleName)">
-                    <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>{{metaData.simpleName}}     
+            <tr ng-repeat="(fullTypename, metaData) in filterServices()">               
+                <td nowrap><span ng-click="setServiceType(metaData.simpleName)">
+                    <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
                     </span>                                   
                 </td>
                 <td><span ng-click="setServiceType(metaData.simpleName)">{{metaData.description}}</span></td>
