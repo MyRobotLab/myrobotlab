@@ -28,7 +28,7 @@ public class AbstractTest {
 
   private static long coolDownTimeMs = 100;
 
-  /** cached internet test value for tests */
+  /** cached network test value for tests */
   static Boolean hasInternet = null;
 
   static boolean install = true;
@@ -50,8 +50,6 @@ public class AbstractTest {
   protected Set<Attachable> attached = new HashSet<>();
 
   protected boolean printMethods = true;
-
-  // private static boolean useDeprecatedThreadStop = false;
 
   @Rule
   public final TestName testName = new TestName();
@@ -250,56 +248,5 @@ public class AbstractTest {
   public void testFunction() {
     log.info("tested testFunction");
   }
-
-  /*
-  @Override
-  public void attach(Attachable service) throws Exception {
-    attached.add(service);
-  }
-
-  @Override
-  public void attach(String serviceName) throws Exception {
-    attach(Runtime.getService(serviceName));
-  }
-
-  @Override
-  public void detach(Attachable service) {
-    attached.remove(service);
-  }
-
-  @Override
-  public void detach(String serviceName) {
-    detach(Runtime.getService(serviceName));
-  }
-
-  @Override
-  public void detach() {
-    attached.clear();
-  }
-
-  @Override
-  public Set<String> getAttached() {
-    Set<String> ret = new HashSet<>();
-    for (Attachable a : attached) {
-      ret.add(a.getName());
-    }
-    return ret;
-  }
-
-  @Override
-  public boolean isAttached(Attachable instance) {
-    return attached.contains(instance);
-  }
-
-  @Override
-  public boolean isAttached(String name) {
-    return isAttached(Runtime.getService(name));
-  }
-
-  @Override
-  public boolean isLocal() {
-    return true;
-  }
-  */
 
 }
