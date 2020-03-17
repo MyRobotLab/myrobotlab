@@ -246,6 +246,13 @@
     <scope>provided</scope>
   </dependency>
   <dependency>
+    <groupId>miniXCEPTION</groupId>
+    <artifactId>miniXCEPTION</artifactId>
+    <version>0.0</version>
+    <scope>provided</scope>
+    <type>zip</type>
+  </dependency>
+  <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
     <version>1.0.0-beta6</version>
@@ -257,14 +264,6 @@
     <version>3.1.1</version>
     <scope>provided</scope>
   </dependency>
-  
-  <!-- https://mvnrepository.com/artifact/org.bytedeco/javacpp -->
-<dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>javacpp</artifactId>
-    <version>1.5.2</version>
-    <scope>provided</scope>
-</dependency> 
 <!-- Deeplearning4j end -->
 
 <!-- DocumentPipeline begin -->
@@ -324,13 +323,17 @@
   </dependency>
 <!-- GoogleCloud end -->
 
-<!-- HtmlFilter begin -->
+<!-- GoogleSearch begin -->
   <dependency>
     <groupId>org.jsoup</groupId>
     <artifactId>jsoup</artifactId>
     <version>1.8.3</version>
     <scope>provided</scope>
   </dependency>
+<!-- GoogleSearch end -->
+
+<!-- HtmlFilter begin -->
+<!-- Duplicate entry for org.jsoup-jsoup-1.8.3 skipping -->
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
 <!-- HtmlFilter end -->
 
@@ -364,6 +367,10 @@
   </dependency>
 <!-- InMoov end -->
 
+<!-- InMoov2 begin -->
+<!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
+<!-- InMoov2 end -->
+
 <!-- IndianTts begin -->
   <dependency>
     <groupId>org.myrobotlab.audio</groupId>
@@ -377,7 +384,7 @@
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- Duplicate entry for inmoov.fr-inmoov-1.1.9 skipping -->
+<!-- Duplicate entry for inmoov.fr-inmoov-1.1.22 skipping -->
 <!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
 <!-- IntegratedMovement end -->
 
@@ -882,12 +889,6 @@
   </dependency>
 <!-- MyoThalmic end -->
 
-<!-- NaturalReaderSpeech begin -->
-<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
-<!-- NaturalReaderSpeech end -->
-
 <!-- OculusRift begin -->
   <dependency>
     <groupId>slick-util</groupId>
@@ -1145,18 +1146,16 @@
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-core</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <scope>provided</scope>
   </dependency>
-  
-  <!-- https://mvnrepository.com/artifact/com.pi4j/pi4j-native -->
-	<dependency>
-	    <groupId>com.pi4j</groupId>
-	    <artifactId>pi4j-native</artifactId>
-	    <version>1.2</version>
-	    <type>pom</type>
-	</dependency>
-  
+  <dependency>
+    <groupId>com.pi4j</groupId>
+    <artifactId>pi4j-native</artifactId>
+    <version>1.2</version>
+    <scope>provided</scope>
+    <type>pom</type>
+  </dependency>
 <!-- RasPi end -->
 
 <!-- Rekognition begin -->
@@ -1315,29 +1314,18 @@
 <!-- Tensorflow end -->
 
 <!-- TesseractOcr begin -->
-<!-- https://mvnrepository.com/artifact/org.bytedeco/tesseract-platform -->
-<dependency>
-    <groupId>org.bytedeco</groupId>
-    <artifactId>tesseract-platform</artifactId>
-    <version>4.1.0-1.5.2</version>
-    <scope>provided</scope>
-</dependency>
-
-<dependency>
+  <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
     <version>4.1.0-1.5.2</version>
     <scope>provided</scope>
-</dependency>
-
-<!--  TODO: fix me
-
+  </dependency>
   <dependency>
-    <groupId>org.bytedeco.javacpp-presets</groupId>
+    <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.0.0-rc2-1.4.3</version>
+    <version>4.1.0-1.5.2</version>
     <scope>provided</scope>
-  </dependency>  -->
+  </dependency>
 <!-- TesseractOcr end -->
 
 <!-- Test begin -->
@@ -1399,19 +1387,13 @@
     <version>1.1</version>
     <scope>provided</scope>
   </dependency>
-  <dependency>
-    <groupId>org.glassfish.tyrus</groupId>
-    <artifactId>tyrus-client</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.glassfish.tyrus</groupId>
-    <artifactId>tyrus-container-grizzly</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-  </dependency>
 <!-- WebSocketConnector end -->
+
+<!-- WebkitSpeechSynthesis begin -->
+<!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
+<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
+<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
+<!-- WebkitSpeechSynthesis end -->
 
 <!-- Wii begin -->
   <dependency>
@@ -1448,12 +1430,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.9.9 skipping -->
-  <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.9.10.3</version>
-    <scope>provided</scope>
-  </dependency>
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.10.3 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.9.9 skipping -->
 <!-- WikiDataFetcher end -->
 
@@ -1640,7 +1617,8 @@
 										  <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
 										  <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
 										  <GitBuildTime>${git.build.time}</GitBuildTime>
-										  <GitBuildVersion>${git.build.version}</GitBuildVersion>
+										  <GitBuildVersion>${git.build.version}</GitBuildVersion>									      
+									      
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
