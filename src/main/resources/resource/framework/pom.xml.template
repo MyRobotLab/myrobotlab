@@ -1,12 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<!-- 
+		# configure jvm and javac
+		sudo update-alternatives (minus minus) config java
+		sudo update-alternatives (minus minus) config javac 
+		export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+		export PATH=$JAVA_HOME/bin:$PATH
 
 		# shows system vars and env vars
-		mvn -DskipTests -Dbuild.number=71 -DGitBranch=develop help:system
+		mvn -DskipTests -Dbuild.number=71 help:system
 		
 		# fast build
-		mvn -DskipTests -Dbuild.number=180 -DGitBranch=develop compile package -o
+		mvn -DskipTests -Dbuild.number=180 compile package -o
+		
+		# javadoc check
+		mvn -q javadoc:javadoc -o
+		
+		# proxy
+		-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 	
 	 -->	
 	<modelVersion>4.0.0</modelVersion>
@@ -28,7 +39,7 @@
 	     -->
 	    <!-- from jenkins env vars -->
 	    <build.number>${BUILD_NUMBER}</build.number>
-	    <GitBranch>${BRANCH_NAME}</GitBranch>
+	    <GitBranch>${git.branch}</GitBranch>
 	    <username>${NODE_NAME}</username>	    
 	    <platform>${NODE_LABELS}</platform>	    
 	    <!-- end env vars -->
@@ -169,7 +180,7 @@
 									      
 										<!-- maven git plugin id info -->
 										  <GitTags>${git.tags}</GitTags>
-										  <GitBranch>${GitBranch}</GitBranch>
+										  <GitBranch>${git.branch}</GitBranch>
 										  <GitDirty>${git.dirty}</GitDirty>
 										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
 										  <GitCommitId>${git.commit.id}</GitCommitId>
@@ -242,7 +253,7 @@
 			<plugin>
 			    <groupId>pl.project13.maven</groupId>
 			    <artifactId>git-commit-id-plugin</artifactId>
-			    <version>2.2.4</version>
+			    <version>3.0.1</version>
 			    <executions>
 			        <execution>
 			            <id>get-the-git-infos</id>
@@ -309,33 +320,6 @@
                   </filesets>
                 </configuration>
 			</plugin>
-			<!-- not needed as jenkins has a "latest successful artifacts link" - duh
-			<plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-dependency-plugin</artifactId>
-		        <version>2.10</version>
-		        <executions>
-		          <execution>
-		            <id>copy-installed</id>
-		            <phase>install</phase>
-		            <goals>
-		              <goal>copy</goal>
-		            </goals>
-		            <configuration>
-		              <artifactItems>
-		                <artifactItem>
-		                  <groupId>${project.groupId}</groupId>
-		                  <artifactId>${project.artifactId}</artifactId>
-		                  <version>${project.version}</version>
-		                  <type>${project.packaging}</type>
-		                </artifactItem>
-		              </artifactItems>
-		              <outputDirectory>/mrl-test/latest</outputDirectory>
-		            </configuration>
-		          </execution>
-		        </executions>
-		      </plugin>
-			-->
 			
 			<plugin>
 				<groupId>org.jacoco</groupId>
