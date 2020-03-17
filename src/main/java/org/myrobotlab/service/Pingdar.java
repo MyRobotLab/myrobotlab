@@ -157,10 +157,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
 
     ServiceType meta = new ServiceType(Pingdar.class.getCanonicalName());
     meta.addDescription("used as a ultra sonic radar");
-    meta.addCategory("sensor", "display");
+    meta.addCategory("sensors", "display");
     // put peer definitions in
     meta.addPeer("controller", "Arduino", "controller for servo and sensor");
-    meta.addPeer("sensor", "UltrasonicSensor", "sensor");
+    meta.addPeer("sensors", "UltrasonicSensor", "sensors");
     meta.addPeer("servo", "Servo", "servo");
 
     meta.sharePeer("sensor.controller", "controller", "Arduino", "shared arduino");

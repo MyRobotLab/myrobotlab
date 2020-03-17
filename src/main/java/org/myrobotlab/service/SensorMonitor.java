@@ -217,7 +217,7 @@ public class SensorMonitor extends Service {
 
     ServiceType meta = new ServiceType(SensorMonitor.class.getCanonicalName());
     meta.addDescription("sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion");
-    meta.addCategory("sensor", "display");
+    meta.addCategory("sensors", "display");
 
     return meta;
   }

@@ -33,7 +33,7 @@ public class Pir extends Service implements PinListener {
     ServiceType meta = new ServiceType(Pir.class.getCanonicalName());
     meta.addDescription("PIR - Passive Infrared Sensor");
     meta.setAvailable(true); // false if you do not want it viewable in a
-    meta.addCategory("sensor");
+    meta.addCategory("sensors");
     return meta;
   }
 

@@ -182,7 +182,7 @@ public class OculusDiy extends Service implements OrientationListener {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(OculusDiy.class);
     meta.addDescription("Service to receive and compute data from a DIY Oculus");
-    meta.addCategory("video", "control", "sensor", "telerobotics");
+    meta.addCategory("video", "control", "sensors", "telerobotics");
     meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
     meta.addPeer("mpu6050", "Mpu6050", "mpu6050");
     return meta;

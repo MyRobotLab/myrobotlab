@@ -210,7 +210,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
     ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
     meta.addDescription("ranging sensor");
-    meta.addCategory("sensor");
+    meta.addCategory("sensors");
     meta.addPeer("controller", "Arduino", "default sensor controller will be an Arduino");
     return meta;
   }

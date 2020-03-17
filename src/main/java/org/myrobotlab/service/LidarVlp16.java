@@ -66,7 +66,7 @@ public class LidarVlp16 extends Service {
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.setAvailable(false);
-    meta.addCategory("sensor", "lidar");
+    meta.addCategory("sensors", "lidar");
     return meta;
   }
 
