@@ -447,7 +447,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
 
     ServiceType meta = new ServiceType(Bno055.class);
     meta.addDescription("General BNO055 acclerometer and gyro");
-    meta.addCategory("microcontroller", "sensor");
+    meta.addCategory("microcontroller", "sensors");
     meta.setSponsor("calamity");
     return meta;
   }

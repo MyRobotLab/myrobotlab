@@ -194,7 +194,7 @@ public class Lm75a extends Service implements I2CControl {
 
     ServiceType meta = new ServiceType(Lm75a.class.getCanonicalName());
     meta.addDescription("LM75A Digital temperature sensor");
-    meta.addCategory("shield", "sensor", "i2c");
+    meta.addCategory("shield", "sensors", "i2c");
     meta.setSponsor("Mats");
     return meta;
   }

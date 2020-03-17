@@ -86,7 +86,7 @@ public class Android extends Service {
 
     ServiceType meta = new ServiceType(Android.class.getCanonicalName());
     meta.addDescription("re-publishes Android proximity and position information");
-    meta.addCategory("sensor");
+    meta.addCategory("sensors");
     meta.setLicenseApache();
 
     return meta;

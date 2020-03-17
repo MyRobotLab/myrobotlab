@@ -390,7 +390,7 @@ public class OpenCV extends AbstractComputerVision {
 
     ServiceType meta = new ServiceType(OpenCV.class.getCanonicalName());
     meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
-    meta.addCategory("video", "vision", "sensor");
+    meta.addCategory("video", "vision", "sensors");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 

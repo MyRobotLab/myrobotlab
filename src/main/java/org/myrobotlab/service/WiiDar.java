@@ -504,7 +504,7 @@ public class WiiDar extends Service {
     // meta.addDependency("wiiuse.wiimote", "0.12b");
 
     meta.addDependency("wiiusej", "wiiusej", "wiiusej");
-    meta.addCategory("sensor");
+    meta.addCategory("sensors");
     // no longer have hardware for this ...
     meta.setAvailable(false);
     return meta;

@@ -116,7 +116,7 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
     ServiceType meta = new ServiceType(Pcf8574.class.getCanonicalName());
     meta.addDescription("Pcf8574 i2c 8 pin I/O extender");
-    meta.addCategory("shield", "sensor");
+    meta.addCategory("shield", "sensors");
     meta.setSponsor("Mats");
     return meta;
   }

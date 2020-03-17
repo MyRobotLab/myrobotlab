@@ -350,7 +350,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     ServiceType meta = new ServiceType(Ads1115.class.getCanonicalName());
     meta.addDescription("a higher-precision analog to digital converter 16-bit");
     meta.setLicenseApache();
-    meta.addCategory("shield", "sensor", "i2c");
+    meta.addCategory("shield", "sensors", "i2c");
     meta.setSponsor("Mats");
     return meta;
   }

@@ -39,7 +39,7 @@ public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl 
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
     meta.addDescription("AMT203 Encoder - Absolute position encoder");
-    meta.addCategory("encoder", "sensor");
+    meta.addCategory("encoder", "sensors");
     return meta;
   }
 
