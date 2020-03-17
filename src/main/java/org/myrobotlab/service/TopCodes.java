@@ -101,7 +101,7 @@ public class TopCodes extends Service {
 
     ServiceType meta = new ServiceType(TopCodes.class.getCanonicalName());
     meta.addDescription("Topcodes finds visual references and identifiers");
-    meta.addCategory("vision", "video", "sensor");
+    meta.addCategory("vision", "video", "sensors");
     meta.addDependency("topcodes", "topcodes", "1.0.0");
     return meta;
   }

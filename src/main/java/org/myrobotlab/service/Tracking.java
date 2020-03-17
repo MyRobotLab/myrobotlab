@@ -529,7 +529,7 @@ public class Tracking extends Service {
 
     ServiceType meta = new ServiceType(Tracking.class.getCanonicalName());
     meta.addDescription("uses a video input and vision library to visually track objects");
-    meta.addCategory("vision", "video", "sensor", "control");
+    meta.addCategory("vision", "video", "sensors", "control");
     meta.addPeer("pid", "Pid", "Pid service - for all your pid needs");
     meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
     return meta;

@@ -141,7 +141,7 @@ public class Security extends Service implements AuthorizationProvider {
 
     ServiceType meta = new ServiceType(Security.class.getCanonicalName());
     meta.addDescription("provides security");
-    meta.addCategory("framework", "security");
+    meta.addCategory("framework", "key store");
     meta.includeServiceInOneJar(true);
 
     return meta;

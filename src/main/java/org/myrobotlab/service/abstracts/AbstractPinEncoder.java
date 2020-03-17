@@ -36,7 +36,7 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(AbstractPinEncoder.class);
     meta.addDescription("encoder which operates with a single pin");
-    meta.addCategory("encoder", "sensor");
+    meta.addCategory("encoder", "sensors");
     return meta;
   }
 
