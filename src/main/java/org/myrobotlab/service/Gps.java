@@ -888,7 +888,7 @@ public class Gps extends Service implements SerialDataListener {
 
     ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
     meta.addDescription("parses NMEA sentences coming in over a Serial service");
-    meta.addCategory("location", "sensor");
+    meta.addCategory("location", "sensors");
     meta.addPeer("serial", "Serial", "serial port for GPS");
     meta.setLicenseApache();
 

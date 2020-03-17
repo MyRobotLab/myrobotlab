@@ -29,7 +29,7 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(As5048AEncoder.class.getCanonicalName());
     meta.addDescription("AS5048A Encoder - 14 bit - Absolute position encoder");
-    meta.addCategory("encoder", "sensor");
+    meta.addCategory("encoder", "sensors");
     return meta;
   }
 

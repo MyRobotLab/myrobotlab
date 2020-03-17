@@ -360,7 +360,7 @@ public class Lidar extends Service implements SerialDataListener {
 
     ServiceType meta = new ServiceType(Lidar.class.getCanonicalName());
     meta.addDescription("The Lidar Service - Light Detection And Ranging");
-    meta.addCategory("sensor");
+    meta.addCategory("sensors");
 
     return meta;
   }

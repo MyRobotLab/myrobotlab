@@ -209,7 +209,7 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
     meta.addDescription("measures voltage and current of a circuit");
     meta.setLicenseApache();
-    meta.addCategory("shield", "sensor", "i2c");
+    meta.addCategory("shield", "sensors", "i2c");
     meta.setSponsor("Mats");
     return meta;
   }
