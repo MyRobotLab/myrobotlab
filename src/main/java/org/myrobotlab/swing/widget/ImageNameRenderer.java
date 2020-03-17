@@ -24,7 +24,7 @@ public class ImageNameRenderer extends JLabel implements ListCellRenderer {
     NameTypeProvider entry = (NameTypeProvider) value;
     setText("<html><font color=#" + Style.listBackground + ">" + entry.getName() + "</font></html>");
 
-    ImageIcon icon = Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.50);
+    ImageIcon icon = Util.getScaledIcon(Util.getImage(("core/category/" + entry.getSimpleName() + ".png"), "unknown.png"), 0.50);
     setIcon(icon);
 
     if (isSelected) {
