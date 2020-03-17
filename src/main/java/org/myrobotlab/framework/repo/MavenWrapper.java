@@ -150,6 +150,11 @@ public class MavenWrapper extends Repo implements Serializable {
           dep.append("<!-- Duplicate entry for " + depKey + " skipping -->\n");
           continue;
         }
+        if (dependency.getVersion() == null) {
+          dep.append("<!-- skipping " + dependency.getOrgId() + " " + dependency.getArtifactId() + " " + depKey + " null version/latest -->\n");
+          continue;          
+        }
+        
         listedDeps.add(depKey);
         dep.append("  <dependency>\n");
         dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));

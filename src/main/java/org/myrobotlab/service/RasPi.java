@@ -91,7 +91,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     meta.addCategory("i2c", "control");
     meta.setSponsor("Mats");
     meta.addDependency("com.pi4j", "pi4j-core", "1.2");
-    meta.addDependency("com.pi4j", "pi4j-native", "1.2");
+    meta.addDependency("com.pi4j", "pi4j-native", "1.2", "pom");
     return meta;
   }
 
