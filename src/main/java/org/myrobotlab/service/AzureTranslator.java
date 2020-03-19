@@ -94,6 +94,7 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     meta.addCategory("translation", "cloud", "ai");
     meta.addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
     meta.setCloudService(true);
+    meta.setRequiresKeys(true);
     return meta;
   }
 
