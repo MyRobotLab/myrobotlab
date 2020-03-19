@@ -37,6 +37,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   String link;
   String license;// = "Apache";
   Boolean isCloudService = false;
+  Boolean requiresKeys = false;
   Boolean includeServiceInOneJar = false;
 
   public String getLink() {
@@ -135,7 +136,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     // peers.put(name, new ServiceReservation(name, peerType, comment));
     mergePeer(new ServiceReservation(name.trim(), peerType.trim(), comment));
   }
-  
+
   public void addPeer(String name, String peerType, String comment, boolean autoStart) {
     mergePeer(new ServiceReservation(name.trim(), peerType.trim(), comment, autoStart));
   }
@@ -228,10 +229,19 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   public void setCloudService(boolean b) {
     isCloudService = b;
   }
+
+  public void setRequiresKeys(boolean b) {
+    requiresKeys = b;
+  }
+
+  public boolean requiresKeys() {
+    return requiresKeys;
+  }
+
   public void addDependency(String groupId, String artifactId) {
     addDependency(groupId, artifactId, null, null);
   }
-  
+
   public void addDependency(String groupId, String artifactId, String version) {
     addDependency(groupId, artifactId, version, null);
   }
@@ -263,7 +273,4 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
   }
 
-  
-
- 
 }

@@ -12,6 +12,7 @@ import com.google.code.chatterbotapi.ChatterBotFactory;
 import com.google.code.chatterbotapi.ChatterBotSession;
 import com.google.code.chatterbotapi.ChatterBotType;
 
+// FIXME - make an interface for this - search ? chat ? other ?
 public class CleverBot extends Service {
 
   private static final long serialVersionUID = 1L;
@@ -35,7 +36,7 @@ public class CleverBot extends Service {
     try {
       return session.think(toSay);
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("session threw", e);
     }
 
     return null;
@@ -96,6 +97,7 @@ public class CleverBot extends Service {
     meta.addCategory("ai");
     meta.addDependency("ca.pjer", "chatter-bot-api", "2.0.1");
     meta.addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
+    meta.setCloudService(true);
     return meta;
   }
 

@@ -239,6 +239,7 @@ public class Rekognition extends Service {
     // add dependency if necessary
     meta.addDependency("com.amazonaws", "aws-java-sdk-rekognition", "1.11.263");
     meta.setCloudService(true);
+    meta.setRequiresKeys(true);
     meta.addCategory("vision","cloud");
     return meta;
   }
