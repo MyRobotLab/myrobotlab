@@ -234,6 +234,7 @@ public class Polly extends AbstractSpeechSynthesis {
 
     meta.addCategory("speech","cloud");
     meta.setCloudService(true);
+    meta.setRequiresKeys(true);
     return meta;
   }
 

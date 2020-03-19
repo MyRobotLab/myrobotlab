@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl','statusSvc', '$timeout', function($scope, $log, mrl, statusSvc, $timeout) {
+angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', 'statusSvc', '$timeout', function($scope, $log, mrl, statusSvc, $timeout) {
     console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -7,6 +7,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     this.updateState = function(service) {
         $scope.service = service
+        service.serviceData.categoryTypes["show all"] = {
+            "name": "show all",
+            "serviceTypes": []
+        }
     }
 
     $scope.platform = $scope.service.platform
@@ -37,16 +41,22 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         var result = {};
         console.info('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
+
+        if ($scope.category.selected != null && ($scope.category.selected == 'show all') ) {
+            return $scope.service.serviceData.serviceTypes
+        }
+
         for (const [fullTypeName,metaData] of entries) {
             // if (metaData.simpleName.toLowerCase().includes($scope.newType)) {
 
-            if ($scope.category.selected != null){
+            if ($scope.category.selected != null) {
                 categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
             } else {
                 categoryServiceTypes = null
             }
 
-            if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
+            if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */
+            categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
                 result[fullTypeName] = metaData;
             }
         }
@@ -78,17 +88,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         })
     }
 
-    $scope.setServiceType = function(serviceType){
+    $scope.setServiceType = function(serviceType) {
         $scope.newType = serviceType
     }
 
     $scope.start = function() {
 
-        if ($scope.newName == null){
+        if ($scope.newName == null) {
             mrl.error("name of service is required")
             return
         }
-        if ($scope.newType == null){
+        if ($scope.newType == null) {
             mrl.error("type of service is required")
             return
         }

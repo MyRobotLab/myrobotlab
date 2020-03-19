@@ -92,6 +92,8 @@ public class IndianTts extends AbstractSpeechSynthesis {
     meta.setSponsor("moz4r");
     meta.addCategory("speech", "sound");
     meta.addPeer("httpClient", "HttpClient", "httpClient");
+    
+    meta.setRequiresKeys(true);
 
     return meta;
   }

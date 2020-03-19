@@ -77,6 +77,8 @@ public class GoogleCloud extends Service {
     meta.addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
     meta.addCategory("cloud", "vision");
     meta.setCloudService(true);
+    meta.setRequiresKeys(true);
+
     return meta;
   }
 
