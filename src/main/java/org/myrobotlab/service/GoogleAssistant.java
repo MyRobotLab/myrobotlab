@@ -40,6 +40,7 @@ public class GoogleAssistant extends PythonProxy {
     meta.setAvailable(true); // false if you do not want it viewable in a gui
     meta.addCategory("ai", "cloud");
     meta.setCloudService(true);
+    meta.setRequiresKeys(true);
     return PythonProxy.addMetaData(meta);
   }
 

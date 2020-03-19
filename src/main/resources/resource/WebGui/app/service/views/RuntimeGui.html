@@ -32,6 +32,8 @@
                     </span>                                   
                 </td>
                 <td><span ng-click="setServiceType(metaData.simpleName)">{{metaData.description}}</span></td>
+                <td><img src='/core/category/key.png' width="18" ng-show='metaData.requiresKeys' uib-tooltip='requires keys'/> </td>
+                <td><img src='/core/category/cloud.png' width="18" ng-show='metaData.isCloudService' uib-tooltip='cloud service'/></td>
             </tr>
         </table>
     </div>
