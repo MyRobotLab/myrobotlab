@@ -1450,9 +1450,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
 
     // you have to send released before removing from registry
-    rt.invoke("released", sw);
+    rt.invoke("released", name);
 
-    // remove from registry
+    // last step - remove from registry
     registry.remove(name);
 
     log.info("released {}", name);
@@ -1510,13 +1510,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         log.warn("unknown type and/or remote service");
         continue;
       }
-      // runtime.invoke("released", se.serviceDirectory.get(serviceName));
-      // FIXME DO THIS
+
       try {
         sw.stopService();
         // sw.releaseService(); // FIXED ! - releaseService will mod the
         // maps :P
-        runtime.invoke("released", sw);
+        runtime.invoke("released", sw.getFullName());
       } catch (Exception e) {
         runtime.error(String.format("%s threw while stopping", e));
         Logging.logError(e);
@@ -2415,13 +2414,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return registration;
   }
 
-  /*
-   * release event
-   *
-   * @param sw - the name of the Service which was successfully released
+  /**
+   * released event - when a service is successfully released from the registry
+   * this event is triggered
+   * @param serviceName
+   * @return
    */
-  public ServiceInterface released(ServiceInterface sw) {
-    return sw;
+  public String released(String serviceName) {
+    return serviceName;
   }
 
   /**
