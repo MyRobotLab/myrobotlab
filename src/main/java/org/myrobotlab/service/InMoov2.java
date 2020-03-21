@@ -260,6 +260,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	boolean isPirActivated = false;
 
 	boolean isUltraSonicSensorActivated = false;
+	
+	boolean isServoMixerActivated = false;
 
 	// TODO - refactor into a Simulator interface when more simulators are borgd
 	transient JMonkeyEngine jme;
@@ -293,6 +295,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	boolean mute = false;
 
 	transient NeoPixel neopixel;
+	
+	transient ServoMixer servomixer;
 
 	transient Python python;
 
@@ -716,6 +720,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public boolean isUltraSonicSensorActivated() {
 		return isUltraSonicSensorActivated;
 	}
+	
+	public boolean isServoMixerActivated() {
+        return isServoMixerActivated;
+        }
 
 	public Set<String> listConfigFiles() {
 
@@ -1864,6 +1872,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return torso;
 	}
+	
+	public ServoMixer startServoMixer() {
+
+               servomixer = (ServoMixer) startPeer("servomixer");
+               isServoMixerActivated = true;
+
+               speakBlocking(get("STARTINGSERVOMIXER"));
+               broadcastState();
+               return servomixer;
+        }
 
 	public void stop() {
 		if (head != null) {
@@ -1966,6 +1984,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		releasePeer("ultraSonicSensor");
 		isPirActivated = false;
 	}
+	
+        public void stopServoMixer() {
+                speakBlocking(get("STOPSERVOMIXER"));
+                releasePeer("ServoMixer");
+                isServoMixerActivated = false;
+        }
 
 	public void waitTargetPos() {
 		if (head != null) {
