@@ -1,0 +1,37 @@
+<!-- ServoMixerGui html-->
+<table>
+<tr>
+    <td>
+        <div class="form-inline col-md-5">
+            <span class="input-group-btn">
+            <input class="form-control col-md-16 ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="poseName" name="poseName" id="poseName" ng-init="" placeholder="Saving pose name" style="">
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" ng-click="msg.savePose(poseName)">SavePose</button>
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" ng-click="msg.loadPose()">LoadPose</button>
+            </span>
+            <span class="input-group-btn">
+                <!-- <button class="btn btn-primary" ng-show="!isAttached()" ng-click="attachController()">control all</button>-->
+                <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">enable</button>
+            </span>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td>
+        <div class="container">
+            <div ng-repeat="servo in servos" class="row">
+                <!-- div class="col-md-2">&nbsp;</div -->
+                <div class="col-md-2">
+                    <button ng-class="['btn', sliders[servo].tracking?'btn-default':'btn-primary']" ng-click="toggle(servo)">{{servo}}</button>
+                </div>
+                <div class="col-md-9">
+                    <rzslider class="custom-slider" rz-slider-model="sliders[servo].value" rz-slider-options="sliders[servo].options"/>
+                </div>
+            </div>
+        </div>
+    </td>
+</tr>
+</table>
