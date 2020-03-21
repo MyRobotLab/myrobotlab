@@ -34,34 +34,13 @@
                 </li>
             </ul>
         </div>
-        <button type="button" class="btn btn-default" ng-click="exec()">
-            <span class="glyphicon glyphicon-play"></span>
-            execute
-        
-        
-        </button>
-        <button type="button" class="btn btn-default" ng-click="msg.stop()">
-            <span class="glyphicon glyphicon-stop"></span>
-            stop
-        
-        
-        </button>
+        <button class="btn btn-default" ng-click="exec()"><span class="glyphicon glyphicon-play"></span>execute</button>
+        <button class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
         <button class="btn btn-default" ng-click="export()">export</button>
-		<button class="btn btn-default" ng-click="saveTextAsFile()">save</button>
-        
+		<button class="btn btn-default" ng-click="saveTextAsFile()">save</button> 
     </div>
 </div>
-<!--
-<div class="row">
-    <br/>
-    <form class="form-inline">
-        <div class="form-group">
-            <label for="location">script location</label>
-            <input type="text" class="form-control" id="location" ng-model="service.localScriptDir"/>
-            <button type="button" class="btn btn-default" ng-click="msg.setLocalScriptDir(service.localScriptDir)">update</button>
-        </div>
-    </form>
-</div> -->
+
 <div class="row">
     Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/>
     <uib-tabset active="activeTabIndex">
@@ -84,29 +63,6 @@
 		                                       onChange: aceChanged}"></div>
         </uib-tab>
     </uib-tabset>
-</div>
-<!-- {{activeScript}} -->
-<!-- FIXME - make debug window directive -->
-<span class="label label-default pull-right" ng-click="showProperties=!showProperties">{{(showProperties)?"hide":"show"}} properties</span>
-<div ng-show="showProperties">
-    <table class="table table-striped">
-        <tr ng-repeat="(key, value) in properties">
-            <!-- <td>{{key}}</td> 1, 2, 3, 4.... -->
-            <td>{{value[0]}}</td>
-            <td ng-show="statusControlMode=='status'">{{value[1]}}</td>
-            <td ng-show="statusControlMode!='status'">
-                <input type="text" class="form-control" value="{{value[1]}}"/>
-            </td>
-            <td>
-            <!-- units -->
-            </td>
-            <td>
-            <!-- info -->
-            {{value[2]}}
-                    </td>
-        </tr>
-    </table>
-    <br>
 </div>
 <div class="row">
 <pre>{{log}}</pre>
