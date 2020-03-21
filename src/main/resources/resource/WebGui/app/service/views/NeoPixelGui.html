@@ -65,13 +65,13 @@
   <div class="col-lg-12">
     <div class="input-group">
     	<span class="input-group-addon">Pixel #</span>
-    	<input type="text class="form-control" ng-model=eachpixel.address ng-disabled="true">
+    	<input type="text" class="form-control" ng-model="eachpixel.address" ng-disabled="true">
     	<span class="input-group-addon">Red</span>
-    	<input type="text class="form-control" ng-model=eachpixel.red ng-disabled="!isAttached">
+    	<input type="text" class="form-control" ng-model="eachpixel.red" ng-disabled="!isAttached">
     	<span class="input-group-addon">Green</span>
-    	<input type="text class="form-control" ng-model=eachpixel.green ng-disabled="!isAttached">
+    	<input type="text" class="form-control" ng-model="eachpixel.green" ng-disabled="!isAttached">
     	<span class="input-group-addon">Blue</span>
-    	<input type="text class="form-control" ng-model=eachpixel.blue ng-disabled="!isAttached">
+    	<input type="text" class="form-control" ng-model="eachpixel.blue" ng-disabled="!isAttached">
     	<span class="input-group-btn">
     		<button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.setPixel(eachpixel.address, eachpixel.red, eachpixel.green,eachpixel.blue)">Set Pixel</button>
     		<button class="btn btn-default" ng-disabled="!isAttached" ng-click="msg.sendPixel(eachpixel.address, eachpixel.red, eachpixel.green,eachpixel.blue)">Show Pixel</button>
