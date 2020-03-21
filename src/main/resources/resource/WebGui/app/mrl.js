@@ -171,10 +171,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * callback is invoked
      */
     this.onReleased = function(msg) {
-        var service = msg.data[0]
-
+        var name = msg.data[0]
+        _self.releasePanel(name)
         // FIXME - unregister from all callbacks
-        delete registry[_self.getFullName(service)]
+        // delete registry[_self.getFullName(service)]
     }
 
     // FIXME - the Runtime.cli uses this
@@ -900,7 +900,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // TODO - releasePanel
         _self.releasePanel = function(inName) {
             //remove a service and it's panels
-            let name = mrl.getFullName(inName)
+            let name = _self.getFullName(inName)
             console.debug('removing service', name)
             //remove panels
             if (name in panels) {

@@ -940,6 +940,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
+  public void onReleased(String serviceName) {
+    log.info("released {}", serviceName);
+  }
+  
   public void onRegistered(Registration r) {
     ServiceInterface si = r.service;
     // new service

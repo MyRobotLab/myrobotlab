@@ -714,17 +714,21 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
     return false;
   }
+  
+  public void onReleased(String serviceName) {
+    removeTab(serviceName);
+  }
 
   // FIXME - when a service is 'being' released Runtime should
   // manage the releasing of the subscriptions !!!
-  synchronized public void removeTab(final ServiceInterface si) {
+  synchronized public void removeTab(final String serviceName) {
 
-    serviceGuis.remove(si.getName());
+    serviceGuis.remove(serviceName);
 
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        String name = si.getName();
+        String name = serviceName;
         tabs.removeTab(name);
         if (guiServiceGui != null) {
           guiServiceGui.rebuildGraph();
