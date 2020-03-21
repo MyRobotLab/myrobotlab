@@ -164,7 +164,7 @@ public class Python extends Service {
 
       } finally {
         executing = false;
-        info("script completed");
+        log.info("script completed");
         invoke("finishedExecutingScript");
       }
     }
