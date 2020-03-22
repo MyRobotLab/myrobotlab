@@ -67,7 +67,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 
-		meta.addPeer("eye", "OpenCV", "eye");
+    meta.addPeer("eye", "OpenCV", "eye");
+    meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
