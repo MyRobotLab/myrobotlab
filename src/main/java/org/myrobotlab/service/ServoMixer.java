@@ -14,7 +14,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 
 public class ServoMixer extends Service {
 
-  private static final String POSES_DIRECTORY = "poses";
+  public String posesDirectory = "poses";
   private static final long serialVersionUID = 1L;
 
   public ServoMixer(String n, String id) {
@@ -32,10 +32,16 @@ public class ServoMixer extends Service {
     return servos;
   }
 
+  public void savePose(String name) throws IOException {
+    // This assumes all servos will be used for the pose.
+    List<ServoControl> servos = listAllServos();
+    savePose(name, servos);
+  }
+  
   public void savePose(String name, List<ServoControl> servos) throws IOException {
     // TODO: save this pose somewhere!
     // we should make a directory
-    File poseDirectory = new File(POSES_DIRECTORY);
+    File poseDirectory = new File(posesDirectory);
     if (!poseDirectory.exists()) {
       poseDirectory.mkdirs();
     }
@@ -48,7 +54,7 @@ public class ServoMixer extends Service {
   }
 
   public Pose loadPose(String name) throws IOException {
-    String filename = new File(POSES_DIRECTORY).getAbsolutePath() + File.separator + name + ".pose";
+    String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
     log.info("Loading Pose name {}", filename);
     Pose p = Pose.loadPose(filename);
     return p;
@@ -60,8 +66,10 @@ public class ServoMixer extends Service {
     // then move the servos to the positions
     for (String sc : p.getPositions().keySet()) {
       ServoControl servo = (ServoControl) Runtime.getService(sc);
-      Double d = p.getPositions().get(sc);
-      servo.moveTo(d);
+      Double speed = p.getSpeeds().get(sc);
+      Double position = p.getPositions().get(sc);
+      servo.setSpeed(speed);
+      servo.moveTo(position);
     }
   }
 
@@ -69,13 +77,17 @@ public class ServoMixer extends Service {
     // TODO: look up the pose / load it
     // then move the servos to the positions
     Pose p = loadPose(name);
-    for (String sc : p.getPositions().keySet()) {
-      ServoControl servo = (ServoControl) Runtime.getService(sc);
-      Double d = p.getPositions().get(sc);
-      servo.moveTo(d);
-    }
+    moveToPose(p);
   }
 
+  public String getPosesDirectory() {
+    return posesDirectory;
+  }
+
+  public void setPosesDirectory(String posesDirectory) {
+    this.posesDirectory = posesDirectory;
+  }
+  
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(ServoMixer.class.getCanonicalName());
     meta.addDescription("ServoMixer - most just a swing gui that allows for simple movements of all servos in one gui panel.");
