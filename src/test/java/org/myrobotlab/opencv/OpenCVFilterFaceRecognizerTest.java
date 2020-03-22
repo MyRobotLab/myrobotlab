@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
@@ -16,6 +18,10 @@ import org.junit.Assert;
 public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceRecognizerTest.class);
 
+  // a temporary folder for service tests to use
+  @ClassRule
+  public static TemporaryFolder testFolder = new TemporaryFolder();
+  
   String baseDirectory = "src/test/resources/OpenCV/FaceRecognizer/";
   String[] names = new String[] {"Tony Stark", "Natasha Romanoff", "Steve Rogers"};
 
@@ -30,8 +36,9 @@ public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
     // create our test filter.
     log.info("Create filter.");
     OpenCVFilterFaceRecognizer filter = new OpenCVFilterFaceRecognizer("facerec");
+    // set the training directory:
+    filter.setTrainingDir(testFolder.getRoot().getAbsolutePath()+File.separator+"OpenCVFaceRecognizer");
     // Here we want to train the model.. 
-    // TODO: what oh what do we want to do here..
     filter.setMode(OpenCVFilterFaceRecognizer.Mode.TRAIN);   
     // now we need to pass some images in for tony.
     for (String name : names) {
