@@ -32,7 +32,6 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoMixer;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
