@@ -14,7 +14,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 
 public class ServoMixer extends Service {
 
-  private static final String POSES_DIRECTORY = "poses";
+  public String posesDirectory = "poses";
   private static final long serialVersionUID = 1L;
 
   public ServoMixer(String n, String id) {
@@ -41,7 +41,7 @@ public class ServoMixer extends Service {
   public void savePose(String name, List<ServoControl> servos) throws IOException {
     // TODO: save this pose somewhere!
     // we should make a directory
-    File poseDirectory = new File(POSES_DIRECTORY);
+    File poseDirectory = new File(posesDirectory);
     if (!poseDirectory.exists()) {
       poseDirectory.mkdirs();
     }
@@ -54,7 +54,7 @@ public class ServoMixer extends Service {
   }
 
   public Pose loadPose(String name) throws IOException {
-    String filename = new File(POSES_DIRECTORY).getAbsolutePath() + File.separator + name + ".pose";
+    String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
     log.info("Loading Pose name {}", filename);
     Pose p = Pose.loadPose(filename);
     return p;
@@ -80,6 +80,14 @@ public class ServoMixer extends Service {
     moveToPose(p);
   }
 
+  public String getPosesDirectory() {
+    return posesDirectory;
+  }
+
+  public void setPosesDirectory(String posesDirectory) {
+    this.posesDirectory = posesDirectory;
+  }
+  
   static public ServiceType getMetaData() {
     ServiceType meta = new ServiceType(ServoMixer.class.getCanonicalName());
     meta.addDescription("ServoMixer - most just a swing gui that allows for simple movements of all servos in one gui panel.");
