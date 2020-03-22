@@ -16,9 +16,10 @@ import org.myrobotlab.service.interfaces.ServoControl;
 /** represent a set of servo positions at a given point in time */
 public class Pose {
 
-  public HashMap<String, Double> positions = new HashMap<String, Double>();
   public final String name;
   public final Date createdDate;
+  public HashMap<String, Double> positions = new HashMap<String, Double>();
+  public HashMap<String, Double> speeds = new HashMap<String, Double>();
 
   public Pose(String name, List<ServoControl> servos) {
     this.name = name;
@@ -26,10 +27,15 @@ public class Pose {
     List<String> servoNames = new ArrayList<String>();
     for (ServoControl sc : servos) {
       positions.put(sc.getName(), sc.getPos());
+      speeds.put(sc.getName(),  sc.getSpeed());
       servoNames.add(sc.getName());
     }
   }
 
+  public HashMap<String, Double> getSpeeds() {
+    return speeds;
+  }
+  
   public HashMap<String, Double> getPositions() {
     return positions;
   }
@@ -86,7 +92,7 @@ public class Pose {
 
   @Override
   public String toString() {
-    return "Pose [positions=" + positions + ", name=" + name + ", createdDate=" + createdDate + "]";
+    return "Pose [positions=" + positions + ", speeds=\" + speeds + \", name=" + name + ", createdDate=" + createdDate + "]";
   }
 
 }

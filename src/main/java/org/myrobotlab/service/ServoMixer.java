@@ -32,6 +32,12 @@ public class ServoMixer extends Service {
     return servos;
   }
 
+  public void savePose(String name) throws IOException {
+    // This assumes all servos will be used for the pose.
+    List<ServoControl> servos = listAllServos();
+    savePose(name, servos);
+  }
+  
   public void savePose(String name, List<ServoControl> servos) throws IOException {
     // TODO: save this pose somewhere!
     // we should make a directory
@@ -60,8 +66,10 @@ public class ServoMixer extends Service {
     // then move the servos to the positions
     for (String sc : p.getPositions().keySet()) {
       ServoControl servo = (ServoControl) Runtime.getService(sc);
-      Double d = p.getPositions().get(sc);
-      servo.moveTo(d);
+      Double speed = p.getSpeeds().get(sc);
+      Double position = p.getPositions().get(sc);
+      servo.setSpeed(speed);
+      servo.moveTo(position);
     }
   }
 
@@ -69,11 +77,7 @@ public class ServoMixer extends Service {
     // TODO: look up the pose / load it
     // then move the servos to the positions
     Pose p = loadPose(name);
-    for (String sc : p.getPositions().keySet()) {
-      ServoControl servo = (ServoControl) Runtime.getService(sc);
-      Double d = p.getPositions().get(sc);
-      servo.moveTo(d);
-    }
+    moveToPose(p);
   }
 
   static public ServiceType getMetaData() {
