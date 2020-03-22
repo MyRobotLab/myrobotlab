@@ -14,9 +14,9 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         $scope.sliders[servo].tracking = !$scope.sliders[servo].tracking
     }
 
-    _self.onSliderChange = function(servo){
-        if (!$scope.sliders[servo].tracking){
-            msg.sendTo(servo, 'moveTo', $scope.sliders[servo].value)
+    _self.onSliderChange = function(servoName){
+        if (!$scope.sliders[servoName].tracking){
+            msg.sendTo(servoName, 'moveTo', $scope.sliders[servoName].value)
         }
     }
 
@@ -33,21 +33,23 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             $scope.sliders[data.name].value = data.pos;
             $scope.$apply()
             break
-        case 'onServoControl':
+        case 'onListAllServos':
             // servos sliders are either in "tracking" or "control" state
             // "tracking" they are moving from callback position info published by servos
             // "control" they are sending control messages to the servos
             $scope.servos = inMsg.data[0]
             for (var servo of $scope.servos) {
                 // dynamically build sliders
-                $scope.sliders[servo] = {
+                $scope.sliders[servo.name] = {
                     value: 0,
-                    tracking: true,
+                    tracking: false,
                     options: {
-                        id: servo,
+                        id: servo.name,
                         floor: 0,
                         ceil: 180,
-                        onStart: function(id) {},
+                        onStart: function(id) {
+                            console.info('ServoMixer.onStart')
+                        },
                         onChange: function(id) {
                             _self.onSliderChange(id)
                         },
@@ -65,7 +67,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
                 // these are "intermediate" subscriptions in that they
                 // don't send a subscribe down to service .. yet 
                 // that must already be in place (and is in the case of Servo.publishServoData)
-                msg.subscribeTo(_self, servo, 'publishServoData')
+                msg.subscribeTo(_self, servo.name, 'publishServoData')
 
             }
             $scope.$apply()

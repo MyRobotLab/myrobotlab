@@ -25,10 +25,10 @@
             <div ng-repeat="servo in servos" class="row">
                 <!-- div class="col-md-2">&nbsp;</div -->
                 <div class="col-md-2">
-                    <button ng-class="['btn', sliders[servo].tracking?'btn-default':'btn-primary']" ng-click="toggle(servo)">{{servo}}</button>
+                    <button ng-class="['btn', sliders[servo.name].tracking?'btn-default':'btn-primary']" ng-click="toggle(servo.name)">{{servo.name}}</button>
                 </div>
                 <div class="col-md-9">
-                    <rzslider class="custom-slider" rz-slider-model="sliders[servo].value" rz-slider-options="sliders[servo].options"/>
+                    <rzslider class="custom-slider" rz-slider-model="sliders[servo.name].value" rz-slider-options="sliders[servo.name].options"/>
                 </div>
             </div>
         </div>
