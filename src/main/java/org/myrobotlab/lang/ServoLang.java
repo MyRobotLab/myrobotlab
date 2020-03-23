@@ -14,7 +14,7 @@ public class ServoLang extends LangUtils {
     // sb.append(name + ".detach()\n");
     sb.append("# sets initial position of servo before moving\n");
     sb.append("# in theory this is the position of the servo when this file was created\n");
-    sb.append(name + String.format(".setPosition(%.1f)\n", s.getPos()));
+    sb.append(name + String.format(".setPosition(%.1f)\n". s.getPos()));
     sb.append(name + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
     sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
     sb.append(name + ".setRest(" + s.getRest() + ")\n");
