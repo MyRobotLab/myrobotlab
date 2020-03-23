@@ -1,9 +1,14 @@
 package org.myrobotlab.lang;
 
+import java.text.DecimalFormat;
+
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Servo;
 
+
 public class ServoLang extends LangUtils {
+
+  transient static DecimalFormat f = new DecimalFormat("#.##");
 
   public String toPython(Servo s) {
     StringBuilder sb = new StringBuilder();
@@ -14,7 +19,7 @@ public class ServoLang extends LangUtils {
     // sb.append(name + ".detach()\n");
     sb.append("# sets initial position of servo before moving\n");
     sb.append("# in theory this is the position of the servo when this file was created\n");
-    sb.append(name + String.format(".setPosition(%.1f)\n", s.getPos()));
+    sb.append(name + String.format(".setPosition(%s)\n", f.format(s.getPos())));
     sb.append(name + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
     sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
     sb.append(name + ".setRest(" + s.getRest() + ")\n");
