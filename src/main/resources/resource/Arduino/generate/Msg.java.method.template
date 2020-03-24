@@ -1,14 +1,21 @@
 
 	public synchronized void %name%(%javaMethodParameters%) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(%javaWriteMsgSize%); // size
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(%javaWriteMsgSize%); // size
 %javaWrite% 
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
 %javaSendRecord%
 	  } catch (Exception e) {

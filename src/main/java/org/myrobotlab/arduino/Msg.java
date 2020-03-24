@@ -1,7 +1,6 @@
 package org.myrobotlab.arduino;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -87,7 +86,7 @@ public class Msg {
 	boolean invoke = true;
 	
 	boolean ackEnabled = true;
-    ByteArrayOutputStream baos = null;
+	
 	 public static class AckLock {
 	    // first is always true - since there
 	    // is no msg to be acknowledged...
@@ -614,15 +613,22 @@ public class Msg {
 
 	public synchronized void getBoardInfo() {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
-      appendMessage(GET_BOARD_INFO); // msgType = 2
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1); // size
+      write(GET_BOARD_INFO); // msgType = 2
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> getBoardInfo");
@@ -638,18 +644,25 @@ public class Msg {
 
 	public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2); // size
-      appendMessage(ENABLE_PIN); // msgType = 4
-      appendMessage(address);
-      appendMessage(type);
-      appendMessageb16(rate);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 2); // size
+      write(ENABLE_PIN); // msgType = 4
+      write(address);
+      write(type);
+      writeb16(rate);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> enablePin");
@@ -671,16 +684,23 @@ public class Msg {
 
 	public synchronized void setDebug(Boolean enabled/*bool*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(SET_DEBUG); // msgType = 5
-      appendMessagebool(enabled);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SET_DEBUG); // msgType = 5
+      writebool(enabled);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setDebug");
@@ -698,16 +718,23 @@ public class Msg {
 
 	public synchronized void setSerialRate(Integer rate/*b32*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 4); // size
-      appendMessage(SET_SERIAL_RATE); // msgType = 6
-      appendMessageb32(rate);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 4); // size
+      write(SET_SERIAL_RATE); // msgType = 6
+      writeb32(rate);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setSerialRate");
@@ -725,15 +752,22 @@ public class Msg {
 
 	public synchronized void softReset() {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
-      appendMessage(SOFT_RESET); // msgType = 7
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1); // size
+      write(SOFT_RESET); // msgType = 7
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> softReset");
@@ -749,16 +783,23 @@ public class Msg {
 
 	public synchronized void enableAck(Boolean enabled/*bool*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(ENABLE_ACK); // msgType = 8
-      appendMessagebool(enabled);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(ENABLE_ACK); // msgType = 8
+      writebool(enabled);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> enableAck");
@@ -776,18 +817,25 @@ public class Msg {
 
 	public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 4 + 1 + 4); // size
-      appendMessage(ECHO); // msgType = 10
-      appendMessagef32(myFloat);
-      appendMessage(myByte);
-      appendMessagef32(secondFloat);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 4 + 1 + 4); // size
+      write(ECHO); // msgType = 10
+      writef32(myFloat);
+      write(myByte);
+      writef32(secondFloat);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> echo");
@@ -809,16 +857,23 @@ public class Msg {
 
 	public synchronized void customMsg(int[] msg/*[]*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + msg.length)); // size
-      appendMessage(CUSTOM_MSG); // msgType = 12
-      appendMessage(msg);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + (1 + msg.length)); // size
+      write(CUSTOM_MSG); // msgType = 12
+      write(msg);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> customMsg");
@@ -836,16 +891,23 @@ public class Msg {
 
 	public synchronized void deviceDetach(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(DEVICE_DETACH); // msgType = 14
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(DEVICE_DETACH); // msgType = 14
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> deviceDetach");
@@ -863,17 +925,24 @@ public class Msg {
 
 	public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(I2C_BUS_ATTACH); // msgType = 15
-      appendMessage(deviceId);
-      appendMessage(i2cBus);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(I2C_BUS_ATTACH); // msgType = 15
+      write(deviceId);
+      write(i2cBus);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> i2cBusAttach");
@@ -893,18 +962,25 @@ public class Msg {
 
 	public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(I2C_READ); // msgType = 16
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(size);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1); // size
+      write(I2C_READ); // msgType = 16
+      write(deviceId);
+      write(deviceAddress);
+      write(size);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> i2cRead");
@@ -926,18 +1002,25 @@ public class Msg {
 
 	public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + (1 + data.length)); // size
-      appendMessage(I2C_WRITE); // msgType = 17
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(data);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + (1 + data.length)); // size
+      write(I2C_WRITE); // msgType = 17
+      write(deviceId);
+      write(deviceAddress);
+      write(data);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> i2cWrite");
@@ -959,19 +1042,26 @@ public class Msg {
 
 	public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1); // size
-      appendMessage(I2C_WRITE_READ); // msgType = 18
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(readSize);
-      appendMessage(writeValue);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1 + 1); // size
+      write(I2C_WRITE_READ); // msgType = 18
+      write(deviceId);
+      write(deviceAddress);
+      write(readSize);
+      write(writeValue);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> i2cWriteRead");
@@ -995,18 +1085,25 @@ public class Msg {
 
 	public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 4); // size
-      appendMessage(NEO_PIXEL_ATTACH); // msgType = 20
-      appendMessage(deviceId);
-      appendMessage(pin);
-      appendMessageb32(numPixels);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 4); // size
+      write(NEO_PIXEL_ATTACH); // msgType = 20
+      write(deviceId);
+      write(pin);
+      writeb32(numPixels);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> neoPixelAttach");
@@ -1028,21 +1125,28 @@ public class Msg {
 
 	public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
-      appendMessage(NEO_PIXEL_SET_ANIMATION); // msgType = 21
-      appendMessage(deviceId);
-      appendMessage(animation);
-      appendMessage(red);
-      appendMessage(green);
-      appendMessage(blue);
-      appendMessageb16(speed);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+      write(NEO_PIXEL_SET_ANIMATION); // msgType = 21
+      write(deviceId);
+      write(animation);
+      write(red);
+      write(green);
+      write(blue);
+      writeb16(speed);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> neoPixelSetAnimation");
@@ -1070,17 +1174,24 @@ public class Msg {
 
 	public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + buffer.length)); // size
-      appendMessage(NEO_PIXEL_WRITE_MATRIX); // msgType = 22
-      appendMessage(deviceId);
-      appendMessage(buffer);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + (1 + buffer.length)); // size
+      write(NEO_PIXEL_WRITE_MATRIX); // msgType = 22
+      write(deviceId);
+      write(buffer);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> neoPixelWriteMatrix");
@@ -1100,17 +1211,24 @@ public class Msg {
 
 	public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(ANALOG_WRITE); // msgType = 23
-      appendMessage(pin);
-      appendMessage(value);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(ANALOG_WRITE); // msgType = 23
+      write(pin);
+      write(value);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> analogWrite");
@@ -1130,17 +1248,24 @@ public class Msg {
 
 	public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(DIGITAL_WRITE); // msgType = 24
-      appendMessage(pin);
-      appendMessage(value);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(DIGITAL_WRITE); // msgType = 24
+      write(pin);
+      write(value);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> digitalWrite");
@@ -1160,16 +1285,23 @@ public class Msg {
 
 	public synchronized void disablePin(Integer pin/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(DISABLE_PIN); // msgType = 25
-      appendMessage(pin);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(DISABLE_PIN); // msgType = 25
+      write(pin);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> disablePin");
@@ -1187,15 +1319,22 @@ public class Msg {
 
 	public synchronized void disablePins() {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
-      appendMessage(DISABLE_PINS); // msgType = 26
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1); // size
+      write(DISABLE_PINS); // msgType = 26
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> disablePins");
@@ -1211,17 +1350,24 @@ public class Msg {
 
 	public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(PIN_MODE); // msgType = 27
-      appendMessage(pin);
-      appendMessage(mode);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(PIN_MODE); // msgType = 27
+      write(pin);
+      write(mode);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> pinMode");
@@ -1241,17 +1387,24 @@ public class Msg {
 
 	public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(SET_TRIGGER); // msgType = 30
-      appendMessage(pin);
-      appendMessage(triggerValue);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(SET_TRIGGER); // msgType = 30
+      write(pin);
+      write(triggerValue);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setTrigger");
@@ -1271,17 +1424,24 @@ public class Msg {
 
 	public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(SET_DEBOUNCE); // msgType = 31
-      appendMessage(pin);
-      appendMessage(delay);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(SET_DEBOUNCE); // msgType = 31
+      write(pin);
+      write(delay);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setDebounce");
@@ -1301,20 +1461,27 @@ public class Msg {
 
 	public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
-      appendMessage(SERVO_ATTACH); // msgType = 32
-      appendMessage(deviceId);
-      appendMessage(pin);
-      appendMessageb16(initPos);
-      appendMessageb16(initVelocity);
-      appendMessage(name);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
+      write(SERVO_ATTACH); // msgType = 32
+      write(deviceId);
+      write(pin);
+      writeb16(initPos);
+      writeb16(initVelocity);
+      write(name);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoAttach");
@@ -1340,17 +1507,24 @@ public class Msg {
 
 	public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(SERVO_ATTACH_PIN); // msgType = 33
-      appendMessage(deviceId);
-      appendMessage(pin);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(SERVO_ATTACH_PIN); // msgType = 33
+      write(deviceId);
+      write(pin);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoAttachPin");
@@ -1370,16 +1544,23 @@ public class Msg {
 
 	public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(SERVO_DETACH_PIN); // msgType = 34
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SERVO_DETACH_PIN); // msgType = 34
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoDetachPin");
@@ -1397,17 +1578,24 @@ public class Msg {
 
 	public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_SET_VELOCITY); // msgType = 35
-      appendMessage(deviceId);
-      appendMessageb16(velocity);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 2); // size
+      write(SERVO_SET_VELOCITY); // msgType = 35
+      write(deviceId);
+      writeb16(velocity);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoSetVelocity");
@@ -1427,19 +1615,26 @@ public class Msg {
 
 	public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1); // size
-      appendMessage(SERVO_SWEEP_START); // msgType = 36
-      appendMessage(deviceId);
-      appendMessage(min);
-      appendMessage(max);
-      appendMessage(step);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1 + 1); // size
+      write(SERVO_SWEEP_START); // msgType = 36
+      write(deviceId);
+      write(min);
+      write(max);
+      write(step);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoSweepStart");
@@ -1463,16 +1658,23 @@ public class Msg {
 
 	public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(SERVO_SWEEP_STOP); // msgType = 37
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SERVO_SWEEP_STOP); // msgType = 37
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoSweepStop");
@@ -1490,17 +1692,24 @@ public class Msg {
 
 	public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
-      appendMessage(deviceId);
-      appendMessageb16(target);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 2); // size
+      write(SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
+      write(deviceId);
+      writeb16(target);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoMoveToMicroseconds");
@@ -1520,17 +1729,24 @@ public class Msg {
 
 	public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_SET_ACCELERATION); // msgType = 39
-      appendMessage(deviceId);
-      appendMessageb16(acceleration);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 2); // size
+      write(SERVO_SET_ACCELERATION); // msgType = 39
+      write(deviceId);
+      writeb16(acceleration);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoSetAcceleration");
@@ -1550,17 +1766,24 @@ public class Msg {
 
 	public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(SERIAL_ATTACH); // msgType = 41
-      appendMessage(deviceId);
-      appendMessage(relayPin);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(SERIAL_ATTACH); // msgType = 41
+      write(deviceId);
+      write(relayPin);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> serialAttach");
@@ -1580,17 +1803,24 @@ public class Msg {
 
 	public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + data.length)); // size
-      appendMessage(SERIAL_RELAY); // msgType = 42
-      appendMessage(deviceId);
-      appendMessage(data);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + (1 + data.length)); // size
+      write(SERIAL_RELAY); // msgType = 42
+      write(deviceId);
+      write(data);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> serialRelay");
@@ -1610,18 +1840,25 @@ public class Msg {
 
 	public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_ATTACH); // msgType = 44
-      appendMessage(deviceId);
-      appendMessage(triggerPin);
-      appendMessage(echoPin);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1); // size
+      write(ULTRASONIC_SENSOR_ATTACH); // msgType = 44
+      write(deviceId);
+      write(triggerPin);
+      write(echoPin);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorAttach");
@@ -1643,16 +1880,23 @@ public class Msg {
 
 	public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStartRanging");
@@ -1670,16 +1914,23 @@ public class Msg {
 
 	public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStopRanging");
@@ -1697,16 +1948,23 @@ public class Msg {
 
 	public synchronized void setAref(Integer type/*b16*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 2); // size
-      appendMessage(SET_AREF); // msgType = 48
-      appendMessageb16(type);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 2); // size
+      write(SET_AREF); // msgType = 48
+      writeb16(type);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setAref");
@@ -1724,18 +1982,25 @@ public class Msg {
 
 	public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + (1 + pins.length)); // size
-      appendMessage(MOTOR_ATTACH); // msgType = 49
-      appendMessage(deviceId);
-      appendMessage(type);
-      appendMessage(pins);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + (1 + pins.length)); // size
+      write(MOTOR_ATTACH); // msgType = 49
+      write(deviceId);
+      write(type);
+      write(pins);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> motorAttach");
@@ -1757,17 +2022,24 @@ public class Msg {
 
 	public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(MOTOR_MOVE); // msgType = 50
-      appendMessage(deviceId);
-      appendMessage(pwr);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(MOTOR_MOVE); // msgType = 50
+      write(deviceId);
+      write(pwr);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> motorMove");
@@ -1787,17 +2059,24 @@ public class Msg {
 
 	public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
-      appendMessage(MOTOR_MOVE_TO); // msgType = 51
-      appendMessage(deviceId);
-      appendMessage(pos);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1); // size
+      write(MOTOR_MOVE_TO); // msgType = 51
+      write(deviceId);
+      write(pos);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> motorMoveTo");
@@ -1817,18 +2096,25 @@ public class Msg {
 
 	public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(ENCODER_ATTACH); // msgType = 52
-      appendMessage(deviceId);
-      appendMessage(type);
-      appendMessage(pin);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1 + 1 + 1); // size
+      write(ENCODER_ATTACH); // msgType = 52
+      write(deviceId);
+      write(type);
+      write(pin);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> encoderAttach");
@@ -1850,16 +2136,23 @@ public class Msg {
 
 	public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(SET_ZERO_POINT); // msgType = 53
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SET_ZERO_POINT); // msgType = 53
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> setZeroPoint");
@@ -1877,16 +2170,23 @@ public class Msg {
 
 	public synchronized void servoStop(Integer deviceId/*byte*/) {
 		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
-      appendMessage(SERVO_STOP); // msgType = 56
-      appendMessage(deviceId);
+		  if (ackEnabled){
+		    if (waiting) {
+		      // another thread and request is waiting
+		      // we are going to cancel
+		      return;
+		    }
+		    waitForAck();
+		  }		  
+			write(MAGIC_NUMBER);
+			write(1 + 1); // size
+      write(SERVO_STOP); // msgType = 56
+      write(deviceId);
  
-          sendMessage();
      if (ackEnabled){
-          waitForAck();
+       // we just wrote - block threads sending
+       // until they get an ack
+       ackRecievedLock.acknowledged = false;
      }
       if(record != null){
         txBuffer.append("> servoStop");
@@ -2178,87 +2478,79 @@ public class Msg {
     log.error(error);
   }
   
-	void appendMessage(int b8) throws Exception {
+	void write(int b8) throws Exception {
 
 		if ((b8 < 0) || (b8 > 255)) {
 			log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
 		}
 
-        baos.write(b8 & 0xFF);
-//		serial.write(b8 & 0xFF);
-	}
-	
-	void startMessage() {
-	  baos = new ByteArrayOutputStream();
+		serial.write(b8 & 0xFF);
 	}
 
-	void appendMessagebool(boolean b1) throws Exception {
+	void writebool(boolean b1) throws Exception {
 		if (b1) {
-			appendMessage(1);
+			serial.write(1);
 		} else {
-			appendMessage(0);
+			serial.write(0);
 		}
 	}
 
-	void appendMessageb16(int b16) throws Exception {
+	void writeb16(int b16) throws Exception {
 		if ((b16 < -32768) || (b16 > 32767)) {
 			log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
 		}
 
-		appendMessage(b16 >> 8 & 0xFF);
-		appendMessage(b16 & 0xFF);
+		write(b16 >> 8 & 0xFF);
+		write(b16 & 0xFF);
 	}
 
-	void appendMessageb32(int b32) throws Exception {
-		appendMessage(b32 >> 24 & 0xFF);
-		appendMessage(b32 >> 16 & 0xFF);
-		appendMessage(b32 >> 8 & 0xFF);
-		appendMessage(b32 & 0xFF);
+	void writeb32(int b32) throws Exception {
+		write(b32 >> 24 & 0xFF);
+		write(b32 >> 16 & 0xFF);
+		write(b32 >> 8 & 0xFF);
+		write(b32 & 0xFF);
 	}
 	
-	void appendMessagef32(float f32) throws Exception {
+	void writef32(float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    appendMessage(f[3] & 0xFF);
-    appendMessage(f[2] & 0xFF);
-    appendMessage(f[1] & 0xFF);
-    appendMessage(f[0] & 0xFF);
+    write(f[3] & 0xFF);
+    write(f[2] & 0xFF);
+    write(f[1] & 0xFF);
+    write(f[0] & 0xFF);
 	}
 	
-	void appendMessagebu32(long b32) throws Exception {
-		appendMessage((int)(b32 >> 24 & 0xFF));
-		appendMessage((int)(b32 >> 16 & 0xFF));
-		appendMessage((int)(b32 >> 8 & 0xFF));
-		appendMessage((int)(b32 & 0xFF));
+	void writebu32(long b32) throws Exception {
+		write((int)(b32 >> 24 & 0xFF));
+		write((int)(b32 >> 16 & 0xFF));
+		write((int)(b32 >> 8 & 0xFF));
+		write((int)(b32 & 0xFF));
 	}
 
-	void appendMessage(String str) throws Exception {
-		appendMessage(str.getBytes());
+	void write(String str) throws Exception {
+		write(str.getBytes());
 	}
 
-	void appendMessage(int[] array) throws Exception {
+	void write(int[] array) throws Exception {
 		// write size
-		appendMessage(array.length & 0xFF);
+		write(array.length & 0xFF);
 
 		// write data
 		for (int i = 0; i < array.length; ++i) {
-			appendMessage(array[i] & 0xFF);
+			write(array[i] & 0xFF);
 		}
 	}
 
-	void appendMessage(byte[] array) throws Exception {
+	void write(byte[] array) throws Exception {
 		// write size
-		appendMessage(array.length);
+		write(array.length);
 
 		// write data
 		for (int i = 0; i < array.length; ++i) {
-			appendMessage(array[i]);
+			write(array[i]);
 		}
 	}
 	
-	void sendMessage() throws Exception {
-	  serial.write(baos.toByteArray());
-	}
 	
 	public boolean isRecording() {
 		return record != null;

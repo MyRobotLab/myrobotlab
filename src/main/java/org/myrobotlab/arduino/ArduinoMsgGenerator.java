@@ -386,7 +386,7 @@ public class ArduinoMsgGenerator {
     StringBuilder javaMethodParameters = new StringBuilder();
     StringBuilder cppMethodParameters = new StringBuilder();
     StringBuilder cppWrite = new StringBuilder("  write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
-    StringBuilder javaWrite = new StringBuilder("      appendMessage(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
+    StringBuilder javaWrite = new StringBuilder("      write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
 
     String arduinoOrMrlComm = (keywords.contains(name)) ? "" : "mrlComm->";
     StringBuilder cppCaseHeader = new StringBuilder("  case " + CodecUtils.toUnderScore(name) + ": { // " + name + "\n");
@@ -480,7 +480,7 @@ public class ArduinoMsgGenerator {
 
         // cppWrite.append(" writestr(" + paramName + ");\n");
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("      appendMessage(" + paramName + ");\n");
+        javaWrite.append("      write(" + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length())");
 
@@ -489,14 +489,14 @@ public class ArduinoMsgGenerator {
       } else if (idlParamType.equals("[]")) {
 
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("      appendMessage(" + paramName + ");\n");
+        javaWrite.append("      write(" + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length)");
 
         cppWriteMsgSize.append(" + (1 + " + paramName + "Size)");
       } else {
         cppWrite.append("  write" + idlParamType + "(" + paramName + ");\n");
-        javaWrite.append("      appendMessage" + idlParamType + "(" + paramName + ");\n");
+        javaWrite.append("      write" + idlParamType + "(" + paramName + ");\n");
         cppWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
         javaWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
       }
