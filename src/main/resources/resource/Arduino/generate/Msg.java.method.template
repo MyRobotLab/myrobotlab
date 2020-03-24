@@ -1,17 +1,16 @@
 
-	public synchronized void %name%(%javaMethodParameters%) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(%javaWriteMsgSize%); // size
+  public synchronized void %name%(%javaMethodParameters%) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(%javaWriteMsgSize%); // size
 %javaWrite% 
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
 %javaSendRecord%
-	  } catch (Exception e) {
-	  			log.error("%name% threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("%name% threw",e);
+    }
+  }
