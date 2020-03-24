@@ -177,23 +177,35 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     port.writeInt(data);
   }
 
+  public void write(byte[] data) throws Exception {
+    if (debug && debugTX) {
+      StringBuilder b = new StringBuilder();
+      for (int i = 0; i < data.length; i++) {
+        b.append( data[i] & 0xff );
+        if (i != data.length - 1)
+          b.append(",");
+      }
+      log.info("Sending Byte Array: {}", b);
+    }
+    port.writeBytes(data);
+  }
   /**
    * Java made a mistake having InputStream and OutputStream abstract
    * classes vs interfaces - perhaps a PortInputStream and PortOutputStream can
    * be created in the future....
    */
   public void write(int[] data) throws Exception {
+   
     // use the writeIntArray method to batch this operation.
     if (debug && debugTX) {
       StringBuilder b = new StringBuilder();
       for (int i = 0; i < data.length; i++) {
-        b.append("" + Integer.toString(data[i]) + "");
+        b.append( data[i]  & 0xff );
         if (i != data.length - 1)
           b.append(",");
       }
       log.debug("Sending Int Array: {}", b);
     }
-
     port.writeIntArray(data);
   }
 
