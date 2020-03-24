@@ -829,19 +829,18 @@ public class VirtualMsg {
 
 	// Java-land --to--> MrlComm
 
-	public synchronized void publishMRLCommError(String errorMsg/*str*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + errorMsg.length())); // size
+  public synchronized void publishMRLCommError(String errorMsg/*str*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + (1 + errorMsg.length())); // size
       appendMessage(PUBLISH_MRLCOMM_ERROR); // msgType = 1
       appendMessage(errorMsg);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishMRLCommError");
         txBuffer.append("/");
@@ -851,17 +850,16 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishMRLCommError threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishMRLCommError threw",e);
+    }
+  }
 
-	public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
+  public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
       appendMessage(PUBLISH_BOARD_INFO); // msgType = 3
       appendMessage(version);
       appendMessage(boardType);
@@ -870,10 +868,10 @@ public class VirtualMsg {
       appendMessage(activePins);
       appendMessage(deviceSummary);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishBoardInfo");
         txBuffer.append("/");
@@ -893,24 +891,23 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishBoardInfo threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishBoardInfo threw",e);
+    }
+  }
 
-	public synchronized void publishAck(Integer function/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void publishAck(Integer function/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(PUBLISH_ACK); // msgType = 9
       appendMessage(function);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishAck");
         txBuffer.append("/");
@@ -920,26 +917,25 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishAck threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishAck threw",e);
+    }
+  }
 
-	public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 4 + 1 + 4); // size
+  public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 4 + 1 + 4); // size
       appendMessage(PUBLISH_ECHO); // msgType = 11
       appendMessagef32(myFloat);
       appendMessage(myByte);
       appendMessagef32(secondFloat);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishEcho");
         txBuffer.append("/");
@@ -953,24 +949,23 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishEcho threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishEcho threw",e);
+    }
+  }
 
-	public synchronized void publishCustomMsg(int[] msg/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + msg.length)); // size
+  public synchronized void publishCustomMsg(int[] msg/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + (1 + msg.length)); // size
       appendMessage(PUBLISH_CUSTOM_MSG); // msgType = 13
       appendMessage(msg);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishCustomMsg");
         txBuffer.append("/");
@@ -980,25 +975,24 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishCustomMsg threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishCustomMsg threw",e);
+    }
+  }
 
-	public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + data.length)); // size
+  public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + (1 + data.length)); // size
       appendMessage(PUBLISH_I2C_DATA); // msgType = 19
       appendMessage(deviceId);
       appendMessage(data);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishI2cData");
         txBuffer.append("/");
@@ -1010,24 +1004,23 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishI2cData threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishI2cData threw",e);
+    }
+  }
 
-	public synchronized void publishDebug(String debugMsg/*str*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + debugMsg.length())); // size
+  public synchronized void publishDebug(String debugMsg/*str*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + (1 + debugMsg.length())); // size
       appendMessage(PUBLISH_DEBUG); // msgType = 28
       appendMessage(debugMsg);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishDebug");
         txBuffer.append("/");
@@ -1037,24 +1030,23 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishDebug threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishDebug threw",e);
+    }
+  }
 
-	public synchronized void publishPinArray(int[] data/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + data.length)); // size
+  public synchronized void publishPinArray(int[] data/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + (1 + data.length)); // size
       appendMessage(PUBLISH_PIN_ARRAY); // msgType = 29
       appendMessage(data);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishPinArray");
         txBuffer.append("/");
@@ -1064,27 +1056,26 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishPinArray threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishPinArray threw",e);
+    }
+  }
 
-	public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2 + 2); // size
+  public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 2 + 2); // size
       appendMessage(PUBLISH_SERVO_EVENT); // msgType = 40
       appendMessage(deviceId);
       appendMessage(eventType);
       appendMessageb16(currentPos);
       appendMessageb16(targetPos);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishServoEvent");
         txBuffer.append("/");
@@ -1100,25 +1091,24 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishServoEvent threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishServoEvent threw",e);
+    }
+  }
 
-	public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + data.length)); // size
+  public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + (1 + data.length)); // size
       appendMessage(PUBLISH_SERIAL_DATA); // msgType = 43
       appendMessage(deviceId);
       appendMessage(data);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishSerialData");
         txBuffer.append("/");
@@ -1130,25 +1120,24 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishSerialData threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishSerialData threw",e);
+    }
+  }
 
-	public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
+  public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 2); // size
       appendMessage(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
       appendMessage(deviceId);
       appendMessageb16(echoTime);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishUltrasonicSensorData");
         txBuffer.append("/");
@@ -1160,25 +1149,24 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishUltrasonicSensorData threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishUltrasonicSensorData threw",e);
+    }
+  }
 
-	public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
+  public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 2); // size
       appendMessage(PUBLISH_ENCODER_DATA); // msgType = 54
       appendMessage(deviceId);
       appendMessageb16(position);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishEncoderData");
         txBuffer.append("/");
@@ -1190,24 +1178,23 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishEncoderData threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishEncoderData threw",e);
+    }
+  }
 
-	public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
       appendMessage(version);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishMrlCommBegin");
         txBuffer.append("/");
@@ -1217,10 +1204,10 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishMrlCommBegin threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("publishMrlCommBegin threw",e);
+    }
+  }
 
 
 	public static String methodToString(int method) {

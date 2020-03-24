@@ -612,18 +612,17 @@ public class Msg {
 
 	// Java-land --to--> MrlComm
 
-	public synchronized void getBoardInfo() {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
+  public synchronized void getBoardInfo() {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1); // size
       appendMessage(GET_BOARD_INFO); // msgType = 2
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> getBoardInfo");
         txBuffer.append("\n");
@@ -631,26 +630,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("getBoardInfo threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("getBoardInfo threw",e);
+    }
+  }
 
-	public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2); // size
+  public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 2); // size
       appendMessage(ENABLE_PIN); // msgType = 4
       appendMessage(address);
       appendMessage(type);
       appendMessageb16(rate);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> enablePin");
         txBuffer.append("/");
@@ -664,24 +662,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("enablePin threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("enablePin threw",e);
+    }
+  }
 
-	public synchronized void setDebug(Boolean enabled/*bool*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void setDebug(Boolean enabled/*bool*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(SET_DEBUG); // msgType = 5
       appendMessagebool(enabled);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setDebug");
         txBuffer.append("/");
@@ -691,24 +688,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setDebug threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setDebug threw",e);
+    }
+  }
 
-	public synchronized void setSerialRate(Integer rate/*b32*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 4); // size
+  public synchronized void setSerialRate(Integer rate/*b32*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 4); // size
       appendMessage(SET_SERIAL_RATE); // msgType = 6
       appendMessageb32(rate);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setSerialRate");
         txBuffer.append("/");
@@ -718,23 +714,22 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setSerialRate threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setSerialRate threw",e);
+    }
+  }
 
-	public synchronized void softReset() {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
+  public synchronized void softReset() {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1); // size
       appendMessage(SOFT_RESET); // msgType = 7
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> softReset");
         txBuffer.append("\n");
@@ -742,24 +737,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("softReset threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("softReset threw",e);
+    }
+  }
 
-	public synchronized void enableAck(Boolean enabled/*bool*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void enableAck(Boolean enabled/*bool*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(ENABLE_ACK); // msgType = 8
       appendMessagebool(enabled);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> enableAck");
         txBuffer.append("/");
@@ -769,26 +763,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("enableAck threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("enableAck threw",e);
+    }
+  }
 
-	public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 4 + 1 + 4); // size
+  public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 4 + 1 + 4); // size
       appendMessage(ECHO); // msgType = 10
       appendMessagef32(myFloat);
       appendMessage(myByte);
       appendMessagef32(secondFloat);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> echo");
         txBuffer.append("/");
@@ -802,24 +795,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("echo threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("echo threw",e);
+    }
+  }
 
-	public synchronized void customMsg(int[] msg/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + (1 + msg.length)); // size
+  public synchronized void customMsg(int[] msg/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + (1 + msg.length)); // size
       appendMessage(CUSTOM_MSG); // msgType = 12
       appendMessage(msg);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> customMsg");
         txBuffer.append("/");
@@ -829,24 +821,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("customMsg threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("customMsg threw",e);
+    }
+  }
 
-	public synchronized void deviceDetach(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void deviceDetach(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(DEVICE_DETACH); // msgType = 14
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> deviceDetach");
         txBuffer.append("/");
@@ -856,25 +847,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("deviceDetach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("deviceDetach threw",e);
+    }
+  }
 
-	public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(I2C_BUS_ATTACH); // msgType = 15
       appendMessage(deviceId);
       appendMessage(i2cBus);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cBusAttach");
         txBuffer.append("/");
@@ -886,26 +876,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cBusAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("i2cBusAttach threw",e);
+    }
+  }
 
-	public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
+  public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1); // size
       appendMessage(I2C_READ); // msgType = 16
       appendMessage(deviceId);
       appendMessage(deviceAddress);
       appendMessage(size);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cRead");
         txBuffer.append("/");
@@ -919,26 +908,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cRead threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("i2cRead threw",e);
+    }
+  }
 
-	public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + (1 + data.length)); // size
+  public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + (1 + data.length)); // size
       appendMessage(I2C_WRITE); // msgType = 17
       appendMessage(deviceId);
       appendMessage(deviceAddress);
       appendMessage(data);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cWrite");
         txBuffer.append("/");
@@ -952,27 +940,26 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cWrite threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("i2cWrite threw",e);
+    }
+  }
 
-	public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1); // size
+  public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1 + 1); // size
       appendMessage(I2C_WRITE_READ); // msgType = 18
       appendMessage(deviceId);
       appendMessage(deviceAddress);
       appendMessage(readSize);
       appendMessage(writeValue);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cWriteRead");
         txBuffer.append("/");
@@ -988,26 +975,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cWriteRead threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("i2cWriteRead threw",e);
+    }
+  }
 
-	public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 4); // size
+  public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 4); // size
       appendMessage(NEO_PIXEL_ATTACH); // msgType = 20
       appendMessage(deviceId);
       appendMessage(pin);
       appendMessageb32(numPixels);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelAttach");
         txBuffer.append("/");
@@ -1021,17 +1007,16 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("neoPixelAttach threw",e);
+    }
+  }
 
-	public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+  public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
       appendMessage(NEO_PIXEL_SET_ANIMATION); // msgType = 21
       appendMessage(deviceId);
       appendMessage(animation);
@@ -1040,10 +1025,10 @@ public class Msg {
       appendMessage(blue);
       appendMessageb16(speed);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelSetAnimation");
         txBuffer.append("/");
@@ -1063,25 +1048,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelSetAnimation threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("neoPixelSetAnimation threw",e);
+    }
+  }
 
-	public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + buffer.length)); // size
+  public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + (1 + buffer.length)); // size
       appendMessage(NEO_PIXEL_WRITE_MATRIX); // msgType = 22
       appendMessage(deviceId);
       appendMessage(buffer);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelWriteMatrix");
         txBuffer.append("/");
@@ -1093,25 +1077,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelWriteMatrix threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("neoPixelWriteMatrix threw",e);
+    }
+  }
 
-	public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(ANALOG_WRITE); // msgType = 23
       appendMessage(pin);
       appendMessage(value);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> analogWrite");
         txBuffer.append("/");
@@ -1123,25 +1106,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("analogWrite threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("analogWrite threw",e);
+    }
+  }
 
-	public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(DIGITAL_WRITE); // msgType = 24
       appendMessage(pin);
       appendMessage(value);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> digitalWrite");
         txBuffer.append("/");
@@ -1153,24 +1135,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("digitalWrite threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("digitalWrite threw",e);
+    }
+  }
 
-	public synchronized void disablePin(Integer pin/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void disablePin(Integer pin/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(DISABLE_PIN); // msgType = 25
       appendMessage(pin);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> disablePin");
         txBuffer.append("/");
@@ -1180,23 +1161,22 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("disablePin threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("disablePin threw",e);
+    }
+  }
 
-	public synchronized void disablePins() {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1); // size
+  public synchronized void disablePins() {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1); // size
       appendMessage(DISABLE_PINS); // msgType = 26
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> disablePins");
         txBuffer.append("\n");
@@ -1204,25 +1184,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("disablePins threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("disablePins threw",e);
+    }
+  }
 
-	public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(PIN_MODE); // msgType = 27
       appendMessage(pin);
       appendMessage(mode);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> pinMode");
         txBuffer.append("/");
@@ -1234,25 +1213,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("pinMode threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("pinMode threw",e);
+    }
+  }
 
-	public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(SET_TRIGGER); // msgType = 30
       appendMessage(pin);
       appendMessage(triggerValue);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setTrigger");
         txBuffer.append("/");
@@ -1264,25 +1242,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setTrigger threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setTrigger threw",e);
+    }
+  }
 
-	public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(SET_DEBOUNCE); // msgType = 31
       appendMessage(pin);
       appendMessage(delay);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setDebounce");
         txBuffer.append("/");
@@ -1294,17 +1271,16 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setDebounce threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setDebounce threw",e);
+    }
+  }
 
-	public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
+  public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
       appendMessage(SERVO_ATTACH); // msgType = 32
       appendMessage(deviceId);
       appendMessage(pin);
@@ -1312,10 +1288,10 @@ public class Msg {
       appendMessageb16(initVelocity);
       appendMessage(name);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoAttach");
         txBuffer.append("/");
@@ -1333,25 +1309,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoAttach threw",e);
+    }
+  }
 
-	public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(SERVO_ATTACH_PIN); // msgType = 33
       appendMessage(deviceId);
       appendMessage(pin);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoAttachPin");
         txBuffer.append("/");
@@ -1363,24 +1338,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoAttachPin threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoAttachPin threw",e);
+    }
+  }
 
-	public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(SERVO_DETACH_PIN); // msgType = 34
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoDetachPin");
         txBuffer.append("/");
@@ -1390,25 +1364,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoDetachPin threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoDetachPin threw",e);
+    }
+  }
 
-	public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
+  public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 2); // size
       appendMessage(SERVO_SET_VELOCITY); // msgType = 35
       appendMessage(deviceId);
       appendMessageb16(velocity);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSetVelocity");
         txBuffer.append("/");
@@ -1420,27 +1393,26 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSetVelocity threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoSetVelocity threw",e);
+    }
+  }
 
-	public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1 + 1); // size
+  public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1 + 1); // size
       appendMessage(SERVO_SWEEP_START); // msgType = 36
       appendMessage(deviceId);
       appendMessage(min);
       appendMessage(max);
       appendMessage(step);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSweepStart");
         txBuffer.append("/");
@@ -1456,24 +1428,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSweepStart threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoSweepStart threw",e);
+    }
+  }
 
-	public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(SERVO_SWEEP_STOP); // msgType = 37
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSweepStop");
         txBuffer.append("/");
@@ -1483,25 +1454,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSweepStop threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoSweepStop threw",e);
+    }
+  }
 
-	public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
+  public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 2); // size
       appendMessage(SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
       appendMessage(deviceId);
       appendMessageb16(target);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoMoveToMicroseconds");
         txBuffer.append("/");
@@ -1513,25 +1483,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoMoveToMicroseconds threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoMoveToMicroseconds threw",e);
+    }
+  }
 
-	public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 2); // size
+  public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 2); // size
       appendMessage(SERVO_SET_ACCELERATION); // msgType = 39
       appendMessage(deviceId);
       appendMessageb16(acceleration);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSetAcceleration");
         txBuffer.append("/");
@@ -1543,25 +1512,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSetAcceleration threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoSetAcceleration threw",e);
+    }
+  }
 
-	public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(SERIAL_ATTACH); // msgType = 41
       appendMessage(deviceId);
       appendMessage(relayPin);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> serialAttach");
         txBuffer.append("/");
@@ -1573,25 +1541,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("serialAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("serialAttach threw",e);
+    }
+  }
 
-	public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + (1 + data.length)); // size
+  public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + (1 + data.length)); // size
       appendMessage(SERIAL_RELAY); // msgType = 42
       appendMessage(deviceId);
       appendMessage(data);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> serialRelay");
         txBuffer.append("/");
@@ -1603,26 +1570,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("serialRelay threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("serialRelay threw",e);
+    }
+  }
 
-	public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
+  public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1); // size
       appendMessage(ULTRASONIC_SENSOR_ATTACH); // msgType = 44
       appendMessage(deviceId);
       appendMessage(triggerPin);
       appendMessage(echoPin);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorAttach");
         txBuffer.append("/");
@@ -1636,24 +1602,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("ultrasonicSensorAttach threw",e);
+    }
+  }
 
-	public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStartRanging");
         txBuffer.append("/");
@@ -1663,24 +1628,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorStartRanging threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("ultrasonicSensorStartRanging threw",e);
+    }
+  }
 
-	public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStopRanging");
         txBuffer.append("/");
@@ -1690,24 +1654,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorStopRanging threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("ultrasonicSensorStopRanging threw",e);
+    }
+  }
 
-	public synchronized void setAref(Integer type/*b16*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 2); // size
+  public synchronized void setAref(Integer type/*b16*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 2); // size
       appendMessage(SET_AREF); // msgType = 48
       appendMessageb16(type);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setAref");
         txBuffer.append("/");
@@ -1717,26 +1680,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setAref threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setAref threw",e);
+    }
+  }
 
-	public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + (1 + pins.length)); // size
+  public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + (1 + pins.length)); // size
       appendMessage(MOTOR_ATTACH); // msgType = 49
       appendMessage(deviceId);
       appendMessage(type);
       appendMessage(pins);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorAttach");
         txBuffer.append("/");
@@ -1750,25 +1712,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("motorAttach threw",e);
+    }
+  }
 
-	public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(MOTOR_MOVE); // msgType = 50
       appendMessage(deviceId);
       appendMessage(pwr);
- 
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorMove");
         txBuffer.append("/");
@@ -1780,25 +1740,24 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorMove threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("motorMove threw",e);
+    }
+  }
 
-	public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1); // size
+  public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1); // size
       appendMessage(MOTOR_MOVE_TO); // msgType = 51
       appendMessage(deviceId);
       appendMessage(pos);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorMoveTo");
         txBuffer.append("/");
@@ -1810,26 +1769,25 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorMoveTo threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("motorMoveTo threw",e);
+    }
+  }
 
-	public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1 + 1 + 1); // size
+  public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1 + 1 + 1); // size
       appendMessage(ENCODER_ATTACH); // msgType = 52
       appendMessage(deviceId);
       appendMessage(type);
       appendMessage(pin);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> encoderAttach");
         txBuffer.append("/");
@@ -1843,24 +1801,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("encoderAttach threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("encoderAttach threw",e);
+    }
+  }
 
-	public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(SET_ZERO_POINT); // msgType = 53
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setZeroPoint");
         txBuffer.append("/");
@@ -1870,24 +1827,23 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setZeroPoint threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("setZeroPoint threw",e);
+    }
+  }
 
-	public synchronized void servoStop(Integer deviceId/*byte*/) {
-		try {
-		 
-          startMessage();
-          appendMessage(MAGIC_NUMBER);
-          appendMessage(1 + 1); // size
+  public synchronized void servoStop(Integer deviceId/*byte*/) {
+    try {
+      startMessage();
+      appendMessage(MAGIC_NUMBER);
+      appendMessage(1 + 1); // size
       appendMessage(SERVO_STOP); // msgType = 56
       appendMessage(deviceId);
  
-          sendMessage();
-     if (ackEnabled){
-          waitForAck();
-     }
+      sendMessage();
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoStop");
         txBuffer.append("/");
@@ -1897,10 +1853,10 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoStop threw",e);
-	  }
-	}
+	} catch (Exception e) {
+      log.error("servoStop threw",e);
+    }
+  }
 
 
 	public static String methodToString(int method) {
