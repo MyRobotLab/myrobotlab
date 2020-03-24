@@ -1071,17 +1071,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   @Override
   public void write(byte[] data) throws Exception {
-    
-    for (String portName : connectedPorts.keySet()) {
-      Port writePort = connectedPorts.get(portName);
-      writePort.write(data);
+    for (int i = 0; i < data.length; ++i) {
+      write(data[i] & 0xff); // recently removed - & 0xFF
     }
-
-    // TODO: invoke publishTX with the array?
-    for (int i = 0 ; i < data.length;i++) {
-      invoke("publishTX", (int)data[i]);
-    }
-    
   }
   
   public void writeInt(int b) throws Exception {
