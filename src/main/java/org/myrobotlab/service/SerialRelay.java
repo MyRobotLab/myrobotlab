@@ -131,9 +131,14 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
 
   public int[] onSerialData(SerialRelayData data) {
     if (data.deviceId == controller.getDeviceId(this)) {
+      byte[] byteData = new byte[data.data.length];
+      // TODO: convert serial relay data to pass around a byte array..
+      for (int i = 0 ; i < data.data.length; i++) {
+        byteData[i] = (byte)(data.data[i] & 0xFF);
+      }
       if (listener instanceof Arduino) {
         for (int newByte : data.data) {
-          ((Arduino) listener).onByte(((int) newByte & 0xFF));
+          ((Arduino) listener).onBytes(byteData);
         }
       }
       return data.data;
