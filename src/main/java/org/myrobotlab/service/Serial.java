@@ -39,6 +39,7 @@ import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -739,21 +740,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portName != null;
   }
 
-  @Override
-  public void onBytes(byte[] bytes) {
-    if (bytes == null) {
-      return;
-    }    
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0 ; i < bytes.length ; i++) {
-      builder.append((bytes[i]&0xFF) + ",");
-    }
-    log.info("On bytes called len: {}  data: {}" , bytes.length, builder.toString());
-    for (int i = 0 ; i < bytes.length; i ++) {
-      onByte(bytes[i]&0xFF);
-    }
-  }
-  
   /**
    * onByte is typically the functions clients of the Serial service use when
    * they want to consume serial data.
@@ -763,34 +749,40 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * readFromPublishedByte is a catch mechanism to verify tests
    * 
    */
-  public final void onByte(Integer newByte) {
-    newByte = newByte & 0xff;
-    ++rxCount;
-
-    // publish the rx byte !
-    invoke("publishRX", newByte);
-
-    if (blockingRX.size() < BUFFER_SIZE) {
-      blockingRX.add(newByte);
-    }
-    
-    try {
-      tcpSerialHub.broadcast(newByte);
-    } catch (IOException e) {
-      log.warn("Error broadcasting to tcp serial hub", e);
-    }
-
-    if (recordRx != null) {
-      // potentially variety of formats can be supported here
+  @Override
+  public void onBytes(byte[] bytes) {
+    if (bytes == null) {
+      return;
+    }    
+    // TODO: right now.. PortJSSC invokes this and it invokes onBytes on the Arduino / other classes directly..  
+    // Why do that in both places?  seems like there should be a more stream lined approach to avoid copying the same byte array 
+    // to multiple end points.
+    //    String byteIntString = StringUtil.byteArrayToIntString(bytes);
+    // log.info("On bytes called len: {}  data: {}" , bytes.length, byteIntString);
+    for (int i = 0 ; i < bytes.length; i ++) {
+      Integer newByte = bytes[i] & 0xff;
+      ++rxCount;
+      // publish the rx byte !
+      invoke("publishRX", newByte);
+      if (blockingRX.size() < BUFFER_SIZE) {
+        blockingRX.add(newByte);
+      }
       try {
-        recordRx.write(String.format(" %02X", newByte).getBytes());
+        tcpSerialHub.broadcast(newByte);
       } catch (IOException e) {
-        log.warn("Error writing to recordRx", e);
+        log.warn("Error broadcasting to tcp serial hub", e);
+      }
+      if (recordRx != null) {
+        // potentially variety of formats can be supported here
+        try {
+          recordRx.write(String.format(" %02X", newByte).getBytes());
+        } catch (IOException e) {
+          log.warn("Error writing to recordRx", e);
+        }
       }
     }
-
   }
-
+  
   @Override
   public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);

@@ -235,11 +235,17 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     if (event.isRXCHAR()) {// If data is available
       log.debug("Serial Receive Event fired.");
       try {
-        byte[] buffer = this.port.readBytes(event.getEventValue());
+        int byteCount = event.getEventValue();
+        if (byteCount == 0) {
+          // no data available.
+          return;
+        }
+        byte[] buffer = this.port.readBytes(byteCount);
         if (buffer == null) {
           // no data available.
           return;
         }
+        
         for (String key : listeners.keySet()) {
           listeners.get(key).onBytes(buffer);
         }
