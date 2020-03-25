@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -59,7 +60,12 @@ public class PortStream extends Port {
   public int read() throws IOException {
     return in.read();
   }
-
+  
+  public byte[] readBytes() {
+    // TODO: implement this.. i don't actually want integers.. i want a byte array!
+    throw new NotImplementedException();
+  }
+  
   // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
   // is ever bigger than the read and no end of stream has occurred
   // it will block forever :P

@@ -224,18 +224,21 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
    * org.myrobotlab.roomba.Z#serialEvent(org.myrobotlab.serial.SerialDeviceEvent
    * )
    */
+  
   @Override
-  public Integer onByte(Integer newByte) {
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      onByte(bytes[i] & 0xFF);
+    }
+  }
 
+  public void onByte(Integer newByte) {
     buffer[bufferLast++] = (byte) newByte.intValue();
     if (bufferLast == 26) {
       bufferLast = 0;
       System.arraycopy(buffer, 0, sensor_bytes, 0, 26);
       computeSensors();
     }
-
-    return newByte;
-
   }
 
   /**

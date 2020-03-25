@@ -830,6 +830,7 @@ public class VirtualMsg {
 	// Java-land --to--> MrlComm
 
   public synchronized void publishMRLCommError(String errorMsg/*str*/) {
+    log.info("Sending Messge: publishMRLCommError");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -856,6 +857,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+    log.info("Sending Messge: publishBoardInfo");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -897,6 +899,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishAck(Integer function/*byte*/) {
+    log.info("Sending Messge: publishAck");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -923,6 +926,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    log.info("Sending Messge: publishEcho");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -955,6 +959,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishCustomMsg(int[] msg/*[]*/) {
+    log.info("Sending Messge: publishCustomMsg");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -981,6 +986,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    log.info("Sending Messge: publishI2cData");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1010,6 +1016,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishDebug(String debugMsg/*str*/) {
+    log.info("Sending Messge: publishDebug");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1036,6 +1043,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishPinArray(int[] data/*[]*/) {
+    log.info("Sending Messge: publishPinArray");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1062,6 +1070,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
+    log.info("Sending Messge: publishServoEvent");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1097,6 +1106,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    log.info("Sending Messge: publishSerialData");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1126,6 +1136,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+    log.info("Sending Messge: publishUltrasonicSensorData");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1155,6 +1166,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
+    log.info("Sending Messge: publishEncoderData");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1184,6 +1196,7 @@ public class VirtualMsg {
   }
 
   public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
+    log.info("Sending Messge: publishMrlCommBegin");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);

@@ -613,6 +613,7 @@ public class Msg {
 	// Java-land --to--> MrlComm
 
   public synchronized void getBoardInfo() {
+    log.info("Sending Messge: getBoardInfo");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -636,6 +637,7 @@ public class Msg {
   }
 
   public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
+    log.info("Sending Messge: enablePin");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -668,6 +670,7 @@ public class Msg {
   }
 
   public synchronized void setDebug(Boolean enabled/*bool*/) {
+    log.info("Sending Messge: setDebug");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -694,6 +697,7 @@ public class Msg {
   }
 
   public synchronized void setSerialRate(Integer rate/*b32*/) {
+    log.info("Sending Messge: setSerialRate");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -720,6 +724,7 @@ public class Msg {
   }
 
   public synchronized void softReset() {
+    log.info("Sending Messge: softReset");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -743,6 +748,7 @@ public class Msg {
   }
 
   public synchronized void enableAck(Boolean enabled/*bool*/) {
+    log.info("Sending Messge: enableAck");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -769,6 +775,7 @@ public class Msg {
   }
 
   public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    log.info("Sending Messge: echo");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -801,6 +808,7 @@ public class Msg {
   }
 
   public synchronized void customMsg(int[] msg/*[]*/) {
+    log.info("Sending Messge: customMsg");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -827,6 +835,7 @@ public class Msg {
   }
 
   public synchronized void deviceDetach(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: deviceDetach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -853,6 +862,7 @@ public class Msg {
   }
 
   public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
+    log.info("Sending Messge: i2cBusAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -882,6 +892,7 @@ public class Msg {
   }
 
   public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
+    log.info("Sending Messge: i2cRead");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -914,6 +925,7 @@ public class Msg {
   }
 
   public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
+    log.info("Sending Messge: i2cWrite");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -946,6 +958,7 @@ public class Msg {
   }
 
   public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
+    log.info("Sending Messge: i2cWriteRead");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -981,6 +994,7 @@ public class Msg {
   }
 
   public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
+    log.info("Sending Messge: neoPixelAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1013,6 +1027,7 @@ public class Msg {
   }
 
   public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+    log.info("Sending Messge: neoPixelSetAnimation");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1054,6 +1069,7 @@ public class Msg {
   }
 
   public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
+    log.info("Sending Messge: neoPixelWriteMatrix");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1083,6 +1099,7 @@ public class Msg {
   }
 
   public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    log.info("Sending Messge: analogWrite");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1112,6 +1129,7 @@ public class Msg {
   }
 
   public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    log.info("Sending Messge: digitalWrite");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1141,6 +1159,7 @@ public class Msg {
   }
 
   public synchronized void disablePin(Integer pin/*byte*/) {
+    log.info("Sending Messge: disablePin");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1167,6 +1186,7 @@ public class Msg {
   }
 
   public synchronized void disablePins() {
+    log.info("Sending Messge: disablePins");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1190,6 +1210,7 @@ public class Msg {
   }
 
   public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
+    log.info("Sending Messge: pinMode");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1219,6 +1240,7 @@ public class Msg {
   }
 
   public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
+    log.info("Sending Messge: setTrigger");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1248,6 +1270,7 @@ public class Msg {
   }
 
   public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
+    log.info("Sending Messge: setDebounce");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1277,6 +1300,7 @@ public class Msg {
   }
 
   public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
+    log.info("Sending Messge: servoAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1315,6 +1339,7 @@ public class Msg {
   }
 
   public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+    log.info("Sending Messge: servoAttachPin");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1344,6 +1369,7 @@ public class Msg {
   }
 
   public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: servoDetachPin");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1370,6 +1396,7 @@ public class Msg {
   }
 
   public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
+    log.info("Sending Messge: servoSetVelocity");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1399,6 +1426,7 @@ public class Msg {
   }
 
   public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
+    log.info("Sending Messge: servoSweepStart");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1434,6 +1462,7 @@ public class Msg {
   }
 
   public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: servoSweepStop");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1460,6 +1489,7 @@ public class Msg {
   }
 
   public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
+    log.info("Sending Messge: servoMoveToMicroseconds");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1489,6 +1519,7 @@ public class Msg {
   }
 
   public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+    log.info("Sending Messge: servoSetAcceleration");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1518,6 +1549,7 @@ public class Msg {
   }
 
   public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
+    log.info("Sending Messge: serialAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1547,6 +1579,7 @@ public class Msg {
   }
 
   public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    log.info("Sending Messge: serialRelay");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1576,6 +1609,7 @@ public class Msg {
   }
 
   public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
+    log.info("Sending Messge: ultrasonicSensorAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1608,6 +1642,7 @@ public class Msg {
   }
 
   public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: ultrasonicSensorStartRanging");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1634,6 +1669,7 @@ public class Msg {
   }
 
   public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: ultrasonicSensorStopRanging");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1660,6 +1696,7 @@ public class Msg {
   }
 
   public synchronized void setAref(Integer type/*b16*/) {
+    log.info("Sending Messge: setAref");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1686,6 +1723,7 @@ public class Msg {
   }
 
   public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
+    log.info("Sending Messge: motorAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1718,6 +1756,7 @@ public class Msg {
   }
 
   public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
+    log.info("Sending Messge: motorMove");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1725,6 +1764,7 @@ public class Msg {
       appendMessage(MOTOR_MOVE); // msgType = 50
       appendMessage(deviceId);
       appendMessage(pwr);
+ 
       sendMessage();
       if (ackEnabled){
         waitForAck();
@@ -1746,6 +1786,7 @@ public class Msg {
   }
 
   public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
+    log.info("Sending Messge: motorMoveTo");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1775,6 +1816,7 @@ public class Msg {
   }
 
   public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
+    log.info("Sending Messge: encoderAttach");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1807,6 +1849,7 @@ public class Msg {
   }
 
   public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: setZeroPoint");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1833,6 +1876,7 @@ public class Msg {
   }
 
   public synchronized void servoStop(Integer deviceId/*byte*/) {
+    log.info("Sending Messge: servoStop");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);

@@ -1,5 +1,6 @@
 
   public synchronized void %name%(%javaMethodParameters%) {
+    log.info("Sending Messge: %name%");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);

@@ -146,35 +146,41 @@ public abstract class Port implements Runnable, SerialControl {
 
   abstract public int read() throws Exception;
 
+  abstract public byte[] readBytes() throws Exception;
   /**
    * reads from Ports input stream and puts it on the Serials main RX line - to
    * be published and buffered - PortJSSC uses the thread of the library to "push" serial data
    */
   @Override
   public void run() {
-
-    log.info("listening on port {}", portName);
+    log.info("Listening on port {}", portName);
     listening = true;
     Integer newByte = -1;
     try {
-      while (listening && ((newByte = read()) > -1)) { // "real" java byte
-        // 255 / -1 will
-        // kill this
-        // log.error(String.format("%d",newByte));
+      while (listening) {
+        // read everything that's available on the port.
+        byte[] buffer = readBytes();
+        if (buffer == null) { 
+          // TODO: maybe this be a tight loop. we might want some sort of thread sleep here?
+          continue;
+        }
+        // we have data.. let's publish it.
         for (String key : listeners.keySet()) {
-          listeners.get(key).onByte(newByte);
+          listeners.get(key).onBytes(buffer);
           // log.info(String.format("%d",newByte));
         }
-        ++stats.total;
-        if (stats.total % stats.interval == 0) {
-
-          stats.ts = System.currentTimeMillis();
-          stats.delta = stats.ts - stats.lastTS;
-          stats.lineSpeed = (8 * stats.interval) / stats.delta;
-          for (String key : listeners.keySet()) {
-            listeners.get(key).updateStats(stats);
+        // TODO: better stats.. for now.. keeping previous behavior.
+        for (int i = 0; i<buffer.length;i++) {
+          ++stats.total;
+          if (stats.total % stats.interval == 0) {
+            stats.ts = System.currentTimeMillis();
+            stats.delta = stats.ts - stats.lastTS;
+            stats.lineSpeed = (8 * stats.interval) / stats.delta;
+            for (String key : listeners.keySet()) {
+              listeners.get(key).updateStats(stats);
+            }
+            stats.lastTS = stats.ts;
           }
-          stats.lastTS = stats.ts;
         }
       }
       log.info("{} no longer listening - last byte {} ", portName, newByte);

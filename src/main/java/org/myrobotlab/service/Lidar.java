@@ -90,7 +90,13 @@ public class Lidar extends Service implements SerialDataListener {
   }
 
   @Override
-  public Integer onByte(Integer b) throws IOException {
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      onByte(bytes[i] & 0xFF);
+    }
+  }
+
+  public Integer onByte(Integer b) {
     index++;
 
     if (log.isDebugEnabled()) {
@@ -119,7 +125,11 @@ public class Lidar extends Service implements SerialDataListener {
         log.debug("Buffer size =  {}  Buffer =  {}", buffer.size(), buffer);
       }
       // WTF do I do with this data now?
-      buffer.flush(); // flush entire buffer so I can convert it to a byte
+      try {
+        buffer.flush();
+      } catch (IOException e) {
+        log.warn("Buffer flush error", e);
+      } // flush entire buffer so I can convert it to a byte
       // array
       message = buffer.toByteArray();
       info = String.format("size of message = %s", message.length);
