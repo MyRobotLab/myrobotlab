@@ -67,6 +67,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 
@@ -1440,11 +1441,16 @@ public class Arduino extends AbstractMicrocontroller
    */
 
   public void onBytes(byte[] bytes) {
+    
+    String byteString = StringUtil.byteArrayToIntString(bytes);
+    log.info("Bytes Called with values: >{}<", byteString);
+    
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
-      // log.info("On Byte: {}", newByte);
+      log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
+      
       try {
         /**
          * Archtype InputStream read - rxtxLib does not have this straightforward
@@ -1470,14 +1476,14 @@ public class Arduino extends AbstractMicrocontroller
             warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
             // dump.setLength(0);
           }
-          return;
+          continue;
         } else if (byteCount == 2) {
           // get the size of message
           if (newByte > 64) {
             byteCount = 0;
             msgSize = 0;
             error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
-            return;
+            continue;
           }
           msgSize = newByte.intValue();
           // dump.append(String.format("MSG|SZ %d", msgSize));
@@ -1490,7 +1496,7 @@ public class Arduino extends AbstractMicrocontroller
         } else {
           // the case where byteCount is negative?! not got.
           error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
-          return;
+          continue;
         }
         if (byteCount == 2 + msgSize) {
           // we've received a full message
@@ -1623,10 +1629,8 @@ public class Arduino extends AbstractMicrocontroller
 
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.debug("Message Ack received: =={}==", Msg.methodToString(function));
-
+    log.info("Message Ack received: =={}==", Msg.methodToString(function));
     msg.ackReceived(function);
-
     numAck++;
   }
 
@@ -1753,7 +1757,8 @@ public class Arduino extends AbstractMicrocontroller
    */
   // < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
-    log.error(errorMsg);
+    warn("MrlCommError: " + errorMsg);
+    log.error("MRLCommError: {}", errorMsg);
     return errorMsg;
   }
 

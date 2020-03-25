@@ -284,6 +284,9 @@ public class Msg {
       } else { 
          arduino.publishMRLCommError( errorMsg);
       }
+      // TODO: This error /warning message isn't auto-generated.  Need to find a better way of injecting some debug stuff like this into the various method impls.
+      // TODO: remove / regenerate this before merging this PR.
+      log.warn("MRL Comm Error Message: {}", errorMsg);
       if(record != null){
         rxBuffer.append("< publishMRLCommError");
         rxBuffer.append("/");
