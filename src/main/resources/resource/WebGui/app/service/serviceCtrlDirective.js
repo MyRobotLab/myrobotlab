@@ -7,17 +7,13 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
         },
         link: function(scope, elem, attr) {
             scope.service = mrl.getService(scope.panel.name);
-
-            var isUndefinedOrNull = function(val) {
-                return angular.isUndefined(val) || val === null;
-            };
             scope.panelconfig = {};
             //prepare dynamic controller injection
             var html = '<div service-ctrl-next ' + 'controller-name="' + scope.panel.simpleName + 'GuiCtrl" ' + 'name="panel.name" ' + 'service="service" ' + 'msginterface="msginterface" ' + 'msgmethods="msgmethods" ' + 'panelconfig="panelconfig" ' + 'size="panel.size" cb="cb"' + '></div>';
             var watch = scope.$watch(function() {
                 return scope.panel.templatestatus;
             }, function() {
-                if (!isUndefinedOrNull(scope.panel.templatestatus) && scope.panel.templatestatus == 'loaded') {
+                if (scope.panel.templatestatus && scope.panel.templatestatus == 'loaded') {
                     watch();
                     $log.info('deps loaded, start ctrl', scope.panel.name);
                     mrl.createMsgInterface(scope.panel.name).then(function(msg_) {
