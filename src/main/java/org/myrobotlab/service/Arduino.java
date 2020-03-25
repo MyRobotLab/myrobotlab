@@ -1440,83 +1440,80 @@ public class Arduino extends AbstractMicrocontroller
    */
 
   public void onBytes(byte[] bytes) {
-    // For now, let's just call onByte for each byte upcasted as an int.
+    // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
-      onByte(bytes[i] & 0xFF);
-    }
-  }
-  // FIXME - onByte(int[] data)
- // @Override
-  public void onByte(Integer newByte) {
-   // log.info("On Byte: {}", newByte);
-    try {
-      /**
-       * Archtype InputStream read - rxtxLib does not have this straightforward
-       * design, but the details of how it behaves is is handled in the Serial
-       * service and we are given a unified interface
-       *
-       * The "read()" is data taken from a blocking queue in the Serial service.
-       * If we want to support blocking functions in Arduino then we'll
-       * "publish" to our local queues
-       */
-      // TODO: consider reading more than 1 byte at a time ,and make this
-      // callback onBytes or something like that.
+      // For now, let's just call onByte for each byte upcasted as an int.
+      Integer newByte = bytes[i] & 0xFF;
+      // log.info("On Byte: {}", newByte);
+      try {
+        /**
+         * Archtype InputStream read - rxtxLib does not have this straightforward
+         * design, but the details of how it behaves is is handled in the Serial
+         * service and we are given a unified interface
+         *
+         * The "read()" is data taken from a blocking queue in the Serial service.
+         * If we want to support blocking functions in Arduino then we'll
+         * "publish" to our local queues
+         */
+        // TODO: consider reading more than 1 byte at a time ,and make this
+        // callback onBytes or something like that.
 
-      ++byteCount;
-      if (log.isDebugEnabled()) {
-        log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
-      }
-      if (byteCount == 1) {
-        if (newByte != MAGIC_NUMBER) {
-          byteCount = 0;
-          msgSize = 0;
-          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
-          warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-          // dump.setLength(0);
+        ++byteCount;
+        if (log.isDebugEnabled()) {
+          log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
         }
-        return;
-      } else if (byteCount == 2) {
-        // get the size of message
-        if (newByte > 64) {
-          byteCount = 0;
-          msgSize = 0;
-          error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
+        if (byteCount == 1) {
+          if (newByte != MAGIC_NUMBER) {
+            byteCount = 0;
+            msgSize = 0;
+            Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
+            warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            // dump.setLength(0);
+          }
+          return;
+        } else if (byteCount == 2) {
+          // get the size of message
+          if (newByte > 64) {
+            byteCount = 0;
+            msgSize = 0;
+            error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
+            return;
+          }
+          msgSize = newByte.intValue();
+          // dump.append(String.format("MSG|SZ %d", msgSize));
+        } else if (byteCount > 2) {
+          // remove header - fill msg data - (2) headbytes -1
+          // (offset)
+          // dump.append(String.format("|P%d %d", byteCount,
+          // newByte));
+          ioCmd[byteCount - 3] = newByte.intValue();
+        } else {
+          // the case where byteCount is negative?! not got.
+          error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
           return;
         }
-        msgSize = newByte.intValue();
-        // dump.append(String.format("MSG|SZ %d", msgSize));
-      } else if (byteCount > 2) {
-        // remove header - fill msg data - (2) headbytes -1
-        // (offset)
-        // dump.append(String.format("|P%d %d", byteCount,
-        // newByte));
-        ioCmd[byteCount - 3] = newByte.intValue();
-      } else {
-        // the case where byteCount is negative?! not got.
-        error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
-        return;
-      }
-      if (byteCount == 2 + msgSize) {
-        // we've received a full message
-        log.info("Full message received: {} {}", ioCmd[0], VirtualMsg.methodToString(ioCmd[0]));
-        msg.processCommand(ioCmd);
+        if (byteCount == 2 + msgSize) {
+          // we've received a full message
+          log.info("Full message received: {} {}", ioCmd[0], VirtualMsg.methodToString(ioCmd[0]));
+          msg.processCommand(ioCmd);
 
-        // Our 'first' getBoardInfo may not receive a acknowledgement
-        // so this should be disabled until boadInfo is valid
+          // Our 'first' getBoardInfo may not receive a acknowledgement
+          // so this should be disabled until boadInfo is valid
 
-        // clean up memory/buffers
+          // clean up memory/buffers
+          msgSize = 0;
+          byteCount = 0;
+          Arrays.fill(ioCmd, 0); // optimize remove
+        }
+      } catch (Exception e) {
+        ++errorHardwareToServiceRxCnt;
+        error("msg structure violation %d", errorHardwareToServiceRxCnt);
+        log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
+        // try again (clean up memory buffer)
         msgSize = 0;
         byteCount = 0;
-        Arrays.fill(ioCmd, 0); // optimize remove
+        Logging.logError(e);
       }
-    } catch (Exception e) {
-      ++errorHardwareToServiceRxCnt;
-      error("msg structure violation %d", errorHardwareToServiceRxCnt);
-      log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
-      // try again (clean up memory buffer)
-      msgSize = 0;
-      byteCount = 0;
-      Logging.logError(e);
     }
     return;
   }
