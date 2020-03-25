@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
+import javax.swing.JFrame;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -60,6 +61,7 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+import org.bytedeco.javacv.ProjectorDevice;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
@@ -1481,9 +1483,18 @@ public class OpenCV extends AbstractComputerVision {
         
         if (display && !isHeadless()) {
           if (canvasFrame == null) {
-            canvasFrame = new CanvasFrame("display");
+            // FIXME - strange canvaFrame's fullscreen mode is not exposed :(
+            // ProjectorDevice pd = new ProjectorDevice("display 2");
+            // canvasFrame = pd.createCanvasFrame();
+            
+            canvasFrame = new CanvasFrame(displayFilter); 
+            canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            // canvasFrame.setAlwaysOnTop(true);            
+            canvasFrame.setResizable(true);
+            canvasFrame.pack();
           }
           canvasFrame.showImage(b);
+          
         } else if (!display && canvasFrame != null) {
           canvasFrame.dispose();
           canvasFrame = null;
