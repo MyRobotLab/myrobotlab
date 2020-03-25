@@ -96,7 +96,13 @@ public class IBus extends Service implements SerialDataListener {
   }
 
   @Override
-  public Integer onByte(Integer b) {
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      onByte(bytes[i] & 0xFF);
+    }
+  }
+  
+  public void onByte(Integer b) {
     // while (stream -> available() > 0) {
     long now = millis();
     if (now - last >= PROTOCOL_TIMEGAP) {
@@ -155,7 +161,7 @@ public class IBus extends Service implements SerialDataListener {
         break;
     }
 
-    return b;
+   // return b;
   }
 
   public int[] publishChanel(int[] channel) {

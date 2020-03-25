@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -51,6 +52,11 @@ public class PortQueue extends Port {
     return in.take();
   }
 
+  public byte[] readBytes() {
+    // TODO: implement this.. i don't actually want integers.. i want a byte array!
+    throw new NotImplementedException();
+  }
+  
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
 
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);

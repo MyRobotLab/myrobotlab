@@ -69,11 +69,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public final static Integer BAUD_115200 = 115200;
 
   /**
-   * deprecated hardware library
-   */
-  final public static String HARDWARE_LIBRARY_RXTX = "org.myrobotlab.serial.PortRXTX";
-
-  /**
    * different hardware library - hotspot only
    */
   final public static String HARDWARE_LIBRARY_JSSC = "org.myrobotlab.serial.PortJSSC";
@@ -638,7 +633,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       return HARDWARE_LIBRARY_ANDROID_BLUETOOTH;
     } else {
       return HARDWARE_LIBRARY_JSSC;
-      // return HARDWARE_LIBRARY_RXTX; buh bye !!
     }
   }
 
@@ -745,6 +739,21 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portName != null;
   }
 
+  @Override
+  public void onBytes(byte[] bytes) {
+    if (bytes == null) {
+      return;
+    }    
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0 ; i < bytes.length ; i++) {
+      builder.append((bytes[i]&0xFF) + ",");
+    }
+    log.info("On bytes called len: {}  data: {}" , bytes.length, builder.toString());
+    for (int i = 0 ; i < bytes.length; i ++) {
+      onByte(bytes[i]&0xFF);
+    }
+  }
+  
   /**
    * onByte is typically the functions clients of the Serial service use when
    * they want to consume serial data.
@@ -754,8 +763,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * readFromPublishedByte is a catch mechanism to verify tests
    * 
    */
-  @Override
-  public final Integer onByte(Integer newByte) throws IOException {
+  public final void onByte(Integer newByte) {
     newByte = newByte & 0xff;
     ++rxCount;
 
@@ -766,14 +774,21 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       blockingRX.add(newByte);
     }
     
-    tcpSerialHub.broadcast(newByte);
+    try {
+      tcpSerialHub.broadcast(newByte);
+    } catch (IOException e) {
+      log.warn("Error broadcasting to tcp serial hub", e);
+    }
 
     if (recordRx != null) {
       // potentially variety of formats can be supported here
-      recordRx.write(String.format(" %02X", newByte).getBytes());
+      try {
+        recordRx.write(String.format(" %02X", newByte).getBytes());
+      } catch (IOException e) {
+        log.warn("Error writing to recordRx", e);
+      }
     }
 
-    return newByte;
   }
 
   @Override

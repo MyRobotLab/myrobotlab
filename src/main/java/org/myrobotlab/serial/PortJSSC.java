@@ -122,6 +122,16 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   public int read() throws Exception {
     return read(1, 20000)[0];
   }
+  
+  public byte[] readBytes() {
+    try {
+      // read what's available
+      return port.readBytes();
+    } catch (SerialPortException e) {
+      log.warn("Read Bytes Exception", e);
+      return null;
+    }
+  }
 
   /**
    * FIXME - this more powerful read should be propegated up to the interface
@@ -223,16 +233,17 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     // FYI - if you want more events processed here - you need to register them
     // in setParams
     if (event.isRXCHAR()) {// If data is available
-
       log.debug("Serial Receive Event fired.");
-      byte[] buffer = null;
       try {
-        buffer = this.port.readBytes(event.getEventValue());
+        byte[] buffer = this.port.readBytes(event.getEventValue());
+        if (buffer == null) {
+          // no data available.
+          return;
+        }
+        for (String key : listeners.keySet()) {
+          listeners.get(key).onBytes(buffer);
+        }
         for (int i = 0; i < buffer.length; i++) {
-
-          for (String key : listeners.keySet()) {
-            listeners.get(key).onByte((int) (buffer[i] & 0xFF));
-          }
           ++stats.total;
           if (stats.total % stats.interval == 0) {
             stats.ts = System.currentTimeMillis();

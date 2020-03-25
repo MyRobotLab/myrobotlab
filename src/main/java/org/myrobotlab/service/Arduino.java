@@ -26,6 +26,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -1438,9 +1439,16 @@ public class Arduino extends AbstractMicrocontroller
    *
    */
 
+  public void onBytes(byte[] bytes) {
+    // For now, let's just call onByte for each byte upcasted as an int.
+    for (int i = 0 ; i < bytes.length; i++) {
+      onByte(bytes[i] & 0xFF);
+    }
+  }
   // FIXME - onByte(int[] data)
-  @Override
-  public Integer onByte(Integer newByte) {
+ // @Override
+  public void onByte(Integer newByte) {
+   // log.info("On Byte: {}", newByte);
     try {
       /**
        * Archtype InputStream read - rxtxLib does not have this straightforward
@@ -1466,14 +1474,14 @@ public class Arduino extends AbstractMicrocontroller
           warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
           // dump.setLength(0);
         }
-        return newByte;
+        return;
       } else if (byteCount == 2) {
         // get the size of message
         if (newByte > 64) {
           byteCount = 0;
           msgSize = 0;
           error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
-          return newByte;
+          return;
         }
         msgSize = newByte.intValue();
         // dump.append(String.format("MSG|SZ %d", msgSize));
@@ -1486,11 +1494,11 @@ public class Arduino extends AbstractMicrocontroller
       } else {
         // the case where byteCount is negative?! not got.
         error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
-        return newByte;
+        return;
       }
       if (byteCount == 2 + msgSize) {
         // we've received a full message
-
+        log.info("Full message received: {} {}", ioCmd[0], VirtualMsg.methodToString(ioCmd[0]));
         msg.processCommand(ioCmd);
 
         // Our 'first' getBoardInfo may not receive a acknowledgement
@@ -1510,7 +1518,7 @@ public class Arduino extends AbstractMicrocontroller
       byteCount = 0;
       Logging.logError(e);
     }
-    return newByte;
+    return;
   }
 
   @Override

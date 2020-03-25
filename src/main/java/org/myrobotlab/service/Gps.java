@@ -192,9 +192,15 @@ public class Gps extends Service implements SerialDataListener {
   public void addGPSListener(Service service) {
     addListener("publishGPS", service.getName(), "onGPS");
   }
-
+  
   @Override
-  public Integer onByte(Integer b) throws IOException {
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      onByte(bytes[i] & 0xFF);
+    }
+  }
+
+  public void onByte(Integer b) {
 
     try {
       // log.info("byteReceived Index = " + index + " actual data byte = "
@@ -259,7 +265,7 @@ public class Gps extends Service implements SerialDataListener {
       error(e.getMessage());
     }
 
-    return b;
+    //return b;
 
   }
 
