@@ -47,18 +47,26 @@ public class PortQueue extends Port {
     return new ArrayList<String>();
   }
 
-  @Override
-  public int read() throws IOException, InterruptedException {
+  // @Override
+  public int readA() throws IOException, InterruptedException {
     return in.take();
   }
 
   public byte[] readBytes() {
-    // TODO: implement this.. i don't actually want integers.. i want a byte array!
-    throw new NotImplementedException();
+    // TODO: make it a byte array queue
+    try {
+      Integer val = in.take();
+      byte[] data = new byte[1];
+      data[0] = val.byteValue();
+      return data;
+    } catch (InterruptedException e) {
+      // we don't care, just return if we were interrupted.
+      // log.debug("Interrupted PortQueue in readBytes.");
+      return null;
+    }
   }
   
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
-
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
   }

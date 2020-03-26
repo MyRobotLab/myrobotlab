@@ -144,7 +144,7 @@ public abstract class Port implements Runnable, SerialControl {
     isOpen = true;
   }
 
-  abstract public int read() throws Exception;
+  // abstract public int read() throws Exception;
 
   abstract public byte[] readBytes() throws Exception;
   /**

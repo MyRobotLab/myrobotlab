@@ -113,15 +113,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     }
     port = null;
   }
-
-  /**
-   * FIXME - the "int read()" should provide a timeout to be supplied ! This
-   * needs refactoring in the interface
-   */
-  @Override
-  public int read() throws Exception {
-    return read(1, 20000)[0];
-  }
   
   public byte[] readBytes() {
     try {
@@ -131,18 +122,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       log.warn("Read Bytes Exception", e);
       return null;
     }
-  }
-
-  /**
-   * FIXME - this more powerful read should be propegated up to the interface
-   * 
-   * @param numbytes
-   * @param timeout
-   * @return
-   * @throws Exception
-   */
-  public int[] read(int numbytes, int timeout) throws Exception {
-    return port.readIntArray(numbytes, timeout);
   }
 
   @Override
