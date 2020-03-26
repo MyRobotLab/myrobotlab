@@ -38,15 +38,11 @@ To start a list of named services on startup, you can use the -service command l
 
 The above would start runtime, python, the swing gui and lastly the webgui.
 
-
 ## Building Project
 
-MyRobotLab builds using the Apache Maven java build system.
+### Install Java 8 (see above)
 
-Download Maven At:
-https://maven.apache.org/download.cgi
- 
-Clone the myrobotlab project
+### Cloning Repo
 
 create a directory to clone the repositories in  (assuming you're on windows and cloning to the c:\dev directory)
 
@@ -55,6 +51,19 @@ create a directory to clone the repositories in  (assuming you're on windows and
 `git clone https://github.com/MyRobotLab/myrobotlab.git`
 `cd c:\dev\myrobotlab`
 
+### Building with Eclipse
+Download Eclipse for Java Developers At:
+https://www.eclipse.org/downloads/packages/
+
+
+
+### Building with Maven
+
+MyRobotLab builds using the Apache Maven java build system.
+
+Download Maven At:
+https://maven.apache.org/download.cgi
+ 
 To compile and build a myrobotlab.jar  first : ensure that "mvn" (maven version 3.3+ is installed and in the path)
 
 `mvn clean install`  
