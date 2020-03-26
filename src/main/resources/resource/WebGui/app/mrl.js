@@ -835,6 +835,16 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             return panels[fullname]
         }
 
+        _self.getPanel = function(serviceName) {
+            let name = _self.getFullName(serviceName)
+            if (panels.hasOwnProperty(name)) {
+                return panels[name]
+            } else {
+                console.error('could not find panel ' + name)
+            }
+            return null
+        }
+
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
             panel = {
@@ -1270,13 +1280,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.debug('mrl.init()')
+                console.debug('mrl.init')
                 if (connected) {
-                    console.debug('mrl.init() connected')
+                    console.debug('connected')
                     return true
                 }
                 if (connecting) {
-                    console.debug('mrl.init() connecting')
+                    console.debug('connecting')
                     return false
                 }
 
@@ -1313,6 +1323,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             setDisplayCallback: setDisplayCallback,
             subscribeToUpdates: _self.subscribeToUpdates,
             getPanelList: _self.getPanelList,
+            getPanel: _self.getPanel,
             sendTo: _self.sendTo,
             getShortName: _self.getShortName,
             getSimpleName: _self.getSimpleName,
