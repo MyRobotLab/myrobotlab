@@ -55,15 +55,18 @@ public class PortStream extends Port {
     // the "pure" Java (non-JNI/JNA) world...
     return new ArrayList<String>();
   }
-
-  @Override
-  public int read() throws IOException {
-    return in.read();
-  }
   
   public byte[] readBytes() {
     // TODO: implement this.. i don't actually want integers.. i want a byte array!
-    throw new NotImplementedException();
+    try {
+      Integer val = in.read();
+      byte[] data = new byte[1];
+      data[0] = val.byteValue();
+      return data;
+    } catch (IOException e) {
+      log.warn("Interrupted PortStream in readBytes.  Perhaps port was closed?", e);
+    }
+    return null;
   }
   
   // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
