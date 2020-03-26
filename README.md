@@ -46,10 +46,12 @@ The above would start runtime, python, the swing gui and lastly the webgui.
 
 create a directory to clone the repositories in  (assuming you're on windows and cloning to the c:\dev directory)
 
-`mkdir c:\dev`
-`cd dev`
-`git clone https://github.com/MyRobotLab/myrobotlab.git`
-`cd c:\dev\myrobotlab`
+```dos
+mkdir c:\dev
+cd dev
+git clone https://github.com/MyRobotLab/myrobotlab.git
+cd c:\dev\myrobotlab
+```
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
