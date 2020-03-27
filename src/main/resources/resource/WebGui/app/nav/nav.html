@@ -1,44 +1,28 @@
-<style>
-    .badge-notify {
-        background: red;
-        position: relative;
-        top: -12px;
-        left: -25px;
-    }
-
-    .title {
-        color: #9d9d9d;
-        float: left;
-        height: 50px;
-        padding: 15px 15px;
-        font-size: 18px;
-        line-height: 20px;
-    }
-</style>
 <div class="navbar navbar-inverse container-fluid" role="navigation" ng-show="viewType != 'min'">
-    <span class="title pull-left">
-        <span class="pull-left" ng-if="connected">
-            <img src="../../connected.png" alt="">
-        </span>
-        <span class="pull-left" ng-if="!connected">
-            <img src="../../disconnected.png" alt="">
-        </span>
-            <a class="navbar-brand" href="http://myrobotlab.org">MyRobotLab</a>
-            {{id}} <span class="glyphicon glyphicon-resize-horizontal"></span>
-            {{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}
+    <ul class="nav navbar-nav navbar-left">
+        <li>
+            <!--TODO - green png if connected - if not re-connect button-->
+            <span class="pull-left" ng-if="connected">
+                <img src="../../connected.png" alt="">
+            </span>
+            <span class="pull-left" ng-if="!connected">
+                <img src="../../disconnected.png" alt="">
+            </span>
+            <a class="navbar-brand" href="/">MyRobotLab</a>
+        </li>
+        <li>
+            <a href="http://myrobotlab.org">
+            <!--{{platform.branch}}-->
+            {{id}} <span class="glyphicon glyphicon-resize-horizontal"></span> {{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}
 				{{remotePlatform.mrlVersion}}
-    </span>
+		</a>
+        </li>
+    </ul>
     <span class="pull-right">
         <form class="navbar-form">
-            <div class="container pull-right">
-                <button class="btn btn-default btn-lg btn-link">
-                    <span class="glyphicon glyphicon-bell"></span>
-                </button>
-                <span class="badge badge-notify">3</span>
-            </div>
             <div class="btn-group pull-left" uib-dropdown>
                 <div uib-dropdown-toggle>
-                    <button class="btn btn-default btn-lg btn-link" type="submit" tooltip-placement="bottom" uib-tooltip="More features">
+                    <button class="btn btn-default" type="submit" tooltip-placement="bottom" uib-tooltip="More features">
                         <i class="glyphicon glyphicon-option-vertical"></i>
                     </button>
                 </div>
@@ -46,25 +30,34 @@
                     <li>
                         <a href="" ng-click="about()">
                             <i class="glyphicon glyphicon-info-sign"></i>
-                            &nbsp;&nbsp;About       
+                            &nbsp;&nbsp;About                 
+                        
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="help()">
                             <i class="glyphicon glyphicon-question-sign"></i>
                             &nbsp;&nbsp;Help
+                        
+                        
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="noWorky()">
                             <i class="glyphicon glyphicon-alert"></i>
                             &nbsp;&nbsp;No Worky !           
+                        
+                        
+                        
                         </a>
                     </li>
                     <li>
                         <a href="" ng-click="shutdown('shutdown')">
                             <i class="glyphicon glyphicon-off"></i>
-                            &nbsp;&nbsp;Shutdown
+                            &nbsp;&nbsp;Shutdown                   
+                        
                         </a>
                     </li>
                     <!--
@@ -82,6 +75,7 @@
             </div>
         </form>
     </span>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 </div>
 <!-- todo make a tranform which changes status to alert -->
 <div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
