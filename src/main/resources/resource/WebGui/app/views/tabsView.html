@@ -22,6 +22,11 @@
         margin-left: 50px;
     }
 
+    #main {
+        transition: margin-left .5s;
+        padding: 16px;
+    }
+
     @media screen and (max-height: 450px) {
         .sidenav {
             padding-top: 15px;
@@ -50,7 +55,9 @@
             </ul>
         </div>
     </div>
-    <span onclick="openNav()" style="font-size:30px;cursor:pointer">&#9776;</span>
+    <div id="main">
+    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;Open</span>
+    <!--span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span-->
     <!--   THIS IS THE MOST IMPORTANT PART OF /main
                     could possibly use this as "undock" ?
              
@@ -74,12 +81,15 @@
         <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
     </div>
 </div>
+</div>
 <script>
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("main").style.marginLeft = "250px";
     }
 
     function closeNav() {
         document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("main").style.marginLeft = "0";
     }
 </script>
