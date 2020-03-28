@@ -1440,17 +1440,15 @@ public class Arduino extends AbstractMicrocontroller
    *
    */
 
-  public void onBytes(byte[] bytes) {
-    
+  public synchronized void onBytes(byte[] bytes) {
+    // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("Bytes Called with values: >{}<", byteString);
-    
+    log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
-      log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
-      
+      // log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
       try {
         /**
          * Archtype InputStream read - rxtxLib does not have this straightforward
@@ -1495,17 +1493,18 @@ public class Arduino extends AbstractMicrocontroller
           ioCmd[byteCount - 3] = newByte.intValue();
         } else {
           // the case where byteCount is negative?! not got.
+          log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
           error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
           continue;
         }
         if (byteCount == 2 + msgSize) {
           // we've received a full message
-          log.info("Full message received: {} {}", ioCmd[0], VirtualMsg.methodToString(ioCmd[0]));
-          msg.processCommand(ioCmd);
-
+          log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), Arrays.copyOf(ioCmd, byteCount));
+          // TODO: should we truncate our ioCmd that we send here?  the ioCmd array is larger than the message in almost all cases.
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount); 
+          msg.processCommand(actualCommand);
           // Our 'first' getBoardInfo may not receive a acknowledgement
           // so this should be disabled until boadInfo is valid
-
           // clean up memory/buffers
           msgSize = 0;
           byteCount = 0;
@@ -1525,7 +1524,15 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   @Override
-  public void onConnect(String portName) {
+  public synchronized void onConnect(String portName) {
+    // TODO: if we get this notification.. i think we need to reset our onBytes method so it doesn't think it's 1/2 way through a message.
+
+    // initialize the mrlcomm message parser.
+    byteCount = 0;
+    msgSize = 0;
+
+    log.info("{} onConnect for port {}", getName(), portName);
+
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
