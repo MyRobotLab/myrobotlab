@@ -57,8 +57,8 @@ public class PortStream extends Port {
   }
   
   public byte[] readBytes() {
-    // TODO: implement this.. i don't actually want integers.. i want a byte array!
     try {
+      // TODO: read(byte[]) not individual bytes here!
       Integer val = in.read();
       byte[] data = new byte[1];
       data[0] = val.byteValue();

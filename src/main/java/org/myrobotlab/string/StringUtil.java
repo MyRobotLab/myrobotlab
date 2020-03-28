@@ -214,5 +214,15 @@ public class StringUtil {
     return builder.toString();
   }
 
+  public static Object intArrayToString(int[] ints) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0 ; i < ints.length-1; i++) {
+      builder.append(ints[i]);
+      builder.append(",");
+    }
+    builder.append(ints[ints.length-1]);
+    return builder.toString();
+  }
+
 
 }
