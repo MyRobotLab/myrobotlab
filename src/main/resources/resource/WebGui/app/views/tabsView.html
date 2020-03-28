@@ -55,8 +55,10 @@
             </ul>
         </div>
     </div>
-    <div id="main">
-    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;Open</span>
+    <span onclick="openNav()" style="font-size:30px;cursor:pointer">&#9776;</span>
+
+    <!-- div id="main">
+    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;Open</span -->
     <!--span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span-->
     <!--   THIS IS THE MOST IMPORTANT PART OF /main
                     could possibly use this as "undock" ?
@@ -85,11 +87,11 @@
 <script>
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
-        document.getElementById("main").style.marginLeft = "250px";
+        // document.getElementById("main").style.marginLeft = "250px";
     }
 
     function closeNav() {
         document.getElementById("mySidenav").style.width = "0";
-        document.getElementById("main").style.marginLeft = "0";
+        // document.getElementById("main").style.marginLeft = "0";
     }
 </script>
