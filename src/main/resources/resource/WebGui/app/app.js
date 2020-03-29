@@ -109,7 +109,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
         resolve: {
             test: function($stateParams, mrl) {
                 console.log('tabs calling mrl.init() from router')
-                mrl.setViewType('min')
+                // mrl.setViewType('min')
                 return mrl.init();
             }
         }

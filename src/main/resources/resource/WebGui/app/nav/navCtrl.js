@@ -12,7 +12,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.infoCount = 0
     // platform of webgui
     $scope.remotePlatform = null
-    $scope.viewType = mrl.getViewType()
+    //$scope.viewType = mrl.getViewType()
 
     $scope.displayImages = mrl.getDisplayImages()
 

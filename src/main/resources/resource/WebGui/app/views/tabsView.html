@@ -33,7 +33,7 @@
         }
     }
 </style>
-<div class="container-fluid" ng-show="viewType != 'min'">
+<div class="container-fluid">
     <!--1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right-->
     <!--migrate to Angular UI Bootstrap when they offer one-->
     <div id="mySidenav" class="sidenav">
@@ -55,10 +55,8 @@
             </ul>
         </div>
     </div>
-    <span onclick="openNav()" style="font-size:30px;cursor:pointer">&#9776;</span>
-
-    <!-- div id="main">
-    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;Open</span -->
+    <div id="main">
+    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;</span>
     <!--span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span-->
     <!--   THIS IS THE MOST IMPORTANT PART OF /main
                     could possibly use this as "undock" ?
@@ -77,13 +75,6 @@
         </div>
     </div>
 </div>
-</div>
-<div class="container-fluid" ng-show="viewType == 'min'">
-    <div class="tab-content">
-        <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
-    </div>
-</div>
-</div>
 <script>
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
@@ -95,3 +86,7 @@
         // document.getElementById("main").style.marginLeft = "0";
     }
 </script>
+<!--
+<input type="text" ng-model="name" />
+<button ng-click="changeTab(name)" >change tab</button>
+-->
