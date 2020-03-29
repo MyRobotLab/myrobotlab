@@ -1,17 +1,19 @@
 
-  public synchronized void %name%(%javaMethodParameters%) {
+  public synchronized byte[] %name%(%javaMethodParameters%) {
     log.info("Sending Messge: %name%");
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
       appendMessage(%javaWriteMsgSize%); // size
 %javaWrite% 
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
 %javaSendRecord%
+      return message;
 	} catch (Exception e) {
       log.error("%name% threw",e);
+      return null;
     }
   }

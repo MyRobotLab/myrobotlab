@@ -10,8 +10,12 @@ import java.util.Map;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
+import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.slf4j.Logger;
 
 ///////////// MrlComm.h ///////////////
@@ -31,7 +35,7 @@ import org.slf4j.Logger;
  * processing
  * 
  */
-public class MrlComm {
+public class MrlComm implements MrlCommListener {
 
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
@@ -490,8 +494,8 @@ public class MrlComm {
     ((MrlI2CBus) getDevice(deviceId)).i2cWriteRead(deviceAddress, readSize, writeValue);
   }
 
-  public void invoke(String method, Object... params) {
-    virtual.invokeOn(this, method, params);
+  public Object invoke(String method, Object... params) {
+    return virtual.invokeOn(this, method, params);
   }
 
   public long micros() {
@@ -850,6 +854,84 @@ public class MrlComm {
 
   public void servoStop(Integer deviceId) {
     log.info("servoStop {}", deviceId);
+  }
+
+  @Override
+  public BoardInfo publishBoardInfo(Integer version, Integer boardTypeId, Integer microsPerLoop, Integer sram, Integer activePins, int[] deviceSummary) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishAck(Integer function) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public int[] publishCustomMsg(int[] msg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public java.lang.String publishDebug(java.lang.String debugMsg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishEcho(float myFloat, int myByte, float secondFloat) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public EncoderData publishEncoderData(Integer deviceId, Integer position) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishI2cData(Integer deviceId, int[] data) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishMrlCommBegin(Integer version) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public java.lang.String publishMRLCommError(java.lang.String errorMsg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public PinData[] publishPinArray(int[] data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
