@@ -2,6 +2,10 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
     $log.info('SecurityGuiCtrl')
     var _self = this
     var msg = this.msg
+    
+    // FIXME - need better way to have multiple panels, currently this is just for testing
+    $scope.mrl = mrl
+    $scope.panel = mrl.getPanel('runtime')
 
     $scope.keyNames = [];
 
