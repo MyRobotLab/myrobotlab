@@ -220,7 +220,7 @@ public class ArduinoMsgGenerator {
 
     idlToJava = idlToJava.replace("%arduino%", "arduino");
     idlToJava = idlToJava.replace("%javaClass%", "Msg");
-    idlToJava = idlToJava.replace("%javaArduinoClass%", "Arduino");
+    idlToJava = idlToJava.replace("%javaArduinoClass%", "MrlCommListener");
 
     virtualJava = virtualJava.replace("%arduino%", "virtual");
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");

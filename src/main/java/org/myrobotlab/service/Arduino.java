@@ -53,6 +53,7 @@ import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -73,7 +74,7 @@ import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
-    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher {
+    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 

@@ -20,16 +20,16 @@ import org.myrobotlab.arduino.virtual.MrlComm;
  which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
  with the cpp template (src/resource/Arduino/generate/Msg.java.template)
 
- 	Schema Type Conversions
+   Schema Type Conversions
 
-	Schema      ARDUINO					Java							Range
-	none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
-	boolean		boolean					boolean							0 1
-    b16			int						int (short)						2 bytes	-32,768 to 32,767
-    b32			long					int								4 bytes -2,147,483,648 to 2,147,483, 647
-    bu32		unsigned long			long							0 to 4,294,967,295
-    str			char*, size				String							variable length
-    []			byte[], size			int[]							variable length
+  Schema      ARDUINO          Java              Range
+  none    byte/unsigned char    int (cuz Java byte bites)    1 byte - 0 to 255
+  boolean    boolean          boolean              0 1
+    b16      int            int (short)            2 bytes  -32,768 to 32,767
+    b32      long          int                4 bytes -2,147,483,648 to 2,147,483, 647
+    bu32    unsigned long      long              0 to 4,294,967,295
+    str      char*, size        String              variable length
+    []      byte[], size      int[]              variable length
 
  All message editing should be done in the arduinoMsg.schema
 
@@ -47,7 +47,7 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -62,16 +62,16 @@ import org.slf4j.Logger;
 
 public class VirtualMsg {
 
-	public static final int MAX_MSG_SIZE = 64;
-	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 63;
-	
-	int ackMaxWaitMs = 1000;
+  public static final int MAX_MSG_SIZE = 64;
+  public static final int MAGIC_NUMBER = 170; // 10101010
+  public static final int MRLCOMM_VERSION = 63;
   
-  	boolean waiting = false;
-	
-	
-	// send buffer
+  int ackMaxWaitMs = 1000;
+  
+    boolean waiting = false;
+  
+  
+  // send buffer
   int sendBufferSize = 0;
   int sendBuffer[] = new int[MAX_MSG_SIZE];
   
@@ -81,25 +81,26 @@ public class VirtualMsg {
   int byteCount = 0;
   int msgSize = 0;
 
-	// ------ device type mapping constants
-	int method = -1;
-	public boolean debug = false;
-	boolean invoke = true;
-	
-	boolean ackEnabled = false;
-    ByteArrayOutputStream baos = null;
-	 public static class AckLock {
-	    // first is always true - since there
-	    // is no msg to be acknowledged...
-	    volatile boolean acknowledged = true;
-	  }
-	 
-	transient AckLock ackRecievedLock = new AckLock();
-	
-	// recording related
-	transient FileOutputStream record = null;
-	transient StringBuilder rxBuffer = new StringBuilder();
-	transient StringBuilder txBuffer = new StringBuilder();	
+  // ------ device type mapping constants
+  int method = -1;
+  public boolean debug = false;
+  boolean invoke = true;
+  
+  boolean ackEnabled = false;
+    public ByteArrayOutputStream baos = null;
+    
+   public static class AckLock {
+      // first is always true - since there
+      // is no msg to be acknowledged...
+      volatile boolean acknowledged = true;
+    }
+   
+  transient AckLock ackRecievedLock = new AckLock();
+  
+  // recording related
+  transient FileOutputStream record = null;
+  transient StringBuilder rxBuffer = new StringBuilder();
+  transient StringBuilder txBuffer = new StringBuilder();  
 
   public static final int DEVICE_TYPE_UNKNOWN   =     0;
   public static final int DEVICE_TYPE_ARDUINO   =     1;
@@ -111,7 +112,7 @@ public class VirtualMsg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
-		
+    
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
@@ -229,7 +230,7 @@ public class VirtualMsg {
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
  */
-	
+  
   // public void getBoardInfo(){}
   // public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
   // public void setDebug(Boolean enabled/*bool*/){}
@@ -273,39 +274,39 @@ public class VirtualMsg {
   // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
-	
+  
 
-	
-	public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
+  
+  public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
 
-	public VirtualMsg(MrlComm arduino, SerialDevice serial) {
-		this.arduino = arduino;
-		this.serial = serial;
-	}
-	
-	public void begin(SerialDevice serial){
-	  this.serial = serial;
-	}
+  public VirtualMsg(MrlComm arduino, SerialDevice serial) {
+    this.arduino = arduino;
+    this.serial = serial;
+  }
+  
+  public void begin(SerialDevice serial){
+    this.serial = serial;
+  }
 
-	// transient private Msg instance;
+  // transient private Msg instance;
 
-	// ArduinoSerialCallBacks - TODO - extract interface
-	transient private MrlComm arduino;
-	
-	transient private SerialDevice serial;
-	
-	public void setInvoke(boolean b){
-	  invoke = b;
-	}
-	
-	public void processCommand(){
-	  processCommand(ioCmd);
-	}
-	
-	public void processCommand(int[] ioCmd) {
-		int startPos = 0;
-		method = ioCmd[startPos];
-		switch (method) {
+  // ArduinoSerialCallBacks - TODO - extract interface
+  transient private MrlComm arduino;
+  
+  transient private SerialDevice serial;
+  
+  public void setInvoke(boolean b){
+    invoke = b;
+  }
+  
+  public void processCommand(){
+    processCommand(ioCmd);
+  }
+  
+  public void processCommand(int[] ioCmd) {
+    int startPos = 0;
+    method = ioCmd[startPos];
+    switch (method) {
     case GET_BOARD_INFO: {
       if(invoke){
         arduino.invoke("getBoardInfo");
@@ -822,14 +823,14 @@ public class VirtualMsg {
       }
       break;
     }
-		
-		}
-	}
-	
+    
+    }
+  }
+  
 
-	// Java-land --to--> MrlComm
+  // Java-land --to--> MrlComm
 
-  public synchronized void publishMRLCommError(String errorMsg/*str*/) {
+  public synchronized byte[] publishMRLCommError(String errorMsg/*str*/) {
     log.info("Sending Messge: publishMRLCommError");
     try {
       startMessage();
@@ -838,7 +839,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_MRLCOMM_ERROR); // msgType = 1
       appendMessage(errorMsg);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -851,12 +852,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishMRLCommError threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+  public synchronized byte[] publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
     log.info("Sending Messge: publishBoardInfo");
     try {
       startMessage();
@@ -870,7 +873,7 @@ public class VirtualMsg {
       appendMessage(activePins);
       appendMessage(deviceSummary);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -893,12 +896,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishBoardInfo threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishAck(Integer function/*byte*/) {
+  public synchronized byte[] publishAck(Integer function/*byte*/) {
     log.info("Sending Messge: publishAck");
     try {
       startMessage();
@@ -907,7 +912,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_ACK); // msgType = 9
       appendMessage(function);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -920,12 +925,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishAck threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+  public synchronized byte[] publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
     log.info("Sending Messge: publishEcho");
     try {
       startMessage();
@@ -936,7 +943,7 @@ public class VirtualMsg {
       appendMessage(myByte);
       appendMessagef32(secondFloat);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -953,12 +960,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishEcho threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishCustomMsg(int[] msg/*[]*/) {
+  public synchronized byte[] publishCustomMsg(int[] msg/*[]*/) {
     log.info("Sending Messge: publishCustomMsg");
     try {
       startMessage();
@@ -967,7 +976,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_CUSTOM_MSG); // msgType = 13
       appendMessage(msg);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -980,12 +989,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishCustomMsg threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
     log.info("Sending Messge: publishI2cData");
     try {
       startMessage();
@@ -995,7 +1006,7 @@ public class VirtualMsg {
       appendMessage(deviceId);
       appendMessage(data);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1010,12 +1021,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishI2cData threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishDebug(String debugMsg/*str*/) {
+  public synchronized byte[] publishDebug(String debugMsg/*str*/) {
     log.info("Sending Messge: publishDebug");
     try {
       startMessage();
@@ -1024,7 +1037,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_DEBUG); // msgType = 28
       appendMessage(debugMsg);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1037,12 +1050,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishDebug threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishPinArray(int[] data/*[]*/) {
+  public synchronized byte[] publishPinArray(int[] data/*[]*/) {
     log.info("Sending Messge: publishPinArray");
     try {
       startMessage();
@@ -1051,7 +1066,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_PIN_ARRAY); // msgType = 29
       appendMessage(data);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1064,12 +1079,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishPinArray threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
+  public synchronized byte[] publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
     log.info("Sending Messge: publishServoEvent");
     try {
       startMessage();
@@ -1081,7 +1098,7 @@ public class VirtualMsg {
       appendMessageb16(currentPos);
       appendMessageb16(targetPos);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1100,12 +1117,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishServoEvent threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
     log.info("Sending Messge: publishSerialData");
     try {
       startMessage();
@@ -1115,7 +1134,7 @@ public class VirtualMsg {
       appendMessage(deviceId);
       appendMessage(data);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1130,12 +1149,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishSerialData threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+  public synchronized byte[] publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
     log.info("Sending Messge: publishUltrasonicSensorData");
     try {
       startMessage();
@@ -1145,7 +1166,7 @@ public class VirtualMsg {
       appendMessage(deviceId);
       appendMessageb16(echoTime);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1160,12 +1181,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishUltrasonicSensorData threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
+  public synchronized byte[] publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
     log.info("Sending Messge: publishEncoderData");
     try {
       startMessage();
@@ -1175,7 +1198,7 @@ public class VirtualMsg {
       appendMessage(deviceId);
       appendMessageb16(position);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1190,12 +1213,14 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishEncoderData threw",e);
+      return null;
     }
   }
 
-  public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
+  public synchronized byte[] publishMrlCommBegin(Integer version/*byte*/) {
     log.info("Sending Messge: publishMrlCommBegin");
     try {
       startMessage();
@@ -1204,7 +1229,7 @@ public class VirtualMsg {
       appendMessage(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
       appendMessage(version);
  
-      sendMessage();
+      byte[] message = sendMessage();
       if (ackEnabled){
         waitForAck();
       }
@@ -1217,14 +1242,16 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
+      return message;
 	} catch (Exception e) {
       log.error("publishMrlCommBegin threw",e);
+      return null;
     }
   }
 
 
-	public static String methodToString(int method) {
-		switch (method) {
+  public static String methodToString(int method) {
+    switch (method) {
     case PUBLISH_MRLCOMM_ERROR:{
       return "publishMRLCommError";
     }
@@ -1394,47 +1421,47 @@ public class VirtualMsg {
       return "servoStop";
     }
 
-		default: {
-			return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
+    default: {
+      return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
 
-		} // default
-		}
-	}
+    } // default
+    }
+  }
 
-	public String str(int[] buffer, int start, int size) {
-		byte[] b = new byte[size];
-		for (int i = start; i < start + size; ++i){
-			b[i - start] = (byte)(buffer[i] & 0xFF);
-		}
-		return new String(b);
-	}
+  public String str(int[] buffer, int start, int size) {
+    byte[] b = new byte[size];
+    for (int i = start; i < start + size; ++i){
+      b[i - start] = (byte)(buffer[i] & 0xFF);
+    }
+    return new String(b);
+  }
 
-	public int[] subArray(int[] buffer, int start, int size) {		
-		return Arrays.copyOfRange(buffer, start, start + size);
-	}
+  public int[] subArray(int[] buffer, int start, int size) {    
+    return Arrays.copyOfRange(buffer, start, start + size);
+  }
 
-	// signed 16 bit bucket
-	public int b16(int[] buffer, int start/*=0*/) {
-		return  (short)(buffer[start] << 8) + buffer[start + 1];
-	}
-	
-	// signed 32 bit bucket
-	public int b32(int[] buffer, int start/*=0*/) {
-		return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-	}
-	
-	// unsigned 32 bit bucket
-	public long bu32(int[] buffer, int start/*=0*/) {
-		long ret = ((buffer[start + 0] << 24)
-				+ (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-		if (ret < 0){
-			return 4294967296L + ret;
-		}
-		
-		return ret;
-	}
+  // signed 16 bit bucket
+  public int b16(int[] buffer, int start/*=0*/) {
+    return  (short)(buffer[start] << 8) + buffer[start + 1];
+  }
+  
+  // signed 32 bit bucket
+  public int b32(int[] buffer, int start/*=0*/) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  }
+  
+  // unsigned 32 bit bucket
+  public long bu32(int[] buffer, int start/*=0*/) {
+    long ret = ((buffer[start + 0] << 24)
+        + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+    if (ret < 0){
+      return 4294967296L + ret;
+    }
+    
+    return ret;
+  }
 
   // float 32 bit bucket
   public float f32(int[] buffer, int start/*=0*/) {
@@ -1448,6 +1475,9 @@ public class VirtualMsg {
   
   public boolean readMsg() throws Exception {
     // handle serial data begin
+    if (serial == null) {
+      return false;
+    }
     int bytesAvailable = serial.available();
     if (bytesAvailable > 0) {
       //publishDebug("RXBUFF:" + String(bytesAvailable));
@@ -1498,112 +1528,116 @@ public class VirtualMsg {
     log.error(error);
   }
   
-	void appendMessage(int b8) throws Exception {
+  void appendMessage(int b8) throws Exception {
 
-		if ((b8 < 0) || (b8 > 255)) {
-			log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
-		}
+    if ((b8 < 0) || (b8 > 255)) {
+      log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
+    }
 
         baos.write(b8 & 0xFF);
-//		serial.write(b8 & 0xFF);
-	}
-	
-	void startMessage() {
-	  baos = new ByteArrayOutputStream();
-	}
+//    serial.write(b8 & 0xFF);
+  }
+  
+  void startMessage() {
+    baos = new ByteArrayOutputStream();
+  }
 
-	void appendMessagebool(boolean b1) throws Exception {
-		if (b1) {
-			appendMessage(1);
-		} else {
-			appendMessage(0);
-		}
-	}
+  void appendMessagebool(boolean b1) throws Exception {
+    if (b1) {
+      appendMessage(1);
+    } else {
+      appendMessage(0);
+    }
+  }
 
-	void appendMessageb16(int b16) throws Exception {
-		if ((b16 < -32768) || (b16 > 32767)) {
-			log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
-		}
+  void appendMessageb16(int b16) throws Exception {
+    if ((b16 < -32768) || (b16 > 32767)) {
+      log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
+    }
 
-		appendMessage(b16 >> 8 & 0xFF);
-		appendMessage(b16 & 0xFF);
-	}
+    appendMessage(b16 >> 8 & 0xFF);
+    appendMessage(b16 & 0xFF);
+  }
 
-	void appendMessageb32(int b32) throws Exception {
-		appendMessage(b32 >> 24 & 0xFF);
-		appendMessage(b32 >> 16 & 0xFF);
-		appendMessage(b32 >> 8 & 0xFF);
-		appendMessage(b32 & 0xFF);
-	}
-	
-	void appendMessagef32(float f32) throws Exception {
+  void appendMessageb32(int b32) throws Exception {
+    appendMessage(b32 >> 24 & 0xFF);
+    appendMessage(b32 >> 16 & 0xFF);
+    appendMessage(b32 >> 8 & 0xFF);
+    appendMessage(b32 & 0xFF);
+  }
+  
+  void appendMessagef32(float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
     appendMessage(f[3] & 0xFF);
     appendMessage(f[2] & 0xFF);
     appendMessage(f[1] & 0xFF);
     appendMessage(f[0] & 0xFF);
-	}
-	
-	void appendMessagebu32(long b32) throws Exception {
-		appendMessage((int)(b32 >> 24 & 0xFF));
-		appendMessage((int)(b32 >> 16 & 0xFF));
-		appendMessage((int)(b32 >> 8 & 0xFF));
-		appendMessage((int)(b32 & 0xFF));
-	}
+  }
+  
+  void appendMessagebu32(long b32) throws Exception {
+    appendMessage((int)(b32 >> 24 & 0xFF));
+    appendMessage((int)(b32 >> 16 & 0xFF));
+    appendMessage((int)(b32 >> 8 & 0xFF));
+    appendMessage((int)(b32 & 0xFF));
+  }
 
-	void appendMessage(String str) throws Exception {
-		appendMessage(str.getBytes());
-	}
+  void appendMessage(String str) throws Exception {
+    appendMessage(str.getBytes());
+  }
 
-	void appendMessage(int[] array) throws Exception {
-		// write size
-		appendMessage(array.length & 0xFF);
+  void appendMessage(int[] array) throws Exception {
+    // write size
+    appendMessage(array.length & 0xFF);
 
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			appendMessage(array[i] & 0xFF);
-		}
-	}
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(array[i] & 0xFF);
+    }
+  }
 
-	void appendMessage(byte[] array) throws Exception {
-		// write size
-		appendMessage(array.length);
+  void appendMessage(byte[] array) throws Exception {
+    // write size
+    appendMessage(array.length);
 
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			appendMessage(array[i]);
-		}
-	}
-	
-	void sendMessage() throws Exception {
-	  serial.write(baos.toByteArray());
-	}
-	
-	public boolean isRecording() {
-		return record != null;
-	}
-	
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(array[i]);
+    }
+  }
+  
+  byte[] sendMessage() throws Exception {
+      byte[] message = baos.toByteArray();
+      if (serial != null) {
+      serial.write(message);
+    }
+    return message;
+  }
+  
+  public boolean isRecording() {
+    return record != null;
+  }
+  
 
-	public void record() throws Exception {
-		
-		if (record == null) {
-			record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
-		}
-	}
+  public void record() throws Exception {
+    
+    if (record == null) {
+      record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
+    }
+  }
 
-	public void stopRecording() {
-		if (record != null) {
-			try {
-				record.close();
-			} catch (Exception e) {
-			}
-			record = null;
-		}
-	}
-	
-	public static String deviceTypeToString(int typeId) {
-		switch(typeId){
+  public void stopRecording() {
+    if (record != null) {
+      try {
+        record.close();
+      } catch (Exception e) {
+      }
+      record = null;
+    }
+  }
+  
+  public static String deviceTypeToString(int typeId) {
+    switch(typeId){
     case 0 :  {
       return "unknown";
 
@@ -1644,28 +1678,28 @@ public class VirtualMsg {
       return "Encoder";
 
     }
-		
-		default: {
-			return "unknown";
-		}
-		}
-	}
+    
+    default: {
+      return "unknown";
+    }
+    }
+  }
   
   public void enableAcks(boolean b){
     // disable local blocking
-	  ackEnabled = b;
-	  // if (!localOnly){
-	  // shutdown MrlComm from sending acks
-	  // below is a method only in Msg.java not in VirtualMsg.java
-	  // it depends on the definition of enableAck in arduinoMsg.schema  
-	  // enableAck(b);
-	  // }
-	}
-	
-	public void waitForAck(){
-	  if (!ackEnabled || ackRecievedLock.acknowledged){
-	    return;
-	  }
+    ackEnabled = b;
+    // if (!localOnly){
+    // shutdown MrlComm from sending acks
+    // below is a method only in Msg.java not in VirtualMsg.java
+    // it depends on the definition of enableAck in arduinoMsg.schema  
+    // enableAck(b);
+    // }
+  }
+  
+  public void waitForAck(){
+    if (!ackEnabled || ackRecievedLock.acknowledged){
+      return;
+    }
     synchronized (ackRecievedLock) {
       try {
         long ts = System.currentTimeMillis();
@@ -1683,19 +1717,19 @@ public class VirtualMsg {
         arduino.invoke("noAck");
       }
     }
-	}
-	
-	public void ackReceived(int function){
-	   synchronized (ackRecievedLock) {
-	      ackRecievedLock.acknowledged = true;
-	      ackRecievedLock.notifyAll();
-	    }
-	}
-	
-	public int getMethod(){
-	  return method;
-	}
-	
+  }
+  
+  public void ackReceived(int function){
+     synchronized (ackRecievedLock) {
+        ackRecievedLock.acknowledged = true;
+        ackRecievedLock.notifyAll();
+      }
+  }
+  
+  public int getMethod(){
+    return method;
+  }
+  
 
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
@@ -1705,59 +1739,59 @@ public class VirtualMsg {
   public int[] getBuffer() {    
     return sendBuffer;
   }
-	
-	public static void main(String[] args) {
-		try {
+  
+  public static void main(String[] args) {
+    try {
 
-			// FIXME - Test service started or reference retrieved
-			// FIXME - subscribe to publishError
-			// FIXME - check for any error
-			// FIXME - basic design - expected state is connected and ready -
-			// between classes it
-			// should connect - also dumping serial comm at different levels so
-			// virtual arduino in
-			// Python can model "real" serial comm
-			String port = "COM10";
+      // FIXME - Test service started or reference retrieved
+      // FIXME - subscribe to publishError
+      // FIXME - check for any error
+      // FIXME - basic design - expected state is connected and ready -
+      // between classes it
+      // should connect - also dumping serial comm at different levels so
+      // virtual arduino in
+      // Python can model "real" serial comm
+      String port = "COM10";
 
-			LoggingFactory.init(Level.INFO);
-			
-			/*
-			Runtime.start("gui","SwingGui");
-			VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
-			virtual.connectVirtualUart(port, port + "UART");
-			*/
-			
-			MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
-			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
-			
-			/*
-			arduino.connect(port);
-			
-			// test pins
-			arduino.enablePin(5);
-			
-			arduino.disablePin(5);
-			
-			// test status list enabled
-			arduino.enableBoardStatus(true);
-			
-			servo01.attach(arduino, 8);
-			
-			servo01.moveTo(30);
-			servo01.moveTo(130);
-			
-			arduino.enableBoardStatus(false);
-			*/
-			// test ack
-			
-			// test heartbeat
-			
-			
+      LoggingFactory.init(Level.INFO);
+      
+      /*
+      Runtime.start("gui","SwingGui");
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+      virtual.connectVirtualUart(port, port + "UART");
+      */
+      
+      MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
+      Servo servo01 = (Servo)Runtime.start("servo01","Servo");
+      
+      /*
+      arduino.connect(port);
+      
+      // test pins
+      arduino.enablePin(5);
+      
+      arduino.disablePin(5);
+      
+      // test status list enabled
+      arduino.enableBoardStatus(true);
+      
+      servo01.attach(arduino, 8);
+      
+      servo01.moveTo(30);
+      servo01.moveTo(130);
+      
+      arduino.enableBoardStatus(false);
+      */
+      // test ack
+      
+      // test heartbeat
+      
+      
 
-		} catch (Exception e) {
-			log.error("main threw", e);
-		}
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
 
-	}
+  }
 
 }
