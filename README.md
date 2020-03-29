@@ -1,22 +1,28 @@
 myrobotlab
 ==========
 
-Open Source Java Framework for Robotics and Creative Machine Control
+Open Source Framework for Robotics and Creative Machine Control
 
 Project Website: http://www.myrobotlab.org  (Stop by and say hello in the shoutbox!)
 
+## Base Requirements
+
+You will need Java 8 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit)
+
+## Download the myrobotlab.jar
+Download
+
+latest [Nixie 1.1.X](http://build.myrobotlab.org:8080/job/myrobotlab/job/develop/lastSuccessfulBuild/artifact/target/myrobotlab.jar)
+
+stable [Manticore 1.0.2693](https://github.com/MyRobotLab/myrobotlab/releases/tag/1.0.2693)
 
 ## Installing Dependencies
 
-Dependencies for MyRobotLab are downloaded when you run "java -jar myrobotlab.jar -install"
-They are managed via integration with Apache Ivy.
+After downloading the myrobtlab.jar into a new folder, dependencies for all services can be installed with the following command 
 
-When doing development with MyRobotLab, you can import it as a Maven project and dependencies are managed through maven.
-Each service defines a static method called getMetaData().  This method is used to generate the pom.xml file and also to create the .myrobotlab/serviceData.json file which is used by Ivy.
+`java -jar myrobotlab.jar -install`
 
 ## Running MyRobotLab
-
-You will need Java 8 or newer.  If you are only running MyRobotLab you need the JRE (Java Runtime Environment.)  If you are going to be building from source, you'll need the JDK (Java Development Kit)
 
 Make sure java is in your path. open a terminal window and change to the directory where you've downloaded the myroblab.jar
 
@@ -34,15 +40,17 @@ To pass additional arguments to the JVM on startup (such as increasing the java 
 
 To start a list of named services on startup, you can use the -service command line arg with a list of service name/type pairs.
 
-`java -jar myrobotlab.jar -service runtime Runtime python Python gui SwingGui wegbui WebGui` 
+`java -jar myrobotlab.jar --service runtime Runtime python Python gui SwingGui wegbui WebGui` 
 
 The above would start runtime, python, the swing gui and lastly the webgui.
 
 ## Building Project
+MyRobotLab core is written in Java.  Its web ui is written in AngularJs and html.  
+And a few services (e.g. InMoov2) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.
 
-### Install Java 8 (see above)
+All development environments require git and cloning the source.
 
-### Cloning Repo
+#### Cloning Repo
 
 create a directory to clone the repositories in  (assuming you're on windows and cloning to the c:\dev directory)
 
@@ -52,6 +60,13 @@ cd dev
 git clone https://github.com/MyRobotLab/myrobotlab.git
 cd c:\dev\myrobotlab
 ```
+
+### Java Core
+If you want to be making core changes, you will need to install a 
+Java developement environment
+
+#### Install Java 8
+https://www.oracle.com/java/technologies/javase-jdk8-downloads.html
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
