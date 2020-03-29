@@ -55,6 +55,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
 
     panelsUpdated(mrl.getPanelList())
     mrl.setSearchFunction($scope.setSearchText)
+    mrl.setTabsViewCtrl(this)
     mrl.subscribeToUpdates(panelsUpdated)
 }
 ])
