@@ -39,7 +39,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     $scope.filterServices = function() {
         var result = {};
-        console.info('$scope.category.selected is ' + $scope.category.selected)
+        // console.debug('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
 
         if ($scope.category.selected != null && ($scope.category.selected == 'show all') ) {

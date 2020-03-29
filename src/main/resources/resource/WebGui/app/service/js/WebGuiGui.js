@@ -2,6 +2,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     $log.info('WebGuiGuiCtrl')
     var _self = this
     var msg = this.msg
+    $scope.mrl = mrl
 
      // $scope.displayImages =  mrl.getDisplayImages()
     
@@ -43,6 +44,10 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
             break
         }
     }
+
+    // $scope.panel = mrl.getPanel($scope.service.name)
+	$scope.panel = mrl.getPanel('runtime')
+
 
     //mrl.subscribe($scope.service.name, 'pulse')
     msg.subscribe('publishShowAll')
