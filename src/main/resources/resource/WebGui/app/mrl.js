@@ -35,6 +35,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // search function - setting the nav search
     let searchFunction = null
 
+    // controller references !
+    let navCtrl = null
+    let tabsViewCtrl = null
+
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
@@ -999,10 +1003,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             zIndex = (newPanel.zIndex > zIndex) ? (newPanel.zIndex + 1) : zIndex
             panels[newPanel.name].zIndex = newPanel.zIndex
             panels[newPanel.name].hide = newPanel.hide
-            // data has been updated - now proccess the changes
-            //            panels[newPanel.name].notifyPositionChanged()  // tabs breaks panels
-            //            panels[newPanel.name].notifyZIndexChanged() // tabs breaks panels
-            //            panels[newPanel.name].notifySizeChanged() // tabs breaks panels
             notifyAllOfUpdate()
             // <-- WTF is this?
         }
@@ -1065,6 +1065,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         _self.setSearchFunction = function(ref) {
             searchFunction = ref
+        }
+        _self.setNavCtrl = function(ref) {
+            navCtrl = ref
+        }
+        _self.setTabsViewCtrl = function(ref) {
+            tabsViewCtrl = ref
         }
 
         /**
@@ -1317,7 +1323,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
             controllerscope: _self.controllerscope,
             setSearchFunction: _self.setSearchFunction,
+            setNavCtrl: _self.setNavCtrl,
+            setTabsViewCtrl: _self.setTabsViewCtrl,
             error:_self.error,
+            changeTab:_self.changeTab,
             search: _self.search,
             createMessage: _self.createMessage,
             display: _self.display,
