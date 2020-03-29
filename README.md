@@ -45,10 +45,12 @@ To start a list of named services on startup, you can use the -service command l
 The above would start runtime, python, the swing gui and lastly the webgui.
 
 ## Building Project
+MyRobotLab core is written in Java.  Its web ui is written in AngularJs and html.  
+And a few services (e.g. InMoov2) are in a different repo.  The can be developed seperately so 3 build instruction sets are described.
 
-### Install Java 8 (see above)
+All development environments require git and cloning the source.
 
-### Cloning Repo
+#### Cloning Repo
 
 create a directory to clone the repositories in  (assuming you're on windows and cloning to the c:\dev directory)
 
@@ -58,6 +60,13 @@ cd dev
 git clone https://github.com/MyRobotLab/myrobotlab.git
 cd c:\dev\myrobotlab
 ```
+
+### Java Core
+If you want to be making core changes, you will need to install a 
+Java developement environment
+
+#### Install Java 8
+https://www.oracle.com/java/technologies/javase-jdk8-downloads.html
 
 ### Building with Eclipse
 Download Eclipse for Java Developers At:
