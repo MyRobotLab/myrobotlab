@@ -1073,6 +1073,14 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             tabsViewCtrl = ref
         }
 
+        _self.changeTab = function(serviceName){
+            if (!tabsViewCtrl){
+                console.error('tabsViewCtrl is null - cannot changeTab')
+            } else {
+                tabsViewCtrl.changeTab(serviceName)
+            }
+        }
+
         /**
          * search panels using the nav search input
          */

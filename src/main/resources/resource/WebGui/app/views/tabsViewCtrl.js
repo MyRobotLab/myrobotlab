@@ -1,5 +1,6 @@
 angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
     $log.info('tabsViewCtrl $scope.$id - ' + $scope.$id)
+    _self = this
 
     $scope.view_tab = null
     // $scope.viewType = mrl.getViewType()
@@ -39,6 +40,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
         }
     }
 
+    
     $scope.changeTab = function(tab) {
         tab = mrl.getFullName(tab)
         $scope.view_tab = tab
@@ -53,6 +55,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
         // displayName: ""
     }
 
+    _self.changeTab = $scope.changeTab
     panelsUpdated(mrl.getPanelList())
     mrl.setSearchFunction($scope.setSearchText)
     mrl.setTabsViewCtrl(this)
