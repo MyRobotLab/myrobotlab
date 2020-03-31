@@ -3,6 +3,9 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     var _self = this
     var msg = this.msg
     $scope.mrl = mrl
+    $scope.panel = mrl.getPanel('runtime')
+
+    $scope.activePanel = 'settings'	
 
      // $scope.displayImages =  mrl.getDisplayImages()
     
@@ -11,6 +14,31 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         $scope.service = service
         $scope.port = service.port
     }
+	
+    $scope.setPanel = function(panelName) {
+        $scope.activePanel = panelName
+
+        // unselect active buttons by removing active class
+        var container = document.querySelector("#containerWebGui");
+        if (container!=null) {
+            var matchesItems = container.querySelectorAll(".dotWebGuiActive");
+            for (var i = 0; i < matchesItems.length; i++) { matchesItems[i].classList.remove('dotWebGuiActive'); }
+
+            var matchesItems = container.querySelectorAll(".dotWebGuiButtonsActive");
+            for (var i = 0; i < matchesItems.length; i++) { matchesItems[i].classList.remove('dotWebGuiButtonsActive'); matchesItems[i].classList.add('dotTorsoButtons'); }
+        }     
+
+        // add activ class to dot ans button object
+        if (document.querySelector("#"+panelName+"Dot")!=null) {
+            document.querySelector("#"+panelName+"Dot").classList.add('dotWebGuiActive');
+            document.querySelector("#"+panelName+"Button").classList.add('dotWebGuiButtonsActive');
+        }   
+
+    }
+
+    $scope.showPanel = function(panelName) {
+        return $scope.activePanel == panelName
+    }	
 
     // init scope variables
     $scope.pulseData = ''
