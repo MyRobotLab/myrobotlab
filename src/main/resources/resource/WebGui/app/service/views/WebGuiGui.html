@@ -118,25 +118,25 @@
             <!-- Right -->
             
 
-            <div id="arduinoButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')"><img src="../img/WebGui/arduino.png"/>&nbsp;</div>
+            <a id="arduinoButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" href="http://myrobotlab.org/content/uploading-mrlcomm-arduino-0" target="_blank"><img src="../img/WebGui/arduino.png"/>&nbsp;</a>
 
-            <div id="inmoovButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="Access and begin with InMoov" ng-click="changeTab('i01')"><img src="../img/WebGui/inmoov.png"/>&nbsp;</div>
+            <div id="inmoovButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../img/WebGui/inmoov.png"/>&nbsp;</div>
 
             <div id="serialButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../img/WebGui/serial.png"/>&nbsp;</div>
 
-            <div id="visionButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="Vision with OpenCV and filters" ng-model="service.isOpenCVActivated" ng-init="msg.startOpenCV()" ng-click="changeTab('openCV')"><img src="../img/WebGui/vision.png"/>&nbsp;</div>
+            <div id="visionButton" class="dotWebGuiButtons rightWebGuiSide preventWebGuiDragSelect" title="Vision with OpenCV and filters" ng-click="msg.start('OpenCV','OpenCV')"><img src="../img/WebGui/vision.png"/>&nbsp;</div>
 
             <!-- Left -->
 
             <div id="servoButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')"><img src="../img/WebGui/servo.png"/>&nbsp;</div>
 
-            <div id="goButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="Get started right away" ng-click="changeTab('runtime')"><img src="../img/WebGui/go.png"/>&nbsp;</div>
+            <div id="goButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="Get started right away" ng-click="mrl.changeTab('runtime')"><img src="../img/WebGui/go.png"/>&nbsp;</div>
 
-            <div id="introductionButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="A quick overview of MyRobotLab" ng-click="changeTab('runtime')"><img src="../img/WebGui/introduction.png"/>&nbsp;</div>
+            <a id="introductionButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../img/WebGui/introduction.png"/>&nbsp;</a>
 
-            <div id="pythonButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="Start coding with Python" ng-click="changeTab('python')"><img src="../img/WebGui/python.png"/>&nbsp;</div>
+            <div id="pythonButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../img/WebGui/python.png"/>&nbsp;</div>
 
-            <div id="BackWebGuiButton" class="dotBackButtons leftWebGuiSide preventWebGuiDragSelect" ng-click="changeTab('security')">Security</div>
+            <div id="BackWebGuiButton" class="dotBackButtons leftWebGuiSide preventWebGuiDragSelect" ng-click="mrl.changeTab('security')">Security</div>
         </div>
     </td>
 <tr>
