@@ -1,7 +1,17 @@
 <style>
-    .sidenav {
+
+    #mySidenavContainer{
         /* padding-top: 300px; */
-        height: 100%;
+        
+        /* Firefox */
+        height: -moz-calc(100vh - 75px);
+        /* WebKit */
+        height: -webkit-calc(100vh - 75px);
+        /* Opera */
+        height: -o-calc(100vh - 75px);
+        /* Standard */
+        height: calc(100vh - 75px);
+
         width: 0;
         position: fixed;
         z-index: 100;
@@ -9,10 +19,134 @@
         /* top: 0; */
         left: 0;
         background-color: #EEE;
-        overflow-x: hidden;
-        transition: 0.5s;
-        padding-top: 60px;
+        overflow: hidden;
+        transition: 0.7s;
+        transition-timing-function: ease;
+        padding-top: 45px;
+        visibility: hidden;
     }
+    #sidenavTop{
+        overflow-x: hidden;
+        overflow-y: hidden;
+        width: 0;
+        z-index: 110;
+        top: 8px;
+    }
+
+    #sideNavSearch{
+        position: absolute;
+        left: 14px;
+        top: 6px;
+        width: 178px;
+    }
+
+    #handleOpen{
+        position: inherit;
+        left: 6px;
+        top: 56px;
+        z-index: 120;
+        cursor: pointer
+        /*visibility: hidden;*/
+    }
+
+    #handleClose{
+        position: absolute;
+        top: 8px;
+        left: 220px;
+        visibility: hidden;
+        color: #a5a5a5;
+        font-size: 23px;
+        cursor: pointer;
+    }
+
+    .sidenav {
+        /* padding-top: 300px; */
+
+        /* Firefox */
+        height: -moz-calc(100vh - 120px);
+        /* WebKit */
+        height: -webkit-calc(100vh - 120px);
+        /* Opera */
+        height: -o-calc(100vh - 120px);
+        /* Standard */
+        height: calc(100vh - 120px);
+
+        width: 0;
+        position: fixed;
+        z-index: 100;
+        /* opacity: 0.90;*/
+        /* top: 0; */
+        left: 0;
+        background-color: #fbfcff;
+        overflow-x: hidden;
+        transition: 0.7s;
+        transition-timing-function: ease;
+        white-space: nowrap;
+        border-top-color: #cccccc;
+        border-top-style: solid;
+        border-top-width: 1px;
+        border-bottom-color: #d6d6d6;
+        border-bottom-style: solid;
+        border-bottom-width: 3px;
+        scrollbar-width: thin;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      background: #e1e1e1; 
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: ##abb4c3; 
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #56aaff; 
+    }
+
+
+
+    /* Tamaño del scroll */
+    .sidenav::-webkit-scrollbar {
+      width: 6px;
+      height: 8px;
+    }
+
+     /* Estilos barra (thumb) de scroll */
+    .sidenav::-webkit-scrollbar-thumb {
+      background: #abcff2;
+      border-radius: 4px;
+    }
+
+    .sidenav::-webkit-scrollbar-thumb:active {
+      background-color: #56aaff;
+    }
+
+    .sidenav::-webkit-scrollbar-thumb:hover {
+      background: #56aaff;
+      box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
+    }
+
+     /* Estilos track de scroll */
+    .sidenav::-webkit-scrollbar-track {
+      background: #e1e1e1;
+      border-radius: 4px;
+    }
+
+    /*
+    .container::-webkit-scrollbar-track:hover, 
+    .container::-webkit-scrollbar-track:active {
+      background: #d4d4d4;
+    }
+    */
+
+
 
     .sidenav .closebtn {
         position: absolute;
@@ -23,8 +157,31 @@
     }
 
     #main {
+        position: inherit;
         transition: margin-left .5s;
         padding: 16px;
+        width: 100%;
+        /* Firefox */
+        height: -moz-calc(100vh - 92px);
+        /* WebKit */
+        height: -webkit-calc(100vh - 92px);
+        /* Opera */
+        height: -o-calc(100vh - 92px);
+        /* Standard */
+        height: calc(100vh - 92px);
+
+        z-index: 1;
+        background-color: #FFFFFF;
+        overflow-x: hidden;
+        transition-timing-function: ease;
+        border-top-color: #cccccc;
+        border-top-style: solid;
+        border-top-width: 1px;
+        border-bottom-color: #d6d6d6;
+        border-bottom-style: solid;
+        border-bottom-width: 3px;
+        scrollbar-width: thin;
+
     }
 
     @media screen and (max-height: 450px) {
@@ -32,56 +189,141 @@
             padding-top: 15px;
         }
     }
+
 </style>
 <div class="container-fluid">
-    <!--1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right-->
-    <!--migrate to Angular UI Bootstrap when they offer one-->
-    <div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" style="font-size:30px;cursor:pointer" onclick="closeNav()">&times;</a>
-        <div class="row col-md-2">
-            <!-- input type="text" class="form-control" ng-change="checkForWildCard(searchText)" ng-model="searchText.displayName" placeholder="Search" style="width:200px;" typeahead-min-length="0" -->
-            <input type="text" class="form-control" ng-model="searchText.displayName" placeholder="Search" style="width:200px;" typeahead-min-length="0">
-        </div>
-        <div class="row"/>
-        <div class="tabbable">
-
-            <ul class="nav nav-tabs nav-stacked col-md-1" role="tablist">
-                <li ng-repeat="panel in panels | orderBy:getName:true | filter:searchText:wildCardOn" ng-class="{'active': view_tab == panel.name}">
-                    <a class="btn pull-left" ng-click="changeTab(panel.name)" href="">
-                        <img ng-src="{{::panel.simpleName}}.png" width="16">
-                        <b>{{::panel.displayName}}</b>
-                    </a>
-                </li>
-            </ul>
-        </div>
+    <!-- 1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right -->
+    <!-- migrate to Angular UI Bootstrap when they offer one -->
+    
+    <!--
+    <div id="handleOpen1">
+        <a href="javascript:void(0)" style="font-size:30px;cursor:pointer" onclick="openNav()">&#62;</a>
     </div>
-    <div id="main">
-    <span onmouseenter="openNav()" style="font-size:30px;cursor:pointer">&#9776;</span>
-    <!--span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span-->
-    <!--   THIS IS THE MOST IMPORTANT PART OF /main
-                    could possibly use this as "undock" ?
-             
-            <div ng-repeat="panel in panels"
-                 panel-drctv
-                 panel="panel">
+    -->
+
+    <!-- start mySidenavContainer -->
+    <div id="mySidenavContainer" onmouseleave="closeNav()">
+        <div id="sidenavTop">
+            
+                <!-- input type="text" class="form-control" ng-change="checkForWildCard(searchText)" ng-model="searchText.displayName" placeholder="Search" style="width:200px;" typeahead-min-length="0" -->
+                <input  id="sideNavSearch" type="text" class="form-control" ng-model="searchText.displayName" placeholder="Search" typeahead-min-length="0">
+            
+            <!--
+            <div id="handleClose">
+                <a href="javascript:void(0)" class="closebtn" style="font-size:30px;cursor:pointer" onclick="closeNav()">X</a>
             </div>
             -->
-    <div ng-repeat="panel in panels" service-ctrl-directive panel="panel">
-    <!--maybe move this to somewhere general?-->
-    </div>
-    <div class="col-md-12">
-        <div class="tab-content">
-            <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
+            <div id="handleClose" onmouseenter="closeNav()" onclick="closeNav()">X</div>
+        </div>
+
+        <div id="mySidenav" class="sidenav">
+            
+            <div class="row"/>
+                <div class="tabbable">
+                    <ul class="nav nav-tabs nav-stacked col-md-1" role="tablist">
+                        <li ng-repeat="panel in panels | orderBy:getName:true | filter:searchText:wildCardOn" ng-class="{'active': view_tab == panel.name}">
+                            <a class="btn pull-left" ng-click="changeTab(panel.name)" href="">
+                                <img ng-src="{{::panel.simpleName}}.png" width="16">
+                                <b>{{::panel.displayName}}</b>
+                            </a>
+                        </li>
+                     </ul>
+                </div>
+            </div>
+            
         </div>
     </div>
+    <!-- end mySidenavContainer -->
+
+    <span>
+            
+            <span id="handleOpen" onmouseenter="openNav()" onclick="openNav()">
+
+               <svg width="20" height="35" xmlns="http://www.w3.org/2000/svg">
+                   <g>
+                        <title>background</title>
+                        <rect fill="#fff" id="canvas_background" height="37" width="22" y="-1" x="-1"/>
+                        <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+                            <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+                        </g>
+                   </g>
+                   <g>
+                        <title>Layer 1</title>
+                        <path Googl="true" transform="rotate(90, 13.7234, 11.3055)" id="svg_4" d="m7.457573,13.991423l6.265938,-5.372295l6.265949,5.372295z" stroke-width="1.5" fill="#56aaff"/>
+                        <rect id="svg_5" height="25.416863" width="5.264383" y="4.894994" x="3.792315" stroke-width="1.5" fill="#abcff2"/>
+                   </g>
+               </svg>
+            </span><!-- &#9776; --><!-- &#62; -->
+
+    </span>
+
+    <!-- start main -->
+    <div id="main">
+
+       
+        <!-- span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span> -->
+        <!--   THIS IS THE MOST IMPORTANT PART OF /main
+                        could possibly use this as "undock" ?
+
+                <div ng-repeat="panel in panels"
+                     panel-drctv
+                     panel="panel">
+                </div>
+                -->
+        <div ng-repeat="panel in panels" service-ctrl-directive panel="panel">
+            <!-- maybe move this to somewhere general? -->
+            <!-- Astro: I don't know what is this. I need some "graphic Map" with names of elements with examples -->
+        </div>
+        <div class="col-md-12">
+            <div class="tab-content">
+                <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
+            </div>
+        </div>
+
+    </div>
+    <!-- end main -->
+
+
 </div>
+
+
+
 <script>
+    
+    // first time
+    onStartOpenNav();
+    function onStartOpenNav(){
+        //document.getElementById("handleOpen").style.visibility = "hidden";
+        document.getElementById("handleClose").style.visibility = "hidden";
+        setTimeout(function () {
+            openNav();
+        }, 3000);
+    }
+
     function openNav() {
+        // prevent bouncing        
+        document.getElementById("handleOpen").style.visibility = "hidden";
+        document.getElementById("handleClose").style.visibility = "hidden";
+        setTimeout(function () {
+            document.getElementById("handleClose").style.visibility = "visible";
+        }, 600);
+
+        document.getElementById("mySidenavContainer").style.visibility = "visible";
+        document.getElementById("mySidenavContainer").style.width = "250px";
         document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("sidenavTop").style.width = "250px";
         document.getElementById("main").style.marginLeft = "250px";
     }
 
     function closeNav() {
+        // prevent bouncing
+        document.getElementById("handleOpen").style.visibility = "hidden";
+        setTimeout(function () {
+            document.getElementById("handleOpen").style.visibility = "visible";
+        }, 600);
+        document.getElementById("handleClose").style.visibility = "hidden";
+        document.getElementById("mySidenavContainer").style.width = "0px";
+        document.getElementById("sidenavTop").style.width = "0px";
         document.getElementById("mySidenav").style.width = "0";
         document.getElementById("main").style.marginLeft = "0";
     }

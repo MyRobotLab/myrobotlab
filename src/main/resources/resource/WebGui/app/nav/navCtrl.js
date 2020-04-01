@@ -173,7 +173,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
 
     // set the display callback function for webgui.display(x)
     mrl.setDisplayCallback($scope.displayImage)
-
+    mrl.setNavCtrl(this)
     $scope.stateGo = $state.go
 }
 ])
