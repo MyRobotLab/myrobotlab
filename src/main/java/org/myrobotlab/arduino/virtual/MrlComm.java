@@ -572,8 +572,8 @@ public class MrlComm implements MrlCommListener {
     msg.publishMRLCommError(f);
   }
 
-  boolean readMsg() throws Exception {
-    return msg.readMsg();
+  public void onBytes(byte[] newBytes) throws Exception {
+    msg.onBytes(newBytes);
   }
 
   void sendCustomMsg(int[] customMsg) {
