@@ -1,0 +1,319 @@
+
+
+.preventWebGuiDragSelect{
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+.dotWebGuiDisabled{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    background-color: #7d7d7d;
+}
+
+.dotWebGuiEnabled{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    background-color: #00a5cb;
+    box-shadow: inset 0 0px 1px 1px rgb(255, 255, 255, 0.54);
+}
+
+@keyframes dotWebGuiActive {
+  0% { filter: saturate(200%) brightness(200%) drop-shadow(0px 0px 10px rgba(255, 0, 0, 0.6)); }
+  10% { background-color: #FF0000; }
+  50% {box-shadow: 0 0px 20px 6px rgb(250, 0, 0, 0.54), 0px 0px 10px 1px rgba(255, 133, 133, 0.92), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.54);}
+
+  90% { background-color: #d68080; }
+  100% { filter: none; }
+}
+
+.dotWebGuiActive{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #0042A4;
+    border-top: 2px solid #AFE1EC;
+    border-right: 2px solid #AFE1EC;
+    border-bottom: 2px solid #AFE1EC;
+    border-left: 2px solid #AFE1EC;
+    animation: dotTorsoActive 2000ms infinite;
+}
+
+
+#WebGuiIndicator{
+    display: table-cell;
+    position:absolute;
+    left:214px;
+    top:36px;
+    width: 200px;
+    height: 40px;
+}
+
+
+.rectangleWebGuiIndicator{
+    border-radius: 5px;
+    background: #73AD21;
+    line-height: 40px;
+    font-family: helvetica,sans-serif;
+    font-size: 22;
+    font-weight: normal;
+    color: #17d6ed;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 40px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+    box-shadow: 0 0px 5px 2px rgb(21, 215, 237);
+    cursor:default;  
+}
+
+.rectangleWebGuiIndicatorActive{
+    border-radius: 5px;
+    background: #73AD21;
+    line-height: 40px;
+    font-family: helvetica,sans-serif;
+    font-size: 22;
+    font-weight: normal;
+    color: #17d6ed;
+    background-image: linear-gradient(#001720, #01424c);
+    text-align: center;
+    vertical-align: middle;
+    text-shadow: 0 0 3px #3e2e2e, 0 0 20px #fff, 0 0 30px #00a5cb, 0 0 12px #74ace6, 0 0 50px #0042a4, 0 0 60px #3582f5, 0 0 70px #4954ff;
+
+    -webkit-filterg: saturate(200%)  drop-shadow(0px 0px 5px rgba(255, 255, 255, 1));
+    box-shadow: 0 0px 4px 3px rgb(21, 215, 237), 0px 0px 10px 1px rgb(255, 255, 255), 0px 0px 9px 3px rgb(255, 0, 0);
+
+}
+
+.dotWebGuiButtons img{
+    position:absolute;
+    width:180px;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+}
+.dotWebGuiButtons:hover{
+    color: #FFFFFF;
+}
+.dotWebGuiButtons:active{
+    color: #FFFFFF;
+    text-shadow: 0 0 3px #414b4e, 0 0 10px #FFFFFF, 0 0 10px #FFFFFF, 0 0 10px #FFFFFF;
+}
+
+.dotWebGuiButtonsActive img{
+    position:absolute;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    cursor: default;
+}
+
+
+.leftWebGuiSide{
+    text-align: left;
+}
+
+.rightWebGuiSide{
+    text-align: right;
+}
+
+
+/* -------------------    Left Buttons  --------------------*/
+
+#servoDot{
+    position:absolute;
+    left:213px;
+    top:325px;
+}
+#servoButton img{
+    position:absolute;
+    width:130px;
+    right: 262px;
+    top: 369px;
+}
+#servoButton:hover + #servoDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* ------------------------------------*/
+
+#goDot{
+    position:absolute;
+    left:358px;
+    top:403px;
+}
+#goButton img{
+    position:absolute;
+    width:130px;
+    left: 420px;
+    top: 384px;
+}
+#goButton:hover + #goDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* ------------------------------------*/
+
+#introductionDot{
+    position:absolute;
+    left:358px;
+    top:403px;
+}
+#introductionButton img{
+    position:absolute;
+    width:130px;
+    left: 329px;
+    top: 236px;
+}
+#introductionButton:hover + #introductionDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* ------------------------------------*/
+
+#pythonDot{
+    position:absolute;
+    left:358px;
+    top:403px;
+}
+#pythonButton img{
+    position:absolute;
+    width:130px;
+    left: 415px;
+    top: 92px;
+}
+#pythonButton:hover + #pythonDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+
+
+/* -------------------    Right Buttons --------------------*/
+
+#arduinoDot{
+    position:absolute;
+    left:308px;
+    top:470px;
+}
+#arduinoButton img{
+    position:absolute;
+    width:130px;   
+    left: 167px;
+    top: 236px;
+}
+#arduinoButton:hover + #arduinoDot{
+    background-color: #FF0000;
+    animation: none;
+}
+/* ------------------------------------*/
+
+#inmoovDot{
+    position:absolute;
+    left:308px;
+    top:470px;
+}
+#inmoovButton img{
+    position:absolute;
+    width:130px;   
+    left: 5px;
+    top: 230px;
+}
+#inmoovButton:hover + #inmoovDot{
+    background-color: #FF0000;
+    animation: none;
+}
+/* ------------------------------------*/
+
+#serialDot{
+    position:absolute;
+    left:358px;
+    top:403px;
+}
+#serialButton img{
+    position:absolute;
+    width:130px;
+    left: 78px;
+    top: 89px;
+}
+#serialButton:hover + #serialDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* ------------------------------------*/
+
+#visionDot{
+    position:absolute;
+    left:358px;
+    top:403px;
+}
+#visionButton img{
+    position:absolute;
+    width:130px;
+    left: 78px;
+    top: 382px;
+}
+#visionButton:hover + #visionDot{
+    background-color: #FF0000;
+    animation: none;
+}
+
+/* -------------------    Left Back position --------------------*/
+
+.dotBackButtons{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #587e88;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #414b4e, 0 0 7px #76bed3, 0 0 7px #8ddaefd9;
+}
+.dotBackButtonsActive{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #ff1414, 0 0 10px #FFFFFF;
+    cursor: default;
+}
+
+#BackWebGuiButton{
+    left: 24px;
+    top: 549px;
+}
