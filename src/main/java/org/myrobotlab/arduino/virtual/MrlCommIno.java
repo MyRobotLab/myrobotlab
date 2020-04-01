@@ -82,9 +82,18 @@ public class MrlCommIno {
     // get a command and process it from
     // the serial port (if available.)
     // wdt_disable();
-    if (mrlComm.readMsg()) {
-      mrlComm.processCommand();
-    }
+    // mrlComm on the java side just receives bytes now...  crap.
+    
+    // TODO: This is a divergence from the MrlComm.ino code!
+    // We no longer have readMsg on the java side.  only onBytes(byte[])
+   
+    
+    
+    // the virtual device should listen for on bytes instead.
+    // TODO: don't merge until this is addressed. we need to make sure that messages get relayed to this dark corner of the code
+//    if (mrlComm.readMsg()) {
+//      mrlComm.processCommand();
+//    }
     // update devices
     mrlComm.updateDevices();
     // send back load time and memory

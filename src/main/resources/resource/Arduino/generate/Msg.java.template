@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.arduino.virtual.MrlComm;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * <pre>
@@ -78,7 +80,7 @@ public class %javaClass% {
   // recv buffer
   int ioCmd[] = new int[MAX_MSG_SIZE];
   
-  int byteCount = 0;
+  AtomicInteger byteCount = new AtomicInteger(0);
   int msgSize = 0;
 
   // ------ device type mapping constants
@@ -86,14 +88,19 @@ public class %javaClass% {
   public boolean debug = false;
   boolean invoke = true;
   
+  private int errorServiceToHardwareRxCnt = 0;
+  private int errorHardwareToServiceRxCnt = 0;
+  
   boolean ackEnabled = %ackEnabled%;
-    public ByteArrayOutputStream baos = null;
+  private ByteArrayOutputStream baos = null;
+  public volatile boolean pendingMessage = false;
+  public volatile boolean clearToSend = false;
     
-   public static class AckLock {
-      // first is always true - since there
-      // is no msg to be acknowledged...
-      volatile boolean acknowledged = true;
-    }
+  public static class AckLock {
+    // first is always true - since there
+    // is no msg to be acknowledged...
+    volatile boolean acknowledged = true;
+  }
    
   transient AckLock ackRecievedLock = new AckLock();
   
@@ -141,6 +148,18 @@ public class %javaClass% {
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
     method = ioCmd[startPos];
+    // always process mrlbegin.. 
+    log.info("Process Command: {} Method: {}", method, ioCmd);
+    if (method != PUBLISH_MRL_COMM_BEGIN) {
+      if (!clearToSend) {
+        log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
+        System.err.println("\nDumping command not clear to send.\n");
+        return;
+      }
+    } else {
+      // Process!
+      log.info("Clear to process!!!!!!!!!!!!!!!!!!");
+    }
     switch (method) {
 %javaHandleCases%    
     }
@@ -205,52 +224,128 @@ public class %javaClass% {
     return f;
   }
   
-  public boolean readMsg() throws Exception {
-    // handle serial data begin
-    if (serial == null) {
-      return false;
-    }
-    int bytesAvailable = serial.available();
-    if (bytesAvailable > 0) {
-      //publishDebug("RXBUFF:" + String(bytesAvailable));
-      // now we should loop over the available bytes .. not just read one by one.
-      for (int i = 0; i < bytesAvailable; i++) {
-        // read the incoming byte:
-        int newByte = serial.read();
-        //publishDebug("RX:" + String(newByte));
-        ++byteCount;
-        // checking first byte - beginning of message?
-        if (byteCount == 1 && newByte != VirtualMsg.MAGIC_NUMBER) {
-          publishError(F("error serial"));
-          // reset - try again
-          byteCount = 0;
-          // return false;
+  public void onBytes(byte[] bytes) {
+    // TODO: This is a debug message only...
+    String byteString = StringUtil.byteArrayToIntString(bytes);
+    log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
+    // this gives us the current full buffer that was read from the seral
+    for (int i = 0 ; i < bytes.length; i++) {
+      // For now, let's just call onByte for each byte upcasted as an int.
+      Integer newByte = bytes[i] & 0xFF;
+      try {
+        /**
+         * Archtype InputStream read - rxtxLib does not have this straightforward
+         * design, but the details of how it behaves is is handled in the Serial
+         * service and we are given a unified interface
+         *
+         * The "read()" is data taken from a blocking queue in the Serial service.
+         * If we want to support blocking functions in Arduino then we'll
+         * "publish" to our local queues
+         */
+        // TODO: consider reading more than 1 byte at a time ,and make this
+        // callback onBytes or something like that.
+        byteCount.incrementAndGet();
+        
+        //log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
+        // ++byteCount;
+        if (log.isDebugEnabled()) {
+          log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
         }
-        if (byteCount == 2) {
-          // get the size of message
-          // todo check msg < 64 (MAX_MSG_SIZE)
-          if (newByte > 64) {
-            // TODO - send error back
-            byteCount = 0;
-            continue; // GroG - I guess  we continue now vs return false on error conditions?
+        if (byteCount.get() == 1) {
+          if (newByte != MAGIC_NUMBER) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
+            // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
+            // dump.setLength(0);
           }
-          msgSize = newByte;
+          continue;
+        } else if (byteCount.get() == 2) {
+          // get the size of message
+          if (newByte > 64) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            // This is an error scenario.. we should reset our byte count also.
+            // error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt ));
+            log.error("Arduino->MRL error {} rx sz errors", ++errorServiceToHardwareRxCnt);
+            continue;
+          }
+          msgSize = newByte.intValue();
+          // dump.append(String.format("MSG|SZ %d", msgSize));
+        } else if (byteCount.get() == 3) {
+          // This is the method..
+          int method = newByte.intValue();
+          // TODO: lookup the method in the label.. 
+          if (methodToString(method).startsWith("ERROR")) {
+            // we've got an error scenario here.. reset the parser and try again!
+            log.error("Arduino->MRL error unknown method error. resetting parser.");
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+          }
+          
+          ioCmd[byteCount.get() - 3] = method;
+        } else if (byteCount.get() > 3) {
+          // remove header - fill msg data - (2) headbytes -1
+          // (offset)
+          // dump.append(String.format("|P%d %d", byteCount,
+          // newByte));
+          ioCmd[byteCount.get() - 3] = newByte.intValue();
+        } else {
+          // the case where byteCount is negative?! not got.
+          log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
+          //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
+          continue;
         }
-        if (byteCount > 2) {
-          // fill in msg data - (2) headbytes -1 (offset)
-          ioCmd[byteCount - 3] = newByte;
+        if (byteCount.get() == 2 + msgSize) {
+          // we've received a full message
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
+          log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          // TODO: should we truncate our ioCmd that we send here?  the ioCmd array is larger than the message in almost all cases.
+          // re-init the parser
+          // TODO: this feels very thread un-safe!
+          Arrays.fill(ioCmd, 0); // optimize remove
+          // process the command.
+          
+         
+          
+          processCommand(actualCommand);
+          msgSize = 0;
+          byteCount = new AtomicInteger(0);
+          // Our 'first' getBoardInfo may not receive a acknowledgement
+          // so this should be disabled until boadInfo is valid
+          // clean up memory/buffers
+          
         }
-        // if received header + msg
-        if (byteCount == 2 + msgSize) {
-          // we've reach the end of the command, just return true .. we've got it
-          byteCount = 0;
-          return true;
-        }
+      } catch (Exception e) {
+        ++errorHardwareToServiceRxCnt ;
+        // error("msg structure violation %d", errorHardwareToServiceRxCnt);
+        log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
+        // try again (clean up memory buffer)
+        // Logging.logError(e);
+        
+        // perhpas we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // find the first occurance of 170 in the bytes
+        // subbytes
+        // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
+        i = i - byteCount.get()+1;
+        log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
+        log.error("Original Byte Array: {}", StringUtil.byteArrayToIntString(bytes));
+        System.err.println("Try to consume more messages!");
+        msgSize = 0;
+        byteCount = new AtomicInteger(0);
+        // attempt to reprocess from the beginngin
+        // TODO: what about infinite loops!!!
+        i = 0;
+        return;
+        
+        
       }
-    } // if Serial.available
-      // we only partially read a command.  (or nothing at all.)
-    return false;
+    }
+    log.info("Done with onBytes method.");
+    return;
   }
+
 
   String F(String msg) {
     return msg;
@@ -338,9 +433,19 @@ public class %javaClass% {
     }
   }
   
-  byte[] sendMessage() throws Exception {
-      byte[] message = baos.toByteArray();
-      if (serial != null) {
+  synchronized byte[] sendMessage() throws Exception {
+    byte[] message = baos.toByteArray();
+    if (ackEnabled) {
+      // wait for any outstanding pending messages.
+      while (pendingMessage) {
+        Thread.sleep(1);
+        log.info("Pending message");
+      }
+      // set a new pending flag.
+      pendingMessage=true;
+    }
+    // write data if serial not null.
+    if (serial != null) {
       serial.write(message);
     }
     return message;
@@ -484,6 +589,32 @@ public class %javaClass% {
       log.error("main threw", e);
     }
 
+  }
+
+  public void waitForBegin() {
+    // poll until a begin MrlComm Message has been seen.
+    log.info("Wait for Begin called in Msg.");
+    while (!clearToSend ) {
+      // TODO: don't sleep. rather notify
+      try {
+        Thread.sleep(1);
+      } catch (InterruptedException e) {
+        log.info("Wait for MrlCommBegin interrupted.", e);
+      }
+    }
+  }
+
+  public synchronized void onConnect(String portName) {
+    // reset the parser...
+    log.info("On Connect Called in Msg.");
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    // we're not clear to send.
+    this.clearToSend = false;
+    // watch for the first MrlCommBegin message;
+    // TODO: we should have some sort of timeout / error handling here.
+    this.waitForBegin();
+    
   }
 
 }
