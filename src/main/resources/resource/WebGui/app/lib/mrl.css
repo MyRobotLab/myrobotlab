@@ -171,8 +171,14 @@ table, th, td {
 
 .notification-badge {
     position: relative;
-    padding-left: 3px;
-    padding-right: 3px;    
+    left: -40px;   
+}
+
+#notification-entries {
+    width: 300px;
+    height: 400px;
+}
+
 }
 
 .nav-color{
