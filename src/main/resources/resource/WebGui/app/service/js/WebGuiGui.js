@@ -5,7 +5,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     $scope.mrl = mrl
     $scope.panel = mrl.getPanel('runtime')
 
-    $scope.activePanel = 'settings'	
+    $scope.activePanel = 'settings' 
 
      // $scope.displayImages =  mrl.getDisplayImages()
     
@@ -14,7 +14,14 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         $scope.service = service
         $scope.port = service.port
     }
-	
+
+    $scope.setActive = function(val) {
+        var index = array.indexOf(5);
+        if (index > -1) {
+            array.splice(index, 1);
+        }
+    }
+    
     $scope.setPanel = function(panelName) {
         $scope.activePanel = panelName
 
@@ -38,7 +45,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
 
     $scope.showPanel = function(panelName) {
         return $scope.activePanel == panelName
-    }	
+    }   
 
     // init scope variables
     $scope.pulseData = ''
@@ -73,8 +80,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         }
     }
 
-    // $scope.panel = mrl.getPanel($scope.service.name)
-	$scope.panel = mrl.getPanel('runtime')
+    $scope.setPanel('extension')
 
 
     //mrl.subscribe($scope.service.name, 'pulse')

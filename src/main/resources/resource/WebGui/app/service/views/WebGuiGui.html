@@ -1,3 +1,20 @@
+<style>
+    #containerWebGui{
+    width: 620px;
+    height: 588px;
+    /* border: 1px solid #000; */
+    position: relative;
+    background-image: url("../img/WebGui/MRL_background.png");
+    z-index: 0;
+    float: none;
+    }
+
+    #containerWebGui-cell {
+    width: 620px;
+    }
+
+</style>
+
 <form class="form-inline" role="forms">
     <div class="form-group">
         <label data-toggle="tooltip">
@@ -93,24 +110,12 @@
 
 <!------------------------------DEMO HOMEPAGE START-------------------------->
 <!------------------------------DEMO HOMEPAGE START-------------------------->
-<style>
-    #containerWebGui{
-    width: 620px;
-    height: 588px;
-    /* border: 1px solid #000; */
-    position: relative;
-    background-image: url("../img/WebGui/MRL_background.png");
-    z-index: 0;
-    float: none;
-    }
-
-    #containerWebGui-cell {
-    width: 620px;
-    }
-
-</style>
 
 <table border="1" class="table table-striped">
+<tr>
+    <td colspan="2">&nbsp;{{onText}} 
+    </td>
+</tr>
 <tr>
     <link type="text/css" rel="stylesheet" media="all" href="../service/css/WebGuiGui.css">
     <td id="containerWebGui-cell">
@@ -139,8 +144,18 @@
             <div id="BackWebGuiButton" class="dotBackButtons leftWebGuiSide preventWebGuiDragSelect" ng-click="mrl.changeTab('security')">Security</div>
         </div>
     </td>
-<tr>
+<td>
 <!-- panels begin -->
+<!------------------------ extension begin ------------------------------>
+<table ng-show="showPanel('extension')" class="table table-striped">
+<tr>
+    <td>
+        <img src="../img/WebGui/MRL_extension1.png"/>
+        <a id="logoButton" class="dotWebGuiButtons leftWebGuiSide preventWebGuiDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank"><img src="../img/WebGui/logo.png"/>&nbsp;</a>
+     </td>
+</tr>
+</table>    
+<!------------------------ extension end ------------------------------>
 <!------------------------ arduino begin ------------------------------>
 <table ng-show="showPanel('arduino')" class="table table-striped">
 <tr>
@@ -190,7 +205,6 @@
 </table>
 <!------------------------ introduction end ------------------------------>
 <!-- panels end -->
-</table>
-
+</td></tr></table>
 
 <!------------------------------DEMO HOMEPAGE END---------------------------->
