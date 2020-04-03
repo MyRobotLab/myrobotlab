@@ -123,7 +123,7 @@
             <!-- Right -->
             
 
-            <a id="arduinoButton" class="WebGuiButtons preventWebGuiDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" href="http://myrobotlab.org/content/uploading-mrlcomm-arduino-0" target="_blank"><img src="../img/WebGui/arduino.png"/>&nbsp;</a>
+            <a id="arduinoButton" class="WebGuiButtons preventWebGuiDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" href="https://youtu.be/-EQxjpsOJDg" target="_blank"><img src="../img/WebGui/arduino.png"/>&nbsp;</a>
 
             <div id="inmoovButton" class="WebGuiButtons preventWebGuiDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../img/WebGui/inmoov.png"/>&nbsp;</div>
 
@@ -141,7 +141,9 @@
 
             <div id="pythonButton" class="WebGuiButtons preventWebGuiDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../img/WebGui/python.png"/>&nbsp;</div>
 
-            <div id="securityButton" class="securityButtons preventWebGuiDragSelect" ng-click="mrl.changeTab('security')">Security</div>
+            <div id="securityButton" class="securityButtons preventWebGuiDragSelect" ng-click="setPanel('security')">Security</div>
+
+            <div id="homeButton" class="homeButtons preventWebGuiDragSelect" ng-click="setPanel('extension')">Home</div>
         </div>
     </td>
 <td>
@@ -162,21 +164,11 @@
     <td>
         <img src="../arduino.png"/>
         <label>Arduino:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <img href="https://youtu.be/-EQxjpsOJDg" target="_blank">
     </td>
 </tr>
 </table>    
 <!------------------------ arduino end ------------------------------>
-<!------------------------ serial begin ------------------------------>
-<table ng-show="showPanel('serial')" class="table table-striped">
-<tr>
-    <td>
-        <img src="../serial.png"/>
-        <label>Serial:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-        <img ng-src="{{(!service.isSerialActivated)?'../../red.png':'../../green.png'}}"/>
-    </td>
-</tr>
-</table>
-<!------------------------ serial end ------------------------------>
 <!------------------------ serial begin ------------------------------>
 <table ng-show="showPanel('serial')" class="table table-striped">
 <tr>
@@ -195,6 +187,17 @@
 </tr>
 </table>
 <!------------------------ serial end ------------------------------>
+<!------------------------ servo begin ------------------------------>
+<table ng-show="showPanel('servo')" class="table table-striped">
+<tr>
+    <td>
+        <img src="../Servo.png"/>
+        <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+    </td>
+</tr>
+</table>
+<!------------------------ servo end ------------------------------>
 <!------------------------ introduction begin ------------------------------>
 <table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
 <tr>
@@ -211,6 +214,24 @@
 </tr>
 </table>
 <!------------------------ introduction end ------------------------------>
+<!------------------------ security begin ------------------------------>
+<table ng-show="showPanel('security')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../Security.png"/>
+        <p>If you have something to hide this service is for you !<br>
+        Useful to store passwords or secrets keys ( like api keys ) inside an AES safe and expose some code lines.<br>
+        It is important to never expose API keys inside any script !</p>
+        <a lass="row col-md-1" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Security.py">LOAD SCRIPT IN PYTHON</a>
+    </td>
+</tr>    
+<tr>
+    <td>
+        <div class="tab-content" service-body panel="mrl.getPanel('security')"></div>
+    </td>
+</tr>
+</table>
+<!------------------------ security end ------------------------------>
 <!------------------------ runtime begin ------------------------------>
 <table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
 <tr>
@@ -222,8 +243,7 @@
         <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>
         <a lass="row col-md-3" target="_blank" href="https://github.com/MyRobotLab/pyrobotlab/blob/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
     </td>
-</tr>   
-<tr>
+
     <td>
         <div class="tab-content" service-body panel="mrl.getPanel('runtime')"></div>
     </td>
