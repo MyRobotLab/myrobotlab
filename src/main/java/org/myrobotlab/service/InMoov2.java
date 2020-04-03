@@ -1988,7 +1988,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
         public void stopServoMixer() {
                 speakBlocking(get("STOPSERVOMIXER"));
-                releasePeer("ServoMixer");
+                releasePeer("servomixer");
                 isServoMixerActivated = false;
         }
 
