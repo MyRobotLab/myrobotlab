@@ -86,12 +86,13 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       port = new SerialPort(portName);
       port.openPort();
       port.setParams(rate, dataBits, stopBits, parity);
+      port.addEventListener(this, SerialPort.MASK_RXCHAR);
       // TODO - add self as a event listener, and listen to MASK_RXCHAR
       // it would probably be a good idea to register for "all" then filter on
       // the SerialEvent - then
       // it would be easier to get notified on other events besides just serial
       // reads .. eg. dtr etc..
-      port.addEventListener(this, SerialPort.MASK_RXCHAR);
+     
     } catch (Exception e) {
       throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
@@ -211,8 +212,9 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   public void serialEvent(SerialPortEvent event) {
     // FYI - if you want more events processed here - you need to register them
     // in setParams
+    
     if (event.isRXCHAR()) {// If data is available
-      log.debug("Serial Receive Event fired.");
+      log.info("Serial Receive Event fired.");
       try {
         int byteCount = event.getEventValue();
         if (byteCount == 0) {
@@ -226,6 +228,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
         }
         
         for (String key : listeners.keySet()) {
+          // TODO: feels like this should be synchronized?
           listeners.get(key).onBytes(buffer);
         }
         for (int i = 0; i < buffer.length; i++) {
