@@ -135,7 +135,7 @@
 
             <div id="servoButton" class="WebGuiButtons preventWebGuiDragSelect" title="A quick run test with your servo" ng-click="msg.start('i01.servo', 'Servo')"><img src="../img/WebGui/servo.png"/>&nbsp;</div>
 
-            <div id="goButton" class="WebGuiButtons preventWebGuiDragSelect" title="Get started right away" ng-click="mrl.changeTab('runtime')"><img src="../img/WebGui/go.png"/>&nbsp;</div>
+            <div id="goButton" class="WebGuiButtons preventWebGuiDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../img/WebGui/go.png"/>&nbsp;</div>
 
             <a id="introductionButton" class="WebGuiButtons preventWebGuiDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../img/WebGui/introduction.png"/>&nbsp;</a>
 
@@ -204,6 +204,25 @@
 </tr>
 </table>
 <!------------------------ introduction end ------------------------------>
+<!------------------------ runtime begin ------------------------------>
+<table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
+<tr>
+    <td>
+        <img src="../runtime.png"/>&nbsp;&nbsp;
+        <p> The Runtime is the first Service to start when MyRobotLab begins.<br> Every running instance of MyRobotLab includes a single Runtime Service.<br> The Runtime is a singleton, which means there should be only one per running process of MyRobotLab.<br> Its responsibilities include the creation, removal, and merging of Services into the Service registry.<br>
+        The registry is critical for routing communication between Services.<br>
+        In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
+        <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>
+        <a lass="row col-md-3" target="_blank" href="https://github.com/MyRobotLab/pyrobotlab/blob/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
+    </td>
+</tr>   
+<tr>
+    <td>
+        <div class="tab-content" service-body panel="mrl.getPanel('runtime')"></div>
+    </td>
+</tr>
+</table>
+<!------------------------ runtime end ------------------------------>
 <!-- panels end -->
 </td></tr></table>
 
