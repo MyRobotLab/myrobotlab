@@ -324,6 +324,7 @@ public class VirtualMsg {
     } else {
       // Process!
       log.info("Clear to process!!!!!!!!!!!!!!!!!!");
+      this.clearToSend = true;
     }
     switch (method) {
     case GET_BOARD_INFO: {
@@ -1514,7 +1515,7 @@ public class VirtualMsg {
         // callback onBytes or something like that.
         byteCount.incrementAndGet();
         
-        //log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
+        log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
         // ++byteCount;
         if (log.isDebugEnabled()) {
           log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
@@ -1545,14 +1546,33 @@ public class VirtualMsg {
           // This is the method..
           int method = newByte.intValue();
           // TODO: lookup the method in the label.. 
+          if (!clearToSend) {
+            // The only method we care about is begin!!!
+            if (method != Msg.PUBLISH_MRL_COMM_BEGIN) {
+              // This is a reset sort of scenario!  we should be killing our parser state
+              // we are only looking for a begin message now!!
+              byteCount = new AtomicInteger(0);
+              msgSize = 0;
+              continue;
+            } else {
+              // we're good to go.. maybe even clear to send at this point?
+            }
+          }
           if (methodToString(method).startsWith("ERROR")) {
             // we've got an error scenario here.. reset the parser and try again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
+            if (isFullMessage(bytes)) {
+              // TODO: This could be an infinite loop 
+              // try to reprocess this byte array, maybe the parser got out of sync
+              onBytes(bytes);
+              return;
+            }
+            
+          } else {
+            ioCmd[byteCount.get() - 3] = method;
           }
-          
-          ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
           // remove header - fill msg data - (2) headbytes -1
           // (offset)
@@ -1575,9 +1595,28 @@ public class VirtualMsg {
           Arrays.fill(ioCmd, 0); // optimize remove
           // process the command.
           
-         
+          // This full command that we received. 
           
           processCommand(actualCommand);
+          // we should only process this command if we are clear to sync.. 
+          // if this is a begin command..  
+//          if (!clearToSend) {
+//            // if we're not clear to send.. we need to process this command
+//            // only if it's a begin command.
+//            if (isMrlCommBegin(actualCommand)) {
+//              processCommand(actualCommand);
+//            } else {
+//              // reset the parser and attempt from the next byte
+//              // TODO: check that it's not bytes.length-1
+//              byte[] shiftedBytes = Arrays.copyOfRange(bytes, 1, bytes.length);
+//              byteCount = new AtomicInteger(0);
+//              onBytes(shiftedBytes);
+//              return;
+//            }
+//            
+//          } else {
+//            processCommand(actualCommand);
+//          }
           msgSize = 0;
           byteCount = new AtomicInteger(0);
           // Our 'first' getBoardInfo may not receive a acknowledgement
@@ -1613,7 +1652,6 @@ public class VirtualMsg {
     log.info("Done with onBytes method.");
     return;
   }
-
 
   String F(String msg) {
     return msg;
@@ -1923,6 +1961,49 @@ public class VirtualMsg {
     // TODO: we should have some sort of timeout / error handling here.
     this.waitForBegin();
     
+  }
+
+
+  private boolean isMrlCommBegin(int[] actualCommand) {
+    // TODO Auto-generated method stub
+    int method = actualCommand[0];
+    if (Msg.PUBLISH_MRL_COMM_BEGIN == method) {
+      return true;
+    }
+    return false;
+  }
+
+  private boolean isFullMessage(byte[] bytes) {
+    // Criteria that a sequence of bytes could be parsed as a complete message.
+    // can't be null
+    if (bytes == null) 
+      return false;
+    // it's got to be at least 3 bytes long.  magic + method + size
+    if (bytes.length <= 2) 
+      return false;
+    // first byte has to be magic
+    if ((bytes[0] & 0xFF) != this.MAGIC_NUMBER) 
+      return false;
+    
+    int method = bytes[1] & 0xFF;
+    String strMethod = Msg.methodToString(method); 
+    // only known methods. 
+    // TODO: make the methodToString return null for an unknown lookup.
+    if (strMethod.startsWith("ERROR")) 
+      return false;
+    
+    // now it's got to be the proper length
+    int length = bytes[1] & 0xFF;
+    // max message size is 64 bytes
+    if (length > 64)
+      return false;
+
+    // it's a exactly a full message or a message and more.
+    if (bytes.length >= length+2)
+      return true;
+
+    
+    return false;
   }
 
 }
