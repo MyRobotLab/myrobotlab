@@ -1,6 +1,21 @@
+<!------------------------------HOMEPAGE START-------------------------->
 
-<!------------------------------DEMO HOMEPAGE START-------------------------->
-<!------------------------------DEMO HOMEPAGE START-------------------------->
+<style>
+    #containerIntro{
+    width: 620px;
+    height: 588px;
+    /* border: 1px solid #000; */
+    position: relative;
+    background-image: url("../img/Intro/MRL_background.png");
+    z-index: 0;
+    float: none;
+    }
+
+    #containerIntro-cell {
+    width: 620px;
+    }
+
+</style>
 
 <table border="1" class="table table-striped">
     <tr>
@@ -8,33 +23,33 @@
         </td>
     </tr>
     <tr>
-        <link type="text/css" rel="stylesheet" media="all" href="../service/css/WebGuiGui.css">
-        <td id="containerWebGui-cell">
-            <div id="containerWebGui">
+        <link type="text/css" rel="stylesheet" media="all" href="../service/css/IntroGui.css">
+        <td id="containerIntro-cell">
+            <div id="containerIntro">
                 <!-- Right -->
                 
     
-                <a id="arduinoButton" class="WebGuiButtons preventWebGuiDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" href="https://youtu.be/-EQxjpsOJDg" target="_blank"><img src="../img/WebGui/arduino.png"/>&nbsp;</a>
+                <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" href="https://youtu.be/-EQxjpsOJDg" target="_blank"><img src="../img/Intro/arduino.png"/>&nbsp;</a>
     
-                <div id="inmoovButton" class="WebGuiButtons preventWebGuiDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../img/WebGui/inmoov.png"/>&nbsp;</div>
+                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../img/Intro/inmoov.png"/>&nbsp;</div>
     
-                <div id="serialButton" class="WebGuiButtons preventWebGuiDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../img/WebGui/serial.png"/>&nbsp;</div>
+                <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../img/Intro/serial.png"/>&nbsp;</div>
     
-                <div id="visionButton" class="WebGuiButtons preventWebGuiDragSelect" title="Vision with OpenCV and filters" ng-click="msg.start('OpenCV','OpenCV')"><img src="../img/WebGui/vision.png"/>&nbsp;</div>
+                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="msg.start('OpenCV','OpenCV')"><img src="../img/Intro/vision.png"/>&nbsp;</div>
     
                 <!-- Left -->
     
-                <div id="servoButton" class="WebGuiButtons preventWebGuiDragSelect" title="A quick run test with your servo" ng-click="msg.start('i01.servo', 'Servo')"><img src="../img/WebGui/servo.png"/>&nbsp;</div>
+                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="msg.start('i01.servo', 'Servo')"><img src="../img/Intro/servo.png"/>&nbsp;</div>
     
-                <div id="goButton" class="WebGuiButtons preventWebGuiDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../img/WebGui/go.png"/>&nbsp;</div>
+                <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../img/Intro/go.png"/>&nbsp;</div>
     
-                <a id="introductionButton" class="WebGuiButtons preventWebGuiDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/Intro.png"/>&nbsp;</a>
+                <a id="introductionButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/Intro.png"/>&nbsp;</a>
+
+                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../img/Intro/python.png"/>&nbsp;</div>
     
-                <div id="pythonButton" class="WebGuiButtons preventWebGuiDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../img/WebGui/python.png"/>&nbsp;</div>
+                <div id="securityButton" class="securityButtons preventIntroDragSelect" ng-click="setPanel('security')">Security</div>
     
-                <div id="securityButton" class="securityButtons preventWebGuiDragSelect" ng-click="setPanel('security')">Security</div>
-    
-                <div id="homeButton" class="homeButtons preventWebGuiDragSelect" ng-click="setPanel('extension')">Home</div>
+                <div id="homeButton" class="homeButtons preventIntroDragSelect" ng-click="setPanel('extension')">Home</div>
             </div>
         </td>
     <td>
@@ -43,8 +58,8 @@
     <table ng-show="showPanel('extension')" class="table table-striped">
     <tr>
         <td>
-            <img src="../img/WebGui/MRL_extension1.png"/>
-            <a id="logoButton" class="WebGuiButtons preventWebGuiDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank"><img src="../img/WebGui/logo.png"/></a>
+            <img src="../img/Intro/MRL_extension1.png"/>
+            <a id="logoButton" class="IntroButtons preventIntroDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank"><img src="../img/Intro/logo.png"/></a>
          </td>
     </tr>
     </table>    
