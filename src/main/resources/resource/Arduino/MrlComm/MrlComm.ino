@@ -94,7 +94,8 @@ void setup()
     delay(100); // wait for serial port to connect. Needed for native USB
   }
 
-  // clear serial
+  // clear serial, write 64 bytes of garbage data to make sure the Msg.java can sync properly.
+  Serial.write("MRLComm Reset.                                                 ");
   Serial.flush();
 
   mrlComm.begin(Serial);
