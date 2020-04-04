@@ -3,9 +3,6 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     var _self = this
     var msg = this.msg
     $scope.mrl = mrl
-    $scope.panel = mrl.getPanel('runtime')
-
-    $scope.activePanel = 'settings' 
 
      // $scope.displayImages =  mrl.getDisplayImages()
     
@@ -15,13 +12,8 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         $scope.port = service.port
     }
 
-    $scope.setActive = function(val) {
-        var index = array.indexOf(5);
-        if (index > -1) {
-            array.splice(index, 1);
-        }
-    }
-
+    // init scope variables
+    $scope.pulseData = ''
     //$scope.saveP
     this.onMsg = function(inMsg) {
         let data = inMsg.data[0]
@@ -53,6 +45,10 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         }
     }
 
+    // $scope.panel = mrl.getPanel($scope.service.name)
+	$scope.panel = mrl.getPanel('runtime')
+
+
     //mrl.subscribe($scope.service.name, 'pulse')
     msg.subscribe('publishShowAll')
     // msg.subscribe('publishHideAll') FIXME ? not symmetric
@@ -65,3 +61,4 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     msg.subscribe(this)
 }
 ])
+
