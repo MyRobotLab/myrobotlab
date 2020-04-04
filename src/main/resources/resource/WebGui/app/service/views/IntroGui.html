@@ -1,4 +1,4 @@
-<!------------------------------HOMEPAGE START-------------------------->
+<!------------------------------INTRO-PAGE START-------------------------->
 
 <style>
     #containerIntro{
@@ -39,12 +39,12 @@
     
                 <!-- Left -->
     
-                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="msg.start('i01.servo', 'Servo')"><img src="../img/Intro/servo.png"/>&nbsp;</div>
+                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')"><img src="../img/Intro/servo.png"/>&nbsp;</div>
     
                 <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../img/Intro/go.png"/>&nbsp;</div>
     
-                <a id="introductionButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/Intro.png"/>&nbsp;</a>
-
+                <a id="introductionButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/introduction.png"/>&nbsp;</a>
+    
                 <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../img/Intro/python.png"/>&nbsp;</div>
     
                 <div id="securityButton" class="securityButtons preventIntroDragSelect" ng-click="setPanel('security')">Security</div>
@@ -99,11 +99,62 @@
         <td>
             <img src="../Servo.png"/>
             <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>&nbsp;&nbsp;
+            <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.stopServo():msg.startServo()" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Settings</button>
+            <!--div ng-click="msg.start('servo', 'Servo')"></div-->
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>The Servo service is used to control servos through a micro-controller such as an Arduino or a Raspberry pi (ServoController).<br>
+            The service will allow to control attaching or detaching the device, control his position and the speed at wich it move to that position, and turn off/on the servo.<br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <strong>servo.attach</strong>(controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
+
+            <strong>servo.detach</strong>(controller): detach the servo from the microcontroller<br>
+
+            <strong>servo.enable</strong>(): will turn the servo motor on<br>
+
+            <strong>servo.disable</strong>(): will turn the servo motor off<br>
+
+            <strong>servo.moveTo</strong>(pos): ask the servo to move to a position<br>
+
+            <strong>servo.moveToBlocking</strong>(pos): ask the servo to move to a position and wait the position reached<br>
+
+            <strong>servo.map</strong>(inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
+
+            <strong>servo.setInverted</strong>(true/false): Reverse the direction of rotation of the servo.</p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>&nbsp;&nbsp;
+            <a lass="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">LOAD SCRIPT IN PYTHON</a>
         </td>
     </tr>
     </table>
     <!------------------------ servo end ------------------------------>
+    <!------------------------ servo1 begin ------------------------------>
+    <table ng-show="showPanel('servo1')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Servo.png"/>
+            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller for you. You should be able to select it in the drop down.<br> Select the correct signal pin the servo is attached to.  Then select "attach" and the servo should be controllable with the slider bar.<br>  Limits can be set in order to protect the servo from going beyond a certain minimum and maximum value.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('servo')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ servo1 end ------------------------------>
     <!------------------------ introduction begin ------------------------------>
     <table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
     <tr>
@@ -146,7 +197,7 @@
             <p> The Runtime is the first Service to start when MyRobotLab begins.<br> Every running instance of MyRobotLab includes a single Runtime Service.<br> The Runtime is a singleton, which means there should be only one per running process of MyRobotLab.<br> Its responsibilities include the creation, removal, and merging of Services into the Service registry.<br>
             The registry is critical for routing communication between Services.<br>
             In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
-            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>&nbsp;&nbsp;
             <a lass="row col-md-3" target="_blank" href="https://github.com/MyRobotLab/pyrobotlab/blob/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
         </td>
     
@@ -159,5 +210,4 @@
     <!-- panels end -->
     </td></tr></table>
     
-    <!------------------------------DEMO HOMEPAGE END---------------------------->
-    
+    <!------------------------------INTRO-PAGE END---------------------------->
