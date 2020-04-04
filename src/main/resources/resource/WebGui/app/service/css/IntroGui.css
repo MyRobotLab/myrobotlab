@@ -1,6 +1,6 @@
 
 
-.preventWebGuiDragSelect{
+.preventIntroDragSelect{
     -webkit-user-select: none;  /* Chrome all / Safari all */
     -moz-user-select: none;     /* Firefox all */
     -ms-user-select: none;      /* IE 10+ */
@@ -10,7 +10,7 @@
     -o-user-drag: none;
 }
 
-.WebGuiButtons {
+.IntroButtons {
     position:absolute;
     width:130px;
     cursor: pointer;
@@ -21,18 +21,18 @@
     */
 }
 
-.WebGuiButtons:hover {
+.IntroButtons:hover {
     animation: none;
     -webkit-filter: saturate(400%) drop-shadow(0px 0px 8px rgba(255, 255, 255, 1));
     cursor:pointer;
 }
 
-.WebGuiButtons:active {
+.IntroButtons:active {
     -webkit-filter: saturate(400%) drop-shadow(0px 0px 8px rgba(20, 255, 255, 1));
     cursor:pointer;
 }
 
-.WebGuiButtonsActive {
+.IntroButtonsActive {
     position:absolute;
     color: #f38094;
     cursor: pointer;
