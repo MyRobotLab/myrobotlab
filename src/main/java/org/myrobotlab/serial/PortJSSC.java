@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 import jssc.SerialPort;
@@ -50,7 +51,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   // FIXME - better way to handle this across all port types
   @Override
   public List<String> getPortNames() {
-
     ArrayList<String> ret = new ArrayList<String>();
     try {
       String[] portNames = SerialPortList.getPortNames();
@@ -92,7 +92,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       // the SerialEvent - then
       // it would be easier to get notified on other events besides just serial
       // reads .. eg. dtr etc..
-     
     } catch (Exception e) {
       throw new IOException(String.format("could not open port %s  rate %d dataBits %d stopBits %d parity %d", portName, rate, dataBits, stopBits, parity), e);
     }
@@ -101,16 +100,14 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   @Override
   public void close() {
     try {
-
       listening = false;
-
       port.closePort();
       // FIXME - JSSC issue (IMHO)
       // if a listener doesn't exist it throws ? meh :P
       // port.removeEventListener();
       // port.notifyOnDataAvailable(false);
     } catch (Exception e) {
-      log.error("close threw", e);
+      log.error("Serial port close exception.", e);
     }
     port = null;
   }
@@ -142,7 +139,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
         log.error("port not opened or is null");
         return false;
       }
-
       return port.setParams(rate, dataBits, stopBits, parity);
     } catch (Exception e) {
       throw new IOException(e);
@@ -169,13 +165,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 
   public void write(byte[] data) throws Exception {
     if (debug && debugTX) {
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < data.length; i++) {
-        b.append( data[i] & 0xff );
-        if (i != data.length - 1)
-          b.append(",");
-      }
-      log.info("Sending Byte Array: {}", b);
+      String dataString = StringUtil.byteArrayToIntString(data);
+      log.info("Sending Byte Array: {}", dataString);
     }
     port.writeBytes(data);
   }
@@ -185,16 +176,11 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
    * be created in the future....
    */
   public void write(int[] data) throws Exception {
-   
+    // TODO: consider deprication of this method, and just use byte arrays instead.
     // use the writeIntArray method to batch this operation.
     if (debug && debugTX) {
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < data.length; i++) {
-        b.append( data[i]  & 0xff );
-        if (i != data.length - 1)
-          b.append(",");
-      }
-      log.debug("Sending Int Array: {}", b);
+      String dataString = StringUtil.intArrayToString(data);
+      log.debug("Sending Int Array: {}", dataString);
     }
     port.writeIntArray(data);
   }
@@ -212,9 +198,9 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   public void serialEvent(SerialPortEvent event) {
     // FYI - if you want more events processed here - you need to register them
     // in setParams
-    
-    if (event.isRXCHAR()) {// If data is available
-      log.info("Serial Receive Event fired.");
+    if (event.isRXCHAR()) {
+      // If data is available
+      // log.info("Serial Receive Event fired.");
       try {
         int byteCount = event.getEventValue();
         if (byteCount == 0) {
@@ -226,11 +212,12 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
           // no data available.
           return;
         }
-        
+        // we have data, let's notify the listeners.
         for (String key : listeners.keySet()) {
-          // TODO: feels like this should be synchronized?
+          // TODO: feels like this should be synchronized or maybe the buffer should be immutable?
           listeners.get(key).onBytes(buffer);
         }
+        // gather stats about this serial event (bytes read...)
         for (int i = 0; i < buffer.length; i++) {
           ++stats.total;
           if (stats.total % stats.interval == 0) {
