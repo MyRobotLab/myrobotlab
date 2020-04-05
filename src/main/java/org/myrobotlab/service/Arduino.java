@@ -173,7 +173,6 @@ public class Arduino extends AbstractMicrocontroller
 
   private long boardInfoRequestTs;
 
-  int byteCount;
   @Deprecated /*
                * should develop a MrlSerial on Arduinos and
                * Arduino.getSerial("s1")
@@ -190,11 +189,6 @@ public class Arduino extends AbstractMicrocontroller
    * they will be referenced by name OR by index
    */
   transient Map<String, DeviceMapping> deviceList = new ConcurrentHashMap<String, DeviceMapping>();
-
-  // FIXME - use
-  int errorServiceToHardwareRxCnt = 0;
-
-  int errorHardwareToServiceRxCnt = 0;
 
   I2CBus i2cBus = null;
 
@@ -219,8 +213,6 @@ public class Arduino extends AbstractMicrocontroller
   transient Mapper motorPowerMapper = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public transient Msg msg;
-
-  int msgSize;
 
   Integer nextDeviceId = 0;
 
@@ -1442,98 +1434,18 @@ public class Arduino extends AbstractMicrocontroller
    */
 
   public synchronized void onBytes(byte[] bytes) {
-    // TODO: This is a debug message only...
-    String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
-    // this gives us the current full buffer that was read from the seral
-    for (int i = 0 ; i < bytes.length; i++) {
-      // For now, let's just call onByte for each byte upcasted as an int.
-      Integer newByte = bytes[i] & 0xFF;
-      // log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
-      try {
-        /**
-         * Archtype InputStream read - rxtxLib does not have this straightforward
-         * design, but the details of how it behaves is is handled in the Serial
-         * service and we are given a unified interface
-         *
-         * The "read()" is data taken from a blocking queue in the Serial service.
-         * If we want to support blocking functions in Arduino then we'll
-         * "publish" to our local queues
-         */
-        // TODO: consider reading more than 1 byte at a time ,and make this
-        // callback onBytes or something like that.
-
-        ++byteCount;
-        if (log.isDebugEnabled()) {
-          log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
-        }
-        if (byteCount == 1) {
-          if (newByte != MAGIC_NUMBER) {
-            byteCount = 0;
-            msgSize = 0;
-            Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
-            warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-            // dump.setLength(0);
-          }
-          continue;
-        } else if (byteCount == 2) {
-          // get the size of message
-          if (newByte > 64) {
-            byteCount = 0;
-            msgSize = 0;
-            error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
-            continue;
-          }
-          msgSize = newByte.intValue();
-          // dump.append(String.format("MSG|SZ %d", msgSize));
-        } else if (byteCount > 2) {
-          // remove header - fill msg data - (2) headbytes -1
-          // (offset)
-          // dump.append(String.format("|P%d %d", byteCount,
-          // newByte));
-          ioCmd[byteCount - 3] = newByte.intValue();
-        } else {
-          // the case where byteCount is negative?! not got.
-          log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
-          error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
-          continue;
-        }
-        if (byteCount == 2 + msgSize) {
-          // we've received a full message
-          log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), Arrays.copyOf(ioCmd, byteCount));
-          // TODO: should we truncate our ioCmd that we send here?  the ioCmd array is larger than the message in almost all cases.
-          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount); 
-          msg.processCommand(actualCommand);
-          // Our 'first' getBoardInfo may not receive a acknowledgement
-          // so this should be disabled until boadInfo is valid
-          // clean up memory/buffers
-          msgSize = 0;
-          byteCount = 0;
-          Arrays.fill(ioCmd, 0); // optimize remove
-        }
-      } catch (Exception e) {
-        ++errorHardwareToServiceRxCnt;
-        error("msg structure violation %d", errorHardwareToServiceRxCnt);
-        log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
-        // try again (clean up memory buffer)
-        msgSize = 0;
-        byteCount = 0;
-        Logging.logError(e);
-      }
-    }
-    return;
+    log.info("On Bytes called in Arduino. {}", bytes);
+    // These bytes arrived from the serial port data, push them down into the msg parser.
+    // if a full message is detected, the publish(Function) method will be directly called on
+    // this arduino instance.
+    msg.onBytes(bytes);
   }
 
   @Override
   public synchronized void onConnect(String portName) {
-    // TODO: if we get this notification.. i think we need to reset our onBytes method so it doesn't think it's 1/2 way through a message.
-
-    // initialize the mrlcomm message parser.
-    byteCount = 0;
-    msgSize = 0;
-
+    // Pass this serial port notification down to the msg parser
+    msg.onConnect(portName);
     log.info("{} onConnect for port {}", getName(), portName);
-
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
@@ -1545,6 +1457,7 @@ public class Arduino extends AbstractMicrocontroller
 
   @Override
   public void onDisconnect(String portName) {
+    // TODO: add a msg.onDisconnect(portName) ...
     info("%s disconnected from %s", getName(), portName);
     // enableAck(false);
     enableBoardInfo(false);
@@ -1554,11 +1467,9 @@ public class Arduino extends AbstractMicrocontroller
 
   public void openMrlComm(String path) {
     try {
-
       if (!setArduinoPath(path)) {
         return;
       }
-
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
         mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
@@ -1916,8 +1827,6 @@ public class Arduino extends AbstractMicrocontroller
     // reset Java-land
     deviceIndex.clear();
     deviceList.clear();
-    errorHardwareToServiceRxCnt = 0;
-    errorServiceToHardwareRxCnt = 0;
   }
 
   /**
