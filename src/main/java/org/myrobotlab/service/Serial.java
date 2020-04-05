@@ -39,6 +39,7 @@ import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
+
 import org.slf4j.Logger;
 
 /**
@@ -744,7 +745,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public void onBytes(byte[] bytes) {
     if (bytes == null) {
       return;
-    }    
+    }
+    invoke("publishBytes", bytes);
+
     // TODO: right now.. PortJSSC invokes this and it invokes onBytes on the Arduino / other classes directly..  
     // Why do that in both places?  seems like there should be a more stream lined approach to avoid copying the same byte array 
     // to multiple end points.
@@ -809,7 +812,17 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portNames;
   }
 
-  
+
+  /**
+   * publish a byte array of data that was read from the serial port.
+   * 
+   * @param bytes
+   * @return
+   */
+  public byte[] publishBytes(byte[] bytes) {
+    return bytes;
+  }
+
   /**
    * Publishing receive data to and end point
    * @param data
