@@ -2699,7 +2699,7 @@ public class Msg {
     this.clearToSend = false;
     // watch for the first MrlCommBegin message;
     // TODO: we should have some sort of timeout / error handling here.
-    this.waitForBegin();
+    // this.waitForBegin();
     
   }
 
