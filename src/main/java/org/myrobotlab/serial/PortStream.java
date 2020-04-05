@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.lang.NotImplementedException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -104,6 +102,7 @@ public class PortStream extends Port {
   
   public void write(int[] data) throws IOException {
     // TODO: is there a more effecient way to do this?
+    // TODO: consider deprication of this method and only read/write byte[] from a port.
     for (int i = 0; i < data.length; i++) {
       out.write(data[i]);
     }

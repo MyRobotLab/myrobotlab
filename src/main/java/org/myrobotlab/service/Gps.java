@@ -200,7 +200,7 @@ public class Gps extends Service implements SerialDataListener {
     }
   }
 
-  public void onByte(Integer b) {
+  private void onByte(Integer b) {
 
     try {
       // log.info("byteReceived Index = " + index + " actual data byte = "
@@ -210,7 +210,6 @@ public class Gps extends Service implements SerialDataListener {
       // now depending on what model it was and
       // what stage of initialization we do that funky stuff
       if (b == 0x0a) { // GPS strings end with /CR /LF = 0x0d 0x0a
-
         // log.info("Buffer size = " + buffer.size() + " Buffer = " +
         // buffer.toString());
         buffer.flush(); // flush entire buffer so I can convert it to a
@@ -218,7 +217,6 @@ public class Gps extends Service implements SerialDataListener {
         // message = buffer.toByteArray();
         messageString = new String(buffer.toByteArray(), ("UTF-8"));
         // log.info("size of message = " + message.length);
-
         if (messageString.contains("GGA")) {
           log.info("GGA string detected");
           invoke("publishGGAData");

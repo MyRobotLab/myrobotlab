@@ -47,11 +47,6 @@ public class PortQueue extends Port {
     return new ArrayList<String>();
   }
 
-  // @Override
-  public int readA() throws IOException, InterruptedException {
-    return in.take();
-  }
-
   public byte[] readBytes() {
     // TODO: make it a byte array queue
     try {

@@ -137,9 +137,7 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
         byteData[i] = (byte)(data.data[i] & 0xFF);
       }
       if (listener instanceof Arduino) {
-        for (int newByte : data.data) {
-          ((Arduino) listener).onBytes(byteData);
-        }
+        ((Arduino) listener).onBytes(byteData);
       }
       return data.data;
     }

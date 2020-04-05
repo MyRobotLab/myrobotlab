@@ -102,7 +102,7 @@ public class IBus extends Service implements SerialDataListener {
     }
   }
   
-  public void onByte(Integer b) {
+  private void onByte(Integer b) {
     // while (stream -> available() > 0) {
     long now = millis();
     if (now - last >= PROTOCOL_TIMEGAP) {

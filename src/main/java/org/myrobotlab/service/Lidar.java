@@ -96,7 +96,7 @@ public class Lidar extends Service implements SerialDataListener {
     }
   }
 
-  public Integer onByte(Integer b) {
+  private Integer onByte(Integer b) {
     index++;
 
     if (log.isDebugEnabled()) {
