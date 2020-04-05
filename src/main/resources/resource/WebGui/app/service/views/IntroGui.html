@@ -45,7 +45,7 @@
     
                 <a id="introButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/intro.png"/>&nbsp;</a>
     
-                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="mrl.changeTab('python')"><img src="../Intro/img/python.png"/>&nbsp;</div>
+                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="setPanel('python')"><img src="../Intro/img/python.png"/>&nbsp;</div>
     
                 <div id="securityButton" class="securityButtons preventIntroDragSelect" ng-click="setPanel('security')">Security</div>
     
@@ -171,6 +171,22 @@
     </tr>
     </table>
     <!------------------------ introduction end ------------------------------>
+<!------------------------ python begin ------------------------------>
+    <table ng-show="showPanel('python')" class="table table-striped">
+    <tr>
+        <td>
+            <p>The Python Service allows development and execution of Python scripts which interact and control other Services.<br>  The GUI provides a rudementary IDE for this Service.  You can find a large number of scripts in the community library pyrobotlab</p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Python">MORE INFO</a>&nbsp;&nbsp;
+            <a lass="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('python')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ python end ------------------------------>
     <!------------------------ security begin ------------------------------>
     <table ng-show="showPanel('security')" class="inmoov-sub-panel table table-striped">
     <tr>
