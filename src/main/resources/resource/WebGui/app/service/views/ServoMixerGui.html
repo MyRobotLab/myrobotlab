@@ -1,5 +1,21 @@
 <!-- ServoMixerGui html-->
 <table>
+    <label>&nbsp;</label>
+<tr>
+    <td>
+        <div class="form-inline col-md-2">
+            <span class="input-group-btn">
+            <input class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="directoryName" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="">
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getPosesDirectory(directoryName)">Open Directory</button>
+            </span>
+            <span class="input-group-btn">
+                <button class="btn btn-default" ng-click="msg.setPosesDirectory(directoryName)">Save Directory name</button>
+            </span>
+        </div>
+    </td>
+</tr>    
 <tr>
     <td>
         <div class="form-inline col-md-5">
