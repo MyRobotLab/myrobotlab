@@ -1434,7 +1434,7 @@ public class Arduino extends AbstractMicrocontroller
    */
 
   public synchronized void onBytes(byte[] bytes) {
-    log.info("On Bytes called in Arduino. {}", bytes);
+    // log.info("On Bytes called in Arduino. {}", bytes);
     // These bytes arrived from the serial port data, push them down into the msg parser.
     // if a full message is detected, the publish(Function) method will be directly called on
     // this arduino instance.
@@ -1550,6 +1550,7 @@ public class Arduino extends AbstractMicrocontroller
   public void publishAck(Integer function/* byte */) {
     log.info("Message Ack received: =={}==", Msg.methodToString(function));
     msg.ackReceived(function);
+    msg.pendingMessage = false;
     numAck++;
   }
 
