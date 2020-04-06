@@ -1910,6 +1910,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		releasePeer("brain");
 		isBrainActivated = false;
 	}
+	
+	public void stopHead() {
+		speakBlocking(get("STOPHEAD"));
+		releasePeer("head");
+		isHeadActivated = false;
+	}
 
 	public void stopEar() {
 		speakBlocking(get("STOPEAR"));
