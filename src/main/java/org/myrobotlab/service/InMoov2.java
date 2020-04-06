@@ -801,7 +801,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	 * @param directory - the directory that contains the gesture python files.
 	 */
 	public boolean loadGestures(String directory) {
-		speakBlocking("loading gestures"); // FIXME - make polyglot
+		speakBlocking(get("STARTINGGESTURES"));
 
 		// iterate over each of the python files in the directory
 		// and load them into the python interpreter.
