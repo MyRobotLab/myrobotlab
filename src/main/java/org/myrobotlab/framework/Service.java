@@ -848,6 +848,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getResourceDir() {
     return getResourceDir(getClass().getSimpleName());
   }
+  
+  /**
+   * list of resources for this service top level
+   * @return
+   */
+  public File[] getResourceDirList() {
+    String resDir = getResourceDir();
+    File f = new File(resDir);
+    return f.listFiles();
+  }
 
   static public String getResourceDir(String serviceType) {
     String resourceDir = getResourceRoot() + fs + serviceType;
