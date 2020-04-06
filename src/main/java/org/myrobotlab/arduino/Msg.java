@@ -284,7 +284,7 @@ public class Msg {
     int startPos = 0;
     method = ioCmd[startPos];
     // always process mrlbegin.. 
-    log.info("Process Command: {} Method: {}", method, ioCmd);
+    log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -2255,7 +2255,7 @@ public class Msg {
         // callback onBytes or something like that.
         byteCount.incrementAndGet();
         
-        log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
+        // log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
         // ++byteCount;
         if (log.isDebugEnabled()) {
           log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
@@ -2389,7 +2389,7 @@ public class Msg {
         
       }
     }
-    log.info("Done with onBytes method.");
+    // log.info("Done with onBytes method.");
     return;
   }
 
@@ -2713,7 +2713,7 @@ public class Msg {
     return false;
   }
 
-  private boolean isFullMessage(byte[] bytes) {
+  public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.
     // can't be null
     if (bytes == null) 
@@ -2722,7 +2722,7 @@ public class Msg {
     if (bytes.length <= 2) 
       return false;
     // first byte has to be magic
-    if ((bytes[0] & 0xFF) != this.MAGIC_NUMBER) 
+    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER) 
       return false;
     
     int method = bytes[1] & 0xFF;
