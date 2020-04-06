@@ -412,18 +412,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     log.error("IMPLEMENT ME !");
   }
 
-  public void extract() throws IOException {
-    extract(false);
-  }
-
-  public void extract(boolean overwrite) throws IOException {
-
-    // FIXME - check resource version vs self version
-    // overwrite if different ? - would be in manifest
-
-    FileIO.extractResources(overwrite);
-  }
-
   public Broadcaster getBroadcaster() {
     return broadcaster;
   }
@@ -474,12 +462,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
 
-    
-    configBuilder.resource("./resource/WebGui/app");
-    configBuilder.resource("./resource");
-    
-
-    // for debugging
+    // for debugging - has higher priority
     // v- this makes http://localhost:8888/#/main worky
     configBuilder.resource("./src/main/resources/resource/WebGui/app");
     // allow sub components to be served
@@ -493,6 +476,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // FUTURE !!!
     configBuilder.resource("./src/main/resources");
 
+
+    configBuilder.resource("./resource/WebGui/app");
+    configBuilder.resource("./resource");
+    
     
     // can't seem to make this work .mappingPath("resource/")
 
@@ -1111,7 +1098,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void start() {
     try {
-
+      
+      log.info("starting webgui service....");
+      
       if (port == null) {
         port = 8888;
       }
@@ -1176,15 +1165,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void startService() {
     super.startService();
-    // extract all resources
-    // if resource directory exists - do not overwrite !
-    // could whipe out user mods
-    try {
-      extract();
-    } catch (Exception e) {
-      log.error("webgui start service threw", e);
-    }
-
     start();
   }
 
@@ -1234,7 +1214,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "python", "Python", "--invoke", "python", "execFile", "start.py"});
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "webgui", "WebGui", "intro", "Intro" });
       
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

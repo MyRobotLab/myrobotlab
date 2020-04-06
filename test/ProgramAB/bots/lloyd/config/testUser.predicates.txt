@@ -1,3 +1,0 @@
-jsenabled:true
-foo:1511113480404
-name:foo2
