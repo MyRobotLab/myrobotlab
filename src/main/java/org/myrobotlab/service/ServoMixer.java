@@ -14,7 +14,7 @@ import org.myrobotlab.service.interfaces.ServoControl;
 
 public class ServoMixer extends Service {
 
-  public String posesDirectory = "poses";
+  public String posesDirectory = getDataInstanceDir() + fs + "poses";
   private static final long serialVersionUID = 1L;
 
   public ServoMixer(String n, String id) {
