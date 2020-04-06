@@ -859,6 +859,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return f.listFiles();
   }
 
+  static public String getResourceDir(Class<?> clazz) {
+    return getResourceDir(clazz.getSimpleName());
+  }
+
   static public String getResourceDir(String serviceType) {
     String resourceDir = getResourceRoot() + fs + serviceType;
     if (resourceOverrides.containsKey(serviceType)) {

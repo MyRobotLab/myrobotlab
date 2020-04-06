@@ -38,13 +38,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_dnn.Net;
-import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
@@ -63,8 +63,14 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
    */
   final List<Rectangle> bb = new ArrayList<>();
   final Map<String, List<Classification>> classifications = new TreeMap<>();
-  public String model = "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
-  public String protoTxt = "models/facedetectdnn/deploy.prototxt.txt";
+  // if deps were checked in it would be like this
+  /*
+  public String model = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel");
+  public String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/deploy.prototxt.txt");
+  */
+  // but 
+  public String model = "resource/OpenCV/models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
+  public String protoTxt = "resource/OpenCV/models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
 
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
