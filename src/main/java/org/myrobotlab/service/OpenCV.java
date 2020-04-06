@@ -446,10 +446,10 @@ public class OpenCV extends AbstractComputerVision {
     // to 100mb currently
 
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
-    meta.addDependency("opencv", "opencv_classifiers", "0.0.1", "zip");
+    meta.addDependency("opencv", "opencv_classifiers", "0.0.2", "zip");
 
     // the DNN Face Detection module
-    meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.0", "zip");
+    meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.1", "zip");
 
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
