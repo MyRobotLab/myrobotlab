@@ -117,6 +117,21 @@ public class FileIO {
 
     return true;
   }
+  
+  
+  /**
+   * Copy the contents of dir into the path destination
+   * s
+   * @param dir
+   * @param path
+   * @throws IOException
+   */
+  
+  final public static void copy(File[] dir, String path) throws IOException {
+    for (File f : dir) {
+      copy(f, new File(path));
+    }
+  }
 
   /**
    * A simple copy method which works like a 'regular' operating system copy
@@ -126,10 +141,14 @@ public class FileIO {
    * @throws IOException
    */
   static public final void copy(File src, File dst) throws IOException {
-    log.info("copying from {} to {}", src, dst);
+    log.warn("copying from {} to {}", src, dst);
     if (!src.isDirectory()) {
       byte[] b = toByteArray(src);
-      toFile(dst, b);
+      if (dst.exists() && dst.isDirectory()) {
+        toFile(new File(gluePaths(dst.getPath(), src.getName())), b);
+      } else {
+        toFile(dst, b);
+      }
     } else {
       if (!dst.exists()) {
         // if dst does not exist copy 'contents' of src into dst
@@ -1471,5 +1490,6 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
+
 
 }
