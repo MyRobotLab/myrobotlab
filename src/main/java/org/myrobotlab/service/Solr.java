@@ -138,7 +138,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     File f = new File(getDataInstanceDir());
     f.mkdirs();
     
-    File check = new File(FileIO.gluePaths(path, "core"));
+    File check = new File(FileIO.gluePaths(path, "core1"));
     if (!check.exists()) {
       FileIO.copy(getResourceDirList(), path);
     }
