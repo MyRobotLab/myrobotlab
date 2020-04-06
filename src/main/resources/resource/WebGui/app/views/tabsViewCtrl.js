@@ -31,7 +31,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
         console.debug('tabsViewCtrl.panelsUpdated ' + panels.length)
         $scope.panels = panels
 
-        if (!$scope.view_tab && panels.length > 0) {
+        if (!$scope.view_tab && panels.length > 0 && $scope.panels[$scope.panels.length - 1].name.startsWith('intro')) {
             $scope.changeTab($scope.panels[0].name)
         }
 

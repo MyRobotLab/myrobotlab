@@ -984,7 +984,6 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   public void captureFromResourceFile(String filename) throws IOException {
-    FileIO.extractResource(filename, filename);
     capture(filename);
   }
 

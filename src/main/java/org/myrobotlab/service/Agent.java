@@ -46,7 +46,6 @@ import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
@@ -319,12 +318,13 @@ public class Agent extends Service {
       log.info("agent versioned {} does not exist", agentMyRobotLabJar);
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
       if (!agentJar.endsWith(".jar")) {
+        String cwd = System.getProperty("user.dir");
         log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
-        log.info("i will build a jar for you on src from {}", FileIO.cwd());
+        log.info("i will build a jar for you on src from {}", cwd);
         // guessing the src root is in cwd
         // globalOptions.src
         // FIXME - what do we do on failure of compile ?
-        String newVersion = mvn(FileIO.cwd(), agentBranch, null);
+        String newVersion = mvn(cwd, agentBranch, null);
         if (newVersion != null) {
           log.info("built version {}", newVersion);
         } else {
@@ -1054,6 +1054,8 @@ public class Agent extends Service {
       options.services.add("Log");
       options.services.add("webgui");
       options.services.add("WebGui");      
+      options.services.add("intro");
+      options.services.add("Intro");      
       options.services.add("gui");
       options.services.add("SwingGui");
       options.services.add("python");

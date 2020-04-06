@@ -818,6 +818,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
 
+  /**
+   * All resource access should be using this method.
+   * Util.getResource... should be deprecated.
+   * This should be the one source which determines the location
+   * and resolves the priority of setting this configuration
+   * @return
+   */
   static public String getResourceRoot() {
     // FIXME - should "this" be the test ?
     // If so it should be its own static function...
@@ -830,7 +837,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if ("resource".equals(resourceRoot)) {
       // allow default to be overriden by src if it exists
       File src = new File("src");
-      if (src.exists()) {
+      if (src.exists()) {        
         resourceRoot = "src" + fs + "main" + fs + "resources" + fs + "resource";
       }
     }

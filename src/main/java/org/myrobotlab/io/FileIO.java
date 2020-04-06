@@ -24,6 +24,9 @@
  * FIXME - can probably start deprecating some of these methods in favor of
  * apache-io or guava or even path/files in java 8
  * 
+ * Consider a resources.zip in the jar - then an "extract" just getResourceStream("resources/resource.zip") 
+ * simply extracts a single zip. 
+ * 
  * */
 package org.myrobotlab.io;
 
@@ -54,14 +57,16 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import org.myrobotlab.service.Runtime;
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
 
 /**
@@ -82,28 +87,17 @@ public class FileIO {
   }
 
   static public final Logger log = LoggerFactory.getLogger(FileIO.class);
+  final static public String fs = File.separator;
 
-  
-  /**
-   * At some point this should be the single point where all data and .myrobotlab dir stuff use -
-   * that way it can be "configured" to point somewhere else ..
-   */
-  // static private String cfgDir = null;
-
-  
   /**
    * compares two files - throws if they are not identical, good to use in
    * testing
    * 
    * @param filename1
-   *          f
    * @param filename2
-   *          f
-   * @return true/false
+   * @return
    * @throws FileComparisonException
-   *           e
    * @throws IOException
-   *           e
    */
   static public final boolean compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
     File file1 = new File(filename1);
@@ -125,18 +119,12 @@ public class FileIO {
   }
 
   /**
-   * a simple copy method which works like a 'regular' operating system copy
+   * A simple copy method which works like a 'regular' operating system copy
    * 
    * @param src
-   *          s
    * @param dst
-   *          d
    * @throws IOException
-   *           e
-   * 
    */
-  // TODO - test dst exists or not
-  // TODO - test slashes on end of dirs
   static public final void copy(File src, File dst) throws IOException {
     log.info("copying from {} to {}", src, dst);
     if (!src.isDirectory()) {
@@ -166,11 +154,8 @@ public class FileIO {
    * copy file or folder from one place to another with string interface
    * 
    * @param src
-   *          s
    * @param dst
-   *          d
    * @throws IOException
-   *           e
    */
   static public final void copy(String src, String dst) throws IOException {
     copy(new File(src), new File(dst));
@@ -209,23 +194,11 @@ public class FileIO {
    * @param dst
    *          - target location
    * @param overwrite
-   *          o
    * @return true/false
    * @throws IOException
-   *           e
    */
   static public final boolean extract(String root, String src, String dst, boolean overwrite) throws IOException {
-    log.info("extract([{}], [{}], [{}])", root, src, dst);
-
-    if (dst == null) {
-      dst = "./";
-    }
-
-    File check = new File(dst);
-    if (check.exists() && !overwrite) {
-      log.warn("{} aleady exists - not extracting", dst);
-      return false;
-    }
+    log.info("extract(root={}, src={}, dst={}, overwrite={})", root, src, dst, overwrite);
 
     boolean contents = false;
     boolean found = false;
@@ -268,6 +241,13 @@ public class FileIO {
       // however for directories - there is no specific key given
       // and all the contents has to be iterated through :P
 
+      String finalDst = gluePathsForwardSlash(dst, src);
+      File check = new File(finalDst);
+      if (check.exists() && !overwrite) {
+        log.warn("{} aleady exists - not extracting", finalDst);
+        return false;
+      }
+
       // trying direct key of resource first ....
       URL url = FileIO.class.getResource(src);
       if (url != null) {
@@ -295,7 +275,7 @@ public class FileIO {
         JarEntry file = (JarEntry) enumEntries.nextElement();
         // log.debug(file.getName());
 
-        // spin through resrouces until a match
+        // spin through resources until a match
         if (fromRoot != null && !file.getName().startsWith(fromRoot)) {
           // log.info(String.format("skipping %s", file.getName()));
           continue;
@@ -352,31 +332,9 @@ public class FileIO {
       jar.close();
 
       return found;
-    } else {
-      copy(new File(String.format("%s/%s", root, src)), new File(dst));
-      return true;
     }
-
-  }
-
-  static public final void extractResource(String src, String dst, boolean overwrite) throws IOException {
-    extract(getRoot(), Util.getResourceDir() + File.separator + src + File.separator + dst + File.separator + overwrite);
-  }
-
-  /**
-   * copies a resource file or directory from the myrobotlab.jar and extracts it
-   * onto the file system at a destination supplied. This method works during
-   * dev, build, and runtime
-   * 
-   * @param src
-   *          s
-   * @param dst
-   *          d
-   * @throws IOException
-   *           e
-   */
-  static public final void extractResource(String src, String dst) throws IOException {
-    extractResource(src, dst, true);
+    log.warn("not extracting source is not a jar");
+    return false;
   }
 
   /**
@@ -390,52 +348,16 @@ public class FileIO {
    */
   static public final boolean extractResources() {
     try {
-      return extractResources(false);
+      CmdOptions options = Runtime.getOptions();
+      // PROBLEM !!! FIXME !!
+      // extract(getRoot(), "resource", options.resourceDir,
+      // options.extractResources);
+      extract(getRoot(), "resource", null, options.extractResources);
     } catch (Exception e) {
       Logging.logError(e);
     }
     return false;
   }
-
-  /**
-   * same as extractResources except with an ability to force overwriting an
-   * already existing directory
-   * 
-   * @param overwrite
-   *          true/false
-   * @return true/false
-   * @throws IOException
-   *           e
-   */
-  static public final boolean extractResources(boolean overwrite) throws IOException {
-    // This is the path in the uber jar file that contains the resources.
-    String resourceName = "resource";
-    File check = new File(Util.getResourceDir());
-    if (check.exists() && !overwrite) {
-      log.info("Resources aleady exist: not extracting -- Dir : {} Jar : {}", Util.getResourceDir(), resourceName);
-      return false;
-    }
-
-    // FIXME - this should just copy sources if not a jar
-    if (!isJar()) {
-      log.info("mrl is not operating in a jar - not extracting ");
-      return false;
-    }
-
-    return extract(resourceName, null);
-  }
-    /*
-  static public String setCfgDir(String dirName) {
-    log.info("setting cfgDir to {}", dirName);
-    cfgDir = dirName;
-    File c = new File(cfgDir);
-    c.mkdirs();
-    if (!c.exists() || !c.isDirectory()) {
-      log.error("{} is not a directory or does not exist", c.getAbsolutePath());
-    }
-    return cfgDir;
-  }
-  */
 
   /**
    * get configuration directory
@@ -466,11 +388,11 @@ public class FileIO {
       if (!dir.isDirectory()) {
         log.error("{} is not a file", dirName);
       }
-      
+
       return dirName;
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("getCfgDir threw", e);
     }
     return null;
   }
@@ -515,6 +437,16 @@ public class FileIO {
     }
   }
 
+  /**
+   * "Clever" function to get the list of service based on class files.
+   * It is so "clever" because dev-time may have source files, but test-time utilities
+   * might not know where the source is.  Runtime has no source.
+   * 
+   * A better solution might be to maintain a list of services as a text file :(
+   * 
+   * @return
+   * @throws IOException
+   */
   static public final List<String> getServiceList() throws IOException {
 
     List<URL> urls = listContents(getRoot(), "org/myrobotlab/service", false, new String[] { ".*\\.class" },
@@ -537,26 +469,6 @@ public class FileIO {
     return classes;
   }
 
-  @Deprecated
-  static public final String gluePaths(String path1, String path2) {
-    // normalize to 'real' network slash direction ;)
-    // jar internals probably do not handle back-slash
-    // most file access even on 'windows' machine can interface correctly
-    // with forward slash
-    // network url order is always forward slash
-    path1 = path1.replace("\\", "/").trim();
-    path2 = path2.replace("\\", "/").trim();
-    // only 1 slash between path1 & path2
-    if (path1.endsWith("/")) {
-      path1 = path1.substring(0, path1.length() - 1);
-    }
-    if (path2.startsWith("/")) {
-      path2 = path2.substring(1);
-    }
-
-    return String.format("%s/%s", path1, path2);
-  }
-
   static public final boolean isJar() {
     return isJar(null);
   }
@@ -571,71 +483,12 @@ public class FileIO {
     return false;
   }
 
-  /*
-   * FIXME FIXME - make this a more general implementation of getServiceList
-   * static public final List<File> getPackageContent(String packageName) throws
-   * IOException { return getPackageContent(packageName, false, null, null); }
-   */
-
-  /**
-   * The "goal" of this method is to get the list of contents from a package
-   * REGARDLESS of the packaging :P Regrettably, the implementation depends
-   * greatly on if the classes are on the file system vs if they are in a jar
-   * file
-   * 
-   * Step 1: find out if our application is running in a jar (runtime release)
-   * or running on classes on the file system (debug)
-   * 
-   * Step 2: if we are running from the file system with .class files - it
-   * becomes very simple file operations
-   * 
-   * @param packageName
-   * @param recurse
-   * @param include
-   * @param exclude
-   * @return
-   * @throws IOException
-   */
-  // FIXME reconcile with listPackage - No Files ! use URL returns ?!?!?
-  /*
-   * static public final List<File> getPackageContent(String packageName,
-   * boolean recurse, String[] include, String[] exclude) throws IOException {
-   * 
-   * ArrayList<File> files = new ArrayList<File>();
-   * 
-   * if (!isJar()) {
-   * 
-   * ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-   * assert classLoader != null; String path = packageName.replace('.', '/');
-   * Enumeration<URL> resources = classLoader.getResources(path); List<File>
-   * dirs = new ArrayList<File>(); log.info("resources.hasMoreElements {}",
-   * resources.hasMoreElements());
-   * 
-   * while (resources.hasMoreElements()) { URL resource =
-   * resources.nextElement(); log.info("resources.nextElement {}", resource);
-   * dirs.add(new File(resource.getFile())); }
-   * 
-   * // if (recurse) { for (File directory : dirs) { // FIXME
-   * files.addAll(findPackageContents(directory, // packageName, recurse,
-   * include, exclude)); } } else { // sdf }
-   * 
-   * // } return files;// .toArray(new Class[classes.size()]); }
-   */
-
-  /*
-   * public static String getJarName() { String nm = getRoot(); if
-   * (!nm.endsWith(".jar")) { log.error("mrl is not in a jar!"); return null; }
-   * return nm; }
-   */
-
   /**
    * list the contents of 'self' at directory 'src'
    * 
    * @param src
-   *          s
    * @return list of urls
    * @throws IOException
-   *           e
    */
   static public final List<URL> listContents(String src) throws IOException {
     return listContents(getRoot(), src, true, null, null);
@@ -650,18 +503,12 @@ public class FileIO {
    * file directory
    * 
    * @param root
-   *          r
    * @param src
-   *          s
    * @param recurse
-   *          true/false
    * @param include
-   *          string array
    * @param exclude
-   *          string array
-   * @return list of urls
+   * @return
    * @throws IOException
-   *           e
    */
   static public final List<URL> listContents(String root, String src, boolean recurse, String[] include, String[] exclude) throws IOException {
     List<URL> classes = new ArrayList<URL>();
@@ -1031,7 +878,7 @@ public class FileIO {
       List<URL> urls = null;
 
       log.info("findPackageContents resource/Python/examples");
-      urls = listContents(root, Util.getResourceDir() + "/Python/examples");
+      urls = listContents(root, gluePaths(Service.getResourceRoot(), "/Python/examples"));
 
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
@@ -1042,7 +889,7 @@ public class FileIO {
        */
 
       urls = listContents(getRoot(), Util.getResourceDir() + "/Python/examples");
-      log.info("findPackageContents {}/Python/examples {}", Util.getResourceDir() , urls.size());
+      log.info("findPackageContents {}/Python/examples {}", Util.getResourceDir(), urls.size());
 
       urls = listContents(src);
       log.info("findPackageContents {} {}", src, urls.size());
@@ -1164,14 +1011,15 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return byte array
    */
+  @Deprecated /*user Service.getResource(src)*/
   static public final byte[] resourceToByteArray(String src) {
 
     // this path assumes in a jar ?
-    //  String filename = "/resource/" + src;
+    // String filename = "/resource/" + src;
     log.info("looking for Resource {}", src);
     InputStream isr = null;
     if (isJar()) {
-      //  this path assumes in a jar ?  ensure it's forward slashes
+      // this path assumes in a jar ? ensure it's forward slashes
       String filename = "/resource/" + src.replace("\\", "/");
       isr = FileIO.class.getResourceAsStream(filename);
     } else {
@@ -1211,6 +1059,7 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return string
    */
+  @Deprecated /* use Service.getResourceAsString(src) */
   static public final String resourceToString(String src) {
     byte[] bytes = resourceToByteArray(src);
     if (bytes == null) {
@@ -1223,7 +1072,6 @@ public class FileIO {
    * removes a file or recursively removes directory
    * 
    * @param file
-   *          f
    * @return true/false
    */
   static public final boolean rm(File file) {
@@ -1249,10 +1097,8 @@ public class FileIO {
   /**
    * recursively remove files and directories, leaving exlusions
    * 
-   * @param directory
-   *          - the directory to remove
-   * @param exclude
-   *          - the exceptions to save
+   * @param directory - the directory to remove
+   * @param exclude - the exceptions to save
    * @return true/false
    */
   static public final boolean rmDir(File directory, Set<File> exclude) {
@@ -1526,17 +1372,32 @@ public class FileIO {
     return propMap;
   }
 
-  // Taken from Commons-io IOUtils
+  /**
+   * Taken from Commons-io IOUtils
+   * @param input
+   * @return
+   */
   public static InputStream toInputStream(String input) {
     return toInputStream(input, Charset.defaultCharset());
   }
 
-  // Taken from Commons-io IOUtils
+  /**
+   * Taken from Commons-io IOUtils
+   * @param input
+   * @param encoding
+   * @return
+   */
   public static InputStream toInputStream(String input, Charset encoding) {
     return new ByteArrayInputStream(input.getBytes(Charsets.toCharset(encoding)));
   }
 
-  // Taken from Commons-io IOUtils
+  /**
+   * Taken from Commons-io IOUtils
+   * @param input
+   * @param encoding
+   * @return
+   * @throws IOException
+   */
   public static InputStream toInputStream(String input, String encoding) throws IOException {
     byte[] bytes = input.getBytes(Charsets.toCharset(encoding));
     return new ByteArrayInputStream(bytes);
@@ -1550,28 +1411,65 @@ public class FileIO {
     }
     return ret;
   }
-  
+
   public static String cleanFileName(String name) {
     return name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
   }
 
-  public static String cwd() {
-    return System.getProperty("user.dir");
-  }
-
   /**
-   * Same as toString(filename) but does not throw - simply returns null in case of error
-   * @param filename - name of file
+   * Same as toString(filename) but does not throw - simply returns null in case
+   * of error
+   * 
+   * @param filename
+   *          - name of file
    * @return
    */
   public static String toSafeString(String filename) {
     try {
       return toString(filename);
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("{} not found", filename);
     }
     return null;
   }
 
+  /**
+   * This method correctly glues paths together, with the result being a forward
+   * path reference. Most references of file operations work correctly with
+   * forward slash even on windows Backslash will fail inside a jar when
+   * requesting resource stream references. Network access of course is forward
+   * slash ... https://en.wikipedia.org/wiki/Backslash Bill Gates and IBM are
+   * evil !
+   * 
+   * @param path1
+   * @param path2
+   * @return forward slash path
+   */
+  static public final String gluePathsForwardSlash(String path1, String path2) {
+
+    path1 = path1.replace("\\", "/").trim();
+    path2 = path2.replace("\\", "/").trim();
+    // only 1 slash between path1 & path2
+    if (path1.endsWith("/")) {
+      path1 = path1.substring(0, path1.length() - 1);
+    }
+    if (path2.startsWith("/")) {
+      path2 = path2.substring(1);
+    }
+    return String.format("%s/%s", path1, path2);
+  }
+
+  public static String gluePaths(String path1, String path2) {
+    path1 = path1.replace("\\", FileIO.fs).trim();
+    path2 = path2.replace("/", FileIO.fs).trim();
+    // only 1 slash between path1 & path2
+    if (path1.endsWith(FileIO.fs)) {
+      path1 = path1.substring(0, path1.length() - 1);
+    }
+    if (path2.startsWith(FileIO.fs)) {
+      path2 = path2.substring(1);
+    }
+    return String.format("%s%s%s", path1, FileIO.fs, path2);
+  }
 
 }
