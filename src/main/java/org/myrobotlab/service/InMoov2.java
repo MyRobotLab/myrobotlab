@@ -1900,7 +1900,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.attach(right, trigPin, echoPin);
+					right.attach(ultrasonicRight, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1921,7 +1921,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino left = (Arduino) startPeer("left");
 					left.connect(port);
-					left.attach(left, trigPin, echoPin);
+					left.attach(ultrasonicLeft, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
