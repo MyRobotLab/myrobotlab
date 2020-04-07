@@ -1,0 +1,236 @@
+<!------------------------------INTRO-PAGE START-------------------------->
+
+<style>
+    #containerIntro{
+    width: 620px;
+    height: 588px;
+    /* border: 1px solid #000; */
+    position: relative;
+    background-image: url("../Intro/img/MRL_background.png");
+    z-index: 0;
+    float: none;
+    }
+
+    #containerIntro-cell {
+    width: 620px;
+    }
+
+</style>
+
+<table border="1" class="table table-striped">
+    <tr>
+        <td colspan="2">&nbsp;{{onText}} 
+        </td>
+    </tr>
+    <tr>
+        <link type="text/css" rel="stylesheet" media="all" href="../service/css/IntroGui.css">
+        <td id="containerIntro-cell">
+            <div id="containerIntro">
+                <!-- Right -->
+                
+    
+                <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')"><img src="../Intro/img/arduino.png"/>&nbsp;</a>
+    
+                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../Intro/img/inmoov.png"/>&nbsp;</div>
+    
+                <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../Intro/img/serial.png"/>&nbsp;</div>
+    
+                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="msg.start('OpenCV','OpenCV')"><img src="../Intro/img/visionActive.png"/>&nbsp;</div>
+    
+                <!-- Left -->
+    
+                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')"><img src="../Intro/img/servo.png"/>&nbsp;</div>
+    
+                <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../Intro/img/go.png"/>&nbsp;</div>
+    
+                <a id="introButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/intro.png"/>&nbsp;</a>
+    
+                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="setPanel('python')"><img src="../Intro/img/python.png"/>&nbsp;</div>
+    
+                <div id="securityButton" class="securityButtons preventIntroDragSelect" ng-click="setPanel('security')">Security</div>
+    
+                <div id="homeButton" class="homeButtons preventIntroDragSelect" ng-click="setPanel('extension')">Home</div>
+            </div>
+        </td>
+    <td>
+    <!-- panels begin -->
+    <!------------------------ extension begin ------------------------------>
+    <table ng-show="showPanel('extension')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Intro/img/MRL_extension1.png"/>
+            <a id="logoButton" class="IntroButtons preventIntroDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank"><img src="../Intro/img/logo.png"/></a>
+         </td>
+    </tr>
+    </table>    
+    <!------------------------ extension end ------------------------------>
+    <!------------------------ arduino begin ------------------------------>
+    <table ng-show="showPanel('arduino')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../arduino.png"/>
+            <label>Arduino</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <p> MrlComm.ino is a catch all phrase for the Arduino sketch that runs as part of MyRobotLab.<br>  It is bundled with each build of myrobotlab.<br> You can locate the MrlComm.ino in <strong>resource/Arduino/MrlComm/MrlComm.ino</strong>.<br> Normally you would copy & paste the MRLComm.ino into the arduino IDE for upload to<br> the Arduino board.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/-EQxjpsOJDg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </td>
+    </tr>
+    </table>    
+    <!------------------------ arduino end ------------------------------>
+    <!------------------------ serial begin ------------------------------>
+    <table ng-show="showPanel('serial')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../serial.png"/>
+            <label>Serial:</label>
+            <P>Serial service is a way to send and receive serial data into and out of MRL</P>
+            <a class="row col-md-3" href="http://myrobotlab.org/service/Serial" target="_blank">MORE INFO</a>
+            <a class="row col-md-4" href="http://myrobotlab.org/service/Serial" target="_blank">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img width="600" src="http://myrobotlab.org/sites/default/files/users/user3images/Serial_1.png"/>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ serial end ------------------------------>
+    <!------------------------ servo begin ------------------------------>
+    <table ng-show="showPanel('servo')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Servo.png"/>
+            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>&nbsp;&nbsp;
+            <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.stopServo():msg.startServo()" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Settings</button>
+            <!--div ng-click="msg.start('servo', 'Servo')"></div-->
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>The Servo service is used to control servos through a micro-controller such as an Arduino or a Raspberry pi (ServoController).<br>
+            The service will allow to control attaching or detaching the device, control his position and the speed at wich it move to that position, and turn off/on the servo.<br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <strong>servo.attach</strong>(controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
+
+            <strong>servo.detach</strong>(controller): detach the servo from the microcontroller<br>
+
+            <strong>servo.enable</strong>(): will turn the servo motor on<br>
+
+            <strong>servo.disable</strong>(): will turn the servo motor off<br>
+
+            <strong>servo.moveTo</strong>(pos): ask the servo to move to a position<br>
+
+            <strong>servo.moveToBlocking</strong>(pos): ask the servo to move to a position and wait the position reached<br>
+
+            <strong>servo.map</strong>(inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
+
+            <strong>servo.setInverted</strong>(true/false): Reverse the direction of rotation of the servo.</p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>&nbsp;&nbsp;
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ servo end ------------------------------>
+    <!------------------------ servo1 begin ------------------------------>
+    <table ng-show="showPanel('servo1')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Servo.png"/>
+            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller for you. You should be able to select it in the drop down.<br> Select the correct signal pin the servo is attached to.  Then select "attach" and the servo should be controllable with the slider bar.<br>  Limits can be set in order to protect the servo from going beyond a certain minimum and maximum value.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('servo')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ servo1 end ------------------------------>
+    <!------------------------ introduction begin ------------------------------>
+    <table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
+    <tr>
+        <td>
+            <img src="../myrobotlab.png"/>
+            <label>MyRobotLab:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+    </tr>    
+    <tr>
+        <td>
+            <p> Maybe this can redirect to this link http://myrobotlab.org/quick_start</p>
+            <a target="_self" href="http://myrobotlab.org/quick_start"></a>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ introduction end ------------------------------>
+    <!------------------------ python begin ------------------------------>
+    <table ng-show="showPanel('python')" class="table table-striped">
+    <tr>
+        <td>
+            <p>The Python Service allows development and execution of Python scripts which interact and control other Services.<br>  The GUI provides a rudementary IDE for this Service.  You can find a large number of scripts in the community library pyrobotlab</p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Python">MORE INFO</a>&nbsp;&nbsp;
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">LOAD SCRIPT IN PYTHON</a>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/_uQrJ0TkZlc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('python')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ python end ------------------------------>
+    <!------------------------ security begin ------------------------------>
+    <table ng-show="showPanel('security')" class="inmoov-sub-panel table table-striped">
+    <tr>
+        <td>
+            <img src="../Security.png"/>
+            <p>If you have something to hide this service is for you !<br>
+            Useful to store passwords or secrets keys ( like api keys ) inside an AES safe and expose some code lines.<br>
+            It is important to never expose API keys inside any script !</p>
+            <a class="row col-md-1" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Security.py">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    </tr>    
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('security')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ security end ------------------------------>
+    <!------------------------ runtime begin ------------------------------>
+    <table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
+    <tr>
+        <td>
+            <img src="../runtime.png"/>&nbsp;&nbsp;
+            <p> The Runtime is the first Service to start when MyRobotLab begins.<br> Every running instance of MyRobotLab includes a single Runtime Service.<br> The Runtime is a singleton, which means there should be only one per running process of MyRobotLab.<br> Its responsibilities include the creation, removal, and merging of Services into the Service registry.<br>
+            The registry is critical for routing communication between Services.<br>
+            In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>&nbsp;&nbsp;
+            <a class="row col-md-3" target="_blank" href="https://github.com/MyRobotLab/pyrobotlab/blob/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('runtime')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ runtime end ------------------------------>
+    <!-- panels end -->
+    </td></tr></table>
+    
+    <!------------------------------INTRO-PAGE END---------------------------->
+

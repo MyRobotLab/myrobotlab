@@ -130,9 +130,18 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
    */
   public void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
-    FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
-    FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path + File.separator + "solr.xml");
+    // FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
+    // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path + File.separator + "solr.xml");
     // load up the solr core container and start solr
+    
+    // FIXME - a bit unsatisfactory
+    File f = new File(getDataInstanceDir());
+    f.mkdirs();
+    
+    File check = new File(FileIO.gluePaths(path, "core1"));
+    if (!check.exists()) {
+      FileIO.copy(getResourceDirList(), path);
+    }
     Path solrHome = Paths.get(path);
     log.info(solrHome.toFile().getAbsolutePath());
     Path solrXml = solrHome.resolve("solr.xml");
@@ -951,7 +960,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+    LoggingFactory.init(Level.DEBUG);
     try {
       Solr solr = (Solr) Runtime.start("solr", "Solr");
       solr.startEmbedded();

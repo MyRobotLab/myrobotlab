@@ -1,0 +1,194 @@
+
+
+.preventIntroDragSelect{
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+}
+
+.IntroButtons {
+    position:absolute;
+    width:130px;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+}
+
+.IntroButtons:hover {
+    animation: none;
+    -webkit-filter: saturate(400%) drop-shadow(0px 0px 8px rgba(255, 255, 255, 1));
+    cursor:pointer;
+}
+
+.IntroButtons:active {
+    -webkit-filter: saturate(400%) drop-shadow(0px 0px 8px rgba(20, 255, 255, 1));
+    cursor:pointer;
+}
+
+.IntroButtonsActive {
+    position:absolute;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    cursor: default;
+}
+
+
+/* -------------------    Right Buttons  --------------------*/
+
+#logoButton img{
+    position:absolute;
+    right: 194px;
+    top: 212px;
+}
+
+/* -------------------    Left Buttons  --------------------*/
+
+#servoButton img{
+    position:absolute;
+    left: 232px;
+    top: 369px;
+}
+
+/* ------------------------------------*/
+
+#goButton img{
+    position:absolute;
+    left: 420px;
+    top: 373px;
+}
+
+/* ------------------------------------*/
+
+#introButton img{
+    position:absolute;
+    left: 310px;
+    top: 221px;
+}
+
+/* ------------------------------------*/
+
+#pythonButton img{
+    position:absolute;
+    left: 404px;
+    top: 86px;
+}
+
+/* ------------------------------------*/
+
+#arduinoButton img{
+    position:absolute;   
+    left: 153px;
+    top: 224px;
+}
+
+/* ------------------------------------*/
+
+#inmoovButton img{
+    position:absolute;   
+    left: 0px;
+    top: 224px;
+}
+
+/* ------------------------------------*/
+
+
+#serialButton img{
+    position:absolute;
+    left: 70px;
+    top: 80px;
+}
+
+/* ------------------------------------*/
+
+
+#visionButton img{
+    position:absolute;
+    left: 63px;
+    top: 367px;
+}
+
+/* ------------------------------------*/
+
+
+.securityButtons{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #587e88;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #414b4e, 0 0 7px #76bed3, 0 0 7px #8ddaefd9;
+}
+
+.securityButtonsActive{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #ff1414, 0 0 10px #FFFFFF;
+    cursor: default;
+}
+
+#securityButton{
+    left: 522px;
+    top: 549px;
+}
+
+/* ------------------------------------*/
+
+
+.homeButtons{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #587e88;
+    cursor: pointer;
+    display: inline-block;
+    /* 
+    overflow: hidden;
+    break the glow
+    */
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #414b4e, 0 0 7px #76bed3, 0 0 7px #8ddaefd9;
+}
+
+.homeButtonsActive{
+    position:absolute;
+    font-family: helvetica,sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #f38094;
+    cursor: pointer;
+    display: inline-block;
+    height: 24px;
+    max-height: 24px;
+    text-shadow: 0 0 3px #ff1414, 0 0 10px #FFFFFF;
+    cursor: default;
+}
+
+#homeButton{
+    left: 33px;
+    top: 549px;
+}
