@@ -69,14 +69,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
                 meta.addPeer("eye", "OpenCV", "eye");
                 meta.addPeer("servomixer", "ServoMixer", "for making gestures");
-		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
-                meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
+		meta.addPeer("ultrasonicRight", "UltrasonicSensor", "measure distance");
+                meta.addPeer("ultrasonicLeft", "UltrasonicSensor", "measure distance");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
 		meta.addPeer("right", "Arduino", "legacy controller");
-		meta.addPeer("extra1", "Arduino", "legacy controller");
-		meta.addPeer("extra2", "Arduino", "legacy controller");
+		meta.addPeer("controller3", "Arduino", "legacy controller");
+		meta.addPeer("controller4", "Arduino", "legacy controller");
 
 		meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
@@ -229,9 +229,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	transient HtmlFilter htmlFilter;
 	
-	transient UltrasonicSensor ultraSonicRight;
+	transient UltrasonicSensor ultrasonicRight;
 
-	transient UltrasonicSensor ultraSonicLeft;
+	transient UltrasonicSensor ultrasonicLeft;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -268,9 +268,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	boolean isPirActivated = false;
 
-	boolean isUltraSonicRightActivated = false;
+	boolean isUltrasonicRightActivated = false;
 
-	boolean isUltraSonicLeftActivated = false;
+	boolean isUltrasonicLeftActivated = false;
 	
 	boolean isServoMixerActivated = false;
 
@@ -728,12 +728,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return isPirActivated;
 	}
 
-	public boolean isUltraSonicRightActivated() {
-		return isUltraSonicRightActivated;
+	public boolean isUltrasonicRightActivated() {
+		return isUltrasonicRightActivated;
 	}
 
-	public boolean isUltraSonicLeftActivated() {
-		return isUltraSonicLeftActivated;
+	public boolean isUltrasonicLeftActivated() {
+		return isUltrasonicLeftActivated;
 	}
 	
 	public boolean isServoMixerActivated() {
@@ -1888,44 +1888,46 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return torso;
 	}
 	
-	public UltrasonicSensor startUltraSonicRight(String port) {
-		if (ultraSonicRight == null) {
+	public UltrasonicSensor startUltrasonicRight(String port, int trigPin, int echoPin) {
+		if (ultrasonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
-			isUltraSonicRightActivated = true;
+			isUltrasonicRightActivated = true;
 
-			ultraSonicRight = (UltrasonicSensor) startPeer("ultraSonicRight");
+			ultrasonicRight = (UltrasonicSensor) startPeer("ultrasonicRight");
 
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino extra1 = (Arduino) startPeer("extra1");
-					extra1.connect(port);
+					Arduino right = (Arduino) startPeer("right");
+					right.connect(port);
+					right.attach(right, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
 			}
 		}
-		return ultraSonicRight;
+		return ultrasonicRight;
 	}
 
-	public UltrasonicSensor startUltraSonicLeft(String port) {
-		if (ultraSonicLeft == null) {
+	public UltrasonicSensor startUltrasonicLeft(String port, int trigPin, int echoPin) {
+		if (ultrasonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
-			isUltraSonicLeftActivated = true;
+			isUltrasonicLeftActivated = true;
 
-			ultraSonicLeft = (UltrasonicSensor) startPeer("ultraSonicLeft");
+			ultrasonicLeft = (UltrasonicSensor) startPeer("ultrasonicLeft");
 
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino extra1 = (Arduino) startPeer("extra1");
-					extra1.connect(port);
+					Arduino left = (Arduino) startPeer("left");
+					left.connect(port);
+					left.attach(left, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
 			}
 		}
-		return ultraSonicLeft;
+		return ultrasonicLeft;
 	}
 	
 	public ServoMixer startServoMixer() {
@@ -2040,16 +2042,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		isPirActivated = false;
 	}
 
-	public void stopUltraSonicRight() {
+	public void stopUltrasonicRight() {
 		speakBlocking(get("STOPULTRASONIC"));
-		releasePeer("ultraSonicRight");
-		isUltraSonicRightActivated = false;
+		releasePeer("ultrasonicRight");
+		isUltrasonicRightActivated = false;
 	}
 
-	public void stopUltraSonicLeft() {
+	public void stopUltrasonicLeft() {
 		speakBlocking(get("STOPULTRASONIC"));
-		releasePeer("ultraSonicLeft");
-		isUltraSonicLeftActivated = false;
+		releasePeer("ultrasonicLeft");
+		isUltrasonicLeftActivated = false;
 	}
 	
         public void stopServoMixer() {
