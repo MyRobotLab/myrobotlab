@@ -17,14 +17,14 @@ import org.slf4j.Logger;
 
 /**
  * 
- * Sweety - The sweety robot service. Maintained by \@beetlejuice
+ * Andrew - The Andrew robot service. Maintained by \@beetlejuice
  *
  */
-public class Sweety extends Service {
+public class Andrew extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Sweety.class);
+  public final static Logger log = LoggerFactory.getLogger(Andrew.class);
 
   transient public Arduino arduino;
   transient public Adafruit16CServoDriver adaFruit16cRight;
@@ -210,7 +210,7 @@ public class Sweety extends Service {
    * change" Exemple
    * setRightArm({39,1,2,3},{40,1,2,3},{41,1,2,3},{-1,1,2,3},{-1,1,2,3}) Python
    * exemple :
-   * sweety.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
+   * Andrew.setRightArm([1,0,180,90],[2,0,180,0],[3,180,90,90],[7,7,4,4],[8,5,8,1])
    */
   public void setRightArm(double[] shoulder, double[] arm, double[] biceps, double[] elbow, double[] wrist) {
     rightShoulder = new ServoConfig(shoulder);
@@ -256,7 +256,7 @@ public class Sweety extends Service {
   /**
    * Set pin, min, max, and rest for head tilt and pan . -1 in an array mean "no
    * change" Exemple setHead({39,1,2,3},{40,1,2,3}) Python exemple :
-   * sweety.setHead([1,0,180,90],[2,0,180,0])
+   * Andrew.setHead([1,0,180,90],[2,0,180,0])
    */
   public void setHead(double[] tilt, double[] pan) {
     neckTilt = new ServoConfig(tilt);
@@ -283,14 +283,14 @@ public class Sweety extends Service {
 
     try {
 
-      Runtime.start("sweety", "Sweety");
+      Runtime.start("andrew", "Andrew");
 
     } catch (Exception e) {
       Logging.logError(e);
     }
   }
 
-  public Sweety(String n, String id) {
+  public Andrew(String n, String id) {
     super(n, id);
   }
 
@@ -753,7 +753,7 @@ public class Sweety extends Service {
   }
 
   @Override
-  public Sweety publishState() {
+  public Andrew publishState() {
     super.publishState();
     if (arduino != null)
       arduino.publishState();
@@ -1046,7 +1046,7 @@ public class Sweety extends Service {
   }
 
   public OpenNi startOpenNI() throws Exception {
-    // TODO modify this function to fit new sweety
+    // TODO modify this function to fit new Andrew
     /*
      * Start the Kinect service
      */
@@ -1111,13 +1111,13 @@ public class Sweety extends Service {
     }
 
     script.append(indentSpace);
-    script.append(String.format("Sweety.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(),
+    script.append(String.format("Andrew.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(),
         rightElbowServo.getPos(), rightWristServo.getPos()));
     script.append(indentSpace);
-    script.append(String.format("Sweety.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(),
+    script.append(String.format("Andrew.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(),
         leftWristServo.getPos()));
     script.append(indentSpace);
-    script.append(String.format("Sweety.setHeadPosition(%f,%f)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
+    script.append(String.format("Andrew.setHeadPosition(%f,%f)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
 
     send("python", "appendScript", script.toString());
 
@@ -1158,8 +1158,8 @@ public class Sweety extends Service {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Sweety.class.getCanonicalName());
-    meta.addDescription("service for the Sweety robot");
+    ServiceType meta = new ServiceType(Andrew.class.getCanonicalName());
+    meta.addDescription("service for the Andrew robot");
     meta.addCategory("robot");
 
     return meta;

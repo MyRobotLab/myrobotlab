@@ -5,8 +5,9 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.nd4j.linalg.io.Assert;
 
+
 @Ignore
-public class SweetyTest extends AbstractServiceTest {
+public class AndrewTest extends AbstractServiceTest {
 
   /*
   public void startVirtualPort(String port) {
@@ -33,8 +34,8 @@ public class SweetyTest extends AbstractServiceTest {
     webgui.autoStartBrowser = false;
 
     
-    Sweety sweety = (Sweety)Runtime.start("sweety", "Sweety");
-    return sweety;
+    Andrew andrew = (Andrew)Runtime.start("andrew", "Andrew");
+    return andrew;
   }
   
 
@@ -46,23 +47,23 @@ public class SweetyTest extends AbstractServiceTest {
     
     
     
-    Sweety sweety = (Sweety)service;
+    Andrew andrew = (Andrew)service;
     
-    sweety.startService();
+    andrew.startService();
   
 
-    sweety.startServos();
+    andrew.startServos();
     
     
-    sweety.connect(port);
+    andrew.connect(port);
     
   //  sweety.startUltraSonic(port);
     
-    sweety.attach();
+    andrew.attach();
     
-    Assert.notNull(sweety.captureGesture());
+    Assert.notNull(andrew.captureGesture());
     
-    sweety.detach();
+    andrew.detach();
     
     // for some reason this isn't released. 
     // Runtime.release("webgui");
