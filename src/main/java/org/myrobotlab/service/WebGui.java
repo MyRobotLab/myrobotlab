@@ -460,7 +460,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // FIRST DEFINED HAS HIGHER PRIORITY !! no virtual mapping of resources
     // for access after extracting :(
 
-    configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
+    // configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
+    // clone InMoov2 at the same level as myrobotlab
+    configBuilder.resource("../InMoov2/resource/WebGui/app");
 
     // for debugging - has higher priority
     // v- this makes http://localhost:8888/#/main worky
