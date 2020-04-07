@@ -45,8 +45,12 @@
         left: 6px;
         top: 56px;
         z-index: 120;
-        cursor: pointer
-        /*visibility: hidden;*/
+        cursor: pointer;
+        transform: scaleX(1.5) rotate(90deg);
+        font-size: 28px;
+        color: #b3b3b3;
+        padding-left: 20px;
+        visibility: hidden;
     }
 
     #handleClose{
@@ -63,13 +67,13 @@
         /* padding-top: 300px; */
 
         /* Firefox */
-        height: -moz-calc(100vh - 120px);
+        height: -moz-calc(100vh - 98px);
         /* WebKit */
-        height: -webkit-calc(100vh - 120px);
+        height: -webkit-calc(100vh - 98px);
         /* Opera */
-        height: -o-calc(100vh - 120px);
+        height: -o-calc(100vh - 98px);
         /* Standard */
-        height: calc(100vh - 120px);
+        height: calc(100vh - 98px);
 
         width: 0;
         position: fixed;
@@ -88,7 +92,11 @@
         border-bottom-color: #d6d6d6;
         border-bottom-style: solid;
         border-bottom-width: 3px;
+        border-right-color: #f2f5f7;
+        border-right-style: solid;
+        border-right-width: 1px;
         scrollbar-width: thin;
+        /*overscroll-behavior: contain;*/
     }
 
     ::-webkit-scrollbar {
@@ -109,8 +117,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #56aaff; 
     }
-
-
 
     /* Tamaño del scroll */
     .sidenav::-webkit-scrollbar {
@@ -146,14 +152,20 @@
     }
     */
 
-
-
     .sidenav .closebtn {
         position: absolute;
         top: 0;
         right: 25px;
         /* font-size: 36px; */
         margin-left: 50px;
+    }
+    .sidenav .pull-left{
+        width: 100vw !important;
+        text-align: left !important;
+    }
+
+    .sidenav .nav-tabs>li.active>a{
+        background-color: #e5f0fb;
     }
 
     #main {
@@ -172,15 +184,11 @@
 
         z-index: 1;
         background-color: #FFFFFF;
-        overflow-x: hidden;
+        overflow: scroll;
         transition-timing-function: ease;
-        border-top-color: #cccccc;
-        border-top-style: solid;
-        border-top-width: 1px;
-        border-bottom-color: #d6d6d6;
-        border-bottom-style: solid;
-        border-bottom-width: 3px;
         scrollbar-width: thin;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
 
     }
 
@@ -195,18 +203,14 @@
     <!-- 1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right -->
     <!-- migrate to Angular UI Bootstrap when they offer one -->
     
-    <!--
-    <div id="handleOpen1">
-        <a href="javascript:void(0)" style="font-size:30px;cursor:pointer" onclick="openNav()">&#62;</a>
-    </div>
-    -->
-
     <!-- start mySidenavContainer -->
-    <div id="mySidenavContainer" onmouseleave="closeNav()">
+    <div id="mySidenavContainer">
+    <!-- <div id="mySidenavContainer" onmouseleave="closeNav()"> -->
+    
         <div id="sidenavTop">
             
-                <!-- input type="text" class="form-control" ng-change="checkForWildCard(searchText)" ng-model="searchText.displayName" placeholder="Search" style="width:200px;" typeahead-min-length="0" -->
-                <input  id="sideNavSearch" type="text" class="form-control" ng-model="searchText.displayName" placeholder="Search" typeahead-min-length="0">
+            <!-- input type="text" class="form-control" ng-change="checkForWildCard(searchText)" ng-model="searchText.displayName" placeholder="Search" style="width:200px;" typeahead-min-length="0" -->
+            <input  id="sideNavSearch" type="text" class="form-control" ng-model="searchText.displayName" placeholder="Search" typeahead-min-length="0">
             
             <!--
             <div id="handleClose">
@@ -235,31 +239,10 @@
     </div>
     <!-- end mySidenavContainer -->
 
-    <span>
-            
-            <span id="handleOpen" onmouseenter="openNav()" onclick="openNav()">
-
-               <svg width="20" height="35" xmlns="http://www.w3.org/2000/svg">
-                   <g>
-                        <title>background</title>
-                        <rect fill="#fff" id="canvas_background" height="37" width="22" y="-1" x="-1"/>
-                        <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
-                            <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
-                        </g>
-                   </g>
-                   <g>
-                        <title>Layer 1</title>
-                        <path Googl="true" transform="rotate(90, 13.7234, 11.3055)" id="svg_4" d="m7.457573,13.991423l6.265938,-5.372295l6.265949,5.372295z" stroke-width="1.5" fill="#56aaff"/>
-                        <rect id="svg_5" height="25.416863" width="5.264383" y="4.894994" x="3.792315" stroke-width="1.5" fill="#abcff2"/>
-                   </g>
-               </svg>
-            </span><!-- &#9776; --><!-- &#62; -->
-
-    </span>
+    <span id="handleOpen" onmouseenter="openNav()" onclick="openNav()" class="glyphicon glyphicon-eject"></span>
 
     <!-- start main -->
     <div id="main">
-
        
         <!-- span onmouseenter="openNav()" style="font-size:130px;cursor:pointer">&#9776;</span> -->
         <!--   THIS IS THE MOST IMPORTANT PART OF /main
@@ -308,11 +291,13 @@
             document.getElementById("handleClose").style.visibility = "visible";
         }, 600);
 
+        document.getElementById("main").style.width = "calc(100% - 250px)";
         document.getElementById("mySidenavContainer").style.visibility = "visible";
         document.getElementById("mySidenavContainer").style.width = "250px";
         document.getElementById("mySidenav").style.width = "250px";
         document.getElementById("sidenavTop").style.width = "250px";
         document.getElementById("main").style.marginLeft = "250px";
+        /*document.getElementById("main").style.width = "calc(100% - 250px)";*/
     }
 
     function closeNav() {
@@ -321,11 +306,14 @@
         setTimeout(function () {
             document.getElementById("handleOpen").style.visibility = "visible";
         }, 600);
+        
         document.getElementById("handleClose").style.visibility = "hidden";
         document.getElementById("mySidenavContainer").style.width = "0px";
         document.getElementById("sidenavTop").style.width = "0px";
         document.getElementById("mySidenav").style.width = "0";
         document.getElementById("main").style.marginLeft = "0";
+        document.getElementById("main").style.width = "100%";
+
     }
 </script>
 <!--

@@ -180,7 +180,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   /**
    * command line options
    */
-  static CmdOptions options;
+  static CmdOptions options = new CmdOptions();
 
   /**
    * the platform (local instance) for this runtime. It must be a non-static as
@@ -544,37 +544,17 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
           // startHeartbeat();
 
-          extract(); // FIXME - too overkill - do by checking version of re
+          FileIO.extractResources();
         }
       }
     }
     return runtime;
   }
 
-  static public boolean extract() {
-	// we now check a version.txt 
-    // FIXME - check to see if this extract only once - it should !
-    // FIXME - make static function extract() and "force" it to overwrite
-    // FIXME - put in command line to -extract similar to -install
-    // FIXME - divide up resources so each service has its appropriate
-    // dependencies
-    // OR - bundle them as dependency resources into artifactory
-    try {
-      String resourceDir = (options != null)? options.resourceDir:"resource";
-      
-      String forceExtraction = null;
-      try {
-    	  forceExtraction = FileIO.toString(new File(resourceDir + fs + "version.txt"));
-      } catch(Exception e) {/*don't care*/}
-      boolean extract = (getVersion() == null)?true:!getVersion().equals(forceExtraction);
-      FileIO.extractResources(extract);
-      return true;
-    } catch (Exception e) {
-      log.error("extraction threw", e);
-    }
-    return false;
-  }
-
+  /**
+   * The jvm args which started this process
+   * @return all jvm args in a list
+   */
   static public List<String> getJvmArgs() {
     RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
     return runtimeMxBean.getInputArguments();
@@ -1154,7 +1134,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public static void main(String[] args) {
 
     try {
-      options = new CmdOptions();
+      // options = new CmdOptions();
 
       // for Callable execution ...
       // int exitCode = new CommandLine(options).execute(args);
@@ -1988,6 +1968,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     @Option(names = { "--resource-dir" }, description = "sets the location of the resource directory")
     public String resourceDir = "resource";
+
+    @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
+    public boolean extractResources = false;
 
   }
 

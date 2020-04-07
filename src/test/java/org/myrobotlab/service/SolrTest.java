@@ -62,11 +62,7 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public Service createService() {
-    
-//    Repo.getInstance().install();
     Repo.getInstance().install("Solr");
-    LoggingFactory.init("WARN");
-    // TODO Auto-generated method stub
     Solr solr = (Solr)Runtime.start("solr", "Solr");
     return solr;
   }
@@ -75,8 +71,8 @@ public class SolrTest extends AbstractServiceTest {
   public void testService() throws Exception {
     // LoggingFactory.init("INFO"); please do not do this
     Solr solr = (Solr)service;
-    String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
-    solr.startEmbedded(solrHome);
+    // String solrHome = SolrTest.testFolder.getRoot().getAbsolutePath();
+    solr.startEmbedded();
     solr.deleteEmbeddedIndex();
     solr.addDocument(makeTestDoc("doc_1"));
     solr.commit();

@@ -169,7 +169,26 @@ table, th, td {
     text-decoration: none;
 }
 
-#mrlShoutdown_on{
+.notification-badge {
+    position: relative;
+    left: -40px;   
+}
+
+#notification-entries {
+    width: 300px;
+    height: 400px;
+}
+
+.nav-color{
+    color:#9d9d9d;
+    padding-top: 16px;
+    padding-left: 16px;
+    float: right;
+}
+
+.nav-icon{
+    color:#9d9d9d;
+    font-size: 24px;
     padding-top: 8px;
     padding-left: 8px;
     float: right;

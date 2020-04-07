@@ -61,3 +61,4 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     msg.subscribe(this)
 }
 ])
+

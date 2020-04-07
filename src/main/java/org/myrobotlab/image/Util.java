@@ -45,12 +45,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.myrobotlab.io.FileIO;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -60,6 +59,7 @@ import org.slf4j.Logger;
  * references: http://www.colblindor.com/color-name-hue/ - excellent resource
  * 
  */
+@Deprecated /* this class should be avoided, for resource access Service.getResource... should be used */
 public class Util {
 
   /*
@@ -240,6 +240,7 @@ public class Util {
    */
   public static String getResourceDir() {
     // first try for the resource.dir system property
+    /* THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE 
     String resourceDir = System.getProperty("resource.dir");
     if (resourceDir != null) {
       // log.info("Returning {}", resourceDir);
@@ -251,27 +252,11 @@ public class Util {
     } else {
       resourceDir = System.getProperty("user.dir") + File.separator + "resource";
     }
+    */
     // log.info("Returning {}", resourceDir);
-    return resourceDir;
+    return Service.getResourceRoot();
   }
   
-  /**
-   * by default will take the data.dir property if set.
-   * If mrl is running inside of a jar it will use the user.dir + "data" as the directory.
-   * 
-   * @return current data directory
-   */
-  /* FIXME - wrong place, and implementation should follow other picocli options
-  public static String getDataDir() {
-    // first try for the data.dir system property
-    String dataDir = System.getProperty("data.dir");
-    if (dataDir != null) {
-      return dataDir;
-    }    
-    return System.getProperty("user.dir") + File.separator + "data";
-  }
-  */
-
 
   /**
    * Check if file exist from current resource directory
