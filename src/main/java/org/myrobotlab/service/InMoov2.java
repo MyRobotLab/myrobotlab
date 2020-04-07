@@ -69,8 +69,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
                 meta.addPeer("eye", "OpenCV", "eye");
                 meta.addPeer("servomixer", "ServoMixer", "for making gestures");
-		meta.addPeer("ultraSonicRight", "UltraSonicSensor", "measure distance");
-                meta.addPeer("ultraSonicLeft", "UltraSonicSensor", "measure distance");
+		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
+                meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
@@ -229,9 +229,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	transient HtmlFilter htmlFilter;
 	
-	transient UltraSonicSensor ultraSonicRight;
+	transient UltrasonicSensor ultraSonicRight;
 
-	transient UltraSonicSensor ultraSonicLeft;
+	transient UltrasonicSensor ultraSonicLeft;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -1888,12 +1888,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return torso;
 	}
 	
-	public UltraSonicSensor startUltraSonicRight(String port) {
+	public UltrasonicSensor startUltraSonicRight(String port) {
 		if (ultraSonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltraSonicRightActivated = true;
 
-			ultraSonicRight = (UltraSonicSensor) startPeer("ultraSonicRight");
+			ultraSonicRight = (UltrasonicSensor) startPeer("ultraSonicRight");
 
 			if (port != null) {
 				try {
@@ -1908,12 +1908,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return ultraSonicRight;
 	}
 
-	public UltraSonicSensor startUltraSonicLeft(String port) {
+	public UltrasonicSensor startUltraSonicLeft(String port) {
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltraSonicLeftActivated = true;
 
-			ultraSonicLeft = (UltraSonicSensor) startPeer("ultraSonicLeft");
+			ultraSonicLeft = (UltrasonicSensor) startPeer("ultraSonicLeft");
 
 			if (port != null) {
 				try {
