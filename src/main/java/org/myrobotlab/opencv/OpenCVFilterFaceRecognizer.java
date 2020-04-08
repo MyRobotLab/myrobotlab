@@ -16,6 +16,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 import static org.bytedeco.opencv.global.opencv_imgproc.getAffineTransform;
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 import static org.bytedeco.opencv.global.opencv_imgproc.warpAffine;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,9 +26,12 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+
 import javax.imageio.ImageIO;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacv.Frame;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -42,10 +46,11 @@ import org.bytedeco.opencv.opencv_face.FisherFaceRecognizer;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
-import org.bytedeco.javacv.Frame;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 /**
@@ -83,7 +88,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // subsequent
   // training and for masking images prior to comparison.
   private Mat facemask = null;
-  private String cascadeDir = "haarcascades";
+  
+  // cannot be this because - gets changed to src/main/resources/resource/OpenCV if src is present !!!!
+  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  public String cascadeDir = "resource/OpenCV/haarcascades";
+
   private CascadeClassifier faceCascade;
   private CascadeClassifier eyeCascade;
   // private CascadeClassifier mouthCascade;
