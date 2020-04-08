@@ -70,13 +70,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
                 meta.addPeer("eye", "OpenCV", "eye");
                 meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
-                meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
+		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
 		meta.addPeer("right", "Arduino", "legacy controller");
-		meta.addPeer("extra1", "Arduino", "legacy controller");
-		meta.addPeer("extra2", "Arduino", "legacy controller");
+		meta.addPeer("controller3", "Arduino", "legacy controller");
+		meta.addPeer("controller4", "Arduino", "legacy controller");
 
 		meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
@@ -1654,6 +1654,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return rightHand;
 	}
+	
+	public Double getUltraSonicRightDistance() {
+	if (ultraSonicRight != null) {
+	  return ultraSonicRight.range();
+	} else {
+	  warn("No UltraSonicRight attached");
+	  return 0.0;
+		}
+	}
+
+	public Double getUltraSonicLeftDistance() {
+	if (ultraSonicLeft != null) {
+	  return ultraSonicLeft.range();
+	} else {
+	  warn("No UltraSonicLeft attached");
+	  return 0.0;
+		}
+	}
 
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
@@ -1887,8 +1905,25 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return torso;
 	}
-	
+
+	/**
+	 * called with only port - will default with defaulted pins
+	 * @param port
+	 * @return
+	 */
 	public UltrasonicSensor startUltraSonicRight(String port) {
+	  return startUltraSonicRight(port, 64, 63);
+	}
+
+	/**
+	 * called explicitly with pin values
+	 * @param port
+	 * @param trigPin
+	 * @param echoPin
+	 * @return
+	 */
+	public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
+	
 		if (ultraSonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltraSonicRightActivated = true;
@@ -1898,8 +1933,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino extra1 = (Arduino) startPeer("extra1");
-					extra1.connect(port);
+					Arduino right = (Arduino) startPeer("right");
+					right.connect(port);
+					right.attach(ultraSonicRight, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1908,7 +1944,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return ultraSonicRight;
 	}
 
-	public UltrasonicSensor startUltraSonicLeft(String port) {
+	
+	 public UltrasonicSensor startUltraSonicLeft(String port) {
+	   return startUltraSonicLeft(port, 64, 63);
+	 }
+
+  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
+		
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltraSonicLeftActivated = true;
@@ -1918,8 +1960,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino extra1 = (Arduino) startPeer("extra1");
-					extra1.connect(port);
+					Arduino left = (Arduino) startPeer("left");
+					left.connect(port);
+					left.attach(ultraSonicLeft, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
