@@ -16,7 +16,7 @@
     </div>
     <div class="col-md-12 input-group">
         <tr ng-repeat="c in service.controllers">
-        <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
+        <attach ng-model="possibleController" title="Type or select a controller"  interface="org.myrobotlab.service.interfaces.ServoController"/>
         <span class="input-group-btn">
             <button class="btn btn-default" ng-show="!isAttached()" ng-click="attachController()">attach</button>
         </span>
