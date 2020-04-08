@@ -64,7 +64,9 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   /**
    * our default classifier - pre-trained
    */
-  public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  // cannot be this because - gets changed to src/main/resources/resource/OpenCV if src is present !!!!
+  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  public String cascadeDir = "resource/OpenCV/haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
   // public String cascadeFile = "haarcascade_frontalface_default.xml";
 

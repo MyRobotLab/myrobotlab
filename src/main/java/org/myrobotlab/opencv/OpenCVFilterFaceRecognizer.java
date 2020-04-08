@@ -88,7 +88,11 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   // subsequent
   // training and for masking images prior to comparison.
   private Mat facemask = null;
-  public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  
+  // cannot be this because - gets changed to src/main/resources/resource/OpenCV if src is present !!!!
+  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  public String cascadeDir = "resource/OpenCV/haarcascades";
+
   private CascadeClassifier faceCascade;
   private CascadeClassifier eyeCascade;
   // private CascadeClassifier mouthCascade;
