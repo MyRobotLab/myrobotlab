@@ -1908,8 +1908,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
 	public UltrasonicSensor startUltrasonicRight(String port, int trigPin, int echoPin) {
 
-		trigRightPin.setPin(64);
-		echoRightPin.setPin(63);
+		//trigRightPin.setPin(64);
+		//echoRightPin.setPin(63);
 	
 		if (ultrasonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -1922,19 +1922,21 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.attach(ultrasonicRight, trigRightPin, echoRightPin);
+					//right.attach(ultrasonicRight, trigRightPin, echoRightPin);
+					right.attach(ultrasonicRight, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
 			}
 		}
+		broadcastState();
 		return ultrasonicRight;
 	}
 
 	public UltrasonicSensor startUltrasonicLeft(String port, int trigPin, int echoPin) {
 
-		trigLeftPin.setPin(64);
-		echoLeftPin.setPin(63);
+		//trigLeftPin.setPin(64);
+		//echoLeftPin.setPin(63);
 		
 		if (ultrasonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -1947,12 +1949,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino left = (Arduino) startPeer("left");
 					left.connect(port);
-					left.attach(ultrasonicLeft, trigLeftPin, echoLeftPin);
+					//left.attach(ultrasonicLeft, trigLeftPin, echoLeftPin);
+					left.attach(ultrasonicLeft, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
 			}
 		}
+		broadcastState();
 		return ultrasonicLeft;
 	}
 	
