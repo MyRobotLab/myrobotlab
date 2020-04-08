@@ -67,16 +67,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 
-		meta.addPeer("eye", "OpenCV", "eye");
-		meta.addPeer("servomixer", "ServoMixer", "for making gestures");
+                meta.addPeer("eye", "OpenCV", "eye");
+                meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
-		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
+                meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
 		meta.addPeer("right", "Arduino", "legacy controller");
-		meta.addPeer("controller3", "Arduino", "legacy controller");
-		meta.addPeer("controller4", "Arduino", "legacy controller");
+		meta.addPeer("extra1", "Arduino", "legacy controller");
+		meta.addPeer("extra2", "Arduino", "legacy controller");
 
 		meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
@@ -737,8 +737,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public boolean isServoMixerActivated() {
-		return isServoMixerActivated;
-		}
+        return isServoMixerActivated;
+        }
 
 	public Set<String> listConfigFiles() {
 
@@ -1898,8 +1898,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino controller3 = (Arduino) startPeer("controller3");
-					controller3.connect(port);
+					Arduino extra1 = (Arduino) startPeer("extra1");
+					extra1.connect(port);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1918,8 +1918,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 			if (port != null) {
 				try {
 					speakBlocking(port);
-					Arduino controller4 = (Arduino) startPeer("controller4");
-					controller4.connect(port);
+					Arduino extra1 = (Arduino) startPeer("extra1");
+					extra1.connect(port);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1930,13 +1930,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
 	public ServoMixer startServoMixer() {
 
-			   servomixer = (ServoMixer) startPeer("servomixer");
-			   isServoMixerActivated = true;
+               servomixer = (ServoMixer) startPeer("servomixer");
+               isServoMixerActivated = true;
 
-			   speakBlocking(get("STARTINGSERVOMIXER"));
-			   broadcastState();
-			   return servomixer;
-		}
+               speakBlocking(get("STARTINGSERVOMIXER"));
+               broadcastState();
+               return servomixer;
+        }
 
 	public void stop() {
 		if (head != null) {
@@ -2052,11 +2052,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		isUltraSonicLeftActivated = false;
 	}
 	
-		public void stopServoMixer() {
-				speakBlocking(get("STOPSERVOMIXER"));
-				releasePeer("servomixer");
-				isServoMixerActivated = false;
-		}
+        public void stopServoMixer() {
+                speakBlocking(get("STOPSERVOMIXER"));
+                releasePeer("servomixer");
+                isServoMixerActivated = false;
+        }
 
 	public void waitTargetPos() {
 		if (head != null) {
