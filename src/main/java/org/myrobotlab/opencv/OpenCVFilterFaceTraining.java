@@ -72,7 +72,6 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvRect;
-import org.bytedeco.opencv.opencv_core.CvSeq;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -81,7 +80,9 @@ import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_face.EigenFaceRecognizer;
 import org.bytedeco.opencv.opencv_face.FaceRecognizer;
 import org.bytedeco.opencv.global.opencv_objdetect;
-import org.bytedeco.opencv.opencv_objdetect.CvHaarClassifierCascade;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.OpenCV;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
@@ -103,7 +104,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   /**
    * our default classifier - pre-trained
    */
-  public String cascadeDir = "haarcascades";
+  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  public String cascadeDir = "resource/OpenCV/haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
 
   // a map between the hashcode and the string label
