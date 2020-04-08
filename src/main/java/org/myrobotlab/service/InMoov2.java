@@ -1905,11 +1905,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return torso;
 	}
-	
-	public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
 
-		trigRightPin.setPin(64);
-		echoRightPin.setPin(63);
+	/**
+	 * called with only port - will default with defaulted pins
+	 * @param port
+	 * @return
+	 */
+	public UltrasonicSensor startUltraSonicRight(String port) {
+	  return startUltraSonicRight(port, 64, 63);
+	}
+
+	/**
+	 * called explicitly with pin values
+	 * @param port
+	 * @param trigPin
+	 * @param echoPin
+	 * @return
+	 */
+	public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
 	
 		if (ultraSonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -1922,7 +1935,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.attach(ultraSonicRight, trigRightPin, echoRightPin);
+					right.attach(ultraSonicRight, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1931,11 +1944,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return ultraSonicRight;
 	}
 
+	
+	 public UltrasonicSensor startUltraSonicLeft(String port) {
+	   return startUltraSonicLeft(port, 64, 63);
+	 }
 
-	public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
-
-		trigLeftPin.setPin(64);
-		echoLeftPin.setPin(63);
+  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
 		
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -1948,7 +1962,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino left = (Arduino) startPeer("left");
 					left.connect(port);
-					left.attach(ultraSonicLeft, trigLeftPin, echoLeftPin);
+					left.attach(ultraSonicLeft, trigPin, echoPin);
 				} catch (Exception e) {
 					error(e);
 				}
