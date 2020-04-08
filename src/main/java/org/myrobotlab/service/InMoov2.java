@@ -1654,6 +1654,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return rightHand;
 	}
+	
+	public Double getUltrasonicRightDistance() {
+	if (ultrasonicRight != null) {
+	  return ultrasonicRight.range();
+	} else {
+	  warn("No UltrasonicRight attached");
+	  return 0.0;
+		}
+	}
+
+	public Double getUltrasonicLeftDistance() {
+	if (ultrasonicLeft != null) {
+	  return ultrasonicLeft.range();
+	} else {
+	  warn("No UltrasonicLeft attached");
+	  return 0.0;
+		}
+	}
 
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
@@ -1889,6 +1907,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public UltrasonicSensor startUltrasonicRight(String port, int trigPin, int echoPin) {
+
+		trigRightPin.setPin(64);
+		echoRightPin.setPin(63);
+	
 		if (ultrasonicRight == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltrasonicRightActivated = true;
@@ -1900,7 +1922,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.attach(ultrasonicRight, trigPin, echoPin);
+					right.attach(ultrasonicRight, trigRightPin, echoRightPin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1910,6 +1932,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public UltrasonicSensor startUltrasonicLeft(String port, int trigPin, int echoPin) {
+
+		trigLeftPin.setPin(64);
+		echoLeftPin.setPin(63);
+		
 		if (ultrasonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
 			isUltrasonicLeftActivated = true;
@@ -1921,7 +1947,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino left = (Arduino) startPeer("left");
 					left.connect(port);
-					left.attach(ultrasonicLeft, trigPin, echoPin);
+					left.attach(ultrasonicLeft, trigLeftPin, echoLeftPin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -1929,6 +1955,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return ultrasonicLeft;
 	}
+	
+	
 	
 	public ServoMixer startServoMixer() {
 
