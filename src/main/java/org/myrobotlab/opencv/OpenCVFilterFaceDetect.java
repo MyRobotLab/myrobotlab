@@ -25,10 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-//import static org.bytedeco.opencv.helper.opencv_objdetect.cvHaarDetectObjects;
-import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
 //import static org.bytedeco.opencv.global.opencv_core.cvLoad;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_DO_CANNY_PRUNING;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_DO_ROUGH_SEARCH;
@@ -38,33 +34,23 @@ import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 //import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_FEATURE_MAX;
 //import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_MAGIC_VAL;
 
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
-
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 
-import javax.swing.Box;
-
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
-import org.bytedeco.opencv.global.opencv_objdetect;
-import org.bytedeco.opencv.opencv_core.CvMemStorage;
-import org.bytedeco.opencv.opencv_core.CvRect;
-import org.bytedeco.opencv.opencv_core.CvSeq;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.io.FileIO;
 // import org.bytedeco.opencv.opencv_objdetect;
 // import org.bytedeco.opencv.opencv_objdetect.CvHaarClassifierCascade;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
+import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {
@@ -78,7 +64,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   /**
    * our default classifier - pre-trained
    */
-  public String cascadeDir = "haarcascades";
+  public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
   // public String cascadeFile = "haarcascade_frontalface_default.xml";
 
