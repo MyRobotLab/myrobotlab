@@ -104,7 +104,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   /**
    * our default classifier - pre-trained
    */
-  public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  public String cascadeDir = "resource/OpenCV/haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
 
   // a map between the hashcode and the string label
