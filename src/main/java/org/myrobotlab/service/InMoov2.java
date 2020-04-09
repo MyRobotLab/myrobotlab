@@ -71,6 +71,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
                 meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
 		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
+		meta.addPeer("pir", "Pir", "infrared sensor");
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
@@ -232,6 +233,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	transient UltrasonicSensor ultraSonicRight;
 
 	transient UltrasonicSensor ultraSonicLeft;
+	
+	transient Pir pir;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -1672,6 +1675,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	  return 0.0;
 		}
 	}
+	
+	//public void publishPin(Pin pin) {
+		//log.info("{} - {}", pin.pin, pin.value);
+		//if (pin.value == 1) {
+			//lastPIRActivityTime = System.currentTimeMillis();
+		//}
+		/// if its PIR & PIR is active & was sleeping - then wake up !
+		//if (pin == pin.pin && startSleep != null && pin.value == 1) {
+			//powerUp();
+		//}
+	//}
 
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
@@ -1971,6 +1985,32 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return ultraSonicLeft;
 	}
 	
+	public Pir startPir(String port) {
+		return startPir(port, 23);
+	}
+
+	public Pir startPir(String port, int pin) {
+		
+		if (pir == null) {
+			speakBlocking(get("STARTINGPIR"));
+			isPirActivated = true;
+
+			pir = (Pir) startPeer("pir");
+
+			if (port != null) {
+				try {
+					speakBlocking(port);
+					Arduino right = (Arduino) startPeer("right");
+					right.connect(port);
+					right.attach(pir, pin);
+				} catch (Exception e) {
+					error(e);
+				}
+			}
+		}
+		return pir;
+	}
+	
 	public ServoMixer startServoMixer() {
 
                servomixer = (ServoMixer) startPeer("servomixer");
@@ -2077,12 +2117,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		isSimulatorActivated = false;
 	}
 
-	public void stopPir() {
-		speakBlocking(get("STOPPIR"));
-		releasePeer("pir");
-		isPirActivated = false;
-	}
-
 	public void stopUltraSonicRight() {
 		speakBlocking(get("STOPULTRASONIC"));
 		releasePeer("ultraSonicRight");
@@ -2093,6 +2127,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPULTRASONIC"));
 		releasePeer("ultraSonicLeft");
 		isUltraSonicLeftActivated = false;
+	}
+	
+	public void stopPir() {
+		speakBlocking(get("STOPPIR"));
+		releasePeer("pir");
+		isPirActivated = false;
 	}
 	
         public void stopServoMixer() {
