@@ -33,6 +33,7 @@ public class Intro extends Service {
     meta.setAvailable(true); 
     meta.addCategory("general");
     meta.addPeer("servo", "Servo", "servo");
+    meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
     return meta;
   }
 
@@ -50,18 +51,88 @@ public class Intro extends Service {
     }
   }
 
-  transient Servo servo;
+  transient ServoControl servo;
 
   boolean isServoActivated = false;
 
   public boolean isServoActivated() {
-        return isServoActivated;
-        }
+    return isServoActivated;
+  }
+  
+
+  public Servo(String n, String id) throws Exception {
+    super(n, id);
+
+    startPeers();
+
+    servo.setPin(3);
+
+    servo.setMinMax(0.0, 180.0);
+
+    servo.setRest(90.0);
+
+    servo.setPosition(90.0);
+
+    setSpeed(100.0);
+  }
+
+  public void broadcastState() {
+    super.broadcastState();
+    servo.broadcastState();
+  }
+
+  public void disable() {
+    servo.disable();
+  }
+
+  public void enable() {
+    sleep(Intro.attachPauseMs);
+    servo.enable();
+  }
+
+  public void fullSpeed() {
+    servo.fullSpeed();
+  }
+
+  public ServoControl getServo() {
+    return servo;
+  }
+
+  @Override
+  public boolean save() {
+    super.save();
+    servo.save();
+    return true;
+  }
+
+  public void setAutoDisable(Boolean idleTimeoutMs) {
+    servo.setAutoDisable(idleTimeoutMs);
+  }
+
+  public void setLimits(double servoMin, double servoMax) {
+    servo.setMinMax(servoMin, servoMax);
+  }
+
+  public void setServo(ServoControl servo) {
+    this.servo = servo;
+  }
+
+  public void setSpeed(Double servo) {
+    this.servo.setSpeed(servo);
+  }
+
+    public void stop() {
+    servo.stop();
+  }
+
+  public void waitTargetPos() {
+    servo.waitTargetPos();
+  }
 
 
 
   public Servo startServo(String port) {
-    return startServo(port, 3);
+    return startServo(port, pin);
   }
 
   public Servo startServo(String port, int pin) {
