@@ -1676,16 +1676,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 	}
 	
-	public void publishPin(Pin pin) {
-		log.info("{} - {}", pin.pin, pin.value);
-		if (pin.value == 1) {
-			lastPIRActivityTime = System.currentTimeMillis();
-		}
-		// if its PIR & PIR is active & was sleeping - then wake up !
-		if (pin == pin.pin && startSleep != null && pin.value == 1) {
-			powerUp();
-		}
-	}
+	//public void publishPin(Pin pin) {
+		//log.info("{} - {}", pin.pin, pin.value);
+		//if (pin.value == 1) {
+			//lastPIRActivityTime = System.currentTimeMillis();
+		//}
+		/// if its PIR & PIR is active & was sleeping - then wake up !
+		//if (pin == pin.pin && startSleep != null && pin.value == 1) {
+			//powerUp();
+		//}
+	//}
 
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
