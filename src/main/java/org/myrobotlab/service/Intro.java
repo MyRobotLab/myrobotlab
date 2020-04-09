@@ -58,81 +58,9 @@ public class Intro extends Service {
   public boolean isServoActivated() {
     return isServoActivated;
   }
-  
-
-  public Servo(String n, String id) throws Exception {
-    super(n, id);
-
-    startPeers();
-
-    servo.setPin(3);
-
-    servo.setMinMax(0.0, 180.0);
-
-    servo.setRest(90.0);
-
-    servo.setPosition(90.0);
-
-    setSpeed(100.0);
-  }
-
-  public void broadcastState() {
-    super.broadcastState();
-    servo.broadcastState();
-  }
-
-  public void disable() {
-    servo.disable();
-  }
-
-  public void enable() {
-    sleep(Intro.attachPauseMs);
-    servo.enable();
-  }
-
-  public void fullSpeed() {
-    servo.fullSpeed();
-  }
-
-  public ServoControl getServo() {
-    return servo;
-  }
-
-  @Override
-  public boolean save() {
-    super.save();
-    servo.save();
-    return true;
-  }
-
-  public void setAutoDisable(Boolean idleTimeoutMs) {
-    servo.setAutoDisable(idleTimeoutMs);
-  }
-
-  public void setLimits(double servoMin, double servoMax) {
-    servo.setMinMax(servoMin, servoMax);
-  }
-
-  public void setServo(ServoControl servo) {
-    this.servo = servo;
-  }
-
-  public void setSpeed(Double servo) {
-    this.servo.setSpeed(servo);
-  }
-
-    public void stop() {
-    servo.stop();
-  }
-
-  public void waitTargetPos() {
-    servo.waitTargetPos();
-  }
-
-
 
   public Servo startServo(String port) {
-    return startServo(port, pin);
+    return startServo(port, 3);
   }
 
   public Servo startServo(String port, int pin) {
