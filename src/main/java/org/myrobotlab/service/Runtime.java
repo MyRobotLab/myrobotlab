@@ -1257,7 +1257,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         invokeCommands(options.invoke);
       }
 
-      if (options.interactive || !options.spawnedFromAgent) {
+      if (options.install == null && (options.interactive || !options.spawnedFromAgent)) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
         getInstance().startInteractiveMode();
       }
@@ -1492,13 +1492,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
 
       try {
-        sw.stopService();
-        // sw.releaseService(); // FIXED ! - releaseService will mod the
-        // maps :P
-        runtime.invoke("released", sw.getFullName());
+        if (sw != null) {
+          sw.stopService();        
+          runtime.invoke("released", sw.getFullName());
+        }
       } catch (Exception e) {
-        runtime.error(String.format("%s threw while stopping", e));
-        Logging.logError(e);
+        runtime.error("%s threw while stopping", e);
       }
     }
 
@@ -1549,12 +1548,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } catch (Exception e) {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
-
-    // In unusual situations, System.exit(int) might not actually stop the
-    // program.
-    // Runtime.getRuntime().halt(int) on the other hand, always does.
-    System.exit(-1); // really returned ? or jvm bug ?
-    java.lang.Runtime.getRuntime().halt(-1);
+    
+    System.exit(0); 
   }
 
   public Integer publishShutdown(Integer seconds) {
