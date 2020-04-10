@@ -1492,13 +1492,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
 
       try {
-        sw.stopService();
-        // sw.releaseService(); // FIXED ! - releaseService will mod the
-        // maps :P
-        runtime.invoke("released", sw.getFullName());
+        if (sw != null) {
+          sw.stopService();        
+          runtime.invoke("released", sw.getFullName());
+        }
       } catch (Exception e) {
-        runtime.error(String.format("%s threw while stopping", e));
-        Logging.logError(e);
+        runtime.error("%s threw while stopping", e);
       }
     }
 
@@ -1553,8 +1552,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // In unusual situations, System.exit(int) might not actually stop the
     // program.
     // Runtime.getRuntime().halt(int) on the other hand, always does.
-    System.exit(-1); // really returned ? or jvm bug ?
-    java.lang.Runtime.getRuntime().halt(-1);
+    // System.exit(-1); // really returned ? or jvm bug ?
+    System.exit(0); // <-- this is normal termination - why did someone put -1 ?
+    // - fix the root problems don't get bigger hammers
+    // java.lang.Runtime.getRuntime().halt(-1); 
   }
 
   public Integer publishShutdown(Integer seconds) {
