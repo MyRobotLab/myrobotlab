@@ -59,17 +59,17 @@ public class Intro extends Service {
     return isServoActivated;
   }
 
-  public Servo startServo(String port) {
+  public ServoControl startServo(String port) {
     return startServo(port, 3);
   }
 
-  public Servo startServo(String port, int pin) {
+  public ServoControl startServo(String port, int pin) {
   
     if (servo == null) {
       speakBlocking("starting servo");
       isServoActivated = true;
 
-      servo = (Servo) startPeer("servo");
+      servo = (ServoControl) startPeer("servo");
 
       if (port != null) {
         try {
