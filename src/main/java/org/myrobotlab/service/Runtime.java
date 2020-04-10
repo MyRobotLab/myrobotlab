@@ -1257,7 +1257,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         invokeCommands(options.invoke);
       }
 
-      if (options.interactive || !options.spawnedFromAgent) {
+      if (options.install == null && (options.interactive || !options.spawnedFromAgent)) {
         log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
         getInstance().startInteractiveMode();
       }
@@ -1548,14 +1548,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     } catch (Exception e) {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
-
-    // In unusual situations, System.exit(int) might not actually stop the
-    // program.
-    // Runtime.getRuntime().halt(int) on the other hand, always does.
-    // System.exit(-1); // really returned ? or jvm bug ?
-    System.exit(0); // <-- this is normal termination - why did someone put -1 ?
-    // - fix the root problems don't get bigger hammers
-    // java.lang.Runtime.getRuntime().halt(-1); 
+    
+    System.exit(0); 
   }
 
   public Integer publishShutdown(Integer seconds) {
