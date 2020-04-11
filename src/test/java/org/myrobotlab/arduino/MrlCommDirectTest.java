@@ -35,14 +35,14 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
   @Test
   public void testMrlCommBegin() throws Exception {
     msg = new Msg(this, null);
-    assertFalse(msg.clearToSend);
+    assertFalse(msg.isClearToSend());
     // now we want to just see how it responds when i send it various byte sequences.
     //byte[] testBytes = new byte[] {-86,14,1};
     byte[] testBytes = createTestBytes("170,2,55,63");
     msg.onBytes(testBytes);
     // msg.waitForBegin();
     // now what? 
-    assertTrue(msg.clearToSend);
+    assertTrue(msg.isClearToSend());
     // Thread.sleep(1000);
   }
   
@@ -52,7 +52,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
     String testMsg2 = "170,2,55,63";
 
     msg = new Msg(this, null);
-    assertFalse(msg.clearToSend);
+    assertFalse(msg.isClearToSend());
     byte[] testBytes = createTestBytes(testMsg1);
     msg.onBytes(testBytes);
     // and the next batch up..
@@ -60,7 +60,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
     msg.onBytes(createTestBytes(testMsg2));
     // msg.waitForBegin();
     // now what? 
-    assertTrue(msg.clearToSend);
+    assertTrue(msg.isClearToSend());
     
     
   }
@@ -71,13 +71,13 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
     String testMsg1 = "170,14,1,12,101,255";
     String testMsg2 = "170,2,55,63";
     msg = new Msg(this, null);
-    assertFalse(msg.clearToSend);
+    assertFalse(msg.isClearToSend());
     msg.onBytes(createTestBytes(testMsg1));
     msg.onBytes(createTestBytes(testMsg2));
     
     
     msg.onBytes(createTestBytes("0,0,0,0,0,0"));
-    assertTrue(msg.clearToSend);
+    assertTrue(msg.isClearToSend());
   }
   
   private static byte[] createTestBytes(String intString) {
@@ -271,8 +271,6 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
     System.err.println("Publish Ack " + numAcks + "function:" + function );
     log.info("Publish Ack {}", function);   
     System.err.println("Publish Ack: " + function);
-    
-    
   }
 
   @Override
@@ -329,7 +327,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
     // but at this point.. we are clear to send messages
     // because mrlcomm has started.. so .. let's say clear to send.
     log.info("Publish MRL Comm Begin");
-    msg.clearToSend = true;
+    // msg.clearToSend = true;
     System.err.println("\nPublish MrlBegin: " + version +"\n");
   }
 
