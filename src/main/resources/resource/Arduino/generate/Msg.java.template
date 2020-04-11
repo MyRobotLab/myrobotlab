@@ -94,7 +94,7 @@ public class %javaClass% {
   boolean ackEnabled = %ackEnabled%;
   private ByteArrayOutputStream baos = null;
   public volatile boolean pendingMessage = false;
-  public volatile boolean clearToSend = false;
+  private volatile boolean clearToSend = false;
     
   public static class AckLock {
     // first is always true - since there
@@ -696,6 +696,10 @@ public class %javaClass% {
 
     
     return false;
+  }
+
+  public boolean isClearToSend() {
+    return clearToSend;
   }
 
 }
