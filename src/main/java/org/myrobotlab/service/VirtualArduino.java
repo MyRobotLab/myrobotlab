@@ -109,10 +109,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       if (myThread == null) {
         myThread = new Thread(this, String.format("%s.mrlcomm", virtual.getName()));
         myThread.start();
+        log.info("start called ");
       }
     }
     
     synchronized public void stop() {
+      log.info("stop called for mrlcomm ino script.");
       if (myThread != null) {
         isRunning = false;
         myThread.interrupt();
@@ -122,27 +124,41 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
     public void run() {
       isRunning = true;
+      
+      // prior to running reset, MrlComm would be reset,
+      // this is also what happens if you press the reset button on 
+      // the actual arduino.  (alternatively, we could create a new MrlComm instance.. 
+      // and not rely on calling softReset()...
+      ino.getMrlComm().softReset();
       ino.setup();
       while (isRunning) {
         try {
-
           ino.loop();
-
-          Thread.sleep(1);
-        } catch(InterruptedException e1) {
-          isRunning = false;
+          if (isRunning)
+            try {
+              // a small delay that can be interrupted
+              Thread.sleep(1);
+            } catch(InterruptedException e1) {
+              // we were interrupted.. we need to shut down.
+              isRunning = false;
+            }
         } catch (Exception e) {
           log.error("mrlcomm threw", e);
           isRunning = false;          
         }
+
       }
       log.info("leaving InoScriptRunner");
     }
+    
+    public boolean isRunning() {
+      return isRunning;
+    }
+      
   }
 
   public VirtualArduino(String n, String id) {
     super(n, id);
-    uart = (Serial) createPeer("uart");
   }
 
   public void connect(String portName) throws IOException {
@@ -215,9 +231,14 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       board = "uno";
     }
 
+    // start the serial service that talks to our uart.
+    // TODO: we really shouldn't have a serial service here.. we should really have just the uart.
+    uart = (Serial) startPeer("uart");
+    uart.addPortListener(getName());
     log.info("uart {}", uart);
     
     ino = new MrlCommIno(this);
+    
     mrlComm = ino.getMrlComm();
     msg = mrlComm.getMsg();
     msg.setInvoke(false);
@@ -228,15 +249,13 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     if (runner == null) {
       runner = new InoScriptRunner(this, ino);
     }
-    
-    uart = (Serial) startPeer("uart");
-    uart.addPortListener(getName());
+
     start();
   }
 
   public void releaseService() {
     if (runner != null) {
-      runner.isRunning = false;
+      runner.stop();
     }
     releasePeers();
     super.releaseService();
@@ -279,12 +298,22 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public String publishConnect(String portName) {
+    log.info("Virtual Arduino Publish Connect for port {}", portName);
     return portName;
   }
 
   // chaining Serial's connect event
   @Override
   public void onConnect(String portName) {
+    log.info("ON CONNECT CALLED IN VIRTUAL ARDUINO!!!!!!!!!!!!!!!!!");
+    // Ok.. so we've been told to connect.. the uart is connected.. we need to make sure we reset the mrlcommino that is running.
+    if (runner.isRunning()) {
+      // Stop the mrlcomm runner.. and restart it..  we just got a serial port connect.
+      log.info("Stopping mrlcomm runner.");
+      stop();
+    }
+    log.info("starting MRL comm runner.");
+    start();
     invoke("publishConnect", portName);
   }
 

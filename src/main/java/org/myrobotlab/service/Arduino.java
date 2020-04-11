@@ -1448,7 +1448,7 @@ public class Arduino extends AbstractMicrocontroller
     log.info("{} onConnect for port {}", getName(), portName);
     info("%s connected to %s", getName(), portName);
     // chained...
-    invoke("publishConnect", portName);
+    // invoke("publishConnect", portName);
   }
 
   public void onCustomMsg(Integer ax, Integer ay, Integer az) {

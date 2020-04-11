@@ -1,14 +1,23 @@
 package org.myrobotlab.arduino.virtual;
 
+import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
+import org.slf4j.Logger;
+
 
 public class MrlCommIno {
-  transient Serial Serial;// = new Serial();
+  
+  public final static Logger log = LoggerFactory.getLogger(MrlCommIno.class);
+  
+  transient Serial serial;// = new Serial();
   transient VirtualArduino virtual;
 
   public MrlCommIno(VirtualArduino virtual) {
     this.virtual = virtual;
+    this.serial = virtual.getSerial();
     this.mrlComm = new MrlComm(virtual);
   }
 
@@ -64,11 +73,11 @@ public class MrlCommIno {
    * Here we default out serial port to 115.2kbps.
    */
   public void setup() {
-
-    // Serial.begin(115200);
-
+    log.info("Setup loop called.  Starting virtual mrlcomm script.");
     // start with standard serial & rate
-    mrlComm.begin(Serial);
+    mrlComm.begin(serial);
+    // msg->publishMrlCommBegin(MRLCOMM_VERSION);
+    mrlComm.getMsg().publishMrlCommBegin(Msg.MRLCOMM_VERSION);
   }
 
   /**
@@ -86,8 +95,15 @@ public class MrlCommIno {
     
     // TODO: This is a divergence from the MrlComm.ino code!
     // We no longer have readMsg on the java side.  only onBytes(byte[])
-   
     
+    // TODO: gotta figure out how to pass the serial data into this class.
+    // if we even want to try to emmulate the full arduino loop here..  
+    // seems kinda reasonable for simulation purposes.. but definitely hard to maintain.
+    
+    if (mrlComm.readMsg()) {
+      mrlComm.processCommand();
+    }
+
     
     // the virtual device should listen for on bytes instead.
     // TODO: don't merge until this is addressed. we need to make sure that messages get relayed to this dark corner of the code
@@ -99,6 +115,7 @@ public class MrlCommIno {
     // send back load time and memory
     // driven by getBoardInfo now !!!
     // mrlComm.publishBoardStatus();
+    
   } // end of big loop
 
   public MrlComm getMrlComm() {

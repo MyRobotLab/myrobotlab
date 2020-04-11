@@ -15,7 +15,6 @@ import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.slf4j.Logger;
 
 ///////////// MrlComm.h ///////////////
@@ -35,7 +34,10 @@ import org.slf4j.Logger;
  * processing
  * 
  */
-public class MrlComm implements MrlCommListener {
+public class MrlComm {
+
+  // TODO: default to 1000, for debugging i've increased it to 10 seconds.  
+  private static final int BOARD_INFO_DELAY = 1000;
 
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
@@ -273,7 +275,10 @@ public class MrlComm implements MrlCommListener {
   }
 
   public void begin(org.myrobotlab.service.Serial serial) {
-
+    // wire the serial port through to virtual message
+    // TODO: consider creating a new virtual message instead?
+    
+    msg.begin(serial);
   }
 
   // > customMsg/[] msg
@@ -768,14 +773,14 @@ public class MrlComm implements MrlCommListener {
     // until it is reset after sending publishBoardInfo
     ++loopCount;
     long now = millis();
-    if ((now - lastHeartbeatUpdate > 1000) && heartbeatEnabled) {
+    if ((now - lastHeartbeatUpdate > BOARD_INFO_DELAY) && heartbeatEnabled) {
       onDisconnect();
       lastHeartbeatUpdate = now;
       heartbeatEnabled = false;
       return;
     }
 
-    if ((now - lastBoardInfoTs > 1000) && boardInfoEnabled) {
+    if ((now - lastBoardInfoTs > BOARD_INFO_DELAY) && boardInfoEnabled) {
       lastBoardInfoTs = now;
       publishBoardInfo();
     }
@@ -796,7 +801,8 @@ public class MrlComm implements MrlCommListener {
       boolean dataCount = false;
       for (int i = 0; i < pinList.size(); ++i) {
         Pin pin = pinList.get(i);
-        if (pin.rate == 0 || (now > pin.lastUpdate + (1000 / pin.rate))) {
+        // TODO: is this also based on board delay?
+        if (pin.rate == 0 || (now > pin.lastUpdate + (BOARD_INFO_DELAY / pin.rate))) {
           pin.lastUpdate = now;
           // TODO: move the analog read outside of this method and
           if (pin.type == Arduino.ANALOG) {
@@ -856,82 +862,12 @@ public class MrlComm implements MrlCommListener {
     log.info("servoStop {}", deviceId);
   }
 
-  @Override
-  public BoardInfo publishBoardInfo(Integer version, Integer boardTypeId, Integer microsPerLoop, Integer sram, Integer activePins, int[] deviceSummary) {
+  public boolean readMsg() {
     // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void publishAck(Integer function) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public int[] publishCustomMsg(int[] msg) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public java.lang.String publishDebug(java.lang.String debugMsg) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void publishEcho(float myFloat, int myByte, float secondFloat) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public EncoderData publishEncoderData(Integer deviceId, Integer position) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void publishI2cData(Integer deviceId, int[] data) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void publishMrlCommBegin(Integer version) {
-    // TODO Auto-generated method stub
-    
-  }
-
-  @Override
-  public java.lang.String publishMRLCommError(java.lang.String errorMsg) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public PinData[] publishPinArray(int[] data) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime) {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO: we really should be reading the byte stream from the serial port here
+    // and passing it to the virtualmessage parser to trigger the callbacks on the listener.  
+    // TODO: make sure to implement this... how ever the heck that's going to happen. i don't know yet.
+    return false;
   }
 
 }
