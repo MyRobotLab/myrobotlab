@@ -46,6 +46,9 @@ import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
 import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
@@ -265,7 +268,6 @@ public class Msg {
   // transient private Msg instance;
 
   // ArduinoSerialCallBacks - TODO - extract interface
-  // TODO: arduino shouldn're really be a publisher.. this message class ia a publisher!
   transient private MrlCommListener arduino;
   
   transient private SerialDevice serial;
@@ -2690,7 +2692,7 @@ public class Msg {
 
   public synchronized void onConnect(String portName) {
     // reset the parser...
-    log.info("On Connect Called in Msg...!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a");
+    log.info("On Connect Called in Msg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
     // we're not clear to send.

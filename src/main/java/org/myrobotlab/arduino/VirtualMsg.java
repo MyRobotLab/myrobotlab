@@ -3,11 +3,14 @@ package org.myrobotlab.arduino;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.myrobotlab.logging.Level;
+
 import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.string.StringUtil;
 
@@ -42,16 +45,20 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import org.myrobotlab.service.interfaces.MrlCommListener;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
- * MrlComm byte stream parser
+ * Singlton messaging interface to an MrlComm
  *
  * @author GroG
- * @author kwatters
  *
  */
 
@@ -87,7 +94,7 @@ public class VirtualMsg {
   boolean ackEnabled = false;
   private ByteArrayOutputStream baos = null;
   public volatile boolean pendingMessage = false;
-  public volatile boolean clearToSend = false;
+  private volatile boolean clearToSend = false;
     
   public static class AckLock {
     // first is always true - since there
@@ -1945,7 +1952,7 @@ public class VirtualMsg {
 
   public synchronized void onConnect(String portName) {
     // reset the parser...
-    log.info("On Connect Called in VIRTUAL Msg.!!!!!!!!!!!!!!!!!!!!");
+    log.info("On Connect Called in Msg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
     // we're not clear to send.
@@ -1997,6 +2004,10 @@ public class VirtualMsg {
 
     
     return false;
+  }
+
+  public boolean isClearToSend() {
+    return clearToSend;
   }
 
 }
