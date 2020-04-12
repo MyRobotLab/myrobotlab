@@ -7,6 +7,9 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
 
     $scope.activePanel = 'settings' 
 
+    $activeTutorial = null
+    $scope.code = ''
+
     // GOOD Intro TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
