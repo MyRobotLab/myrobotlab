@@ -237,6 +237,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	transient UltrasonicSensor ultraSonicLeft;
 	
 	transient Pir pir;
+	
+	private PinArrayControl pirArduino;
+
+	public Integer pirPin = null;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -1661,33 +1665,34 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public Double getUltraSonicRightDistance() {
-	if (ultraSonicRight != null) {
-	  return ultraSonicRight.range();
-	} else {
-	  warn("No UltraSonicRight attached");
-	  return 0.0;
+	        if (ultraSonicRight != null) {
+	          return ultraSonicRight.range();
+	        } else {
+	          warn("No UltraSonicRight attached");
+	          return 0.0;
 		}
 	}
 
 	public Double getUltraSonicLeftDistance() {
-	if (ultraSonicLeft != null) {
-	  return ultraSonicLeft.range();
-	} else {
-	  warn("No UltraSonicLeft attached");
-	  return 0.0;
+	        if (ultraSonicLeft != null) {
+	          return ultraSonicLeft.range();
+	        } else {
+	          warn("No UltraSonicLeft attached");
+	          return 0.0;
 		}
 	}
 	
-	//public void publishPin(Pin pin) {
-		//log.info("{} - {}", pin.pin, pin.value);
-		//if (pin.value == 1) {
-			//lastPIRActivityTime = System.currentTimeMillis();
-		//}
-		/// if its PIR & PIR is active & was sleeping - then wake up !
-		//if (pin == pin.pin && startSleep != null && pin.value == 1) {
-			//powerUp();
-		//}
-	//}
+        public void publishPin(Pin pin) {
+		log.info("{} - {}", pin.pin, pin.value);
+		if (pin.value == 1) {
+		  lastPIRActivityTime = System.currentTimeMillis();
+		}
+		// if its PIR & PIR is active & was sleeping - then wake up !
+		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
+		  // attach(); // good morning / evening / night... asleep for % hours
+		  powerUp();
+		}
+	}
 
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
@@ -1965,7 +1970,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	   return startUltraSonicLeft(port, 64, 63);
 	 }
 
-  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
+         public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
 		
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -2003,8 +2008,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 				try {
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
-					right.connect(port);
-					right.attach(pir, pin);
+					//right.connect(port);
+					right.enablePin(pir, pirPin);
+					pirArduino = right;
+					pirPin = pin;
+					right.addListener("publishPin", this.getName(), "publishPin");
 				} catch (Exception e) {
 					error(e);
 				}
@@ -2135,6 +2143,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPPIR"));
 		releasePeer("pir");
 		isPirActivated = false;
+		if (pirArduino != null && pirPin != null) {
+			pirArduino.disablePin(pirPin);
+			pirPin = null;
+			pirArduino = null;
 	}
 	
         public void stopServoMixer() {
