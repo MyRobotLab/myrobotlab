@@ -528,8 +528,8 @@ table, th, td {
   width: calc(100% - 6px);
   font-family: Arial, Helvetica, sans-serif!important;
   font-weight: 900;
-  font-size: 32px;
-  top: 16px;
+  font-size: 45px;
+  top: -19px;
   text-align: center;
   color: #f3f3f3;
   letter-spacing: 16px;
