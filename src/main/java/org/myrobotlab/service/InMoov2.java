@@ -2011,7 +2011,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.enablePin(pin, pirPin);
+					right.enablePin(pin, 10);
 					pirArduino = right;
 					pirPin = pin;
 					right.addListener("publishPin", this.getName(), "publishPin");
