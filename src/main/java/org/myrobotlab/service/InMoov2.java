@@ -310,6 +310,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	transient NeoPixel neopixel;
 	
+	transient public Arduino neopixelArduino;	
+	
 	transient ServoMixer servomixer;
 
 	transient Python python;
@@ -1197,7 +1199,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
-		if (neopixel != null /* && neopixelArduino != null */) {
+		if (neopixel != null && neopixelArduino != null) {
 			neopixel.setAnimation(animation, red, green, blue, speed);
 		} else {
 			warn("No Neopixel attached");
@@ -1919,6 +1921,35 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 		return torso;
 	}
+	
+	public Neopixel startNeopixel(String port) {
+		return startNeopixel(port, 2);
+	}
+
+	public Neopixel startNeopixel(String port, int pin) {
+		
+		if (neopixel == null) {
+			speakBlocking(get("STARTINGNEOPIXEL"));
+			isNeopixelActivated = true;
+
+			neopixel = (Neopixel) startPeer("neopixel");
+
+			//if (port != null) {
+				//try {
+					//speakBlocking(port);
+					//Arduino controller3 = (Arduino) startPeer("controller3");
+					//controller3.connect(port);
+					//controller3.enablePin(pin, pirPin);
+					//pirArduino = right;
+					//pirPin = pin;
+					//right.addListener("publishPin", this.getName(), "publishPin");
+				//} catch (Exception e) {
+					//error(e);
+				//}
+			//}
+		}
+		return neopixel;
+	}	
 
 	/**
 	 * called with only port - will default with defaulted pins
@@ -2109,6 +2140,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		releasePeer("torso");
 		isTorsoActivated = false;
 	}
+	
+	public void stopNeopixel() {
+		speakBlocking(get("STOPNEOPIXEL"));
+		releasePeer("neopixel");
+		isNeopixelActivated = false;
+		if (neopixel != null && neopixelArduino != null) {
+			neopixel.animationStop();
+		} else {
+			warn("No Neopixel attached");
+		}
+	}	
 
 	public void stopSimulator() {
 		speakBlocking(get("STOPVIRTUAL"));
