@@ -993,7 +993,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (ear != null) {
 			ear.lockOutAllGrammarExcept("power up");
 		}
-
+                startSleep = System.currentTimeMillis();
 		python.execMethod("power_down");
 	}
 
