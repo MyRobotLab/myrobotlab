@@ -238,9 +238,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
 	transient Pir pir;
 	
-	private PinArrayControl pirArduino;
+	//private PinArrayControl pirArduino;
 
-	public Integer pirPin = null;
+	//public Integer pirPin = null;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -2009,10 +2009,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.enablePin(pir, pirPin);
-					pirArduino = right;
-					pirPin = pin;
-					right.addListener("publishPin", this.getName(), "publishPin");
+					//right.enablePin(pir, pirPin);
+					//pirArduino = right;
+					//pirPin = pin;
+					//right.addListener("publishPin", this.getName(), "publishPin");
 				} catch (Exception e) {
 					error(e);
 				}
@@ -2143,10 +2143,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPPIR"));
 		releasePeer("pir");
 		isPirActivated = false;
-		if (pirArduino != null && pirPin != null) {
-			pirArduino.disablePin(pirPin);
-			pirPin = null;
-			pirArduino = null;
+		//if (pirArduino != null && pirPin != null) {
+			//pirArduino.disablePin(pirPin);
+			//pirPin = null;
+			//pirArduino = null;
 	}
 	
         public void stopServoMixer() {
