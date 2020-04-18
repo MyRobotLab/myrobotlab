@@ -1688,7 +1688,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		  lastPIRActivityTime = System.currentTimeMillis();
 		}
 		// if its PIR & PIR is active & was sleeping - then wake up !
-		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
+		if (pirPin == pin.pin && pin.value == 1) {
 		  // attach(); // good morning / evening / night... asleep for % hours
 		  powerUp();
 		}
