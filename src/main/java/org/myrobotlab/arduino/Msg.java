@@ -86,7 +86,7 @@ public class Msg {
   // ------ device type mapping constants
   int method = -1;
   public boolean debug = false;
-  boolean invoke = true;
+  boolean invoke = false;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
@@ -94,7 +94,7 @@ public class Msg {
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
   private volatile boolean pendingMessage = false;
-  public volatile boolean clearToSend = false;
+  private volatile boolean clearToSend = false;
     
   public static class AckLock {
     // first is always true - since there
@@ -2302,7 +2302,9 @@ public class Msg {
             // Clear to send!!
             log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
             clearToSend = true;
-          } else {
+          } 
+          
+          if (!clearToSend) {
             log.warn("NOT CLEAR TO SEND! resetting parser!");
             // We opened the port, and we got some data that isn't a Begin message.
             // so, I think we need to reset the parser and continue processing bytes...
@@ -2671,7 +2673,7 @@ public class Msg {
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
     // we're not clear to send.
-    this.clearToSend = false;
+    // this.clearToSend = false;
     // watch for the first MrlCommBegin message;
     // TODO: we should have some sort of timeout / error handling here.
     // this.waitForBegin();
