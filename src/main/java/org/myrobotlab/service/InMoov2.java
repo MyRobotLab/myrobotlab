@@ -72,6 +72,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
 		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 		meta.addPeer("pir", "Pir", "infrared sensor");
+		meta.addPeer("neopixel", "NeoPixel", "neopixel animation");		
 
 		// the two legacy controllers .. :(
 		meta.addPeer("left", "Arduino", "legacy controller");
@@ -1199,7 +1200,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
-		if (neopixel != null /*&& neopixelArduino != null*/) {
+		if (neopixel != null && neopixelArduino != null) {
 			neopixel.setAnimation(animation, red, green, blue, speed);
 		} else {
 			warn("No Neopixel attached");
@@ -2145,7 +2146,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPNEOPIXEL"));
 		releasePeer("neopixel");
 		isNeopixelActivated = false;
-		if (neopixel != null /*&& neopixelArduino != null*/) {
+		if (neopixel != null && neopixelArduino != null) {
 			neopixel.animationStop();
 		} else {
 			warn("No Neopixel attached");
