@@ -288,7 +288,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	String lastGestureExecuted;
 
-	Long lastPirActivityTime;
+	Long lastPirActivityTime = null;
 
 	transient InMoov2Arm leftArm;
 
