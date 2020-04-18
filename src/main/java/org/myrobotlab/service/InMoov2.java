@@ -1685,7 +1685,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public void publishPin(Pin pin) {
 		log.info("{} - {}", pin.pin, pin.value);
 		if (pin.value == 1) {
-		  lastPIRActivityTime = System.currentTimeMillis();
+		  //lastPIRActivityTime = System.currentTimeMillis();
+		  warn("cannot find symbol");
 		}
 		// if its PIR & PIR is active & was sleeping - then wake up !
 		//if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
