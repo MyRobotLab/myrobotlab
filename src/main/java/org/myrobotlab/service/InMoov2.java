@@ -1665,20 +1665,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public Double getUltraSonicRightDistance() {
-	        if (ultraSonicRight != null) {
-	          return ultraSonicRight.range();
-	        } else {
-	          warn("No UltraSonicRight attached");
-	          return 0.0;
+	if (ultraSonicRight != null) {
+	  return ultraSonicRight.range();
+	} else {
+	  warn("No UltraSonicRight attached");
+	  return 0.0;
 		}
 	}
 
 	public Double getUltraSonicLeftDistance() {
-	        if (ultraSonicLeft != null) {
-	          return ultraSonicLeft.range();
-	        } else {
-	          warn("No UltraSonicLeft attached");
-	          return 0.0;
+	if (ultraSonicLeft != null) {
+	  return ultraSonicLeft.range();
+	} else {
+	  warn("No UltraSonicLeft attached");
+	  return 0.0;
 		}
 	}
 	
