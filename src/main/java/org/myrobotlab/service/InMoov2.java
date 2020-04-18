@@ -1682,18 +1682,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 	}
 	
-        //public void publishPin(Pin pin) {
-		//log.info("{} - {}", pin.pin, pin.value);
-		//if (pin.value == 1) {
-		  //lastPIRActivityTime = System.currentTimeMillis();
-		//}
+	public void publishPin(Pin pin) {
+		log.info("{} - {}", pin.pin, pin.value);
+		if (pin.value == 1) {
+		  lastPIRActivityTime = System.currentTimeMillis();
+		}
 		// if its PIR & PIR is active & was sleeping - then wake up !
-		//if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
+		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
 		  // attach(); // good morning / evening / night... asleep for % hours
-		  //powerUp();
-		//}
-	//}
-
+		  powerUp();
+		}
+	}
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
 		startLeftArm(leftPort);
@@ -2012,7 +2011,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					right.enablePin(pin, pirPin);
 					pirArduino = right;
 					pirPin = pin;
-					//right.addListener("publishPin", this.getName(), "publishPin");
+					right.addListener("publishPin", this.getName(), "publishPin");
 				} catch (Exception e) {
 					error(e);
 				}
