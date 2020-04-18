@@ -2143,10 +2143,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPPIR"));
 		releasePeer("pir");
 		isPirActivated = false;
-		//if (pirArduino != null && pirPin != null) {
-			//pirArduino.disablePin(pirPin);
-			//pirPin = null;
-			//pirArduino = null;
+		if (pirArduino != null && pirPin != null) {
+			pirArduino.disablePin(pirPin);
+			pirPin = null;
+			pirArduino = null;
 	}
 	
         public void stopServoMixer() {
