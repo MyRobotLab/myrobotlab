@@ -238,9 +238,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
 	transient Pir pir;
 	
-	//private PinArrayControl pirArduino;
+	private PinArrayControl pirArduino;
 
-	//public Integer pirPin = null;
+	public Integer pirPin = null;
 
 	// transient ImageDisplay imageDisplay;
 
