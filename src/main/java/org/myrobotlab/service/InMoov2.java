@@ -1924,10 +1924,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public NeoPixel startNeopixel(String port) {
-		return startNeopixel(port, 2);
+		return startNeopixel(port, 2, 16);
 	}
 
-	public NeoPixel startNeopixel(String port, int pin) {
+	public NeoPixel startNeopixel(String port, int pin, int numPixel) {
 		
 		if (neopixel == null) {
 			speakBlocking(get("STARTINGNEOPIXEL"));
