@@ -1940,7 +1940,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino controller3 = (Arduino) startPeer("controller3");
 					controller3.connect(port);
-					controller3.attach(controller3, pin, numPixel);
+					controller3.attach(neopixelArduino, pin, numPixel);
 					neopixelArduino = controller3;
 					//pin = pin;
 					//controller3.addListener("publishPin", this.getName(), "publishPin");
