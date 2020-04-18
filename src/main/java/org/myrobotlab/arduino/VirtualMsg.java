@@ -94,7 +94,7 @@ public class VirtualMsg {
   boolean ackEnabled = false;
   private ByteArrayOutputStream baos = null;
   public volatile boolean pendingMessage = false;
-  private volatile boolean clearToSend = false;
+  private volatile boolean clearToSend = true;
     
   public static class AckLock {
     // first is always true - since there

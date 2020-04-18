@@ -212,7 +212,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
     try {
       serial.connect(testPort);
       // TODO: figure out why we don't get our clear to send setup.
-      msg.clearToSend = true;
+      // msg.clearToSend = true;
     } catch (IOException e) {
       // TODO Auto-generated catch block
       log.error("Failed to connect to a virtual serila port!?", e);
