@@ -205,6 +205,11 @@ public class StringUtil {
    * @return
    */
   public static String byteArrayToIntString(byte[] bytes) {
+    if (bytes.length == 0) {
+      // TODO: null or string?
+      return null;
+    }
+    
     StringBuilder builder = new StringBuilder();
     for (int i = 0 ; i < bytes.length-1; i++) {
       builder.append((bytes[i] & 0xFF));

@@ -1550,7 +1550,7 @@ public class Arduino extends AbstractMicrocontroller
   public void publishAck(Integer function/* byte */) {
     log.info("Message Ack received: =={}==", Msg.methodToString(function));
     msg.ackReceived(function);
-    msg.pendingMessage = false;
+    //msg.pendingMessage = false;
     numAck++;
   }
 

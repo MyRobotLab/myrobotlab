@@ -88,28 +88,15 @@ public class MrlCommIno {
    *           - error if processing of a command blows up for some reason.
    */
   public void loop() throws Exception {
-    // get a command and process it from
-    // the serial port (if available.)
-    // wdt_disable();
-    // mrlComm on the java side just receives bytes now...  crap.
-    
+
     // TODO: This is a divergence from the MrlComm.ino code!
     // We no longer have readMsg on the java side.  only onBytes(byte[])
-    
-    // TODO: gotta figure out how to pass the serial data into this class.
-    // if we even want to try to emmulate the full arduino loop here..  
-    // seems kinda reasonable for simulation purposes.. but definitely hard to maintain.
-    
-    if (mrlComm.readMsg()) {
-      mrlComm.processCommand();
-    }
 
-    
-    // the virtual device should listen for on bytes instead.
-    // TODO: don't merge until this is addressed. we need to make sure that messages get relayed to this dark corner of the code
-//    if (mrlComm.readMsg()) {
-//      mrlComm.processCommand();
-//    }
+    // read incoming data from the serial port.
+    // This method will also publish the incoming data to onBytes
+    // If full commands exist in the data, it will process those commands
+    // and publish an ack for each processed command.
+    mrlComm.readMsg();
     // update devices
     mrlComm.updateDevices();
     // send back load time and memory

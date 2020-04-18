@@ -80,8 +80,8 @@ public class Msg {
   // recv buffer
   int ioCmd[] = new int[MAX_MSG_SIZE];
   
-  AtomicInteger byteCount = new AtomicInteger(0);
-  int msgSize = 0;
+  private AtomicInteger byteCount = new AtomicInteger(0);
+  private int msgSize = 0;
 
   // ------ device type mapping constants
   int method = -1;
@@ -93,8 +93,8 @@ public class Msg {
   
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
-  public volatile boolean pendingMessage = false;
-  private volatile boolean clearToSend = false;
+  private volatile boolean pendingMessage = false;
+  public volatile boolean clearToSend = false;
     
   public static class AckLock {
     // first is always true - since there
@@ -2286,83 +2286,56 @@ public class Msg {
           // This is the method..
           int method = newByte.intValue();
           // TODO: lookup the method in the label.. 
-          if (!clearToSend) {
-            // The only method we care about is begin!!!
-            if (method != Msg.PUBLISH_MRL_COMM_BEGIN) {
-              // This is a reset sort of scenario!  we should be killing our parser state
-              // we are only looking for a begin message now!!
-              byteCount = new AtomicInteger(0);
-              msgSize = 0;
-              continue;
-            } else {
-              // we're good to go.. maybe even clear to send at this point?
-            }
-          }
+          // if this is a valid method
           if (methodToString(method).startsWith("ERROR")) {
             // we've got an error scenario here.. reset the parser and try again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
-            if (isFullMessage(bytes)) {
-              // TODO: This could be an infinite loop 
-              // try to reprocess this byte array, maybe the parser got out of sync
-              onBytes(bytes);
-              return;
-            }
-            
-          } else {
-            ioCmd[byteCount.get() - 3] = method;
+            // Here we have an unknown method.. we have to be in a parser error sort of state.  
+            // reset the parser state and try to continue processing the rest of the bytes
+            continue;
           }
+          
+          // If we're not clear to send, we need to unlock if this is a begin message.
+          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
+            // Clear to send!!
+            log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
+            clearToSend = true;
+          } else {
+            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            // We opened the port, and we got some data that isn't a Begin message.
+            // so, I think we need to reset the parser and continue processing bytes...
+            // there will be errors until the next magic byte is seen.
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            // Here we have an unknown method.. we have to be in a parser error sort of state.  
+            // reset the parser state and try to continue processing the rest of the bytes
+            continue;
+          }
+          // we are in a valid parse state.    
+          ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
           // remove header - fill msg data - (2) headbytes -1
           // (offset)
-          // dump.append(String.format("|P%d %d", byteCount,
-          // newByte));
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
-          // the case where byteCount is negative?! not got.
+          // the case where byteCount is negative?! not got.  You should probably never see this.
           log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
           //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
           continue;
         }
+        // we have a complete message here.
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
           int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
           log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
-          // TODO: should we truncate our ioCmd that we send here?  the ioCmd array is larger than the message in almost all cases.
-          // re-init the parser
-          // TODO: this feels very thread un-safe!
-          Arrays.fill(ioCmd, 0); // optimize remove
           // process the command.
-          
-          // This full command that we received. 
-          
           processCommand(actualCommand);
-          // we should only process this command if we are clear to sync.. 
-          // if this is a begin command..  
-//          if (!clearToSend) {
-//            // if we're not clear to send.. we need to process this command
-//            // only if it's a begin command.
-//            if (isMrlCommBegin(actualCommand)) {
-//              processCommand(actualCommand);
-//            } else {
-//              // reset the parser and attempt from the next byte
-//              // TODO: check that it's not bytes.length-1
-//              byte[] shiftedBytes = Arrays.copyOfRange(bytes, 1, bytes.length);
-//              byteCount = new AtomicInteger(0);
-//              onBytes(shiftedBytes);
-//              return;
-//            }
-//            
-//          } else {
-//            processCommand(actualCommand);
-//          }
+          // re-init parser
+          Arrays.fill(ioCmd, 0); // optimize remove
           msgSize = 0;
           byteCount = new AtomicInteger(0);
-          // Our 'first' getBoardInfo may not receive a acknowledgement
-          // so this should be disabled until boadInfo is valid
-          // clean up memory/buffers
-          
         }
       } catch (Exception e) {
         ++errorHardwareToServiceRxCnt ;
@@ -2484,7 +2457,7 @@ public class Msg {
     if (ackEnabled) {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
-        Thread.sleep(1);
+        Thread.sleep(1000);
         log.info("Pending message");
       }
       // set a new pending flag.
@@ -2492,6 +2465,7 @@ public class Msg {
     }
     // write data if serial not null.
     if (serial != null) {
+      log.info("Msg writing message to serial port {} data:{}", serial.getPortName(), message);
       serial.write(message);
     }
     return message;
@@ -2603,6 +2577,7 @@ public class Msg {
   }
   
   public void ackReceived(int function){
+     pendingMessage = false;
      synchronized (ackRecievedLock) {
         ackRecievedLock.acknowledged = true;
         ackRecievedLock.notifyAll();

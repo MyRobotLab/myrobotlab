@@ -1,19 +1,36 @@
 package org.myrobotlab.service;
 
-import org.junit.Ignore;
+import java.io.IOException;
+
+import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.service.data.PinData;
+import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 
-@Ignore
-public class VirtualArduinoTest extends AbstractServiceTest {
+// @Ignore
+public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommListener, SerialDataListener, Runnable {
 
-  
+  private Msg msg = new Msg(this, null);
+  private Thread portReaderThread = null;
+  String testPort = "testPort";
+  Serial serial = (Serial)Runtime.start("dteSerial", "Serial");
+
   @Override
   public Service createService() {
-    
     Runtime.setLogLevel("info");
 
-    
+    // Runtime.start("gui", "SwingGui");
+    // First thing, set up our serial port before we start the virtual arduino
+    // TODO: there is a race condition here.. we need to listen before the virtual arduino starts.
+    portReaderThread = new Thread(this, "VirtualArduinoTest.portReaderThread");
+    portReaderThread.start();
+
     // TODO Auto-generated method stub
     VirtualArduino service = (VirtualArduino)Runtime.start("virtualArduino", "VirtualArduino");
     return service;
@@ -21,47 +38,212 @@ public class VirtualArduinoTest extends AbstractServiceTest {
 
   @Override
   public void testService() throws Exception {
-   
-    String testPort = "testPort";
-    
     VirtualArduino va = (VirtualArduino)service;
-
+    // attach to the serial port for callbacks to this test.
+    // va.getSerial().addByteListener(this);
     // Ok.. now what ?  i mean.. what the heck can a virtual arduino do?  
     // It should be able to read and write bytes to a uart.  (com port)
-    
     log.info("About to connect");
-    
     // the virtual arduino service should respond to some bytes being written to it's uart.
     // but first thing is to test.. if we "connect" to the virtual arduino.. does the uart respond with hello.
+    // connect the virtual arduino to the uart port.
     va.connect(testPort);
+    // connect our local serial port to the test port
+    serial.connect(testPort);
     
-  //   va.start();
+    // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
     
-    // now
+    // At this point what do we have.
     
-    // Now that the virtual arduino connected.. what does the uart have to say.
-    while (true) {
-      // int i = va.uart.read();
-      //System.out.println("READ: " + i);
-      // Just so text doesn't spew too fast.
-      
-      //  let's try writing some data to the serial port.
-      Thread.sleep(5000);
-      log.info("Writing a messge to attach a servo!");
-      Msg msg = new Msg(null, null);
-      byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
-      va.uart.write(data);
-      // i'd like to see an ack come back!
-      va.uart.write(msg.servoMoveToMicroseconds(0, 2000));
-      
-      // va.getMsg();
-      
-      System.out.println("Waiting... for what I have no idea.");
-      Thread.sleep(5000);
+    Thread.sleep(1000);
+    log.info("Writing a messge to attach a servo!");
+    byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
+    serial.write(data);
+    // i'd like to see an ack come back!
+    Thread.sleep(1000);
+    // TODO: this ack received needs to come back from the arduino service currently..
+    // but it should be pushe down into the internals of the msg class
+    // msg.ackReceived(0);
+
+
+    //va.uart.write(msg.servoMoveToMicroseconds(0, 2000));
+
+    // va.msg.ackReceived(0);
+    // va.getMsg();
+
+    System.out.println("Waiting... for what I have no idea.");
+    Thread.sleep(50000);
+    // }
+
+
+
+  }
+
+
+  // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
+  // none of these will get called unlesss this test gets the onBytes called that passes the returned stream down to the Msg.java onBytes.
+
+  @Override
+  public BoardInfo publishBoardInfo(Integer version, Integer boardTypeId, Integer microsPerLoop, Integer sram, Integer activePins, int[] deviceSummary) {
+    return null;
+  }
+
+  @Override
+  public void publishAck(Integer function) {
+    log.info("Publish Ack for function {}", VirtualMsg.methodToString(function));
+    // TODO Auto-generated method stub
+    // we got an ack from the virtual arduino .. acknoledge that in the mirror real msg parser.
+    msg.ackReceived(function);
+  }
+
+  @Override
+  public int[] publishCustomMsg(int[] msg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String publishDebug(String debugMsg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishEcho(float myFloat, int myByte, float secondFloat) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public EncoderData publishEncoderData(Integer deviceId, Integer position) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishI2cData(Integer deviceId, int[] data) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void publishMrlCommBegin(Integer version) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public String publishMRLCommError(String errorMsg) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public PinData[] publishPinArray(int[] data) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Object invoke(String method, Object... params) {
+    // TODO 
+    log.warn("Don't Invoke!");
+    return null;
+  }
+
+  @Override
+  public void onBytes(byte[] data) {
+    // TODO relay the bytes back to the Arduino side real Msg.java ? Is this right?
+    log.info("On Bytes Virtual Arduino Test : {}", data);
+    msg.onBytes(data);
+  }
+
+  @Override
+  public QueueStats publishStats(QueueStats stats) {
+    // TODO Auto-generated method stub
+    // NoOp in the unit test for now.
+    return null;
+  }
+
+  @Override
+  public void updateStats(QueueStats stats) {
+    // TODO Auto-generated method stub
+    // NoOp in the unit test for now.    
+  }
+
+  @Override
+  public void onConnect(String portName) {
+    // TODO : here is where we should initialize the Msg.java parser.
+    // cascade the message down to our parser.
+    // log.info("ON CONNECT IN THE TEST!");
+    // msg.onConnect(portName);
+
+  }
+
+  @Override
+  public void onDisconnect(String portName) {
+    // TODO add onDisconnect to the Msg.java class.
+    // msg.onDisconnect(portName);
+  }
+
+  @Override
+  public void run() {
+    // TODO Auto-generated method stub
+    log.info("Starting the port reader thread.");
+
+    try {
+      serial.connect(testPort);
+      // TODO: figure out why we don't get our clear to send setup.
+      msg.clearToSend = true;
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      log.error("Failed to connect to a virtual serila port!?", e);
+      return;
     }
-    
-    
-    
+
+    while (true) {
+      byte[] data = null;
+      try {
+        data = serial.readBytes();
+        //log.info("Called read bytes on serial. port:{} data:{}", serial.getPortName(), data);
+      } catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      if (data != null) {
+        onBytes(data);
+      } else {
+        // TODO: avoid cpu burn here.
+        try {
+          Thread.sleep(1);
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
+
   }
 
 }

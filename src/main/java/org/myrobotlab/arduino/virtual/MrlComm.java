@@ -2,6 +2,7 @@ package org.myrobotlab.arduino.virtual;
 
 import static org.myrobotlab.arduino.VirtualMsg.MRLCOMM_VERSION;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -9,12 +10,15 @@ import java.util.Map;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
 ///////////// MrlComm.h ///////////////
@@ -34,10 +38,10 @@ import org.slf4j.Logger;
  * processing
  * 
  */
-public class MrlComm {
+public class MrlComm implements SerialDataListener {
 
   // TODO: default to 1000, for debugging i've increased it to 10 seconds.  
-  private static final int BOARD_INFO_DELAY = 1000;
+  private static final int BOARD_INFO_DELAY = 10000;
 
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
@@ -178,7 +182,7 @@ public class MrlComm {
    */
 
   // handles all messages to and from pc
-  transient VirtualMsg msg;
+  transient VirtualMsg virtualMsg;
 
   int msgSize;
 
@@ -216,7 +220,7 @@ public class MrlComm {
   public MrlComm(VirtualArduino virtual) {
     // msg = VirtualMsg.getInstance();
     this.virtual = virtual;
-    msg = new VirtualMsg(this, virtual.getSerial());
+    virtualMsg = new VirtualMsg(this, virtual.getSerial());
     softReset();
   }
 
@@ -227,7 +231,7 @@ public class MrlComm {
    * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
    * Id leaves something to be desired - and the "index" does not spin through
    * the deviceList to find it .. a dynamic array of pointers would only expand
-   * if it could not accomidate the current number of devices, when a device was
+   * if it could not accommodate the current number of devices, when a device was
    * removed - the slot could be re-used by the next device request
    */
   Device addDevice(Device device) {
@@ -275,10 +279,14 @@ public class MrlComm {
   }
 
   public void begin(org.myrobotlab.service.Serial serial) {
+
     // wire the serial port through to virtual message
     // TODO: consider creating a new virtual message instead?
-    
-    msg.begin(serial);
+    virtualMsg.begin(serial);
+
+    // subscribe to the onBytes from the serial port!
+    serial.addByteListener(this);
+
   }
 
   // > customMsg/[] msg
@@ -353,11 +361,11 @@ public class MrlComm {
 
   // > echo/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[] config/bu32 bui322
   public void echo(float myFloat, int myByte, float mySecondFloat) {
-    msg.publishDebug(String("echo float " + String(myFloat)));
-    msg.publishDebug(String("echo int " + String(myByte)));
-    msg.publishDebug(String("echo float2 " + String(mySecondFloat)));
+    virtualMsg.publishDebug(String("echo float " + String(myFloat)));
+    virtualMsg.publishDebug(String("echo int " + String(myByte)));
+    virtualMsg.publishDebug(String("echo float2 " + String(mySecondFloat)));
     // msg.publishDebug(String("pi is " + String(3.141529)));
-    msg.publishEcho(myFloat, myByte & 0xFF, mySecondFloat);
+    virtualMsg.publishEcho(myFloat, myByte & 0xFF, mySecondFloat);
   }
 
   public void enableAck(boolean enabled) {
@@ -454,7 +462,7 @@ public class MrlComm {
       // node = node.next;
     }
 
-    msg.publishError(F("device does not exist"));
+    virtualMsg.publishError(F("device does not exist"));
     return null; // returning a null ptr can cause runtime error
     // you'll still get a runtime error if any field, member or method not
     // defined is accessed
@@ -471,7 +479,7 @@ public class MrlComm {
   }
 
   public VirtualMsg getMsg() {
-    return msg;
+    return virtualMsg;
   }
 
   public String getName() {
@@ -536,13 +544,13 @@ public class MrlComm {
     // msg.publishDebug("MrlNeopixel.deviceAttach!");
 
     MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
-    msg.publishDebug("id" + String(deviceId));
+    virtualMsg.publishDebug("id" + String(deviceId));
     neo.attach(pin, numPixels);
   }
 
   // > neoPixelAttach/pin/b16 numPixels
   public void neoPixelSetAnimation(int deviceId, int animation, int red, int green, int blue, int speed) {
-    msg.publishDebug("MrlNeopixel.setAnimation!");
+    virtualMsg.publishDebug("MrlNeopixel.setAnimation!");
     ((MrlNeopixel) getDevice(deviceId)).setAnimation(animation, red, green, blue, speed);
   }
 
@@ -565,24 +573,25 @@ public class MrlComm {
     // TODO change mode of pin ... duh
   }
 
-  public void processCommand() {
-
-    msg.processCommand();
-    if (ackEnabled) {
-      msg.publishAck(msg.getMethod());
-    }
-  }
+//  public void processCommand() {
+//
+//    virtualMsg.processCommand();
+//    if (ackEnabled) {
+//      virtualMsg.publishAck(virtualMsg.getMethod());
+//    }
+//  }
 
   public void publishError(java.lang.String f) {
-    msg.publishMRLCommError(f);
+    virtualMsg.publishMRLCommError(f);
   }
 
   public void onBytes(byte[] newBytes) throws Exception {
-    msg.onBytes(newBytes);
+    log.info("MrlComm called onBytes : {}", newBytes);
+    virtualMsg.onBytes(newBytes);
   }
 
   void sendCustomMsg(int[] customMsg) {
-    msg.publishCustomMsg(customMsg);
+    virtualMsg.publishCustomMsg(customMsg);
   }
 
   // TODO - implement
@@ -663,21 +672,21 @@ public class MrlComm {
   // TODO - implement
   // > setDebounce/pin/delay
   public void setDebounce(int pin, int delay) {
-    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
+    virtualMsg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(delay));
   }
 
   public void setDebug(boolean enabled) {
-    msg.debug = enabled;
+    virtualMsg.debug = enabled;
   }
 
   public void setSerialRate(long rate) {
-    msg.publishDebug("setSerialRate " + String(rate));
+    virtualMsg.publishDebug("setSerialRate " + String(rate));
   }
 
   // TODO - implement
   // > setTrigger/pin/value
   public void setTrigger(int pin, int triggerValue) {
-    msg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
+    virtualMsg.publishDebug("implement me ! setDebounce (" + String(pin) + "," + String(triggerValue));
   }
 
   public void setZeroPoint(Integer deviceId) {
@@ -697,7 +706,7 @@ public class MrlComm {
     // resetting variables to default
     loopCount = 0;
     boardStatusEnabled = false;
-    msg.debug = false;
+    virtualMsg.debug = false;
     lastHeartbeatUpdate = 0;
     for (int i = 0; i < VirtualMsg.MAX_MSG_SIZE; i++) {
       customMsgBuffer[i] = 0;
@@ -822,7 +831,7 @@ public class MrlComm {
         // node = node.next;
       }
       if (dataCount) {
-        msg.publishPinArray(buffer);
+        virtualMsg.publishPinArray(buffer);
       }
     }
   }
@@ -852,7 +861,7 @@ public class MrlComm {
       // buffer - then stop
       // with virtual arduino we don't want a gazillion error messages and won't
       // publishBoardInfo unless connected
-      msg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
+      virtualMsg.publishBoardInfo(MRLCOMM_VERSION, boardType, load, getFreeRam(), pinList.size(), deviceSummary);
     }
     lastBoardInfoUs = now;
     loopCount = 0;
@@ -866,8 +875,51 @@ public class MrlComm {
     // TODO Auto-generated method stub
     // TODO: we really should be reading the byte stream from the serial port here
     // and passing it to the virtualmessage parser to trigger the callbacks on the listener.  
+    // here we need to pick up the data that's available.. and process it..
+    
+//    try {
+//      byte[] incomingData = serial.readBytes();
+//      if (incomingData != null) {
+//        log.info("MRLCOMM GOT DATA from port:{} data:{}", serial.getPortName(), incomingData);
+//        onBytes(incomingData);
+//      }
+//    } catch (IOException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    } catch (InterruptedException e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    } catch (Exception e) {
+//      // TODO Auto-generated catch block
+//      e.printStackTrace();
+//    }
+    // TODO: i'm not sure what process message would be. that's handled in the onBytes method.
     // TODO: make sure to implement this... how ever the heck that's going to happen. i don't know yet.
     return false;
+  }
+
+  @Override
+  public QueueStats publishStats(QueueStats stats) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void updateStats(QueueStats stats) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void onConnect(java.lang.String portName) {
+    // TODO Auto-generated method stub
+    log.info("MrlComm onConnect for port:{}", portName);
+  }
+
+  @Override
+  public void onDisconnect(java.lang.String portName) {
+    // TODO Auto-generated method stub
+    log.info("MrlComm onDisconnect for port:{}", portName);
   }
 
 }

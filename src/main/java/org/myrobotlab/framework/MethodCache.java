@@ -153,7 +153,7 @@ public class MethodCache {
   public void cacheMethodEntries(Class<?> object, Set<Class<?>> excludeFromDeclared) {
 
     if (objectCache.containsKey(object.getTypeName())) {
-      log.info("already cached {} methods", object.getSimpleName());
+      log.debug("already cached {} methods", object.getSimpleName());
       return;
     }
 
@@ -161,7 +161,7 @@ public class MethodCache {
     MethodIndex mi = new MethodIndex();
     Method[] methods = object.getMethods();
     Method[] declaredMethods = object.getDeclaredMethods();
-    log.info("caching {}'s {} methods and {} declared methods", object.getSimpleName(), methods.length, declaredMethods.length);
+    log.debug("caching {}'s {} methods and {} declared methods", object.getSimpleName(), methods.length, declaredMethods.length);
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
 
@@ -223,7 +223,7 @@ public class MethodCache {
     // object.getSimpleName(), methods.length,
     // mi.remoteMethods.keySet().size());
     objectCache.put(object.getTypeName(), mi);
-    log.info("cached {} {} methods with {} ordinal signatures in {} ms", object.getSimpleName(), mi.methodsIndex.size(), mi.methodOrdinalIndex.size(),
+    log.debug("cached {} {} methods with {} ordinal signatures in {} ms", object.getSimpleName(), mi.methodsIndex.size(), mi.methodOrdinalIndex.size(),
         System.currentTimeMillis() - start);
   }
 

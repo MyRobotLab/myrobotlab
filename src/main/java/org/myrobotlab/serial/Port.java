@@ -50,7 +50,7 @@ public abstract class Port implements Runnable, SerialControl {
   int txErrors;
   int rxErrors;
 
-  boolean isOpen = false;
+  private boolean isOpen = false;
 
   // FIXME - find a better way to handle this
   // necessary - to be able to invoke
@@ -74,13 +74,12 @@ public abstract class Port implements Runnable, SerialControl {
   }
 
   public void close() {
-
+    isOpen = false;
     listening = false;
     if (readingThread != null) {
       readingThread.interrupt();
     }
     readingThread = null;
-
     log.info("closed port {}", portName);
   }
 

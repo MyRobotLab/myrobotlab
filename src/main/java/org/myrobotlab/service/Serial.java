@@ -251,7 +251,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public void addByteListener(SerialDataListener listener) {
-    addByteListener(listener.getName());
+    listeners.put(listener.getName(), listener);
   }
 
   /**
@@ -267,6 +267,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * @param name
    */
   public void addByteListener(String name) {
+    log.info("Add Byte Listener for Name {}", name);
     ServiceInterface si = Runtime.getService(name);
     
     if (si == null) {
@@ -276,10 +277,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     if (si != null && SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
       // local optimization
-      listeners.put(si.getName(), (SerialDataListener) si);
+      addByteListener((SerialDataListener) si);
     } else {
+      // TODO: review this section here..  we might have double publishing going on.
       // pub sub
       addListener("publishRX", name, "onByte");
+      addListener("publishBytes", name, "onBytes");
       addListener("publishConnect", name, "onConnect");
       addListener("publishDisconnect", name, "onDisconnect");
     }
@@ -567,10 +570,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (uart == null) {
       uart = (Serial) Runtime.start(String.format("%s.UART", myPort.replace("/", "_")), "Serial");
     }
-
     uart.connectPort(uPort, uart);
-
     log.info("connectToVirtualUart - creating uart {} <--> {}", myPort, uartPort);
+    // returning the serial service that is connected to the DCE side of the virtual port.
     return uart;
   }
 
@@ -729,6 +731,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public boolean isConnected() {
+    // really?  shouldn't this be something like...
+    // if the port is actually connected?
     return portName != null;
   }
 
@@ -820,6 +824,20 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * @return
    */
   public byte[] publishBytes(byte[] bytes) {
+    log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
+    // we need to write the bytes to the listeners!  hmm.. 
+//    for (String listener : listeners.keySet()) {
+//      if (listener.equals(getName())) {
+//        // avoid a nasty loopback.
+//        continue;
+//      }
+//      try {
+//        listeners.get(listener).onBytes(bytes);
+//      } catch (Exception e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//      }
+//    }
     return bytes;
   }
 
@@ -850,6 +868,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   @Override
   synchronized public int read() throws IOException, InterruptedException {
 
+    log.info("READ CALLED ON SERIAL.");
     if (timeoutMS == null) {
       return blockingRX.take();
     }
@@ -862,6 +881,28 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
 
     return newByte;
+  }
+  
+
+  /**
+   * return a byte array represending all the input pending data at the time it's called.
+   * If there is no input data, null is returned.
+   * 
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  synchronized public byte[] readBytes() throws IOException, InterruptedException {
+    int size = blockingRX.size();
+    if (size == 0) {
+      return null;
+    } else {
+      byte[] data = new byte[size];
+      for (int i = 0; i < size; i++) {
+        data[i] = blockingRX.take().byteValue();
+      }
+      return data;
+    }
   }
 
   // FIXME add timeout parameter (with default)
@@ -1083,7 +1124,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   @Override
   public void write(byte[] data) throws Exception {
     
+    if (data == null) {
+      return;
+    }
+    
     for (String portName : connectedPorts.keySet()) {
+      log.info("Writing data to port {} data:{}", portName, data);
       Port writePort = connectedPorts.get(portName);
       writePort.write(data);
     }
