@@ -1,4 +1,5 @@
 <div class="navbar navbar-inverse container-fluid" role="navigation">
+<!-- <div class="navbar navbar-inverse navbar-fixed-top" role="navigation"> -->
     <ul class="nav navbar-nav navbar-left">
         <li>
             <!--TODO - green png if connected - if not re-connect button-->
@@ -11,7 +12,8 @@
             <a class="navbar-brand" href="/">MyRobotLab</a>
         </li>
     </ul>
-    <span class="pull-right" style="display: inline-flex;">
+
+    <span class="pull-right" style="display: flex;"><!-- inline-flex -->
         <span class="nav-color">{{remotePlatform.id}}  {{remotePlatform.mrlVersion}}</span>
         <div class="btn-group pull-left" uib-dropdown>
             <div uib-dropdown-toggle class="glyphicon glyphicon-option-vertical nav-icon"></div>
@@ -44,32 +46,35 @@
                 <span class="badge badge-danger notification-badge" style="background-color:red;" ng-hide="errorCount + warningCount + infoCount == 0">{{errorCount + warningCount + infoCount}}</span>
             </span>
             <ul id="notification-entries" class="dropdown-menu-right" uib-dropdown-menu>
+            <li>
+                Notifications
+            </i>
                 <li>
 
-<div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
-    <span class="label label-danger">error</span>
-    {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
-            <span ng-hide="errorCount < 2" class="badge">{{errorCount}}</span>
-    <button type="button" class="close" data-ng-click="errorStatus = null;errorCount = 0" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<div class="alert alert-warning alert-dismissable mb-0" ng-hide="warningStatus == null">
-    <span class="label label-warning">warning</span>
-    {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
-            <span ng-hide="warningCount < 2" class="badge">{{warningCount}}</span>
-    <button type="button" class="close" data-ng-click="warningStatus = null;warningCount = 0" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
-<div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null">
-    <span class="label label-info">info</span>
-    {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
-            <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
-    <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
-</div>
+                    <div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
+                        <span class="label label-danger">error</span>
+                        {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
+                                <span ng-hide="errorCount < 2" class="badge">{{errorCount}}</span>
+                        <button type="button" class="close" data-ng-click="errorStatus = null;errorCount = 0" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="alert alert-warning alert-dismissable mb-0" ng-hide="warningStatus == null">
+                        <span class="label label-warning">warning</span>
+                        {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
+                                <span ng-hide="warningCount < 2" class="badge">{{warningCount}}</span>
+                        <button type="button" class="close" data-ng-click="warningStatus = null;warningCount = 0" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null">
+                        <span class="label label-info">info</span>
+                        {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
+                                <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
+                        <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
                 </li>
             </ul>
