@@ -1923,6 +1923,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return torso;
 	}
 	
+	public NeoPixel startNeopixel() {
+		return startNeopixel(right, 2, 16);
+	}
+	
 	public NeoPixel startNeopixel(String port) {
 		return startNeopixel(port, 2, 16);
 	}
