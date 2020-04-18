@@ -1922,17 +1922,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return torso;
 	}
 	
-	public Neopixel startNeopixel(String port) {
+	public NeoPixel startNeopixel(String port) {
 		return startNeopixel(port, 2);
 	}
 
-	public Neopixel startNeopixel(String port, int pin) {
+	public NeoPixel startNeopixel(String port, int pin) {
 		
 		if (neopixel == null) {
 			speakBlocking(get("STARTINGNEOPIXEL"));
 			isNeopixelActivated = true;
 
-			neopixel = (Neopixel) startPeer("neopixel");
+			neopixel = (NeoPixel) startPeer("neopixel");
 
 			//if (port != null) {
 				//try {
