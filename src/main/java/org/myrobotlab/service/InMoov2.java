@@ -2142,6 +2142,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		isTorsoActivated = false;
 	}
 	
+	public void stopNeopixelAnimation() {
+		if (neopixel != null && neopixelArduino != null) {
+			neopixel.animationStop();
+		} else {
+			warn("No Neopixel attached");
+		}
+	}	
+
 	public void stopNeopixel() {
 		speakBlocking(get("STOPNEOPIXEL"));
 		releasePeer("neopixel");
