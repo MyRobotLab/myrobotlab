@@ -1935,19 +1935,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 			neopixel = (NeoPixel) startPeer("neopixel");
 
-			//if (port != null) {
-				//try {
-					//speakBlocking(port);
-					//Arduino controller3 = (Arduino) startPeer("controller3");
-					//controller3.connect(port);
-					//controller3.enablePin(pin, pirPin);
-					//pirArduino = right;
-					//pirPin = pin;
-					//right.addListener("publishPin", this.getName(), "publishPin");
-				//} catch (Exception e) {
-					//error(e);
-				//}
-			//}
+			if (port != null) {
+				try {
+					speakBlocking(port);
+					Arduino controller3 = (Arduino) startPeer("controller3");
+					controller3.connect(port);
+					controller3.attach(controller3, pin, numPixel);
+					neopixelArduino = controller3;
+					//pin = pin;
+					//controller3.addListener("publishPin", this.getName(), "publishPin");
+				} catch (Exception e) {
+					error(e);
+				}
+			}
 		}
 		return neopixel;
 	}	
