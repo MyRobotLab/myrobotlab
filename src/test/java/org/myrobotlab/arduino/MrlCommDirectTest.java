@@ -267,7 +267,8 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
   public void publishAck(Integer function) {
     // if we get an ack.. the msg object isn't pending anymore.
     numAcks++;
-    msg.pendingMessage = false;
+    msg.ackReceived(function);
+    //msg.pendingMessage = false;
     System.err.println("Publish Ack " + numAcks + "function:" + function );
     log.info("Publish Ack {}", function);   
     System.err.println("Publish Ack: " + function);

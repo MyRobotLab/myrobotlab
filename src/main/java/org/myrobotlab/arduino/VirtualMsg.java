@@ -80,7 +80,7 @@ public class VirtualMsg {
   // recv buffer
   int ioCmd[] = new int[MAX_MSG_SIZE];
   
-  AtomicInteger byteCount = new AtomicInteger(0);
+  private AtomicInteger byteCount = new AtomicInteger(0);
   int msgSize = 0;
 
   // ------ device type mapping constants
@@ -306,9 +306,9 @@ public class VirtualMsg {
     invoke = b;
   }
   
-  public void processCommand(){
-    processCommand(ioCmd);
-  }
+//  public void processCommand(){
+//    processCommand(ioCmd);
+//  }
   
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
@@ -1496,7 +1496,7 @@ public class VirtualMsg {
   public void onBytes(byte[] bytes) {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
+    log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
@@ -1549,6 +1549,7 @@ public class VirtualMsg {
           if (!clearToSend) {
             // The only method we care about is begin!!!
             if (method != Msg.PUBLISH_MRL_COMM_BEGIN) {
+              log.warn("VIRTUAL NOT CLEAR TO SEND.. RESET PARSER!");
               // This is a reset sort of scenario!  we should be killing our parser state
               // we are only looking for a begin message now!!
               byteCount = new AtomicInteger(0);
@@ -1598,6 +1599,8 @@ public class VirtualMsg {
           // This full command that we received. 
           
           processCommand(actualCommand);
+          // Probably always true on the virtualMsg side, regardless.. we can always send our ack.. 
+          publishAck(method);
           // we should only process this command if we are clear to sync.. 
           // if this is a begin command..  
 //          if (!clearToSend) {
@@ -1752,6 +1755,7 @@ public class VirtualMsg {
     }
     // write data if serial not null.
     if (serial != null) {
+      log.info("Writing to serial {} port {} data {}", serial.getName(), serial.getPortName(), message);
       serial.write(message);
     }
     return message;
@@ -1863,10 +1867,13 @@ public class VirtualMsg {
   }
   
   public void ackReceived(int function){
+    log.info("Virtual MSG Ack Received..");
+    this.pendingMessage = false;
      synchronized (ackRecievedLock) {
         ackRecievedLock.acknowledged = true;
         ackRecievedLock.notifyAll();
       }
+     
   }
   
   public int getMethod(){
@@ -1952,15 +1959,19 @@ public class VirtualMsg {
 
   public synchronized void onConnect(String portName) {
     // reset the parser...
-    log.info("On Connect Called in Msg.");
+    log.info("On Connect Called in VirtualMsg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
     // we're not clear to send.
-    this.clearToSend = false;
+    // virutal message is always clear to send if it's connected.
+    // probably just always clear to send in general..
+    this.clearToSend = true;
+    
+    // on connect. we need to restart the mrlcomm runner.
+    
     // watch for the first MrlCommBegin message;
     // TODO: we should have some sort of timeout / error handling here.
     // this.waitForBegin();
-    
   }
 
 

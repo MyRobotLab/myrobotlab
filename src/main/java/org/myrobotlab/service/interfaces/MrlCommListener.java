@@ -12,6 +12,9 @@ import org.myrobotlab.service.data.SerialRelayData;
  *
  */
 public interface MrlCommListener {
+  
+  public void onBytes(byte[] data);
+  
   public BoardInfo publishBoardInfo(Integer version/* byte */,
       Integer boardTypeId/* byte */, Integer microsPerLoop/* b16 */,
       Integer sram/* b16 */, Integer activePins, int[] deviceSummary/* [] */);
