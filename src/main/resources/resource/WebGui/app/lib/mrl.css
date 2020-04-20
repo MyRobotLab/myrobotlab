@@ -82,14 +82,14 @@ table, th, td {
   left: 264px;
   background-color: #ff6302;
   color: #ff6302;
-  height: 33px;
+  height: 12px;
   font-size: large;
   font-weight: bold;
   top: 0px;
   width: 8px;
   margin-left: -4px;
   z-index: 4;
-  padding-top: 32px;
+  padding-top: 13px;
   opacity: 0.8;
   text-indent: -8px;
 }
@@ -747,21 +747,23 @@ table, th, td {
 
 .servoBubble {
   position: absolute;
-  top: 14px;
-  left: -27px;
-  height: 22px;
+  top: 50px;
+  left: -23px;
+  height: 20px;
   color: black;
   text-align: center;
-  background: #ffffff;
+  background: #ffffff8f;
   border-color: #d8d8d8;
   border-style: solid;
   border-width: 1px;
   /* padding: 4px; */
-  width: 70px;
+  width: 60px;
   border-radius: 4px;
   /*box-shadow: 5px 6px 3px #9090908c;*/
   pointer-events: none;
   text-shadow: none;
+  /*padding-top: 40px;*/
+
 }
 
 .servoBigLabelLimits {
