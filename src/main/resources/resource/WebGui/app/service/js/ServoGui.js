@@ -76,6 +76,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
     }
 
+    $scope.refreshSlider = function () {
+        $timeout(function () {
+            $scope.$broadcast('rzSliderForceRender');
+        });
+    };
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
