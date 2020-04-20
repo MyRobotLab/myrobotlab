@@ -1808,10 +1808,11 @@ public class VirtualMsg {
   }
   
   public void ackReceived(int function){
-     synchronized (ackRecievedLock) {
-        ackRecievedLock.acknowledged = true;
-        ackRecievedLock.notifyAll();
-      }
+    pendingMessage = false;
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.acknowledged = true;
+      ackRecievedLock.notifyAll();
+    }
   }
   
   public int getMethod(){

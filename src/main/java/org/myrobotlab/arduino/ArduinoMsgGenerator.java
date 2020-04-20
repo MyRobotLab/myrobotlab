@@ -221,11 +221,19 @@ public class ArduinoMsgGenerator {
     idlToJava = idlToJava.replace("%arduino%", "arduino");
     idlToJava = idlToJava.replace("%javaClass%", "Msg");
     idlToJava = idlToJava.replace("%javaArduinoClass%", "MrlCommListener");
+    // Msg doesn't publish acks back to MrlComm
+    idlToJava = idlToJava.replace("%publishAcks%", "");
+    // on startup Msg needs to see an MrlBeginMessage before it's clear to send data.
+    idlToJava = idlToJava.replace("%clearToSend%", "false");
 
     virtualJava = virtualJava.replace("%arduino%", "virtual");
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
     virtualJava = virtualJava.replace("%ackEnabled%", "false");
+    // virtual message should publish an ack after each processCommand call.
+    virtualJava = virtualJava.replace("%publishAcks%", "publishAck(method);");
+    // virtual message doesn't need to wait for a begin message to be clear to send.
+    virtualJava = virtualJava.replace("%clearToSend%", "true");
 
     fileSnr.put("%ackEnabled%", ackEnabled );
     // process substitutions
