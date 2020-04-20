@@ -64,46 +64,38 @@ import org.slf4j.Logger;
 
 public class VirtualMsg {
 
+  public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
   public static final int MRLCOMM_VERSION = 64;
-  
-  int ackMaxWaitMs = 1000;
-  
-    boolean waiting = false;
-  
-  
+  private int ackMaxWaitMs = 1000;
+  private boolean waiting = false;
   // send buffer
-  int sendBufferSize = 0;
-  int sendBuffer[] = new int[MAX_MSG_SIZE];
-  
+  private int sendBufferSize = 0;
+  private int sendBuffer[] = new int[MAX_MSG_SIZE];
   // recv buffer
-  int ioCmd[] = new int[MAX_MSG_SIZE];
-  
+  private int ioCmd[] = new int[MAX_MSG_SIZE];
   private AtomicInteger byteCount = new AtomicInteger(0);
-  int msgSize = 0;
-
+  private int msgSize = 0;
   // ------ device type mapping constants
-  int method = -1;
+  private int method = -1;
   public boolean debug = false;
-  boolean invoke = true;
+  // TODO: remove this!
+  boolean invoke = false;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = false;
   private ByteArrayOutputStream baos = null;
-  public volatile boolean pendingMessage = false;
+  private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = true;
-    
   public static class AckLock {
     // first is always true - since there
     // is no msg to be acknowledged...
     volatile boolean acknowledged = true;
   }
-   
   transient AckLock ackRecievedLock = new AckLock();
-  
   // recording related
   transient FileOutputStream record = null;
   transient StringBuilder rxBuffer = new StringBuilder();
@@ -282,9 +274,7 @@ public class VirtualMsg {
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
   
-
   
-  public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
 
   public VirtualMsg(MrlComm arduino, SerialDevice serial) {
     this.arduino = arduino;
@@ -306,9 +296,9 @@ public class VirtualMsg {
     invoke = b;
   }
   
-//  public void processCommand(){
-//    processCommand(ioCmd);
-//  }
+  public void processCommand(){
+    processCommand(ioCmd);
+  }
   
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
@@ -1526,7 +1516,6 @@ public class VirtualMsg {
             continue;
           }
           msgSize = newByte.intValue();
-          // dump.append(String.format("MSG|SZ %d", msgSize));
         } else if (byteCount.get() == 3) {
           // This is the method..
           int method = newByte.intValue();
@@ -1536,38 +1525,49 @@ public class VirtualMsg {
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             continue;
-          } else {
-            ioCmd[byteCount.get() - 3] = method;
           }
+          
+          // If we're not clear to send, we need to unlock if this is a begin message.
+          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
+            // Clear to send!!
+            log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
+            clearToSend = true;
+          } 
+          
+          if (!clearToSend) {
+            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            // We opened the port, and we got some data that isn't a Begin message.
+            // so, I think we need to reset the parser and continue processing bytes...
+            // there will be errors until the next magic byte is seen.
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            // Here we have an unknown method.. we have to be in a parser error sort of state.  
+            // reset the parser state and try to continue processing the rest of the bytes
+            continue;
+          }
+          // we are in a valid parse state.    
+          ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
+          // This is the body of the message copy it to the buffer
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
-          // the case where byteCount is negative?! not got.
+          // the case where byteCount is negative?! not got.  You should probably never see this.
           log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
           //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
           continue;
         }
+        // we have a complete message here.
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
           int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
           log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
-          // TODO: should we truncate our ioCmd that we send here?  the ioCmd array is larger than the message in almost all cases.
-          // re-init the parser
-          // TODO: this feels very thread un-safe!
-          Arrays.fill(ioCmd, 0); // optimize remove
           // process the command.
-          
-          // This full command that we received. 
-          
           processCommand(actualCommand);
-          // Probably always true on the virtualMsg side, regardless.. we can always send our ack.. 
           publishAck(method);
+          // re-init parser
+          Arrays.fill(ioCmd, 0); // optimize remove
           msgSize = 0;
           byteCount = new AtomicInteger(0);
-          // Our 'first' getBoardInfo may not receive a acknowledgement
-          // so this should be disabled until boadInfo is valid
-          // clean up memory/buffers
-          
         }
       } catch (Exception e) {
         ++errorHardwareToServiceRxCnt ;
@@ -1697,7 +1697,6 @@ public class VirtualMsg {
     }
     // write data if serial not null.
     if (serial != null) {
-      log.info("Writing to serial {} port {} data {}", serial.getName(), serial.getPortName(), message);
       serial.write(message);
     }
     return message;
@@ -1809,13 +1808,10 @@ public class VirtualMsg {
   }
   
   public void ackReceived(int function){
-    log.info("Virtual MSG Ack Received..");
-    this.pendingMessage = false;
      synchronized (ackRecievedLock) {
         ackRecievedLock.acknowledged = true;
         ackRecievedLock.notifyAll();
       }
-     
   }
   
   public int getMethod(){
@@ -1901,19 +1897,15 @@ public class VirtualMsg {
 
   public synchronized void onConnect(String portName) {
     // reset the parser...
-    log.info("On Connect Called in VirtualMsg.");
+    log.info("On Connect Called in Msg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
     // we're not clear to send.
-    // virutal message is always clear to send if it's connected.
-    // probably just always clear to send in general..
-    this.clearToSend = true;
-    
-    // on connect. we need to restart the mrlcomm runner.
-    
+    // this.clearToSend = false;
     // watch for the first MrlCommBegin message;
     // TODO: we should have some sort of timeout / error handling here.
     // this.waitForBegin();
+    
   }
 
 

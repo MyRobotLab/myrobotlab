@@ -64,28 +64,23 @@ import org.slf4j.Logger;
 
 public class Msg {
 
+  public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
   public static final int MRLCOMM_VERSION = 64;
-  
-  int ackMaxWaitMs = 1000;
-  
-    boolean waiting = false;
-  
-  
+  private int ackMaxWaitMs = 1000;
+  private boolean waiting = false;
   // send buffer
-  int sendBufferSize = 0;
-  int sendBuffer[] = new int[MAX_MSG_SIZE];
-  
+  private int sendBufferSize = 0;
+  private int sendBuffer[] = new int[MAX_MSG_SIZE];
   // recv buffer
-  int ioCmd[] = new int[MAX_MSG_SIZE];
-  
+  private int ioCmd[] = new int[MAX_MSG_SIZE];
   private AtomicInteger byteCount = new AtomicInteger(0);
   private int msgSize = 0;
-
   // ------ device type mapping constants
-  int method = -1;
+  private int method = -1;
   public boolean debug = false;
+  // TODO: remove this!
   boolean invoke = false;
   
   private int errorServiceToHardwareRxCnt = 0;
@@ -95,15 +90,12 @@ public class Msg {
   private ByteArrayOutputStream baos = null;
   private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = false;
-    
   public static class AckLock {
     // first is always true - since there
     // is no msg to be acknowledged...
     volatile boolean acknowledged = true;
   }
-   
   transient AckLock ackRecievedLock = new AckLock();
-  
   // recording related
   transient FileOutputStream record = null;
   transient StringBuilder rxBuffer = new StringBuilder();
@@ -252,9 +244,7 @@ public class Msg {
   // public void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/){}
   // public void publishMrlCommBegin(Integer version/*byte*/){}
   
-
   
-  public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
 
   public Msg(MrlCommListener arduino, SerialDevice serial) {
     this.arduino = arduino;
@@ -2236,27 +2226,13 @@ public class Msg {
   public void onBytes(byte[] bytes) {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
+    log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
-        /**
-         * Archtype InputStream read - rxtxLib does not have this straightforward
-         * design, but the details of how it behaves is is handled in the Serial
-         * service and we are given a unified interface
-         *
-         * The "read()" is data taken from a blocking queue in the Serial service.
-         * If we want to support blocking functions in Arduino then we'll
-         * "publish" to our local queues
-         */
-        // TODO: consider reading more than 1 byte at a time ,and make this
-        // callback onBytes or something like that.
         byteCount.incrementAndGet();
-        
-        // log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
-        // ++byteCount;
         if (log.isDebugEnabled()) {
           log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
         }
@@ -2267,7 +2243,6 @@ public class Msg {
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
             log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
-            // dump.setLength(0);
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -2281,19 +2256,14 @@ public class Msg {
             continue;
           }
           msgSize = newByte.intValue();
-          // dump.append(String.format("MSG|SZ %d", msgSize));
         } else if (byteCount.get() == 3) {
           // This is the method..
           int method = newByte.intValue();
-          // TODO: lookup the method in the label.. 
-          // if this is a valid method
           if (methodToString(method).startsWith("ERROR")) {
             // we've got an error scenario here.. reset the parser and try again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
-            // Here we have an unknown method.. we have to be in a parser error sort of state.  
-            // reset the parser state and try to continue processing the rest of the bytes
             continue;
           }
           
@@ -2318,8 +2288,7 @@ public class Msg {
           // we are in a valid parse state.    
           ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
-          // remove header - fill msg data - (2) headbytes -1
-          // (offset)
+          // This is the body of the message copy it to the buffer
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
           // the case where byteCount is negative?! not got.  You should probably never see this.
@@ -2467,7 +2436,6 @@ public class Msg {
     }
     // write data if serial not null.
     if (serial != null) {
-      log.info("Msg writing message to serial port {} data:{}", serial.getPortName(), message);
       serial.write(message);
     }
     return message;
