@@ -40,8 +40,6 @@ import org.slf4j.Logger;
  *
  */
 
-// TODO:kw re-enable this before merging better_acks2
-@Ignore
 public class ArduinoTest extends AbstractTest implements PinArrayListener, PinListener {
   
   public final static Logger log = LoggerFactory.getLogger(ArduinoTest.class);
