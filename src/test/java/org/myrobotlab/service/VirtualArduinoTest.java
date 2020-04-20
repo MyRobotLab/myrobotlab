@@ -66,13 +66,13 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
     // msg.ackReceived(0);
 
 
-    //va.uart.write(msg.servoMoveToMicroseconds(0, 2000));
+    serial.write(msg.servoMoveToMicroseconds(0, 2000));
 
     // va.msg.ackReceived(0);
     // va.getMsg();
 
     System.out.println("Waiting... for what I have no idea.");
-    Thread.sleep(50000);
+    Thread.sleep(5000);
     // }
 
 

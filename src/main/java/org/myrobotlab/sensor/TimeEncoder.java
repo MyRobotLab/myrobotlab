@@ -45,7 +45,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
   double defaultMaxSpeedDegreesPerMs = 0.5;
 
   // time between next evaluation
-  int sampleIntervalMs = 200;
+  int sampleIntervalMs = 5;
 
   // where we are
   double beginPos;

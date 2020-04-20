@@ -18,11 +18,8 @@ import org.slf4j.Logger;
 public abstract class Port implements Runnable, SerialControl {
 
   public final static Logger log = LoggerFactory.getLogger(Port.class);
-
   String portName;
-
   transient HashMap<String, SerialDataListener> listeners = new HashMap<>();
-
   static int pIndex = 0;
 
   /**
@@ -31,14 +28,10 @@ public abstract class Port implements Runnable, SerialControl {
    */
   transient Thread readingThread = null;
   boolean listening = false;
-  
-
   public boolean debug = true;
   public boolean debugTX = true;
   public boolean debugRX = false;
-
   QueueStats stats = new QueueStats();
-
   // hardware serial port details
   // default convention over configuration
   // int rate = 57600;
@@ -46,10 +39,8 @@ public abstract class Port implements Runnable, SerialControl {
   int dataBits = 8;
   int stopBits = 1;
   int parity = 0;
-
   int txErrors;
   int rxErrors;
-
   private boolean isOpen = false;
 
   // FIXME - find a better way to handle this
@@ -142,8 +133,6 @@ public abstract class Port implements Runnable, SerialControl {
     log.info("opening port {}", portName);
     isOpen = true;
   }
-
-  // abstract public int read() throws Exception;
 
   abstract public byte[] readBytes() throws Exception;
   /**

@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-
-import org.apache.commons.lang.NotImplementedException;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
