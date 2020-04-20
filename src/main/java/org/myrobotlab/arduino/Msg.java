@@ -2641,6 +2641,7 @@ public class Msg {
     log.info("On Connect Called in Msg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
+    this.pendingMessage = false;
     // we're not clear to send.
     // this.clearToSend = false;
     // watch for the first MrlCommBegin message;
