@@ -89,7 +89,7 @@ public class %javaClass% {
   boolean ackEnabled = %ackEnabled%;
   private ByteArrayOutputStream baos = null;
   private volatile boolean pendingMessage = false;
-  private volatile boolean clearToSend = false;
+  private volatile boolean clearToSend = %clearToSend%;
   public static class AckLock {
     // first is always true - since there
     // is no msg to be acknowledged...
@@ -295,6 +295,7 @@ public class %javaClass% {
           log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
           // process the command.
           processCommand(actualCommand);
+          %publishAcks%
           // re-init parser
           Arrays.fill(ioCmd, 0); // optimize remove
           msgSize = 0;
@@ -499,10 +500,11 @@ public class %javaClass% {
   }
   
   public void ackReceived(int function){
-     synchronized (ackRecievedLock) {
-        ackRecievedLock.acknowledged = true;
-        ackRecievedLock.notifyAll();
-      }
+    pendingMessage = false;
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.acknowledged = true;
+      ackRecievedLock.notifyAll();
+    }
   }
   
   public int getMethod(){

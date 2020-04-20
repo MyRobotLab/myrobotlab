@@ -2303,6 +2303,7 @@ public class Msg {
           log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
           // process the command.
           processCommand(actualCommand);
+          
           // re-init parser
           Arrays.fill(ioCmd, 0); // optimize remove
           msgSize = 0;
@@ -2428,7 +2429,7 @@ public class Msg {
     if (ackEnabled) {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
-        Thread.sleep(1000);
+        Thread.sleep(1);
         log.info("Pending message");
       }
       // set a new pending flag.
@@ -2547,11 +2548,11 @@ public class Msg {
   }
   
   public void ackReceived(int function){
-     pendingMessage = false;
-     synchronized (ackRecievedLock) {
-        ackRecievedLock.acknowledged = true;
-        ackRecievedLock.notifyAll();
-      }
+    pendingMessage = false;
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.acknowledged = true;
+      ackRecievedLock.notifyAll();
+    }
   }
   
   public int getMethod(){
