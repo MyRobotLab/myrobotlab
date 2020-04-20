@@ -825,19 +825,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   public byte[] publishBytes(byte[] bytes) {
     log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
-    // we need to write the bytes to the listeners!  hmm.. 
-//    for (String listener : listeners.keySet()) {
-//      if (listener.equals(getName())) {
-//        // avoid a nasty loopback.
-//        continue;
-//      }
-//      try {
-//        listeners.get(listener).onBytes(bytes);
-//      } catch (Exception e) {
-//        // TODO Auto-generated catch block
-//        e.printStackTrace();
-//      }
-//    }
     return bytes;
   }
 

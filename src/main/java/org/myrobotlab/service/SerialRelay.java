@@ -13,6 +13,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.SerialRelayData;
+import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
 import org.slf4j.Logger;
@@ -136,8 +137,12 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
       for (int i = 0 ; i < data.data.length; i++) {
         byteData[i] = (byte)(data.data[i] & 0xFF);
       }
-      if (listener instanceof Arduino) {
-        ((Arduino) listener).onBytes(byteData);
+      if (listener instanceof SerialDataListener) {
+        try {
+          ((SerialDataListener) listener).onBytes(byteData);
+        } catch (Exception e) {
+          log.warn("Exception relaying serial data to listener. {}", byteData, e);
+        }
       }
       return data.data;
     }
