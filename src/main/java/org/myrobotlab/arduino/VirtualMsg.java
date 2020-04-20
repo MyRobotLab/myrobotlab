@@ -1502,21 +1502,7 @@ public class VirtualMsg {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
-        /**
-         * Archtype InputStream read - rxtxLib does not have this straightforward
-         * design, but the details of how it behaves is is handled in the Serial
-         * service and we are given a unified interface
-         *
-         * The "read()" is data taken from a blocking queue in the Serial service.
-         * If we want to support blocking functions in Arduino then we'll
-         * "publish" to our local queues
-         */
-        // TODO: consider reading more than 1 byte at a time ,and make this
-        // callback onBytes or something like that.
         byteCount.incrementAndGet();
-        
-        // log.info("{} Byte Count {} MsgSize: {} On Byte: {}", i, byteCount, msgSize, newByte);
-        // ++byteCount;
         if (log.isDebugEnabled()) {
           log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
         }
@@ -1527,7 +1513,6 @@ public class VirtualMsg {
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
             // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
             log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
-            // dump.setLength(0);
           }
           continue;
         } else if (byteCount.get() == 2) {
@@ -1545,40 +1530,16 @@ public class VirtualMsg {
         } else if (byteCount.get() == 3) {
           // This is the method..
           int method = newByte.intValue();
-          // TODO: lookup the method in the label.. 
-          if (!clearToSend) {
-            // The only method we care about is begin!!!
-            if (method != Msg.PUBLISH_MRL_COMM_BEGIN) {
-              log.warn("VIRTUAL NOT CLEAR TO SEND.. RESET PARSER!");
-              // This is a reset sort of scenario!  we should be killing our parser state
-              // we are only looking for a begin message now!!
-              byteCount = new AtomicInteger(0);
-              msgSize = 0;
-              continue;
-            } else {
-              // we're good to go.. maybe even clear to send at this point?
-            }
-          }
           if (methodToString(method).startsWith("ERROR")) {
             // we've got an error scenario here.. reset the parser and try again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
-            if (isFullMessage(bytes)) {
-              // TODO: This could be an infinite loop 
-              // try to reprocess this byte array, maybe the parser got out of sync
-              onBytes(bytes);
-              return;
-            }
-            
+            continue;
           } else {
             ioCmd[byteCount.get() - 3] = method;
           }
         } else if (byteCount.get() > 3) {
-          // remove header - fill msg data - (2) headbytes -1
-          // (offset)
-          // dump.append(String.format("|P%d %d", byteCount,
-          // newByte));
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
           // the case where byteCount is negative?! not got.
@@ -1601,25 +1562,6 @@ public class VirtualMsg {
           processCommand(actualCommand);
           // Probably always true on the virtualMsg side, regardless.. we can always send our ack.. 
           publishAck(method);
-          // we should only process this command if we are clear to sync.. 
-          // if this is a begin command..  
-//          if (!clearToSend) {
-//            // if we're not clear to send.. we need to process this command
-//            // only if it's a begin command.
-//            if (isMrlCommBegin(actualCommand)) {
-//              processCommand(actualCommand);
-//            } else {
-//              // reset the parser and attempt from the next byte
-//              // TODO: check that it's not bytes.length-1
-//              byte[] shiftedBytes = Arrays.copyOfRange(bytes, 1, bytes.length);
-//              byteCount = new AtomicInteger(0);
-//              onBytes(shiftedBytes);
-//              return;
-//            }
-//            
-//          } else {
-//            processCommand(actualCommand);
-//          }
           msgSize = 0;
           byteCount = new AtomicInteger(0);
           // Our 'first' getBoardInfo may not receive a acknowledgement
