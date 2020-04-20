@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -56,17 +57,30 @@ public class PortStream extends Port {
   
   public byte[] readBytes() {
     try {
-      // TODO: read(byte[]) not individual bytes here!
-      Integer val = in.read();
-      byte[] data = new byte[1];
-      data[0] = val.byteValue();
-      return data;
+      int size = in.available();
+      if (size < 1) {
+        // no data to read.. just return null
+        return null;
+      } else {
+        // ok, we have data! so, let's read 
+        // TODO: reuse the buffer.
+        byte[] data = new byte[size];
+        int numRead = in.read(data);
+        if (numRead != size) {
+          // Uh oh.. let's just log this warning, we shouldn't see it.
+          log.warn("Port Stream Read possible error.  numRead {} does not equal size {}", numRead, size);
+          return Arrays.copyOfRange(data, 0, numRead);
+        }
+        // TODO: test for byte alignment issues here.. can we rely on the available count?
+        // return Arrays.copyOfRange(data, 0, numRead);  ?
+        return data;
+      }
     } catch (IOException e) {
       log.warn("Interrupted PortStream in readBytes.  Perhaps port was closed?", e);
     }
     return null;
   }
-  
+
   // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
   // is ever bigger than the read and no end of stream has occurred
   // it will block forever :P
@@ -96,8 +110,9 @@ public class PortStream extends Port {
   }
 
   public void write(byte[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
     out.write(data);
+    // TODO: should we flush here?
+    out.flush();
   }
   
   public void write(int[] data) throws IOException {
