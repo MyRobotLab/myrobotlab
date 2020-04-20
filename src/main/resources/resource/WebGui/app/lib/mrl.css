@@ -85,7 +85,7 @@ table, th, td {
   height: 33px;
   font-size: large;
   font-weight: bold;
-  top: -8px;
+  top: 0px;
   width: 8px;
   margin-left: -4px;
   z-index: 4;
@@ -759,7 +759,7 @@ table, th, td {
   /* padding: 4px; */
   width: 70px;
   border-radius: 4px;
-  box-shadow: 5px 6px 3px #9090908c;
+  /*box-shadow: 5px 6px 3px #9090908c;*/
   pointer-events: none;
   text-shadow: none;
 }
