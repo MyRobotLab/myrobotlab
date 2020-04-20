@@ -2,7 +2,6 @@ package org.myrobotlab.arduino.virtual;
 
 import static org.myrobotlab.arduino.VirtualMsg.MRLCOMM_VERSION;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,12 +11,8 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.Arduino;
-import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.data.PinData;
-import org.myrobotlab.service.data.SerialRelayData;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
 
@@ -41,7 +36,7 @@ import org.slf4j.Logger;
 public class MrlComm implements SerialDataListener {
 
   // TODO: default to 1000, for debugging i've increased it to 10 seconds.  
-  private static final int BOARD_INFO_DELAY = 10000;
+  private static final int BOARD_INFO_DELAY = 1000;
 
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
 
@@ -573,14 +568,6 @@ public class MrlComm implements SerialDataListener {
     // TODO change mode of pin ... duh
   }
 
-//  public void processCommand() {
-//
-//    virtualMsg.processCommand();
-//    if (ackEnabled) {
-//      virtualMsg.publishAck(virtualMsg.getMethod());
-//    }
-//  }
-
   public void publishError(java.lang.String f) {
     virtualMsg.publishMRLCommError(f);
   }
@@ -872,29 +859,11 @@ public class MrlComm implements SerialDataListener {
   }
 
   public boolean readMsg() {
-    // TODO Auto-generated method stub
     // TODO: we really should be reading the byte stream from the serial port here
     // and passing it to the virtualmessage parser to trigger the callbacks on the listener.  
-    // here we need to pick up the data that's available.. and process it..
-    
-//    try {
-//      byte[] incomingData = serial.readBytes();
-//      if (incomingData != null) {
-//        log.info("MRLCOMM GOT DATA from port:{} data:{}", serial.getPortName(), incomingData);
-//        onBytes(incomingData);
-//      }
-//    } catch (IOException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    } catch (InterruptedException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    } catch (Exception e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
-    // TODO: i'm not sure what process message would be. that's handled in the onBytes method.
-    // TODO: make sure to implement this... how ever the heck that's going to happen. i don't know yet.
+    // However, those bytes are automagically getting pushed to the onBytes method of VirtualMsg for us
+    // by the Serial port service connected to the uart (DCE) side of the virtual arduino.
+    // So, this method is a no-op in virtual land..  in real MrlComm this method reads from the serial port.
     return false;
   }
 
@@ -907,7 +876,6 @@ public class MrlComm implements SerialDataListener {
   @Override
   public void updateStats(QueueStats stats) {
     // TODO Auto-generated method stub
-    
   }
 
   @Override

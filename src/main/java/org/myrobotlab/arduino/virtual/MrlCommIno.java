@@ -2,7 +2,6 @@ package org.myrobotlab.arduino.virtual;
 
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
 import org.slf4j.Logger;
@@ -88,21 +87,13 @@ public class MrlCommIno {
    *           - error if processing of a command blows up for some reason.
    */
   public void loop() throws Exception {
-
-    // TODO: This is a divergence from the MrlComm.ino code!
-    // We no longer have readMsg on the java side.  only onBytes(byte[])
-
-    // read incoming data from the serial port.
-    // This method will also publish the incoming data to onBytes
-    // If full commands exist in the data, it will process those commands
-    // and publish an ack for each processed command.
+    // This is NoOp, real messages are read in the onBytes of VirtualMsg
     mrlComm.readMsg();
     // update devices
     mrlComm.updateDevices();
     // send back load time and memory
     // driven by getBoardInfo now !!!
     // mrlComm.publishBoardStatus();
-    
   } // end of big loop
 
   public MrlComm getMrlComm() {

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
@@ -89,7 +88,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
   @Before
   public void setUp() throws Exception {
-    Runtime.setLogLevel("info");
+    // Runtime.setLogLevel("debug");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     
 //    Runtime.start("gui", "SwingGui");
