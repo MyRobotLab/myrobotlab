@@ -97,7 +97,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
  // @Test
   public void testMrlCommReconnect2() throws Exception {
     msg = new Msg(this, null);
-    msg.setInvoke(false);
+    //msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     for (int i = 0; i < 100; i++) {
@@ -111,7 +111,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
  //  @Test
   public void testMrlCommReconnect() throws Exception {
     msg = new Msg(this, null);
-    msg.setInvoke(false);
+   // msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     port.open();
@@ -138,7 +138,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
  // 
   public void testMrlComm() throws Exception {
     msg = new Msg(this, null);
-    msg.setInvoke(false);
+    //msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     port.open();

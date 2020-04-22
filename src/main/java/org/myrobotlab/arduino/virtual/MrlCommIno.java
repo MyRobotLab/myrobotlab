@@ -86,7 +86,7 @@ public class MrlCommIno {
    * @throws Exception
    *           - error if processing of a command blows up for some reason.
    */
-  public void loop() throws Exception {
+  public void loop() {
     // This is NoOp, real messages are read in the onBytes of VirtualMsg
     mrlComm.readMsg();
     // update devices

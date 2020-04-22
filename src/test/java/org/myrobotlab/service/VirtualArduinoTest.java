@@ -1,6 +1,10 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
+import java.util.List;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
@@ -11,6 +15,7 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
 import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
 // @Ignore
@@ -40,7 +45,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
   public void testService() throws Exception {
     VirtualArduino va = (VirtualArduino)service;
     // attach to the serial port for callbacks to this test.
-    // va.getSerial().addByteListener(this);
     // Ok.. now what ?  i mean.. what the heck can a virtual arduino do?  
     // It should be able to read and write bytes to a uart.  (com port)
     log.info("About to connect");
@@ -48,13 +52,26 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
     // but first thing is to test.. if we "connect" to the virtual arduino.. does the uart respond with hello.
     // connect the virtual arduino to the uart port.
     va.connect(testPort);
+    
+    // Let's exercise a few things on the virtual arduino service.
+    List<PinDefinition> pins = va.getPinList();
+    assertTrue(pins.size() > 0);
+    
+    va.disconnect();
+    
+    assertFalse(va.isConnected());
+    
+    // see that it can't connect to a null port
+    va.connect(null);
+    assertFalse(va.isConnected());
+    // make sure after all that we can still connect to the virtual port.
+    va.connect(testPort);
+    assertTrue(va.isConnected());
+    
     // connect our local serial port to the test port
     serial.connect(testPort);
-    
     // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
-    
     // At this point what do we have.
-    
     Thread.sleep(1000);
     log.info("Writing a messge to attach a servo!");
     byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
@@ -64,21 +81,10 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
     // TODO: this ack received needs to come back from the arduino service currently..
     // but it should be pushe down into the internals of the msg class
     // msg.ackReceived(0);
-
-
     serial.write(msg.servoMoveToMicroseconds(0, 2000));
-
-    // va.msg.ackReceived(0);
-    // va.getMsg();
-
     System.out.println("Waiting... for what I have no idea.");
-    Thread.sleep(5000);
-    // }
-
-
-
+    Thread.sleep(1000);
   }
-
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
   // none of these will get called unlesss this test gets the onBytes called that passes the returned stream down to the Msg.java onBytes.

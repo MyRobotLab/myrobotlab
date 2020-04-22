@@ -402,8 +402,6 @@ public class ArduinoMsgGenerator {
     StringBuilder cppCaseArduinoMethod = new StringBuilder("      " + arduinoOrMrlComm + name + "(");
 
     StringBuilder javaCaseHeader = new StringBuilder("    case " + CodecUtils.toUnderScore(name) + ": {\n");
-    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){");
-    javaCaseArduinoMethod.append("\n        arduino.invoke(\"" + name + "\"");
 
     StringBuilder javaCaseRecord = new StringBuilder("      if(record != null){");
     javaCaseRecord.append("\n        rxBuffer.append(\"< " + name + "\");\n");
@@ -412,10 +410,10 @@ public class ArduinoMsgGenerator {
     javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
     // compiler check
-    StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      } else { \n         arduino." + name + "(");
-    if (paramaters.length > 0) {
-      javaCaseArduinoMethod.append(", ");
-    }
+    StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      arduino." + name + "(");
+//    if (paramaters.length > 0) {
+//      javaCaseArduinoMethod.append(", ");
+//    }
 
     StringBuilder javaCaseParams = new StringBuilder();
 
@@ -649,11 +647,12 @@ public class ArduinoMsgGenerator {
       javaMethod = javaMethod.replace(search, snr.get(search));
     }
 
-    javaCaseRecord.append("      rxBuffer.append(\"\\n\");\n");
-    javaCaseRecord.append("      try{\n");
-    javaCaseRecord.append("        record.write(rxBuffer.toString().getBytes());\n");
-    javaCaseRecord.append("        rxBuffer.setLength(0);\n");
-    javaCaseRecord.append("      }catch(IOException e){}\n");
+    javaCaseRecord.append("        rxBuffer.append(\"\\n\");\n");
+    javaCaseRecord.append("        try{\n");
+    javaCaseRecord.append("          record.write(rxBuffer.toString().getBytes());\n");
+    javaCaseRecord.append("          rxBuffer.setLength(0);\n");
+    // TODO: handle the exception here better?
+    javaCaseRecord.append("        }catch(IOException e){}\n");
 
     // TODO
     if (dir == '<') {
@@ -663,8 +662,8 @@ public class ArduinoMsgGenerator {
       methodSnr.put("cppHandleCase", "");
       methodSnr.put("cppGeneratedCallBacks", "");
 
-      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"
-          + javaCaseRecord + "      }\n" + javaCaseFooter);
+      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethodComment + javaCaseParams + "\n"
+          + javaCaseRecord + "}\n" + javaCaseFooter);
       methodSnr.put("javaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("javaMethod", "");
 
@@ -686,8 +685,7 @@ public class ArduinoMsgGenerator {
       methodSnr.put("javaGeneratedCallBack", "");
 
       // vJava send methods
-      methodSnr.put("vJavaHandleCase",
-          javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
+      methodSnr.put("vJavaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethodComment + javaCaseParams + "\n" + javaCaseFooter);
       methodSnr.put("vJavaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("vJavaMethod", "");
 

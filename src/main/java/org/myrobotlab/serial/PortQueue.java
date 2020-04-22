@@ -97,14 +97,6 @@ public class PortQueue extends Port {
     
   }
   
-  public void write(int[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
-    for (int i = 0; i < data.length; i++) {
-      // TODO: is there a type casting problem here? or does it promote properly 0xFF?
-      write(data[i]);
-    }
-  }
-
   @Override
   public boolean isHardware() {
     return false;

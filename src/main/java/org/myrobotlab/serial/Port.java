@@ -211,7 +211,7 @@ public abstract class Port implements Runnable, SerialControl {
    */
   abstract public void write(int b) throws Exception;
 
-  abstract public void write(int[] data) throws Exception;
+  // abstract public void write(int[] data) throws Exception;
 
   abstract public void write(byte[] data) throws Exception;
 

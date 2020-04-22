@@ -263,13 +263,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   @Override
   public boolean send(byte[] bytes) {
     try {
-      // BLECH - conversion to support silly send(byte[] bytes)
-      int[] ints = new int[bytes.length];
-      for (int i = 0; i < ints.length; ++i) {
-        ints[i] = bytes[i];
-      }
-      serial.write(ints);
-      // if( flushOutput ) port.flush(); // hmm, not sure if a good idea
+      serial.write(bytes);
     } catch (Exception e) { // null pointer or serial port dead
       e.printStackTrace();
     }

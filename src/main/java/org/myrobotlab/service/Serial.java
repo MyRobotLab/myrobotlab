@@ -1154,28 +1154,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
   }
 
-  synchronized public void write(int[] data) throws Exception {
-    // If the port is JSSC we can just write the array.
-    for (String portName : connectedPorts.keySet()) {
-      Port writePort = connectedPorts.get(portName);
-      // take advantage to write the array in one call.
-      writePort.write(data);
-      // still need to publishtx..
-      // TODO: make publishTX publish an int array. not one at a time.
-      for (int i = 0; i < data.length; ++i) {
-        // main line TX
-        invoke("publishTX", data[i]);
-        ++txCount;
-      }
-    }
-
-    if (recordTx != null) {
-      for (int i = 0; i < data.length; ++i) {
-        recordTx.write(data[i]);
-      }
-    }
-  }
-
   // ============= write methods begin ====================
   // write(String data) not in OutputStream
   public void write(String data) throws Exception {
