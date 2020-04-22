@@ -1887,6 +1887,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		jme.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
 		jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
 		jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
+		
+		//We set the correct location view
+		jme.cameraLookAt(getName() + ".torso.lowStom");
 
 		// additional experimental mappings
 		/*
