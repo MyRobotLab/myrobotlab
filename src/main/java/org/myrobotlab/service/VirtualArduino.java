@@ -133,19 +133,14 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       ino.getMrlComm().softReset();
       ino.setup();
       while (isRunning) {
+        if (isRunning)
+          ino.loop();
         try {
-          if (isRunning)
-            ino.loop();
-            try {
-              // a small delay that can be interrupted
-              Thread.sleep(1);
-            } catch(InterruptedException e1) {
-              // we were interrupted.. we need to shut down.
-              isRunning = false;
-            }
-        } catch (Exception e) {
-          log.error("mrlcomm threw", e);
-          isRunning = false;          
+          // a small delay that can be interrupted
+          Thread.sleep(1);
+        } catch(InterruptedException e1) {
+          // we were interrupted.. we need to shut down.
+          isRunning = false;
         }
 
       }
@@ -258,7 +253,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     
     mrlComm = ino.getMrlComm();
     virtualMsg = mrlComm.getMsg();
-    virtualMsg.setInvoke(false);
+    // virtualMsg.setInvoke(false);
     boardInfo = mrlComm.boardInfo;
     // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
     setBoard(Arduino.BOARD_TYPE_UNO);
@@ -282,7 +277,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return uart;
   }
 
-  public org.myrobotlab.arduino.virtual.MrlComm MrlComm() {
+  public MrlComm MrlComm() {
     return ino.getMrlComm();
   }
 

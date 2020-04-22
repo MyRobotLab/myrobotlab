@@ -80,8 +80,6 @@ public class %javaClass% {
   // ------ device type mapping constants
   private int method = -1;
   public boolean debug = false;
-  // TODO: remove this!
-  boolean invoke = false;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
@@ -126,10 +124,6 @@ public class %javaClass% {
   transient private %javaArduinoClass% arduino;
   
   transient private SerialDevice serial;
-  
-  public void setInvoke(boolean b){
-    invoke = b;
-  }
   
   public void processCommand(){
     processCommand(ioCmd);
