@@ -89,7 +89,7 @@
               </span>
               <span>
                 Sweep <!-- ---- FIXME ---- -->
-                <toggle ng-model="toggleSweep" title="Servo moves back and forth" ng-change="!isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
+                <toggle ng-model="toggleSweep" title="Servo moves back and forth" ng-change="!service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
 
                 <!--
                      <button class="btn btn-default  btn-xs" style="width: 80px; height: 34px;" type="button" ng-click="sweep()">
