@@ -18,9 +18,8 @@ import org.slf4j.Logger;
 public abstract class Port implements Runnable, SerialControl {
 
   public final static Logger log = LoggerFactory.getLogger(Port.class);
-  String portName;
+  public String portName;
   transient HashMap<String, SerialDataListener> listeners = new HashMap<>();
-  static int pIndex = 0;
 
   /**
    * Thread for reading if required - in case of PortQueue and PortStream (but
@@ -33,8 +32,6 @@ public abstract class Port implements Runnable, SerialControl {
   public boolean debugRX = false;
   QueueStats stats = new QueueStats();
   // hardware serial port details
-  // default convention over configuration
-  // int rate = 57600;
   int rate = 115200;
   int dataBits = 8;
   int stopBits = 1;
@@ -43,13 +40,13 @@ public abstract class Port implements Runnable, SerialControl {
   int rxErrors;
   private boolean isOpen = false;
 
-  // FIXME - find a better way to handle this
-  // necessary - to be able to invoke
-  // "nameless" port implementation to query "hardware" ports
-  // overloading a "Port" and a PortQuery - :P
-  public Port() {
-  }
 
+  /** 
+   * Default constructor for a port at a minimum requires a port name.  Typically something like COM4 or /dev/ttyACM0 
+   * or even a virtual port name.
+   * 
+   * @param portName
+   */
   public Port(String portName) {
     this.stats.name = portName;
     this.portName = portName;
@@ -115,8 +112,7 @@ public abstract class Port implements Runnable, SerialControl {
   public void listen(Map<String, SerialDataListener> listeners) {
     this.listeners.putAll(listeners);
     if (readingThread == null) {
-      ++pIndex;
-      readingThread = new Thread(this, String.format("%s.portListener %s", portName, pIndex));
+      readingThread = new Thread(this, String.format("%s.portListener", portName));
       readingThread.start();
     } else {
       log.info("{} already listening", portName);

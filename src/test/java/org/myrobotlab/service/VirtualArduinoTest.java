@@ -169,13 +169,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
   }
 
   @Override
-  public Object invoke(String method, Object... params) {
-    // TODO 
-    log.warn("Don't Invoke!");
-    return null;
-  }
-
-  @Override
   public void onBytes(byte[] data) {
     // TODO relay the bytes back to the Arduino side real Msg.java ? Is this right?
     log.info("On Bytes Virtual Arduino Test : {}", data);
@@ -250,6 +243,13 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommLi
       }
     }
 
+  }
+
+  @Override
+  public void ackTimeout() {
+    // TODO: validate something...
+    log.warn("Ack Timeout was seen!");
+    
   }
 
 }
