@@ -890,4 +890,11 @@ public class MrlComm implements SerialDataListener {
     log.info("MrlComm onDisconnect for port:{}", portName);
   }
 
+  public void ackTimeout() {
+    // TODO: this is required for the VirtualMsg class to handle ack timeouts. 
+    // in reality, the uart/DCE side doesn't do anything with this.  We only care
+    // about this on the real Msg side of the interface.  
+    log.warn("Ack timeout seen, this shouldn't happen in virtual device land.");
+  }
+
 }
