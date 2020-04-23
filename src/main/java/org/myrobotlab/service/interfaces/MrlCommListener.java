@@ -45,7 +45,6 @@ public interface MrlCommListener {
 
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime);
   
-  // TODO: remove this from the interface and remove "invoke" from the msg class.
-  public Object invoke(String method, Object... params);
+  public void ackTimeout();
   
 }

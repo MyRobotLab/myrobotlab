@@ -2497,7 +2497,7 @@ public class Msg {
         log.error("Ack not received");
         // part of resetting ?
         // ackRecievedLock.acknowledged = true;
-        arduino.invoke("noAck");
+        arduino.ackTimeout();
       }
     }
   }

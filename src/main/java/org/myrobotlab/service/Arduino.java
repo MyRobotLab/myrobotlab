@@ -2216,12 +2216,8 @@ public class Arduino extends AbstractMicrocontroller
     return deviceList;
   }
 
-  public void noAck() {
-    log.error("no Ack we are resetting the serial port !");
-    /*
-     * String portName = getPortName(); disconnect(); sleep(1000);
-     * connect(portName);
-     */
+  public void ackTimeout() {
+    log.warn("Ack Timeout seen.  TODO: consider resetting the com port, reconnecting and re syncing all devices.");
   }
 
   public void publishMrlCommBegin(Integer version) {

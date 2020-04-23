@@ -32,10 +32,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
 
   transient SerialPort port = null;
 
-  public PortJSSC() {
-    super();
-  }
-
   public PortJSSC(String portName, int rate, int dataBits, int stopBits, int parity) throws IOException {
     super(portName, rate, dataBits, stopBits, parity);
   }

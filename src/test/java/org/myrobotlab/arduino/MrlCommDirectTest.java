@@ -354,11 +354,11 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, 
   }
 
   @Override
-  public Object invoke(String method, Object... params) {
+  public void ackTimeout() {
     // TODO Auto-generated method stub
-    log.info("Invoke!!!! {}", method);
-    return null;
+    log.warn("Ack Timeout seen!");
   }
+
 }
 
 
