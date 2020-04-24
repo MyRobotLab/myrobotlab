@@ -29,9 +29,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.JoystickListener;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
@@ -237,10 +235,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	transient UltrasonicSensor ultraSonicLeft;
 	
 	transient Pir pir;
-	
-	private PinArrayControl pirArduino;
-
-	public Integer pirPin = null;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -288,9 +282,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	String lastGestureExecuted;
 
-	Long lastPirActivityTime = null;
-	
-	Long startSleep = null;
+	Long lastPirActivityTime;
 
 	transient InMoov2Arm leftArm;
 
@@ -995,7 +987,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (ear != null) {
 			ear.lockOutAllGrammarExcept("power up");
 		}
-		startSleep = System.currentTimeMillis();
+
 		python.execMethod("power_down");
 	}
 
@@ -1667,35 +1659,34 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public Double getUltraSonicRightDistance() {
-		if (ultraSonicRight != null) {
-			return ultraSonicRight.range();
-		} else {
-			warn("No UltraSonicRight attached");
-			return 0.0;
+	if (ultraSonicRight != null) {
+	  return ultraSonicRight.range();
+	} else {
+	  warn("No UltraSonicRight attached");
+	  return 0.0;
 		}
 	}
 
 	public Double getUltraSonicLeftDistance() {
-		if (ultraSonicLeft != null) {
-			return ultraSonicLeft.range();
-		} else {
-			warn("No UltraSonicLeft attached");
-			return 0.0;
+	if (ultraSonicLeft != null) {
+	  return ultraSonicLeft.range();
+	} else {
+	  warn("No UltraSonicLeft attached");
+	  return 0.0;
 		}
 	}
 	
-	public void publishPin(Pin pin) {
-		log.info("{} - {}", pin.pin, pin.value);
-		if (pin.value == 1) {
-		  lastPirActivityTime = System.currentTimeMillis();
-		}
-		// if its PIR & PIR is active & was sleeping - then wake up !
-		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
-		  // attach(); // good morning / evening / night... asleep for % hours
-		  powerUp();
-		}
-	}
-	
+	//public void publishPin(Pin pin) {
+		//log.info("{} - {}", pin.pin, pin.value);
+		//if (pin.value == 1) {
+			//lastPIRActivityTime = System.currentTimeMillis();
+		//}
+		/// if its PIR & PIR is active & was sleeping - then wake up !
+		//if (pin == pin.pin && startSleep != null && pin.value == 1) {
+			//powerUp();
+		//}
+	//}
+
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
 		startLeftArm(leftPort);
@@ -1975,7 +1966,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	   return startUltraSonicLeft(port, 64, 63);
 	 }
 
-         public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
+  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
 		
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -2014,10 +2005,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.enablePin(pin, 10);
-					pirArduino = right;
-					pirPin = pin;
-					right.addListener("publishPin", this.getName(), "publishPin");
+					right.attach(pir, pin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -2148,11 +2136,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPPIR"));
 		releasePeer("pir");
 		isPirActivated = false;
-		if (pirArduino != null && pirPin != null) {
-			pirArduino.disablePin(pirPin);
-			pirPin = null;
-			pirArduino = null;
-		}
 	}
 	
         public void stopServoMixer() {

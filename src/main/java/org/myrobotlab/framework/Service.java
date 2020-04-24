@@ -870,10 +870,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return resourceDir;
   }
-  
-  static void setResourceDir(String serviceType, String path) {
-    resourceOverrides.put(serviceType, path);
-  }
 
   public byte[] getResource(String resourceName) {
     String filename = getResourceDir() + fs + resourceName;
