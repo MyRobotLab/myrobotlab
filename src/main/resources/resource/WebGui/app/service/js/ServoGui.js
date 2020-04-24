@@ -82,6 +82,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         });
     };
 
+    $scope.$on('$stateChangeSuccess', function () {
+        refreshSlider();
+    });
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
