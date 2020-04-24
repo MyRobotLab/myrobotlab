@@ -145,6 +145,13 @@
       border-radius: 4px;
     }
 
+    /*
+    .container::-webkit-scrollbar-track:hover, 
+    .container::-webkit-scrollbar-track:active {
+      background: #d4d4d4;
+    }
+    */
+
     .sidenav .closebtn {
         position: absolute;
         top: 0;
@@ -265,14 +272,15 @@
 
 
 <script>
-    // Ahoy Astro :) 
-    // these things typically can be handled by the tabViewCtrl.js - any function assigned to $scope can be
-    // seen by the html     
+    
     // first time
     onStartOpenNav();
     function onStartOpenNav(){
+        //document.getElementById("handleOpen").style.visibility = "hidden";
         document.getElementById("handleClose").style.visibility = "hidden";
-        openNav();
+        setTimeout(function () {
+            openNav();
+        }, 1);
     }
 
     function openNav() {
