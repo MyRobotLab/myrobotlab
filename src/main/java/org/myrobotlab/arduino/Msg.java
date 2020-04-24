@@ -79,14 +79,14 @@ public class Msg {
   private int msgSize = 0;
   // ------ device type mapping constants
   private int method = -1;
-  public boolean debug = false;
+  public boolean debug = true;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
-  private volatile boolean pendingMessage = false;
+  public volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = false;
   public static class AckLock {
     // first is always true - since there
@@ -267,8 +267,10 @@ public class Msg {
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
     method = ioCmd[startPos];
-    // always process mrlbegin.. 
-    log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    // always process mrlbegin..
+    if (debug) { 
+      log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    }
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -579,7 +581,9 @@ public class Msg {
   // Java-land --to--> MrlComm
 
   public synchronized byte[] getBoardInfo() {
-    log.info("Sending Messge: getBoardInfo");
+    if (debug) {
+      log.info("Sending Message: getBoardInfo");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -605,7 +609,9 @@ public class Msg {
   }
 
   public synchronized byte[] enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
-    log.info("Sending Messge: enablePin");
+    if (debug) {
+      log.info("Sending Message: enablePin");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -640,7 +646,9 @@ public class Msg {
   }
 
   public synchronized byte[] setDebug(Boolean enabled/*bool*/) {
-    log.info("Sending Messge: setDebug");
+    if (debug) {
+      log.info("Sending Message: setDebug");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -669,7 +677,9 @@ public class Msg {
   }
 
   public synchronized byte[] setSerialRate(Integer rate/*b32*/) {
-    log.info("Sending Messge: setSerialRate");
+    if (debug) {
+      log.info("Sending Message: setSerialRate");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -698,7 +708,9 @@ public class Msg {
   }
 
   public synchronized byte[] softReset() {
-    log.info("Sending Messge: softReset");
+    if (debug) {
+      log.info("Sending Message: softReset");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -724,7 +736,9 @@ public class Msg {
   }
 
   public synchronized byte[] enableAck(Boolean enabled/*bool*/) {
-    log.info("Sending Messge: enableAck");
+    if (debug) {
+      log.info("Sending Message: enableAck");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -753,7 +767,9 @@ public class Msg {
   }
 
   public synchronized byte[] echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-    log.info("Sending Messge: echo");
+    if (debug) {
+      log.info("Sending Message: echo");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -788,7 +804,9 @@ public class Msg {
   }
 
   public synchronized byte[] customMsg(int[] msg/*[]*/) {
-    log.info("Sending Messge: customMsg");
+    if (debug) {
+      log.info("Sending Message: customMsg");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -817,7 +835,9 @@ public class Msg {
   }
 
   public synchronized byte[] deviceDetach(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: deviceDetach");
+    if (debug) {
+      log.info("Sending Message: deviceDetach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -846,7 +866,9 @@ public class Msg {
   }
 
   public synchronized byte[] i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
-    log.info("Sending Messge: i2cBusAttach");
+    if (debug) {
+      log.info("Sending Message: i2cBusAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -878,7 +900,9 @@ public class Msg {
   }
 
   public synchronized byte[] i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
-    log.info("Sending Messge: i2cRead");
+    if (debug) {
+      log.info("Sending Message: i2cRead");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -913,7 +937,9 @@ public class Msg {
   }
 
   public synchronized byte[] i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
-    log.info("Sending Messge: i2cWrite");
+    if (debug) {
+      log.info("Sending Message: i2cWrite");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -948,7 +974,9 @@ public class Msg {
   }
 
   public synchronized byte[] i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
-    log.info("Sending Messge: i2cWriteRead");
+    if (debug) {
+      log.info("Sending Message: i2cWriteRead");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -986,7 +1014,9 @@ public class Msg {
   }
 
   public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
-    log.info("Sending Messge: neoPixelAttach");
+    if (debug) {
+      log.info("Sending Message: neoPixelAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1021,7 +1051,9 @@ public class Msg {
   }
 
   public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
-    log.info("Sending Messge: neoPixelSetAnimation");
+    if (debug) {
+      log.info("Sending Message: neoPixelSetAnimation");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1065,7 +1097,9 @@ public class Msg {
   }
 
   public synchronized byte[] neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
-    log.info("Sending Messge: neoPixelWriteMatrix");
+    if (debug) {
+      log.info("Sending Message: neoPixelWriteMatrix");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1097,7 +1131,9 @@ public class Msg {
   }
 
   public synchronized byte[] analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-    log.info("Sending Messge: analogWrite");
+    if (debug) {
+      log.info("Sending Message: analogWrite");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1129,7 +1165,9 @@ public class Msg {
   }
 
   public synchronized byte[] digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-    log.info("Sending Messge: digitalWrite");
+    if (debug) {
+      log.info("Sending Message: digitalWrite");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1161,7 +1199,9 @@ public class Msg {
   }
 
   public synchronized byte[] disablePin(Integer pin/*byte*/) {
-    log.info("Sending Messge: disablePin");
+    if (debug) {
+      log.info("Sending Message: disablePin");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1190,7 +1230,9 @@ public class Msg {
   }
 
   public synchronized byte[] disablePins() {
-    log.info("Sending Messge: disablePins");
+    if (debug) {
+      log.info("Sending Message: disablePins");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1216,7 +1258,9 @@ public class Msg {
   }
 
   public synchronized byte[] pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
-    log.info("Sending Messge: pinMode");
+    if (debug) {
+      log.info("Sending Message: pinMode");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1248,7 +1292,9 @@ public class Msg {
   }
 
   public synchronized byte[] setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
-    log.info("Sending Messge: setTrigger");
+    if (debug) {
+      log.info("Sending Message: setTrigger");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1280,7 +1326,9 @@ public class Msg {
   }
 
   public synchronized byte[] setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
-    log.info("Sending Messge: setDebounce");
+    if (debug) {
+      log.info("Sending Message: setDebounce");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1312,7 +1360,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
-    log.info("Sending Messge: servoAttach");
+    if (debug) {
+      log.info("Sending Message: servoAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1353,7 +1403,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
-    log.info("Sending Messge: servoAttachPin");
+    if (debug) {
+      log.info("Sending Message: servoAttachPin");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1385,7 +1437,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoDetachPin(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: servoDetachPin");
+    if (debug) {
+      log.info("Sending Message: servoDetachPin");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1414,7 +1468,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
-    log.info("Sending Messge: servoSetVelocity");
+    if (debug) {
+      log.info("Sending Message: servoSetVelocity");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1446,7 +1502,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
-    log.info("Sending Messge: servoSweepStart");
+    if (debug) {
+      log.info("Sending Message: servoSweepStart");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1484,7 +1542,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoSweepStop(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: servoSweepStop");
+    if (debug) {
+      log.info("Sending Message: servoSweepStop");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1513,7 +1573,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
-    log.info("Sending Messge: servoMoveToMicroseconds");
+    if (debug) {
+      log.info("Sending Message: servoMoveToMicroseconds");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1545,7 +1607,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
-    log.info("Sending Messge: servoSetAcceleration");
+    if (debug) {
+      log.info("Sending Message: servoSetAcceleration");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1577,7 +1641,9 @@ public class Msg {
   }
 
   public synchronized byte[] serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
-    log.info("Sending Messge: serialAttach");
+    if (debug) {
+      log.info("Sending Message: serialAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1609,7 +1675,9 @@ public class Msg {
   }
 
   public synchronized byte[] serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
-    log.info("Sending Messge: serialRelay");
+    if (debug) {
+      log.info("Sending Message: serialRelay");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1641,7 +1709,9 @@ public class Msg {
   }
 
   public synchronized byte[] ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
-    log.info("Sending Messge: ultrasonicSensorAttach");
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1676,7 +1746,9 @@ public class Msg {
   }
 
   public synchronized byte[] ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: ultrasonicSensorStartRanging");
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorStartRanging");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1705,7 +1777,9 @@ public class Msg {
   }
 
   public synchronized byte[] ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: ultrasonicSensorStopRanging");
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorStopRanging");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1734,7 +1808,9 @@ public class Msg {
   }
 
   public synchronized byte[] setAref(Integer type/*b16*/) {
-    log.info("Sending Messge: setAref");
+    if (debug) {
+      log.info("Sending Message: setAref");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1763,7 +1839,9 @@ public class Msg {
   }
 
   public synchronized byte[] motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
-    log.info("Sending Messge: motorAttach");
+    if (debug) {
+      log.info("Sending Message: motorAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1798,7 +1876,9 @@ public class Msg {
   }
 
   public synchronized byte[] motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
-    log.info("Sending Messge: motorMove");
+    if (debug) {
+      log.info("Sending Message: motorMove");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1830,7 +1910,9 @@ public class Msg {
   }
 
   public synchronized byte[] motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
-    log.info("Sending Messge: motorMoveTo");
+    if (debug) {
+      log.info("Sending Message: motorMoveTo");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1862,7 +1944,9 @@ public class Msg {
   }
 
   public synchronized byte[] encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
-    log.info("Sending Messge: encoderAttach");
+    if (debug) {
+      log.info("Sending Message: encoderAttach");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1897,7 +1981,9 @@ public class Msg {
   }
 
   public synchronized byte[] setZeroPoint(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: setZeroPoint");
+    if (debug) {
+      log.info("Sending Message: setZeroPoint");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1926,7 +2012,9 @@ public class Msg {
   }
 
   public synchronized byte[] servoStop(Integer deviceId/*byte*/) {
-    log.info("Sending Messge: servoStop");
+    if (debug) {
+      log.info("Sending Message: servoStop");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -2181,16 +2269,15 @@ public class Msg {
   public void onBytes(byte[] bytes) {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+    if (debug) {
+      log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+    }
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
         byteCount.incrementAndGet();
-        if (log.isDebugEnabled()) {
-          log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
-        }
         if (byteCount.get() == 1) {
           if (newByte != MAGIC_NUMBER) {
             byteCount = new AtomicInteger(0);
@@ -2255,7 +2342,9 @@ public class Msg {
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
           int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
-          log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          if (debug) {
+            log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          }
           // process the command.
           processCommand(actualCommand);
           
@@ -2385,7 +2474,9 @@ public class Msg {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
         Thread.sleep(1);
-        log.info("Pending message");
+        if (debug) {
+          log.info("Pending message");
+        }
       }
       // set a new pending flag.
       pendingMessage=true;

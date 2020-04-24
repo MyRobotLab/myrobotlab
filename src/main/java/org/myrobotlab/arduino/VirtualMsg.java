@@ -297,8 +297,10 @@ public class VirtualMsg {
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
     method = ioCmd[startPos];
-    // always process mrlbegin.. 
-    log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    // always process mrlbegin..
+    if (debug) { 
+      log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    }
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -749,7 +751,9 @@ public class VirtualMsg {
   // Java-land --to--> MrlComm
 
   public synchronized byte[] publishMRLCommError(String errorMsg/*str*/) {
-    log.info("Sending Messge: publishMRLCommError");
+    if (debug) {
+      log.info("Sending Message: publishMRLCommError");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -778,7 +782,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
-    log.info("Sending Messge: publishBoardInfo");
+    if (debug) {
+      log.info("Sending Message: publishBoardInfo");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -822,7 +828,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishAck(Integer function/*byte*/) {
-    log.info("Sending Messge: publishAck");
+    if (debug) {
+      log.info("Sending Message: publishAck");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -851,7 +859,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-    log.info("Sending Messge: publishEcho");
+    if (debug) {
+      log.info("Sending Message: publishEcho");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -886,7 +896,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishCustomMsg(int[] msg/*[]*/) {
-    log.info("Sending Messge: publishCustomMsg");
+    if (debug) {
+      log.info("Sending Message: publishCustomMsg");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -915,7 +927,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-    log.info("Sending Messge: publishI2cData");
+    if (debug) {
+      log.info("Sending Message: publishI2cData");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -947,7 +961,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishDebug(String debugMsg/*str*/) {
-    log.info("Sending Messge: publishDebug");
+    if (debug) {
+      log.info("Sending Message: publishDebug");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -976,7 +992,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishPinArray(int[] data/*[]*/) {
-    log.info("Sending Messge: publishPinArray");
+    if (debug) {
+      log.info("Sending Message: publishPinArray");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1005,7 +1023,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
-    log.info("Sending Messge: publishServoEvent");
+    if (debug) {
+      log.info("Sending Message: publishServoEvent");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1043,7 +1063,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-    log.info("Sending Messge: publishSerialData");
+    if (debug) {
+      log.info("Sending Message: publishSerialData");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1075,7 +1097,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
-    log.info("Sending Messge: publishUltrasonicSensorData");
+    if (debug) {
+      log.info("Sending Message: publishUltrasonicSensorData");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1107,7 +1131,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
-    log.info("Sending Messge: publishEncoderData");
+    if (debug) {
+      log.info("Sending Message: publishEncoderData");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1139,7 +1165,9 @@ public class VirtualMsg {
   }
 
   public synchronized byte[] publishMrlCommBegin(Integer version/*byte*/) {
-    log.info("Sending Messge: publishMrlCommBegin");
+    if (debug) {
+      log.info("Sending Message: publishMrlCommBegin");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);
@@ -1394,16 +1422,15 @@ public class VirtualMsg {
   public void onBytes(byte[] bytes) {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
-    log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+    if (debug) {
+      log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+    }
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
         byteCount.incrementAndGet();
-        if (log.isDebugEnabled()) {
-          log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
-        }
         if (byteCount.get() == 1) {
           if (newByte != MAGIC_NUMBER) {
             byteCount = new AtomicInteger(0);
@@ -1468,7 +1495,9 @@ public class VirtualMsg {
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
           int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
-          log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          if (debug) {
+            log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          }
           // process the command.
           processCommand(actualCommand);
           publishAck(method);
@@ -1598,7 +1627,9 @@ public class VirtualMsg {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
         Thread.sleep(1);
-        log.info("Pending message");
+        if (debug) {
+          log.info("Pending message");
+        }
       }
       // set a new pending flag.
       pendingMessage=true;
