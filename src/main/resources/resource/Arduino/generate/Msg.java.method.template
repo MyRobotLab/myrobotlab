@@ -1,6 +1,8 @@
 
   public synchronized byte[] %name%(%javaMethodParameters%) {
-    log.info("Sending Messge: %name%");
+    if (debug) {
+      log.info("Sending Message: %name%");
+    }
     try {
       startMessage();
       appendMessage(MAGIC_NUMBER);

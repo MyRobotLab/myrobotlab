@@ -891,7 +891,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
 
-    invoke("publishServoMoveTo", this);
+    for (String controller : this.getControllers()) {
+      // TODO: just have a direct reference to the controllers 
+      // avoid this type cast and runtime lookup!!!!!
+      ((ServoController)Runtime.getService(controller)).onServoMoveTo(this);
+    }
+    // invoke("publishServoMoveTo", this);
     broadcastState();
 
     if (isBlocking) {

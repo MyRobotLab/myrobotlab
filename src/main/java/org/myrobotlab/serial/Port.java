@@ -139,7 +139,6 @@ public abstract class Port implements Runnable, SerialControl {
   public void run() {
     log.info("Listening on port {}", portName);
     listening = true;
-    Integer newByte = -1;
     try {
       while (listening) {
         // read everything that's available on the port.
@@ -148,10 +147,13 @@ public abstract class Port implements Runnable, SerialControl {
           // TODO: maybe this be a tight loop. we might want some sort of thread sleep here?
           continue;
         }
+        // debug
+        if (debug && debugRX) {
+          log.info("RX Data: {}", buffer);
+        }
         // we have data.. let's publish it.
         for (String key : listeners.keySet()) {
           listeners.get(key).onBytes(buffer);
-          // log.info(String.format("%d",newByte));
         }
         // TODO: better stats.. for now.. keeping previous behavior.
         for (int i = 0; i<buffer.length;i++) {
@@ -167,7 +169,7 @@ public abstract class Port implements Runnable, SerialControl {
           }
         }
       }
-      log.info("{} no longer listening - last byte {} ", portName, newByte);
+      log.info("Port: {} no longer listening.", portName);
     } catch (InterruptedException e) {
       log.info("port {} interrupted - stopping listener", portName);
     } catch (Exception e1) {

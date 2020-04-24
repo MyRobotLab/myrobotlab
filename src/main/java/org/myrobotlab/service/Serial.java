@@ -824,7 +824,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * @return
    */
   public byte[] publishBytes(byte[] bytes) {
-    log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
+    // log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
     return bytes;
   }
 
@@ -1114,9 +1114,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (data == null) {
       return;
     }
-    
+
     for (String portName : connectedPorts.keySet()) {
-      log.info("Writing data to port {} data:{}", portName, data);
+      // log.info("Writing data to port {} data:{}", portName, data);
       Port writePort = connectedPorts.get(portName);
       writePort.write(data);
     }

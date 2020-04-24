@@ -3,6 +3,7 @@ package org.myrobotlab.serial;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.myrobotlab.logging.LoggerFactory;
@@ -27,11 +28,15 @@ import jssc.SerialPortList;
 public class PortJSSC extends Port implements SerialControl, SerialPortEventListener, Serializable {
 
   private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(PortJSSC.class);
-
+  // default string to use if not otherwise specified to support Instantiator.
+  private static final String NULL_PORT = "NULL_PORT";
   transient SerialPort port = null;
 
+  public PortJSSC() {
+    super(NULL_PORT);
+  }
+  
   public PortJSSC(String portName, int rate, int dataBits, int stopBits, int parity) throws IOException {
     super(portName, rate, dataBits, stopBits, parity);
   }
@@ -47,17 +52,15 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   // FIXME - better way to handle this across all port types
   @Override
   public List<String> getPortNames() {
-    ArrayList<String> ret = new ArrayList<String>();
     try {
-      String[] portNames = SerialPortList.getPortNames();
-      for (int i = 0; i < portNames.length; i++) {
-        ret.add(portNames[i]);
-        log.info(portNames[i]);
-      }
+      List<String> ret = Arrays.asList(SerialPortList.getPortNames());
+      log.info("Serial Ports {}", ret);
+      return ret;
     } catch (Exception e) {
       log.error("getPortNames threw", e);
     }
-    return ret;
+    // null or empty?
+    return new ArrayList<String>();
   }
 
   public boolean isCTS() {
@@ -165,20 +168,6 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       log.info("Sending Byte Array: {}", dataString);
     }
     port.writeBytes(data);
-  }
-  /**
-   * Java made a mistake having InputStream and OutputStream abstract
-   * classes vs interfaces - perhaps a PortInputStream and PortOutputStream can
-   * be created in the future....
-   */
-  public void write(int[] data) throws Exception {
-    // TODO: consider deprication of this method, and just use byte arrays instead.
-    // use the writeIntArray method to batch this operation.
-    if (debug && debugTX) {
-      String dataString = StringUtil.intArrayToString(data);
-      log.debug("Sending Int Array: {}", dataString);
-    }
-    port.writeIntArray(data);
   }
 
   @Override
