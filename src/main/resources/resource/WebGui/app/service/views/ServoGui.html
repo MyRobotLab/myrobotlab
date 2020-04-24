@@ -1,6 +1,6 @@
-                
+
 <!-- ServoGui.html -->
-<div id="servoContent" onload="refreshSlider()">
+<div class="servoContent">
 
   <div class="row">
     <div class="col-md-12">
@@ -21,13 +21,13 @@
 
 
                   <span id="PinEnable">
-                     PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin"/>
+                     PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
                     <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
                     <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Disabled</button>
                   </span>
 
                   <!-- Temporal for test -->
-                  <span style="background-color: #FF5555; height: 30px; display: inline-block;"> Temp
+                  <span style="background-color: #FF5555; display: inline-block;"> Temp
                     <tr ng-repeat="c in service.controllers">
                       <span>
                         <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
@@ -47,155 +47,158 @@
 
           <div class="row">
             <div class="col-md-12">
-              <div ng-show="!service.enabled" id="servoMask"></div>
-              <div id="servoPositionArea">        
-                <div id="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) - 0px));">
-                  <span class="glyphicon glyphicon-eject white"></span>
-                  <span class="servoBubble preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
-                </div>
-              </div>
-              <div ng-show="service.enabled" class="preventDragSelect">
-                <div id="energizedZone">
-                  <div id="energizedBar" title="the servo is energized" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                  </div>                
-                </div>
-              </div>          
-              <rzslider class="custom-slider2" id="sliderPosition"  ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+              <div class="verticalSpacer"></div>
+              <div class="sliderContainer"><!-- sliderContainer -->
+                <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
+                <div class="limitsZone">
+                  
+                  <!-- servo status -->       
+                  <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
+                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
+                    <div class="servoCursor"></div>
+                  </div>
+                  <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">Rest
+                    <div class="restCursor"></div>
+                  </div>
 
-              <div id="outputZone">
-                <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div>
-              </div>
+                  <div ng-show="service.enabled" class="preventDragSelect">
+                    <div class="energizedZone"><!-- Energized --> 
+                      <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="glyphicon glyphicon-flash"></span>ENERGIZED
+                      </div>                
+                    </div>
+                  </div>
+                
+                  <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                  <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(60*100/180)}}%)); width: calc(100% - ({{100 -((120-60)*100/180)}}%));"></div>
+
+                  <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                  <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
+                </div>
+
+                <rzslider class="custom-slider2 sliderPosition" ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+              </div><!-- /sliderContainer -->
 
             </div><!-- /.col-md-12 -->
           </div><!-- /.row -->
+          <!-- <div class="verticalSpacer"></div> -->
         </uib-tab>
+
+
+
 
 
 
 
         <uib-tab heading="Advanced" select="refreshSlider()">
           <!-- ------------------ Advanced ------------------ -->
-
           <nav class="settingsbar">
-            <!-- <div class="container-fluid"> -->
-              <span>
-                Invert <!-- ---- FIXME ---- -->
-                <toggle ng-model="toggleInvert" ng-change="changed()" size="btn-lg" />
-              </span>
-              <span>
-                Blocking <!-- ---- FIXME ---- -->
-                <toggle ng-model="toggleBlocking" ng-change="changed()" size="btn-lg" />
-              </span>
-              <span>
-                Sweep <!-- ---- FIXME ---- -->
-                <toggle ng-model="toggleSweep" title="Sweep" ng-change="!service.sweep?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
+            <span>
+              Invert <!-- ---- FIXME ---- -->
+              <toggle ng-model="toggleInvert" ng-change="changed()" size="btn-lg" />
+            </span>
+            <span>
+              Blocking <!-- ---- FIXME ---- -->
+              <toggle ng-model="toggleBlocking" ng-change="changed()" size="btn-lg" />
+            </span>
+            <span>
+              Sweep <!-- ---- FIXME ---- -->
+              <toggle ng-model="toggleSweep" title="Sweep" ng-change="!service.sweep?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
 
-                <!--
-                     <button class="btn btn-default  btn-xs" style="width: 80px; height: 34px;" type="button" ng-click="sweep()">
-                     <button class="btn btn-default glyphicon glyphicon-stop btn-xs" type="button" ng-click="msg.stop()"></button>
-                   -->
+              <!--
+                   <button class="btn btn-default  btn-xs" style="width: 80px; height: 34px;" type="button" ng-click="sweep()">
+                   <button class="btn btn-default glyphicon glyphicon-stop btn-xs" type="button" ng-click="msg.stop()"></button>
+                 -->
 
-              </span>
-              <span class="lastColumn">
-                Auto-disable <!-- FIXME -->
-                <input type="text" class="form-control" placeholder="time" ng-model="time" /> sec
-                <toggle ng-model="toggleAutoDisable" ng-change="changed()" size="btn-lg" />
-                <!--          
-                <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
-                -->
-                <!-- ---- can we set timeout on toggle Auto-disable ON? ---- -->
-                <!-- ---- or we need a (Set) button? ---- -->
-                
-              </span>
-            <!-- </div> -->
+            </span>
+            <span class="lastColumn">
+              Auto-disable <!-- FIXME -->
+              <input type="text" class="form-control" placeholder="time" ng-model="time" /> sec
+              <toggle ng-model="toggleAutoDisable" ng-change="changed()" size="btn-lg" />
+              <!--          
+              <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
+              -->
+              <!-- ---- can we set timeout on toggle Auto-disable ON? ---- -->
+              <!-- ---- or we need a (Set) button? ---- -->
+              
+            </span>
           </nav>
 
-        <nav class="settingsbar">
-          
-            <span class="switchesButtons">
 
-              Input <!-- FIXME - hardcoded to test-->
-              <button class="btn btn-input"  ng-click="setMinMax({service.currentPos.toFixed(2)},143)">Min</button>
-              <button class="btn btn-input"  ng-click="">Max</button>
-            </span>
-            <span class="switchesButtons">
-
-              Output<!-- FIXME - hardcoded to test-->
-              <button class="btn btn-output"  ng-click="msg.setMinMax({service.currentPos.toFixed(2)},143)">Min</button>
-              <button class="btn btn-output"  ng-click="msg.setMinMax(8,{service.currentPos.toFixed(2)})">Max</button>
-            </span>        
-            <span class="switchesButtons">
-              Rest
-              <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set</button>
-            </span>
-            <span class="switchesButtons lastColumn">
-              Speed
-              <input type="text" class="form-control" placeholder="speed" ng-model="speed" style="width:40px;" /> &deg;/s&nbsp;
-              <button class="btn btn-speed"  ng-click="setSpeed(speed)">Set</button>
-            </span>
-   
-        </nav>
-      
-      <!-- Previous Limits slider -->
-      <!--
-        <div class="row">
-          <div class="col-md-12">
-            <br />
-            <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" rz-slider-options="limits.options"/>
-          </div>
-        </div>
-      -->
-        <!-- /.row -->      
-
+          <table class="table tableLimits" style="margin-bottom: 0px!important;">
+            <tbody>
+              <tr>
+                <td>Input</td>
+                <td><button class="btn btn-input"  ng-click="setMinMax({service.currentPos.toFixed(2)},143)">Min</button></td>
+                <td><button class="btn btn-input"  ng-click="">Max</button></td>
+                <td></td>
+                <td>Output</td>
+                <td><button class="btn btn-output"  ng-click="msg.setMinMax({service.currentPos.toFixed(2)},143)">Min</button>
+                        </td>
+                <td><button class="btn btn-output"  ng-click="msg.setMinMax(8,{service.currentPos.toFixed(2)})">Max</button></td>
+                <td></td>
+                <td>Rest</td>
+                <td><button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set</button></td>
+                <td></td>
+                <td>Speed</td>
+                <td><input type="text" class="form-control" placeholder="speed" ng-model="speed" style="width:40px;" /> &deg;/s&nbsp;
+                  <button class="btn btn-speed"  ng-click="setSpeed(speed)">Set</button></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td class="inputColor">{{limits.minValue}}</td>
+                <td class="inputColor">{{limits.maxValue}}</td>
+                <td></td>
+                <td></td>
+                <td class="outputColor">{{limits.minValue}}</td>
+                <td class="outputColor">{{limits.maxValue}}</td>
+                <td></td>
+                <td></td>
+                <td class="restColor">{{rest}}</td>
+                <td colspan="3"></td>
+              </tr>
+            </tbody>
+          </table>
 
 
-        <div class="row">
-          <div class="col-md-12">
-            <div ng-show="!service.enabled" id="servoMask"></div>
-            <div id="servoPositionArea">        
-              <div id="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) - 0px));">
-                <span class="glyphicon glyphicon-eject white"></span>
-                <span class="servoBubble preventDragSelect">{{service.currentPos.toFixed(2)}}&deg;</span>
-              </div>
-            </div>
-            <div ng-show="service.enabled" class="preventDragSelect">
-              
-              <div id="energizedZone">
-                <div id="energizedBar" title="the servo is energized" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
- <span class="glyphicon glyphicon-flash"></span>ENERGIZED
-
-              </div>
-<!-- -
-              <div id="energizedBar" title="the servo is energized" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));">
--->               
-                
-              </div>
-            </div>
-            
-            <div id="inputZone">
-              <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div>
-            </div>          
-
-            <rzslider class="custom-slider2" id="sliderPosition"  ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>       
-            
-            <div id="outputZone">
-              <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div>
-            </div>
-  
-            <div id="labelZone" class="preventDragSelect">
-              <div id="restPoint"style="left: calc(100% - (({{100 -(rest*100/180)}}%) - 0px));">{{rest}}</div>      
-              <div id="outputMinValue" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%) - 32px);">{{limits.minValue}}</div>
-              <div id="outputMaxValue" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.maxValue*100/180)}}%) - 7px);">{{limits.maxValue}}</div>
-            </div>
-
-          </div><!-- /.col-md-12 -->
-        </div><!-- /.row -->
-
-        <br /><br /><br /><br />
-
-        <div class="row align-items-center">
+        
+          <div class="row">
             <div class="col-md-12">
-             
+              <div class="sliderContainer"><!-- sliderContainer -->
+                <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
+                <div class="limitsZone">
+                  
+                  <!-- servo status -->       
+                  <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
+                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
+                    <div class="servoCursor"></div>
+                  </div>
+                  <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">Rest
+                    <div class="restCursor"></div>
+                  </div>
+
+                  <div ng-show="service.enabled" class="preventDragSelect">
+                    <div class="energizedZone"><!-- Energized --> 
+                      <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"><span class="glyphicon glyphicon-flash"></span>ENERGIZED
+                      </div>                
+                    </div>
+                  </div>
+                  
+                  <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                  <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(60*100/180)}}%)); width: calc(100% - ({{100 -((120-60)*100/180)}}%));"></div>
+
+                  <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                  <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
+                </div>
+
+                <rzslider class="custom-slider2 sliderPosition" ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+              </div><!-- /sliderContainer -->
+            </div><!-- /.col-md-12 -->
+          </div><!-- /.row -->
+
+
+
+          <div class="row align-items-center">
+            <div class="col-md-12">
               <nav class="settingsbar">
                 <div class="dropdownLabel">
                   Encoder
@@ -209,17 +212,15 @@
                     </select>
                 </div>
               </nav>
- 
             </div><!-- /.col-md-12 -->
-        </div><!-- /.row -->  
+          </div><!-- /.row -->  
 
-      </uib-tab>
-    </uib-tabset>
+        </uib-tab>
+      </uib-tabset>
 
-  </div><!-- /.col-md-12 -->
-</div><!-- /.row --> 
-
-<br /><br />
+    </div><!-- /.col-md-12 -->
+  </div><!-- /.row --> 
+  
   <div class="row">
     <div class="col-md-4">
       <table class="table table-striped">
