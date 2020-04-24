@@ -1,4 +1,3 @@
-
 <!-- ServoGui.html -->
 <div class="servoContent">
 
@@ -37,8 +36,7 @@
                     <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
                     <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">detach</button>
                   </span>
-                  <!-- /Temp ------------ -->
-                  
+                  <!-- /Temp ------------ -->                  
 
                 </form>
               </span>
@@ -76,8 +74,8 @@
                   <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
                 </div>
 
-                <rzslider class="custom-slider2 sliderPosition" ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
-              </div><!-- /sliderContainer -->
+                <rzslider class="custom-slider2 sliderPosition" ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options" />
+                </div><!-- /sliderContainer -->
 
             </div><!-- /.col-md-12 -->
           </div><!-- /.row -->
@@ -103,13 +101,7 @@
             </span>
             <span>
               Sweep <!-- ---- FIXME ---- -->
-              <toggle ng-model="toggleSweep" title="Sweep" ng-change="!service.sweep?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
-
-              <!--
-                   <button class="btn btn-default  btn-xs" style="width: 80px; height: 34px;" type="button" ng-click="sweep()">
-                   <button class="btn btn-default glyphicon glyphicon-stop btn-xs" type="button" ng-click="msg.stop()"></button>
-                 -->
-
+              <toggle ng-model="toggleSweep" title="Sweep" ng-change="!service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
             </span>
             <span class="lastColumn">
               Auto-disable <!-- FIXME -->
@@ -197,7 +189,7 @@
           </div><!-- /.row -->
 
 
-
+              
           <div class="row align-items-center">
             <div class="col-md-12">
               <nav class="settingsbar">
