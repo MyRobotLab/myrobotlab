@@ -119,6 +119,14 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     ringFinger.setPin(5);
     pinky.setPin(6);
     wrist.setPin(7);
+    
+    /*
+    thumb.setSensorPin(A0);
+    index.setSensorPin(A1);
+    majeure.setSensorPin(A2);
+    ringFinger.setSensorPin(A3);
+    pinky.setSensorPin(A4);
+    */
 
     // TOOD: what are the initial velocities?
     // Initial rest positions?
@@ -464,6 +472,17 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     pinky.setPin(pinkyPin);
     wrist.setPin(wristPin);
   }
+
+  public void setSensorPins(int thumbSensorPin, int indexSensorPin, int majeureSensorPin, int ringFingerSensorPin, int pinkySensorPin) {
+    log.info("setSensorPins {} {} {} {} {}", thumbSensorPin, indexSensorPin, majeureSensorPin, ringFingerSensorPin, pinkySensorPin);
+    /*
+    thumb.setSensorPin(thumbSensorPin);
+    index.setSensorPin(indexSensorPin);
+    majeure.setSensorPin(majeureSensorPin);
+    ringFinger.setSensorPin(ringFingerSensorPin);
+    pinky.setSensorPin(pinkySensorPin);
+    */
+  }  
 
   public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
     setRest(thumb, index, majeure, ringFinger, pinky, null);
