@@ -81,6 +81,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             $scope.$broadcast('rzSliderForceRender');
         });
     };
+    
+    // trying to fix the slider refresh
+    $scope.$on('$stateChangeSuccess', function () {
+        refreshSlider();
+    });
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
