@@ -7,53 +7,71 @@
       <uib-tabset>
         <uib-tab heading="Basic" select="refreshSlider()">
           <!-- ------------------ Basic ------------------ -->
-          <nav class="settingsbarBasic">
-            <div class="containgger-fluid">
+          <nav class="settingsbar preventDragSelect">
+              <span class="labelColumn1">
+                Controller
+              </span>
               <span>
-                <form class="navbar-form">Controller 
-
-                  <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
-                    <option selected>FIXME Detached</option>
-                    <option>left</option>
-                    <option>right</option>
-                  </select> 
-
-
-                  <span id="PinEnable">
-                     PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
-                    <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Disable</button>
-                    <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Enable</button>
-                  </span>
-
-                  <!-- Temporal for test -->
-                  <span style="background-color: #FF5555; display: inline-block;"> Temp
-                    <tr ng-repeat="c in service.controllers">
-                      <span>
-                        <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
-                      </span>
-                    </tr>
-
-                    <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">Attach</button>
-                    <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">Detach</button>
-                  </span>
-                  <!-- /Temp ------------ -->                  
-
-                </form>
+                <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
+                  <option selected>FIXME Detached</option>
+                  <option>left</option>
+                  <option>right</option>
+                </select>
+              </span> 
+              <span id="PinEnable">
+                PIN
+                <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
+                <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
+                <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Disabled</button>
               </span>
 
-            </div>
+              <!-- right column option -->
+              <!--
+              <span class="lastColumn">
+                Encoder
+                <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
+                  <option selected>None</option>
+                  <option>Encoder 1</option>
+                  <option>SuperEncoder</option>
+                  <option>BadEncoder</option>
+                </select>              
+              </span>
+              -->
           </nav>
 
           <div class="row">
             <div class="col-md-12">
-              <div class="verticalSpacer"></div>
+              <span id="PinEnable">
+                 PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
+                <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Disable</button>
+                <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Enable</button>
+              </span>
+              <div class="verticalSpacer">
+
+              <!-- To maintain the same slider height as in Advanced -->
+                <nav class="settingsbar preventDragSelect">
+                  <span class="labelColumn1">Encoder</span>
+                  <span>
+                    <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
+                      <option selected>None</option>
+                      <option>Encoder 1</option>
+                      <option>SuperEncoder</option>
+                      <option>BadEncoder</option>
+                    </select>              
+                    <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">Attach</button>
+                    <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">Detach</button>
+                  </span>
+                </nav>
+
+              </div><!--/verticalSpacer -->
+
               <div class="sliderContainer"><!-- sliderContainer -->
                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
                 <div class="limitsZone">
                   
                   <!-- servo status -->       
                   <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
-                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
+                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
                     <div class="servoCursor"></div>
                   </div>
                   <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">Rest
@@ -84,13 +102,9 @@
 
 
 
-
-
-
-
         <uib-tab heading="Advanced" select="refreshSlider()">
           <!-- ------------------ Advanced ------------------ -->
-          <nav class="settingsbar">
+          <nav class="settingsbar preventDragSelect">
             <span>
               Invert <!-- ---- FIXME ---- -->
               <toggle ng-model="toggleInvert" ng-change="changed()" size="btn-lg" />
@@ -104,8 +118,8 @@
               <toggle ng-model="toggleSweep" title="Sweep" ng-change="!service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg" />
             </span>
             <span class="lastColumn">
-              Auto-disable <!-- FIXME -->
-              <input type="text" class="form-control" placeholder="time" ng-model="time" /> sec
+              Auto-disable&nbsp;<!-- FIXME -->
+              <input type="text" class="form-control" placeholder="time" ng-model="time" />&nbsp;sec&nbsp;
               <toggle ng-model="toggleAutoDisable" ng-change="changed()" size="btn-lg" />
               <!--          
               <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
@@ -117,7 +131,7 @@
           </nav>
 
 
-          <table class="table tableLimits" style="margin-bottom: 0px!important;">
+          <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
             <tbody>
               <tr>
                 <td>Input</td>
@@ -136,17 +150,17 @@
                 <td><input type="text" class="form-control" placeholder="speed" ng-model="speed" style="width:40px;" /> &deg;/s&nbsp;
                   <button class="btn btn-speed"  ng-click="setSpeed(speed)">Set</button></td>
               </tr>
-              <tr>
+              <tr class="valuesRow">
                 <td></td>
-                <td class="inputColor">{{limits.minValue}}</td>
-                <td class="inputColor">{{limits.maxValue}}</td>
-                <td></td>
-                <td></td>
-                <td class="outputColor">{{limits.minValue}}</td>
-                <td class="outputColor">{{limits.maxValue}}</td>
+                <td class="inputColor preventDragSelect">{{limits.minValue}}</td>
+                <td class="inputColor preventDragSelect">{{limits.maxValue}}</td>
                 <td></td>
                 <td></td>
-                <td class="restColor">{{rest}}</td>
+                <td class="outputColor preventDragSelect">{{limits.minValue}}</td>
+                <td class="outputColor preventDragSelect">{{limits.maxValue}}</td>
+                <td></td>
+                <td></td>
+                <td class="restColor preventDragSelect">{{rest}}</td>
                 <td colspan="3"></td>
               </tr>
             </tbody>
@@ -162,7 +176,7 @@
                   
                   <!-- servo status -->       
                   <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
-                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
+                    <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
                     <div class="servoCursor"></div>
                   </div>
                   <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">Rest
@@ -186,33 +200,29 @@
                 <rzslider class="custom-slider2 sliderPosition" ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
               </div><!-- /sliderContainer -->
             </div><!-- /.col-md-12 -->
-          </div><!-- /.row -->
-
-
-              
-          <div class="row align-items-center">
-            <div class="col-md-12">
-              <nav class="settingsbar">
-                <div class="dropdownLabel">
-                  Encoder
-                </div>
-                <div>
-                  <select class="form-goup form-control" title="Encoders list">
-                      <option selected>None</option>
-                      <option>Encoder 1</option>
-                      <option>SuperEncoder</option>
-                      <option>BadEncoder</option>
-                    </select>
-                </div>
-              </nav>
-            </div><!-- /.col-md-12 -->
-          </div><!-- /.row -->  
+          </div><!-- /.row -->          
 
         </uib-tab>
       </uib-tabset>
 
     </div><!-- /.col-md-12 -->
   </div><!-- /.row --> 
+
+  <!-- ------- Temporal for test ------ -->
+  <div class="row">
+    <div class="col-md-4">
+      <span style="background-color: #FF5555; display: inline-block;"> Temp
+        <tr ng-repeat="c in service.controllers">
+          <span>
+            <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
+          </span>
+        </tr>
+        <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
+        <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">detach</button>
+      </span>
+    </div><!-- /.col-md-4 -->
+  </div><!-- /.row -->  
+  <!-- /Temp ------------ -->   
   
   <div class="row">
     <div class="col-md-4">
