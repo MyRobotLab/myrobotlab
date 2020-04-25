@@ -154,7 +154,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
     // current image size,
     // and save it for later.
     if (facemask == null) {
-      File filterfile = new File(Util.getResourceDir() + File.separator + "facerec"+File.separator+"Filter.png");
+      File filterfile = new File(Service.getResourceDir(OpenCV.class, "facerec/Filter.png"));
       // Face mask used to mask edges of face pictures to eliminate noise around
       // the edges
       if (!filterfile.exists()) {

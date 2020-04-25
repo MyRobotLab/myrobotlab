@@ -33,7 +33,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,8 +47,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.MRLListener;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Style;
@@ -323,7 +322,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       }
 
       mxCell v1 = (mxCell) graph.insertVertex(parent, null, new SwingGraphVertex(serviceName, canonicalName, displayName, toolTip, SwingGraphVertex.Type.SERVICE), x, y, 100, 50,
-          "shape=image;image=file:///" + Util.getResourceDir() + "/" + canonicalName + ".png");
+          "shape=image;image=file:///" + Service.getResourceRoot() + "/" + canonicalName + ".png");
       
       serviceCells.put(serviceName, v1);
 

@@ -47,7 +47,6 @@ import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -166,7 +165,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // FIXME - move to security
   private static SSLContext createSSLContext2() {
     try {
-      InputStream keyStoreStream = new FileInputStream((Util.getResourceDir() + "/keys/myrobotlab-keystore.jks"));
+      InputStream keyStoreStream = new FileInputStream(getResourceDir(Security.class, "/keys/myrobotlab-keystore.jks"));
       char[] keyStorePassword = "changeit".toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(keyStoreStream, keyStorePassword);
@@ -462,6 +461,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     // configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
     // clone InMoov2 at the same level as myrobotlab
+
+    // TODO - spin through dirs ? - look for any exact match for service file and add it as a resource ?
     configBuilder.resource("../InMoov2/resource/WebGui/app");
 
     // for debugging - has higher priority
@@ -1216,7 +1217,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "python", "Python", "--invoke", "python", "execFile", "start.py"});
-      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "webgui", "WebGui", "intro", "Intro" });
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin"});
       
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

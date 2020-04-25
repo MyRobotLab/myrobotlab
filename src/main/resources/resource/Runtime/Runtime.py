@@ -23,13 +23,13 @@ for service in services:
 # create and start an Arduino service
 Runtime.start("arduino", "Arduino")
 
-+# Send a copy of the logs to the MRL debugging team
-+# Pass your MRL Username as the parameter
+# Send a copy of the logs to the MRL debugging team
+# Pass your MRL Username as the parameter
 Runtime.noWorky("GroG")
 # the Big Hammer - the last thing
 # MRL will see - shuts everything down in 10 seconds
 # Runtime.shutdown(10)
-+
-+# To execute a program from the Operating System (OS)
-+# Note: this is blocking, that is the program must finish before control returns to MRL
-+# Runtime.exec("c:/notepad.exe")
+
+# To execute a program from the Operating System (OS)
+# Note: this is blocking, that is the program must finish before control returns to MRL
+# Runtime.exec("c:/notepad.exe")
