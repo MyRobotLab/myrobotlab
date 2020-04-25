@@ -307,9 +307,16 @@
                 <configuration>
                   <filesets>
                     <fileset>
-                      <directory>.myrobotlab</directory>
+                      <directory>data/.myrobotlab</directory>
                       <followSymlinks>false</followSymlinks>
 				    </fileset>
+					<fileset>
+						<directory>libraries</directory>
+						<includes>
+							<include>repo.json</include>
+						</includes>
+						<followSymlinks>false</followSymlinks>
+					</fileset>
 					<fileset>
 						<directory>src/main/resources/resource/framework</directory>
 						<includes>

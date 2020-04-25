@@ -65,6 +65,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
@@ -897,7 +898,7 @@ public class FileIO {
       List<URL> urls = null;
 
       log.info("findPackageContents resource/Python/examples");
-      urls = listContents(root, gluePaths(Service.getResourceRoot(), "/Python/examples"));
+     // urls = listContents(root, gluePaths(Service.getResourceRoot(), "/Python/examples"));
 
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
@@ -907,8 +908,8 @@ public class FileIO {
        * log.info("{}", test); }
        */
 
-      urls = listContents(getRoot(), Util.getResourceDir() + "/Python/examples");
-      log.info("findPackageContents {}/Python/examples {}", Util.getResourceDir(), urls.size());
+      urls = listContents(getRoot(), Service.getResourceDir(Python.class, "examples"));
+      log.info("findPackageContents {}/Python/examples {}", Service.getResourceDir(Python.class, "examples"), urls.size());
 
       urls = listContents(src);
       log.info("findPackageContents {} {}", src, urls.size());
@@ -1042,7 +1043,7 @@ public class FileIO {
       String filename = "/resource/" + src.replace("\\", "/");
       isr = FileIO.class.getResourceAsStream(filename);
     } else {
-      String localFilename = Util.getResourceDir() + File.separator + src;
+      String localFilename = Service.getResourceRoot() + File.separator + src;
       try {
         isr = new FileInputStream(localFilename);
       } catch (Exception e) {
@@ -1112,7 +1113,7 @@ public class FileIO {
   static public final boolean rm(String filename) {
     return rm(new File(filename));
   }
-
+  
   /**
    * recursively remove files and directories, leaving exlusions
    * 

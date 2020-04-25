@@ -40,7 +40,8 @@ public class Intro extends Service {
       tuto.title = "Servo with Arduino Hardware";
       tuto.servicesRequired = new String[] { "Servo", "Arduino" };
       tuto.isInstalled = repo.isInstalled(Servo.class) && repo.isInstalled(Arduino.class);
-      tuto.script = FileIO.toString(getResourceRoot() + fs + "Servo/Servo.py");
+
+      tuto.script = getResourceAsString(Servo.class, "Servo.py"); //FileIO.toString(getResource(Servo.class,"Servo.py"));
       tutorials.put(tuto.title, tuto);
     } catch (Exception e) {
       log.error("Intro constructor threw", e);

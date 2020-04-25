@@ -63,6 +63,7 @@ import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -114,12 +115,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   transient static public final TreeMap<String, ServiceReservation> dnaPool = new TreeMap<String, ServiceReservation>();
 
-  /**
-   * service type can override the location of its resource directory if specified on the command line
-   * --resource-override {ServiceType} {location} {ServiceType} {location} ...
-   */
-  static protected Map<String,String> resourceOverrides = new HashMap<>();
-  
   private static final long serialVersionUID = 1L;
 
   transient public final static Logger log = LoggerFactory.getLogger(Service.class);
@@ -141,8 +136,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected String id;
 
-  protected String simpleName; // used in gson encoding for getSimpleName()
+  /**
+   * simpleName used in serialization 
+   */
+  protected String simpleName;
 
+  /**
+   * full class name used in serialization
+   */
   protected String serviceClass;
 
   private boolean isRunning = false;
@@ -817,7 +818,74 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
+  
+  // ============== resources begin ======================================
+  
+  /**
+   * Non-static getResourceDir() will return /resource/{ServiceType}
+   * @return
+   */
+  public String getResourceDir() {
+    return getResourceDir(getClass());
+  }
+  
+  /**
+   * Static getResourceDir(Class<?> clazz) will return the appropriate resource directory,
+   * typically it will be /resource/{ServiceType} but depending if run in the presence of other
+   * developing directories.
+   * 
+   * @param clazz
+   * @return
+   */
+  static public String getResourceDir(Class<?> clazz) {
+    return getResourceDir(clazz.getSimpleName(), null);
+  }
+  
+  static public String getResourceDir(Class<?> clazz, String additionalPath) {
+    return getResourceDir(clazz.getSimpleName(), additionalPath);
+  }
+  
+  /**
+   * getResourceDir gets the appropriate resource path for any resource supplied in additionalPath.
+   * This is a private method, if you need a resource, use getResource or getResourceAsString
+   * 
+   * <pre>
+   * Order of increasing precedence is:
+   *     1. resource
+   *     2. src/resource/{ServiceType} or
+   *     3. ../{ServiceType}/resource/{ServiceType}
+   * </pre>
+   * 
+   * @param serviceType
+   * @param additionalPath
+   * @return
+   */
+  static private String getResourceDir(String serviceType, String additionalPath) {
+    
+    // setting resource directory
+    String resourceDir = "resource" + fs + serviceType;
+    
+    // overriden by src
+    String override = "src" + fs + "main" + fs + "resources" + fs + "resource" + fs + serviceType;
+    File test = new File(override);
+    if (test.exists()) {
+      log.info("found override resource dir {}", override);
+      resourceDir = override;
+    }
 
+    override = ".." + fs + serviceType + fs + "resource" + fs + serviceType;
+    test = new File(override);
+    if (test.exists()) {
+      log.info("found override repo dir {}", override);
+      resourceDir = override;
+    }
+    
+    if (additionalPath != null) {
+      resourceDir = FileIO.gluePaths(resourceDir, additionalPath);
+    }
+    return resourceDir;
+  } 
+  
   /**
    * All resource access should be using this method.
    * Util.getResource... should be deprecated.
@@ -825,28 +893,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * and resolves the priority of setting this configuration
    * @return
    */
+  
   static public String getResourceRoot() {
-    // FIXME - should "this" be the test ?
-    // If so it should be its own static function...
-
-    // order of precedence
-    // 1. if there is a src directory use it unless
-    // 2. options say to override it
-
-    String resourceRoot = (Runtime.getOptions() != null)?Runtime.getOptions().resourceDir:"resource";
-    if ("resource".equals(resourceRoot)) {
-      // allow default to be overriden by src if it exists
-      File src = new File("src");
-      if (src.exists()) {        
-        resourceRoot = "src" + fs + "main" + fs + "resources" + fs + "resource";
-      }
-    }
-
-    return resourceRoot;
-  }
-
-  public String getResourceDir() {
-    return getResourceDir(getClass().getSimpleName());
+    // setting resource root details
+    String resourceRootDir = "resource";
+    // allow default to be overriden by src if it exists
+    File src = new File("src");
+    if (src.exists()) {        
+      resourceRootDir = "src" + fs + "main" + fs + "resources" + fs + "resource";
+    }    
+    return resourceRootDir;
   }
   
   /**
@@ -859,38 +915,51 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return f.listFiles();
   }
 
-  static public String getResourceDir(Class<?> clazz) {
-    return getResourceDir(clazz.getSimpleName());
-  }
-
-  static public String getResourceDir(String serviceType) {
-    String resourceDir = getResourceRoot() + fs + serviceType;
-    if (resourceOverrides.containsKey(serviceType)) {
-    	resourceDir = resourceOverrides.get(serviceType);
-    }
-    return resourceDir;
-  }
-  
-  static void setResourceDir(String serviceType, String path) {
-    resourceOverrides.put(serviceType, path);
-  }
-
-  public byte[] getResource(String resourceName) {
-    String filename = getResourceDir() + fs + resourceName;
+  /**
+   * Get a resource, first parameter is serviceType
+   * @param serviceType - the type of service
+   * @param resourceName - the path of the resource
+   * @return
+   */
+  static public byte[] getResource(String serviceType, String resourceName) {
+    String filename = getResourceDir(serviceType, resourceName);
     File f = new File(filename);
     if (!f.exists()) {
-      error("resource %s does not exist", f);
+      log.error("resource {} does not exist", f);
       return null;
     }
     byte[] content = null;
     try {
       content = Files.readAllBytes(Paths.get(filename));
     } catch (IOException e) {
-      error(e);
+      log.error("getResource threw", e);
     }
     return content;
   }
+  
+  public byte[] getResource(String resourceName) {
+    return getResource(getClass(), resourceName);
+  }
 
+  /**
+   * static getResource(Class, resourceName) to access a different services
+   * resources
+   * 
+   * @param clazz
+   * @param resourceName
+   * @return
+   */
+  static public byte[] getResource(Class<?> clazz, String resourceName) {
+    return getResource(clazz.getSimpleName(), resourceName);
+  }
+  
+ 
+  /**
+   * Get a resource as a string.
+   * This will follow the conventions of finding the appropriate resource dir
+   * @param resourceName
+   * @return
+   */
   public String getResourceAsString(String resourceName) {
     byte[] data = getResource(resourceName);
     if (data != null) {
@@ -903,15 +972,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return null;
   }
 
-  public String getResourceInstanceDir() {
-    String dataDir = Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
-    File f = new File(dataDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    return Runtime.getOptions().resourceDir + fs + getClass().getSimpleName() + fs + getName();
+  static public String getResourceAsString(Class<?> clazz, String resourceName) {
+    return getResourceAsString(clazz.getSimpleName(), resourceName);
   }
 
+  static public String getResourceAsString(String serviceType, String resourceName) {
+    byte[] data = getResource(serviceType, resourceName);
+    if (data != null) {
+      try {
+        return new String(data, "UTF-8");
+      } catch (Exception e) {
+        log.error("getResourceAsString threw", e);
+      }
+    }
+    return null;
+  }
+  
   /**
    * Constructor of service, reservedkey typically is a services name and inId
    * will be its process id
@@ -929,12 +1005,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.info("creating remote proxy service for id {}", id);
     }
     
-    
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
-
+            
     try {
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
@@ -960,7 +1035,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // so that reservations are set with actual names if
     // necessary
     mergePeerDna(reservedKey, serviceClass);
-    // xxx
 
     // see if incoming key is my "actual" name
     ServiceReservation sr = dnaPool.get(reservedKey);
@@ -2691,6 +2765,52 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     Files.write(Paths.get(filename), python.toString().getBytes());
     info("saved %s to %s", getName(), filename);
     return python;
+  }
+
+  /**
+   * non parameter version for use within a Service
+   * @return
+   */
+  public byte[] getServiceIcon() {
+    return getServiceIcon(getClass().getSimpleName());
+  }
+
+  /**
+   * static class version for use when class is available "preferred"
+   * @param serviceType
+   * @return
+   */
+  public static byte[] getServiceIcon(Class<?> serviceType) {
+    return getServiceIcon(serviceType.getSimpleName());
+  }
+  /**
+   * One place to get the ServiceIcons so that we can avoid a lot of
+   * strings with "resource/Servo.png"
+   * @param serviceType
+   * @return
+   */
+  public static byte[] getServiceIcon(String serviceType) {
+    try {
+    // this is bad (making a string with resource root
+    // - but at least its only
+    String path = getResourceRoot() + fs + serviceType + ".png";
+    return Files.readAllBytes(Paths.get(path));
+    } catch(Exception e) {
+      log.warn("getServiceIcon threw", e);
+    }
+    return null;
+  }
+
+  public static String getServiceScript(Class<?> clazz) {
+    return getServiceScript(clazz.getSimpleName());
+  }
+
+  public static String getServiceScript(String serviceType) {
+    return getResourceAsString(serviceType, String.format("%s.py", serviceType));
+  }
+
+  public String getServiceScript() {
+    return getServiceScript(getClass());
   }
 
 }

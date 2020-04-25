@@ -111,9 +111,38 @@
     </tr>
     <tr>
         <td>
-            <p>The Servo service is used to control servos through a micro-controller such as an Arduino or a Raspberry pi (ServoController).<br>
-            The service will allow to control attaching or detaching the device, control his position and the speed at wich it move to that position, and turn off/on the servo.<br>
+            The Servo service is used to control hobby servos through a Servo Controller.  This could be a Raspberry pi, micro-controller such as an Arduino, or other I2C servo controller.<br>
+            The Servo service allows control of position, speed, and limits of the servo actuator.
         </td>
+    </tr>
+    <tr>
+        <td>
+            Would you like to use real or virtual hardware ?
+            <toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isVirtual?msg.setVirtual(true):msg.setVirtual(false)" width="80" height="30" on="virtual" off="real"/>
+            <br/>
+            <div ng-show="!service.isVirtual" >
+                <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/><br>
+                A servo must be wired with its own power supply. <br>
+                Its not recommended to use the 5v power supply from the Arduino.<br>
+                You can do this with a 4 battery pack which will produce 6 volts for the servo.
+            </div>
+            <div ng-show="service.isVirtual" >
+                <img src="../Intro/servoTutorial/arduino_servo_virtual.png" width="500"/><br>
+                JMonkey simulation service is used to do a 3d simulation of the servo using the same Servo service for control.
+            </div>
+        </td>
+    </tr>
+    <tr>
+    <td>
+    <div ng-model="code" style="height: 500px;width: 50%;" id="$index" ui-ace="{
+		                                       useWrapMode : false,
+		                                       showGutter: true,		                                       
+                                               theme:'chrome',
+		                                       mode: 'python',
+		                                       firstLineNumber: 1,
+		                                       onLoad: aceLoaded,		                                       
+		                                       onChange: aceChanged}"></div>
+       </td>
     </tr>
     <tr>
         <td>

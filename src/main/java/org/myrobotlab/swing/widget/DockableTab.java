@@ -23,8 +23,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.Runtime;
@@ -241,7 +243,8 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
         // "/mrl_logo_36_36.png");
         URL url = null;
         try {
-          url = new URL("file:///" + Util.getResourceDir() + "/mrl_logo_36_36.png");
+          
+          url = new URL(Service.getResourceRoot() + "/mrl_logo_36_36.png");
           Toolkit kit = Toolkit.getDefaultToolkit();
           Image img = kit.createImage(url);
           undocked.setIconImage(img);

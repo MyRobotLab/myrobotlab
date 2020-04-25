@@ -42,6 +42,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Hd44780;
@@ -52,8 +53,8 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(AudioFileGui.class);
-  ImageIcon readyOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "green.png")));
-  ImageIcon readyNOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "red.png")));
+  ImageIcon readyOK = new ImageIcon(ImageIO.read(new File(Service.getResourceRoot() + File.separator + "green.png")));
+  ImageIcon readyNOK = new ImageIcon(ImageIO.read(new File(Service.getResourceRoot() + File.separator + "red.png")));
   JLabel isReadyIcon = new JLabel(readyNOK, JLabel.CENTER);
   JTextArea screenContent = new JTextArea(4, 20);
   ButtonGroup backLightGroup = new ButtonGroup();
