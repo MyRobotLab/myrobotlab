@@ -94,7 +94,7 @@ table, th, td {
   color: #e48b53;
   height: 8px;
   font-size: small;
-  top: -35px;
+  top: -48px;
   z-index: 50;
   text-indent: -12px;
 }
@@ -102,7 +102,7 @@ table, th, td {
 .restCursor{
   position: absolute;
   background-color: #e48b53;
-  height: 19px;
+  height: 23px;
   top: 16px;
   width: 1px;
   z-index: 1;
@@ -146,10 +146,10 @@ table, th, td {
   position: absolute;
   background-color: #61b6b9;
   /* width: 67%; */
-  top: 0px;
+  top: -8px;
   /* top: 115px; */
   left: 95px;
-  height: 9px;
+  height: 8px;
   z-index: 40;
   pointer-events: none;
 }
@@ -158,9 +158,9 @@ table, th, td {
   position: absolute;
   background-color: #92ca7f;
   width: 50%;
-  top: 9px;
+  top: 18px;
   left: 95px;
-  height: 9px;
+  height: 8px;
   z-index: 12;
   pointer-events: none;
 }
@@ -257,18 +257,28 @@ table, th, td {
 
 .tableLimits{
   width: 100%;
-  border-width: 1px!important;
+  /* border-width: 1px!important; */
 }
 .tableLimits td {
    padding: 2px!important;
    text-align: center;
+   padding-top: 5px!important;
+   padding-bottom: 5px!important;
    border-width: 0px!important;
-   height: 15px!important;
+   line-height: 23px!important;
+   /* height: 15px!important; */
+   vertical-align: middle!important;
 }
 .tableLimits tr:nth-child(1) {
    border-width: 1px!important;
    border-bottom-color: #efefef;
    border-bottom-style: solid;
+}
+.tableLimits tr:nth-child(1) {
+   border-width: 1px!important;
+   padding-top: 2px!important;
+   padding-bottom: 2px!important;
+   line-height: 20px;
 }
 .tableLimits td:nth-child(1) {
    text-align: left;   
@@ -295,6 +305,16 @@ table, th, td {
 .tableLimits td:nth-child(13) {
    text-align: right;   
 }
+.valuesRow{
+  height: 10px;
+  padding: 0px;
+  line-height: 10px;
+}
+.valuesRow td{
+  background-color: #ffffff;
+  padding: 0px!important;
+  line-height: 18px!important;
+}
 
 .servoContent .toggle *{
   width: 220%;
@@ -309,32 +329,45 @@ table, th, td {
   border-bottom-color: #eaeaea;
   margin-top: 4px;
   color: #616161;
+  display: flex;
+  background-color: aqua;
+  align-content: space-between;
 }
 
 .settingsbar{
-  padding-top: 6px;
+  padding-top: 0px;
+  display: inline-block;
+  padding-bottom: 10px!important;
   align-self: flex-start;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
+  line-height: 33px;
+  height: 36px;
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: #eaeaea;
   margin-top: 4px;
+  /* background-color: aliceblue; */
   color: #616161;
-  align-content: space-evenly;
+  align-content: space-between;
   width: 100%;
-  display: inline-flex;
 }
 
 .settingsbar .btn{
   color: #FFFFFF;
-  height: 30px;
+  height: 28px;
   font-size: smaller;
   text-align: center;
-  top: -2px;
+  /* top: 0px; */
   display: inline-flex;
   margin-right: 12px;
 }
 
+.settingsbar .form-control, input{
+  display: inline!important;
+  height: 28px;
+  padding: 2px;
+  margin-right: 14px;
+}
 .custom-slider.rzslider .rz-bar {
   background: #ffc6aa;
   height: 5px;
@@ -360,22 +393,22 @@ table, th, td {
 }
 
 .lastColumn{
-  right: 0px!important;
+  right: 8px!important;
   position: absolute;
-  padding-right: 8px;
 }
 
 .custom-slider2.rzslider .rz-pointer {
   position: absolute;
   width: 60px;
   height: 32px;
-  top: 21px;
+  top: 23px;
   bottom: 0px;
   color: black;
   background-color:  transparent;
   position: relative;
   z-index: 104;
   bottom: 80px;
+  cursor: ew-resize;
 }
 .custom-slider2.rzslider .rz-pointer:focus {
   outline: none!important;
@@ -401,9 +434,9 @@ table, th, td {
 .servoCursor{
   position: absolute;
   background-color: #dcdcdc;
-  height: 14px;
+  height: 13px;
   width: 2px;
-  top: 12px;
+  top: 15px;
 }
 
 .custom-slider2 .rz-bubble:nth-child(7) {
@@ -436,7 +469,7 @@ table, th, td {
     position: absolute;
     z-index: 1;
     width: 100%;
-    height: 62px;
+    height: 80px;
     top: -29px;
     padding-top: 16px;
     /* background-color: #d80e0ec9; */
@@ -605,39 +638,42 @@ table, th, td {
     /* cursor: not-allowed; */
     color: #403f3f;
     font-size: medium;
-    height: 30px;
-    width: 50px!important;
+    height: 28px;
+    width: 32px!important;
     text-align: center;
     background-color: #ffffff;
+    margin-right: 0px;
 }
 #PinEnable input.form-control[disabled] {
     cursor: not-allowed;
     color: #ffffff;
     font-size: medium;
+    margin-right: 0px;
     background-color: #337ab7!important;
 }
 
 .verticalSpacer{
-  height: 37px;
+  height: 55px;
   position: inherit;
+  vertical-align: middle;
   width: 100%;
   /* background-color: aliceblue; */
 }
 .inputColor{
   color: #92ca7f;
-  font-size: small;
+  font-size: medium;
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif!important;
 }
 .outputColor{
   color: #61b6b9;
-  font-size: small;
+  font-size: medium;
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif!important;
 }
 .restColor{
   color: #e48b53;
-  font-size: small;
+  font-size: medium;
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif!important;
 }
@@ -652,6 +688,7 @@ table, th, td {
   position: absolute;
   height: 18px;
   left: 0px;
+  /* opacity: 0.7; */
   line-height: 19px;
   -webkit-border-radius: 2px;
   border-radius: 2px;
@@ -707,18 +744,18 @@ table, th, td {
   outline: none!important;
 }
 
-.servoPanelRow input[type=text]{
+.settingsbar input[type=text]{
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
   border-radius: 2px;
 }
 
-.servoPanelRow input[type=checkbox] {
+.settingsbar input[type=checkbox] {
   width: 20px!important;
   height: 18px!important;
 }
 
-.servoPanelRow .input-group-addon {
+.settingsbar .input-group-addon {
     padding: 2px 6px;
     font-size: 10px;
     font-weight: 200;
@@ -726,38 +763,45 @@ table, th, td {
     height: 20px;
     text-align: center;
 }
-.servoPanelRow .pinOn {
+.settingsbar .pinOn {
   background-color:#337ab7!important;
   color:#FFFFFF!important;
   width: 90px;
-  height: 32px;
+  height: 28px;
+  margin-left: -5px;
+  margin-top: -2px;
   text-align: center;
 }
-.servoPanelRow .pinOff {
+.settingsbar .pinOff {
   background-color:#FFFFFF!important;
   color:#000000!important;
   width: 90px;
-  height: 32px;
+  height: 28px;
+  margin-left: -5px;
+  margin-top: -2px;
   text-align: center;
 }
+.labelColumn1{
+  width: 81px!important;
+  display: inline-block;
+  margin-left: 8px;
+}
 
-/* style="height: 32px; width: 50px!important;" */
-
-.servoPanelRow input[type=checkbox]:checked:after {
+.settingsbar input[type=checkbox]:checked:after {
   border-bottom: 10px solid blue!important;
   border-top: 10px solid blue;
 }
 
 .servoPosition {
   position: absolute!important;
-  top: -17px;
+  top: -28px;
   display: flex;
-  /*left: 10%;*/
+  font-size: medium;
   z-index: 44!important;
   background-color: #ffffff;
   pointer-events: none;
-  height: 12px;
-  line-height: 10px;
+  height: 16px;
+  line-height: 16px;
   z-index: 52!important;
   /* margin-left: 2px; */
   color: #999999;
