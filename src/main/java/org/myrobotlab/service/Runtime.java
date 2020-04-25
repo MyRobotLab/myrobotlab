@@ -1147,8 +1147,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
       options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
       options.libraries = (platform.isWindows()) ? options.libraries.replace("/", "\\") : options.libraries.replace("\\", "/");
-      options.resourceDir = (platform.isWindows()) ? options.resourceDir.replace("/", "\\") : options.resourceDir.replace("\\", "/");
-
+      
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
       if (!dataDir.exists()) {
@@ -1221,10 +1220,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         }
       }
       
-      if (options.resourceOverride != null) {
-    	  Service.resourceOverrides = options.resourceOverride;
-      }
-
       // FIXME TEST THIS !! 0 length, single service, multiple !
       if (options.install != null) {
         // we start the runtime so there is a status publisher which will
@@ -1913,10 +1908,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     @Option(names = { "-i",
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
     public String install[];
-
-    @Option(names = { "-R",
-    "--resource-override" }, arity = "0..*", description = "service type can override the location of its resource directory, --resource-override {ServiceType} {location} {ServiceType} {location} ...")
-    public Map<String,String> resourceOverride = null;
     
     @Option(names = { "-d",
     "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
@@ -1960,10 +1951,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
     public String dataDir = "data";
-
-    @Option(names = { "--resource-dir" }, description = "sets the location of the resource directory")
-    public String resourceDir = "resource";
-
+    
     @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
     public boolean extractResources = false;
 

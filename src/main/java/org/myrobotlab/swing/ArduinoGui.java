@@ -55,6 +55,7 @@ import org.fife.ui.rsyntaxtextarea.TextEditorPane;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.service.Arduino;
@@ -370,7 +371,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     JPanel uploadPanel = new JPanel(new BorderLayout());
     String mrlIno = null;
     try {
-      pathToMrlComm.setText(Util.getResourceDir() + "/Arduino/MrlComm/MrlComm.ino");
+      pathToMrlComm.setText(FileIO.gluePaths(Service.getResourceDir(Arduino.class),"/Arduino/MrlComm/MrlComm.ino"));
       mrlIno = FileIO.toString(pathToMrlComm.getText());
     } catch (Exception e) {
       log.warn("MrlComm.ino not found", e);
