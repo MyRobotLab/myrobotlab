@@ -21,8 +21,8 @@
 
                   <span id="PinEnable">
                      PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
-                    <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
-                    <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Disabled</button>
+                    <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Disable</button>
+                    <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Enable</button>
                   </span>
 
                   <!-- Temporal for test -->
@@ -33,8 +33,8 @@
                       </span>
                     </tr>
 
-                    <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
-                    <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">detach</button>
+                    <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">Attach</button>
+                    <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">Detach</button>
                   </span>
                   <!-- /Temp ------------ -->                  
 

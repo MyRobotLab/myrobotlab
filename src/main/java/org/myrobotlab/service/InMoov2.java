@@ -1171,7 +1171,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 			return;
 		}
 
-		locale = new Locale(code);get("STARTINGGESTURES")
+		locale = new Locale(code);
 
 		speakBlocking(get("SETLANG"), "%s", locale.getDisplayLanguage());
 
