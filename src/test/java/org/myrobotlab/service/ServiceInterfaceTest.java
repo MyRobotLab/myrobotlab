@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -107,7 +108,6 @@ public class ServiceInterfaceTest extends AbstractTest {
     
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.start("python", "Python");
-    String testScriptDirectory = Util.getResourceDir() + File.separator + "%s/";
     ServiceData sd = ServiceData.getLocalInstance();
     List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
     
@@ -153,9 +153,8 @@ public class ServiceInterfaceTest extends AbstractTest {
         servicesThatDontStartProperly.add(service);
       }
 
-      // validate that a script exists
-      File script = new File(String.format(testScriptDirectory, service) + service + ".py");
-      if (script.exists()) {
+      String serviceScript = Service.getServiceScript(service);
+      if (serviceScript != null) {
         log.info("Service Has a Script: {}", service);
         numScripts++;
       } else {
@@ -164,7 +163,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
 
       //
-      if (testServiceScript(python, testScriptDirectory, service)) {
+      if (testServiceScript(python, service)) {
         // log.info("Default script for {} executes ok!", service);
         numScriptsWorky++;
       } else {
@@ -231,18 +230,14 @@ public class ServiceInterfaceTest extends AbstractTest {
     }
   }
 
-  private boolean testServiceScript(Python python, String testScriptDirectory, String service) {
+  private boolean testServiceScript(Python python, String serviceType) {
 
-    // TODO: this blows stuff up too much.
-
-    String testScriptFile = String.format(testScriptDirectory, service) + service + ".py";
-    String prefix = "virtual = True\n";
-    File script = new File(testScriptFile);
-    if (!script.exists()) {
-      log.warn("No default script for Service {}", script);
+    String testScriptFile = Service.getServiceScript(serviceType);
+    if (testScriptFile == null) {
+      log.warn("No default script for Service {}", Service.getResource(serviceType, serviceType + ".py"));
       return false;
     } else {
-      log.info("Default Script Exists for {}", service);
+      log.info("Default Script Exists for {}", serviceType);
     }
 
     return false;

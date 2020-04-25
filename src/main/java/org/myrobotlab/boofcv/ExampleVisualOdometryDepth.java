@@ -30,8 +30,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.ejml.data.DMatrixRMaj;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Resolution;
 import org.slf4j.Logger;
 
@@ -93,11 +95,11 @@ public class ExampleVisualOdometryDepth {
     MediaManager media = DefaultMediaManager.INSTANCE;
 
     // String directory = UtilIO.pathExample("kinect/straight");
-    String directory = Util.getResourceDir() + File.separator + "BoofCv"+ File.separator;
+    String directory = Service.getResourceDir(BoofCv.class);
     log.info("Using directory {}", directory);
 
     // load camera description and the video sequence
-    VisualDepthParameters param = CalibrationIO.load(media.openFile(directory + "visualdepth.yaml"));
+    VisualDepthParameters param = CalibrationIO.load(media.openFile(Service.getResourceDir(BoofCv.class, "visualdepth.yaml")));
 
     // specify how the image features are going to be tracked
     PkltConfig configKlt = new PkltConfig();
