@@ -276,7 +276,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   boolean speakErrors = false;
   Long startSleep = null;
   transient public InMoovTorso torso;
-                                       transient public UltrasonicSensor ultrasonicSensor;
+  transient public UltrasonicSensor ultrasonicSensor;
 
   // ---------------------------------------------------------------
   // end services reservations

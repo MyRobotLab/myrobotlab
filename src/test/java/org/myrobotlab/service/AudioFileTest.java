@@ -28,7 +28,7 @@ public class AudioFileTest extends AbstractServiceTest {
     af1.setVolume(1.0);
     Assert.assertEquals(1.0, af1.getVolume(), 0.0);
     
-    String filename = Service.getResourceDir(AudioFile.class, "Clock/tick.mp3");
+    String filename = Service.getResourceDir(AudioFile.class, "tick.mp3");
     // unit tests will set this to mute ... (build servers shouldn't start playing sounds when a build runs.) 
     af1.setMute(true);
 

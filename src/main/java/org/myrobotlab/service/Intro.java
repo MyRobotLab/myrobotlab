@@ -1,7 +1,12 @@
 package org.myrobotlab.service;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.repo.Repo;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -12,6 +17,18 @@ public class Intro extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Intro.class);
+
+  public class TutorialInfo {
+
+    public String id;
+    public String title;
+    public boolean isInstalled;
+    public String[] servicesRequired;
+    public String script;
+
+  }
+
+  Map<String, TutorialInfo> tutorials = new TreeMap<>();
 
   public Intro(String n, String id) {
     super(n, id);
@@ -43,19 +60,34 @@ public class Intro extends Service {
 
     ServiceType meta = new ServiceType(Intro.class);
     meta.addDescription("Introduction to MyRobotlab");
-    meta.setAvailable(true); 
+    meta.setAvailable(true);
     meta.addCategory("general");
     return meta;
+  }
+
+  public void checkInstalled(String forTutorial, String serviceType) {
+    Runtime runtime = Runtime.getInstance();
+    Repo repo = runtime.getRepo();
+
+    TutorialInfo tutorial = new TutorialInfo();
+    tutorial.title = forTutorial;
+    tutorial.isInstalled = repo.isInstalled(serviceType);
   }
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
+      
+      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro", "python", "Python" });
+      
+      // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      // webgui.setSsl(true);
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8888);
+      webgui.startService();
 
-      Runtime.start("intro", "Intro");
-      Runtime.start("servo", "Servo");
-      Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {
       log.error("main threw", e);
