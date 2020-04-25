@@ -41,10 +41,14 @@
 
           <div class="row">
             <div class="col-md-12">
-
+              <span id="PinEnable">
+                 PIN <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
+                <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Disable</button>
+                <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Enable</button>
+              </span>
               <div class="verticalSpacer">
-              <!-- To maintain the same slider height as in Advanced -->
 
+              <!-- To maintain the same slider height as in Advanced -->
                 <nav class="settingsbar preventDragSelect">
                   <span class="labelColumn1">Encoder</span>
                   <span>
@@ -54,6 +58,8 @@
                       <option>SuperEncoder</option>
                       <option>BadEncoder</option>
                     </select>              
+                    <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">Attach</button>
+                    <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">Detach</button>
                   </span>
                 </nav>
 
@@ -93,10 +99,6 @@
           </div><!-- /.row -->
           <!-- <div class="verticalSpacer"></div> -->
         </uib-tab>
-
-
-
-
 
 
 
