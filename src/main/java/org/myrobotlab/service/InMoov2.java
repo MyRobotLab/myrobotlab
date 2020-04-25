@@ -67,8 +67,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 
-                meta.addPeer("eye", "OpenCV", "eye");
-                meta.addPeer("servomixer", "ServoMixer", "for making gestures");
+        meta.addPeer("eye", "OpenCV", "eye");
+        meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
 		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 		meta.addPeer("pir", "Pir", "infrared sensor");
@@ -1167,13 +1167,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		// filter of the set of supported locales
 		if (!locales.containsKey(code)) {
-			error("InMooov does not support %s only %s", code, locales.keySet());
+			error("InMoov does not support %s only %s", code, locales.keySet());
 			return;
 		}
 
 		locale = new Locale(code);
 
-		speakBlocking("setting language to %s", locale.getDisplayLanguage());
+		speakBlocking(get("SETLANG"), "%s", locale.getDisplayLanguage());
 
 		// attempt to set all other language providers to the same language as me
 		List<String> providers = Runtime.getServiceNamesFromInterface(LocaleProvider.class);
@@ -1294,7 +1294,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		startServos(leftPort, rightPort);
 		// startMouthControl(head.jaw, mouth);
 
-		speakBlocking("startup sequence completed");
+		speakBlocking(get("STARTINGSEQUENCE"));
 	}
 
 	public ProgramAB startBrain() {
@@ -1587,7 +1587,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		speakBlocking(get("STARTINGMOUTH"));
 		if (Platform.isVirtual()) {
-			speakBlocking("in virtual hardware mode");
+			speakBlocking(get("STARTINGMOUTH"));
 		}
 		speakBlocking(get("WHATISTHISLANGUAGE"));
 
@@ -1878,6 +1878,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		jme.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
 		jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
 		jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
+
+		//We set the correct location view
+		jme.cameraLookAt(getName() + ".torso.lowStom");
 
 		// additional experimental mappings
 		/*

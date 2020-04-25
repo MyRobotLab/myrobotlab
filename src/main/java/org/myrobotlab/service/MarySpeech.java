@@ -174,8 +174,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
 
   
     String[] voices = new String[] { "voice-bits1-hsmm", "voice-bits3-hsmm", "voice-cmu-bdl-hsmm", "voice-cmu-nk-hsmm", "voice-cmu-rms-hsmm", "voice-cmu-slt-hsmm",
-        "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm",
-        "voice-enst-camille-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-jessica-hsmm", "voice-upmc-pierre-hsmm" };
+        "voice-dfki-obadiah-hsmm", "voice-dfki-ot-hsmm", "voice-dfki-pavoque-neutral-hsmm", "voice-dfki-poppy-hsmm", "voice-dfki-prudence-hsmm", "voice-dfki-spike-hsmm", "voice-enst-dennys-hsmm", "voice-istc-lucia-hsmm", "voice-upmc-pierre-hsmm" };
 
     for (String voice : voices) {
       meta.addDependency("de.dfki.mary", voice, "5.2");
@@ -245,10 +244,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Emma", "female", "de", "bits1-hsmm");
     addVoice("Henry", "male", "en", "cmu-rms-hsmm");
     addVoice("Alim", "male", "tr", "dfki-ot-hsmm");
-    addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm");
+    //addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm"); this is useless because it is totally non understandable
     addVoice("Spike", "male", "en-GB", "dfki-spike-hsmm");
     addVoice("Sally", "female", "en-US", "cmu-slt-hsmm");
-    addVoice("Camille", "female", "fr", "enst-camille-hsmm");
+    //addVoice("Camille", "female", "fr", "enst-camille-hsmm"); this is useless because it is totally non understandable
     addVoice("Hans", "male", "de", "dfki-pavoque-neutral-hsmm");
     addVoice("Poppy", "female", "en-GB", "dfki-poppy-hsmm");
     addVoice("Mark", "male", "en-US", "cmu-bdl-hsmm");
