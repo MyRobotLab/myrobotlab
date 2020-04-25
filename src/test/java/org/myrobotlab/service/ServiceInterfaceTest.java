@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -107,7 +108,6 @@ public class ServiceInterfaceTest extends AbstractTest {
     
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.start("python", "Python");
-    String testScriptDirectory = Util.getResourceDir() + File.separator + "%s/";
     ServiceData sd = ServiceData.getLocalInstance();
     List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
     
@@ -153,8 +153,10 @@ public class ServiceInterfaceTest extends AbstractTest {
         servicesThatDontStartProperly.add(service);
       }
 
+      String testScriptDirectory = Service.getServiceScript(service);
       // validate that a script exists
-      File script = new File(String.format(testScriptDirectory, service) + service + ".py");
+      //File script = new File(String.format(testScriptDirectory, service) + service + ".py");
+      File script = new File(testScriptDirectory);
       if (script.exists()) {
         log.info("Service Has a Script: {}", service);
         numScripts++;

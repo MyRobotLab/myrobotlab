@@ -981,14 +981,14 @@
   <dependency>
     <groupId>opencv</groupId>
     <artifactId>opencv_classifiers</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
   <dependency>
     <groupId>opencv</groupId>
     <artifactId>opencv_facedetectdnn</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
@@ -1091,17 +1091,11 @@
 <!-- Polly end -->
 
 <!-- ProgramAB begin -->
-  <dependency>
-    <groupId>program-ab</groupId>
-    <artifactId>program-ab-data</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- skipping program-ab program-ab-data program-ab-program-ab-data-null null version/latest -->
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.4</version>
+    <version>0.0.8.5</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
@@ -1251,19 +1245,6 @@
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
-  <dependency>
-    <groupId>mrl-solr</groupId>
-    <artifactId>mrl-solr-data</artifactId>
-    <version>1.0</version>
-    <scope>provided</scope>
-    <type>zip</type>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.logging.log4j</groupId>
-          <artifactId>log4j-slf4j-impl</artifactId>
-        </exclusion>
-      </exclusions>
-  </dependency>
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
