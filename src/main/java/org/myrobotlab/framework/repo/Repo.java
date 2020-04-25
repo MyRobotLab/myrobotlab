@@ -400,6 +400,10 @@ public abstract class Repo {
     info("finished installing %d services", sd.getServiceTypeNames().length);
   }
 
+  public boolean isInstalled(Class<?> serviceType) {
+    return isInstalled(serviceType.getSimpleName());
+  }
+
   // FIXME - implement String[] serviceTypes parameter
   public boolean isInstalled(String serviceType) {
     return getUnfulfilledDependencies(serviceType).size() == 0;
@@ -411,7 +415,6 @@ public abstract class Repo {
    * returns false
    * 
    * @param fullTypeName
-   *          f
    * @return true/false
    */
   public boolean isServiceTypeInstalled(String fullTypeName) {

@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.data.SensorData;
@@ -47,7 +48,7 @@ public class ArduinoMotorPotTest {
   private int potPin = 0;
   private int rate = 5;
   private int rightPwm = 7;
-  private String sketchFilename = Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MRLComm.c";
+  private String sketchFilename = Service.getResourceDir(Arduino.class, "MRLComm.c");
   private double tolerance = 1.5;
   // public boolean uploadSketch = false;
   public boolean uploadSketch = false;

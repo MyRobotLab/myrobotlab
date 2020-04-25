@@ -646,6 +646,7 @@ public class Security extends Service implements AuthorizationProvider {
     try {
 
       Properties fileStore = new Properties();
+      log.info("security loading secure store file {}", getStoreFileName());
       String storeFileContents = FileIO.toString(getStoreFileName());
       if (storeFileContents != null) {
         String properties = decrypt(storeFileContents, new File(getKeyFileName()));

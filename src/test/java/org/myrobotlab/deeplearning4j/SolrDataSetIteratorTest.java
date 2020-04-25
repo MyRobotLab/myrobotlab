@@ -18,8 +18,10 @@ import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Ignore;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Deeplearning4j;
+import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Solr;
 import org.myrobotlab.test.AbstractTest;
@@ -73,7 +75,7 @@ public class SolrDataSetIteratorTest extends AbstractTest {
     CustomModel newMod = dl4j.loadComputationGraph(filename);
     // TODO: load am image!
     // a test image
-    String path = Util.getResourceDir() + File.separator + "OpenCV" + File.separator + "testData" + File.separator + "rachel.jpg";
+    String path = Service.getResourceDir(OpenCV.class, "testData/rachel.jpg");
     IplImage image = cvLoadImage(path);
     Map<String, Double> results = dl4j.classifyImageCustom(image, newMod.getModel(), newMod.getLabels());
     for (String key : results.keySet()) {

@@ -98,8 +98,7 @@ public abstract class OpenCVFilter implements Serializable {
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
-    tryfile = Util.getResourceDir() + File.separator + OpenCV.class.getSimpleName() + File.separator
-        + infile;
+    tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return load(tryfile);
@@ -136,7 +135,7 @@ public abstract class OpenCVFilter implements Serializable {
     }
 
     // service resources - when jar extracts ?
-    tryfile = Util.getResourceDir() + File.separator + infile;
+    tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);

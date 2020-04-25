@@ -25,7 +25,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
@@ -39,8 +41,8 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
   public final static Logger log = LoggerFactory.getLogger(WebkitSpeechRecognitionGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
-  BufferedImage microOn = ImageIO.read(new File(Util.getResourceDir() + File.separator+"InMoov"+File.separator+"monitor"+File.separator+"microOn.png"));
-  BufferedImage microOff = ImageIO.read(new File(Util.getResourceDir() +File.separator+"InMoov"+File.separator+"monitor"+File.separator+"microOff.png"));
+  BufferedImage microOn = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class),"microOn.png")));
+  BufferedImage microOff = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class),"microOff.png"))); 
 
   private JButton micro = new JButton(new ImageIcon(microOn));
   JComboBox comboLanguage = new JComboBox();
