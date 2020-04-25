@@ -153,11 +153,8 @@ public class ServiceInterfaceTest extends AbstractTest {
         servicesThatDontStartProperly.add(service);
       }
 
-      String testScriptDirectory = Service.getServiceScript(service);
-      // validate that a script exists
-      //File script = new File(String.format(testScriptDirectory, service) + service + ".py");
-      File script = new File(testScriptDirectory);
-      if (script.exists()) {
+      String serviceScript = Service.getServiceScript(service);
+      if (serviceScript != null) {
         log.info("Service Has a Script: {}", service);
         numScripts++;
       } else {
@@ -166,7 +163,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
 
       //
-      if (testServiceScript(python, testScriptDirectory, service)) {
+      if (testServiceScript(python, service)) {
         // log.info("Default script for {} executes ok!", service);
         numScriptsWorky++;
       } else {
@@ -233,18 +230,14 @@ public class ServiceInterfaceTest extends AbstractTest {
     }
   }
 
-  private boolean testServiceScript(Python python, String testScriptDirectory, String service) {
+  private boolean testServiceScript(Python python, String serviceType) {
 
-    // TODO: this blows stuff up too much.
-
-    String testScriptFile = String.format(testScriptDirectory, service) + service + ".py";
-    String prefix = "virtual = True\n";
-    File script = new File(testScriptFile);
-    if (!script.exists()) {
-      log.warn("No default script for Service {}", script);
+    String testScriptFile = Service.getServiceScript(serviceType);
+    if (testScriptFile == null) {
+      log.warn("No default script for Service {}", Service.getResource(serviceType, serviceType + ".py"));
       return false;
     } else {
-      log.info("Default Script Exists for {}", service);
+      log.info("Default Script Exists for {}", serviceType);
     }
 
     return false;
