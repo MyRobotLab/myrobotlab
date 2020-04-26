@@ -110,7 +110,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   /**
    * list of names of possible controllers
    */
-  ServoController controllers = ServoController;
+  ServoController controllers = controllers;
   public List<String> controllers;
   public String controllerName;
 
