@@ -1233,6 +1233,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public boolean setVirtual(boolean virtual) {
 		super.setVirtual(virtual);
 		Platform.setVirtual(virtual);
+		speakBlocking(get("STARTINGVIRTUALHARD"));
 		return virtual;
 	}
 
@@ -1240,7 +1241,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (mouth != null) {
 			mouth.setVoice(name);
 			voiceSelected = name;
-			speakBlocking("setting voice to %s", name);
+			speakBlocking(get("SETLANG"), "%s", name);
 		}
 	}
 
