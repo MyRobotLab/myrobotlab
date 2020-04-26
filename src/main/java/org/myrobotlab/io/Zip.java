@@ -211,10 +211,12 @@ public class Zip {
 
     LoggingFactory.init(Level.INFO);
 
+      /*
     ArrayList<String> files = listDirectoryContents("myrobotlab.jar", Util.getResourceDir() + "/Python/");
     for (int i = 0; i < files.size(); ++i) {
       log.info(files.get(i));
     }
+    */
 
   }
 

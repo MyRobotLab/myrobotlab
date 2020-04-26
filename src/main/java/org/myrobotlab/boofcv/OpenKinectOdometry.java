@@ -30,7 +30,9 @@ import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.equation.Equation;
 import org.ejml.equation.Sequence;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
 import org.openkinect.freenect.DepthHandler;
@@ -100,7 +102,7 @@ public class OpenKinectOdometry {
   boolean firstVideo = true;
   boolean firstImage = true;
 
-  String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
+  String baseDir = Service.getResourceDir(BoofCv.class);
   String nameCalib = "intrinsic.yaml";
 
   Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);
@@ -232,7 +234,7 @@ public class OpenKinectOdometry {
 
     MediaManager media = DefaultMediaManager.INSTANCE;
     // String directory = UtilIO.pathExample("kinect/straight");
-    String directory = Util.getResourceDir() + File.separator + "BoofCv"+File.separator;
+    String directory = Service.getResourceDir(BoofCv.class)+File.separator;
     Log.info("Using directory ", directory);
 
     // load camera description and the video sequence

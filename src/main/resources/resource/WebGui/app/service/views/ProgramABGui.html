@@ -15,7 +15,8 @@
             <select class="btn btn-default dropdown-toggle" ng-model="currentBotName" ng-options="key as key for (key, value) in service.sessions"></select>
             <select class="btn btn-default dropdown-toggle" ng-model="currentUserName" ng-options="key as key for (key, value) in userNames"></select>
             <input class="form-control col-md-6" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(utterance)" placeholder="type here"/>
-            <button class="btn btn-default" ng-click="getSessionResponse(utterance)">Talk</button>
+            <!-- button class="btn btn-default" ng-click="getSessionResponse(utterance)">Talk</button-->
+            <button class="btn btn-default" ng-click="getSessionResponse(utterance)">reload aiml</button>
           </span>
     </div>
 </div>

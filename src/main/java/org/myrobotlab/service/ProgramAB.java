@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.alicebot.ab.AIMLMap;
 import org.alicebot.ab.AIMLSet;
@@ -85,14 +86,16 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       return str.toString();
     }
   }
+  
+  /**
+   * set of current known bots and their paths
+   */
+  Set<File> botPaths = new TreeSet<>();
 
   static final long serialVersionUID = 1L;
+  
   transient public final static Logger log = LoggerFactory.getLogger(ProgramAB.class);
-  // TODO: this path is really specific to each bot that is loaded.
-  // right now there is a requirement that all active bots are loaded from the
-  // same directory. (defaulting to ProgramAB)
-  private String path = "ProgramAB";
-  // bots map is keyed off the lower case version of the bot name.
+
   private transient HashMap<String, Bot> bots = new HashMap<String, Bot>();
   // Mapping a bot to a username and chat session
   private HashMap<String, HashMap<String, ChatData>> sessions = new HashMap<String, HashMap<String, ChatData>>();
@@ -109,10 +112,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   // TODO: if true, AIML is written back to disk on shutdown of this service.
   public boolean writeOnExit = true;
 
-  /**
-   * list of available bots - populated on startup
-   */
-  HashSet<String> availableBots = new HashSet<>();
   boolean peerSearch = true;
   private Locale locale;
   
@@ -129,7 +128,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public ProgramAB(String n, String id) {
     super(n, id);
-    availableBots = getBots();
+    // botPaths = initBotPaths();
     addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
     logPublisher = new SimpleLogPublisher(this); 
     logPublisher.filterClasses(new String[]{ "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
@@ -307,6 +306,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
+  @Deprecated
+  public String getPath() {
+    return null;
+  }
+  
   /**
    * This method specifics how many times the robot will respond with the same
    * thing before forcing a different (default?) response instead.
@@ -646,7 +650,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     startSession(getPath(), username, botName);
   }
 
+  
   public void startSession(String path, String userName, String botName) throws IOException {
+    // hacky cracky here
     startSession(path, userName, botName, MagicBooleans.defaultLocale);
   }
 
@@ -670,7 +676,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // session to attention.)
     log.info("Start Session Path: {} User: {} Bot: {} Locale: {}", path, userName, botName, locale);
     
-    File check = new File(path + fs + "bots" + fs + botName);
+    // File check = new File(path + fs + "bots" + fs + botName);
+    File check = new File(path + fs + botName);
     if (!check.exists() || !check.isDirectory()) {
       String invalid = String.format("%s could not load aiml. %s is not a valid bot directory", getName(), check.getAbsolutePath());
       error(invalid);
@@ -814,12 +821,53 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
+  
+  @Deprecated /* use addPath */
   public String setPath(String path) {
-    if (path != null && !path.equals(this.path)) {
-      this.path = path;
+    error("setPath is no longer supported - if your interested in a new chatbot add it to /data/ProgramAB/{service}/mybot");
+        
+    // legacy kludge - expects parent directory of a dir named bots instead of being
+    // explicitly path to a bot, so to work with interface we look for explicit examples
+    // if they fail, then we attempt to addPath with explicit path (new way)
+    
+    // test for silly bots directory
+    /*
+    File bots = new File(FileIO.gluePaths(path, "bots"));    
+    
+    if (bots.exists() && bots.isDirectory()) {
+      log.info("legacy - we will search the directory");    
+      File[] listOfFiles = bots.listFiles();
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+        } else if (listOfFiles[i].isDirectory()) {
+          addPath(listOfFiles[i].getAbsolutePath());
+        }
+      }
+    } else {
+      // correct way - full path
+      addPath(path);
+    }*/
+    
+    return path;
+  }
+  
+  /**
+   * Verifies and adds a new path to the search directories for bots
+   * @param path
+   * @return
+   */
+  public String addPath(String path) {
+    // verify the path is valid
+    File verify = new File(path);
+    File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
+    if (verify.exists() && verify.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
+      botPaths.add(new File(path));
       broadcastState();
+    } else {
+      error("invalid bot path - a bot must be a directory with a subdirectory named \"aiml\"");
+      return null;
     }
-    return this.path;
+    return path;
   }
 
   public void setCurrentBotName(String currentBotName) {
@@ -841,10 +889,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     broadcastState();
   }
 
-  public String getPath() {
-    return path;
-  }
-
   public String getCurrentUserName() {
     return currentUserName;
   }
@@ -859,6 +903,65 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public HashMap<String, HashMap<String, ChatData>> getSessions() {
     return sessions;
   }
+  
+  /**
+   * Initialize all known paths of a bot.  Each path is "named" by the filename 
+   * of the directory.  This is placed in a map, so there can be collisions.  Collisions
+   * are resolved by the following priority.
+   * <pre>
+   *  /resource/ProgramAB is lowest priorty
+   *  /data/ProgramAB is higher priority
+   *  /../ProgramAB/
+   * </pre>
+   * @return
+   */
+  public Set<String> initBotPaths(){
+    
+    Set<String> paths = new TreeSet<>();
+    
+    // paths are added in reverse priority order, since newly added paths replace
+    // lower priority ones
+            
+    // check for resource bots in /data/ProgramAB dir
+    File resourceBots = new File(getResourceDir());
+    
+    if (!resourceBots.exists() || !resourceBots.isDirectory()) {
+      log.info("{} does not exist !!!", resourceBots);
+      log.info("you can add a bot directory with programab.addBot(\"path/to/bot\")", resourceBots);
+    } else {
+      File[] listOfFiles = resourceBots.listFiles();
+      for (int i = 0; i < listOfFiles.length; i++) {
+        if (listOfFiles[i].isFile()) {
+        } else if (listOfFiles[i].isDirectory()) {
+          paths.add(listOfFiles[i].getAbsolutePath());
+        }
+      }
+    }
+    
+    // check for 'local' bots in /data/ProgramAB dir
+    
+    // check for dev bots
+    if (getResourceDir().startsWith("src")) {
+      log.info("in dev mode resourceDir starts with src");      
+      // automatically look in ../ProgramAB for the cloned repo
+      // look for dev paths in ../ProgramAB
+      File devRepoCheck = new File("../ProgramAB/resource/ProgramAB/bots");
+      if (devRepoCheck.exists() && devRepoCheck.isDirectory()) {
+        log.info("found repo {} adding bot paths", devRepoCheck.getAbsoluteFile());
+        File[] listOfFiles = devRepoCheck.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+          if (listOfFiles[i].isFile()) {
+          } else if (listOfFiles[i].isDirectory()) {
+            paths.add(listOfFiles[i].getAbsolutePath());
+          }
+        }
+      } else {
+        log.error("ProgramAB is a service module clone it at the same level as myrobotlab");
+      }      
+    }
+    
+    return paths;    
+  }
 
   /**
    * This method can be used to get a listing of all bots available in the bots
@@ -866,8 +969,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * 
    * @return
    */
-  public HashSet<String> getBots() {
-    HashSet<String> availableBots = new HashSet<String>();
+  public List<String> getBots() {
+    /*
+    Set<String> availableBots = new HashSet<String>();
     File programAbDir = new File(String.format("%s%sbots", getPath(), File.separator));
     if (!programAbDir.exists() || !programAbDir.isDirectory()) {
       log.info("%s does not exist !!!");
@@ -881,7 +985,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       }
     }
     return availableBots;
+    */
+    List<String> names = new ArrayList<String>();
+    for (File path: botPaths) {
+      names.add(path.getName()/*getStem*/);
+    }
+    return names;
   }
+  
 
   public void attach(Attachable attachable) {
     if (attachable instanceof TextPublisher) {
@@ -934,8 +1045,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // know they are different than the inmoov bots.
     // each bot should have their own name, it's confusing that the inmoov bots
     // are named en-US and so are the program ab bots.
-    meta.addDependency("program-ab", "program-ab-data", "1.1", "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.4");
+
+    // meta.addDependency("program-ab", "program-ab-data", "1.2", "zip");
+    // meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
+
+    meta.addDependency("program-ab", "program-ab-data", null, "zip");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
+    
     meta.addDependency("org.json", "json", "20090211");
     // used by FileIO
     meta.addDependency("commons-io", "commons-io", "2.5");
@@ -944,6 +1060,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "8.4.1");
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.4.1");
     meta.addCategory("ai", "control");
+    meta.setModular(true);
     return meta;
   }
 

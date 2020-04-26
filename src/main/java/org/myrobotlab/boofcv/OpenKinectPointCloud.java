@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
 import org.openkinect.freenect.DepthHandler;
@@ -74,7 +76,7 @@ public class OpenKinectPointCloud {
   boolean firstVideo = true;
   boolean firstImage = true;
 
-  String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
+  String baseDir = Service.getResourceDir(BoofCv.class);
   String nameCalib = "intrinsic.yaml";
 
   Planar<GrayU8> rgb = new Planar<>(GrayU8.class, 1, 1, 3);

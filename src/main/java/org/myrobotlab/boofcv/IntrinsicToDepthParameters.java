@@ -18,15 +18,15 @@
 
 package org.myrobotlab.boofcv;
 
-import boofcv.io.UtilIO;
+import java.io.File;
+
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.BoofCv;
+
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.calib.CameraPinholeRadial;
 import boofcv.struct.calib.VisualDepthParameters;
-
-import java.io.File;
-
-import org.myrobotlab.image.Util;
 
 /**
  * Loads an intrinsic parameters file for the RGB camera and creates a
@@ -38,7 +38,7 @@ public class IntrinsicToDepthParameters {
 
   public static void main(String args[]) {
     // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
+    String baseDir = Service.getResourceDir(BoofCv.class); 
 
     CameraPinholeRadial intrinsic = CalibrationIO.load(new File(baseDir, "intrinsic.yaml"));
 

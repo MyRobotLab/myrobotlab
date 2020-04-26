@@ -1542,12 +1542,12 @@ public class Arduino extends AbstractMicrocontroller
 
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
-        mrlCommFiles = Util.getResourceDir() + "/Arduino/MrlComm";
+        mrlCommFiles = getResourceDir() + "/Arduino/MrlComm";
         // FIXME - don't do this every time :P
-        Zip.extractFromSelf(Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm", "resource/Arduino/MrlComm");
+        Zip.extractFromSelf(getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm", "resource/Arduino/MrlComm");
       } else {
         // running in IDE ?
-        mrlCommFiles = Util.getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm";
+        mrlCommFiles = getResourceDir() + File.separator + "Arduino" + File.separator + "MrlComm";
       }
       File mrlCommDir = new File(mrlCommFiles);
       if (!mrlCommDir.exists() || !mrlCommDir.isDirectory()) {
