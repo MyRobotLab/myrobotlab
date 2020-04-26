@@ -94,13 +94,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   transient public ServoControl pinky;
   transient public ServoControl ringFinger;
 
-    /**
-   * list of names of possible controllers
-   */
-  public List<String> controllers;
-  public String controllerName;
-
-  boolean isAttached = false;
 
   // The pins for the finger tip sensors
   public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
@@ -157,41 +150,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
-  }
-
-  public void onRegistered(Registration s) {
-    refreshControllers();
-    broadcastState();
-  }
-
-  public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-    return controllers;
-  }
-
-  // @Override
-  public ServoController getController() {
-    return controller;
-  }
-
-  public String getControllerName() {
-    String controlerName = null;
-    if (controller != null) {
-      controlerName = controller.getName();
-    }
-    return controlerName;
-  }
-
-  public boolean isAttached() {
-    if (controller != null) {
-      if (((Arduino) controller).getDeviceId((Attachable) this) != null) {
-        isAttached = true;
-        return true;
-      }
-      controller = null;
-    }
-    isAttached = false;
-    return false;
   }
 
   @Override
