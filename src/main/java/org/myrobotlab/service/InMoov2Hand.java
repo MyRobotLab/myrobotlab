@@ -49,7 +49,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     meta.addPeer("ringFinger", "Servo", "RingFinger servo");
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+    meta.addPeer("arduino", "Arduino", "Arduino controller for this hand");
     meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
 
     return meta;
@@ -94,6 +94,14 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   transient public ServoControl pinky;
   transient public ServoControl ringFinger;
 
+    /**
+   * list of names of possible controllers
+   */
+  public List<String> controllers;
+  public String controllerName;
+
+  boolean isAttached = false;
+
   // The pins for the finger tip sensors
   public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
   // public int[] sensorLastValues = new int[] {0,0,0,0,0};
@@ -120,12 +128,13 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     pinky.setPin(6);
     wrist.setPin(7);
     
+    /*
     thumb.setSensorPin(A0);
     index.setSensorPin(A1);
     majeure.setSensorPin(A2);
     ringFinger.setSensorPin(A3);
     pinky.setSensorPin(A4);
-
+    */
 
     // TOOD: what are the initial velocities?
     // Initial rest positions?
@@ -148,6 +157,41 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
+  }
+
+  public void onRegistered(Registration s) {
+    refreshControllers();
+    broadcastState();
+  }
+
+  public List<String> refreshControllers() {
+    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    return controllers;
+  }
+
+  // @Override
+  public ServoController getController() {
+    return controller;
+  }
+
+  public String getControllerName() {
+    String controlerName = null;
+    if (controller != null) {
+      controlerName = controller.getName();
+    }
+    return controlerName;
+  }
+
+  public boolean isAttached() {
+    if (controller != null) {
+      if (((Arduino) controller).getDeviceId((Attachable) this) != null) {
+        isAttached = true;
+        return true;
+      }
+      controller = null;
+    }
+    isAttached = false;
+    return false;
   }
 
   @Override
@@ -471,15 +515,17 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     pinky.setPin(pinkyPin);
     wrist.setPin(wristPin);
   }
-  
+
   public void setSensorPins(int thumbSensorPin, int indexSensorPin, int majeureSensorPin, int ringFingerSensorPin, int pinkySensorPin) {
     log.info("setSensorPins {} {} {} {} {}", thumbSensorPin, indexSensorPin, majeureSensorPin, ringFingerSensorPin, pinkySensorPin);
+    /*
     thumb.setSensorPin(thumbSensorPin);
     index.setSensorPin(indexSensorPin);
     majeure.setSensorPin(majeureSensorPin);
     ringFinger.setSensorPin(ringFingerSensorPin);
     pinky.setSensorPin(pinkySensorPin);
-  }
+    */
+  }  
 
   public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
     setRest(thumb, index, majeure, ringFinger, pinky, null);
