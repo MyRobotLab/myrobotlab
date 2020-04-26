@@ -161,6 +161,41 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
   }
+  
+  public void onRegistered(Registration s) {
+    refreshControllers();
+    broadcastState();
+  }
+
+  public List<String> refreshControllers() {
+    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    return controllers;
+  }
+
+  // @Override
+  public ServoController getController() {
+    return controller;
+  }
+
+  public String getControllerName() {
+    String controlerName = null;
+    if (controller != null) {
+      controlerName = controller.getName();
+    }
+    return controlerName;
+  }
+
+  public boolean isAttached() {
+    if (controller != null) {
+      if (((Arduino) controller).getDeviceId((Attachable) this) != null) {
+        isAttached = true;
+        return true;
+      }
+      controller = null;
+    }
+    isAttached = false;
+    return false;
+  }  
 
   @Override
   public void broadcastState() {
@@ -338,6 +373,53 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void one() {
     moveTo(150.0, 0.0, 180.0, 180.0, 180.0, 90.0);
   }
+  
+  public void attach(String controllerName, int sensorPin) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), sensorPin);
+  }
+
+  public void attach(String controllerName, String sensorPin) throws Exception {
+    attach((ServoController) Runtime.getService(controllerName), Integer.parseInt(sensorPin));
+  }
+
+  @Override
+  public void attach(ServoController controller, int sensorPin) {
+    if (controller == null) {
+      error("setting null as controller");
+      return;
+    }
+    if (isAttached) {
+      log.info("Sensor already attached");
+      return;
+    }
+
+    this.sensorPin = sensorPin;
+
+    controller.attach(this, sensorPin);
+
+    log.info("{} setController {}", getName(), controller.getName());
+    this.controller = controller;
+    controllerName = this.controller.getName();
+    isAttached = true;
+    broadcastState();
+  }
+
+  @Override
+  public void detach(ServoController controller) {
+    // let the controller you want to detach this device
+    if (controller != null) {
+      controller.detach(this);
+    }
+    // setting controller reference to null
+    this.controller = null;
+    isAttached = false;
+    refreshControllers();
+    broadcastState();
+  }
+
+  public void refresh() {
+    broadcastState();
+  }  
 
   @Override
   public LeapData onLeapData(LeapData data) {
@@ -614,5 +696,25 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     pinky.waitTargetPos();
     wrist.waitTargetPos();
   }
+  
+  @Override
+  public void detach(String controllerName) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean isAttached(String name) {
+    return controller != null && name.equals(controller.getName());
+  }
+
+  @Override
+  public Set<String> getAttached() {
+    Set<String> ret = new HashSet<String>();
+    if (controller != null) {
+      ret.add(controller.getName());
+    }
+    return ret;
+  }  
 
 }
