@@ -14,6 +14,7 @@ import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.slf4j.Logger;
 
 /**
@@ -90,7 +91,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
    * peer services
    */
   transient public LeapMotion leap;
-  transient public ServoController controller;
+  transient public NeoPixelController controller;
   transient public ServoControl thumb;
   transient public ServoControl index;
   transient public ServoControl majeure;
@@ -168,12 +169,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+    controllers = Runtime.getServiceNamesFromInterface(NeoPixelController.class);
     return controllers;
   }
 
   // @Override
-  public ServoController getController() {
+  public NeoPixelController getController() {
     return controller;
   }
 
@@ -383,7 +384,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   @Override
-  public void attach(ServoController controller, int sensorPin) {
+  public void attach(NeoPixelController controller, int sensorPin) {
     if (controller == null) {
       error("setting null as controller");
       return;
@@ -405,7 +406,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   @Override
-  public void detach(ServoController controller) {
+  public void detach(NeoPixelController controller) {
     // let the controller you want to detach this device
     if (controller != null) {
       controller.detach(this);
