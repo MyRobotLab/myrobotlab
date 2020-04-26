@@ -14,7 +14,6 @@ import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.slf4j.Logger;
 
 /**
@@ -91,7 +90,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
    * peer services
    */
   transient public LeapMotion leap;
-  transient public NeoPixelController controller;
+  transient public ServoController controller;
   transient public ServoControl thumb;
   transient public ServoControl index;
   transient public ServoControl majeure;
@@ -111,7 +110,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   /**
    * list of names of possible controllers
    */
-  controllers = controllers;
+  ServoController controllers = ServoController;
   public List<String> controllers;
   public String controllerName;
 
@@ -170,12 +169,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public List<String> refreshControllers() {
-    controllers = Runtime.getServiceNamesFromInterface(NeoPixelController.class);
+    controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
     return controllers;
   }
 
   // @Override
-  public NeoPixelController getController() {
+  public ServoController getController() {
     return controller;
   }
 
@@ -385,7 +384,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   @Override
-  public void attach(NeoPixelController controller, int sensorPin) {
+  public void attach(ServoController controller, int sensorPin) {
     if (controller == null) {
       error("setting null as controller");
       return;
@@ -407,7 +406,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   @Override
-  public void detach(NeoPixelController controller) {
+  public void detach(ServoController controller) {
     // let the controller you want to detach this device
     if (controller != null) {
       controller.detach(this);
