@@ -85,14 +85,18 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       log.error("main threw", e);
     }
   }
-  transient public ServoControl index;
+
   /**
    * peer services
    */
   transient public LeapMotion leap;
+  transient public ServoController controller;
+  transient public ServoControl thumb;
+  transient public ServoControl index;
   transient public ServoControl majeure;
-  transient public ServoControl pinky;
   transient public ServoControl ringFinger;
+  transient public ServoControl pinky;
+  transient public ServoControl wrist;
 
 
   // The pins for the finger tip sensors
@@ -101,9 +105,15 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public boolean sensorsEnabled = false;
   public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
 
-  transient public ServoControl thumb;
 
-  transient public ServoControl wrist;
+  
+  /**
+   * list of names of possible controllers
+   */
+  public List<String> controllers;
+  public String controllerName;
+
+  boolean isAttached = false;  
 
   public InMoov2Hand(String n, String id) {
     super(n, id);
