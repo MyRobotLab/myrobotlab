@@ -42,7 +42,9 @@ import com.sun.jna.NativeLibrary;
 
 import org.ddogleg.struct.FastQueue;
 import org.ddogleg.struct.GrowQueue_I8;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.Device;
 import org.openkinect.freenect.Freenect;
@@ -75,9 +77,9 @@ public class ExampleDepthPointCloud {
   public static void main(String args[]) throws IOException {
 
     // String baseDir = "src/main/resources/resource/BoofCv";
-    String nameRgb = Util.getResourceDir() + File.separator + "BoofCv/basket_rgb.png";
-    String nameDepth = Util.getResourceDir() + File.separator + "BoofCv/basket_depth.png";
-    String nameCalib = Util.getResourceDir() + File.separator + "BoofCv/visualdepth.yaml";
+    String nameRgb = Service.getResourceDir(BoofCv.class, "basket_rgb.png");
+    String nameDepth = Service.getResourceDir(BoofCv.class, "basket_depth.png");
+    String nameCalib = Service.getResourceDir(BoofCv.class, "visualdepth.yaml");
 
     VisualDepthParameters param = CalibrationIO.load(nameCalib);
 

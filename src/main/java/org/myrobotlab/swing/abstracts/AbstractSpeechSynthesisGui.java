@@ -47,7 +47,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 
-import org.myrobotlab.image.Util;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.Runtime;
@@ -63,10 +63,10 @@ public abstract class AbstractSpeechSynthesisGui extends ServiceGui implements A
   // FIXME - SSML - adding combo box effects adds tags
   public final static Logger log = LoggerFactory.getLogger(AbstractSpeechSynthesisGui.class);
 
-  JButton speakButton = new JButton(new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "Speech.png"))));
+  JButton speakButton = new JButton(new ImageIcon(ImageIO.read(new File(Service.getResourceRoot() + File.separator + "Speech.png"))));
 
-  ImageIcon readyOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "green.png")));
-  ImageIcon readyNOK = new ImageIcon(ImageIO.read(new File(Util.getResourceDir() + File.separator + "red.png")));
+  ImageIcon readyOK = new ImageIcon(ImageIO.read(new File(Service.getResourceRoot() + File.separator + "green.png")));
+  ImageIcon readyNOK = new ImageIcon(ImageIO.read(new File(Service.getResourceRoot() + File.separator + "red.png")));
 
   JLabel speakingState = new JLabel("not speaking");
   JLabel isReadyIcon = new JLabel(readyNOK, JLabel.CENTER);

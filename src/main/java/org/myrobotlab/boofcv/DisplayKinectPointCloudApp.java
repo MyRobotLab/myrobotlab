@@ -18,10 +18,17 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.Dimension;
+import java.io.File;
+import java.io.IOException;
+
+import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.BoofCv;
+
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.gui.image.ShowImages;
-import boofcv.io.UtilIO;
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.FastQueueArray_I32;
@@ -33,12 +40,6 @@ import boofcv.struct.image.Planar;
 import boofcv.visualize.PointCloudViewer;
 import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point3D_F64;
-import org.ddogleg.struct.FastQueue;
-import org.myrobotlab.image.Util;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Loads kinect data from two files and displays the cloud in a 3D simple
@@ -50,7 +51,7 @@ public class DisplayKinectPointCloudApp {
 
   public static void main(String args[]) throws IOException {
     // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = Util.getResourceDir() + File.separator + "BoofCv";
+    String baseDir = Service.getResourceDir(BoofCv.class);
     String nameRgb = "basket_rgb.png";
     String nameDepth = "basket_depth.png";
     String nameCalib = "intrinsic.yaml";

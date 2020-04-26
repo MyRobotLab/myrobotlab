@@ -8,9 +8,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Arduino;
 import org.slf4j.Logger;
 
 public class ArduinoUtils {
@@ -76,14 +78,9 @@ public class ArduinoUtils {
    *           - if interrupted.
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
-    FileIO.extractResources();
-    String sketchFilename = Util.getResourceDir() + File.separator + "Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
+    FileIO.extractResources(); 
+    String sketchFilename = Service.getResourceDir(Arduino.class, "MRLComm/MRLComm.ino");
     File sketch = new File(sketchFilename);
-    if (!sketch.exists()) {
-      // trying to use development version
-      sketchFilename = Util.getResourceDir()+File.separator+"Arduino"+File.separator+"MRLComm"+File.separator+"MRLComm.ino";
-      sketch = new File(sketchFilename);
-    }
     // Create the command to run (and it's args.)
     String arduinoExe = arduinoPath + getExeName();
     ArrayList<String> args = new ArrayList<String>();
