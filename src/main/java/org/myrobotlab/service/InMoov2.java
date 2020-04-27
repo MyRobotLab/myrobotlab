@@ -1287,7 +1287,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		startMouth();
 		startBrain();
 
-		startHeadTracking();
+		// startHeadTracking();
 		// startEyesTracking();
 		// startOpenCV();
 		startEar();
@@ -1880,9 +1880,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
 		jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
 		
-		//We set the correct location view
-		jme.cameraLookAt(getName() + ".torso.lowStom");
-
 		//We set the correct location view
 		jme.cameraLookAt(getName() + ".torso.lowStom");
 
