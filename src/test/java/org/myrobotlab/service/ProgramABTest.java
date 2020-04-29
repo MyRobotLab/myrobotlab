@@ -1,20 +1,24 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.Map;
 
+import org.alicebot.ab.Bot;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
@@ -148,7 +152,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // pikachu the service.
     pikachu.startService();
     // load the bot brain for the chat with the user
-    pikachu.startSession(path, username, "pikachu", new Locale("ja"));
+    pikachu.startSession(path, username, "pikachu", new java.util.Locale("ja"));
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
     pikachu.releaseService();
@@ -307,6 +311,33 @@ public class ProgramABTest extends AbstractServiceTest {
     Response resp = testService.getResponse(username, "Lars Ümlaüt");
     // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
+  }
+  
+  @Test
+  public void newTests() throws IOException {
+    // minimal startup - create the service get a response
+    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
+    assertTrue(alice.getBots().size() > 0);
+    
+    Response response = alice.getResponse("Hello");
+    assertTrue(!response.msg.startsWith("I have no"));
+    
+    Map<String,Locale> locales = alice.getLocales();
+    assertTrue(locales.size() > 0);
+    
+    BotInfo botInfo = alice.getBotInfo();
+    Bot oldBot = botInfo.getBot();
+    
+    alice.reload();
+    
+    Bot newBotInfo = botInfo.getBot();
+    
+    assertNotEquals(oldBot, newBotInfo);
+    
+    // not sure if this is worth testing - there might be more
+    // assertEquals("Alice", alice.getCurrentBotName());
+    assertEquals("default", alice.getCurrentUserName());
+
   }
   
   // ProgramAB starts - it should find its own bot info's
