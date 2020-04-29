@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.ProgramAB.Response;
+import org.myrobotlab.programab.Response;
 import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
@@ -308,5 +308,23 @@ public class ProgramABTest extends AbstractServiceTest {
     // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
-
+  
+  // ProgramAB starts - it should find its own bot info's
+  // set username = default
+  // set botname = what is available if NOT set
+  // getResponse() -> if current session doesn't exist - get bot
+      // if current bot doesn't exist - attempt to activate it
+  
+  // reload bot creates a new bot leaves old references :(
+  
+  // test - absolute minimal setup and getResponse ... 2 lines ? 1?  
+  // test - setting direct location addBotInfo(path)
+  // test adding new bots from new locations
+  // test mrl.properties - and the lack of those properties
+  // test - make sure Locale comes through to gui 
+  // verify predicates are being used
+  // check reload session !
+  // verify conversation starter
+  // verify inactivity conversation trolling
+  
 }

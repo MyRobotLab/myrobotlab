@@ -1,11 +1,12 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -17,7 +18,7 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
-import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.programab.Response;
 
 // @Ignore
 public class SolrTest extends AbstractServiceTest {
@@ -114,7 +115,7 @@ public class SolrTest extends AbstractServiceTest {
     
     Assert.assertEquals(1, resp.getResults().getNumFound());
     
-    ProgramAB.Response programABResponse = new ProgramAB.Response("joe", "lloyd", "this is a test response.", null, new Date());
+    Response programABResponse = new Response("joe", "lloyd", "this is a test response.", null);
     solr.onResponse(programABResponse);
     
     // what other ones?
