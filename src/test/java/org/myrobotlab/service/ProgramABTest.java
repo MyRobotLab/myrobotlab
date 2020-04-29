@@ -344,7 +344,6 @@ public class ProgramABTest extends AbstractServiceTest {
   public void testDefaultSession() throws IOException {
     // minimal startup - create the service get a response
     ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
-    alice.setPath(path);
     assertTrue(alice.getBots().size() > 0);
     
     // test for a response
