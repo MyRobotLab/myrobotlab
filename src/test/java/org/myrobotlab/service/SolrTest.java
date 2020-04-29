@@ -1,6 +1,6 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.io.IOException;
