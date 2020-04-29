@@ -117,7 +117,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
         addBotPath(file.getAbsolutePath());
       }
     } else {
-      // 2. runtime loading 
+      // 2. runtime loading
       // copy any bot in "resource/ProgramAB/{botName}" not found in
       // "data/ProgramAB/{botName}"
       for (File file : resourceBots) {
@@ -307,7 +307,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return response;
   }
 
-  @Deprecated /* should not be needed */
   private Bot getBot(String botName) {
     return bots.get(botName).getBot();
   }
@@ -587,17 +586,22 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          Japanese support) FIXME - local is defined in the bot,
    *          specifically config/mrl.properties
    * @throws IOException
+   * 
+   *           reasons to deprecate:
+   *           
+   *           1. I question the need to expose this externally at all - if the
+   *           user uses getResponse(username, botname, text) then a session can
+   *           be auto-started - there is really no reason not to auto-start.
+   * 
+   *           2. path is completely invalid here 
+   *           
+   *           3. Locale is completely
+   *           invalid - it is now part of the bot description in mrl.properties
+   *           and shouldn't be defined externally, unles its pulled from
+   *           Runtime
    */
 
-  @Deprecated /*
-               * 1. I question the need to expose this externally at all - if
-               * the user uses getResponse(username, botname, text) then a
-               * session can be auto-started - there is really no reason not to
-               * auto-start. 2. path is completely invalid here 3. Locale is
-               * completely invalid - it is now part of the bot description in
-               * mrl.properties and shouldn't be defined externally, unles its
-               * pulled from Runtime
-               */
+  @Deprecated /* use startSession(String userName, String botName) */
   public Session startSession(@Deprecated String path, String userName, String botName, @Deprecated java.util.Locale locale) {
 
     /*
@@ -916,7 +920,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     // meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
 
     meta.addDependency("program-ab", "program-ab-data", null, "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.6");
 
     meta.addDependency("org.json", "json", "20090211");
     // used by FileIO
@@ -982,8 +986,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   @Override
   public Map<String, Locale> getLocales() {
-    // FIXME should be based on bots found ???
-    return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
+
+    Map<String, Locale> ret = new TreeMap<>();
+    for (BotInfo botInfo : bots.values()) {
+      ret.put(botInfo.locale.getTag(), botInfo.locale);
+    }
+    // return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL",
+    // "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
+    return ret;
   }
 
   @Override
@@ -993,6 +1003,15 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   public BotInfo getBotInfo() {
     return getBotInfo(currentBotName);
+  }
+
+  /**
+   * reload current session
+   * 
+   * @throws IOException
+   */
+  public void reload() throws IOException {
+    reloadSession(getCurrentUserName(), getCurrentBotName());
   }
 
 }

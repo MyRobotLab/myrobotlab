@@ -1,151 +1,151 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<!-- 
-		# configure jvm and javac
-		sudo update-alternatives (minus minus) config java
-		sudo update-alternatives (minus minus) config javac 
-		export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-		export PATH=$JAVA_HOME/bin:$PATH
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <!-- 
+    # configure jvm and javac
+    sudo update-alternatives (minus minus) config java
+    sudo update-alternatives (minus minus) config javac 
+    export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+    export PATH=$JAVA_HOME/bin:$PATH
 
-		# shows system vars and env vars
-		mvn -DskipTests -Dbuild.number=71 help:system
-		
-		# fast build
-		mvn -DskipTests -Dbuild.number=180 compile package -o
-		
-		# javadoc check
-		mvn -q javadoc:javadoc -o
-		
-		# proxy
-		-Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
-	
-	 -->	
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.myrobotlab</groupId>
-	<artifactId>mrl</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>MyRobotLab</name>
-	<description>Open Source Creative Machine Control</description>
-	<properties>
-	    <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
-	    <dependency.locations.enabled>false</dependency.locations.enabled>
-	    <!-- begin env vars -->
-	    <!-- 
-	    	global build number comes either from a local build.properties file,
-	    	or the build.properties is replaced by a curl command
-	    	curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
-	    	maven or jenkins can do this
-	    	
-	     -->
-	    <!-- from jenkins env vars -->
-	    <build.number>${BUILD_NUMBER}</build.number>
-	    <GitBranch>${git.branch}</GitBranch>
-	    <username>${NODE_NAME}</username>	    
-	    <platform>${NODE_LABELS}</platform>	    
-	    <!-- end env vars -->
-	    <!-- echoproperties / -->
-	    
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    # shows system vars and env vars
+    mvn -DskipTests -Dbuild.number=71 help:system
+    
+    # fast build
+    mvn -DskipTests -Dbuild.number=180 compile package -o
+    
+    # javadoc check
+    mvn -q javadoc:javadoc -o
+    
+    # proxy
+    -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+  
+   -->  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.myrobotlab</groupId>
+  <artifactId>mrl</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>MyRobotLab</name>
+  <description>Open Source Creative Machine Control</description>
+  <properties>
+      <!-- TODO all manually set manifest properties here e.g. <build.number>${env.BUILD_NUMBER} - for clarity !!!! -->
+      <dependency.locations.enabled>false</dependency.locations.enabled>
+      <!-- begin env vars -->
+      <!-- 
+        global build number comes either from a local build.properties file,
+        or the build.properties is replaced by a curl command
+        curl http://build.myrobotlab.org:8888/getBuildNumber?branch=develop > build.properties
+        maven or jenkins can do this
+        
+       -->
+      <!-- from jenkins env vars -->
+      <build.number>${BUILD_NUMBER}</build.number>
+      <GitBranch>${git.branch}</GitBranch>
+      <username>${NODE_NAME}</username>      
+      <platform>${NODE_LABELS}</platform>      
+      <!-- end env vars -->
+      <!-- echoproperties / -->
+      
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-	</properties>
-	
-{{repositories}}	
-	
-	
+  </properties>
+  
+{{repositories}}  
+  
+  
 {{dependencies}}
-	
-	<build>
-		<resources>
-			<resource>
-				<filtering>false</filtering>
-				<directory>src/main/resources</directory>
-			</resource>
-			<resource>
-				<filtering>false</filtering>
-				<directory>src/main/java</directory>
-				<includes>
-					<include>**</include>
-				</includes>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<filtering>false</filtering>
-				<directory>src/test/resources</directory>
-			</testResource>
-			<testResource>
-				<filtering>false</filtering>
-				<directory>src/test/java</directory>
-				<includes>
-					<include>**</include>
-				</includes>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</testResource>
-		</testResources>
+  
+  <build>
+    <resources>
+      <resource>
+        <filtering>false</filtering>
+        <directory>src/main/resources</directory>
+      </resource>
+      <resource>
+        <filtering>false</filtering>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <filtering>false</filtering>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <filtering>false</filtering>
+        <directory>src/test/java</directory>
+        <includes>
+          <include>**</include>
+        </includes>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
 
-		<!-- define the plugin -->
-	    <pluginManagement>
-	      <plugins>
-	        <plugin>
-	          <groupId>org.codehaus.mojo</groupId>
-	          <artifactId>properties-maven-plugin</artifactId>
-	          <version>1.0.0</version>
-	        </plugin>
-	      </plugins>
-	    </pluginManagement>
-	
-	        <!-- use plugin -->
-			<plugins>
-			
-			<plugin>
-	        <groupId>org.codehaus.mojo</groupId>
-	        <artifactId>properties-maven-plugin</artifactId>        
-	        <executions>
-	          <execution>
-	            <phase>initialize</phase>
-	            <goals>
-	              <goal>read-project-properties</goal>
-	            </goals>
-	            <configuration>
-	              <files>
-	                <file>build.properties</file>
-	              </files>
-	            </configuration>
-	          </execution>
-	        </executions>
-	      </plugin>
-	
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
-				<executions>
-					<execution>
-						<id>service-data-execution</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
-					<classpathScope>test</classpathScope>
-					<arguments>
-						<!-- TODO: fix this with the proper location -->
-			            <argument>target/classes/resource/framework</argument>
-          			</arguments>
-				</configuration>
-			</plugin>
-		
-			<plugin>
+    <!-- define the plugin -->
+      <pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>properties-maven-plugin</artifactId>
+            <version>1.0.0</version>
+          </plugin>
+        </plugins>
+      </pluginManagement>
+  
+          <!-- use plugin -->
+      <plugins>
+      
+      <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>        
+          <executions>
+            <execution>
+              <phase>initialize</phase>
+              <goals>
+                <goal>read-project-properties</goal>
+              </goals>
+              <configuration>
+                <files>
+                  <file>build.properties</file>
+                </files>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+  
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <executions>
+          <execution>
+            <id>service-data-execution</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
+          <classpathScope>test</classpathScope>
+          <arguments>
+            <!-- TODO: fix this with the proper location -->
+                  <argument>target/classes/resource/framework</argument>
+                </arguments>
+        </configuration>
+      </plugin>
+    
+      <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.0</version>
@@ -172,36 +172,36 @@
                                           <Main-Class>org.myrobotlab.service.Agent</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
                                           <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
-							
-									      <Build-Version>${build.number}</Build-Version>
-									      <Build-Time>${maven.build.timestamp}</Build-Time>
-									      <Build-Host>${agent.name}</Build-Host>
-									      <Build-User>${user.name}</Build-User>
-									      
-										<!-- maven git plugin id info -->
-										  <GitTags>${git.tags}</GitTags>
-										  <GitBranch>${git.branch}</GitBranch>
-										  <GitDirty>${git.dirty}</GitDirty>
-										  <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
-										  <GitCommitId>${git.commit.id}</GitCommitId>
-										  <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
-										  <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
-										  <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
-										  <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
-										  <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
-										  <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
-										  <!-- removed because multi-line value can break manifest
-										    GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull 										    
-										  <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
-										  -->
-										  <GitCommitTime>${git.commit.time}</GitCommitTime>
-										  <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
-										  <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
-										  <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
-										  <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
-										  <GitBuildTime>${git.build.time}</GitBuildTime>
-										  <GitBuildVersion>${git.build.version}</GitBuildVersion>									      
-									      
+              
+                        <Build-Version>${build.number}</Build-Version>
+                        <Build-Time>${maven.build.timestamp}</Build-Time>
+                        <Build-Host>${agent.name}</Build-Host>
+                        <Build-User>${user.name}</Build-User>
+                        
+                    <!-- maven git plugin id info -->
+                      <GitTags>${git.tags}</GitTags>
+                      <GitBranch>${git.branch}</GitBranch>
+                      <GitDirty>${git.dirty}</GitDirty>
+                      <GitRemoteOriginUrl>${git.remote.origin.url}</GitRemoteOriginUrl>
+                      <GitCommitId>${git.commit.id}</GitCommitId>
+                      <GitCommitIdAbbrev>${git.commit.id.abbrev}</GitCommitIdAbbrev>
+                      <GitCommitIdFull>${git.commit.id.full}</GitCommitIdFull>
+                      <GitCommitIdDescribe>${git.commit.id.describe}</GitCommitIdDescribe>
+                      <GitCommitIdDescribeShort>${git.commit.id.describe-short}</GitCommitIdDescribeShort>
+                      <GitCommitUserName>${git.commit.user.name}</GitCommitUserName>
+                      <GitCommitUserEmail>${git.commit.user.email}</GitCommitUserEmail>
+                      <!-- removed because multi-line value can break manifest
+                        GitCommitMessageFull>${git.commit.message.full}</GitCommitMessageFull                         
+                      <GitCommitMessageShort>${git.commit.message.short}</GitCommitMessageShort>
+                      -->
+                      <GitCommitTime>${git.commit.time}</GitCommitTime>
+                      <GitClosestTagName>${git.closest.tag.name}</GitClosestTagName>
+                      <GitClosestTagCommitCount>${git.closest.tag.commit.count}</GitClosestTagCommitCount>
+                      <GitBuildUserName>${git.build.user.name}</GitBuildUserName>
+                      <GitBuildUserEmail>${git.build.user.email}</GitBuildUserEmail>
+                      <GitBuildTime>${git.build.time}</GitBuildTime>
+                      <GitBuildVersion>${git.build.version}</GitBuildVersion>                        
+                        
                                         </manifestEntries>                                    
                                 </transformer>
                             </transformers>
@@ -219,156 +219,156 @@
                     </execution>
                 </executions>
             </plugin>
-		
-			<plugin>
-				<inherited>true</inherited>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<optimize>true</optimize>
-					<debug>true</debug>
-					<compilerArgument>-parameters</compilerArgument>					
-				</configuration>
-			</plugin>
+    
+      <plugin>
+        <inherited>true</inherited>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <optimize>true</optimize>
+          <debug>true</debug>
+          <compilerArgument>-parameters</compilerArgument>          
+        </configuration>
+      </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.8</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
-				</configuration>
-			</plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <version>2.8</version>
+        <configuration>
+          <downloadSources>true</downloadSources>
+        </configuration>
+      </plugin>
 
-			<!-- -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.3</version>
-			</plugin>
+      <!-- -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.3</version>
+      </plugin>
 
-			<plugin>
-			    <groupId>pl.project13.maven</groupId>
-			    <artifactId>git-commit-id-plugin</artifactId>
-			    <version>3.0.1</version>
-			    <executions>
-			        <execution>
-			            <id>get-the-git-infos</id>
-			            <goals>
-			                <goal>revision</goal>
-			            </goals>
-			        </execution>
-			    </executions>
-			    <configuration>
-			        <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-			        <prefix>git</prefix>
-			        <verbose>false</verbose>
-			        <generateGitPropertiesFile>true</generateGitPropertiesFile>
-			        <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-			        <format>json</format>
-			        <gitDescribe>
-			            <skip>false</skip>
-			            <always>false</always>
-			            <dirty>-dirty</dirty>
-			        </gitDescribe>
-			    </configuration>
-			</plugin>					
+      <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+              <execution>
+                  <id>get-the-git-infos</id>
+                  <goals>
+                      <goal>revision</goal>
+                  </goals>
+              </execution>
+          </executions>
+          <configuration>
+              <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+              <prefix>git</prefix>
+              <verbose>false</verbose>
+              <generateGitPropertiesFile>true</generateGitPropertiesFile>
+              <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+              <format>json</format>
+              <gitDescribe>
+                  <skip>false</skip>
+                  <always>false</always>
+                  <dirty>-dirty</dirty>
+              </gitDescribe>
+          </configuration>
+      </plugin>          
 
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<!-- <configuration> <skip>true</skip> </configuration> -->
-				<configuration>
-					<argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
-					<includes>
-						<include>**/*Test.java</include>
-					</includes>
-					<excludes>
-						<exclude>**/integration/*</exclude>
-					</excludes>
-					   <systemPropertyVariables>
-					        <!-- 
-      						<propertyName>java.library.path</propertyName>
-      						<buildDirectory>libraries/native</buildDirectory>
-      						<propertyName>jna.library.path</propertyName>
-      						<buildDirectory>libraries/native</buildDirectory>
-      						 -->
-    					</systemPropertyVariables>
-				</configuration>
-				<version>2.9</version>
-			</plugin>
-			<!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.3</version>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <!-- <configuration> <skip>true</skip> </configuration> -->
+        <configuration>
+          <argLine>-Djava.library.path=libraries/native -Djna.library.path=libraries/native ${argLine}</argLine>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/integration/*</exclude>
+          </excludes>
+             <systemPropertyVariables>
+                  <!-- 
+                  <propertyName>java.library.path</propertyName>
+                  <buildDirectory>libraries/native</buildDirectory>
+                  <propertyName>jna.library.path</propertyName>
+                  <buildDirectory>libraries/native</buildDirectory>
+                   -->
+              </systemPropertyVariables>
+        </configuration>
+        <version>2.9</version>
+      </plugin>
+      <!-- This plugin deletes the .myrobotlab on a build also the target directory from previous builds -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.3</version>
                 <configuration>
                   <filesets>
                     <fileset>
                       <directory>data/.myrobotlab</directory>
                       <followSymlinks>false</followSymlinks>
-				    </fileset>
-					<fileset>
-						<directory>libraries</directory>
-						<includes>
-							<include>repo.json</include>
-						</includes>
-						<followSymlinks>false</followSymlinks>
-					</fileset>
-					<fileset>
-						<directory>src/main/resources/resource/framework</directory>
-						<includes>
-							<include>**/serviceData.json</include>
-						</includes>
-						<followSymlinks>false</followSymlinks>
-					</fileset>
+            </fileset>
+          <fileset>
+            <directory>libraries</directory>
+            <includes>
+              <include>repo.json</include>
+            </includes>
+            <followSymlinks>false</followSymlinks>
+          </fileset>
+          <fileset>
+            <directory>src/main/resources/resource/framework</directory>
+            <includes>
+              <include>**/serviceData.json</include>
+            </includes>
+            <followSymlinks>false</followSymlinks>
+          </fileset>
                   </filesets>
                 </configuration>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
-				<executions>
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>post-unit-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-						<configuration>
-							<!-- Sets the path to the file which contains the execution data. -->
-							<dataFile>target/jacoco.exec</dataFile>
-							<!-- Sets the output directory for the code coverage report. -->
-							<outputDirectory>target/jacoco-ut</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
-			</plugin>
-			
-		</plugins>
-	</build>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.7.9</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>post-unit-test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <!-- Sets the path to the file which contains the execution data. -->
+              <dataFile>target/jacoco.exec</dataFile>
+              <!-- Sets the output directory for the code coverage report. -->
+              <outputDirectory>target/jacoco-ut</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <systemPropertyVariables>
+            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      
+    </plugins>
+  </build>
     <reporting>    
     <plugins>
       <plugin>
@@ -383,12 +383,12 @@
       </plugin>
     </plugins>
     </reporting>
-	<organization>
-		<name>myrobotlab</name>
-		<url>http://myrobotlab.org</url>
-	</organization>
-	<issueManagement>
-			<system>github</system>
-			<url>https://github.com/MyRobotLab/myrobotlab/issues</url>
-	</issueManagement>
+  <organization>
+    <name>myrobotlab</name>
+    <url>http://myrobotlab.org</url>
+  </organization>
+  <issueManagement>
+      <system>github</system>
+      <url>https://github.com/MyRobotLab/myrobotlab/issues</url>
+  </issueManagement>
 </project>
