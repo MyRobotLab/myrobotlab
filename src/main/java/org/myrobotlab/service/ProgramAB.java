@@ -104,48 +104,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public ProgramAB(String n, String id) {
     super(n, id);
-    // botPaths = initBotPaths();
-
-    // 1. scan resources .. either "resource/ProgramAB" or
-    // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
-
-    List<File> resourceBots = scanForBots(getResourceDir());
-
-    if (isDev()) {
-      // 2. dev loading "only" dev bots - from dev location
-      for (File file : resourceBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    } else {
-      // 2. runtime loading
-      // copy any bot in "resource/ProgramAB/{botName}" not found in
-      // "data/ProgramAB/{botName}"
-      for (File file : resourceBots) {
-        String botName = getBotName(file);
-        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
-        if (dataBotDir.exists()) {
-          log.info("found data/ProgramAB/{} not copying", botName);
-        } else {
-          log.info("will copy new data/ProgramAB/{}", botName);
-          try {
-            FileIO.copy(file, dataBotDir);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-
-      // 3. addPath for all bots found in "data/ProgramAB/"
-      List<File> dataBots = scanForBots("data/ProgramAB");
-      for (File file : dataBots) {
-        addBotPath(file.getAbsolutePath());
-      }
-    }
-
-    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
-    logPublisher = new SimpleLogPublisher(this);
-    logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
-    logPublisher.start();
   }
 
   public String getBotName(File file) {
@@ -893,6 +851,48 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     if (peerSearch) {
       startPeer("search");
     }
+
+    // 1. scan resources .. either "resource/ProgramAB" or
+    // ../ProgramAB/resource/ProgramAB (for dev) for valid bot directories
+
+    List<File> resourceBots = scanForBots(getResourceDir());
+
+    if (isDev()) {
+      // 2. dev loading "only" dev bots - from dev location
+      for (File file : resourceBots) {
+        addBotPath(file.getAbsolutePath());
+      }
+    } else {
+      // 2. runtime loading
+      // copy any bot in "resource/ProgramAB/{botName}" not found in
+      // "data/ProgramAB/{botName}"
+      for (File file : resourceBots) {
+        String botName = getBotName(file);
+        File dataBotDir = new File(FileIO.gluePaths("data/ProgramAB", botName));
+        if (dataBotDir.exists()) {
+          log.info("found data/ProgramAB/{} not copying", botName);
+        } else {
+          log.info("will copy new data/ProgramAB/{}", botName);
+          try {
+            FileIO.copy(file, dataBotDir);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+
+      // 3. addPath for all bots found in "data/ProgramAB/"
+      List<File> dataBots = scanForBots("data/ProgramAB");
+      for (File file : dataBots) {
+        addBotPath(file.getAbsolutePath());
+      }
+    }
+
+    addTask("savePredicates", savePredicatesInterval, 0, "savePredicates");
+    logPublisher = new SimpleLogPublisher(this);
+    logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
+    logPublisher.start();
+    
   }
 
   /**
