@@ -185,7 +185,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * 
    * @param text
    * @return
-   * @throws IOException
    */
   public Response getResponse(String text) {
     return getResponse(getCurrentUserName(), text);
@@ -200,7 +199,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param text
    *          - the user that is sending the query
    * @return the response for a user from a bot given the input text.
-   * @throws IOException
    */
   public Response getResponse(String userName, String text) {
     return getResponse(userName, getCurrentBotName(), text);
@@ -214,7 +212,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param botName
    * @param text
    * @return
-   * @throws IOException
    */
   public Response getResponse(String userName, String botName, String text) {
     return getResponse(userName, botName, text, true);
@@ -231,7 +228,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          (specify if the currentbot/currentuser name should be updated in
    *          the programab service.)
    * @return
-   * @throws IOException
    * 
    *           TODO - no one cares about starting sessions, starting a new
    *           session could be as simple as providing a different username, or
@@ -482,7 +478,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param path
    * @param userName
    * @param botName
-   * @throws IOException
    */
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
@@ -543,7 +538,6 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          - The locale of the bot to ensure the aiml is loaded (mostly for
    *          Japanese support) FIXME - local is defined in the bot,
    *          specifically config/mrl.properties
-   * @throws IOException
    * 
    *           reasons to deprecate:
    *           

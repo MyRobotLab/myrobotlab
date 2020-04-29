@@ -830,7 +830,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
   
   /**
-   * Static getResourceDir(Class<?> clazz) will return the appropriate resource directory,
+   * Static getResourceDir(Class clazz) will return the appropriate resource directory,
    * typically it will be /resource/{ServiceType} but depending if run in the presence of other
    * developing directories.
    * 
