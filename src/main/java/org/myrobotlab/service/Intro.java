@@ -1,5 +1,7 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -10,24 +12,34 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.slf4j.Logger;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoController;
+import org.slf4j.Logger;
 
 public class Intro extends Service {
-
-  private static final long serialVersionUID = 1L;
-
-  public final static Logger log = LoggerFactory.getLogger(Intro.class);
 
   public class TutorialInfo {
 
     public String id;
-    public String title;
     public boolean isInstalled;
-    public String[] servicesRequired;
     public String script;
+    public String[] servicesRequired;
+    public String title;
 
   }
+
+  public final static Logger log = LoggerFactory.getLogger(Intro.class);
+
+  private static final long serialVersionUID = 1L;
+  
+  boolean isServoActivated = false;
+  boolean isSpeechActivated = false;
+
+  transient ServoControl servo;
+  transient ServoController controller;
+  transient AbstractSpeechSynthesis speech;
 
   Map<String, TutorialInfo> tutorials = new TreeMap<>();
 
@@ -49,25 +61,6 @@ public class Intro extends Service {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Intro.class);
-    meta.addDescription("Introduction to MyRobotlab");
-    meta.setAvailable(true);
-    meta.addCategory("general");
-    meta.addPeer("servo", "Servo", "servo");
-    meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
-    return meta;
-  }
-
   public void checkInstalled(String forTutorial, String serviceType) {
     Runtime runtime = Runtime.getInstance();
     Repo repo = runtime.getRepo();
@@ -77,10 +70,14 @@ public class Intro extends Service {
     tutorial.isInstalled = repo.isInstalled(serviceType);
   }
 
+  public boolean isServoActivated() {
+    return isServoActivated;
+  }
+
   /**
 	 * This method will load a python file into the python interpreter.
 	 */
-	public static boolean loadFile(String file) {
+	public boolean loadFile(String file) {
 		File f = new File(file);
 		Python p = (Python) Runtime.getService("python");
 		log.info("Loading  Python file {}", f.getAbsolutePath());
@@ -106,6 +103,78 @@ public class Intro extends Service {
 		return true;
 	}
 
+  public void speakBlocking(String text) {
+    if (speech != null) {
+      speech.speak(text);
+    }
+  }
+
+  public void startSpeech() {
+    speech = (AbstractSpeechSynthesis)startPeer("speech");
+    isSpeechActivated = true;
+  }
+
+  public void stopSpeech() {
+    releasePeer("speech");
+    isSpeechActivated = false;
+    speech = null;
+  }
+  
+  public void startServo() {
+    startServo("COM3", 3);
+  }
+  
+  public void startServo(String port) {
+    startServo(port, 3);
+  }
+
+  public void startServo(String port, int pin) {
+  
+    if (servo == null) {
+      speakBlocking("starting servo");
+      isServoActivated = true;
+
+      servo = (ServoControl) startPeer("servo");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          controller = (ServoController) startPeer("controller");
+          ((PortConnector)controller).connect(port);
+          controller.attach(servo);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+  }
+
+  public void stopServo() {
+    speakBlocking("stopping servo");
+    releasePeer("servo");
+    isServoActivated = false;
+  }
+  
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+
+    ServiceType meta = new ServiceType(Intro.class);
+    meta.addDescription("Introduction to MyRobotlab");
+    meta.setAvailable(true);
+    meta.addCategory("general");
+    meta.addPeer("speech", "WebKitSpeechSynthesis", "speech");
+    meta.addPeer("servo", "Servo", "servo");
+    meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
+    return meta;
+  }
+
   public static void main(String[] args) {
     try {
 
@@ -126,44 +195,5 @@ public class Intro extends Service {
     }
   }
 
-  transient ServoControl servo;
-
-  boolean isServoActivated = false;
-
-  public boolean isServoActivated() {
-    return isServoActivated;
-  }
-
-  public ServoControl startServo(String port) {
-    return startServo(port, 3);
-  }
-
-  public ServoControl startServo(String port, int pin) {
   
-    if (servo == null) {
-      speakBlocking("starting servo");
-      isServoActivated = true;
-
-      servo = (ServoControl) startPeer("servo");
-
-      if (port != null) {
-        try {
-          speakBlocking(port);
-          Arduino controller = (Arduino) startPeer("controller");
-          controller.connect(port);
-          controller.attach(controller, pin);
-        } catch (Exception e) {
-          error(e);
-        }
-      }
-    }
-    return servo;
-  }
-
-  public void stopServo() {
-    speakBlocking("stopping servo");
-    releasePeer("servo");
-    isServoActivated = false;
-  }
-
 }
