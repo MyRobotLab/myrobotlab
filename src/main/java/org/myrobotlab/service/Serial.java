@@ -854,19 +854,15 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   @Override
   synchronized public int read() throws IOException, InterruptedException {
-
-    log.info("READ CALLED ON SERIAL.");
     if (timeoutMS == null) {
       return blockingRX.take();
     }
-
     Integer newByte = blockingRX.poll(timeoutMS, TimeUnit.MILLISECONDS);
     if (newByte == null) {
       String error = String.format("%d ms timeout was reached - no data", timeoutMS);
       error(error);
       throw new IOException(error);
     }
-
     return newByte;
   }
   

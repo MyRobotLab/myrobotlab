@@ -565,6 +565,18 @@ public class %javaClass% {
     }
   }
 
+  public synchronized void onDisconnect(String portName) {
+    log.info("On Disconnect Called in Msg.");
+    // reset the parser... this might not be necessary.
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = false;
+      ackRecievedLock.notifyAll();
+    }
+  }
+
+
   public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.
     // can't be null
