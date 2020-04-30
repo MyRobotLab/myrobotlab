@@ -61,6 +61,27 @@ public class OpenCVFilterFlip extends OpenCVFilter {
   public IplImage process(IplImage image) {
 
     cvFlip(image, flipped, flipCode);
+    
+    /**<pre>
+    Flip (Mirror) Vertically
+
+    flip(image, image, 0);
+    Flip (Mirror) Horizontally
+
+    flip(image, image, +1);
+    Rotate 90 Degrees Clockwise
+
+    transpose(image, image);
+    flip(image, image, +1);
+    Rotate 90 Degrees Counter Clockwise (Same as -90 Degrees and 270 Degrees)
+
+    transpose(image, image);
+    flip(image, image, 0);
+    Rotate 180 Degrees (Same as Flipping vertically and horizontally at the same time)
+
+    flip(image, image, -1);
+    </pre>
+    */
 
     return flipped;
   }
