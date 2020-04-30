@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,7 +14,8 @@ import org.junit.Test;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.ProgramAB.Response;
+import org.myrobotlab.programab.Response;
+import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
 public class ProgramABTest extends AbstractServiceTest {
@@ -148,7 +149,7 @@ public class ProgramABTest extends AbstractServiceTest {
     // pikachu the service.
     pikachu.startService();
     // load the bot brain for the chat with the user
-    pikachu.startSession(path, username, "pikachu", new Locale("ja"));
+    pikachu.startSession(path, username, "pikachu", new java.util.Locale("ja"));
     Response resp = pikachu.getResponse("私はケビンです");
     assertEquals("あなたに会えてよかったケビン", resp.msg);
     pikachu.releaseService();
@@ -308,5 +309,63 @@ public class ProgramABTest extends AbstractServiceTest {
     // @GroG says - "this is not working"
     assertEquals("He's a character from Guitar Hero!", resp.msg);
   }
+  
+  @Test
+  public void testLocales() {
+    // have locales
+    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
+    Map<String,Locale> locales = alice.getLocales();
+    assertTrue(locales.size() > 0);
+  }
+  
+  @Test
+  public void testReload() {
+    // FIXME - TODO
+    // reload bot creates a new bot leaves old references :(
+    // verify reload
+    /* Preferably with default bot
+    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
+    // did not work because Alice is lame
+    // alice.getResponse("my name is george");
+    Response response = alice.getResponse("what is my name?");
+      
+    BotInfo botInfo = alice.getBotInfo();
+    Bot oldBot = botInfo.getBot();
+    alice.reload();    
+    Bot newBotInfo = botInfo.getBot();
+    assertNotEquals(oldBot, newBotInfo);
 
+    response = alice.getResponse("what is my name?");
+    assertTrue(response.msg.contains("george"));
+    */
+  }
+  
+  @Test
+  public void testDefaultSession() throws IOException {
+    // minimal startup - create the service get a response
+    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
+    assertTrue(alice.getBots().size() > 0);
+    
+    // test for a response
+    Response response = alice.getResponse("Hello");
+    assertTrue(!response.msg.startsWith("I have no"));
+    
+    // not sure if this is worth testing - there might be more
+    // assertEquals("Alice", alice.getCurrentBotName());
+    assertEquals("default", alice.getCurrentUserName());
+
+  }
+  // TODO - tests
+  // ProgramAB starts - it should find its own bot info's
+  // set username = default
+  // set botname = what is available if NOT set
+  // getResponse() -> if current session doesn't exist - get bot
+      // if current bot doesn't exist - attempt to activate it
+  // test - absolute minimal setup and getResponse ... 2 lines ? 1?  
+  // test - setting direct location addBotInfo(path)
+  // test adding new bots from new locations
+  // test mrl.properties - and the lack of those properties
+  // verify conversation starter
+  // verify inactivity conversation trolling
+  
 }

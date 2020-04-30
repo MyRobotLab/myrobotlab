@@ -830,7 +830,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
   
   /**
-   * Static getResourceDir(Class<?> clazz) will return the appropriate resource directory,
+   * Static getResourceDir(Class clazz) will return the appropriate resource directory,
    * typically it will be /resource/{ServiceType} but depending if run in the presence of other
    * developing directories.
    * 
@@ -2811,6 +2811,30 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public String getServiceScript() {
     return getServiceScript(getClass());
+  }
+
+  /**
+   * Determine if the service is operating in dev mode.
+   * isJar() is no longer appropriate - as some services are modular
+   * and can be operating outside in develop mode in a different repo with
+   * a "runtime" myrobotlab.jar.
+   * 
+   * @return
+   */
+  public boolean isDev() {
+    // 2 folders to check 
+    // src/resource/{ServiceType} for services still bundled with myrobotlab.jar and
+    // ../{ServiceType}/resource/{ServiceType} for services in their own repo
+    File check = new File(FileIO.gluePaths("src/resource", simpleName));
+    if (check.exists()) {
+      return true;
+    }
+    check = new File(FileIO.gluePaths(String.format("../%s/resource", simpleName), simpleName));
+    if (check.exists()) {
+      return true;
+    }
+    return false;
+    
   }
 
 }
