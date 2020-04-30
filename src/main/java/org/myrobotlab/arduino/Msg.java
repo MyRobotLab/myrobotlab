@@ -64,6 +64,7 @@ import org.slf4j.Logger;
 
 public class Msg {
 
+  private static final int ACK_TIMEOUT = 2000;
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
@@ -86,12 +87,12 @@ public class Msg {
   
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
-  private volatile boolean pendingMessage = false;
+  // private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = false;
   public static class AckLock {
-    // first is always true - since there
-    // is no msg to be acknowledged...
-    volatile boolean acknowledged = true;
+    // track if there is a pending message, when sending a message
+    // this goes to true. when getting an ack it goes to false.
+    volatile boolean pendingMessage = false;
   }
   transient AckLock ackRecievedLock = new AckLock();
   // recording related
@@ -271,6 +272,14 @@ public class Msg {
     if (debug) { 
       log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
     }
+    
+    if (method == PUBLISH_ACK) {
+      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // call publishAck on the MrlCommPublisher
+      Integer function = ioCmd[startPos+1]; // bu8
+      ackReceived(function);
+    }
+    
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -2270,7 +2279,7 @@ public class Msg {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
     if (debug) {
-      log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+      log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
@@ -2470,18 +2479,8 @@ public class Msg {
   
   synchronized byte[] sendMessage() throws Exception {
     byte[] message = baos.toByteArray();
-    if (ackEnabled && pendingMessage) {
-      // wait for any outstanding pending messages.
-      while (pendingMessage) {
-        Thread.sleep(1);
-        if (debug) {
-          log.info("Pending message");
-        }
-      }
-    }
     if (ackEnabled) {
-      // set a new pending flag.
-      pendingMessage=true;
+      waitForAck();
     }
     // write data if serial not null.
     if (serial != null) {
@@ -2573,32 +2572,30 @@ public class Msg {
   }
   
   public void waitForAck(){
-    if (!ackEnabled || ackRecievedLock.acknowledged){
+    if (!ackEnabled){
       return;
     }
-    synchronized (ackRecievedLock) {
-      try {
-        long ts = System.currentTimeMillis();
-        // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
-        // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
-      } catch (InterruptedException e) {// don't care}
-      }
-
-      if (!ackRecievedLock.acknowledged) {
-        //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
-        log.error("Ack not received");
-        // part of resetting ?
-        // ackRecievedLock.acknowledged = true;
-        arduino.ackTimeout();
+    // if there's a pending message, we need to wait for the ack to be received.
+    if (ackRecievedLock.pendingMessage) {
+      synchronized (ackRecievedLock) {
+        try {
+          ackRecievedLock.wait(ACK_TIMEOUT);
+        } catch (InterruptedException e) {
+        }
+        if (ackRecievedLock.pendingMessage) {
+          log.error("Ack not received, ack timeout!");
+          // TODO: should we just reset and hope for the best?
+          // ackRecievedLock.acknowledged = true;
+          arduino.ackTimeout();
+        }
       }
     }
   }
   
   public void ackReceived(int function){
-    pendingMessage = false;
+    log.info("ACK RECEIVED {} !!!!!!!", function);
     synchronized (ackRecievedLock) {
-      ackRecievedLock.acknowledged = true;
+      ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
   }
@@ -2685,27 +2682,14 @@ public class Msg {
   }
 
   public synchronized void onConnect(String portName) {
-    // reset the parser...
     log.info("On Connect Called in Msg.");
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    this.pendingMessage = false;
-    // we're not clear to send.
-    // this.clearToSend = false;
-    // watch for the first MrlCommBegin message;
-    // TODO: we should have some sort of timeout / error handling here.
-    // this.waitForBegin();
-    
-  }
-
-
-  private boolean isMrlCommBegin(int[] actualCommand) {
-    // TODO Auto-generated method stub
-    int method = actualCommand[0];
-    if (Msg.PUBLISH_MRL_COMM_BEGIN == method) {
-      return true;
+    // when we connect, we can't expect there were any pending message.  we need to reset the parser state.
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = false;
+      ackRecievedLock.notifyAll();
     }
-    return false;
   }
 
   public static boolean isFullMessage(byte[] bytes) {

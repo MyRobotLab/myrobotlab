@@ -136,6 +136,14 @@ public class %javaClass% {
     if (debug) { 
       log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
     }
+    
+    if (method == PUBLISH_ACK) {
+      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // call publishAck on the MrlCommPublisher
+      Integer function = ioCmd[startPos+1]; // bu8
+      ackReceived(function);
+    }
+    
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
