@@ -475,9 +475,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * This method will close the current bot, and reload it from AIML It then
    * will then re-establish only the session associated with userName.
    * 
-   * @param path
    * @param userName
    * @param botName
+   * @throws IOException
    */
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
