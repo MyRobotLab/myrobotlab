@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -28,6 +29,7 @@ import javax.swing.text.html.StyleSheet;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.service.ProgramAB;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.widget.Console;
@@ -289,7 +291,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        String botname = programab.getCurrentBotName();
+
         String username = programab.getCurrentUserName();
         startSession.setEnabled(true);
         if (programab.getSessions().isEmpty() || !programab.isReady()) {
@@ -297,8 +299,11 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         } else {
           startSession.setBackground(Color.GREEN);
         }
-        progABPath.setText(new File(programab.getPath()).getAbsolutePath());
-        currentBotPath.setText(new File(programab.getPath()).getAbsolutePath() + File.separator + "bots" + File.separator + botname);
+        
+        BotInfo botInfo = programab.getBotInfo();
+        
+        progABPath.setText(botInfo.path.getAbsolutePath());
+        currentBotPath.setText(botInfo.path.getAbsolutePath());
         userName.setText(username);
         botName.removeAllItems();
         Iterator<String> iterator = programab.getBots().iterator();
