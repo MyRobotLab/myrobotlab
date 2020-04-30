@@ -1588,7 +1588,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		speakBlocking(get("STARTINGMOUTH"));
 		if (Platform.isVirtual()) {
-			speakBlocking(get("STARTINGMOUTH"));
+			speakBlocking(get("STARTINGVIRTUALHARD"));
 		}
 		speakBlocking(get("WHATISTHISLANGUAGE"));
 
