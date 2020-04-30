@@ -1091,17 +1091,11 @@
 <!-- Polly end -->
 
 <!-- ProgramAB begin -->
-  <dependency>
-    <groupId>program-ab</groupId>
-    <artifactId>program-ab-data</artifactId>
-    <version>1.1</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- skipping program-ab program-ab-data program-ab-program-ab-data-null null version/latest -->
   <dependency>
     <groupId>program-ab</groupId>
     <artifactId>program-ab-kw</artifactId>
-    <version>0.0.8.4</version>
+    <version>0.0.8.6</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.json-json-20090211 skipping -->
