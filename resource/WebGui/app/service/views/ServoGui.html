@@ -1,0 +1,348 @@
+<!-- ServoGui.html -->
+
+<div id="servoContent" class="prevenSelectDrag">
+    <div class="row">
+        <br /><br />
+        <div class="servoPanelRow">
+            <div class="col-md-10">
+                <div ng-class="{'Detached': isAttached()}">
+                    <div class="input-group" style="height: 40px; width:300px">
+                        <span class="input-group-addon labelItem preventDragSelect">
+                        Controller
+                        </span>
+                        <span class="input-group-addon" style='background-color:{{(isAttached())?"#c6e2ff;":"#FFFFFF;"}}'>
+
+                        
+                     <!-- dropdown? -->
+                            <tr ng-repeat="c in service.controllers">
+                              <span class="input-group-btn" >
+                                <attach ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
+                               </span>
+                            </tr>
+                        </span>
+                        <span class="input-group-addon">               
+               
+
+                
+                        <!-- Fix me. Replace attach an detach buttons with toggle -->
+                        
+                        <toggle width="112" height="30" ng-model="service.isAttached" ng-change="!isAttached()?msg.detach(c):attachController()" on="Attached" off="Detached" class="ng-pristine ng-untouched ng-valid ng-isolate-scope ng-not-empty">
+                          <div class="toggle btn off btn-default" ng-style="wrapperStyle" ng-click="onSwitch($event)">
+                            <div class="toggle-group">
+                              <label class="btn toggle-on-pad btn-primary toggle-on">Attached</label>
+                              <label class="btn toggle-off-pad active btn-default toggle-off">Detached</label>
+                              <span class="btn btn-default toggle-handle"></span>
+                            </div>
+                          </div>
+                        </toggle>
+
+               
+                 Fix me <!-- and delete next buttons -->
+
+                <!-- temporal -->
+                <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
+                <button class="btn btn-premium btn-xs" ng-show="isAttached()" ng-click="msg.detach(c)">detach</button>
+
+
+              </span>
+
+            </div><!-- /input-group -->    
+          </div><!-- /div controllersToAttach -->
+        </div><!-- /.col-lg-6 -->
+
+        <div class="col-md-2">   
+          <div class="input-group" style="float: right !important; width:200px">
+
+            <span class="input-group-addon labelItem preventDragSelect" style="width:30px">
+              PIN
+            </span>
+            <span class="input-group-addon" id="PinEnable">
+                <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin"/>
+            </span>
+
+            <span class="input-group-addon">
+            <div>
+              <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
+              <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()" style="width:90px">Disabled</button>
+            </div>
+          </span>
+               
+          </div><!-- /input-group -->    
+        </div><!-- /.col-lg-6 -->        
+
+
+
+        </div><!-- /.panelRow -->
+      </div><!-- /.row -->
+
+
+    <br />
+
+    <div class="row">
+        <div class="col-md-12">
+          <br />
+          <span class="servoBigLabelLimits preventDragSelect">LIMITS</span>      
+          <rzslider class="custom-slider" rz-slider-model="limits.minValue" rz-slider-high="limits.maxValue" rz-slider-options="limits.options"/>
+        </div>
+    </div><!-- /.row -->
+
+
+
+
+    <div class="row">
+        <div class="servoPanelRow">
+
+          <div class="col-md-5 dividerGray">
+            <div class="input-group" style="height: 46px; width:300px;">
+              <span class="input-group-addon btn btn-default" title=" FIX ME">
+                <label>
+                 
+                 <!--
+                  FIX ME
+                  sometimes "checked" works fine and other times it works in reverse of the autoDisable state.
+                  For example, It can work well in ringFinger, but and when you go to the wrist the "checked" works in reverse.
+                 -->
+                  <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
+                  <span>
+                    Auto-disable
+                    <div class="progress" style="height: 8px; width: 100%; margin-top: 4px; margin-bottom: 0px;">
+                      <span class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{(!service.enabled && !service.autoDisable)?"0":"100"}}" aria-valuemin="0" aria-valuemax="100" style='width: {{(service.enabled && service.autoDisable)?"100":"0"}}%'>
+                      </span>
+                    </div>
+                  </span>
+                </label>
+              </span>
+              <span class="input-group-addon" style="border-right-style: none;">
+                <span class="glyphicon glyphicon-hourglass glyphicon-align-lef" style="border-left: none!important;"></span>
+              </span>
+              <span class="input-group-addon">
+                <input class="form-control ng-pristine ng-valid ng-not-empty ng-touchedglyphicon glyphicon-hourglass" style="width: 65px; " placeholder="3000" title="milliseconds" type="text" name="idle">
+              </span>     
+            </div><!-- /input-group -->     
+          </div><!-- /.col-md-5 --> 
+
+          <div class="col-md-3 dividerGray text-center">
+
+            <!-- Fix me -->
+              <label class="btn btn-xs">
+                <!-- <input type="checkbox" {{(service.blocking)?" ":" checked "}} autocomplete="off" ng-click="msg.setBlocking(!service.blocking)"> -->
+                <input style="width: 20px;" type="checkbox" checked autocomplete="off">
+                <span>Blocking</span>
+                <div class="progress" style="height: 8px; width: 100%; margin-top: 4px; margin-bottom: 0px;">
+                      <span>
+                        <!--
+                        <span class='progress-bar progress-bar active {{(!isBlocking())?"":"progress-bar-striped active"}}' role="progressbar" aria-valuenow="{{(!isBlocking())?"0":"100"}}" aria-valuemin="0" aria-valuemax="100" style='width: {{(!isBlocking())?"0":"100"}}%'></span>
+                        -->
+                        <span class="progress-bar progress-bar-success active progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></span>
+   
+                      </span>
+                    </div>
+              </label>
+          </div><!-- /.col-md-3 -->
+
+
+          <div class="col-md-4 dividerGray" style="float: right !important; width:200px">
+
+            <!-- Fix me -->
+            <div>
+              <label class="btn btn-xs">
+                <!-- <input type="checkbox" {{(service.invert)?"checked":""}} autocomplete="off" ng-click="msg.setInvert(!service.invert)"> -->
+                <input style="width: 20px;" type="checkbox" checked autocomplete="off">
+                <span>Invert</span>
+               <br />
+                    
+              </label>
+            </div>
+          </div><!-- /.col-md-4 -->
+
+        </div>
+      </div><!-- /.row -->
+
+
+
+
+
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+          <div ng-show="!service.enabled" id="servoMask"></div>
+          <span class="servoBigLabelPosition preventDragSelect">POSITION</span>
+          <div id="servoPositionArea">        
+            <div id="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) - 0px));">
+              <span class="glyphicon glyphicon-eject white"></span>
+              <span class="servoBubble preventDragSelect">{{service.currentPos.toFixed(2)}}</span>
+            </div>
+          </div>
+          <div ng-show="service.enabled" class="preventDragSelect">
+            <div id="energizedBar" title="the servo is energized" class="progress-bar progress-bar-info progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                <span class="glyphicon glyphicon-flash"></span>ENERGIZED
+            </div>
+          </div>          
+          <rzslider class="custom-slider2" id="sliderPosition"  ng-click="msg.setPin(pin);msg.enable()" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+        </div><!-- /.col-md-12 -->
+    </div><!-- /.row -->
+
+    <br />
+    <div class="row align-items-center">
+        <div class="servoPanelRow">
+
+          <div class="col-md-6">
+            <div class="input-group btn-xs" style="width: 300px">
+              <span class="input-group-addon labelItem preventDragSelect">
+                Rest position
+              </span>
+              <span class="input-group-addon">
+                <input type="text" class="form-control" style="width: 48px;" ng-disabled="service.enabled" ng-model="rest"/>
+              </span>
+              <span class="input-group-addon">
+                <button class="btn btn-default btn-xs" style="height: 34px;" ng-click="setRest(rest);">Set current</button>
+              </span>
+            </div><!-- /input-group -->    
+          </div><!-- /.col-md-6 -->
+
+          <div class="col-md-6">        
+            <div class="input-group" style="width: 200px; float: right !important;">
+             <span class="input-group-addon labelItem preventDragSelect">
+                Sweep
+              </span>
+              <span class="input-group-addon">
+                <button class="btn btn-default  btn-xs" style="width: 80px; height: 34px;" type="button" ng-click="sweep()"><span class="glyphicon glyphicon-resize-horizontal smallbuttons"></span></button>
+              </span>
+              <span class="input-group-addon">
+                <button class="btn btn-default glyphicon glyphicon-stop btn-xs" type="button" ng-click="msg.stop()"></button>
+              </span>
+            </div>                
+          </div><!-- /.col-md-6 -->
+
+        </div><!-- /.panelRow -->
+    </div><!-- /.row -->  
+
+
+    <div class="row align-items-center">
+        <div class="servoPanelRow">
+          <div class="col-md-12">
+            
+            <div class="input-group btn-xs" style="width: 300px">
+              <span class="input-group-addon labelItem preventDragSelect">
+               <input style="width: 20px;" type="checkbox" checked autocomplete="off"> Speed control
+              </span>
+              <span class="input-group-addon">
+                Speed<br />
+                <input type="text" class="form-control" style="width: 60px;" placeholder="45" ng-model="speed"/>
+                <!-- <input type="text" class="form-control" style="width: 60px;" placeholder="45" ng-model="speed"/> -->
+              </span>
+              <span class="input-group-addon">
+                Max<br />
+                <input type="number" value="500" class="ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                <!-- <input type="number" class="form-control" style="width: 48px;" value="500" /> -->
+              </span>
+              <span class="input-group-addon">
+                <button class="btn btn-default btn-xs" ng-click="setSpeed(speed);">Set</button>
+              </span>
+              
+            </div><!-- /input-group -->    
+            FIX ME
+            <rzslider rz-slider-model="speed"></rzslider>
+            <div class="rzslider ng-isolate-scope" rz-slider-model="speed.minValue" rz-slider-high="500" rz-slider-options="slider_all_options.options"></div>
+
+           </div><!-- /.col-md-12 -->
+
+        </div><!-- /.panelRow -->
+    </div><!-- /.row -->  
+
+
+    <div class="row">
+        <div class="servoPanelRow">
+            <div class="col-md-12">
+<br />Simple version<br />
+                <div class="input-group">
+                    <span class="input-group-addon labelItem preventDragSelect">
+                        Speed
+                    </span>
+                        <span class="input-group-addon">
+                        <input type="text" class="form-control" style="width: 60px;" placeholder="45" ng-model="speed"/>
+                    </span>
+                    <span class="input-group-addon">
+                        <span><input type="text" class="form-control" style="width: 60px;" ng-model="speedMax"/>degrees/s</span>
+                    </span>
+                    <span class="input-group-addon">
+                        <button class="btn btn-default btn-xs" ng-click="setSpeed(speed);">Set</button>
+                    </span>
+                </div><!-- /input-group --> 
+                
+            </div><!-- /.col-md-12 -->
+        </div><!-- /.panelRow -->
+    </div><!-- /.row -->  
+
+
+    <div class="row align-items-center">
+        <div class="servoPanelRow">
+          <div class="col-md-12">
+            <div class="input-group" style="width: 300px">
+              <span class="input-group-addon labelItem preventDragSelect">
+                Encoder
+              </span>
+              <span class="input-group-addon">
+                
+                <form class="form-inline col-lg-12">
+                    <div class="form-goup">
+                        <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
+                            <option selected>None</option>
+                            <option>Encoder 1</option>
+                            <option>SuperEncoder</option>
+                            <option>BadEncoder</option>
+                        </select>
+                    </div>
+                </form>
+
+              </span>
+              <span class="input-group-addon">
+
+              <!--  Fix me -->
+                <toggle width="112" height="30" ng-model="" ng-change="!isAttached()?msg.detach(c):attachController()" on="Attached" off="Detached" class="ng-pristine ng-untouched ng-valid ng-isolate-scope ng-not-empty"  style="width: 180px; height: 20px;">
+                  <div class="toggle btn off btn-default" ng-style="wrapperStyle" ng-click="onSwitch($event)">
+                    <div class="toggle-group">
+                      <label class="btn toggle-on-pad btn-primary toggle-on">Attached</label>
+                      <label class="btn toggle-off-pad active btn-default toggle-off">Detached...</label>
+                      <span class="btn btn-default toggle-handle"></span>
+                    </div>
+                  </div>
+                </toggle>
+
+              </span>
+
+            </div><!-- /input-group -->    
+          </div><!-- /.col-md-12 -->
+      </div><!-- /.panelRow -->
+    </div><!-- /.row -->  
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="row">
+        <div class="col-md-4">
+            <table class="table table-striped">
+                <tr ng-repeat="c in service.controllers">
+                    <td>Controller: {{c}}</td>
+                </tr>
+            </table>
+        </div><!-- /.col-md-4 -->
+        <div class="col-md-8">
+        </div><!-- /.col-md-8 -->
+    </div><!-- /.row -->  
+
+</div>    
+
+<!-- TODO - load info from javadoc -->
+
+<!-- /ServoGui.html -->
