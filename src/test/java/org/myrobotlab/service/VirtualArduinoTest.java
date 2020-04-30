@@ -72,12 +72,12 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.connect(testPort);
     // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
     // At this point what do we have.
-    Thread.sleep(1000);
+//     Thread.sleep(1000);
     log.info("Writing a messge to attach a servo!");
     byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
     serial.write(data);
     // i'd like to see an ack come back!
-    Thread.sleep(1000);
+  //  Thread.sleep(1000);
     // TODO: this ack received needs to come back from the arduino service currently..
     // but it should be pushe down into the internals of the msg class
     // msg.ackReceived(0);
@@ -99,7 +99,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     log.info("Publish Ack for function {}", VirtualMsg.methodToString(function));
     // TODO Auto-generated method stub
     // we got an ack from the virtual arduino .. acknoledge that in the mirror real msg parser.
-    msg.ackReceived(function);
+   //  msg.ackReceived(function);
   }
 
   @Override
