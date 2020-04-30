@@ -81,13 +81,6 @@ public class PortStream extends Port {
     return null;
   }
 
-  // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
-  // is ever bigger than the read and no end of stream has occurred
-  // it will block forever :P
-  public int read(byte[] data) throws IOException {
-    return in.read(data);
-  }
-
   public void setInputStream(InputStream in) {
     this.in = in;
   }
@@ -113,14 +106,6 @@ public class PortStream extends Port {
     out.write(data);
     // TODO: should we flush here?
     out.flush();
-  }
-  
-  public void write(int[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
-    // TODO: consider deprication of this method and only read/write byte[] from a port.
-    for (int i = 0; i < data.length; i++) {
-      out.write(data[i]);
-    }
   }
 
   @Override
