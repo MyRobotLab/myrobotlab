@@ -20,7 +20,7 @@
               </span> 
               <span id="PinEnable">
                 Pin
-                <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="#" ng-model="pin" />
+                <input type="text" class="form-control" ng-disabled="service.enabled" placeholder="0" ng-model="pin" />
                 <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
                 <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Disabled</button>
               </span>

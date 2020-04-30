@@ -39,7 +39,7 @@
     
                 <!-- Left -->
     
-                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')"><img src="../Intro/img/servo.png"/>&nbsp;</div>
+                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-init="msg.loadFile('resource/Servo/Servo_Intro.py')" ng-click="setPanel('servo')"><img src="../Intro/img/servo.png"/>&nbsp;</div>
     
                 <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../Intro/img/go.png"/>&nbsp;</div>
     
@@ -106,7 +106,7 @@
             <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
             <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>&nbsp;&nbsp;
             <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.stopServo():msg.startServo()" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Settings</button>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Tutorial next page</button>
             <!--div ng-click="msg.start('servo', 'Servo')"></div-->
         </td>
     </tr>
@@ -133,7 +133,8 @@
             </div>
         </td>
     </tr>
-    <tr>
+    <!--FOR PYTHON DISPLAY-->
+    <!--tr>
     <td>
     <div ng-model="code" style="height: 500px;width: 50%;" id="$index" ui-ace="{
 		                                       useWrapMode : false,
@@ -144,28 +145,7 @@
 		                                       onLoad: aceLoaded,		                                       
 		                                       onChange: aceChanged}"></div>
        </td>
-    </tr>
-    <tr>
-        <td>
-            <strong>servo.attach</strong>(controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
-
-            <strong>servo.detach</strong>(controller): detach the servo from the microcontroller<br>
-
-            <strong>servo.enable</strong>(): will turn the servo motor on<br>
-
-            <strong>servo.disable</strong>(): will turn the servo motor off<br>
-
-            <strong>servo.moveTo</strong>(pos): ask the servo to move to a position<br>
-
-            <strong>servo.moveToBlocking</strong>(pos): ask the servo to move to a position and wait the position reached<br>
-
-            <strong>servo.map</strong>(inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
-
-            <strong>servo.setInverted</strong>(true/false): Reverse the direction of rotation of the servo.</p>
-            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">LOAD SCRIPT IN PYTHON</a>
-        </td>
-    </tr>
+    </tr-->
     </table>
     <!------------------------ servo end ------------------------------>
     <!------------------------ servo1 begin ------------------------------>
@@ -175,20 +155,127 @@
             <img src="../Servo.png"/>
             <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
             <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo')">Previous page</button>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo2')">Tutorial next page</button>
+        </td>
+    </tr>
+    <tr ng-show="!service.isVirtual">
+        <td>
+            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller called arduino. Define your board type and choose the COM port according to your board.<br>You can open Window device manager/portCOM to know which COM port and rate to use.<br> Then Connect</p>
+        </td>
+    </tr>
+    <tr ng-show="!service.isVirtual">
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
+        </td>
+    </tr>
+    <!--- virtual section -------->
+    <tr ng-show="service.isVirtual">
+        <td>
+            <p>The Servo needs a virtual controller in order to operate.<br> In this tutorial MRL has already setup a controller called varduino.<br> Just click Start</p>
+        </td>
+    </tr>
+    <tr ng-show="service.isVirtual">
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('varduino')"></div>
+        </td>
+    </tr>   
+    </table>
+    <!------------------------ servo1 end ------------------------------>
+    <!------------------------ servo2 begin ------------------------------>
+    <table ng-show="showPanel('servo2')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Servo.png"/>
+            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Previous page</button>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Tutorial next page</button>
+        </td>
+    </tr>
+    <tr ng-show="!service.isVirtual">
+        <td>
+            <p>Now select the controller in the dropdown menu, by selecting it will get "attached".<br> Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.</p>
+        </td>
+    </tr>
+    <!--- virtual section -------->
+    <tr ng-show="service.isVirtual">
+        <td>
+            <p>Now select the JMonkey controller in the dropdown menu, by selecting it will get "attached".<br> Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.</p>
         </td>
     </tr>
     <tr>
         <td>
-            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller for you. You should be able to select it in the drop down.<br> Select the correct signal pin the servo is attached to.  Then select "attach" and the servo should be controllable with the slider bar.<br>  Limits can be set in order to protect the servo from going beyond a certain minimum and maximum value.</p>
+            <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
+        </td>
+    </tr> 
+    </table>
+    <!------------------------ servo2 end ------------------------------>
+    <!------------------------ servo3 begin ------------------------------>
+    <table ng-show="showPanel('servo3')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../Servo.png"/>
+            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo2')">Previous page</button>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo4')">Tutorial next page</button>
         </td>
     </tr>
     <tr>
         <td>
-            <div class="tab-content" service-body panel="mrl.getPanel('servo')"></div>
+            <p>Now if you select the advanced tab, you can set the limits of your servo.<br> There is two types of limits, the input and the output.<br>  The input limits are (TODO SHORT DEFINE), while the output limits are (TODO SHORT DEFINE)<br> 
+            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be at when initialized.</p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
         </td>
     </tr>
     </table>
-    <!------------------------ servo1 end ------------------------------>
+    <!------------------------ servo3 end ------------------------------>
+    <!------------------------ servo4 begin ------------------------------>
+    <table ng-show="showPanel('servo4')" class="table table-striped">
+        <tr>
+            <td>
+                <img src="../Servo.png"/>
+                <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
+                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Previous page</button>
+                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo5')">Tutorial next page</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p>These are the main functions a servo can do.</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong>servo.attach</strong>(controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
+    
+                <strong>servo.detach</strong>(controller): detach the servo from the microcontroller<br>
+    
+                <strong>servo.enable</strong>(): will turn the servo motor on<br>
+    
+                <strong>servo.disable</strong>(): will turn the servo motor off<br>
+    
+                <strong>servo.moveTo</strong>(pos): ask the servo to move to a position<br>
+    
+                <strong>servo.moveToBlocking</strong>(pos): ask the servo to move to a position and wait the position reached<br>
+
+                <strong>servo.sync</strong>(servo02): will sync servo02 with servo01, if you create a second servo<br>
+    
+                <strong>servo.map</strong>(inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
+    
+                <strong>servo.setInverted</strong>(true/false): Reverse the direction of rotation of the servo.</p>
+                <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>&nbsp;&nbsp;
+                <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">SEE PYTHON SCRIPT</a>
+            </td>
+        </tr>
+        </table>
+        <!------------------------ servo4 end ------------------------------>       
     <!------------------------ introduction begin ------------------------------>
     <table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
     <tr>
