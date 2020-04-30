@@ -11,6 +11,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
+import org.myrobotlab.service.interfaces.ServoControl;
 
 public class Intro extends Service {
 
@@ -62,6 +63,8 @@ public class Intro extends Service {
     meta.addDescription("Introduction to MyRobotlab");
     meta.setAvailable(true);
     meta.addCategory("general");
+    meta.addPeer("servo", "Servo", "servo");
+    meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
     return meta;
   }
 
@@ -122,4 +125,45 @@ public class Intro extends Service {
       log.error("main threw", e);
     }
   }
+
+  transient ServoControl servo;
+
+  boolean isServoActivated = false;
+
+  public boolean isServoActivated() {
+    return isServoActivated;
+  }
+
+  public ServoControl startServo(String port) {
+    return startServo(port, 3);
+  }
+
+  public ServoControl startServo(String port, int pin) {
+  
+    if (servo == null) {
+      speakBlocking("starting servo");
+      isServoActivated = true;
+
+      servo = (ServoControl) startPeer("servo");
+
+      if (port != null) {
+        try {
+          speakBlocking(port);
+          Arduino controller = (Arduino) startPeer("controller");
+          controller.connect(port);
+          controller.attach(controller, pin);
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return servo;
+  }
+
+  public void stopServo() {
+    speakBlocking("stopping servo");
+    releasePeer("servo");
+    isServoActivated = false;
+  }
+
 }
