@@ -11,7 +11,7 @@ import org.myrobotlab.service.data.SerialRelayData;
  * @author kwatters
  *
  */
-public interface MrlCommListener {
+public interface MrlCommPublisher {
   
   public void onBytes(byte[] data);
   

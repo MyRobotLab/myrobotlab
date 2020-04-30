@@ -13,14 +13,14 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.serial.PortJSSC;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 // @Ignore
-public class MrlCommDirectTest implements SerialDataListener , MrlCommListener, PortListener {
+public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher, PortListener {
 
   transient public final static Logger log = LoggerFactory.getLogger(MrlCommDirectTest.class);
   public Msg msg = null;

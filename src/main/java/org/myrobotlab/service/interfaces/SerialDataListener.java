@@ -30,6 +30,6 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 public interface SerialDataListener extends NameProvider, QueueReporter, PortListener {
 
   // TODO: other lifecycle methods like connected / disconnected
-  public void onBytes(byte[] bytes) throws Exception;
+  public void onBytes(byte[] bytes);
   
 }

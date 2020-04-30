@@ -14,12 +14,12 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
 // @Ignore
-public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommListener, SerialDataListener, Runnable {
+public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPublisher, SerialDataListener, Runnable {
 
   private Msg msg = new Msg(this, null);
   private Thread portReaderThread = null;

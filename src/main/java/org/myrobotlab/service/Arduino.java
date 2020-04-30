@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.arduino.Msg.MAGIC_NUMBER;
 import static org.myrobotlab.arduino.Msg.MAX_MSG_SIZE;
 import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 
@@ -53,7 +52,7 @@ import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
-import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -74,7 +73,7 @@ import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
-    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommListener {
+    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -1548,7 +1547,7 @@ public class Arduino extends AbstractMicrocontroller
 
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.info("Message Ack received: =={}==", Msg.methodToString(function));
+    // log.info("Message Ack received: =={}==", Msg.methodToString(function));
     msg.ackReceived(function);
     numAck++;
   }
@@ -2222,11 +2221,25 @@ public class Arduino extends AbstractMicrocontroller
 
   public void publishMrlCommBegin(Integer version) {
     log.info("publishMrlCommBegin ({}) - going to sync", version);
-    sync();
+    // If we were already connected up and clear to send.. this is a problem.. it means the board was reset on it.
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
+      // At this point we need to reset!
+      msg.ackReceived(Msg.PUBLISH_MRL_COMM_BEGIN);
+//       msg.pendingMessage = false;
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      mrlCommBegin = 0;
     }
     ++mrlCommBegin;
+    //log.info("Skipping Sync!  TODO: uncomment me.");
+    // This needs to be non-blocking
+    invoke("sync");
+    // sync();
   }
 
   /**
