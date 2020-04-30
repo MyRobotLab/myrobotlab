@@ -572,7 +572,7 @@ public class MrlComm implements SerialDataListener {
     virtualMsg.publishMRLCommError(f);
   }
 
-  public void onBytes(byte[] newBytes) throws Exception {
+  public void onBytes(byte[] newBytes) {
     log.info("MrlComm called onBytes : {}", newBytes);
     virtualMsg.onBytes(newBytes);
   }

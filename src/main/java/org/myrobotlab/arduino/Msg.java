@@ -35,7 +35,7 @@ import org.myrobotlab.string.StringUtil;
 
  All message editing should be done in the arduinoMsg.schema
 
- The binary wire format of an MrlCommListener is:
+ The binary wire format of an MrlCommPublisher is:
 
  MAGIC_NUMBER|MSG_SIZE|METHOD_NUMBER|PARAM0|PARAM1 ...
  
@@ -49,14 +49,14 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
- * Singlton messaging interface to an MrlCommListener
+ * Singlton messaging interface to an MrlCommPublisher
  *
  * @author GroG
  *
@@ -79,14 +79,14 @@ public class Msg {
   private int msgSize = 0;
   // ------ device type mapping constants
   private int method = -1;
-  public boolean debug = true;
+  public boolean debug = false;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
-  public volatile boolean pendingMessage = false;
+  private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = false;
   public static class AckLock {
     // first is always true - since there
@@ -244,7 +244,7 @@ public class Msg {
   
   
 
-  public Msg(MrlCommListener arduino, SerialDevice serial) {
+  public Msg(MrlCommPublisher arduino, SerialDevice serial) {
     this.arduino = arduino;
     this.serial = serial;
   }
@@ -256,7 +256,7 @@ public class Msg {
   // transient private Msg instance;
 
   // ArduinoSerialCallBacks - TODO - extract interface
-  transient private MrlCommListener arduino;
+  transient private MrlCommPublisher arduino;
   
   transient private SerialDevice serial;
   
@@ -2470,7 +2470,7 @@ public class Msg {
   
   synchronized byte[] sendMessage() throws Exception {
     byte[] message = baos.toByteArray();
-    if (ackEnabled) {
+    if (ackEnabled && pendingMessage) {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
         Thread.sleep(1);
@@ -2478,6 +2478,8 @@ public class Msg {
           log.info("Pending message");
         }
       }
+    }
+    if (ackEnabled) {
       // set a new pending flag.
       pendingMessage=true;
     }
@@ -2636,7 +2638,7 @@ public class Msg {
       virtual.connectVirtualUart(port, port + "UART");
       */
       
-      MrlCommListener arduino = (MrlCommListener)Runtime.start("arduino","MrlCommListener");
+      MrlCommPublisher arduino = (MrlCommPublisher)Runtime.start("arduino","MrlCommPublisher");
       Servo servo01 = (Servo)Runtime.start("servo01","Servo");
       
       /*

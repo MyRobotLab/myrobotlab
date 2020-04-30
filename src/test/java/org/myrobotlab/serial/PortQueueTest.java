@@ -34,8 +34,7 @@ public class PortQueueTest implements SerialDataListener {
     assertFalse(portQueue.isOpen());
     portQueue.open();
     assertTrue(portQueue.isOpen());
-    
-
+   
   }
 
   @Override

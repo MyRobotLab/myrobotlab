@@ -49,7 +49,7 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.interfaces.MrlCommListener;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -1623,7 +1623,7 @@ public class VirtualMsg {
   
   synchronized byte[] sendMessage() throws Exception {
     byte[] message = baos.toByteArray();
-    if (ackEnabled) {
+    if (ackEnabled && pendingMessage) {
       // wait for any outstanding pending messages.
       while (pendingMessage) {
         Thread.sleep(1);
@@ -1631,6 +1631,8 @@ public class VirtualMsg {
           log.info("Pending message");
         }
       }
+    }
+    if (ackEnabled) {
       // set a new pending flag.
       pendingMessage=true;
     }

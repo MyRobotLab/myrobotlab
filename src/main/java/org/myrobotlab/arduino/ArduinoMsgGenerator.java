@@ -19,6 +19,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.slf4j.Logger;
 
 public class ArduinoMsgGenerator {
@@ -220,7 +221,7 @@ public class ArduinoMsgGenerator {
 
     idlToJava = idlToJava.replace("%arduino%", "arduino");
     idlToJava = idlToJava.replace("%javaClass%", "Msg");
-    idlToJava = idlToJava.replace("%javaArduinoClass%", "MrlCommListener");
+    idlToJava = idlToJava.replace("%javaArduinoClass%", MrlCommPublisher.class.getSimpleName());
     // Msg doesn't publish acks back to MrlComm
     idlToJava = idlToJava.replace("%publishAcks%", "");
     // on startup Msg needs to see an MrlBeginMessage before it's clear to send data.
@@ -410,6 +411,7 @@ public class ArduinoMsgGenerator {
     javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
     // compiler check
+    // TODO: Replace the publishXX to be onXX for proper naming convention ..
     StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      arduino." + name + "(");
 //    if (paramaters.length > 0) {
 //      javaCaseArduinoMethod.append(", ");
