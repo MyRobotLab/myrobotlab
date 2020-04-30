@@ -87,7 +87,6 @@ public class Msg {
   
   boolean ackEnabled = true;
   private ByteArrayOutputStream baos = null;
-  // private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = false;
   public static class AckLock {
     // track if there is a pending message, when sending a message
@@ -2493,7 +2492,6 @@ public class Msg {
     return record != null;
   }
   
-
   public void record() throws Exception {
     
     if (record == null) {
@@ -2572,7 +2570,7 @@ public class Msg {
   }
   
   public void waitForAck(){
-    if (!ackEnabled){
+    if (!ackEnabled) {
       return;
     }
     // if there's a pending message, we need to wait for the ack to be received.
@@ -2593,7 +2591,6 @@ public class Msg {
   }
   
   public void ackReceived(int function){
-    log.info("ACK RECEIVED {} !!!!!!!", function);
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
@@ -2616,7 +2613,6 @@ public class Msg {
   
   public static void main(String[] args) {
     try {
-
       // FIXME - Test service started or reference retrieved
       // FIXME - subscribe to publishError
       // FIXME - check for any error
@@ -2626,66 +2622,38 @@ public class Msg {
       // virtual arduino in
       // Python can model "real" serial comm
       String port = "COM10";
-
       LoggingFactory.init(Level.INFO);
-      
       /*
       Runtime.start("gui","SwingGui");
       VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
       virtual.connectVirtualUart(port, port + "UART");
       */
-      
       MrlCommPublisher arduino = (MrlCommPublisher)Runtime.start("arduino","MrlCommPublisher");
       Servo servo01 = (Servo)Runtime.start("servo01","Servo");
-      
       /*
       arduino.connect(port);
-      
       // test pins
       arduino.enablePin(5);
-      
       arduino.disablePin(5);
-      
       // test status list enabled
       arduino.enableBoardStatus(true);
-      
       servo01.attach(arduino, 8);
-      
       servo01.moveTo(30);
       servo01.moveTo(130);
-      
       arduino.enableBoardStatus(false);
       */
       // test ack
-      
       // test heartbeat
-      
-      
-
     } catch (Exception e) {
       log.error("main threw", e);
-    }
-
-  }
-
-  public void waitForBegin() {
-    // poll until a begin MrlComm Message has been seen.
-    log.info("Wait for Begin called in Msg.");
-    while (!clearToSend ) {
-      // TODO: don't sleep. rather notify
-      try {
-        Thread.sleep(1);
-      } catch (InterruptedException e) {
-        log.info("Wait for MrlCommBegin interrupted.", e);
-      }
     }
   }
 
   public synchronized void onConnect(String portName) {
     log.info("On Connect Called in Msg.");
+    // reset the parser...
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    // when we connect, we can't expect there were any pending message.  we need to reset the parser state.
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();

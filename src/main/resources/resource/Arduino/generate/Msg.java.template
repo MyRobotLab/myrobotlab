@@ -64,6 +64,7 @@ import org.slf4j.Logger;
 
 public class %javaClass% {
 
+  private static final int ACK_TIMEOUT = 2000;
   public transient final static Logger log = LoggerFactory.getLogger(%javaClass%.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
@@ -86,12 +87,11 @@ public class %javaClass% {
   
   boolean ackEnabled = %ackEnabled%;
   private ByteArrayOutputStream baos = null;
-  private volatile boolean pendingMessage = false;
   private volatile boolean clearToSend = %clearToSend%;
   public static class AckLock {
-    // first is always true - since there
-    // is no msg to be acknowledged...
-    volatile boolean acknowledged = true;
+    // track if there is a pending message, when sending a message
+    // this goes to true. when getting an ack it goes to false.
+    volatile boolean pendingMessage = false;
   }
   transient AckLock ackRecievedLock = new AckLock();
   // recording related
@@ -223,7 +223,7 @@ public class %javaClass% {
     // TODO: This is a debug message only...
     String byteString = StringUtil.byteArrayToIntString(bytes);
     if (debug) {
-      log.info("onBytes called pending {} byteCount: {} data: >{}<", pendingMessage, byteCount, byteString);
+      log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
     // this gives us the current full buffer that was read from the seral
     for (int i = 0 ; i < bytes.length; i++) {
@@ -423,18 +423,8 @@ public class %javaClass% {
   
   synchronized byte[] sendMessage() throws Exception {
     byte[] message = baos.toByteArray();
-    if (ackEnabled && pendingMessage) {
-      // wait for any outstanding pending messages.
-      while (pendingMessage) {
-        Thread.sleep(1);
-        if (debug) {
-          log.info("Pending message");
-        }
-      }
-    }
     if (ackEnabled) {
-      // set a new pending flag.
-      pendingMessage=true;
+      waitForAck();
     }
     // write data if serial not null.
     if (serial != null) {
@@ -447,7 +437,6 @@ public class %javaClass% {
     return record != null;
   }
   
-
   public void record() throws Exception {
     
     if (record == null) {
@@ -486,32 +475,29 @@ public class %javaClass% {
   }
   
   public void waitForAck(){
-    if (!ackEnabled || ackRecievedLock.acknowledged){
+    if (!ackEnabled) {
       return;
     }
-    synchronized (ackRecievedLock) {
-      try {
-        long ts = System.currentTimeMillis();
-        // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
-        // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
-      } catch (InterruptedException e) {// don't care}
-      }
-
-      if (!ackRecievedLock.acknowledged) {
-        //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
-        log.error("Ack not received");
-        // part of resetting ?
-        // ackRecievedLock.acknowledged = true;
-        arduino.ackTimeout();
+    // if there's a pending message, we need to wait for the ack to be received.
+    if (ackRecievedLock.pendingMessage) {
+      synchronized (ackRecievedLock) {
+        try {
+          ackRecievedLock.wait(ACK_TIMEOUT);
+        } catch (InterruptedException e) {
+        }
+        if (ackRecievedLock.pendingMessage) {
+          log.error("Ack not received, ack timeout!");
+          // TODO: should we just reset and hope for the best?
+          // ackRecievedLock.acknowledged = true;
+          arduino.ackTimeout();
+        }
       }
     }
   }
   
   public void ackReceived(int function){
-    pendingMessage = false;
     synchronized (ackRecievedLock) {
-      ackRecievedLock.acknowledged = true;
+      ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
   }
@@ -532,7 +518,6 @@ public class %javaClass% {
   
   public static void main(String[] args) {
     try {
-
       // FIXME - Test service started or reference retrieved
       // FIXME - subscribe to publishError
       // FIXME - check for any error
@@ -542,83 +527,42 @@ public class %javaClass% {
       // virtual arduino in
       // Python can model "real" serial comm
       String port = "COM10";
-
       LoggingFactory.init(Level.INFO);
-      
       /*
       Runtime.start("gui","SwingGui");
       VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
       virtual.connectVirtualUart(port, port + "UART");
       */
-      
       %javaArduinoClass% arduino = (%javaArduinoClass%)Runtime.start("arduino","%javaArduinoClass%");
       Servo servo01 = (Servo)Runtime.start("servo01","Servo");
-      
       /*
       arduino.connect(port);
-      
       // test pins
       arduino.enablePin(5);
-      
       arduino.disablePin(5);
-      
       // test status list enabled
       arduino.enableBoardStatus(true);
-      
       servo01.attach(arduino, 8);
-      
       servo01.moveTo(30);
       servo01.moveTo(130);
-      
       arduino.enableBoardStatus(false);
       */
       // test ack
-      
       // test heartbeat
-      
-      
-
     } catch (Exception e) {
       log.error("main threw", e);
-    }
-
-  }
-
-  public void waitForBegin() {
-    // poll until a begin MrlComm Message has been seen.
-    log.info("Wait for Begin called in Msg.");
-    while (!clearToSend ) {
-      // TODO: don't sleep. rather notify
-      try {
-        Thread.sleep(1);
-      } catch (InterruptedException e) {
-        log.info("Wait for MrlCommBegin interrupted.", e);
-      }
     }
   }
 
   public synchronized void onConnect(String portName) {
-    // reset the parser...
     log.info("On Connect Called in Msg.");
+    // reset the parser...
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    this.pendingMessage = false;
-    // we're not clear to send.
-    // this.clearToSend = false;
-    // watch for the first MrlCommBegin message;
-    // TODO: we should have some sort of timeout / error handling here.
-    // this.waitForBegin();
-    
-  }
-
-
-  private boolean isMrlCommBegin(int[] actualCommand) {
-    // TODO Auto-generated method stub
-    int method = actualCommand[0];
-    if (Msg.PUBLISH_MRL_COMM_BEGIN == method) {
-      return true;
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = false;
+      ackRecievedLock.notifyAll();
     }
-    return false;
   }
 
   public static boolean isFullMessage(byte[] bytes) {
