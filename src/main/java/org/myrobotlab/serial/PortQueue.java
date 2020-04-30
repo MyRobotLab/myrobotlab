@@ -52,23 +52,19 @@ public class PortQueue extends Port {
    * by MrlCommIno can be read here and taken off the queue.
    */
   public byte[] readBytes() {
-    // log.info("Read Bytes on Port Queue called.");
     try {
       // here we should take as many bytes as there are to return.
       int size = in.size();
-      //int size = in.size();
       if (size == 0) {
-        // no data to process. return null.
+        // no data to process.
         return null;
       }
       byte[] data = new byte[size];
       for (int i = 0 ; i < size; i++) {
         data[i] = in.take().byteValue();
       }
-      // log.info("Read value from the input stream. size:{} bytes: {}", size, data);
       return data;
     } catch (InterruptedException e) {
-      // we don't care, just return if we were interrupted.
       // log.debug("Interrupted PortQueue in readBytes.");
       return null;
     }
@@ -81,20 +77,15 @@ public class PortQueue extends Port {
 
   @Override
   public void write(int data) throws IOException {
-    // log.info("Writing int to the output queue. {} size {}" , data, out.size());
     out.add(data);
-    // WOW - PipedOutputStream auto flushes about 1 time every second :P
-    // we force flushing here !
   }
 
   public void write(byte[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
+    // TODO: convert this to an output queue of byte ..
     for (int i = 0; i < data.length; i++) {
-      // write(data[i]);
       out.add(data[i] & 0xFF);
     }
     //log.info("Writing Byte Array {} size:{}", data, out.size());
-    
   }
   
   @Override
