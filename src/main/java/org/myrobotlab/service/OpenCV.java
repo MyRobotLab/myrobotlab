@@ -61,7 +61,6 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
-import org.bytedeco.javacv.ProjectorDevice;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
