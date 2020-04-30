@@ -34,8 +34,8 @@ public class Intro extends Service {
 
   private static final long serialVersionUID = 1L;
   
-  boolean isServoActivated = false;
-  boolean isSpeechActivated = false;
+  public boolean isServoActivated = false;
+  public boolean isSpeechActivated = false;
 
   transient ServoControl servo;
   transient ServoController controller;
@@ -53,8 +53,7 @@ public class Intro extends Service {
       tuto.title = "Servo with Arduino Hardware";
       tuto.servicesRequired = new String[] { "Servo", "Arduino" };
       tuto.isInstalled = repo.isInstalled(Servo.class) && repo.isInstalled(Arduino.class);
-
-      tuto.script = getResourceAsString(Servo.class, "Servo.py"); //FileIO.toString(getResource(Servo.class,"Servo.py"));
+      tuto.script = Service.getServiceScript(Servo.class);
       tutorials.put(tuto.title, tuto);
     } catch (Exception e) {
       log.error("Intro constructor threw", e);
@@ -73,10 +72,25 @@ public class Intro extends Service {
   public boolean isServoActivated() {
     return isServoActivated;
   }
+  
+  /**
+   * execute an Intro resource script
+   * @param introScriptName
+   */
+  public void execScript(String introScriptName) {
+    try {
+      Python p = (Python)Runtime.getService("python");
+      String script = getResourceAsString(introScriptName);
+      p.exec(script, true);
+    } catch (Exception e) {
+      error("unable to execute script %s", introScriptName); 
+    }
+  }
 
   /**
 	 * This method will load a python file into the python interpreter.
 	 */
+  @Deprecated
 	public boolean loadFile(String file) {
 		File f = new File(file);
 		Python p = (Python) Runtime.getService("python");
@@ -110,24 +124,29 @@ public class Intro extends Service {
   }
 
   public void startSpeech() {
-    speech = (AbstractSpeechSynthesis)startPeer("speech");
+    speech = (AbstractSpeechSynthesis)Runtime.start("speech", "WebKitSpeechSynthesis");
     isSpeechActivated = true;
   }
 
   public void stopSpeech() {
-    releasePeer("speech");
+    if (speech != null) {
+      speech.releaseService();
+    }
     isSpeechActivated = false;
     speech = null;
   }
   
+  @Deprecated
   public void startServo() {
     startServo("COM3", 3);
   }
   
+  @Deprecated
   public void startServo(String port) {
     startServo(port, 3);
   }
 
+  @Deprecated
   public void startServo(String port, int pin) {
   
     if (servo == null) {
@@ -149,6 +168,7 @@ public class Intro extends Service {
     }
   }
 
+  @Deprecated
   public void stopServo() {
     speakBlocking("stopping servo");
     releasePeer("servo");
@@ -169,9 +189,9 @@ public class Intro extends Service {
     meta.addDescription("Introduction to MyRobotlab");
     meta.setAvailable(true);
     meta.addCategory("general");
-    meta.addPeer("speech", "WebKitSpeechSynthesis", "speech");
-    meta.addPeer("servo", "Servo", "servo");
-    meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
+    // meta.addPeer("speech", "WebKitSpeechSynthesis", "speech");
+    // meta.addPeer("servo", "Servo", "servo");
+    // meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
     return meta;
   }
 
