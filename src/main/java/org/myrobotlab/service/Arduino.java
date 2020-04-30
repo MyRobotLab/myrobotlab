@@ -1447,7 +1447,7 @@ public class Arduino extends AbstractMicrocontroller
     log.info("{} onConnect for port {}", getName(), portName);
     info("%s connected to %s", getName(), portName);
     // chained...
-    // invoke("publishConnect", portName);
+    invoke("publishConnect", portName);
   }
 
   public void onCustomMsg(Integer ax, Integer ay, Integer az) {
@@ -1456,9 +1456,8 @@ public class Arduino extends AbstractMicrocontroller
 
   @Override
   public void onDisconnect(String portName) {
-    // TODO: add a msg.onDisconnect(portName) ...
+    msg.onDisconnect(portName);
     info("%s disconnected from %s", getName(), portName);
-    // enableAck(false);
     enableBoardInfo(false);
     // chained...
     invoke("publishDisconnect", portName);
