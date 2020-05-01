@@ -79,7 +79,7 @@ public class Intro extends Service {
    */
   public void execScript(String introScriptName) {
     try {
-      Python p = (Python)Runtime.getService("python");
+      Python p = (Python)Runtime.start("python", "Python");
       String script = getResourceAsString(introScriptName);
       p.exec(script, true);
     } catch (Exception e) {
