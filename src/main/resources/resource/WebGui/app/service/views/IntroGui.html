@@ -232,6 +232,7 @@
                 <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
                 <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Previous page</button>
                 <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo5')">Tutorial next page</button>
+                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.loadFile('resource/Intro/Servo01_stop.py')">execFile stop test</button>
             </td>
         </tr>
         <tr>
