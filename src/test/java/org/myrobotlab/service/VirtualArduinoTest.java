@@ -19,48 +19,37 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
 // @Ignore
-public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPublisher, SerialDataListener, Runnable {
+public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPublisher, SerialDataListener {
 
   private Msg msg = new Msg(this, null);
-  private Thread portReaderThread = null;
   String testPort = "testPort";
   Serial serial = (Serial)Runtime.start("dteSerial", "Serial");
+  private int numAcks = 0;
 
   @Override
   public Service createService() {
     Runtime.setLogLevel("info");
-
-    // Runtime.start("gui", "SwingGui");
-    // First thing, set up our serial port before we start the virtual arduino
-    // TODO: there is a race condition here.. we need to listen before the virtual arduino starts.
-    portReaderThread = new Thread(this, "VirtualArduinoTest.portReaderThread");
-    portReaderThread.start();
-
-    // TODO Auto-generated method stub
     VirtualArduino service = (VirtualArduino)Runtime.start("virtualArduino", "VirtualArduino");
     return service;
   }
 
   @Override
   public void testService() throws Exception {
+    
+    // our msg class shouldn't be invoking for the unit test
+    msg.setInvoke(false);
+    
+    // our test service
     VirtualArduino va = (VirtualArduino)service;
     // attach to the serial port for callbacks to this test.
-    // Ok.. now what ?  i mean.. what the heck can a virtual arduino do?  
-    // It should be able to read and write bytes to a uart.  (com port)
-    log.info("About to connect");
-    // the virtual arduino service should respond to some bytes being written to it's uart.
-    // but first thing is to test.. if we "connect" to the virtual arduino.. does the uart respond with hello.
-    // connect the virtual arduino to the uart port.
+    // connect the virtual arduino to the uart (DCE) port.
     va.connect(testPort);
-    
     // Let's exercise a few things on the virtual arduino service.
     List<PinDefinition> pins = va.getPinList();
     assertTrue(pins.size() > 0);
     
     va.disconnect();
-    
     assertFalse(va.isConnected());
-    
     // see that it can't connect to a null port
     va.connect(null);
     assertFalse(va.isConnected());
@@ -72,7 +61,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.connect(testPort);
     // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
     // At this point what do we have.
-//     Thread.sleep(1000);
+// Thread.sleep(1000);
     log.info("Writing a messge to attach a servo!");
     byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
     serial.write(data);
@@ -96,6 +85,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void publishAck(Integer function) {
+    numAcks ++;
     log.info("Publish Ack for function {}", VirtualMsg.methodToString(function));
     // TODO Auto-generated method stub
     // we got an ack from the virtual arduino .. acknoledge that in the mirror real msg parser.
@@ -147,7 +137,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   @Override
   public void publishMrlCommBegin(Integer version) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -170,79 +159,32 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void onBytes(byte[] data) {
-    // TODO relay the bytes back to the Arduino side real Msg.java ? Is this right?
+    // It's the responsibility of the MrlCommPublisher to relay serial bytes  / events to the msg.java class
     log.info("On Bytes Virtual Arduino Test : {}", data);
     msg.onBytes(data);
   }
 
   @Override
   public QueueStats publishStats(QueueStats stats) {
-    // TODO Auto-generated method stub
-    // NoOp in the unit test for now.
-    return null;
+    // TODO NoOp in the unit test for now.
+    return stats;
   }
 
   @Override
   public void updateStats(QueueStats stats) {
-    // TODO Auto-generated method stub
-    // NoOp in the unit test for now.    
+    // TODO: NoOp in the unit test for now.    
   }
 
   @Override
   public void onConnect(String portName) {
-    // TODO : here is where we should initialize the Msg.java parser.
-    // cascade the message down to our parser.
-    // log.info("ON CONNECT IN THE TEST!");
-    // msg.onConnect(portName);
-
+    // TODO: should we test this?  it's the responsibility of the MrlCommPublisher to pass serial events to the msg class.
+    msg.onConnect(portName);
   }
 
   @Override
   public void onDisconnect(String portName) {
-    // TODO add onDisconnect to the Msg.java class.
-    // msg.onDisconnect(portName);
-  }
-
-  @Override
-  public void run() {
-    // TODO Auto-generated method stub
-    log.info("Starting the port reader thread.");
-
-    try {
-      serial.connect(testPort);
-      // TODO: figure out why we don't get our clear to send setup.
-      // msg.clearToSend = true;
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      log.error("Failed to connect to a virtual serila port!?", e);
-      return;
-    }
-
-    while (true) {
-      byte[] data = null;
-      try {
-        data = serial.readBytes();
-        //log.info("Called read bytes on serial. port:{} data:{}", serial.getPortName(), data);
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      if (data != null) {
-        onBytes(data);
-      } else {
-        // TODO: avoid cpu burn here.
-        try {
-          Thread.sleep(1);
-        } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
-      }
-    }
-
+    // TODO: should we test this? it's the responsibility of the MrlCommPublisher to pass serial events to the msg class.
+    msg.onDisconnect(portName);
   }
 
   @Override
@@ -250,6 +192,12 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // TODO: validate something...
     log.warn("Ack Timeout was seen!");
     
+  }
+
+  @Override
+  public Object invoke(String method, Object... params) {
+    log.warn("Don't invoke in a unit test!!!!!!");
+    return null;
   }
 
 }

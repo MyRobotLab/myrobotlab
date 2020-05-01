@@ -359,6 +359,12 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     log.warn("Ack Timeout seen!");
   }
 
+  @Override
+  public Object invoke(String method, Object... params) {
+    log.warn("Dont invoke in a unit test!!!!!!!!!!!!!!!!!!!!!!");
+    return null;
+  }
+
 }
 
 

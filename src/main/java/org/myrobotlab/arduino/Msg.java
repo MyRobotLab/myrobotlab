@@ -81,6 +81,8 @@ public class Msg {
   // ------ device type mapping constants
   private int method = -1;
   public boolean debug = false;
+  // when using a real service, invoke should be true, for unit tests, this should be false.
+  private boolean invoke = true;
   
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
@@ -294,8 +296,11 @@ public class Msg {
     case PUBLISH_MRLCOMM_ERROR: {
       String errorMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishMRLCommError( errorMsg);
+      if(invoke){
+        arduino.invoke("publishMRLCommError",  errorMsg);
+      } else { 
+         arduino.publishMRLCommError( errorMsg);
+      }
       if(record != null){
         rxBuffer.append("< publishMRLCommError");
         rxBuffer.append("/");
@@ -305,7 +310,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -322,8 +327,11 @@ public class Msg {
       startPos += 1;
       int[] deviceSummary = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
+      if(invoke){
+        arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
+      } else { 
+         arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
+      }
       if(record != null){
         rxBuffer.append("< publishBoardInfo");
         rxBuffer.append("/");
@@ -343,15 +351,18 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
     case PUBLISH_ACK: {
       Integer function = ioCmd[startPos+1]; // bu8
       startPos += 1;
-
-      arduino.publishAck( function);
+      if(invoke){
+        arduino.invoke("publishAck",  function);
+      } else { 
+         arduino.publishAck( function);
+      }
       if(record != null){
         rxBuffer.append("< publishAck");
         rxBuffer.append("/");
@@ -361,7 +372,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -372,8 +383,11 @@ public class Msg {
       startPos += 1;
       Float secondFloat = f32(ioCmd, startPos+1);
       startPos += 4; //f32
-
-      arduino.publishEcho( myFloat,  myByte,  secondFloat);
+      if(invoke){
+        arduino.invoke("publishEcho",  myFloat,  myByte,  secondFloat);
+      } else { 
+         arduino.publishEcho( myFloat,  myByte,  secondFloat);
+      }
       if(record != null){
         rxBuffer.append("< publishEcho");
         rxBuffer.append("/");
@@ -387,15 +401,18 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
     case PUBLISH_CUSTOM_MSG: {
       int[] msg = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishCustomMsg( msg);
+      if(invoke){
+        arduino.invoke("publishCustomMsg",  msg);
+      } else { 
+         arduino.publishCustomMsg( msg);
+      }
       if(record != null){
         rxBuffer.append("< publishCustomMsg");
         rxBuffer.append("/");
@@ -405,7 +422,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -414,8 +431,11 @@ public class Msg {
       startPos += 1;
       int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishI2cData( deviceId,  data);
+      if(invoke){
+        arduino.invoke("publishI2cData",  deviceId,  data);
+      } else { 
+         arduino.publishI2cData( deviceId,  data);
+      }
       if(record != null){
         rxBuffer.append("< publishI2cData");
         rxBuffer.append("/");
@@ -427,15 +447,18 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
     case PUBLISH_DEBUG: {
       String debugMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishDebug( debugMsg);
+      if(invoke){
+        arduino.invoke("publishDebug",  debugMsg);
+      } else { 
+         arduino.publishDebug( debugMsg);
+      }
       if(record != null){
         rxBuffer.append("< publishDebug");
         rxBuffer.append("/");
@@ -445,15 +468,18 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
     case PUBLISH_PIN_ARRAY: {
       int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishPinArray( data);
+      if(invoke){
+        arduino.invoke("publishPinArray",  data);
+      } else { 
+         arduino.publishPinArray( data);
+      }
       if(record != null){
         rxBuffer.append("< publishPinArray");
         rxBuffer.append("/");
@@ -463,7 +489,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -476,8 +502,11 @@ public class Msg {
       startPos += 2; //b16
       Integer targetPos = b16(ioCmd, startPos+1);
       startPos += 2; //b16
-
-      arduino.publishServoEvent( deviceId,  eventType,  currentPos,  targetPos);
+      if(invoke){
+        arduino.invoke("publishServoEvent",  deviceId,  eventType,  currentPos,  targetPos);
+      } else { 
+         arduino.publishServoEvent( deviceId,  eventType,  currentPos,  targetPos);
+      }
       if(record != null){
         rxBuffer.append("< publishServoEvent");
         rxBuffer.append("/");
@@ -493,7 +522,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -502,8 +531,11 @@ public class Msg {
       startPos += 1;
       int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
-
-      arduino.publishSerialData( deviceId,  data);
+      if(invoke){
+        arduino.invoke("publishSerialData",  deviceId,  data);
+      } else { 
+         arduino.publishSerialData( deviceId,  data);
+      }
       if(record != null){
         rxBuffer.append("< publishSerialData");
         rxBuffer.append("/");
@@ -515,7 +547,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -524,8 +556,11 @@ public class Msg {
       startPos += 1;
       Integer echoTime = b16(ioCmd, startPos+1);
       startPos += 2; //b16
-
-      arduino.publishUltrasonicSensorData( deviceId,  echoTime);
+      if(invoke){
+        arduino.invoke("publishUltrasonicSensorData",  deviceId,  echoTime);
+      } else { 
+         arduino.publishUltrasonicSensorData( deviceId,  echoTime);
+      }
       if(record != null){
         rxBuffer.append("< publishUltrasonicSensorData");
         rxBuffer.append("/");
@@ -537,7 +572,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -546,8 +581,11 @@ public class Msg {
       startPos += 1;
       Integer position = b16(ioCmd, startPos+1);
       startPos += 2; //b16
-
-      arduino.publishEncoderData( deviceId,  position);
+      if(invoke){
+        arduino.invoke("publishEncoderData",  deviceId,  position);
+      } else { 
+         arduino.publishEncoderData( deviceId,  position);
+      }
       if(record != null){
         rxBuffer.append("< publishEncoderData");
         rxBuffer.append("/");
@@ -559,15 +597,18 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
     case PUBLISH_MRL_COMM_BEGIN: {
       Integer version = ioCmd[startPos+1]; // bu8
       startPos += 1;
-
-      arduino.publishMrlCommBegin( version);
+      if(invoke){
+        arduino.invoke("publishMrlCommBegin",  version);
+      } else { 
+         arduino.publishMrlCommBegin( version);
+      }
       if(record != null){
         rxBuffer.append("< publishMrlCommBegin");
         rxBuffer.append("/");
@@ -577,7 +618,7 @@ public class Msg {
           record.write(rxBuffer.toString().getBytes());
           rxBuffer.setLength(0);
         }catch(IOException e){}
-}
+      }
 
       break;
     }
@@ -2707,6 +2748,10 @@ public class Msg {
 
   public boolean isClearToSend() {
     return clearToSend;
+  }
+  
+  public void setInvoke(boolean b){	
+    invoke = b;	
   }
 
 }
