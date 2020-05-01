@@ -106,8 +106,9 @@
             <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
             <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>&nbsp;&nbsp;
             <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.loadFile('resource/Intro/Servo01_stop.py'):msg.loadFile('resource/Intro/Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
+            <!--toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.execFile('Servo01_stop.py'):msg.execFile('Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/-->&nbsp;&nbsp;
             <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Tutorial next page</button>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.execFile('resource/Intro/Servo01_start.py')">execFile test</button>
+            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.execFile('Servo01_stop.py')">execFile stop test</button>
             
         </td>
     </tr>
@@ -126,7 +127,10 @@
                 <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/><br>
                 A servo must be wired with its own power supply. <br>
                 Its not recommended to use the 5v power supply from the Arduino.<br>
-                You can do this with a 4 battery pack which will produce 6 volts for the servo.
+                You can do this with a 4 battery pack which will produce 6 volts for the servo.<br>
+                
+                For the controller to communicate with MyRobotLab, it is necessary to upload a script on the controller.<br>
+                <a class="row col-md-6" ng-click="setPanel('arduino')">You can follow the quick arduino tutorial</a>.
             </div>
             <div ng-show="service.isVirtual" >
                 <img src="../Intro/servoTutorial/arduino_servo_virtual.png" width="500"/><br>
