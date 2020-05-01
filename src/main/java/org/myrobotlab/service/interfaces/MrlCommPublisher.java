@@ -46,5 +46,8 @@ public interface MrlCommPublisher {
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime);
   
   public void ackTimeout();
+
+  // Necessary evil so Msg.java can invoke the publish methods on the publisher service.
+  public Object invoke(String method, Object... params);
   
 }
