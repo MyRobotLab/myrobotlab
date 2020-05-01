@@ -35,7 +35,7 @@
     
                 <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../Intro/img/serial.png"/>&nbsp;</div>
     
-                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="msg.start('OpenCV','OpenCV')"><img src="../Intro/img/visionActive.png"/>&nbsp;</div>
+                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="setPanel('opencv')"><img src="../Intro/img/visionActive.png"/>&nbsp;</div>
     
                 <!-- Left -->
     
@@ -108,7 +108,7 @@
             <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.loadFile('resource/Intro/Servo01_stop.py'):msg.loadFile('resource/Intro/Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
             <!--toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.execFile('Servo01_stop.py'):msg.execFile('Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/-->&nbsp;&nbsp;
             <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Tutorial next page</button>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.execFile('Servo01_stop.py')">execFile stop test</button>
+            <!--button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.execFile('Servo01_stop.py')">execFile stop test</button-->
             
         </td>
     </tr>
@@ -125,10 +125,11 @@
             <br/>
             <div ng-show="!service.isVirtual" >
                 <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/><br>
+                <br/>
                 A servo must be wired with its own power supply. <br>
                 Its not recommended to use the 5v power supply from the Arduino.<br>
                 You can do this with a 4 battery pack which will produce 6 volts for the servo.<br>
-                
+                <br/>
                 For the controller to communicate with MyRobotLab, it is necessary to upload a script on the controller.<br>
                 <a class="row col-md-6" ng-click="setPanel('arduino')">You can follow the quick arduino tutorial</a>.
             </div>
@@ -343,7 +344,7 @@
             The registry is critical for routing communication between Services.<br>
             In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
             <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://github.com/MyRobotLab/pyrobotlab/blob/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
         </td>
     
         <td>
@@ -352,7 +353,63 @@
     </tr>
     </table>
     <!------------------------ runtime end ------------------------------>
-    <!-- panels end -->
+    <!------------------------ opencv begin ------------------------------>
+    <table ng-show="showPanel('opencv')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../OpenCV.png"/>
+            <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.loadFile('resource/Intro/OpenCV01_stop.py'):msg.loadFile('resource/Intro/OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
+            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv1')">Tutorial next page</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p>The OpenCV Service is a library of vision functions.<br>  
+            Some of the functions are:<br>
+            <br/>
+            -Face detection<br> 
+            -Fast Lucas Kanade optical tracking<br>
+            -Background forground separation<br>
+            -Motion detection<br>
+            -Color segmentation<br>
+            -Yolo object recognition<br>
+            -More...<br>
+            <br/>
+            Many of the functions in OpenCV are implemented as pipeline filters in MRL. <br> That is a filter can run, and the output of one can be connected to the input of another. <br> Not all filters are capable of "pipelining"<br>
+            <br/>
+            How to Add an OpenCV Filter:<br>
+            <br/>
+            Step 1 - select from the available filter list<br>
+            Step 2 - press the arrow button to add it into the left pipeline<br>
+            Step 3 - give it a unique name<br>
+            Step 4 - the filter is running in OpenCV</p>
+            <br/>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/OpenCV">MORE INFO</a>
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/OpenCV.py">LOAD SCRIPT IN PYTHON</a>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ opencv end ------------------------------>
+    <!------------------------ opencv begin ------------------------------>
+    <table ng-show="showPanel('opencv1')" class="table table-striped">
+    <tr>
+        <td>
+            <img src="../OpenCV.png"/>
+            <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.loadFile('resource/Intro/OpenCV01_stop.py'):msg.loadFile('resource/Intro/OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;    
+            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv')">Previous page</button>
+            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv2')">Tutorial next page</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="tab-content" service-body panel="mrl.getPanel('opencv')"></div>
+        </td>
+    </tr>
+    </table>
+    <!------------------------ opencv end ------------------------------>     
+            <!-- panels end -->
     </td></tr></table>
     
     <!------------------------------INTRO-PAGE END---------------------------->
