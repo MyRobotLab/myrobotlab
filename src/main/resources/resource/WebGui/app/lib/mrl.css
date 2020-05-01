@@ -1112,12 +1112,13 @@ padding: 0px;
 }
 
 .videoContainer{
-  background-color: #b4b4b4;
+  background-color: #d4d4d4;
   border: 2px solid #eeeeee;
   position: relative;
   width: 100%;
   padding: 0;
   overflow: hidden;
+  vertical-align: middle;
   max-width: 100%;
 }
 
@@ -1131,15 +1132,18 @@ padding: 0px;
 .videoContent {
   background-color: rgba(224, 233, 255, 0.5);
   position: absolute;
-  background-image: url(/img/InMoov2/background.png);
-  background-repeat: no-repeat;
-  background-size: 100%;
-  top: 0;  
+  top: 0;
   left: 0;
   width: 100%;
+  font-size: larger;
   height: 100%;
   margin: 0;
+  color: #ababab;
   max-width: 100%;
+  vertical-align: middle !important;
+  text-align: center;
+  display: table;
+  table-layout: fixed;
 }
 
 .videoInfo{
@@ -1157,7 +1161,17 @@ padding: 0px;
   text-align: center;
   color: #ffffff;
 }
-
+.vcenter{
+  vertical-align: middle !important;
+  float: none;
+  text-align: center;
+  width: 100% !important;
+  height: 100% !important;
+  /* margin-top: 25%; */
+  /* margin-bottom: 33%; */
+  height: 100px !important;
+  display: table-cell;
+}
 .flexrow {
   display: flex;
   background: lightgray; /*for debug*/
