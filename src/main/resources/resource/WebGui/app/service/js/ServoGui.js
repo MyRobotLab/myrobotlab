@@ -125,6 +125,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             // meant feedback from MRLComm.c
             // but perhaps its come to mean
             // feedback from the service.moveTo
+        case 'onRefreshControllers':
+            $scope.possibleController = data
+            $scope.$apply()
+            break
         case 'onServoData':
             if ($scope.statusControlMode == 'status') {
                 $scope.service.currentPos = data.pos
@@ -200,7 +204,9 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
+    msg.subscribe("refreshControllers")
     msg.subscribe(this)
+    msg.send('refreshControllers')
 
     // no longer needed - interfaces now travel with a service
     // var runtimeName = mrl.getRuntime().name

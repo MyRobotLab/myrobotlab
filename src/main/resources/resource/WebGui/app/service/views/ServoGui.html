@@ -8,15 +8,22 @@
         <uib-tab heading="Basic" select="refreshSlider()">
           <!-- ------------------ Basic ------------------ -->
           <nav class="settingsbar preventDragSelect">
+
+<form class="form-inline" >
+
               <span class="labelColumn1">
-                Controller
+                Controllers 
+              </span>
+              <span ng-repeat="c in service.controllers"> 
+                
+                {{c}}&nbsp; 
               </span>
               <span>
-                <select class="form-group form-control" style="width: 120px!important;" title="Controllers list">
-                  <option selected>FIXME Detached</option>
-                  <option>FIXME left</option>
-                  <option>FIXME right</option>
+                
+                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                  <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}}  </option>
                 </select>
+
               </span> 
               <span id="PinEnable">
                 Pin
@@ -24,19 +31,9 @@
                 <button class="btn btn-default pinOn" ng-show="service.enabled" ng-click="msg.disable()">Enabled</button>
                 <button class="btn btn-default pinOff" ng-show="!service.enabled" ng-click="msg.setPin(pin);msg.enable()">Disabled</button>
               </span>
+            </nav>
 
-              <!-- right column option -->
-              <!--
-              <span class="lastColumn">
-                Encoder
-                <select class="form-group form-control" style="width: 120px!important;" title="Encoders list">
-                  <option selected>None</option>
-                  <option>Encoder 1</option>
-                  <option>SuperEncoder</option>
-                  <option>BadEncoder</option>
-                </select>              
-              </span>
-              -->
+</form>              
           </nav>
 
           <div class="row">
@@ -55,9 +52,8 @@
                     </select>              
                   </span>
                 </nav>
-
               </div><!--/verticalSpacer -->
-
+            
               <div class="sliderContainer"><!-- sliderContainer -->
                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
                 <div class="limitsZone">
@@ -215,21 +211,8 @@
     </div><!-- /.col-md-4 -->
   </div><!-- /.row -->  
   <!-- /Temp ------------ -->   
-  
-  <div class="row">
-    <div class="col-md-4">
-      <table class="table table-striped">
-        <tr ng-repeat="c in service.controllers">
-          <td>Controller: {{c}}</td>
-        </tr>
-      </table>
-    </div><!-- /.col-md-4 -->
-    <div class="col-md-8">
-    </div><!-- /.col-md-8 -->
-  </div><!-- /.row -->  
+
 
 </div><!-- /#servoContent -->    
-
-<!-- TODO - load info from javadoc -->
 
 <!-- /ServoGui.html -->
