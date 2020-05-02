@@ -4,7 +4,7 @@
 # more info @: http://myrobotlab.org/service/Intro
 #########################################
 # uncomment for virtual hardware
-Platform.setVirtual(True)
+# Platform.setVirtual(True)
 
 # Every settings like limits / port number / controller are saved after initial use
 # so you can share them between differents script 
@@ -21,7 +21,7 @@ servo01 = Runtime.start("servo01","Servo")
 # we tell to the service what is going on
 # intro.isServoActivated = True ### this gives a error because of readonly
 # intro.isServoActivated(True) ### this gives a error because of expecting no arg
-intro.isServoActivated()  ### this doesn't Activate anything as expected
+intro.isServoActivated()  ### this doesn't Activate anything
 intro.broadcastState()
 
 # initialize arduino
