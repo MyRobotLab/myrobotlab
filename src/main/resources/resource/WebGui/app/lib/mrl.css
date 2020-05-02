@@ -189,14 +189,17 @@ table, th, td {
 }
 
 .servoContent{
+  /* background-color: antiquewhite; */
   position: relative;
-  top: 6px;
+  top: 7px;
   width: 700px;
+  position: relative;
+  display: inline-table;
 }
 
 .servoContent input.form-control{
   width: 40px!important;
-  height: 22px;
+  height: 28px!important;
   padding: 3px;
   text-align: center;
   display: inline-flex;
@@ -208,7 +211,48 @@ table, th, td {
   top: 1px!important;
   right: -5px;
 }
-
+.servoContent .toggle *{
+  width: 220%;
+  color: #337ab7!important;
+}
+.gray1{
+  color: #cccccc!important;
+}
+.gray2{
+  color: #969696!important;
+}
+.align-middle{
+  vertical-align: middle!important;
+}
+.miniBTN .toggle-handle{
+  width: 28px!important;
+  height: 18px!important;
+  top: -2px!important;
+  right: 0px;
+}
+.miniBTN .toggle *{
+  width: 220%;
+  color: #337ab7!important;
+}
+.miniBTN .toggle-off-pad{
+  color: transparent !important;
+}
+.miniBTN .toggle-on-pad{
+  color: transparent !important;
+}
+.miniBTN .btn {
+  padding: 10px !important;
+  height: 18px !important;
+  width: 34px !important;
+}
+.miniBTN {
+  
+/* line-height: 33px; */
+  
+color: #616161;
+  
+padding: 0px;
+}
 .servoContent .btn-input{
   background-color: #92ca7f;
   width: 35px;
@@ -316,11 +360,6 @@ table, th, td {
   line-height: 18px!important;
 }
 
-.servoContent .toggle *{
-  width: 220%;
-  color: #337ab7!important;
-}
-
 .settingsbarBasic{
   padding-top: 0px!important;
   padding-bottom: 0px!important;
@@ -353,18 +392,21 @@ table, th, td {
 }
 
 .settingsbar .btn{
-  color: #FFFFFF;
+  /* color: #FFFFFF; */
   height: 28px;
+  /* padding: 4px !important; */
   font-size: smaller;
-  text-align: center;
+  text-align: center !important;
   /* top: 0px; */
   display: inline-flex;
   margin-right: 12px;
+  /* margin-left: 4px; */
 }
 
 .settingsbar .form-control, input{
   display: inline!important;
-  height: 28px;
+  height: 28px!important;
+  line-height: 28px !important;
   padding: 2px;
   margin-right: 14px;
 }
@@ -988,7 +1030,166 @@ table, th, td {
 .nav-icon{
     color:#9d9d9d;
     font-size: 24px;
-    padding-top: 8px;
+    padding-top: 12px;
     padding-left: 8px;
     float: right;
+}
+
+.OpenCVStyle {
+  position: relative;
+  top: 20px;
+}
+
+.OpenCVStyle .form-inline{
+  margin-left: 20px;
+}
+.OpenCVStyle hr{
+  margin-top: 6px;
+}
+
+.OpenCVStyle input[type=checkbox], input[type=radio] {
+    width: 15px;
+    height: 15px !important;
+    border-top-style: solid;
+    margin-left: 20px;
+    margin-right: 0px !important;
+    border-top-width: 21px;
+    box-shadow: inset 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.cellPadding{
+  padding: 8px;
+}
+
+.OpenCVStyle label{
+  margin-right: 8px !important;
+  vertical-align: middle;
+}
+
+.OpenCVStyle ::-webkit-scrollbar {
+      width: 8px;
+}
+
+.OpenCVStyle ::-webkit-scrollbar-thumb {
+      background: #56aaff; 
+}
+
+.OpenCVStyle .btn{
+  padding: 4px;
+  height: 28px;
+  width: 100%;
+  font-size: medium;
+  text-align: center !important;
+}
+
+.OpenCVStyle .form-group{
+  margin-right: 14px;
+  margin-left: 0px;
+}
+
+.OpenCVStyle .form-control{
+  height: 28px!important;
+  padding: 3px;
+  display: inline-flex;
+}
+.OpenCVStyle .glyphicon {
+  /* top: 3px; */
+}
+.progressText{
+  font-family: Arial, Helvetica, sans-serif!important;
+  width: 100%;
+  text-align: center;
+  color: #e2e2e2cc;
+  font-size: 13px;
+  letter-spacing: 3px;
+  font-weight: 900;
+  position: absolute;
+  height: 18px;
+  line-height: 19px;
+}
+.buttonsTable td{
+  padding: 2px;
+}
+
+.videoContainer{
+  background-color: #d4d4d4;
+  border: 2px solid #eeeeee;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.ratio {
+  width: 100%;
+  margin: 0;
+  display: block;
+  max-width: 100%;
+}
+
+.videoContent {
+  background-color: rgba(224, 233, 255, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  font-size: larger;
+  height: 100%;
+  margin: 0;
+  color: #ababab;
+  max-width: 100%;
+  vertical-align: middle !important;
+  text-align: center;
+  display: table;
+  table-layout: fixed;
+}
+
+.videoInfo{
+  width: 100%;
+  padding: 4px;
+  font-size: medium;
+  background-color: #f5f5f5;
+  vertical-align: middle;
+  color: #888888;
+  line-height: 16px;
+  font-family: Arial, Helvetica, sans-serif!important;
+}
+.progress-gray{
+  background-color: #efefef;
+  text-align: center;
+  color: #ffffff;
+}
+.vcenter{
+  vertical-align: middle !important;
+  float: none;
+  text-align: center;
+  width: 100% !important;
+  height: 100% !important;
+  /* margin-top: 25%; */
+  /* margin-bottom: 33%; */
+  height: 100px !important;
+  display: table-cell;
+}
+.flexrow {
+  display: flex;
+  background: lightgray; /*for debug*/
+}
+.flexrow > * {
+  flex: 1;
+  margin: 1em;
+  outline: auto green;
+}
+
+.settingsOpenCV{
+  display: block;
+  width: 100%;
+}
+
+#right{
+    text-align:right;
+}
+#wrapper{
+    width:100%
 }
