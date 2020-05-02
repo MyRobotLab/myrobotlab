@@ -1,6 +1,7 @@
 mkdir dev
 cd dev
 git clone https://github.com/MyRobotLab/InMoov2.git
+git clone https://github.com/MyRobotLab/ProgramAB.git
 git clone https://github.com/MyRobotLab/myrobotlab.git
 cd myrobotlab
 git pull
