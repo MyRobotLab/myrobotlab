@@ -88,7 +88,7 @@
             <label>Serial:</label>
             <P>Serial service is a way to send and receive serial data into and out of MRL</P>
             <a class="row col-md-3" href="http://myrobotlab.org/service/Serial" target="_blank">MORE INFO</a>
-            <a class="row col-md-4" href="http://myrobotlab.org/service/Serial" target="_blank">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-4" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Serial.py" target="_blank">SEE PYTHON SCRIPT</a>
         </td>
     </tr>
     <tr>
@@ -154,7 +154,7 @@
     </tr>
     <tr ng-show="!service.isVirtual">
         <td>
-            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller called arduino. Define your board type and choose the COM port according to your board.<br>You can open Window device manager/portCOM to know which COM port and rate to use.<br>For Linux and Mac arduino.connect("/dev/ttyUSB0").<br> Then Connect</p>
+            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller called arduino. Define your board type and choose the COM port according to your board. Open Windows device manager/port COM to know which COM port and rate to use.<br>For Linux and Mac arduino.connect("/dev/ttyUSB0").<br> Then press "Connect"</p>
         </td>
     </tr>
     <tr ng-show="!service.isVirtual">
@@ -292,7 +292,7 @@
         <td>
             <p>The Python Service allows development and execution of Python scripts which interact and control other Services.<br>  The GUI provides a rudementary IDE for this Service.  You can find a large number of scripts in the community library pyrobotlab</p>
             <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Python">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">SEE PYTHON SCRIPT</a>
             <iframe width="560" height="315" src="https://www.youtube.com/embed/_uQrJ0TkZlc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </td>
     </tr>
@@ -325,7 +325,7 @@
             <p>If you have something to hide this service is for you !<br>
             Useful to store passwords or secrets keys ( like api keys ) inside an AES safe and expose some code lines.<br>
             It is important to never expose API keys inside any script !</p>
-            <a class="row col-md-1" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Security.py">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-1" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Security.py">SEE PYTHON SCRIPT</a>
         </td>
     </tr>    
     <tr>
@@ -344,7 +344,7 @@
             The registry is critical for routing communication between Services.<br>
             In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
             <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">SEE PYTHON SCRIPT</a>
         </td>
     
         <td>
@@ -386,7 +386,7 @@
             Step 4 - the filter is running in OpenCV</p>
             <br/>
             <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/OpenCV">MORE INFO</a>
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/OpenCV.py">LOAD SCRIPT IN PYTHON</a>
+            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/OpenCV.py">SEE PYTHON SCRIPT</a>
         </td>
     </tr>
     </table>
@@ -399,7 +399,7 @@
             <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
             <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.loadFile('resource/Intro/OpenCV01_stop.py'):msg.loadFile('resource/Intro/OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;    
             <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv')">Previous page</button>
-            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv2')">Tutorial next page</button>
+            <!--button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv2')">Tutorial next page</button-->
         </td>
     </tr>
     <tr>
