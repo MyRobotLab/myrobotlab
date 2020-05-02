@@ -46,8 +46,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
 	// FIXME - why
+	@Deprecated
 	static boolean RobotCanMoveRandom = true;
 	private static final long serialVersionUID = 1L;
+	
+	public Arduino neopixelArduino = null;
 
 	static String speechRecognizer = "WebkitSpeechRecognition";
 
@@ -1593,10 +1596,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("WHATISTHISLANGUAGE"));
 
 		return mouth;
-	}
-
-	public void startOpenCV() throws Exception {
-		startOpenCV();
 	}
 
 	public InMoov2Arm startRightArm() {
