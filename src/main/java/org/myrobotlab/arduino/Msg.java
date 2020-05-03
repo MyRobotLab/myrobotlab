@@ -2,7 +2,7 @@ package org.myrobotlab.arduino;
 
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -97,7 +97,7 @@ public class Msg {
   }
   transient AckLock ackRecievedLock = new AckLock();
   // recording related
-  transient FileOutputStream record = null;
+  transient OutputStream record = null;
   transient StringBuilder rxBuffer = new StringBuilder();
   transient StringBuilder txBuffer = new StringBuilder();  
 
