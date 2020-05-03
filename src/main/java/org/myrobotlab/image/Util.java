@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -59,7 +60,7 @@ import org.slf4j.Logger;
  * references: http://www.colblindor.com/color-name-hue/ - excellent resource
  * 
  */
-@Deprecated /* this class should be avoided, for resource access Service.getResource... should be used */
+
 public class Util {
 
   /*
@@ -197,6 +198,15 @@ public class Util {
     return getImage(path, "unknown.png");
   }
 
+  /**
+   * this method should be avoided - it uses getResourceDir while is should
+   * expect full path - the calling Service should be using getResource or if its
+   * not a Service it should be using Service.getResource(class, resourceName)
+   * @param path
+   * @param defaultImage
+   * @return
+   */
+  @Deprecated 
   public static Image getImage(String path, String defaultImage) {
     Image icon = null;
     File imgURL = new File(getResourceDir() + File.separator + path);
@@ -232,12 +242,17 @@ public class Util {
   }
 
   /**
+   * this method should be avoided - it uses getResourceDir while is should
+   * expect full path - the calling Service should be using getResource or if its
+   * not a Service it should be using Service.getResource(class, resourceName)
    * by default will take the resource.dir property if set.
+   * 
    * If mrl is running inside of a jar it will use the user.dir + "resource" as the directory.
    * If mrl is not in a jar, it will use src/main/resources/resource  
    * 
    * @return current resource directory
    */
+  @Deprecated
   public static String getResourceDir() {
     // first try for the resource.dir system property
     /* THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE 
@@ -263,7 +278,8 @@ public class Util {
    * @param element - element to be tested
    * @return boolean
    */
-  public static Boolean isExistRessourceElement(String element) {
+  @Deprecated /* expect full path - don't use getResourceDir */
+  private static Boolean isExistRessourceElement(String element) {
     File f = new File(getResourceDir() + File.separator + element);
     if (!f.exists()) {
       return false;
@@ -271,6 +287,7 @@ public class Util {
     return true;
   }
 
+  @Deprecated /* expect full path - don't use getResourceDir */
   public static final ImageIcon getResourceIcon(String path) {
     ImageIcon icon = null;
 
@@ -408,6 +425,23 @@ public class Util {
     }
   }
 
+  public final static String getImageAsString(String filename) {
+    return getImageAsString(filename, "png");
+  }
+
+  public final static String getImageAsString(String filename, String type) {
+    try {
+      File file = new File(filename);
+      BufferedImage img = ImageIO.read(file);
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ImageIO.write(img, "png", bos);
+      return String.format("data:image/%s;base64,%s", type,  Base64.getEncoder().encodeToString(bos.toByteArray()));
+    } catch (IOException e) {
+      return null;
+    }
+  }
+
+
   /**
    * Produces a resized image that is of the given dimensions
    * 
@@ -464,6 +498,7 @@ public class Util {
     }
   }
 
+  @Deprecated /* expect full path - don't use getResourceDir */
   public static ImageIcon getImageIcon(String path, String description) {
     ImageIcon icon = null;
     String resourcePath = Util.getResourceDir() + File.separator + path;
