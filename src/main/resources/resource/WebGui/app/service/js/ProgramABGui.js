@@ -9,23 +9,18 @@ angular.module('mrlapp.service.ProgramABGui', [])
     // use $scope only when the variable
     // needs to interract with the display
     $scope.currentUserName =  ''
-    $scope.currentBotName = ''
     $scope.utterance = ''
 
-    $scope.userNames = {}
+    $scope.currentBotImage = null;
 
     // grab defaults.
     $scope.newUserName = $scope.service.currentUserName
-    $scope.newBotName = $scope.service.currentBotName
 
     // start info status
     $scope.chatLog = []
 
     // start info status
     $scope.log = []
-
-    $scope.hasSession = false
-
     
     // following the template.
     this.updateState = function(service) {
@@ -33,19 +28,15 @@ angular.module('mrlapp.service.ProgramABGui', [])
         // from user - service.currentSession is always read-only
         // all service data should never be written to, only read from
         $scope.currentUserName = service.currentUserName
-        $scope.currentBotName = service.currentBotName
         $scope.service = service
 
-        $scope.userNames = {}
-
-        $scope.hasSession = Object.keys($scope.service.sessions).length > 0
-
+        /*
         for (let bot in $scope.service.sessions){
             for (let username in $scope.service.sessions[bot]){
                 console.info(username)
-                $scope.userNames[username] = username
             }
         }
+        */
 
     }
     
@@ -56,6 +47,11 @@ angular.module('mrlapp.service.ProgramABGui', [])
 
         switch (inMsg.method) {
         
+        case 'onBotImage':
+            $scope.currentBotImage = data;
+            $scope.$apply()
+            break
+
         case 'onState':
             _self.updateState(data)
             $scope.$apply()
@@ -72,7 +68,7 @@ angular.module('mrlapp.service.ProgramABGui', [])
         case 'onText':
             var textData = data
             $scope.chatLog.unshift({
-                name: $scope.currentBotName,
+                name: $scope.service.currentBotName,
                 text: $sce.trustAsHtml(textData)
             })
             $log.info('onText', textData)
@@ -100,9 +96,20 @@ angular.module('mrlapp.service.ProgramABGui', [])
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
-        
+    }
+
+
+    $scope.getBotInfo = function() {
+        return $scope.service.bots[$scope.service.currentBotName]
+    }
+
+    $scope.getCurrentSession = function() {
+        return $scope.service.sessions[$scope.getCurrentSessionKey()]
     }
     
+    $scope.getCurrentSessionKey = function(){
+        return $scope.service.currentUserName + ' <-> ' + $scope.service.currentBotName
+    }
 
     $scope.test = function(session, utterance) {
         msg.send("getCategories","hello")
@@ -110,8 +117,8 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     
     $scope.getSessionResponse = function(utterance) {
-    	$log.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.currentBotName + ")")
-    	$scope.getResponse($scope.currentUserName, $scope.currentBotName, utterance)
+    	$log.info("SESSION GET RESPONSE (" + $scope.currentUserName + " " + $scope.service.currentBotName + ")")
+    	$scope.getResponse($scope.currentUserName, $scope.service.currentBotName, utterance)
     }
     
     $scope.getResponse = function(username, botname, utterance) {
@@ -136,7 +143,6 @@ angular.module('mrlapp.service.ProgramABGui', [])
     
     $scope.startSession = function(username, botname) {
         $scope.currentUserName = username
-        $scope.currentBotName = botname
     	$scope.chatLog.unshift("Reload Session for Bot " + botname)
         $scope.startSessionLabel = 'Reload Session'
         msg.send("startSession", username, botname)

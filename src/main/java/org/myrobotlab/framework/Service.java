@@ -58,6 +58,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
@@ -2811,6 +2812,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public String getServiceScript() {
     return getServiceScript(getClass());
+  }
+  
+  public String getResourceImage(String imageFile) {
+    String path = FileIO.gluePaths(getResourceDir(), imageFile);
+    return Util.getImageAsString(path);
   }
 
   /**
