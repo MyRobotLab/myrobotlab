@@ -695,7 +695,7 @@ padding: 0px;
 }
 
 .verticalSpacer{
-  height: 55px;
+  height: 57px;
   position: inherit;
   vertical-align: middle;
   width: 100%;
@@ -1193,3 +1193,210 @@ padding: 0px;
 #wrapper{
     width:100%
 }
+
+
+
+/*   Table Header Rotation th 45º and Speech recognition style */
+.table-header-rotated th.row-header{
+  width: auto;
+}
+
+.marginBottom {
+  margin-bottom: 0px;
+}
+.table-header-rotated td{
+  width: 54px;
+  min-width: 54px;
+  border-top: 1px solid #dddddd;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table-header-rotated th.rotate-45{
+  height: 80px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  position: relative;
+  vertical-align: bottom;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.table-header-rotated th.rotate-45 > div{
+  position: relative;
+  top: 0px;
+  left: 40px; /* 80 * tan(45) / 2 = 40 where 80 is the height on the cell and 45 is the transform angle*/
+  height: 100%;
+  -ms-transform:skew(-45deg,0deg);
+  -moz-transform:skew(-45deg,0deg);
+  -webkit-transform:skew(-45deg,0deg);
+  -o-transform:skew(-45deg,0deg);
+  transform:skew(-45deg,0deg);
+  overflow: hidden;
+  border-left: 1px solid #dddddd;
+  border-right: 1px solid #dddddd;
+  border-top: 1px solid #dddddd;
+}
+
+.table-header-rotated th.rotate-45 span {
+  -ms-transform:skew(45deg,0deg) rotate(315deg);
+  -moz-transform:skew(45deg,0deg) rotate(315deg);
+  -webkit-transform:skew(45deg,0deg) rotate(315deg);
+  -o-transform:skew(45deg,0deg) rotate(315deg);
+  transform:skew(45deg,0deg) rotate(315deg);
+  position: absolute;
+  bottom: 30px; /* 40 cos(45) = 28 with an additional 2px margin*/
+  left: -15px; /*Because it looked good, but there is probably a mathematical link here as well*/
+  display: inline-block;
+  /* width: 100%; */
+  width: 85px; /* 80 / cos(45) - 40 cos (45) = 85 where 80 is the height of the cell, 40 the width of the cell and 45 the transform angle*/
+  text-align: left;
+  white-space: nowrap; /*whether to display in one line or not*/
+}
+
+.table-header-rotated tr th:nth-child(1) {
+  width: 72px !important;
+  min-width: 72px;
+  white-space: nowrap;
+}
+.table-header-rotated tr td:nth-child(1) {
+  text-align: left;
+  white-space: nowrap;
+  width: 76px;
+  min-width: 76px;
+}
+.table-header-rotated td:nth-child(2) {
+  width: 144px;
+  min-width: 144px;
+}
+
+.table-header-rotated td:nth-child(8) {
+  min-width: 144px;
+}
+
+.table-header-rotated tr th:nth-child(8) {
+  width: calc( 100% - 474px);
+  text-align: center !important;
+  border-top-style: solid !important;
+  border-top-width: 1px !important;
+  border-top-color: #dddddd !important;
+  border-right-style: solid !important;
+  border-right-width: 1px !important;
+  border-right-color: #dddddd !important;
+}
+.table-header-rotated tr td:nth-child(8) {
+  width: calc( 100% - 474px);
+  text-align: left;
+}
+
+
+.cellStatustrue{
+  color: #5058ff;
+}
+
+.cellStatusfalse{
+  color: #cccccc;
+}
+
+.cellStatusUser{
+  font-weight: bold;
+}
+.cellStatusRobot{
+  background-color: #d6d9fd;
+  color: #170eda !important;
+  font-weight: normal;
+}
+.cellStatusRecognized{
+  font-size: large;
+  font-weight: bold;
+  text-align: left;
+  padding-left: 30px;
+}
+
+.tableScroll{
+  overflow-y: scroll;
+  height: 250px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #d8d8d8;
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-left-color: #dcdcdc;
+}
+
+.tableScroll ::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.tableScroll ::-webkit-scrollbar-thumb {
+  background: #56aaff !important; 
+}
+
+.Recognized{
+  width: 100%;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #c1c1c1;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #c1c1c1;
+}
+.Recognized td:nth-child(1) {
+  padding: 10px;
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-right-color: #c1c1c1;
+  width: 182px;
+  text-align: center;
+  font-weight: bold;
+}
+.Recognized td:nth-child(2) {
+  padding: 10px;
+}
+
+.labelSection{
+  font-size: large;
+  font-weight: bold;
+}
+
+
+.tableMic td:nth-child(1) {
+  padding-right: 20px;
+  padding-top: 4px;
+}
+.tableMic td:nth-child(2) {
+  padding-right: 30px;
+}
+.tableMic td:nth-child(2) {
+  /* padding-left: 30px; */
+  /* border-left-style: solid; */
+  /* border-left-width: 1px; */
+  /* border-left-color: #dcdcdc; */
+}
+.recordingStatus {
+  padding-bottom: 4px;
+  white-space: nowrap;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #dcdcdc;
+}
+.leftBorder {
+  padding-left: 30px;
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-left-color: #dcdcdc;
+}
+
+.tableMic select {
+  width: 305px;
+}
+
+.tableMic input{
+  width: 70px;
+}
+
+/*   -/Table Header Rotation th 45º and Speech recognition style */
