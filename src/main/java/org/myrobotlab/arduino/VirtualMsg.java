@@ -1517,8 +1517,8 @@ public class VirtualMsg {
   
   public void onBytes(byte[] bytes) {
     // TODO: This is a debug message only...
-    String byteString = StringUtil.byteArrayToIntString(bytes);
     if (debug) {
+      String byteString = StringUtil.byteArrayToIntString(bytes);
       log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
     // this gives us the current full buffer that was read from the seral
@@ -1572,8 +1572,6 @@ public class VirtualMsg {
             // there will be errors until the next magic byte is seen.
             byteCount = new AtomicInteger(0);
             msgSize = 0;
-            // Here we have an unknown method.. we have to be in a parser error sort of state.  
-            // reset the parser state and try to continue processing the rest of the bytes
             continue;
           }
           // we are in a valid parse state.    
@@ -1608,7 +1606,6 @@ public class VirtualMsg {
         log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
         // try again (clean up memory buffer)
         // Logging.logError(e);
-        
         // perhpas we could find the first occurance of 170.. and then attempt to re-parse at that point.
         // find the first occurance of 170 in the bytes
         // subbytes
