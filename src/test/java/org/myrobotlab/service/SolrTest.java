@@ -13,15 +13,13 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.AbstractServiceTest;
 
-@Ignore
+// @Ignore
 public class SolrTest extends AbstractServiceTest {
   //@Test
   public void testImageStoreFetch() throws SolrServerException, IOException {
