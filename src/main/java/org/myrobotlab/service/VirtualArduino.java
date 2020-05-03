@@ -47,11 +47,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   transient MrlComm mrlComm;
 
   /**
-   * Blender, JMonkey, other ...
-   */
-  //transient Simulator simulator;
-
-  /**
    * our emulated electronic UART
    */
 
@@ -182,11 +177,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public String setBoard(String board) {
+    // TODO: if the board type changes we need to reinit the pin map.
     log.info("setting board to type {}", board);
     this.board = board;
     mrlComm.boardType = Arduino.getBoardTypeId(board);
-    // Zxcv npinDefs = Arduino.getPinList(board);
-
     broadcastState();
     return board;
   }
@@ -201,7 +195,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   /*
    * easy way to set to get a 54 pin arduino
-   *
    */
   public String setBoardMega() {
     return setBoard(Arduino.BOARD_TYPE_MEGA);
@@ -222,46 +215,33 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   @Override
   public void startService() {
     super.startService();
-    
     if (board == null) {
       board = "uno";
     }
-
-    // start the serial service that talks to our uart.
-    // TODO: we really shouldn't have a serial service here.. we should really have just the uart.
-    // TODO: we need the DCE end of the uart!  not the DTE end!
-    // 
+    // start the serial service that talks to our uart/DCE.
     try {
-      // This is the virtual DCE side of the serial port.
       // create our uart serial port service.
       uart = (Serial) startPeer("uart");
       // create the virtual port for our port name and connect it.
       uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-      
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       log.error("Failed to create virtual uart port!", e);
       return;
     }
-    // TODO: the virtual arduino service listens for bytes from the uart.
+    // The virtual arduino service listens for bytes from the uart.
     uart.addByteListener(this.getName());
-    // TODO: this seems wrong.  the uart listens to it's own connect sort of messages?
-    uart.addPortListener(uart.getName());
     log.info("uart {}", uart);
-    
     ino = new MrlCommIno(this);
-    
     mrlComm = ino.getMrlComm();
     virtualMsg = mrlComm.getMsg();
+    // TODO: should this be false?
     // virtualMsg.setInvoke(false);
     boardInfo = mrlComm.boardInfo;
-    // boardInfo.setType(Arduino.BOARD_TYPE_ID_UNO);
+    // TODO: make sure we obey what the board type is supposed to be!
     setBoard(Arduino.BOARD_TYPE_UNO);
-    
     if (runner == null) {
       runner = new InoScriptRunner(this, ino);
     }
-
     start();
   }
 
@@ -285,24 +265,15 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return mrlComm.getDevice(deviceId);
   }
 
+  @Deprecated
   public int readBlocking(int address, int i) {
-    // TODO Auto-generated method stub
+    // TODO This method doesn't do anything and is only referenced in a unit test.
     return 0;
   }
 
   public void clearPinQueue(int address) {
     mrlComm.pinList.clear();
   }
-/*
-  public Simulator getSimulator() {
-    return simulator;
-  }
-
-  
-  public void attachSimulator(Simulator simulator) {
-    this.simulator = simulator;
-  }
-  */
 
   public MrlComm getMrlComm() {
     return mrlComm;
@@ -330,15 +301,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     this.mrlComm.softReset();
     this.mrlComm.getMsg().publishMrlCommBegin(Msg.MRLCOMM_VERSION);
     virtualMsg.onConnect(portName);
-    // wire the data back to mrlcomm?!
-    
-    // uart.addByteListener(mrlComm);
     start();
-    
-    // we should make sure we are a byte listener?
-    
-    // TODO: pass this down to virtualmsg?
-    // invoke("publishConnect", portName);
+    // chain the connect
+    invoke("publishConnect", portName);
   }
 
   @Override
@@ -349,9 +314,10 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   // chaining Serial's disconnect event ..
   @Override
   public void onDisconnect(String portName) {
-    // TODO: pass the disconnect message down to virtualmsg?
-    // msg.onDisconnect(portName);
-    // invoke("publishDisconnect", portName);
+    // pass the disconnect message down to virtualmsg
+    virtualMsg.onDisconnect(portName);
+    // chain
+    invoke("publishDisconnect", portName);
   }
 
   @Override
@@ -376,26 +342,21 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   // implements PinArrayControl ?
-  // @Override
   public List<PinDefinition> getPinList() {
     // 2 board types have been identified (perhaps this is based on processor?)
     // mega-like & uno like
-
     // if no change - just return the values
     if ((pinMap != null && board.contains("mega") && pinMap.size() == 70) || (pinMap != null && pinMap.size() == 20)) {
       return new ArrayList<PinDefinition>(pinIndex.values());
     }
-
     // create 2 indexes for fast retrieval
     // based on "name" or "address"
     pinMap = new HashMap<String, PinDefinition>();
     pinIndex = new HashMap<Integer, PinDefinition>();
     List<PinDefinition> pinList = new ArrayList<PinDefinition>();
-
     if (board.contains("mega")) {
       for (int i = 0; i < 70; ++i) {
         PinDefinition pindef = new PinDefinition(getName(), i);
-
         // begin wacky pin def logic
         String pinName = null;
         if (i == 0) {
@@ -482,21 +443,16 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     try {
 
       LoggingFactory.init("INFO");
-
       // WOW GOOD TEST !!!
       // Service.reserveRootAs("virtual.uart", "newName");
       // Service.buildDna("Tracking");
-
       // Runtime.start("webgui", "WebGui");
-
       // Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       VirtualArduino virtual = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       virtual.connect("COM99");
       arduino.connect("COM99");
-
       Runtime.start("gui", "SwingGui");
-
       // arduino.enablePin("D7");
       // String port = "COM5";
       // connect the virtual uart
@@ -504,7 +460,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       // connect the arduino to the other end
       // varduino.connect(port);
       // arduino.enablePin(54);
-
     } catch (Exception e) {
       log.error("main threw", e);
     }

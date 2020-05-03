@@ -35,10 +35,8 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void testService() throws Exception {
-    
     // our msg class shouldn't be invoking for the unit test
     msg.setInvoke(false);
-    
     // our test service
     VirtualArduino va = (VirtualArduino)service;
     // attach to the serial port for callbacks to this test.
@@ -46,8 +44,12 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     va.connect(testPort);
     // Let's exercise a few things on the virtual arduino service.
     List<PinDefinition> pins = va.getPinList();
-    assertTrue(pins.size() > 0);
-    
+    assertTrue(pins.size() == 20);
+    // This doesn't seem to work as expected.
+    // how about we change the board?
+    //    va.setBoardMega();
+    //    pins = va.getPinList();
+    //    assertTrue(pins.size() == 70);
     va.disconnect();
     assertFalse(va.isConnected());
     // see that it can't connect to a null port

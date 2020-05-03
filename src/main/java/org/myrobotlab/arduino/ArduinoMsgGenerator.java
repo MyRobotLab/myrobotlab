@@ -656,7 +656,7 @@ public class ArduinoMsgGenerator {
     javaCaseRecord.append("          record.write(rxBuffer.toString().getBytes());\n");
     javaCaseRecord.append("          rxBuffer.setLength(0);\n");
     // TODO: handle the exception here better?
-    javaCaseRecord.append("        }catch(IOException e){}\n");
+    javaCaseRecord.append("        } catch (IOException e) {\n          log.warn(\"failed recording bytes.\", e); \n        }\n");
 
     // TODO
     if (dir == '<') {

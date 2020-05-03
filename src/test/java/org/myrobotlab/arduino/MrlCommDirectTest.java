@@ -35,6 +35,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
   @Test
   public void testMrlCommBegin() throws Exception {
     msg = new Msg(this, null);
+    msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
     // now we want to just see how it responds when i send it various byte sequences.
     //byte[] testBytes = new byte[] {-86,14,1};
@@ -52,6 +53,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     String testMsg2 = "170,2,55,63";
 
     msg = new Msg(this, null);
+    msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
     byte[] testBytes = createTestBytes(testMsg1);
     msg.onBytes(testBytes);
@@ -71,6 +73,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
     String testMsg1 = "170,14,1,12,101,255";
     String testMsg2 = "170,2,55,63";
     msg = new Msg(this, null);
+    msg.setInvoke(false);
     assertFalse(msg.isClearToSend());
     msg.onBytes(createTestBytes(testMsg1));
     msg.onBytes(createTestBytes(testMsg2));
@@ -97,7 +100,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
  // @Test
   public void testMrlCommReconnect2() throws Exception {
     msg = new Msg(this, null);
-    //msg.setInvoke(false);
+    msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     for (int i = 0; i < 100; i++) {
@@ -111,7 +114,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
  //  @Test
   public void testMrlCommReconnect() throws Exception {
     msg = new Msg(this, null);
-   // msg.setInvoke(false);
+    msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     port.open();
@@ -138,7 +141,7 @@ public class MrlCommDirectTest implements SerialDataListener , MrlCommPublisher,
  // 
   public void testMrlComm() throws Exception {
     msg = new Msg(this, null);
-    //msg.setInvoke(false);
+    msg.setInvoke(false);
     PortJSSC port = new PortJSSC(portName, rate, dataBits, stopBits, parity);
     port.listen(this);
     port.open();
