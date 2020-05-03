@@ -47,9 +47,9 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     assertTrue(pins.size() == 20);
     // This doesn't seem to work as expected.
     // how about we change the board?
-    //    va.setBoardMega();
-    //    pins = va.getPinList();
-    //    assertTrue(pins.size() == 70);
+    // va.setBoardMega();
+    // pins = va.getPinList();
+    // assertTrue(pins.size() == 70);
     va.disconnect();
     assertFalse(va.isConnected());
     // see that it can't connect to a null port
@@ -58,23 +58,23 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // make sure after all that we can still connect to the virtual port.
     va.connect(testPort);
     assertTrue(va.isConnected());
-    
+    // now get our local serial port to start reading data from the virtual arduinio
+    serial.addByteListener(this);
     // connect our local serial port to the test port
     serial.connect(testPort);
     // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
     // At this point what do we have.
-// Thread.sleep(1000);
+    // Thread.sleep(1000);
     log.info("Writing a messge to attach a servo!");
     byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
     serial.write(data);
     // i'd like to see an ack come back!
-  //  Thread.sleep(1000);
+    //  Thread.sleep(1000);
     // TODO: this ack received needs to come back from the arduino service currently..
     // but it should be pushe down into the internals of the msg class
     // msg.ackReceived(0);
     serial.write(msg.servoMoveToMicroseconds(0, 2000));
-    System.out.println("Waiting... for what I have no idea.");
-    Thread.sleep(1000);
+
   }
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
@@ -162,7 +162,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   @Override
   public void onBytes(byte[] data) {
     // It's the responsibility of the MrlCommPublisher to relay serial bytes  / events to the msg.java class
-    log.info("On Bytes Virtual Arduino Test : {}", data);
     msg.onBytes(data);
   }
 
@@ -193,7 +192,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   public void ackTimeout() {
     // TODO: validate something...
     log.warn("Ack Timeout was seen!");
-    
   }
 
   @Override
