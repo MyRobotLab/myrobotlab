@@ -55,13 +55,13 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // see that it can't connect to a null port
     va.connect(null);
     assertFalse(va.isConnected());
-    // make sure after all that we can still connect to the virtual port.
-    va.connect(testPort);
-    assertTrue(va.isConnected());
     // now get our local serial port to start reading data from the virtual arduinio
     serial.addByteListener(this);
     // connect our local serial port to the test port
-    serial.connect(testPort);
+    serial.connect(testPort);    
+    // make sure after all that we can still connect to the virtual port.
+    va.connect(testPort);
+    assertTrue(va.isConnected());
     // we should be able to do a simple test that writes data to the uart.. and see it show up in the MrlCommIno script.
     // At this point what do we have.
     // Thread.sleep(1000);
@@ -74,7 +74,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // but it should be pushe down into the internals of the msg class
     // msg.ackReceived(0);
     serial.write(msg.servoMoveToMicroseconds(0, 2000));
-
+    // TODO: Test various messages
   }
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
