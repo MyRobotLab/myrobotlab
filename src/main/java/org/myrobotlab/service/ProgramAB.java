@@ -990,7 +990,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       if (botInfo != null) {
         File check = new File(path);
         if (check.exists()) {
-          return Util.getImageAsString(path);
+          return Util.getImageAsBase64(path);
         }
       }
 
