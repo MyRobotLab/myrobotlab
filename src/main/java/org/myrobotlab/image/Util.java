@@ -425,7 +425,7 @@ public class Util {
     }
   }
 
-  public final static String getImageAsString(String filename) {
+  public final static String getImageAsBase64(String filename) {
     return getImageAsString(filename, "png");
   }
 
