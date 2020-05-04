@@ -2053,6 +2053,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public void stopHead() {
 		speakBlocking(get("STOPHEAD"));
 		releasePeer("head");
+		releasePeer("mouthControl");
 		isHeadActivated = false;
 	}
 
