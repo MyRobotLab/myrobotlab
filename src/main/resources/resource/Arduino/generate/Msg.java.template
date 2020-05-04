@@ -88,7 +88,6 @@ public class %javaClass% {
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = %ackEnabled%;
-  private ByteArrayOutputStream baos = null;
   private volatile boolean clearToSend = %clearToSend%;
   public static class AckLock {
     // track if there is a pending message, when sending a message
@@ -342,7 +341,7 @@ public class %javaClass% {
     log.error(error);
   }
   
-  void appendMessage(int b8) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
 
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
@@ -352,75 +351,71 @@ public class %javaClass% {
 //    serial.write(b8 & 0xFF);
   }
   
-  void startMessage() {
-    baos = new ByteArrayOutputStream();
-  }
-
-  void appendMessagebool(boolean b1) throws Exception {
+  void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
     if (b1) {
-      appendMessage(1);
+      appendMessage(baos, 1);
     } else {
-      appendMessage(0);
+      appendMessage(baos, 0);
     }
   }
 
-  void appendMessageb16(int b16) throws Exception {
+  void appendMessageb16(ByteArrayOutputStream baos, int b16) throws Exception {
     if ((b16 < -32768) || (b16 > 32767)) {
       log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
     }
 
-    appendMessage(b16 >> 8 & 0xFF);
-    appendMessage(b16 & 0xFF);
+    appendMessage(baos, b16 >> 8 & 0xFF);
+    appendMessage(baos, b16 & 0xFF);
   }
 
-  void appendMessageb32(int b32) throws Exception {
-    appendMessage(b32 >> 24 & 0xFF);
-    appendMessage(b32 >> 16 & 0xFF);
-    appendMessage(b32 >> 8 & 0xFF);
-    appendMessage(b32 & 0xFF);
+  void appendMessageb32(ByteArrayOutputStream baos, int b32) throws Exception {
+    appendMessage(baos, b32 >> 24 & 0xFF);
+    appendMessage(baos, b32 >> 16 & 0xFF);
+    appendMessage(baos, b32 >> 8 & 0xFF);
+    appendMessage(baos, b32 & 0xFF);
   }
   
-  void appendMessagef32(float f32) throws Exception {
+  void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    appendMessage(f[3] & 0xFF);
-    appendMessage(f[2] & 0xFF);
-    appendMessage(f[1] & 0xFF);
-    appendMessage(f[0] & 0xFF);
+    appendMessage(baos, f[3] & 0xFF);
+    appendMessage(baos, f[2] & 0xFF);
+    appendMessage(baos, f[1] & 0xFF);
+    appendMessage(baos, f[0] & 0xFF);
   }
   
-  void appendMessagebu32(long b32) throws Exception {
-    appendMessage((int)(b32 >> 24 & 0xFF));
-    appendMessage((int)(b32 >> 16 & 0xFF));
-    appendMessage((int)(b32 >> 8 & 0xFF));
-    appendMessage((int)(b32 & 0xFF));
+  void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
+    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
+    appendMessage(baos, (int)(b32 & 0xFF));
   }
 
-  void appendMessage(String str) throws Exception {
-    appendMessage(str.getBytes());
+  void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
+    appendMessage(baos, str.getBytes());
   }
 
-  void appendMessage(int[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
     // write size
-    appendMessage(array.length & 0xFF);
+    appendMessage(baos, array.length & 0xFF);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i] & 0xFF);
+      appendMessage(baos, array[i] & 0xFF);
     }
   }
 
-  void appendMessage(byte[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
     // write size
-    appendMessage(array.length);
+    appendMessage(baos, array.length);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i]);
+      appendMessage(baos, array[i]);
     }
   }
   
-  synchronized byte[] sendMessage() throws Exception {
+  synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M
