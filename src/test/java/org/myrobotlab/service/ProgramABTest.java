@@ -313,10 +313,12 @@ public class ProgramABTest extends AbstractServiceTest {
   @Test
   public void testLocales() {
     // have locales
-    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
-    alice.setCurrentBotName("Alice");
-    Map<String,Locale> locales = alice.getLocales();
+    ProgramAB lloyd = (ProgramAB)Runtime.start("pikachu", "ProgramAB");
+    lloyd.setPath(path);
+    lloyd.setCurrentBotName("pikachu");
+    Map<String,Locale> locales = lloyd.getLocales();
     assertTrue(locales.size() > 0);
+    assertTrue(locales.containsKey("ja"));
   }
   
   @Test
@@ -325,18 +327,18 @@ public class ProgramABTest extends AbstractServiceTest {
     // reload bot creates a new bot leaves old references :(
     // verify reload
     /* Preferably with default bot
-    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
-    // did not work because Alice is lame
-    // alice.getResponse("my name is george");
-    Response response = alice.getResponse("what is my name?");
+    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
+    // did not work because lloyd is lame
+    // lloyd.getResponse("my name is george");
+    Response response = lloyd.getResponse("what is my name?");
       
-    BotInfo botInfo = alice.getBotInfo();
+    BotInfo botInfo = lloyd.getBotInfo();
     Bot oldBot = botInfo.getBot();
-    alice.reload();    
+    lloyd.reload();    
     Bot newBotInfo = botInfo.getBot();
     assertNotEquals(oldBot, newBotInfo);
 
-    response = alice.getResponse("what is my name?");
+    response = lloyd.getResponse("what is my name?");
     assertTrue(response.msg.contains("george"));
     */
   }
@@ -344,12 +346,13 @@ public class ProgramABTest extends AbstractServiceTest {
   @Test
   public void testDefaultSession() throws IOException {
     // minimal startup - create the service get a response
-    ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
-    alice.setCurrentBotName("Alice");
-    assertTrue(alice.getBots().size() > 0);
+    ProgramAB lloyd = (ProgramAB)Runtime.start("lloyd", "ProgramAB");
+    lloyd.setPath(path);
+    lloyd.setCurrentBotName("lloyd");
+    assertTrue(lloyd.getBots().size() > 0);
     
     // test for a response
-    Response response = alice.getResponse("Hello");
+    Response response = lloyd.getResponse("Hello");
     assertTrue(!response.msg.startsWith("I have no"));
     
     // not sure if this is worth testing - there might be more
