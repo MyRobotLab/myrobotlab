@@ -11,105 +11,148 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
     </h3>
 </div>
 <div ng-show="webkitSupport" class="row">
-    <table class="table table-striped">
-        <tr>
-            <td>
-                <button ng-click="changeListeningState()">
-                    <span>
-                        <img ng-src="{{micImage}}" width="150"/>
-                    </span>
-                </button>
-                <br>
-                <!-- select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select -->
-                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
-                    <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
-                </select>
-                {{service.status}}
-                
-                
-                <div ng-show="error != null" class="alert alert-danger" role="alert">
-                    {{error}}
-                    
-                    <p ng-show="error == 'audio-capture'">
-                        No microphone was found. Ensure that a microphone is installed and that
-                        <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892">microphone settings</a>
-                        are configured correctly.  </p>
-                    <p ng-show="error == 'not-allowed'">
-                        Permission to use microphone is blocked. To change, go to
-                        <a href="chrome://settings/contentExceptions#media-stream">chrome://settings/content/microphone?search=microphone</a>
-                    </p>
-                     <p ng-show="error == 'aborted'">
-                        This speech recognizer can only run in one tab.  It is likely another tab has stopped this instance from running.
-                    </p>
-                </div>
+
+  <table class="table marginBottom">
+    <tr>
+      <td style="width: 182px;">
+        <button ng-click="changeListeningState()">
+          <span>
+              <img ng-src="{{micImage}}" width="150"/>
+          </span>
+        </button>
+      </td>
+      <td>
+
+        <table class="tableMic marginBottom">
+          <tr>
+            <td colspan="2">
+              <!-- select class="form-control" id="select_language" ng-model="selectedLanguage" ng-change="setLanguage()" ng-options="name for (name, value) in languages"></select -->
+              <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                  <option ng-repeat="(key, value) in service.locales" value="{{key}}">{{value.displayLanguage}} - {{value.displayCountry}} </option>
+              </select>              
             </td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>recognized</td>
-            <td>{{recognizedResult.text}} &nbsp;&nbsp;&nbsp;{{recognizedResult.confidence}}</td>
-        </tr>
-        <tr>
-            <td>
-                <input type="text" class="form-control" placeholder="Hey Robot" ng-model="service.wakeWord"/>
+            <td colspan="2" class="leftBorder">
+              <h4>Wake settings</h4>
             </td>
-            <td>
-                <button class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">set wake word</button>
+          </tr>
+          <tr>
+            <td colspan="2">
+               {{service.status}}&nbsp;
             </td>
-        </tr>
-        <tr>
-            <td>
-                <input type="text" class="form-control" ng-model="service.afterSpeakingPauseMs"/>
+            <td colspan="2" class="leftBorder">
+              Word
+            </td>
+          </tr>
+          <tr>
+            <td class="recordingStatus">
+               Recording: <!-- the $scopes isRecording vs service.isRecording -->
+              {{isRecording}}
+            </td>
+            <td class="recordingStatus">
+              Restarts: {{restartCnt}}
+            </td>
+            <td class="leftBorder">
+              <input type="text" class="form-control" style="width: 80%" placeholder="Hey Robot" ng-model="service.wakeWord"/>
             </td>
             <td>
-                <button class="btn btn-default" ng-click="msg.setAfterSpeakingPause(service.afterSpeakingPauseMs)">set after speaking pause ms</button>
+              <button class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">Set</button>
             </td>
-        </tr>
-        <tr>
+          </tr>
+          <tr>
+            <td colspan="2">
+              After speaking pause
+            </td>
+            <td colspan="2" class="leftBorder">
+              Idle timeout
+            </td>
+          </tr>
+          <tr>
             <td>
-                <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/>seconds
-            
-            
-            
-            
+               <input type="text" class="form-control" ng-model="service.afterSpeakingPauseMs"/> ms
             </td>
             <td>
-                <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">set idle timeout for wake word</button>
+             <button class="btn btn-default" ng-click="msg.setAfterSpeakingPause(service.afterSpeakingPauseMs)">Set</button>
             </td>
-        </tr>
-        <!-- tr>
-            <td>start time</td>
-            <td>{{startTimestamp}}</td>
-        </tr -->
+            <td class="leftBorder">
+              <input type="text" class="form-control" ng-model="service.wakeWordIdleTimeoutSeconds"/> seconds
+            </td>
+            <td>
+              <button class="btn btn-default" ng-click="msg.setWakeWordTimeout(service.wakeWordIdleTimeoutSeconds)">Set</button>
+            </td>
+          </tr>                       
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table class="Recognized">
+    <tr>
+      <td>Recognized<br>
+        <span class="glyphicon glyphicon-asterisk" style="color: hsl(calc(({{recognizedResult.confidence}}) * 200 - 100),100%, 35%);"> </span> {{recognizedResult.confidence}}
+      </td>
+      <td class="cellStatusRecognized" style="color: hsl(calc(({{recognizedResult.confidence}}) * 200 - 100),100%, 35%);">{{recognizedResult.text}}</td>
+    </tr>    
+  </table>  
+  <br >
+      <!-- tr>
+          <td>start time</td>
+          <td>{{startTimestamp}}</td>
+      </tr -->
+    
+  <div class="row text-center">
+    <label>Listening event log</label>
+  </div>
+
+  <table class="table table-striped table-header-rotated marginBottom">
+    <thead>
+      <tr>
+        <!-- Following headers are rotated -->
+        <th class="rotate-45"><div><span>Confidence</span></div></th>
+        <th class="rotate-45"><div><span>Timestamp</span></div></th>
+        <th class="rotate-45"><div><span>Recording</span></div></th>
+        <th class="rotate-45"><div><span>Listening</span></div></th>
+        <th class="rotate-45"><div><span>Awake</span></div></th>
+        <th class="rotate-45"><div><span>Speaking</span></div></th>
+        <th class="rotate-45"><div><span>Published</span></div></th>
+        <th class="rotate-000"><div><span>Recognized</span></div></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="visibility: collapse;">
+        <!-- these td are important to maintain the widths of the columns, to match the following table -->
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="tableScroll">
+    <table class="table table-striped table-header-rotated marginBottom">
+      <!--
+      <thead>
         <tr>
-            <td>recording</td>
-            <!-- the $scopes isRecording vs service.isRecording -->
-            <td>{{isRecording}}</td>
+          <th class="rotate-45"><div><span>Confidence</span></div></th>
+          <th class="rotate-45"><div><span>Timestamp</span></div></th>
+          <th class="rotate-45"><div><span>Recording</span></div></th>
+          <th class="rotate-45"><div><span>Listening</span></div></th>
+          <th class="rotate-45"><div><span>Awake</span></div></th>
+          <th class="rotate-45"><div><span>Speaking</span></div></th>
+          <th class="rotate-45"><div><span>Published</span></div></th>
+          <th class="rotate-000"><div><span>Recognized</span></div></th>
         </tr>
-        <tr>
-            <td>restarts</td>
-            <td>{{restartCnt}}</td>
+      </thead>
+      -->
+      <tbody>
+        <tr ng-repeat="entry in log track by $index">
+
+          <td><span class="glyphicon glyphicon-asterisk" style="color: hsl(calc(({{entry.confidence}}) * 200 - 100),100%, 35%);"> </span> {{entry.confidence}}</td>
+          <td>{{entry.ts}}</td>
+          <td class="cellStatus{{entry.isRecording}}">{{entry.isRecording}}</td>
+          <td class="cellStatus{{entry.isListening}}">{{entry.isListening}}</td>
+          <td class="cellStatus{{entry.isAwake}}">{{entry.isAwake}}</td>
+          <td class="cellStatus{{entry.isSpeaking}}">{{entry.isSpeaking}}</td>
+          <td class="cellStatus{{entry.publishText}}">{{entry.publishText}}</td>
+          <td class="cellStatus{{(entry.isSpeaking)?'Robot':'User'}}" style="color: hsl(calc(({{entry.confidence}}) * 200 - 100),100%, 35%);">{{entry.text}}</td>
         </tr>
+      </tbody>
     </table>
-    <label>listening event log</label>
-    <table class="table table-striped"><tr>
-            <th>confidence</th>
-    <th>timestamp</th>
-    <th>recording</th>
-    <th>listening</th>
-    <th>awake</th>
-    <th>speaking</th>
-    <th>published</th>
-    <th>recognized</th>
-</tr>
-<tr ng-repeat="entry in log track by $index">
-    <td>{{entry.confidence}}</td>
-    <td>{{entry.ts}}</td>
-    <td>{{entry.isRecording}}</td>
-    <td>{{entry.isListening}}</td>
-    <td>{{entry.isAwake}}</td>
-    <td>{{entry.isSpeaking}}</td>
-    <td>{{entry.publishText}}</td>
-    <td>{{entry.text}}</td>
-</tr>
-</table></div>
+  </div>
+</div>
