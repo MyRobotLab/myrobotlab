@@ -2,9 +2,9 @@ package org.myrobotlab.programab;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Properties;
 
 import org.alicebot.ab.Bot;
+import org.alicebot.ab.Properties;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -23,25 +23,22 @@ public class BotInfo {
   private transient Bot bot;
   public Properties properties = new Properties();
   private transient ProgramAB programab;
-  public Locale locale = new Locale("en-US");
+  // public Locale locale = new Locale("en-US");
+  /**
+   * base64 png
+   */
+  public String img;
  
   public BotInfo(ProgramAB programab, File path) {
-    StringBuilder sb = new StringBuilder();
     this.name = path.getName();
     this.path = path;
-    this.programab = programab;
-    sb.append("Found Bot ").append(name);
-    try {
-      properties.load(new FileInputStream(FileIO.gluePaths(path.getAbsolutePath(), "config/mrl.properties")));
-      sb.append(" with config/mrl.properties");
-      if (properties.get("locale") != null && properties.get("locale").toString().length() > 1) {
-        locale = new Locale((String)properties.get("locale"));
-      }
-    } catch(Exception e) {}
-    sb.append(" @ ").append(path);
-    programab.info(sb.toString());
+    this.programab = programab;              
+    programab.info("found bot %s", name);
+    properties.getProperties(FileIO.gluePaths(path.getAbsolutePath(), "config/properties.txt"));
+    log.info("loaded properties");
   }
 
+  
   /**
    * task to save predicates and getting responses will eventually call getBot
    * we don't want initialization to create 2 when only one is needed
@@ -50,14 +47,12 @@ public class BotInfo {
   public synchronized Bot getBot() {
     if (bot == null) {
       // lazy loading of bot - created on the first use
-      /*
-      if (properties.get("locale") != null) {
-        // bot = new Bot(name, path.getAbsolutePath(), new java.util.Locale((String)properties.get("locale")));
+      
+      if (properties.containsKey("locale")) {
+        bot = new Bot(name, path.getAbsolutePath(), java.util.Locale.forLanguageTag(properties.get("locale")));
       } else {
         bot = new Bot(name, path.getAbsolutePath());
-      }*/
-      
-      bot = new Bot(name, path.getAbsolutePath(), locale.transform());
+      }
 
       bot.setSraixHandler(new MrlSraixHandler(programab));
     }
