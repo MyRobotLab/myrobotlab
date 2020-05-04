@@ -1717,11 +1717,22 @@ public class VirtualMsg {
   synchronized byte[] sendMessage() throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
+      // wait for a pending ack to be received before we process our message.^M
       waitForAck();
     }
     // write data if serial not null.
     if (serial != null) {
       serial.write(message);
+      if (ackEnabled){
+        // flip our flag because we're going to send the message now.
+        // TODO: is this deadlocked because it's synchronized?!
+        // TODO: should this be set regardless of if the serial is null?
+        log.info("Setting pending flag.");
+        synchronized (ackRecievedLock) {
+          ackRecievedLock.pendingMessage = true;
+          ackRecievedLock.notifyAll();
+        }
+      }      
     }
     return message;
   }
