@@ -2,6 +2,10 @@
 <div class="OpenCVStyle preventDragSelect">
     <div class="row">    
         <div class="form-inline">
+            <div class="form-group"> 
+                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()"><span class="glyphicon glyphicon-play text-primary"></span> &nbsp;Start Capture</button>
+                <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()"><span class="glyphicon glyphicon-stop"></span> &nbsp;Stop Capture</button>
+            </div>
             <div class="form-group">
                 <label>Grabber</label>                   
                 <select class="form-goup form-control" style="width: 120px!important;" title="Source list">
@@ -44,10 +48,13 @@
                     <input type="text" style="width:146px" placeholder="http://example.com/video" class="form-control" />
                 </div>
             </div>
-            <div class="form-group"> <!-- pull-right -->
+            <!-- pull-right -->
+            <!--
+            <div class="form-group"> 
                 <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()"><span class="glyphicon glyphicon-play text-primary"></span> &nbsp;Start Capture</button>
                 <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()"><span class="glyphicon glyphicon-stop"></span> &nbsp;Stop Capture</button>
             </div>
+            -->
         </div>        
     </div><!-- /.row -->
 
