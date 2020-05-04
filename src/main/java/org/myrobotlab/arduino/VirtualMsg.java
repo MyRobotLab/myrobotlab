@@ -88,7 +88,6 @@ public class VirtualMsg {
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = false;
-  private ByteArrayOutputStream baos = null;
   private volatile boolean clearToSend = true;
   public static class AckLock {
     // track if there is a pending message, when sending a message
@@ -850,14 +849,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishMRLCommError");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + (1 + errorMsg.length())); // size
-      appendMessage(PUBLISH_MRLCOMM_ERROR); // msgType = 1
-      appendMessage(errorMsg);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + errorMsg.length())); // size
+      appendMessage(baos, PUBLISH_MRLCOMM_ERROR); // msgType = 1
+      appendMessage(baos, errorMsg);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -881,19 +880,19 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishBoardInfo");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
-      appendMessage(PUBLISH_BOARD_INFO); // msgType = 3
-      appendMessage(version);
-      appendMessage(boardType);
-      appendMessageb16(microsPerLoop);
-      appendMessageb16(sram);
-      appendMessage(activePins);
-      appendMessage(deviceSummary);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
+      appendMessage(baos, PUBLISH_BOARD_INFO); // msgType = 3
+      appendMessage(baos, version);
+      appendMessage(baos, boardType);
+      appendMessageb16(baos, microsPerLoop);
+      appendMessageb16(baos, sram);
+      appendMessage(baos, activePins);
+      appendMessage(baos, deviceSummary);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -927,14 +926,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishAck");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(PUBLISH_ACK); // msgType = 9
-      appendMessage(function);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, PUBLISH_ACK); // msgType = 9
+      appendMessage(baos, function);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -958,16 +957,16 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishEcho");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 4 + 1 + 4); // size
-      appendMessage(PUBLISH_ECHO); // msgType = 11
-      appendMessagef32(myFloat);
-      appendMessage(myByte);
-      appendMessagef32(secondFloat);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4 + 1 + 4); // size
+      appendMessage(baos, PUBLISH_ECHO); // msgType = 11
+      appendMessagef32(baos, myFloat);
+      appendMessage(baos, myByte);
+      appendMessagef32(baos, secondFloat);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -995,14 +994,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishCustomMsg");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + (1 + msg.length)); // size
-      appendMessage(PUBLISH_CUSTOM_MSG); // msgType = 13
-      appendMessage(msg);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + msg.length)); // size
+      appendMessage(baos, PUBLISH_CUSTOM_MSG); // msgType = 13
+      appendMessage(baos, msg);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1026,15 +1025,15 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishI2cData");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + (1 + data.length)); // size
-      appendMessage(PUBLISH_I2C_DATA); // msgType = 19
-      appendMessage(deviceId);
-      appendMessage(data);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_I2C_DATA); // msgType = 19
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1060,14 +1059,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishDebug");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + (1 + debugMsg.length())); // size
-      appendMessage(PUBLISH_DEBUG); // msgType = 28
-      appendMessage(debugMsg);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + debugMsg.length())); // size
+      appendMessage(baos, PUBLISH_DEBUG); // msgType = 28
+      appendMessage(baos, debugMsg);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1091,14 +1090,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishPinArray");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + (1 + data.length)); // size
-      appendMessage(PUBLISH_PIN_ARRAY); // msgType = 29
-      appendMessage(data);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_PIN_ARRAY); // msgType = 29
+      appendMessage(baos, data);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1122,17 +1121,17 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishServoEvent");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 2 + 2); // size
-      appendMessage(PUBLISH_SERVO_EVENT); // msgType = 40
-      appendMessage(deviceId);
-      appendMessage(eventType);
-      appendMessageb16(currentPos);
-      appendMessageb16(targetPos);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2); // size
+      appendMessage(baos, PUBLISH_SERVO_EVENT); // msgType = 40
+      appendMessage(baos, deviceId);
+      appendMessage(baos, eventType);
+      appendMessageb16(baos, currentPos);
+      appendMessageb16(baos, targetPos);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1162,15 +1161,15 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishSerialData");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + (1 + data.length)); // size
-      appendMessage(PUBLISH_SERIAL_DATA); // msgType = 43
-      appendMessage(deviceId);
-      appendMessage(data);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_SERIAL_DATA); // msgType = 43
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1196,15 +1195,15 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishUltrasonicSensorData");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 2); // size
-      appendMessage(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
-      appendMessage(deviceId);
-      appendMessageb16(echoTime);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, echoTime);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1230,15 +1229,15 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishEncoderData");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 2); // size
-      appendMessage(PUBLISH_ENCODER_DATA); // msgType = 54
-      appendMessage(deviceId);
-      appendMessageb16(position);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, PUBLISH_ENCODER_DATA); // msgType = 54
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, position);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1264,14 +1263,14 @@ public class VirtualMsg {
     if (debug) {
       log.info("Sending Message: publishMrlCommBegin");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
-      appendMessage(version);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+      appendMessage(baos, version);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1636,7 +1635,7 @@ public class VirtualMsg {
     log.error(error);
   }
   
-  void appendMessage(int b8) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
 
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
@@ -1646,75 +1645,71 @@ public class VirtualMsg {
 //    serial.write(b8 & 0xFF);
   }
   
-  void startMessage() {
-    baos = new ByteArrayOutputStream();
-  }
-
-  void appendMessagebool(boolean b1) throws Exception {
+  void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
     if (b1) {
-      appendMessage(1);
+      appendMessage(baos, 1);
     } else {
-      appendMessage(0);
+      appendMessage(baos, 0);
     }
   }
 
-  void appendMessageb16(int b16) throws Exception {
+  void appendMessageb16(ByteArrayOutputStream baos, int b16) throws Exception {
     if ((b16 < -32768) || (b16 > 32767)) {
       log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
     }
 
-    appendMessage(b16 >> 8 & 0xFF);
-    appendMessage(b16 & 0xFF);
+    appendMessage(baos, b16 >> 8 & 0xFF);
+    appendMessage(baos, b16 & 0xFF);
   }
 
-  void appendMessageb32(int b32) throws Exception {
-    appendMessage(b32 >> 24 & 0xFF);
-    appendMessage(b32 >> 16 & 0xFF);
-    appendMessage(b32 >> 8 & 0xFF);
-    appendMessage(b32 & 0xFF);
+  void appendMessageb32(ByteArrayOutputStream baos, int b32) throws Exception {
+    appendMessage(baos, b32 >> 24 & 0xFF);
+    appendMessage(baos, b32 >> 16 & 0xFF);
+    appendMessage(baos, b32 >> 8 & 0xFF);
+    appendMessage(baos, b32 & 0xFF);
   }
   
-  void appendMessagef32(float f32) throws Exception {
+  void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    appendMessage(f[3] & 0xFF);
-    appendMessage(f[2] & 0xFF);
-    appendMessage(f[1] & 0xFF);
-    appendMessage(f[0] & 0xFF);
+    appendMessage(baos, f[3] & 0xFF);
+    appendMessage(baos, f[2] & 0xFF);
+    appendMessage(baos, f[1] & 0xFF);
+    appendMessage(baos, f[0] & 0xFF);
   }
   
-  void appendMessagebu32(long b32) throws Exception {
-    appendMessage((int)(b32 >> 24 & 0xFF));
-    appendMessage((int)(b32 >> 16 & 0xFF));
-    appendMessage((int)(b32 >> 8 & 0xFF));
-    appendMessage((int)(b32 & 0xFF));
+  void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
+    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
+    appendMessage(baos, (int)(b32 & 0xFF));
   }
 
-  void appendMessage(String str) throws Exception {
-    appendMessage(str.getBytes());
+  void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
+    appendMessage(baos, str.getBytes());
   }
 
-  void appendMessage(int[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
     // write size
-    appendMessage(array.length & 0xFF);
+    appendMessage(baos, array.length & 0xFF);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i] & 0xFF);
+      appendMessage(baos, array[i] & 0xFF);
     }
   }
 
-  void appendMessage(byte[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
     // write size
-    appendMessage(array.length);
+    appendMessage(baos, array.length);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i]);
+      appendMessage(baos, array[i]);
     }
   }
   
-  synchronized byte[] sendMessage() throws Exception {
+  synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M

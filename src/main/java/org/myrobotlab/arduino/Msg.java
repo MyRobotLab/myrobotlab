@@ -88,7 +88,6 @@ public class Msg {
   private int errorHardwareToServiceRxCnt = 0;
   
   boolean ackEnabled = true;
-  private ByteArrayOutputStream baos = null;
   private volatile boolean clearToSend = false;
   public static class AckLock {
     // track if there is a pending message, when sending a message
@@ -659,13 +658,13 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: getBoardInfo");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1); // size
-      appendMessage(GET_BOARD_INFO); // msgType = 2
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, GET_BOARD_INFO); // msgType = 2
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -687,16 +686,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: enablePin");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 2); // size
-      appendMessage(ENABLE_PIN); // msgType = 4
-      appendMessage(address);
-      appendMessage(type);
-      appendMessageb16(rate);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2); // size
+      appendMessage(baos, ENABLE_PIN); // msgType = 4
+      appendMessage(baos, address);
+      appendMessage(baos, type);
+      appendMessageb16(baos, rate);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -724,14 +723,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setDebug");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(SET_DEBUG); // msgType = 5
-      appendMessagebool(enabled);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SET_DEBUG); // msgType = 5
+      appendMessagebool(baos, enabled);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -755,14 +754,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setSerialRate");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 4); // size
-      appendMessage(SET_SERIAL_RATE); // msgType = 6
-      appendMessageb32(rate);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4); // size
+      appendMessage(baos, SET_SERIAL_RATE); // msgType = 6
+      appendMessageb32(baos, rate);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -786,13 +785,13 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: softReset");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1); // size
-      appendMessage(SOFT_RESET); // msgType = 7
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, SOFT_RESET); // msgType = 7
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -814,14 +813,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: enableAck");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(ENABLE_ACK); // msgType = 8
-      appendMessagebool(enabled);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ENABLE_ACK); // msgType = 8
+      appendMessagebool(baos, enabled);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -845,16 +844,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: echo");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 4 + 1 + 4); // size
-      appendMessage(ECHO); // msgType = 10
-      appendMessagef32(myFloat);
-      appendMessage(myByte);
-      appendMessagef32(secondFloat);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4 + 1 + 4); // size
+      appendMessage(baos, ECHO); // msgType = 10
+      appendMessagef32(baos, myFloat);
+      appendMessage(baos, myByte);
+      appendMessagef32(baos, secondFloat);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -882,14 +881,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: customMsg");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + (1 + msg.length)); // size
-      appendMessage(CUSTOM_MSG); // msgType = 12
-      appendMessage(msg);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + msg.length)); // size
+      appendMessage(baos, CUSTOM_MSG); // msgType = 12
+      appendMessage(baos, msg);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -913,14 +912,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: deviceDetach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(DEVICE_DETACH); // msgType = 14
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, DEVICE_DETACH); // msgType = 14
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -944,15 +943,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: i2cBusAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(I2C_BUS_ATTACH); // msgType = 15
-      appendMessage(deviceId);
-      appendMessage(i2cBus);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, I2C_BUS_ATTACH); // msgType = 15
+      appendMessage(baos, deviceId);
+      appendMessage(baos, i2cBus);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -978,16 +977,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: i2cRead");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(I2C_READ); // msgType = 16
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(size);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, I2C_READ); // msgType = 16
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, size);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1015,16 +1014,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: i2cWrite");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + (1 + data.length)); // size
-      appendMessage(I2C_WRITE); // msgType = 17
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(data);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, I2C_WRITE); // msgType = 17
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, data);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1052,17 +1051,17 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: i2cWriteRead");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1 + 1); // size
-      appendMessage(I2C_WRITE_READ); // msgType = 18
-      appendMessage(deviceId);
-      appendMessage(deviceAddress);
-      appendMessage(readSize);
-      appendMessage(writeValue);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, I2C_WRITE_READ); // msgType = 18
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, readSize);
+      appendMessage(baos, writeValue);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1092,16 +1091,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: neoPixelAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 4); // size
-      appendMessage(NEO_PIXEL_ATTACH); // msgType = 20
-      appendMessage(deviceId);
-      appendMessage(pin);
-      appendMessageb32(numPixels);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 4); // size
+      appendMessage(baos, NEO_PIXEL_ATTACH); // msgType = 20
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
+      appendMessageb32(baos, numPixels);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1129,19 +1128,19 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: neoPixelSetAnimation");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
-      appendMessage(NEO_PIXEL_SET_ANIMATION); // msgType = 21
-      appendMessage(deviceId);
-      appendMessage(animation);
-      appendMessage(red);
-      appendMessage(green);
-      appendMessage(blue);
-      appendMessageb16(speed);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+      appendMessage(baos, NEO_PIXEL_SET_ANIMATION); // msgType = 21
+      appendMessage(baos, deviceId);
+      appendMessage(baos, animation);
+      appendMessage(baos, red);
+      appendMessage(baos, green);
+      appendMessage(baos, blue);
+      appendMessageb16(baos, speed);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1175,15 +1174,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: neoPixelWriteMatrix");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + (1 + buffer.length)); // size
-      appendMessage(NEO_PIXEL_WRITE_MATRIX); // msgType = 22
-      appendMessage(deviceId);
-      appendMessage(buffer);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + buffer.length)); // size
+      appendMessage(baos, NEO_PIXEL_WRITE_MATRIX); // msgType = 22
+      appendMessage(baos, deviceId);
+      appendMessage(baos, buffer);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1209,15 +1208,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: analogWrite");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(ANALOG_WRITE); // msgType = 23
-      appendMessage(pin);
-      appendMessage(value);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, ANALOG_WRITE); // msgType = 23
+      appendMessage(baos, pin);
+      appendMessage(baos, value);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1243,15 +1242,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: digitalWrite");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(DIGITAL_WRITE); // msgType = 24
-      appendMessage(pin);
-      appendMessage(value);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, DIGITAL_WRITE); // msgType = 24
+      appendMessage(baos, pin);
+      appendMessage(baos, value);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1277,14 +1276,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: disablePin");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(DISABLE_PIN); // msgType = 25
-      appendMessage(pin);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, DISABLE_PIN); // msgType = 25
+      appendMessage(baos, pin);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1308,13 +1307,13 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: disablePins");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1); // size
-      appendMessage(DISABLE_PINS); // msgType = 26
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, DISABLE_PINS); // msgType = 26
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1336,15 +1335,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: pinMode");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(PIN_MODE); // msgType = 27
-      appendMessage(pin);
-      appendMessage(mode);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, PIN_MODE); // msgType = 27
+      appendMessage(baos, pin);
+      appendMessage(baos, mode);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1370,15 +1369,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setTrigger");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(SET_TRIGGER); // msgType = 30
-      appendMessage(pin);
-      appendMessage(triggerValue);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SET_TRIGGER); // msgType = 30
+      appendMessage(baos, pin);
+      appendMessage(baos, triggerValue);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1404,15 +1403,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setDebounce");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(SET_DEBOUNCE); // msgType = 31
-      appendMessage(pin);
-      appendMessage(delay);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SET_DEBOUNCE); // msgType = 31
+      appendMessage(baos, pin);
+      appendMessage(baos, delay);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1438,18 +1437,18 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
-      appendMessage(SERVO_ATTACH); // msgType = 32
-      appendMessage(deviceId);
-      appendMessage(pin);
-      appendMessageb16(initPos);
-      appendMessageb16(initVelocity);
-      appendMessage(name);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
+      appendMessage(baos, SERVO_ATTACH); // msgType = 32
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
+      appendMessageb16(baos, initPos);
+      appendMessageb16(baos, initVelocity);
+      appendMessage(baos, name);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1481,15 +1480,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoAttachPin");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(SERVO_ATTACH_PIN); // msgType = 33
-      appendMessage(deviceId);
-      appendMessage(pin);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SERVO_ATTACH_PIN); // msgType = 33
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1515,14 +1514,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoDetachPin");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(SERVO_DETACH_PIN); // msgType = 34
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_DETACH_PIN); // msgType = 34
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1546,15 +1545,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoSetVelocity");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_SET_VELOCITY); // msgType = 35
-      appendMessage(deviceId);
-      appendMessageb16(velocity);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_SET_VELOCITY); // msgType = 35
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, velocity);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1580,17 +1579,17 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoSweepStart");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1 + 1); // size
-      appendMessage(SERVO_SWEEP_START); // msgType = 36
-      appendMessage(deviceId);
-      appendMessage(min);
-      appendMessage(max);
-      appendMessage(step);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, SERVO_SWEEP_START); // msgType = 36
+      appendMessage(baos, deviceId);
+      appendMessage(baos, min);
+      appendMessage(baos, max);
+      appendMessage(baos, step);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1620,14 +1619,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoSweepStop");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(SERVO_SWEEP_STOP); // msgType = 37
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_SWEEP_STOP); // msgType = 37
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1651,15 +1650,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoMoveToMicroseconds");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
-      appendMessage(deviceId);
-      appendMessageb16(target);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, target);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1685,15 +1684,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoSetAcceleration");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 2); // size
-      appendMessage(SERVO_SET_ACCELERATION); // msgType = 39
-      appendMessage(deviceId);
-      appendMessageb16(acceleration);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_SET_ACCELERATION); // msgType = 39
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, acceleration);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1719,15 +1718,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: serialAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(SERIAL_ATTACH); // msgType = 41
-      appendMessage(deviceId);
-      appendMessage(relayPin);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SERIAL_ATTACH); // msgType = 41
+      appendMessage(baos, deviceId);
+      appendMessage(baos, relayPin);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1753,15 +1752,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: serialRelay");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + (1 + data.length)); // size
-      appendMessage(SERIAL_RELAY); // msgType = 42
-      appendMessage(deviceId);
-      appendMessage(data);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, SERIAL_RELAY); // msgType = 42
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1787,16 +1786,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_ATTACH); // msgType = 44
-      appendMessage(deviceId);
-      appendMessage(triggerPin);
-      appendMessage(echoPin);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_ATTACH); // msgType = 44
+      appendMessage(baos, deviceId);
+      appendMessage(baos, triggerPin);
+      appendMessage(baos, echoPin);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1824,14 +1823,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorStartRanging");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1855,14 +1854,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorStopRanging");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1886,14 +1885,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setAref");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 2); // size
-      appendMessage(SET_AREF); // msgType = 48
-      appendMessageb16(type);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 2); // size
+      appendMessage(baos, SET_AREF); // msgType = 48
+      appendMessageb16(baos, type);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1917,16 +1916,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: motorAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + (1 + pins.length)); // size
-      appendMessage(MOTOR_ATTACH); // msgType = 49
-      appendMessage(deviceId);
-      appendMessage(type);
-      appendMessage(pins);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + (1 + pins.length)); // size
+      appendMessage(baos, MOTOR_ATTACH); // msgType = 49
+      appendMessage(baos, deviceId);
+      appendMessage(baos, type);
+      appendMessage(baos, pins);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1954,15 +1953,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: motorMove");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(MOTOR_MOVE); // msgType = 50
-      appendMessage(deviceId);
-      appendMessage(pwr);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, MOTOR_MOVE); // msgType = 50
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pwr);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -1988,15 +1987,15 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: motorMoveTo");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1); // size
-      appendMessage(MOTOR_MOVE_TO); // msgType = 51
-      appendMessage(deviceId);
-      appendMessage(pos);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, MOTOR_MOVE_TO); // msgType = 51
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pos);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -2022,16 +2021,16 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: encoderAttach");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1 + 1 + 1); // size
-      appendMessage(ENCODER_ATTACH); // msgType = 52
-      appendMessage(deviceId);
-      appendMessage(type);
-      appendMessage(pin);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, ENCODER_ATTACH); // msgType = 52
+      appendMessage(baos, deviceId);
+      appendMessage(baos, type);
+      appendMessage(baos, pin);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -2059,14 +2058,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: setZeroPoint");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(SET_ZERO_POINT); // msgType = 53
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SET_ZERO_POINT); // msgType = 53
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -2090,14 +2089,14 @@ public class Msg {
     if (debug) {
       log.info("Sending Message: servoStop");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(1 + 1); // size
-      appendMessage(SERVO_STOP); // msgType = 56
-      appendMessage(deviceId);
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_STOP); // msgType = 56
+      appendMessage(baos, deviceId);
  
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
@@ -2462,7 +2461,7 @@ public class Msg {
     log.error(error);
   }
   
-  void appendMessage(int b8) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
 
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
@@ -2472,75 +2471,71 @@ public class Msg {
 //    serial.write(b8 & 0xFF);
   }
   
-  void startMessage() {
-    baos = new ByteArrayOutputStream();
-  }
-
-  void appendMessagebool(boolean b1) throws Exception {
+  void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
     if (b1) {
-      appendMessage(1);
+      appendMessage(baos, 1);
     } else {
-      appendMessage(0);
+      appendMessage(baos, 0);
     }
   }
 
-  void appendMessageb16(int b16) throws Exception {
+  void appendMessageb16(ByteArrayOutputStream baos, int b16) throws Exception {
     if ((b16 < -32768) || (b16 > 32767)) {
       log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
     }
 
-    appendMessage(b16 >> 8 & 0xFF);
-    appendMessage(b16 & 0xFF);
+    appendMessage(baos, b16 >> 8 & 0xFF);
+    appendMessage(baos, b16 & 0xFF);
   }
 
-  void appendMessageb32(int b32) throws Exception {
-    appendMessage(b32 >> 24 & 0xFF);
-    appendMessage(b32 >> 16 & 0xFF);
-    appendMessage(b32 >> 8 & 0xFF);
-    appendMessage(b32 & 0xFF);
+  void appendMessageb32(ByteArrayOutputStream baos, int b32) throws Exception {
+    appendMessage(baos, b32 >> 24 & 0xFF);
+    appendMessage(baos, b32 >> 16 & 0xFF);
+    appendMessage(baos, b32 >> 8 & 0xFF);
+    appendMessage(baos, b32 & 0xFF);
   }
   
-  void appendMessagef32(float f32) throws Exception {
+  void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    appendMessage(f[3] & 0xFF);
-    appendMessage(f[2] & 0xFF);
-    appendMessage(f[1] & 0xFF);
-    appendMessage(f[0] & 0xFF);
+    appendMessage(baos, f[3] & 0xFF);
+    appendMessage(baos, f[2] & 0xFF);
+    appendMessage(baos, f[1] & 0xFF);
+    appendMessage(baos, f[0] & 0xFF);
   }
   
-  void appendMessagebu32(long b32) throws Exception {
-    appendMessage((int)(b32 >> 24 & 0xFF));
-    appendMessage((int)(b32 >> 16 & 0xFF));
-    appendMessage((int)(b32 >> 8 & 0xFF));
-    appendMessage((int)(b32 & 0xFF));
+  void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
+    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
+    appendMessage(baos, (int)(b32 & 0xFF));
   }
 
-  void appendMessage(String str) throws Exception {
-    appendMessage(str.getBytes());
+  void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
+    appendMessage(baos, str.getBytes());
   }
 
-  void appendMessage(int[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
     // write size
-    appendMessage(array.length & 0xFF);
+    appendMessage(baos, array.length & 0xFF);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i] & 0xFF);
+      appendMessage(baos, array[i] & 0xFF);
     }
   }
 
-  void appendMessage(byte[] array) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
     // write size
-    appendMessage(array.length);
+    appendMessage(baos, array.length);
 
     // write data
     for (int i = 0; i < array.length; ++i) {
-      appendMessage(array[i]);
+      appendMessage(baos, array[i]);
     }
   }
   
-  synchronized byte[] sendMessage() throws Exception {
+  synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
       // wait for a pending ack to be received before we process our message.^M

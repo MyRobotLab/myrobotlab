@@ -3,12 +3,12 @@
     if (debug) {
       log.info("Sending Message: %name%");
     }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
-      startMessage();
-      appendMessage(MAGIC_NUMBER);
-      appendMessage(%javaWriteMsgSize%); // size
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, %javaWriteMsgSize%); // size
 %javaWrite% 
-      byte[] message = sendMessage();
+      byte[] message = sendMessage(baos);
       if (ackEnabled){
         waitForAck();
       }
