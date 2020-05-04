@@ -17,6 +17,7 @@ import org.alicebot.ab.MagicBooleans;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -71,7 +72,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * default user name chatting with the bot
    */
-  String currentUserName = "default";
+  String currentUserName = "human";
 
   /**
    * save predicates - default every 5 minutes
@@ -82,7 +83,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * display processing and logging
    */
   boolean visualDebug = true;
-
+  
   /**
    * start GoogleSearch (a peer) instead of sraix web service which is down or
    * problematic much of the time
@@ -92,6 +93,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   private Locale locale;
 
   transient SimpleLogPublisher logPublisher = null;
+
+  String TROLLING_SEED = "what are you doing?";
 
   /**
    * Default constructor for the program ab service.
@@ -229,9 +232,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          the programab service.)
    * @return
    * 
-   *           TODO - no one cares about starting sessions, starting a new
-   *           session could be as simple as providing a different username, or
-   *           botname in getResponse and a necessary session could be created
+   *         TODO - no one cares about starting sessions, starting a new session
+   *         could be as simple as providing a different username, or botname in
+   *         getResponse and a necessary session could be created
    * 
    */
   public Response getResponse(String userName, String botName, String text, boolean updateCurrentSession) {
@@ -266,7 +269,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   private BotInfo getBotInfo(String botName) {
-    return bots.get(botName);
+    if (botName == null) {
+      log.error("getBotinfo(null) not valid");
+      return null;
+    }
+    BotInfo botInfo = bots.get(botName);
+    if (botInfo == null) {
+      log.error("botInfo({}) is null", botName);
+      return null;
+    }
+    
+    return botInfo;
   }
 
   /**
@@ -407,7 +420,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   public boolean isEnableAutoConversation() {
-    return getSession().enableAutoConversation;
+    return getSession().enableTrolling;
   }
 
   /**
@@ -494,7 +507,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   public void setEnableAutoConversation(boolean enableAutoConversation) {
-    getSession().enableAutoConversation = enableAutoConversation;
+    getSession().enableTrolling = enableAutoConversation;
   }
 
   public void setMaxConversationDelay(int maxConversationDelay) {
@@ -539,18 +552,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          Japanese support) FIXME - local is defined in the bot,
    *          specifically config/mrl.properties
    * 
-   *           reasons to deprecate:
-   *           
-   *           1. I question the need to expose this externally at all - if the
-   *           user uses getResponse(username, botname, text) then a session can
-   *           be auto-started - there is really no reason not to auto-start.
+   *          reasons to deprecate:
    * 
-   *           2. path is completely invalid here 
-   *           
-   *           3. Locale is completely
-   *           invalid - it is now part of the bot description in mrl.properties
-   *           and shouldn't be defined externally, unles its pulled from
-   *           Runtime
+   *          1. I question the need to expose this externally at all - if the
+   *          user uses getResponse(username, botname, text) then a session can
+   *          be auto-started - there is really no reason not to auto-start.
+   * 
+   *          2. path is completely invalid here
+   * 
+   *          3. Locale is completely invalid - it is now part of the bot
+   *          description in mrl.properties and shouldn't be defined externally,
+   *          unles its pulled from Runtime
    */
 
   @Deprecated /* use startSession(String userName, String botName) */
@@ -660,10 +672,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
     if (botPath.exists() && botPath.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
       BotInfo botInfo = new BotInfo(this, botPath);
+            
       // key'ing on "path" probably would be better and only displaying "name"
       // then there would be no put/collisions only duplicate names
       // (preferrable)
       bots.put(botInfo.name, botInfo);
+      botInfo.img = getBotImage(botInfo.name);
+      
       setCurrentBotName(botInfo.name);
       broadcastState();
     } else {
@@ -699,8 +714,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return addBotPath(path);
   }
 
-  public void setCurrentBotName(String currentBotName) {
-    this.currentBotName = currentBotName;
+  public void setCurrentBotName(String botName) {
+    this.currentBotName = botName;
+    invoke("getBotImage", botName);
     broadcastState();
   }
 
@@ -886,59 +902,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     logPublisher = new SimpleLogPublisher(this);
     logPublisher.filterClasses(new String[] { "org.alicebot.ab.Graphmaster", "org.alicebot.ab.MagicBooleans", "class org.myrobotlab.programab.MrlSraixHandler" });
     logPublisher.start();
-    
-  }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(ProgramAB.class);
-    meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
-    meta.addCategory("ai");
-
-    // FIXME - add Wikipedia local search !!
-    meta.addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");
-
-    // TODO: renamed the bots in the program-ab-data folder to prefix them so we
-    // know they are different than the inmoov bots.
-    // each bot should have their own name, it's confusing that the inmoov bots
-    // are named en-US and so are the program ab bots.
-
-    // meta.addDependency("program-ab", "program-ab-data", "1.2", "zip");
-    // meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
-
-    meta.addDependency("program-ab", "program-ab-data", null, "zip");
-    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.6");
-
-    meta.addDependency("org.json", "json", "20090211");
-    // used by FileIO
-    meta.addDependency("commons-io", "commons-io", "2.5");
-    // TODO: This is for CJK support in ProgramAB move this into the published
-    // POM for ProgramAB so they are pulled in transiently.
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "8.4.1");
-    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.4.1");
-    meta.addCategory("ai", "control");
-    return meta;
-  }
-
-  public static void main(String args[]) {
-    LoggingFactory.init("INFO");
-    // Runtime.start("gui", "SwingGui");
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    Response response = brain.getResponse("Hi, How are you?");
-    log.info(response.toString());
-    response = brain.getResponse("what's new?");
-    log.info(response.toString());
-    /*
-     * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-     * webgui.autoStartBrowser(false); webgui.startService();
-     */
   }
 
   @Override /* FIXME - just do this once in abstract */
@@ -983,7 +947,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     Map<String, Locale> ret = new TreeMap<>();
     for (BotInfo botInfo : bots.values()) {
-      ret.put(botInfo.locale.getTag(), botInfo.locale);
+      if (botInfo.properties.containsKey("locale")) {
+        Locale locale = new Locale(botInfo.properties.get("locale"));
+        ret.put(locale.getTag(), locale);
+      }
     }
     // return Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL",
     // "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
@@ -1006,6 +973,91 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    */
   public void reload() throws IOException {
     reloadSession(getCurrentUserName(), getCurrentBotName());
+  }
+  
+  public String getBotImage() {
+    return getBotImage(getCurrentBotName());
+  }
+
+  public String getBotImage(String botName) {
+    BotInfo botInfo = null;
+    String path = null;
+
+    try {
+
+      botInfo = getBotInfo(botName);
+      path = FileIO.gluePaths(botInfo.path.getAbsolutePath(), "bot.png");
+      if (botInfo != null) {
+        File check = new File(path);
+        if (check.exists()) {
+          return Util.getImageAsBase64(path);
+        }
+      }
+
+    } catch (Exception e) {
+      info("image for %s cannot be found %s", botName, e.getMessage());
+    }
+
+    return getResourceImage("default.png");
+  }
+
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+    ServiceType meta = new ServiceType(ProgramAB.class);
+    meta.addDescription("AIML 2.0 Reference interpreter based on Program AB");
+    meta.addCategory("ai");
+
+    // FIXME - add Wikipedia local search !!
+    meta.addPeer("search", "GoogleSearch", "replacement for handling pannous sriax requests");
+
+    // TODO: renamed the bots in the program-ab-data folder to prefix them so we
+    // know they are different than the inmoov bots.
+    // each bot should have their own name, it's confusing that the inmoov bots
+    // are named en-US and so are the program ab bots.
+
+    // meta.addDependency("program-ab", "program-ab-data", "1.2", "zip");
+    // meta.addDependency("program-ab", "program-ab-kw", "0.0.8.5");
+
+    meta.addDependency("program-ab", "program-ab-data", null, "zip");
+    meta.addDependency("program-ab", "program-ab-kw", "0.0.8.6");
+
+    meta.addDependency("org.json", "json", "20090211");
+    // used by FileIO
+    meta.addDependency("commons-io", "commons-io", "2.5");
+    // TODO: This is for CJK support in ProgramAB move this into the published
+    // POM for ProgramAB so they are pulled in transiently.
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-common", "8.4.1");
+    meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.4.1");
+    meta.addCategory("ai", "control");
+    return meta;
+  }
+
+  public static void main(String args[]) {
+    LoggingFactory.init("INFO");
+    // Runtime.start("gui", "SwingGui");
+    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+    String x = brain.getResourceImage("human.png");
+    log.info(x);
+    /*
+    String x = brain.getBotImage("Alice");
+    log.info(x);
+    Response response = brain.getResponse("Hi, How are you?");
+    log.info(response.toString());
+    response = brain.getResponse("what's new?");
+    log.info(response.toString());
+    */
+
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+
   }
 
 }

@@ -1,12 +1,12 @@
 package org.myrobotlab.programab;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.alicebot.ab.Chat;
+import org.alicebot.ab.Predicates;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.ProgramAB;
@@ -24,15 +24,21 @@ public class Session {
 
   public String userName;
   public boolean processOOB = true;
-  public transient Chat chat;
   public Date lastResponseTime = null;
-  public boolean enableAutoConversation = false;
+  public boolean enableTrolling = false;
   // Number of milliseconds before the robot starts talking on its own.
   public int maxConversationDelay = 5000;
 
+  // FIXME - could be transient ??
   public BotInfo botInfo;
+  public transient Chat chat;
 
   transient ProgramAB programab;
+
+  public File predicatesFile;
+  
+  // public Map<String,String> predicates = new TreeMap<>();
+  public Predicates predicates = null;
 
   /**
    * Session for a user and bot
@@ -61,15 +67,13 @@ public class Session {
       chat = new Chat(botInfo.getBot());
       // loading predefined predicates - if they exist
       File userPredicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), String.format("config/%s.predicates.txt", userName)));
-      File defaultPredicates = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), "config/default.predicates.txt"));
       if (userPredicates.exists()) {
+        predicatesFile = userPredicates;
         chat.predicates.getPredicateDefaults(userPredicates.getAbsolutePath());
-      } else {
-        chat.predicates.getPredicateDefaultsFromInputStream(FileIO.toInputStream(defaultPredicates.getAbsolutePath()));
-      }
+      } 
     }
+    predicates = chat.predicates;
     return chat;
-
   }
 
   public void savePredicates() {
