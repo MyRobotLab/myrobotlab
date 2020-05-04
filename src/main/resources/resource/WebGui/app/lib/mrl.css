@@ -215,6 +215,14 @@ table, th, td {
   width: 220%;
   color: #337ab7!important;
 }
+
+.servoContent select{
+  height: 26px;
+  line-heigt: 10px;
+  font-size: smaller;
+  padding: 2px;
+}
+
 .gray1{
   color: #cccccc!important;
 }
@@ -228,22 +236,31 @@ table, th, td {
   width: 28px!important;
   height: 18px!important;
   top: -2px!important;
-  right: 0px;
+  /* right: 0px; */
+  font-size: smaller;
 }
 .miniBTN .toggle *{
   width: 220%;
+  font-size: smaller;
   color: #337ab7!important;
 }
 .miniBTN .toggle-off-pad{
   color: transparent !important;
+  padding-left: 28px !important;
 }
 .miniBTN .toggle-on-pad{
   color: transparent !important;
+  padding-right: 30px;
+}
+.miniBTN .toggle.off .toggle-group {
+    left: -155%;
+    width: 100px;
 }
 .miniBTN .btn {
-  padding: 10px !important;
-  height: 18px !important;
-  width: 34px !important;
+  /* padding: 10px !important; */
+  height: 26px !important;
+  width: 35px !important;
+  line-height: 26px;
 }
 .miniBTN {
   
@@ -317,6 +334,7 @@ padding: 0px;
    border-width: 1px!important;
    border-bottom-color: #efefef;
    border-bottom-style: solid;
+   height: 44px;
 }
 .tableLimits tr:nth-child(1) {
    border-width: 1px!important;
@@ -325,8 +343,9 @@ padding: 0px;
    line-height: 20px;
 }
 .tableLimits td:nth-child(1) {
-   text-align: left;   
+   text-align: left;
    margin-left: 0px;
+   height: 22px;
 }
 .tableLimits td:nth-child(2) {
    width: 40px;
@@ -344,7 +363,7 @@ padding: 0px;
    width: 40px;
 }
 .tableLimits td:nth-child(11) {
-   width: 80px;
+   width: 30px;
 }
 .tableLimits td:nth-child(13) {
    text-align: right;   
@@ -379,8 +398,8 @@ padding: 0px;
   padding-bottom: 10px!important;
   align-self: flex-start;
   padding-bottom: 8px;
-  line-height: 33px;
-  height: 36px;
+  line-height: 36px;
+  height: 41px;
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: #eaeaea;
@@ -394,10 +413,10 @@ padding: 0px;
 .settingsbar .btn{
   /* color: #FFFFFF; */
   height: 28px;
-  /* padding: 4px !important; */
+  padding: 4px !important;
   font-size: smaller;
   text-align: center !important;
-  /* top: 0px; */
+  top: 0px;
   display: inline-flex;
   margin-right: 12px;
   /* margin-left: 4px; */
@@ -408,7 +427,7 @@ padding: 0px;
   height: 28px!important;
   line-height: 28px !important;
   padding: 2px;
-  margin-right: 14px;
+  /* margin-right: 14px; */
 }
 .custom-slider.rzslider .rz-bar {
   background: #ffc6aa;
@@ -694,8 +713,16 @@ padding: 0px;
     background-color: #337ab7!important;
 }
 
-.verticalSpacer{
-  height: 57px;
+.verticalSpacerBasic{
+  height: 23px;
+  position: inherit;
+  vertical-align: middle;
+  width: 100%;
+  /* background-color: aliceblue; */
+}
+
+.verticalSpacerAdvanced{
+  height: 2px;
   position: inherit;
   vertical-align: middle;
   width: 100%;
@@ -1063,7 +1090,7 @@ padding: 0px;
 
 .OpenCVStyle label{
   margin-right: 8px !important;
-  vertical-align: middle;
+  /* vertical-align: middle; */
 }
 
 .OpenCVStyle ::-webkit-scrollbar {

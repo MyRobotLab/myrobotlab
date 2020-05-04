@@ -3,39 +3,191 @@
     <div class="row">
         <div class="col-md-12">
             <uib-tabset>
+                <uib-tab heading="Controller" select="refreshSlider()">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <nav class="settingsbar preventDragSelect">
+                        <span>
+                          <h6>You need to attach one or more controllers to a servo.<br />
+                        For example real and virtual controller.</h6>
+                        </span>
+                      </nav>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-12">
+                      <table class="table">
+
+                        <tr>
+                          <td>
+                            <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                              <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
+                            </select>
+                          <td>
+                            <button class="btn btn-default" ng-click="attachController()">attach</button>
+                          <td>
+                            <button class="btn btn-default">Remove</button>
+                          </td>
+                          <td>
+                            Pin
+                          </td>
+                          <td>
+                            <select class="form-control">
+                              <option value="" selected>1</option>
+                              <option value="">2</option>
+                              <option value="">3</option>
+                              <option value="">4</option>
+                            </select>
+                          </td>
+                          <td>
+                            Enable
+                          </td>
+                          <td>
+                            <toggle class="miniBTN" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                              <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
+                            </select>
+                          <td>
+                            <button class="btn btn-default" ng-click="attachController()">attach</button>
+                          <td>
+                            <button class="btn btn-default">Remove</button>
+                          </td>
+                          <td>Pin
+                          </td>
+                          <td>
+                            <select class="form-control">
+                              <option value="" selected>1</option>
+                              <option value="">2</option>
+                              <option value="">3</option>
+                              <option value="">4</option>
+                            </select>
+                          </td>
+                          <td>
+                            Enable
+                          </td>
+                          <td>
+                            <toggle class="miniBTN" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td>
+                            <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                              <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
+                            </select>
+                          <td>
+                            <button class="btn btn-default" ng-click="attachController()">attach</button>
+                          <td>
+                            <button class="btn btn-default">Remove</button>
+                          </td>
+                          <td>Pin
+                            
+                          </td>
+                          <td>
+                            <select class="form-control">
+                              <option value="" selected>1</option>
+                              <option value="">2</option>
+                              <option value="">3</option>
+                              <option value="">4</option>
+                            </select>
+                          </td>
+                          <td>
+                            Enable
+                          </td>
+                          <td>
+                            <toggle class="miniBTN" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                          </td>
+                        </tr>
+
+
+                      </table>
+                      <hr>
+                      <button class="btn btn-default">+ Add new controller</button>
+                      
+
+
+                      <div  ng-repeat="c in service.controllers">
+                        <span class="col-md-1"/>
+                        <span class="col-md-2">{{c}}</span>
+                        <span class="col-md-1">Pin</span>
+                        <span class="col-md-1">{{pin}}</span>
+                        <span class="col-md-1">
+                          <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
+                        </span>
+                      </div>
+
+
+                    </div>
+                        <!-- /.col-md-12 -->
+                  </div>
+                  <!-- /.row -->
+
+                  <br /><br /><br /><br />
+                  <!-- ------- Temporal for test ------ -->
+                  <div class="row">
+                    <div class="col-md-6">
+                        <span style="background-color: #FF5555; display: inline-block;">
+                            Temp
+                    <tr ng-repeat="c in service.controllers"></tr>
+                            <span>
+                                <attach title="Type or select controller" ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
+                            </span>
+                            <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
+                            <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
+                        </span>
+                    </div>
+                    <!-- /.col-md-6 -->
+                  </div>
+                  <!-- /.row -->
+                  <!-- /Temp ------------ -->
+                </uib-tab>
+
                 <uib-tab heading="Basic" select="refreshSlider()">
                     <!-- ------------------ Basic ------------------ -->
                     <nav class="settingsbar preventDragSelect">
                         <form class="form-inline">
-                            <span class="labelColumn1">Controllers</span>
-                            <span>
-                                <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
-                                    <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
-                                </select>
-                            </span>
-                            <button class="btn btn-default" ng-click="attachController()">attach</button>
-                            <span class="labelColumn1">Encoder</span>
-                            <span>
-                                <select class="form-goup form-control" style="width: 120px!important;" title="Encoders list">
-                                    <option selected>TimeEncoder</option>
-                                    <option>Other</option>
-                                </select>
-                            </span>
-                            <toggle width="125" height="28" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                          <span>
+                            Blocking              
+                            <!-- ---- FIXME ---- -->
+                            <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
+                          </span>
+                          <span>
+                            Sweep
+                            <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
+                            <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="!service.isSweeping?msg.stop():sweep()" on="" off="" size="btn-lg"/>
+                          </span>
+                          <span>
+                            Speed
+                            <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
+                            &deg;/s &nbsp;<button class="btn btn-speed" ng-click="setSpeed(speed)">Set</button>
+                          </span>
+                          <span class="lastColumn">
+                            Auto-disable &nbsp;
+                            <!-- FIXME -->
+                            <input type="text" class="form-control" placeholder="3" ng-model="time"/>
+                            &nbsp;sec &nbsp;<toggle ng-model="toggleAutoDisable" class="miniBTN" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>
+                            <!--          
+                              <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
+                            -->
+                            <!-- ---- can we set timeout on toggle Auto-disable ON? ---- -->
+                            <!-- ---- or we need a (Set) button? ---- -->
+                          </span>
                         </form>
                     </nav>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="verticalSpacer" ng-repeat="c in service.controllers">
-                                <span class="col-md-1"/>
-                                <span class="col-md-2">{{c}}</span>
-                                <span class="col-md-1">Pin</span>
-                                <span class="col-md-1">{{pin}}</span>
-                                <span class="col-md-1">
-                                    <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
-                                </span>
+                            
+
+                            <div class="verticalSpacerBasic">
+                              <!-- spacer to get the same vertical position of slider in Advacend Tab -->
                             </div>
-                            <!--/verticalSpacer -->
+                            
                             <div class="sliderContainer">
                                 <!-- sliderContainer -->
                                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
@@ -47,7 +199,7 @@
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
                                         Rest
-                    <div class="restCursor"></div>
+                                    <div class="restCursor"></div>
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
                                         <div class="energizedZone">
@@ -75,35 +227,7 @@
                 </uib-tab>
                 <uib-tab heading="Advanced" select="refreshSlider()">
                     <!-- ------------------ Advanced ------------------ -->
-                    <nav class="settingsbar preventDragSelect">
-                        <span>
-                            Invert
-                            <!-- ---- FIXME ---- -->
-                            <toggle ng-model="toggleInvert" title="This will invert servo direction" ng-change="!service.isInverted?msg.isInverted(false):msg.isInverted(true)" on="" off="" size="btn-lg"/>
-                        </span>
-                        <span>
-                            Blocking
-              
-                            <!-- ---- FIXME ---- -->
-                            <toggle ng-model="toggleBlocking" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
-                        </span>
-                        <span>
-                            Sweep
-                            <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
-                            <toggle ng-model="toggleSweep" title="Servo will move from one position to the opposite" ng-change="!service.isSweeping?msg.stop():sweep()" on="" off="" size="btn-lg"/>
-                        </span>
-                        <span class="lastColumn">
-                            Auto-disable &nbsp;
-                            <!-- FIXME -->
-                            <input type="text" class="form-control" placeholder="3" ng-model="time"/>
-                            &nbsp;sec &nbsp;<toggle ng-model="toggleAutoDisable" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>
-                            <!--          
-              <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
-              -->
-                            <!-- ---- can we set timeout on toggle Auto-disable ON? ---- -->
-                            <!-- ---- or we need a (Set) button? ---- -->
-                        </span>
-                    </nav>
+                    
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
@@ -128,11 +252,18 @@
                                     <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set</button>
                                 </td>
                                 <td></td>
-                                <td>Speed</td>
+                                <td>Invert</td>
                                 <td>
-                                    <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
-                                    &deg;/s &nbsp;<button class="btn btn-speed" ng-click="setSpeed(speed)">Set</button>
+                                    <!-- ---- FIXME ---- -->
+                                    <toggle ng-model="toggleInvert" class="miniBTN" title="This will invert servo direction" ng-change="!service.isInverted?msg.isInverted(false):msg.isInverted(true)" on="" off="" size="btn-lg"/>
                                 </td>
+                                <td>Encoder</td>
+                                <td>
+                                  <select class="form-goup form-control"  title="Encoders list">
+                                    <option selected>TimeEncoder</option>
+                                    <option>Other</option>
+                                  </select> 
+                              </td>
                             </tr>
                             <tr class="valuesRow">
                                 <td></td>
@@ -145,10 +276,16 @@
                                 <td></td>
                                 <td></td>
                                 <td class="restColor preventDragSelect">{{rest}}</td>
-                                <td colspan="3"></td>
+                                <td colspan="5"></td>
                             </tr>
                         </tbody>
                     </table>
+                    
+
+
+                    <div class="verticalSpacerAdvanced">
+                      <!-- spacer to get the same vertical position of slider in Basic Tab -->
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="sliderContainer">
@@ -191,23 +328,7 @@
         <!-- /.col-md-12 -->
     </div>
     <!-- /.row -->
-    <!-- ------- Temporal for test ------ -->
-    <div class="row">
-        <div class="col-md-4">
-            <span style="background-color: #FF5555; display: inline-block;">
-                Temp
-        <tr ng-repeat="c in service.controllers"></tr>
-                <span>
-                    <attach title="Type or select controller" ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
-                </span>
-                <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
-                <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
-            </span>
-        </div>
-        <!-- /.col-md-4 -->
-    </div>
-    <!-- /.row -->
-    <!-- /Temp ------------ -->
+
 </div>
 <!-- /#servoContent -->
 <!-- /ServoGui.html -->
