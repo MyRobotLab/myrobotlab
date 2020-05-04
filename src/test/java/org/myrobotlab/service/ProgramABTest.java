@@ -314,6 +314,7 @@ public class ProgramABTest extends AbstractServiceTest {
   public void testLocales() {
     // have locales
     ProgramAB alice = (ProgramAB)Runtime.start("alice", "ProgramAB");
+    alice.setCurrentBotName("Alice");
     Map<String,Locale> locales = alice.getLocales();
     assertTrue(locales.size() > 0);
   }
