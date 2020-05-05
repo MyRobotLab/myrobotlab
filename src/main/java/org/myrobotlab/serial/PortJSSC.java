@@ -165,7 +165,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   public void write(byte[] data) throws Exception {
     if (debug && debugTX) {
       String dataString = StringUtil.byteArrayToIntString(data);
-      log.info("Sending Byte Array: {}", dataString);
+      log.info("Sending Byte Array: >{}< to Port: {}", dataString, portName);
     }
     port.writeBytes(data);
   }
@@ -198,6 +198,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
           return;
         }
         // we have data, let's notify the listeners.
+        log.info("Reading Data from port {} - Data:>{}<", getName(), buffer);
         for (String key : listeners.keySet()) {
           // TODO: feels like this should be synchronized or maybe the buffer should be immutable?
           listeners.get(key).onBytes(buffer);

@@ -1544,7 +1544,7 @@ public class Arduino extends AbstractMicrocontroller
 
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.info("Message Ack received: =={}==", Msg.methodToString(function));
+    log.info("{} Message Ack received: =={}==", getName(), Msg.methodToString(function));
     numAck++;
   }
 
@@ -1577,7 +1577,8 @@ public class Arduino extends AbstractMicrocontroller
     if (boardInfo != null) {
       DeviceSummary[] ds = boardInfo.getDeviceSummary();
       if (deviceList.size() - 1 > ds.length) { /* -1 for self */
-        sync();
+        log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}", deviceList, ds);
+        invoke("sync");
       }
     }
 
@@ -2234,8 +2235,13 @@ public class Arduino extends AbstractMicrocontroller
     ++mrlCommBegin;
     //log.info("Skipping Sync!  TODO: uncomment me.");
     // This needs to be non-blocking
-    invoke("sync");
-    // sync();
+    // If we have devices, we need to sync them.
+    if (deviceList.size() > 0) {
+      log.info("Need to sync devices to mrlcomm. Num Devices: {} Devices: {}", deviceList.size(), deviceList);
+      invoke("sync");
+    } else {
+      log.info("no devices to sync, clear to resume.");
+    }
   }
 
   /**
