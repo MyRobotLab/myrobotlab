@@ -64,7 +64,8 @@ import org.slf4j.Logger;
 
 public class VirtualMsg {
 
-  private static final int ACK_TIMEOUT = 2000;
+  // TODO: pick a more reasonable timeout.. 30 seconds is high.
+  private static final int ACK_TIMEOUT = 30000;
   public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
@@ -847,7 +848,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishMRLCommError(String errorMsg/*str*/) {
     if (debug) {
-      log.info("Sending Message: publishMRLCommError");
+      log.info("Sending Message: publishMRLCommError to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -878,7 +879,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
     if (debug) {
-      log.info("Sending Message: publishBoardInfo");
+      log.info("Sending Message: publishBoardInfo to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -924,7 +925,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishAck(Integer function/*byte*/) {
     if (debug) {
-      log.info("Sending Message: publishAck");
+      log.info("Sending Message: publishAck to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -955,7 +956,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
     if (debug) {
-      log.info("Sending Message: publishEcho");
+      log.info("Sending Message: publishEcho to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -992,7 +993,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishCustomMsg(int[] msg/*[]*/) {
     if (debug) {
-      log.info("Sending Message: publishCustomMsg");
+      log.info("Sending Message: publishCustomMsg to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1023,7 +1024,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
     if (debug) {
-      log.info("Sending Message: publishI2cData");
+      log.info("Sending Message: publishI2cData to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1057,7 +1058,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishDebug(String debugMsg/*str*/) {
     if (debug) {
-      log.info("Sending Message: publishDebug");
+      log.info("Sending Message: publishDebug to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1088,7 +1089,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishPinArray(int[] data/*[]*/) {
     if (debug) {
-      log.info("Sending Message: publishPinArray");
+      log.info("Sending Message: publishPinArray to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1119,7 +1120,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
     if (debug) {
-      log.info("Sending Message: publishServoEvent");
+      log.info("Sending Message: publishServoEvent to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1159,7 +1160,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
     if (debug) {
-      log.info("Sending Message: publishSerialData");
+      log.info("Sending Message: publishSerialData to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1193,7 +1194,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
     if (debug) {
-      log.info("Sending Message: publishUltrasonicSensorData");
+      log.info("Sending Message: publishUltrasonicSensorData to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1227,7 +1228,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
     if (debug) {
-      log.info("Sending Message: publishEncoderData");
+      log.info("Sending Message: publishEncoderData to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1261,7 +1262,7 @@ public class VirtualMsg {
 
   public synchronized byte[] publishMrlCommBegin(Integer version/*byte*/) {
     if (debug) {
-      log.info("Sending Message: publishMrlCommBegin");
+      log.info("Sending Message: publishMrlCommBegin to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {

@@ -1,7 +1,7 @@
 
   public synchronized byte[] %name%(%javaMethodParameters%) {
     if (debug) {
-      log.info("Sending Message: %name%");
+      log.info("Sending Message: %name% to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {

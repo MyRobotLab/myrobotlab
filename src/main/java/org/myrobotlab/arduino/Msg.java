@@ -64,7 +64,8 @@ import org.slf4j.Logger;
 
 public class Msg {
 
-  private static final int ACK_TIMEOUT = 2000;
+  // TODO: pick a more reasonable timeout.. 30 seconds is high.
+  private static final int ACK_TIMEOUT = 30000;
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
@@ -656,7 +657,7 @@ public class Msg {
 
   public synchronized byte[] getBoardInfo() {
     if (debug) {
-      log.info("Sending Message: getBoardInfo");
+      log.info("Sending Message: getBoardInfo to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -684,7 +685,7 @@ public class Msg {
 
   public synchronized byte[] enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
     if (debug) {
-      log.info("Sending Message: enablePin");
+      log.info("Sending Message: enablePin to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -721,7 +722,7 @@ public class Msg {
 
   public synchronized byte[] setDebug(Boolean enabled/*bool*/) {
     if (debug) {
-      log.info("Sending Message: setDebug");
+      log.info("Sending Message: setDebug to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -752,7 +753,7 @@ public class Msg {
 
   public synchronized byte[] setSerialRate(Integer rate/*b32*/) {
     if (debug) {
-      log.info("Sending Message: setSerialRate");
+      log.info("Sending Message: setSerialRate to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -783,7 +784,7 @@ public class Msg {
 
   public synchronized byte[] softReset() {
     if (debug) {
-      log.info("Sending Message: softReset");
+      log.info("Sending Message: softReset to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -811,7 +812,7 @@ public class Msg {
 
   public synchronized byte[] enableAck(Boolean enabled/*bool*/) {
     if (debug) {
-      log.info("Sending Message: enableAck");
+      log.info("Sending Message: enableAck to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -842,7 +843,7 @@ public class Msg {
 
   public synchronized byte[] echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
     if (debug) {
-      log.info("Sending Message: echo");
+      log.info("Sending Message: echo to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -879,7 +880,7 @@ public class Msg {
 
   public synchronized byte[] customMsg(int[] msg/*[]*/) {
     if (debug) {
-      log.info("Sending Message: customMsg");
+      log.info("Sending Message: customMsg to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -910,7 +911,7 @@ public class Msg {
 
   public synchronized byte[] deviceDetach(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: deviceDetach");
+      log.info("Sending Message: deviceDetach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -941,7 +942,7 @@ public class Msg {
 
   public synchronized byte[] i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
     if (debug) {
-      log.info("Sending Message: i2cBusAttach");
+      log.info("Sending Message: i2cBusAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -975,7 +976,7 @@ public class Msg {
 
   public synchronized byte[] i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
     if (debug) {
-      log.info("Sending Message: i2cRead");
+      log.info("Sending Message: i2cRead to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1012,7 +1013,7 @@ public class Msg {
 
   public synchronized byte[] i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
     if (debug) {
-      log.info("Sending Message: i2cWrite");
+      log.info("Sending Message: i2cWrite to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1049,7 +1050,7 @@ public class Msg {
 
   public synchronized byte[] i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
     if (debug) {
-      log.info("Sending Message: i2cWriteRead");
+      log.info("Sending Message: i2cWriteRead to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1089,7 +1090,7 @@ public class Msg {
 
   public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
     if (debug) {
-      log.info("Sending Message: neoPixelAttach");
+      log.info("Sending Message: neoPixelAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1126,7 +1127,7 @@ public class Msg {
 
   public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
     if (debug) {
-      log.info("Sending Message: neoPixelSetAnimation");
+      log.info("Sending Message: neoPixelSetAnimation to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1172,7 +1173,7 @@ public class Msg {
 
   public synchronized byte[] neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
     if (debug) {
-      log.info("Sending Message: neoPixelWriteMatrix");
+      log.info("Sending Message: neoPixelWriteMatrix to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1206,7 +1207,7 @@ public class Msg {
 
   public synchronized byte[] analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
     if (debug) {
-      log.info("Sending Message: analogWrite");
+      log.info("Sending Message: analogWrite to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1240,7 +1241,7 @@ public class Msg {
 
   public synchronized byte[] digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
     if (debug) {
-      log.info("Sending Message: digitalWrite");
+      log.info("Sending Message: digitalWrite to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1274,7 +1275,7 @@ public class Msg {
 
   public synchronized byte[] disablePin(Integer pin/*byte*/) {
     if (debug) {
-      log.info("Sending Message: disablePin");
+      log.info("Sending Message: disablePin to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1305,7 +1306,7 @@ public class Msg {
 
   public synchronized byte[] disablePins() {
     if (debug) {
-      log.info("Sending Message: disablePins");
+      log.info("Sending Message: disablePins to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1333,7 +1334,7 @@ public class Msg {
 
   public synchronized byte[] pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
     if (debug) {
-      log.info("Sending Message: pinMode");
+      log.info("Sending Message: pinMode to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1367,7 +1368,7 @@ public class Msg {
 
   public synchronized byte[] setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
     if (debug) {
-      log.info("Sending Message: setTrigger");
+      log.info("Sending Message: setTrigger to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1401,7 +1402,7 @@ public class Msg {
 
   public synchronized byte[] setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
     if (debug) {
-      log.info("Sending Message: setDebounce");
+      log.info("Sending Message: setDebounce to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1435,7 +1436,7 @@ public class Msg {
 
   public synchronized byte[] servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
     if (debug) {
-      log.info("Sending Message: servoAttach");
+      log.info("Sending Message: servoAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1478,7 +1479,7 @@ public class Msg {
 
   public synchronized byte[] servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
     if (debug) {
-      log.info("Sending Message: servoAttachPin");
+      log.info("Sending Message: servoAttachPin to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1512,7 +1513,7 @@ public class Msg {
 
   public synchronized byte[] servoDetachPin(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: servoDetachPin");
+      log.info("Sending Message: servoDetachPin to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1543,7 +1544,7 @@ public class Msg {
 
   public synchronized byte[] servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
     if (debug) {
-      log.info("Sending Message: servoSetVelocity");
+      log.info("Sending Message: servoSetVelocity to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1577,7 +1578,7 @@ public class Msg {
 
   public synchronized byte[] servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
     if (debug) {
-      log.info("Sending Message: servoSweepStart");
+      log.info("Sending Message: servoSweepStart to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1617,7 +1618,7 @@ public class Msg {
 
   public synchronized byte[] servoSweepStop(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: servoSweepStop");
+      log.info("Sending Message: servoSweepStop to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1648,7 +1649,7 @@ public class Msg {
 
   public synchronized byte[] servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
     if (debug) {
-      log.info("Sending Message: servoMoveToMicroseconds");
+      log.info("Sending Message: servoMoveToMicroseconds to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1682,7 +1683,7 @@ public class Msg {
 
   public synchronized byte[] servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
     if (debug) {
-      log.info("Sending Message: servoSetAcceleration");
+      log.info("Sending Message: servoSetAcceleration to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1716,7 +1717,7 @@ public class Msg {
 
   public synchronized byte[] serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
     if (debug) {
-      log.info("Sending Message: serialAttach");
+      log.info("Sending Message: serialAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1750,7 +1751,7 @@ public class Msg {
 
   public synchronized byte[] serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
     if (debug) {
-      log.info("Sending Message: serialRelay");
+      log.info("Sending Message: serialRelay to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1784,7 +1785,7 @@ public class Msg {
 
   public synchronized byte[] ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
     if (debug) {
-      log.info("Sending Message: ultrasonicSensorAttach");
+      log.info("Sending Message: ultrasonicSensorAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1821,7 +1822,7 @@ public class Msg {
 
   public synchronized byte[] ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: ultrasonicSensorStartRanging");
+      log.info("Sending Message: ultrasonicSensorStartRanging to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1852,7 +1853,7 @@ public class Msg {
 
   public synchronized byte[] ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: ultrasonicSensorStopRanging");
+      log.info("Sending Message: ultrasonicSensorStopRanging to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1883,7 +1884,7 @@ public class Msg {
 
   public synchronized byte[] setAref(Integer type/*b16*/) {
     if (debug) {
-      log.info("Sending Message: setAref");
+      log.info("Sending Message: setAref to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1914,7 +1915,7 @@ public class Msg {
 
   public synchronized byte[] motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
     if (debug) {
-      log.info("Sending Message: motorAttach");
+      log.info("Sending Message: motorAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1951,7 +1952,7 @@ public class Msg {
 
   public synchronized byte[] motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
     if (debug) {
-      log.info("Sending Message: motorMove");
+      log.info("Sending Message: motorMove to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -1985,7 +1986,7 @@ public class Msg {
 
   public synchronized byte[] motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
     if (debug) {
-      log.info("Sending Message: motorMoveTo");
+      log.info("Sending Message: motorMoveTo to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -2019,7 +2020,7 @@ public class Msg {
 
   public synchronized byte[] encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
     if (debug) {
-      log.info("Sending Message: encoderAttach");
+      log.info("Sending Message: encoderAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -2056,7 +2057,7 @@ public class Msg {
 
   public synchronized byte[] setZeroPoint(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: setZeroPoint");
+      log.info("Sending Message: setZeroPoint to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
@@ -2087,7 +2088,7 @@ public class Msg {
 
   public synchronized byte[] servoStop(Integer deviceId/*byte*/) {
     if (debug) {
-      log.info("Sending Message: servoStop");
+      log.info("Sending Message: servoStop to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
