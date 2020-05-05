@@ -196,75 +196,69 @@ public class Gps extends Service implements SerialDataListener {
   @Override
   public void onBytes(byte[] bytes) {
     for (int i = 0; i < bytes.length; i++) {
-      onByte(bytes[i] & 0xFF);
-    }
-  }
+      Integer b = bytes[i] & 0xFF;
 
-  private void onByte(Integer b) {
-
-    try {
-      // log.info("byteReceived Index = " + index + " actual data byte = "
-      // + String.format("%02x", b));
-      buffer.write(b);
-      // so a byte was appended
-      // now depending on what model it was and
-      // what stage of initialization we do that funky stuff
-      if (b == 0x0a) { // GPS strings end with /CR /LF = 0x0d 0x0a
-        // log.info("Buffer size = " + buffer.size() + " Buffer = " +
-        // buffer.toString());
-        buffer.flush(); // flush entire buffer so I can convert it to a
-        // byte array
-        // message = buffer.toByteArray();
-        messageString = new String(buffer.toByteArray(), ("UTF-8"));
-        // log.info("size of message = " + message.length);
-        if (messageString.contains("GGA")) {
-          log.info("GGA string detected");
-          invoke("publishGGAData");
-        } else if (messageString.contains("RMC")) {
-          log.info("RMC string detected");
-          invoke("publishRMCData");
-        } else if (messageString.contains("VTG")) {
-          log.info("VTG string detected");
-          invoke("publishVTGData");
-        } else if (messageString.contains("GSA")) {
-          log.info("GSA string detected");
-          invoke("publishGSAData");
-        } else if (messageString.contains("GSV")) {
-          log.info("GSV string detected");
-          invoke("publishGSVData");
-        } else if (messageString.contains("GLL")) {
-          log.info("GLL string detected");
-          invoke("publishGLLData");
-        } else if (messageString.contains("ZDA")) {
-          log.info("ZDA string detected");
-          invoke("publishZDAData");
-        } else if (messageString.contains("MSS")) {
-          log.info("MSS string detected");
-          invoke("publishMSSData");
-        } else if (messageString.contains("POLYN")) // San Jose
-        // navigation FV-M8
-        // specific?
-        {
-          log.info("POLYN string detected");
-          // invoke("publishPOLYNData");
-        } else if (messageString.contains("PMTK101")) {
-          log.info("Hot Restart string detected");
-          // invoke("publishMTKData");
-        } else if (messageString.contains("PMTK010, 001")) {
-          log.info("Startup string detected");
-          // invoke("publishMTKData");
-        } else {
-          log.info("unknown string detected");
+      try {
+        // log.info("byteReceived Index = " + index + " actual data byte = "
+        // + String.format("%02x", b));
+        buffer.write(b);
+        // so a byte was appended
+        // now depending on what model it was and
+        // what stage of initialization we do that funky stuff
+        if (b == 0x0a) { // GPS strings end with /CR /LF = 0x0d 0x0a
+          // log.info("Buffer size = " + buffer.size() + " Buffer = " +
+          // buffer.toString());
+          buffer.flush(); // flush entire buffer so I can convert it to a
+          // byte array
+          // message = buffer.toByteArray();
+          messageString = new String(buffer.toByteArray(), ("UTF-8"));
+          // log.info("size of message = " + message.length);
+          if (messageString.contains("GGA")) {
+            log.info("GGA string detected");
+            invoke("publishGGAData");
+          } else if (messageString.contains("RMC")) {
+            log.info("RMC string detected");
+            invoke("publishRMCData");
+          } else if (messageString.contains("VTG")) {
+            log.info("VTG string detected");
+            invoke("publishVTGData");
+          } else if (messageString.contains("GSA")) {
+            log.info("GSA string detected");
+            invoke("publishGSAData");
+          } else if (messageString.contains("GSV")) {
+            log.info("GSV string detected");
+            invoke("publishGSVData");
+          } else if (messageString.contains("GLL")) {
+            log.info("GLL string detected");
+            invoke("publishGLLData");
+          } else if (messageString.contains("ZDA")) {
+            log.info("ZDA string detected");
+            invoke("publishZDAData");
+          } else if (messageString.contains("MSS")) {
+            log.info("MSS string detected");
+            invoke("publishMSSData");
+          } else if (messageString.contains("POLYN")) // San Jose
+            // navigation FV-M8
+            // specific?
+          {
+            log.info("POLYN string detected");
+            // invoke("publishPOLYNData");
+          } else if (messageString.contains("PMTK101")) {
+            log.info("Hot Restart string detected");
+            // invoke("publishMTKData");
+          } else if (messageString.contains("PMTK010, 001")) {
+            log.info("Startup string detected");
+            // invoke("publishMTKData");
+          } else {
+            log.info("unknown string detected");
+          }
+          buffer.reset();
         }
-        buffer.reset();
+
+      } catch (Exception e) {
+        error(e.getMessage());
       }
-
-    } catch (Exception e) {
-      error(e.getMessage());
     }
-
-    //return b;
-
   }
 
   public double calculateDistance(double latitude1, double longitude1, double latitude2, double longitude2) {

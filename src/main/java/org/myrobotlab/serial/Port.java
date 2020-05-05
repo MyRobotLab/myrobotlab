@@ -144,7 +144,9 @@ public abstract class Port implements Runnable, SerialControl {
         // read everything that's available on the port.
         byte[] buffer = readBytes();
         if (buffer == null) { 
-          // TODO: maybe this be a tight loop. we might want some sort of thread sleep here?
+          // We want to have a small delay to spare the cpu,
+          // give it a millisecond for data to arrive.
+          Thread.sleep(1);
           continue;
         }
         // debug
