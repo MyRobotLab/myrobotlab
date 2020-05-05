@@ -92,55 +92,50 @@ public class Lidar extends Service implements SerialDataListener {
   @Override
   public void onBytes(byte[] bytes) {
     for (int i = 0; i < bytes.length; i++) {
-      onByte(bytes[i] & 0xFF);
-    }
-  }
+      Integer b = bytes[i] & 0xFF;
+      index++;
 
-  private Integer onByte(Integer b) {
-    index++;
-
-    if (log.isDebugEnabled()) {
-      log.debug(String.format("byteReceived Index = %d expected message size = %d data = %02x", index, dataMessageSize, b));
-    }
-
-    buffer.write(b);
-    // so a byte was appended
-    // now depending on what model it was and
-    // what stage of initialization we do that funky stuff
-    if (MODEL_SICK_LMS200.equals(model) && STATE_MODE_CHANGE.equals(state) && buffer.size() == 14) {
-      // These modes always have 14 bytes replies
-      // log.info(buffer.toString());
-      message = buffer.toByteArray();
-      // dataAvailable = true;
-      if (message[5] == 1 || message[6] == 1) {
-        log.info("Mode change was a Success!!!");
-      }
-      if (message[5] == 0 || message[6] == 0) {
-        log.error("Sorry dude, but I failed to change mode. Please try again.");
-      }
-      state = STATE_NOMINAL;
-    }
-    if (MODEL_SICK_LMS200.equals(model) && STATE_SINGLE_SCAN.equals(state) && index == dataMessageSize) {
       if (log.isDebugEnabled()) {
-        log.debug("Buffer size =  {}  Buffer =  {}", buffer.size(), buffer);
+        log.debug(String.format("byteReceived Index = %d expected message size = %d data = %02x", index, dataMessageSize, b));
       }
-      // WTF do I do with this data now?
-      try {
-        buffer.flush();
-      } catch (IOException e) {
-        log.warn("Buffer flush error", e);
-      } // flush entire buffer so I can convert it to a byte
-      // array
-      message = buffer.toByteArray();
-      info = String.format("size of message = %s", message.length);
-      log.info(info);
-      // dataAvailable = true;
-      invoke("publishLidarData");
-      state = STATE_NOMINAL;
-      index = 0;
 
+      buffer.write(b);
+      // so a byte was appended
+      // now depending on what model it was and
+      // what stage of initialization we do that funky stuff
+      if (MODEL_SICK_LMS200.equals(model) && STATE_MODE_CHANGE.equals(state) && buffer.size() == 14) {
+        // These modes always have 14 bytes replies
+        // log.info(buffer.toString());
+        message = buffer.toByteArray();
+        // dataAvailable = true;
+        if (message[5] == 1 || message[6] == 1) {
+          log.info("Mode change was a Success!!!");
+        }
+        if (message[5] == 0 || message[6] == 0) {
+          log.error("Sorry dude, but I failed to change mode. Please try again.");
+        }
+        state = STATE_NOMINAL;
+      }
+      if (MODEL_SICK_LMS200.equals(model) && STATE_SINGLE_SCAN.equals(state) && index == dataMessageSize) {
+        if (log.isDebugEnabled()) {
+          log.debug("Buffer size =  {}  Buffer =  {}", buffer.size(), buffer);
+        }
+        // WTF do I do with this data now?
+        try {
+          buffer.flush();
+        } catch (IOException e) {
+          log.warn("Buffer flush error", e);
+        } // flush entire buffer so I can convert it to a byte
+        // array
+        message = buffer.toByteArray();
+        info = String.format("size of message = %s", message.length);
+        log.info(info);
+        // dataAvailable = true;
+        invoke("publishLidarData");
+        state = STATE_NOMINAL;
+        index = 0;
+      }
     }
-    return b;
   }
 
   public void connect(String port) throws IOException {

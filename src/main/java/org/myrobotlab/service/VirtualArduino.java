@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
@@ -22,7 +21,6 @@ import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortListener;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
@@ -299,7 +297,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     // TODO: is there a race condition here?
     // ?!?
     this.mrlComm.softReset();
-    this.mrlComm.getMsg().publishMrlCommBegin(Msg.MRLCOMM_VERSION);
+    this.mrlComm.getMsg().publishMrlCommBegin(VirtualMsg.MRLCOMM_VERSION);
     virtualMsg.onConnect(portName);
     start();
     // chain the connect

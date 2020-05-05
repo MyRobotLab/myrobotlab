@@ -228,16 +228,13 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   @Override
   public void onBytes(byte[] bytes) {
     for (int i = 0; i < bytes.length; i++) {
-      onByte(bytes[i] & 0xFF);
-    }
-  }
-
-  public void onByte(Integer newByte) {
-    buffer[bufferLast++] = (byte) newByte.intValue();
-    if (bufferLast == 26) {
-      bufferLast = 0;
-      System.arraycopy(buffer, 0, sensor_bytes, 0, 26);
-      computeSensors();
+      Integer newByte = bytes[i] & 0xFF;
+      buffer[bufferLast++] = (byte) newByte.intValue();
+      if (bufferLast == 26) {
+        bufferLast = 0;
+        System.arraycopy(buffer, 0, sensor_bytes, 0, 26);
+        computeSensors();
+      }
     }
   }
 
