@@ -1,6 +1,8 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.util.List;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.VirtualMsg;
+import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
@@ -39,6 +42,9 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     msg.setInvoke(false);
     // our test service
     VirtualArduino va = (VirtualArduino)service;
+    // for unit tests.. skip invoking. call directly.
+    va.mrlComm.getMsg().setInvoke(false);
+//    va.virtualMsg.setInvoke(false);
     // attach to the serial port for callbacks to this test.
     // connect the virtual arduino to the uart (DCE) port.
     va.connect(testPort);
@@ -68,13 +74,29 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     log.info("Writing a messge to attach a servo!");
     byte[] data = msg.servoAttach(0, 1, 0, 0, "s1");
     serial.write(data);
+    serial.flush();
+    // we probably have a race condition here.. but lets see.
+    Thread.sleep(1000);
+    Device d = va.getDevice(0);
+    assertNotNull(d);
     // i'd like to see an ack come back!
+    
+    
+    // other stuff like..
+    serial.write(msg.servoMoveToMicroseconds(0, 1976));
+    // TODO: meaningful assert
+    serial.write(msg.servoSetVelocity(0, 42));
+    // TODO: meaningful assert
+    serial.write(msg.servoMoveToMicroseconds(0, 2020));
+    // TODO: meaningful assert
+
     //  Thread.sleep(1000);
     // TODO: this ack received needs to come back from the arduino service currently..
     // but it should be pushe down into the internals of the msg class
     // msg.ackReceived(0);
     serial.write(msg.servoMoveToMicroseconds(0, 2000));
     // TODO: Test various messages
+    Thread.sleep(10000);
   }
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
@@ -138,7 +160,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void publishMrlCommBegin(Integer version) {
-    // TODO Auto-generated method stub
+    assertEquals(VirtualMsg.MRLCOMM_VERSION, version.intValue());
   }
 
   @Override
