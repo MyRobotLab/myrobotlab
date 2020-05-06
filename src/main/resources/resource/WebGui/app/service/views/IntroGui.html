@@ -31,7 +31,7 @@
     
                 <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')"><img src="../Intro/img/arduino.png"/>&nbsp;</a>
     
-                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="mrl.changeTab('i01')"><img src="../Intro/img/inmoov.png"/>&nbsp;</div>
+                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="msg.loadFile('resource/Intro/InMoov01_start.py');mrl.changeTab('i01')"><img src="../Intro/img/inmoov.png"/>&nbsp;</div>
     
                 <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../Intro/img/serial.png"/>&nbsp;</div>
     
@@ -361,6 +361,7 @@
             <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
             <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.loadFile('resource/Intro/OpenCV01_stop.py'):msg.loadFile('resource/Intro/OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
             <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv1')">Tutorial next page</button>
+            <!--button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="mrl.changeTab('opencv')">Tutorial next page</button-->
         </td>
     </tr>
     <tr>
