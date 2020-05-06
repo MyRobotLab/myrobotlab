@@ -68,8 +68,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   String portName = "COM42";
 
-  transient VirtualMsg virtualMsg;
-
   /**
    * should be ui widgetized
    */
@@ -231,9 +229,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     log.info("uart {}", uart);
     ino = new MrlCommIno(this);
     mrlComm = ino.getMrlComm();
-    virtualMsg = mrlComm.getMsg();
-    // TODO: should this be false?
-    // virtualMsg.setInvoke(false);
     boardInfo = mrlComm.boardInfo;
     // TODO: make sure we obey what the board type is supposed to be!
     setBoard(Arduino.BOARD_TYPE_UNO);
@@ -295,10 +290,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
     log.info("starting MRL comm runner.");
     // TODO: is there a race condition here?
-    // ?!?
-    this.mrlComm.softReset();
-    this.mrlComm.getMsg().publishMrlCommBegin(VirtualMsg.MRLCOMM_VERSION);
-    virtualMsg.onConnect(portName);
+    mrlComm.softReset();
+    mrlComm.getMsg().publishMrlCommBegin(VirtualMsg.MRLCOMM_VERSION);
+    mrlComm.onConnect(portName);
     start();
     // chain the connect
     invoke("publishConnect", portName);
@@ -312,8 +306,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   // chaining Serial's disconnect event ..
   @Override
   public void onDisconnect(String portName) {
-    // pass the disconnect message down to virtualmsg
-    virtualMsg.onDisconnect(portName);
+    // pass the disconnect message down to mrlcomm 
+    mrlComm.onDisconnect(portName);
     // chain
     invoke("publishDisconnect", portName);
   }
@@ -477,7 +471,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public void onBytes(byte[] bytes) {
     // if we get bytes from the uart (DCE side) of the port.. we need to push them down to the virtual message.
     log.info("VIRTUAL ARDUINO ON BYTES {} !!!!!!!!!!!!!!!!!!!!!!!!!!", bytes);
-    virtualMsg.onBytes(bytes);
+    // This should relay to MrlComm .. which will push it down to virtualMsg
+    mrlComm.onBytes(bytes);
   }
 
 }
