@@ -1456,7 +1456,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 				arduino.attach(head.eyeX);
 				arduino.attach(head.eyeY);
 				arduino.attach(head.jaw);
-				arduino.attach(head.rollNeck);
+				//FIXME rollNeck and eyelids must be connected to right controller
+				//arduino.attach(head.rollNeck);
+				//arduino.attach(head.eyelidLeft);
+				//arduino.attach(head.eyelidRight);
 
 			} catch (Exception e) {
 				error(e);
