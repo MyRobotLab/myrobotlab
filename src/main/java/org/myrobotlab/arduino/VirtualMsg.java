@@ -1718,19 +1718,30 @@ public class VirtualMsg {
     }
     // write data if serial not null.
     if (serial != null) {
-      serial.write(message);
+      // mark it pending before we write the data.
       if (ackEnabled){
         // flip our flag because we're going to send the message now.
         // TODO: is this deadlocked because it's synchronized?!
         // TODO: should this be set regardless of if the serial is null?
-        log.info("Setting pending flag.");
-        synchronized (ackRecievedLock) {
-          ackRecievedLock.pendingMessage = true;
-          ackRecievedLock.notifyAll();
-        }
-      }      
+        markPending();
+      }
+      serial.write(message);
+      // TODO: if there's an exception, we should clear our pending status?
+      if (ackEnabled) {
+        // wait for a pending ack to be received before we process our message.^M
+        waitForAck();
+      }
+
     }
     return message;
+  }
+  
+  public void markPending() {
+    log.info("Setting pending flag.");
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = true;
+      ackRecievedLock.notifyAll();
+    }
   }
   
   public boolean isRecording() {
@@ -1835,7 +1846,7 @@ public class VirtualMsg {
     }
   }
   
-  public void ackReceived(int function){
+  public void ackReceived(int function) {
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
@@ -1894,28 +1905,21 @@ public class VirtualMsg {
     }
   }
 
-  public synchronized void onConnect(String portName) {
+  public void onConnect(String portName) {
     log.info("On Connect Called in Msg.");
     // reset the parser...
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    synchronized (ackRecievedLock) {
-      ackRecievedLock.pendingMessage = false;
-      ackRecievedLock.notifyAll();
-    }
+    ackReceived(-1);
   }
 
-  public synchronized void onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     log.info("On Disconnect Called in Msg.");
     // reset the parser... this might not be necessary.
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    synchronized (ackRecievedLock) {
-      ackRecievedLock.pendingMessage = false;
-      ackRecievedLock.notifyAll();
-    }
+    ackReceived(-1);
   }
-
 
   public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.

@@ -2661,15 +2661,12 @@ public class Msg {
         try {
           ackRecievedLock.wait(ACK_TIMEOUT);
         } catch (InterruptedException e) {
-          log.warn("waitForAck Ack lock interrupted exception.", e);
         }
         if (ackRecievedLock.pendingMessage) {
           log.error("Ack not received, ack timeout!");
           // TODO: should we just reset and hope for the best?
           // ackRecievedLock.acknowledged = true;
           arduino.ackTimeout();
-        } else {
-          log.info("Ack lock was released properly.");
         }
       }
     }
@@ -2680,13 +2677,13 @@ public class Msg {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
-    log.info("Ack Clearing pending status. {}", function);
   }
   
   public int getMethod(){
     return method;
   }
   
+
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
     sendBufferSize += 1;
@@ -2749,7 +2746,6 @@ public class Msg {
     this.msgSize = 0;
     ackReceived(-1);
   }
-
 
   public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.
