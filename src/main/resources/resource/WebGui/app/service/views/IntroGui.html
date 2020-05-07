@@ -159,6 +159,7 @@
     </tr>
     <tr ng-show="!service.isVirtual">
         <td>
+            FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
         </td>
     </tr>
@@ -170,6 +171,7 @@
     </tr>
     <tr ng-show="service.isVirtual">
         <td>
+            FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
         </td>
     </tr>   
@@ -199,6 +201,7 @@
     </tr>
     <tr>
         <td>
+            FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
         </td>
     </tr> 
@@ -223,6 +226,7 @@
     </tr>
     <tr>
         <td>
+            FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
         </td>
     </tr>
@@ -237,7 +241,7 @@
                 <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
                 <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Previous page</button>
                 <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo5')">Tutorial next page</button>
-                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.loadFile('resource/Intro/Servo01_stop.py')">execFile stop test</button>
+                <!--button class="btn btn-default" ng-show="service.isServoActivated" ng-click="msg.execFile('resource/Intro/Servo01_stop.py')">execFile stop test</button-->
             </td>
         </tr>
         <tr>
@@ -392,7 +396,7 @@
     </tr>
     </table>
     <!------------------------ opencv end ------------------------------>
-    <!------------------------ opencv begin ------------------------------>
+    <!------------------------ opencv1 begin ------------------------------>
     <table ng-show="showPanel('opencv1')" class="table table-striped">
     <tr>
         <td>
@@ -405,11 +409,12 @@
     </tr>
     <tr>
         <td>
+            FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('opencv')"></div>
         </td>
     </tr>
     </table>
-    <!------------------------ opencv end ------------------------------>     
+    <!------------------------ opencv1 end ------------------------------>     
             <!-- panels end -->
     </td></tr></table>
     
