@@ -137,6 +137,7 @@ public abstract class Port implements Runnable, SerialControl {
    */
   @Override
   public void run() {
+    // JSSC port doesn't need this, it has it's own thread that publishes SerialEvents for us.
     log.info("Listening on port {}", portName);
     listening = true;
     try {
@@ -154,6 +155,9 @@ public abstract class Port implements Runnable, SerialControl {
           log.info("RX Data: {}", buffer);
         }
         // we have data.. let's publish it.
+        if (listeners.size() == 0) {
+          log.warn("NO LISTENERS for serial port {} data getting dropped! {}", portName, buffer);
+        }
         for (String key : listeners.keySet()) {
           listeners.get(key).onBytes(buffer);
         }

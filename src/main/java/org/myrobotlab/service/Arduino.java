@@ -338,6 +338,7 @@ public class Arduino extends AbstractMicrocontroller
   synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {
     DeviceMapping map = new DeviceMapping(device, attachConfig);
     map.setId(nextDeviceId);
+    log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}",  device.getName(), device.getClass().getSimpleName(), map);
     deviceList.put(device.getName(), map);
     deviceIndex.put(nextDeviceId, map);
     ++nextDeviceId;
@@ -1257,6 +1258,8 @@ public class Arduino extends AbstractMicrocontroller
       serial = (Serial) startPeer("serial");
       msg = new Msg(this, serial);
       serial.addByteListener(this);
+    } else {
+      log.warn("Init serial called and we already have a msg class!");
     }
   }
 
@@ -1574,18 +1577,18 @@ public class Arduino extends AbstractMicrocontroller
       broadcastState();
     }
 
-    if (boardInfo != null) {
-      DeviceSummary[] ds = boardInfo.getDeviceSummary();
-      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
-        log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}", deviceList, ds);
-        invoke("sync");
-      }
-    }
+    // TODO: consider, can we really just re-sync when we see begin only.. ?  feels better/safer.
+//    if (boardInfo != null) {
+//      DeviceSummary[] ds = boardInfo.getDeviceSummary();
+//      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
+//        log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}", deviceList, ds);
+//        invoke("sync");
+//      }
+//    }
 
     // we send here - because this is a "command" message, and we don't want the
     // possibility of
     // block this "status" msgs
-    // send(getName(),"sync", boardInfo);
     lastBoardInfo = boardInfo;
     return boardInfo;
   }
@@ -2217,26 +2220,18 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   public void publishMrlCommBegin(Integer version) {
-    log.info("publishMrlCommBegin ({}) - going to sync", version);
     // If we were already connected up and clear to send.. this is a problem.. it means the board was reset on it.
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
       // At this point we need to reset!
-      msg.ackReceived(Msg.PUBLISH_MRL_COMM_BEGIN);
-//       msg.pendingMessage = false;
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
       mrlCommBegin = 0;
     }
     ++mrlCommBegin;
-    //log.info("Skipping Sync!  TODO: uncomment me.");
+    // log.info("Skipping Sync!  TODO: uncomment me.");
     // This needs to be non-blocking
     // If we have devices, we need to sync them.
-    if (deviceList.size() > 0) {
+    // The device list always has "Arduino" in it for some reason..
+    if (deviceList.size() > 1) {
       log.info("Need to sync devices to mrlcomm. Num Devices: {} Devices: {}", deviceList.size(), deviceList);
       invoke("sync");
     } else {

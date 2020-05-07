@@ -64,8 +64,8 @@ import org.slf4j.Logger;
 
 public class Msg {
 
-  // TODO: pick a more reasonable timeout.. 30 seconds is high.
-  private static final int ACK_TIMEOUT = 30000;
+  // TODO: pick a more reasonable timeout.. 3 seconds is high.
+  private static final int ACK_TIMEOUT = 3000;
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
@@ -2544,19 +2544,30 @@ public class Msg {
     }
     // write data if serial not null.
     if (serial != null) {
-      serial.write(message);
+      // mark it pending before we write the data.
       if (ackEnabled){
         // flip our flag because we're going to send the message now.
         // TODO: is this deadlocked because it's synchronized?!
         // TODO: should this be set regardless of if the serial is null?
-        log.info("Setting pending flag.");
-        synchronized (ackRecievedLock) {
-          ackRecievedLock.pendingMessage = true;
-          ackRecievedLock.notifyAll();
-        }
-      }      
+        markPending();
+      }
+      serial.write(message);
+      // TODO: if there's an exception, we should clear our pending status?
+      if (ackEnabled) {
+        // wait for a pending ack to be received before we process our message.^M
+        waitForAck();
+      }
+
     }
     return message;
+  }
+  
+  public void markPending() {
+    log.info("Setting pending flag.");
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = true;
+      ackRecievedLock.notifyAll();
+    }
   }
   
   public boolean isRecording() {
@@ -2650,29 +2661,32 @@ public class Msg {
         try {
           ackRecievedLock.wait(ACK_TIMEOUT);
         } catch (InterruptedException e) {
+          log.warn("waitForAck Ack lock interrupted exception.", e);
         }
         if (ackRecievedLock.pendingMessage) {
           log.error("Ack not received, ack timeout!");
           // TODO: should we just reset and hope for the best?
           // ackRecievedLock.acknowledged = true;
           arduino.ackTimeout();
+        } else {
+          log.info("Ack lock was released properly.");
         }
       }
     }
   }
   
-  public void ackReceived(int function){
+  public void ackReceived(int function) {
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
+    log.info("Ack Clearing pending status. {}", function);
   }
   
   public int getMethod(){
     return method;
   }
   
-
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
     sendBufferSize += 1;
@@ -2720,26 +2734,20 @@ public class Msg {
     }
   }
 
-  public synchronized void onConnect(String portName) {
+  public void onConnect(String portName) {
     log.info("On Connect Called in Msg.");
     // reset the parser...
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    synchronized (ackRecievedLock) {
-      ackRecievedLock.pendingMessage = false;
-      ackRecievedLock.notifyAll();
-    }
+    ackReceived(-1);
   }
 
-  public synchronized void onDisconnect(String portName) {
+  public void onDisconnect(String portName) {
     log.info("On Disconnect Called in Msg.");
     // reset the parser... this might not be necessary.
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
-    synchronized (ackRecievedLock) {
-      ackRecievedLock.pendingMessage = false;
-      ackRecievedLock.notifyAll();
-    }
+    ackReceived(-1);
   }
 
 
