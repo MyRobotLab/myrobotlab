@@ -116,7 +116,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
       // read what's available
       return port.readBytes();
     } catch (SerialPortException e) {
-      log.warn("Read Bytes Exception", e);
+      log.warn("Port: {} Read Bytes Exception", portName, e);
       return null;
     }
   }
@@ -198,9 +198,10 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
           return;
         }
         // we have data, let's notify the listeners.
-        log.info("Reading Data from port {} - Data:>{}<", getName(), buffer);
+        // log.info("Reading Data from port {} - Data:>{}<", getName(), buffer);
         for (String key : listeners.keySet()) {
           // TODO: feels like this should be synchronized or maybe the buffer should be immutable?
+          // log.info("Calling On Bytes for Listener: {} - Data:{}", key, buffer);
           listeners.get(key).onBytes(buffer);
         }
         // gather stats about this serial event (bytes read...)
@@ -208,8 +209,11 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
           ++stats.total;
           if (stats.total % stats.interval == 0) {
             stats.ts = System.currentTimeMillis();
-            log.info("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, stats.ts - stats.lastTS,
-                8 * stats.interval / (stats.ts - stats.lastTS));
+            long delta = stats.ts - stats.lastTS;
+            // avoid the divide by zero
+            if (delta != 0) {
+              log.info("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, delta, 8 * stats.interval / delta);
+            }
             // publishQueueStats(stats);
             stats.lastTS = stats.ts;
           }

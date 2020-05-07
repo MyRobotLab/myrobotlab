@@ -64,8 +64,8 @@ import org.slf4j.Logger;
 
 public class VirtualMsg {
 
-  // TODO: pick a more reasonable timeout.. 30 seconds is high.
-  private static final int ACK_TIMEOUT = 30000;
+  // TODO: pick a more reasonable timeout.. 3 seconds is high.
+  private static final int ACK_TIMEOUT = 3000;
   public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010

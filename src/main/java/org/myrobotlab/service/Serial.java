@@ -251,6 +251,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public void addByteListener(SerialDataListener listener) {
+    log.info("Adding a Byte listener... {} publishes to {}", getName(), listener.getName());
     listeners.put(listener.getName(), listener);
   }
 
@@ -750,11 +751,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (bytes == null) {
       return;
     }
+    if (listeners.size() ==0) {
+      log.warn("No Listeners !!!  we are invoking publishBytes.. data is likely getting dropped? ");
+    }
     invoke("publishBytes", bytes);
-
-    // TODO: right now.. PortJSSC invokes this and it invokes onBytes on the Arduino / other classes directly..  
-    // Why do that in both places?  seems like there should be a more stream lined approach to avoid copying the same byte array 
-    // to multiple end points.
     // String byteIntString = StringUtil.byteArrayToIntString(bytes);
     // log.info("On bytes called len: {}  data: {}" , bytes.length, byteIntString);
     for (int i = 0 ; i < bytes.length; i ++) {
