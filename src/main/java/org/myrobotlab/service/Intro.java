@@ -16,6 +16,7 @@ import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.Simulator;
 import org.slf4j.Logger;
 
 public class Intro extends Service {
@@ -36,10 +37,12 @@ public class Intro extends Service {
   
   public boolean isServoActivated = false;
   public boolean isSpeechActivated = false;
+  public boolean isSimulatorActivated = false;
 
   transient ServoControl servo;
   transient ServoController controller;
   transient AbstractSpeechSynthesis speech;
+  transient JMonkeyEngine jme;
 
   Map<String, TutorialInfo> tutorials = new TreeMap<>();
 
@@ -72,6 +75,10 @@ public class Intro extends Service {
   public boolean isServoActivated() {
     return isServoActivated;
   }
+
+  public Simulator getSimulator() {
+		return jme;
+	}
   
   /**
    * execute an Intro resource script
@@ -123,6 +130,47 @@ public class Intro extends Service {
     }
   }
 
+  public Simulator startSimulator() throws Exception {
+
+    speakBlocking(get("STARTINGVIRTUAL"));
+
+    if (jme != null) {
+        log.info("start called twice - starting simulator is reentrant");
+        return jme;
+    }
+
+    jme = (JMonkeyEngine) startPeer("simulator");
+
+    isSimulatorActivated = true;
+
+    // adding Intro asset path to the jonkey simulator
+    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
+
+    File check = new File(assetPath);
+    log.info("loading assets from {}", assetPath);
+    if (!check.exists()) {
+        log.warn("%s does not exist");
+    }
+
+    // disable the frustrating servo events ...
+    // Servo.eventsEnabledDefault(false);
+    // jme.loadModels(assetPath); not needed - as Intro unzips the model into
+    // /resource/JMonkeyEngine/assets
+
+    // ========== Requires VirtualServo.j3o ========================
+
+    // ========== servo calibrations begin ======================
+    jme.setRotation(getName() + ".servo01", "z");
+    jme.setMapper(getName() + ".servo01", 0, 180, 30, -30);
+
+    //We set the correct location view
+    jme.cameraLookAt(getName() + ".servo01");
+
+    // ========== servo calibrations end ======================
+
+    return jme;
+  }
+
   public void startSpeech() {
     speech = (AbstractSpeechSynthesis)Runtime.start("speech", "WebKitSpeechSynthesis");
     isSpeechActivated = true;
@@ -135,6 +183,13 @@ public class Intro extends Service {
     isSpeechActivated = false;
     speech = null;
   }
+
+	public void stopSimulator() {
+		//speakBlocking(get("STOPVIRTUAL"));
+		releasePeer("simulator");
+		jme = null;
+		isSimulatorActivated = false;
+	}  
   
   @Deprecated
   public void startServo() {
@@ -186,6 +241,7 @@ public class Intro extends Service {
   static public ServiceType getMetaData() {
 
     ServiceType meta = new ServiceType(Intro.class);
+    meta.addPeer("simulator", "JMonkeyEngine", "simulator");
     meta.addDescription("Introduction to MyRobotlab");
     meta.setAvailable(true);
     meta.addCategory("general");
