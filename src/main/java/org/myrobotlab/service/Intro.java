@@ -42,7 +42,7 @@ public class Intro extends Service {
   transient ServoControl servo;
   transient ServoController controller;
   transient AbstractSpeechSynthesis speech;
-  transient JMonkeyEngine jme;
+  transient JMonkeyEngine jmIntro;
 
   Map<String, TutorialInfo> tutorials = new TreeMap<>();
 
@@ -77,7 +77,7 @@ public class Intro extends Service {
   }
 
   public Simulator getSimulator() {
-		return jme;
+		return jmIntro;
 	}
   
   /**
@@ -134,16 +134,16 @@ public class Intro extends Service {
 
     //speakBlocking(get("STARTINGVIRTUAL"));
 
-    if (jme != null) {
+    if (jmIntro != null) {
         log.info("start called twice - starting simulator is reentrant");
-        return jme;
+        return jmIntro;
     }
 
-    jme = (JMonkeyEngine) startPeer("simulator");
+    jmIntro = (JMonkeyEngine) startPeer("simulator");
 
     isSimulatorActivated = true;
 
-    // adding Intro asset path to the jonkey simulator
+    // adding Intro asset path to the jmonkey simulator
     String assetPath = getResourceDir() + fs + Intro.class.getSimpleName();
 
     File check = new File(assetPath);
@@ -154,21 +154,20 @@ public class Intro extends Service {
 
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
-    // jme.loadModels(assetPath); not needed - as Intro unzips the model into
-    // /resource/JMonkeyEngine/assets
+    jmIntro.loadModels(assetPath);
 
     // ========== Requires VirtualServo.j3o ========================
 
     // ========== servo calibrations begin ======================
-    jme.setRotation(getName() + ".servo01", "z");
-    jme.setMapper(getName() + ".servo01", 0, 180, 30, -30);
+    jmIntro.setRotation(getName() + ".servo01", "z");
+    jmIntro.setMapper(getName() + ".servo01", 0, 180, 30, -30);
 
     //We set the correct location view
-    jme.cameraLookAt(getName() + ".servo01");
+    jmIntro.cameraLookAt(getName() + ".servo01");
 
     // ========== servo calibrations end ======================
 
-    return jme;
+    return jmIntro;
   }
 
   public void startSpeech() {
@@ -187,7 +186,7 @@ public class Intro extends Service {
 	public void stopSimulator() {
 		//speakBlocking(get("STOPVIRTUAL"));
 		releasePeer("simulator");
-		jme = null;
+		jmIntro = null;
 		isSimulatorActivated = false;
 	}  
   
