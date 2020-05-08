@@ -132,7 +132,7 @@ public class Intro extends Service {
 
   public Simulator startSimulator() throws Exception {
 
-    speakBlocking(get("STARTINGVIRTUAL"));
+    //speakBlocking(get("STARTINGVIRTUAL"));
 
     if (jme != null) {
         log.info("start called twice - starting simulator is reentrant");
