@@ -159,11 +159,11 @@ public class Intro extends Service {
     // ========== Requires VirtualServo.j3o ========================
 
     // ========== servo calibrations begin ======================
-    jmIntro.setRotation(getName() + ".servo01", "z");
-    jmIntro.setMapper(getName() + ".servo01", 0, 180, 30, -30);
+    jmIntro.setRotation("servo01", "z");
+    jmIntro.setMapper("servo01", 0, 180, 30, -30);
 
     //We set the correct location view
-    jmIntro.cameraLookAt(getName() + ".servo01");
+    jmIntro.cameraLookAt("servo01");
 
     // ========== servo calibrations end ======================
 
