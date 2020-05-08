@@ -2,8 +2,33 @@
 <div class="row">
     <h3>&nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}}</h3>
 </div>
+Language
 <div class="row">
-    <div class="form-inline col-md-6">
+    <div class="form-inline col-md-6">    
+    <!-- {{locale}} -->
+            <ui-select ng-model="locale.selected" ng-change="msg.setLocale(locale.selected)" theme="bootstrap" style="width: 5em">
+                <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.value.displayLanguage}}</ui-select-match>
+                <ui-select-choices repeat="value.key as (key, value) in languages | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{value.value.displayLanguage}}&nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+            </ui-select>
+    </div>
+</div>
+Create a new service
+<div class="row">
+    <div class="form-inline col-md-6">    
+    <!-- category begin -->
+        <ui-select ng-model="category.selected" theme="bootstrap" style="width: 3.5em">
+            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;category&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="true">
+                <span>
+                    <img ng-src="{{'/core/category/' + $select.selected.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{$select.selected.key}}&nbsp;&nbsp;&nbsp;&nbsp;
+                </span>
+            </ui-select-match>
+            <ui-select-choices repeat="category.key as (key, category) in service.serviceData.categoryTypes | filter: $select.search">
+                <span>
+                    <img ng-src="{{'/core/category/' + category.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{category.value.name}}
+                </span>
+            </ui-select-choices>
+        </ui-select>
+    <!-- category end -->
         <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
         <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
         <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
@@ -14,31 +39,26 @@
 <!-- service type selector begin -->
 <div class="row">
     <div class="form-inline col-md-6">
-
-        <ui-select ng-model="category.selected" theme="bootstrap" style="width: 3.5em">
-            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;category&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="true">
-                 <span><img ng-src="{{'/core/category/' + $select.selected.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{$select.selected.key}}&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </ui-select-match>
-            <ui-select-choices repeat="category.key as (key, category) in service.serviceData.categoryTypes | filter: $select.search">
-                <span><img ng-src="{{'/core/category/' + category.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{category.value.name}}</span>
-            </ui-select-choices>
-        </ui-select>
-
-
         <table class="table table-striped">
-            <tr ng-repeat="(fullTypename, metaData) in filterServices()">               
-                <td nowrap><span ng-click="setServiceType(metaData.simpleName)">
-                    <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
-                    </span>                                   
+            <tr ng-repeat="(fullTypename, metaData) in filterServices()">
+                <td nowrap>
+                    <span ng-click="setServiceType(metaData.simpleName)">
+                        <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
+                    </span>
                 </td>
-                <td><span ng-click="setServiceType(metaData.simpleName)">{{metaData.description}}</span></td>
-                <td><img src='/core/category/key.png' width="18" ng-show='metaData.requiresKeys' uib-tooltip='requires keys'/> </td>
-                <td><img src='/core/category/cloud.png' width="18" ng-show='metaData.isCloudService' uib-tooltip='cloud service'/></td>
+                <td>
+                    <span ng-click="setServiceType(metaData.simpleName)">{{metaData.description}}</span>
+                </td>
+                <td>
+                    <img src='/core/category/key.png' width="18" ng-show='metaData.requiresKeys' uib-tooltip='requires keys'/>
+                </td>
+                <td>
+                    <img src='/core/category/cloud.png' width="18" ng-show='metaData.isCloudService' uib-tooltip='cloud service'/>
+                </td>
             </tr>
         </table>
     </div>
 </div>
-
 <div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">
         <div class="form-group col-md-6">
@@ -46,7 +66,6 @@
         </div>
     </form>
 </div>
-
 <div class="row">
     <div class="form-group col-md-6">
         <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
@@ -69,6 +88,10 @@
                             <tr ng-repeat="c in connectionList">
                                 <td>
                                     <img ng-src="{{'/' + c['c-type'] + '.png'}}" width="18"/>{{c['c-type']}}                                
+                                
+                                
+                                
+                                
                                 </td>
                                 <td>{{c.gateway}}</td>
                                 <td>{{c.uuid}}</td>

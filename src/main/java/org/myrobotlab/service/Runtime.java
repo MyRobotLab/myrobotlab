@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -209,6 +210,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   private List<String> jvmArgs;
 
   private List<String> args;
+  
+  private Properties defaultLocalization = null;
 
   String remoteId = null;
 
@@ -1980,7 +1983,8 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
     }
 
-    locale = Locale.getDefault();
+    setLocale(Locale.getDefault().getTag());
+    defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
     locales = Locale.getDefaults();
 
     if (runtime.platform == null) {
@@ -2697,6 +2701,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   @Override
   public void setLocale(String code) {
     locale = new Locale(code);
+    // attempt to reload all services localizations
+    Map<String, ServiceInterface> services = getLocalServices();
+    for (ServiceInterface service : services.values()) {
+      service.loadLocalizations();      
+    }
   }
 
   @Override
@@ -3523,6 +3532,11 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
 
     return false;
+  }
+
+  public Object localizeDefault(String key) {
+    key = key.toUpperCase();
+    return defaultLocalization.get(key);
   }
 
 }

@@ -22,6 +22,17 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.newType = ""
     $scope.heartbeatTs = null
 
+    $scope.languages = {
+        'en':{
+            'language':'en',
+            'displayLanguage':'English'
+        }
+    }
+
+    $scope.locale = {
+        selected:null
+    }
+
     $scope.category = {
         selected: null
     }
@@ -197,6 +208,32 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onLocalServices':
             {
                 $scope.registry = inMsg.data[0]
+                //  $scope.$apply()
+                break
+            }
+        case 'onLocale':
+            {
+                $scope.locale.selected = inMsg.data[0].language
+                $scope.$apply()
+                break
+            }
+        case 'onLocales':
+            {
+                ls = inMsg.data[0]
+                unique = {}// new Set()
+                for (const key in ls){
+                    if (ls[key].displayLanguage){
+                        // unique.add(ls[key].displayLanguage)
+                        // unique.push(ls[key].language)
+                        unique[ls[key].language] = {
+                            'language':ls[key].language,
+                            'displayLanguage':ls[key].displayLanguage
+                        }
+                    }
+                }
+                // $scope.languages = Array.from(unique)
+                $scope.languages = unique
+                $scope.$apply()
                 break
             }
         case 'onServiceTypes':
@@ -301,10 +338,14 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("registered")
     msg.subscribe("getConnectionHeaders")
     msg.subscribe("sendToCli")
+    msg.subscribe("getLocale")
+    msg.subscribe("getLocales")
 
     //msg.send("getLocalServices")
     msg.send("getConnectionHeaders")
     msg.send("getServiceTypes")
+    msg.send("getLocale")
+    msg.send("getLocales")
     msg.subscribe(this)
 }
 ])

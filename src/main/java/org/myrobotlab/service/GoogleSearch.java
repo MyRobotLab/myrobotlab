@@ -59,15 +59,13 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   /**
    * language of search and results
    */
-  Locale locale = null;
-
+  
   protected List<String> excludeTextFilter = new ArrayList<String>();
 
   public GoogleSearch(String n, String id) {
     super(n, id);
     Runtime runtime = Runtime.getInstance();
     runtime.getLanguage();
-    locale = runtime.getLocale();
     excludeTextFilter.add("Wikipedia");
     setLowerCase();
   }
@@ -94,7 +92,8 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   @Override
   public void setLocale(String code) {
-    locale = new Locale(code);
+    // locale = new Locale(code);
+    Runtime.getInstance().setLocale(code);
     log.info("language is {}", code);
   }
 
@@ -126,7 +125,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
 
       // not sure if locale is supported tag probably is ....
-      String request = "https://google.com/search?lr=lang_" + locale.getTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      String request = "https://google.com/search?lr=lang_" + Runtime.getInstance().getLocaleTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
 
       // Fetch the page
       Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
@@ -229,7 +228,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     try {
       // can only grab first 100 results
 
-      String url = "https://www.google.com/search?lr=lang_" + locale.getTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+      String url = "https://www.google.com/search?lr=lang_" + Runtime.getInstance().getLocaleTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
       String filename = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString());
 
       // FIXME - check for cache ??? or useCache boolean config ?
@@ -385,12 +384,12 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   @Override
   public String getLanguage() {
-    return locale.getLanguage();
+    return Runtime.getInstance().getLanguage();
   }
 
   @Override
   public Locale getLocale() {
-    return locale;
+    return Runtime.getInstance().getLocale();
   }
 
   @Override

@@ -581,12 +581,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return head;
 	}
 
-	/**
-	 * get current language
-	 */
-	public String getLanguage() {
-		return locale.getLanguage();
-	}
 
 	/**
 	 * finds most recent activity
@@ -640,11 +634,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public InMoov2Hand getLeftHand() {
 		return leftHand;
 	}
+	
+  @Override
+  public String getLanguage() {
+    return Runtime.getInstance().getLanguage();
+  }
 
-	@Override
-	public Locale getLocale() {
-		return locale;
-	}
+  @Override
+  public Locale getLocale() {
+    return Runtime.getInstance().getLocale();
+  }
 
 	@Override
 	public Map<String, Locale> getLocales() {

@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
@@ -64,7 +65,7 @@ import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -155,6 +156,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   transient protected Outbox outbox = null;
   
   protected String serviceVersion = null;
+  
+    /**
+   * map of keys to localizations - 
+   * <pre>
+   *  Match Service with current Locale of the Runtime service
+   *  Match Runtime with current Locale of the Runtime service.
+   *  Match Runtime with Default (english) Locale
+   * </pre>
+   * service specific - then runtime
+   */
+  protected transient Properties localization = new Properties();
   
   /**
    * for promoting portability and good pathing
@@ -911,9 +923,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public File[] getResourceDirList() {
-    String resDir = getResourceDir();
-    File f = new File(resDir);
-    return f.listFiles();
+    return getResourceDirList(null);
   }
 
   /**
@@ -1049,6 +1059,25 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
     
+    Locale locale = null;
+    if (!Runtime.class.equals(getClass())) {
+      locale = Runtime.getInstance().getLocale();
+    } else {
+      locale = Locale.getDefault();
+    }
+    
+    // localization
+    // check resource localization directory
+    File[] localizationFiles = getResourceDirList("localization");
+    if (localizationFiles != null && localizationFiles.length > 0 && !getClass().equals(Runtime.class)) {
+      // look local locale file
+      File file = new File(getResourceDir(getClass(), "localization/" + locale.getLanguage() + ".properties"));
+      if (file.exists()) {
+        log.info("found localization file {}", file);
+          loadLocalizations();
+      }
+    }
+    
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
     	try {
@@ -1068,6 +1097,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       Runtime.register(registration);
     }
 
+  }
+
+  /**
+   * get a list of resource files in a resource path
+   * @param additionalPath
+   * @return
+   */
+  public File[] getResourceDirList(String additionalPath) {
+    String resDir = getResourceDir(getClass(), additionalPath);
+    File f = new File(resDir);
+    return f.listFiles();
   }
 
   /**
@@ -2842,5 +2882,57 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
     
   }
+  
+  /**
+   * localize a key - details are
+   * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
+   * 
+   * @param key
+   * @return
+   */
+  public String localize(String key) {
+    return localize(key, (Object[])null);
+  }
+  
+  /**
+   * String format template processing localization
+   * 
+   * @param key
+   * @param args
+   * @return
+   */
+  public String localize(String key, Object ... args) {
+     if (key == null) {
+       log.error("localize(null) not allowed");
+       return null;
+     }     
+     key = key.toUpperCase();     
+     Object prop = localization.get(key);
+          
+     Runtime runtime = Runtime.getInstance();
+     if (prop == null) {
+       // tried to resolve local to this service and failed
+       if (this != runtime) {
+         // if we are not runtime - we ask runtime
+         prop = runtime.localize(key, args);
+       } else if (this == runtime) {
+         // if we are runtime - we try default en
+         prop = runtime.localizeDefault(key);
+       }
+     }
+     if (prop == null) {
+       log.error("please help us get a good translation for {} in {}", key, runtime.getLocale().getTag());
+       return null;
+     }
+     if (args == null) {
+       return prop.toString();
+     } else {
+       return String.format(prop.toString(), args);
+     }
+  }
 
+  public void loadLocalizations() {
+    localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Runtime.getInstance().getLanguage() + ".properties"));
+  }
+  
 }

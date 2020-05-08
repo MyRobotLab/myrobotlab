@@ -80,12 +80,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Deprecated /* use wake word */
   protected boolean lockOutAllGrammar = false;
-
-  /**
-   * the current locale this service is set to e.g. en-US it-IT fr etc...
-   */
-  protected Locale locale;
-
+  
   /**
    * phrase to unlock commands such as "power up"
    */
@@ -134,10 +129,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
     locales = getLocales();
+    /*
     locale = Runtime.getInstance().getLocale();
     if (!locales.containsKey(locale.toString())) {
       locale = new Locale("en-US");
     }
+    */
   }
 
   public void addCommand(String actionPhrase, String name, String method, Object... params) {
@@ -570,18 +567,25 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public void setLocale(String code) {
-    locale = new Locale(code);
-  }
-
-  @Override
   public String getLanguage() {
-    return locale.getLanguage();
+    return Runtime.getInstance().getLanguage();
   }
 
   @Override
   public Locale getLocale() {
-    return locale;
+    return Runtime.getInstance().getLocale();
+  }
+
+  @Override
+  public Map<String, Locale> getLocales() {
+    return Locale.getAvailableLanguages();
+  }
+
+  @Override
+  public void setLocale(String code) {
+    // locale = new Locale(code);
+    Runtime.getInstance().setLocale(code);
+    log.info("language is {}", code);
   }
 
 }

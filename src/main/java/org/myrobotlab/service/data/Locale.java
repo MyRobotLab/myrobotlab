@@ -1,6 +1,10 @@
 package org.myrobotlab.service.data;
 
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 /**
@@ -162,10 +166,16 @@ public class Locale {
 
   public String toString() {
     return getTag();
+  } 
+
+  public static Properties loadLocalizations(String fullPath) {
+    Properties props = new Properties();
+    try {
+      props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));
+    } catch(Exception e) {
+      /* don't care common use case */
+    }
+    return props;
   }
-  /*
-   * public static Map<String, Locale> getDefaults() { // TODO Auto-generated
-   * method stub return null; }
-   */
 
 }
