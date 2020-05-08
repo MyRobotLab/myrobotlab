@@ -144,7 +144,7 @@ public class Intro extends Service {
     isSimulatorActivated = true;
 
     // adding Intro asset path to the jonkey simulator
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
+    String assetPath = getResourceDir() + fs + Intro.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
