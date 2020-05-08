@@ -83,14 +83,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * display processing and logging
    */
   boolean visualDebug = true;
-  
+
   /**
    * start GoogleSearch (a peer) instead of sraix web service which is down or
    * problematic much of the time
    */
   boolean peerSearch = true;
-
-  private Locale locale;
 
   transient SimpleLogPublisher logPublisher = null;
 
@@ -278,7 +276,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.error("botInfo({}) is null", botName);
       return null;
     }
-    
+
     return botInfo;
   }
 
@@ -518,6 +516,34 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     getSession().processOOB = processOOB;
   }
 
+  /**
+   * set a bot property - the result will be serialized to config/properties.txt
+   */
+  public void setBotProperty(String name, String value) {
+    setBotProperty(getCurrentBotName(), name, value);
+  }
+
+  /**
+   * set a bot property - the result will be serialized to config/properties.txt
+   */
+  public void setBotProperty(String botName, String name, String value) {
+    info("setting %s property %s:%s", getCurrentBotName(), name, value);
+    BotInfo botInfo = getBotInfo(botName);
+    name = name.trim();
+    value = value.trim();
+    botInfo.setProperty(name, value);
+  }
+
+  public void removeBotProperty(String name) {
+    removeBotProperty(getCurrentBotName(), name);
+  }
+    
+  public void removeBotProperty(String botName, String name) {
+    info("removing %s property %s", getCurrentBotName(), name);
+    BotInfo botInfo = getBotInfo(botName);
+    botInfo.removeProperty(name);
+  }
+  
   public Session startSession() throws IOException {
     return startSession(currentUserName);
   }
@@ -672,13 +698,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     File verifyAiml = new File(FileIO.gluePaths(path, "aiml"));
     if (botPath.exists() && botPath.isDirectory() && verifyAiml.exists() && verifyAiml.isDirectory()) {
       BotInfo botInfo = new BotInfo(this, botPath);
-            
+
       // key'ing on "path" probably would be better and only displaying "name"
       // then there would be no put/collisions only duplicate names
       // (preferrable)
       bots.put(botInfo.name, botInfo);
       botInfo.img = getBotImage(botInfo.name);
-      
+
       setCurrentBotName(botInfo.name);
       broadcastState();
     } else {
@@ -929,17 +955,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   @Override
   public void setLocale(String code) {
-    this.locale = new Locale(code);
+    Runtime.getInstance().setLocale(code);
   }
 
   @Override
   public String getLanguage() {
-    return locale.getLanguage();
+    return Runtime.getInstance().getLanguage();
   }
 
   @Override
   public Locale getLocale() {
-    return locale;
+    return Runtime.getInstance().getLocale();
   }
 
   @Override
@@ -974,7 +1000,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public void reload() throws IOException {
     reloadSession(getCurrentUserName(), getCurrentBotName());
   }
-  
+
   public String getBotImage() {
     return getBotImage(getCurrentBotName());
   }
@@ -1042,17 +1068,30 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public static void main(String args[]) {
     LoggingFactory.init("INFO");
     // Runtime.start("gui", "SwingGui");
+    
+    Runtime runtime = Runtime.getInstance();
+    runtime.setLocale("it");
+    /*
+    InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
+    String startLeft = i01.localize("STARTINGLEFTONLY");
+    log.info(startLeft);
+    */
+    
     ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+    Runtime.start("polly", "Polly");
+    
+    // brain.localize(key);
+    
+    
     String x = brain.getResourceImage("human.png");
     log.info(x);
+    
     /*
-    String x = brain.getBotImage("Alice");
-    log.info(x);
-    Response response = brain.getResponse("Hi, How are you?");
-    log.info(response.toString());
-    response = brain.getResponse("what's new?");
-    log.info(response.toString());
-    */
+     * String x = brain.getBotImage("Alice"); log.info(x); Response response =
+     * brain.getResponse("Hi, How are you?"); log.info(response.toString());
+     * response = brain.getResponse("what's new?");
+     * log.info(response.toString());
+     */
 
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);

@@ -134,4 +134,6 @@ public interface ServiceInterface
 
   public String getFullName();
 
+  public void loadLocalizations();
+
 }

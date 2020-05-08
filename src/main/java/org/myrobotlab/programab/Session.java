@@ -30,7 +30,7 @@ public class Session {
   public int maxConversationDelay = 5000;
 
   // FIXME - could be transient ??
-  public BotInfo botInfo;
+  transient public BotInfo botInfo;
   public transient Chat chat;
 
   transient ProgramAB programab;

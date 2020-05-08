@@ -48,11 +48,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   protected Map<String, Locale> locales = new HashMap<>();
   
 
-  /**
-   * the current locale this service is set to e.g. en-US it-IT fr etc...
-   */
-  protected Locale locale;
- 
+  
   /**
    * mute or unmute service
    */
@@ -275,12 +271,13 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     
     getVoices();
     
- 
+    /*
     locale = Runtime.getInstance().getLocale();
     if (!locales.containsKey(locale.toString())) {
       // lame - but if all fails drop to en-US :(
       locale = new Locale("en-US");
     }
+    */
     
     // loading supported locales
     Map<String, Locale> l = new TreeMap<>();
@@ -1068,17 +1065,17 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public void setLocale(String code) {
-    locale = new Locale(code);
+    Runtime.getInstance().setLocale(code);
   }
 
   @Override
   public String getLanguage() {
-    return locale.getLanguage();
+    return Runtime.getInstance().getLanguage();
   }
 
   @Override
   public Locale getLocale() {
-    return locale;
+    return Runtime.getInstance().getLocale();
   }
 
   static public ServiceType getMetaData(String serviceType) {
