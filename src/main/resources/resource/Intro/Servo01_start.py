@@ -19,9 +19,8 @@ arduino = Runtime.start("arduino","Arduino")
 servo01 = Runtime.start("servo01","Servo")
 
 # we tell to the service what is going on
-# intro.isServoActivated = True ### this gives a error because of readonly
-# intro.isServoActivated(True) ### this gives a error because of expecting no arg
-intro.isServoActivated()  ### this doesn't Activate anything
+# intro.isServoActivated = True ## FIXME this gives error readonly
+intro.isServoActivated()
 intro.broadcastState()
 
 # initialize arduino
@@ -36,6 +35,8 @@ servo01.map(0, 180, 0, 180)
 
 # set rest position
 servo01.setRest(90)
+# set speed
+servo01.setSpeed(100)
 
 # attach servo
 # print("attaching servo with pins to controller")
