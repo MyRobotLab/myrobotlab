@@ -2701,8 +2701,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // attempt to reload all services localizations
     Map<String, ServiceInterface> services = getLocalServices();
     for (ServiceInterface service : services.values()) {
-      service.loadLocalizations();      
+      service.loadLocalizations(locale.getLanguage());
     }
+    broadcastState();
   }
 
   @Override

@@ -100,7 +100,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
           log.warn("only know about male or female - but will set gender to {} because we don't want to discriminate", g);
         }
         this.gender = g;
-      }
+      }     
       if (lang != null) {
         String[] l = lang.split("-");
         if (l.length > 1) {
@@ -239,6 +239,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   private List<Voice> voiceList = new ArrayList<>();
   
   boolean blocking = false;
+  
+  protected Locale locale = null;
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -250,11 +252,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * some cases, only certain operating systems are supported. We are going to
    * be pessimistic - MarySpeech is "always" ready :)
    */
-  // protected boolean isReady = false;
 
-  public AbstractSpeechSynthesis(String n, String id) {
+   public AbstractSpeechSynthesis(String n, String id) {
     super(n, id);
     setReady(false);   
+    
+    locale = Runtime.getInstance().getLocale();
 
     if (langIndex == null) {
       langIndex = new HashMap<String, List<Voice>>();
@@ -270,22 +273,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     audioFile = (AudioFile) createPeer("audioFile");
     
     getVoices();
-    
-    /*
-    locale = Runtime.getInstance().getLocale();
-    if (!locales.containsKey(locale.toString())) {
-      // lame - but if all fails drop to en-US :(
-      locale = new Locale("en-US");
-    }
-    */
-    
-    // loading supported locales
-    Map<String, Locale> l = new TreeMap<>();
-    for (Voice voice : voices.values()) {
-      if (voice.locale != null) {
-        locales.put(voice.locale.toString(), voice.locale);
-      }
-    }
     
   }
   
@@ -785,9 +772,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       return;
     }
 
-    // get our Runtime locale
-    Runtime runtime = Runtime.getInstance();
-    Locale locale = runtime.getLocale();
     if (locale != null) {
       log.info("locale is {}", locale);
       String localLang = getLangCode(locale.getLanguage());
@@ -1065,7 +1049,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Override
   public void setLocale(String code) {
-    Runtime.getInstance().setLocale(code);
+    locale = new Locale(code);
+    loadLocalizations(locale.getLanguage());
+    log.info("{} new locale is {}", getName(), code);
   }
 
   @Override
