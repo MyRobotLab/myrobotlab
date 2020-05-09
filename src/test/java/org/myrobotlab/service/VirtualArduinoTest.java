@@ -38,6 +38,42 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void testService() throws Exception {
+
+    // for unit testing,
+    msg.setInvoke(false);
+    
+    
+    VirtualArduino va = (VirtualArduino)service;
+    // there's a race condition... the virtual arduino service is starting up.. 
+    // if we call connect too quickly.. it fails with a null pointer because the peer service for serial isn't started.
+    Thread.sleep(1000);
+    va.connect(testPort);
+
+    // so at this point, we expect that we could do something with the virtual arduino.. like open a serial port to the non-uart side of the 
+    // serial port and read some data coming back.
+    Serial serial = (Serial)Runtime.start("serial", "Serial");
+    serial.addByteListener(this);
+    serial.connect(testPort);
+    // Ok.. now we have a serial port..
+    
+    // wait for the msg to get the clear to send.
+    Thread.sleep(2000);
+    
+    // lets flush an add servo message down the serial port
+    
+    
+    serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
+    
+    Thread.sleep(2000);
+    
+    
+    Device d = va.getDevice(0);
+    // we should see some on bytes messages i would thinkg
+    Thread.sleep(100000);
+  }
+
+  
+  public void testServiceA() throws Exception {
     // our msg class shouldn't be invoking for the unit test
     msg.setInvoke(false);
     // our test service
@@ -76,6 +112,9 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(data);
     serial.flush();
     // we probably have a race condition here.. but lets see.
+    
+    // the serial port needs to write to the port queue.. and the mrlcomm needs to be reading those bytes.
+    
     Thread.sleep(1000);
     Device d = va.getDevice(0);
     assertNotNull(d);
@@ -184,6 +223,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   @Override
   public void onBytes(byte[] data) {
     // It's the responsibility of the MrlCommPublisher to relay serial bytes  / events to the msg.java class
+    log.info("VIRTUAL ARDUINO TEST ON BYTES!!!! {}", data);
     msg.onBytes(data);
   }
 

@@ -102,7 +102,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       if (myThread == null) {
         myThread = new Thread(this, String.format("%s.mrlcomm", virtual.getName()));
         myThread.start();
-        log.info("start called ");
+        log.info("start called in virtual arduino.");
       }
     }
     
@@ -121,19 +121,22 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       // this is also what happens if you press the reset button on 
       // the actual arduino.  (alternatively, we could create a new MrlComm instance.. 
       // and not rely on calling softReset()...
+      log.info("Starting up virtual arduino thread.");
       ino.getMrlComm().softReset();
       ino.setup();
+      log.info("Starting loop");
       while (isRunning) {
-        if (isRunning)
+        if (isRunning) {
           ino.loop();
+        }
         try {
           // a small delay that can be interrupted
           Thread.sleep(1);
         } catch(InterruptedException e1) {
           // we were interrupted.. we need to shut down.
           isRunning = false;
+          log.info("MrlCommIno runner thread interrupted.");
         }
-
       }
       log.info("leaving InoScriptRunner");
     }
@@ -161,6 +164,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       uart.disconnect();
     }
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+    
   }
 
   static public ServiceType getMetaData() {
