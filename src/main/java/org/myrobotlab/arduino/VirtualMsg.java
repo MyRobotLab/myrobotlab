@@ -81,7 +81,7 @@ public class VirtualMsg {
   private int msgSize = 0;
   // ------ device type mapping constants
   private int method = -1;
-  public boolean debug = false;
+  public boolean debug = true;
   // when using a real service, invoke should be true, for unit tests, this should be false.
   private boolean invoke = true;
   

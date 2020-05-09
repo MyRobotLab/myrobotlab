@@ -68,6 +68,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public final static Integer BAUD_38400 = 38400;
   public final static Integer BAUD_57600 = 57600;
   public final static Integer BAUD_115200 = 115200;
+  public final static Integer BAUD_230400 = 230400;
+  public final static Integer BAUD_250000 = 250000;
 
   /**
    * different hardware library - hotspot only
@@ -1112,7 +1114,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
 
     for (String portName : connectedPorts.keySet()) {
-      // log.info("Writing data to port {} data:{}", portName, data);
+      log.info("Writing data to port {} data:{}", portName, data);
       Port writePort = connectedPorts.get(portName);
       writePort.write(data);
     }
