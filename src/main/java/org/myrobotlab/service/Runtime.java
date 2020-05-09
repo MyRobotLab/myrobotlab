@@ -211,8 +211,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
   private List<String> args;
   
-  private Properties defaultLocalization = null;
-
   String remoteId = null;
 
   /**
@@ -1983,8 +1981,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       }
     }
 
-    setLocale(Locale.getDefault().getTag());
-    defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
+    setLocale(Locale.getDefault().getTag());    
     locales = Locale.getDefaults();
 
     if (runtime.platform == null) {

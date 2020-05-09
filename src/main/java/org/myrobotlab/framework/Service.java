@@ -157,7 +157,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   
   protected String serviceVersion = null;
   
-    /**
+  /**
+   * default en.properties - if there is one
+   */
+  protected Properties defaultLocalization = null;
+
+  
+  /**
    * map of keys to localizations - 
    * <pre>
    *  Match Service with current Locale of the Runtime service
@@ -166,7 +172,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * </pre>
    * service specific - then runtime
    */
-  protected transient Properties localization = new Properties();
+  protected transient Properties localization = null;
+  
   
   /**
    * for promoting portability and good pathing
@@ -1059,24 +1066,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
     
-    Locale locale = null;
-    if (!Runtime.class.equals(getClass())) {
-      locale = Runtime.getInstance().getLocale();
-    } else {
-      locale = Locale.getDefault();
-    }
-    
-    // localization
-    // check resource localization directory
-    File[] localizationFiles = getResourceDirList("localization");
-    if (localizationFiles != null && localizationFiles.length > 0 && !getClass().equals(Runtime.class)) {
-      // look local locale file
-      File file = new File(getResourceDir(getClass(), "localization/" + locale.getLanguage() + ".properties"));
-      if (file.exists()) {
-        log.info("found localization file {}", file);
-          loadLocalizations();
-      }
-    }
+    loadLocalizations();
     
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
@@ -2908,9 +2898,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
      }     
      key = key.toUpperCase();     
      Object prop = localization.get(key);
-          
-     Runtime runtime = Runtime.getInstance();
+     
      if (prop == null) {
+       prop = defaultLocalization.get(key);
+     }
+          
+     
+     if (prop == null) {
+       Runtime runtime = Runtime.getInstance();
        // tried to resolve local to this service and failed
        if (this != runtime) {
          // if we are not runtime - we ask runtime
@@ -2921,7 +2916,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
        }
      }
      if (prop == null) {
-       log.error("please help us get a good translation for {} in {}", key, runtime.getLocale().getTag());
+       log.error("please help us get a good translation for {} in {}", key, Runtime.getInstance().getLocale().getTag());
        return null;
      }
      if (args == null) {
@@ -2932,7 +2927,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void loadLocalizations() {
-    localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Runtime.getInstance().getLanguage() + ".properties"));
+    defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
+    if (this.getClass().equals(Runtime.class) && localization == null) {      
+      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Locale.getDefault().getLanguage() + ".properties"));
+    } else {
+      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Runtime.getInstance().getLanguage() + ".properties"));
+    }
   }
   
 }
