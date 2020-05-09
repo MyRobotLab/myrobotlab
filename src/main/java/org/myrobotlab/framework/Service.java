@@ -2927,11 +2927,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public void loadLocalizations() {
-    defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
+    loadLocalizations(null);
+  }
+  
+  public void loadLocalizations(String language) {
+    
+    if (defaultLocalization == null) {
+      defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
+    }
     if (this.getClass().equals(Runtime.class) && localization == null) {      
       localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Locale.getDefault().getLanguage() + ".properties"));
     } else {
-      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Runtime.getInstance().getLanguage() + ".properties"));
+      Locale locale = (language == null)?Runtime.getInstance().getLocale():new Locale(language);
+      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
     }
   }
   

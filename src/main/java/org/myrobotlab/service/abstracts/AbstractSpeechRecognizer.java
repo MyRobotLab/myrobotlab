@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.tools.ant.taskdefs.LoadProperties;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -126,15 +127,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   protected boolean removeWakeWord = true;
 
+  protected Locale locale = null;
+
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
-    locales = getLocales();
-    /*
-    locale = Runtime.getInstance().getLocale();
-    if (!locales.containsKey(locale.toString())) {
-      locale = new Locale("en-US");
-    }
-    */
+    locales = getLocales();    
+    locale  = Runtime.getInstance().getLocale();
   }
 
   public void addCommand(String actionPhrase, String name, String method, Object... params) {
@@ -573,14 +571,15 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public Locale getLocale() {
-    return Runtime.getInstance().getLocale();
+    return locale;
   }
 
   @Override
   public void setLocale(String code) {
-    // locale = new Locale(code);
-    Runtime.getInstance().setLocale(code);
-    log.info("language is {}", code);
+    locale = new Locale(code);
+    loadLocalizations(locale.getLanguage());
+    log.info("{} new locale is {}", getName(), code);
+    
   }
 
 }

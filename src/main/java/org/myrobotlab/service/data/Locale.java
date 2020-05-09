@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * 
  * A Locale unlike Java's which actually serializes all the parts
@@ -14,6 +17,8 @@ import java.util.TreeMap;
  */
 public class Locale {
 
+  public final static Logger log = LoggerFactory.getLogger(Locale.class);
+  
   /**
    * 2 letter iso language
    */
@@ -174,6 +179,7 @@ public class Locale {
       props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));
     } catch(Exception e) {
       /* don't care common use case */
+      log.debug("will not load properties %s", fullPath);
     }
     return props;
   }
