@@ -36,7 +36,7 @@ servo01.map(0, 180, 0, 180)
 # set rest position
 servo01.setRest(90)
 # set speed
-servo01.setSpeed(100)
+servo01.setSpeed(100.0)
 
 # attach servo
 # print("attaching servo with pins to controller")
