@@ -577,11 +577,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   @Override
-  public Map<String, Locale> getLocales() {
-    return Locale.getAvailableLanguages();
-  }
-
-  @Override
   public void setLocale(String code) {
     // locale = new Locale(code);
     Runtime.getInstance().setLocale(code);
