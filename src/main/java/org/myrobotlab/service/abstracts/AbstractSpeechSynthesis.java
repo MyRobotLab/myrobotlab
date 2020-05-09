@@ -158,10 +158,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
      * @return the string language name
      */
     public String getLanguage() {
-      if (locale == null) {
-        return null;
-      }
-      return locale.getDisplayLanguage();
+      return locale.getLanguage();
     }
 
     public Locale getLocal() {

@@ -566,7 +566,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   @Override
   public String getLanguage() {
-    return Runtime.getInstance().getLanguage();
+    return locale.getLanguage();
   }
 
   @Override
