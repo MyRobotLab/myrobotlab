@@ -140,6 +140,7 @@ public class Python extends Service {
         interp.exec(code);
 
       } catch (Exception e) {
+        log.error("python exec threw", e);
         String error = Logging.stackToString(e);
         if (error.contains("KeyboardInterrupt")) {
           warn("Python process killed !");
