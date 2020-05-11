@@ -167,8 +167,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * map of keys to localizations - 
    * <pre>
    *  Match Service with current Locale of the Runtime service
+   *  Match Service with Default (English) Locale
    *  Match Runtime with current Locale of the Runtime service.
-   *  Match Runtime with Default (english) Locale
+   *  Match Runtime with Default (English) Locale
    * </pre>
    * service specific - then runtime
    */
