@@ -27,8 +27,8 @@ public abstract class Port implements Runnable, SerialControl {
    */
   transient Thread readingThread = null;
   boolean listening = false;
-  public boolean debug = true;
-  public boolean debugTX = true;
+  public boolean debug = false;
+  public boolean debugTX = false;
   public boolean debugRX = false;
   QueueStats stats = new QueueStats();
   // hardware serial port details

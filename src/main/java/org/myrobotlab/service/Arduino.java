@@ -213,8 +213,6 @@ public class Arduino extends AbstractMicrocontroller
 
   Integer nextDeviceId = 0;
 
-  int numAck = 0;
-
   /**
    * Serial service - the Arduino's serial connection
    */
@@ -1547,8 +1545,9 @@ public class Arduino extends AbstractMicrocontroller
 
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.info("{} Message Ack received: =={}==", getName(), Msg.methodToString(function));
-    numAck++;
+    if (msg.debug) {
+      log.info("{} Message Ack received: =={}==", getName(), Msg.methodToString(function));
+    }
   }
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
