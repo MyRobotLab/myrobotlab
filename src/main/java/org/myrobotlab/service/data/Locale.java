@@ -1,7 +1,14 @@
 package org.myrobotlab.service.data;
 
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
+
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * 
@@ -10,6 +17,8 @@ import java.util.TreeMap;
  */
 public class Locale {
 
+  public final static Logger log = LoggerFactory.getLogger(Locale.class);
+  
   /**
    * 2 letter iso language
    */
@@ -162,10 +171,31 @@ public class Locale {
 
   public String toString() {
     return getTag();
+  } 
+
+  final static public boolean hasLanguage(Map<String, Locale> locales, String language) {
+      if (language == null || locales == null) {
+        return false;
+      }
+      // let Locale parse the incoming string to be safe
+      Locale l = new Locale(language);
+      for (Locale locale : locales.values()) {
+        if (locale.getLanguage().contentEquals(l.getLanguage())) {
+          return true;
+        }
+      }
+      return false;
   }
-  /*
-   * public static Map<String, Locale> getDefaults() { // TODO Auto-generated
-   * method stub return null; }
-   */
+  
+  final static public Properties loadLocalizations(String fullPath) {
+    Properties props = new Properties();
+    try {
+      props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));
+    } catch(Exception e) {
+      /* don't care common use case */
+      log.debug("will not load properties %s", fullPath);
+    }
+    return props;
+  }
 
 }

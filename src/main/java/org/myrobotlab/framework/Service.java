@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
@@ -64,7 +65,7 @@ import org.myrobotlab.lang.LangUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -157,6 +158,25 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected String serviceVersion = null;
   
   /**
+   * default en.properties - if there is one
+   */
+  protected Properties defaultLocalization = null;
+
+  
+  /**
+   * map of keys to localizations - 
+   * <pre>
+   *  Match Service with current Locale of the Runtime service
+   *  Match Service with Default (English) Locale
+   *  Match Runtime with current Locale of the Runtime service.
+   *  Match Runtime with Default (English) Locale
+   * </pre>
+   * service specific - then runtime
+   */
+  protected transient Properties localization = null;
+  
+  
+  /**
    * for promoting portability and good pathing
    */
   transient protected static String fs = File.separator;
@@ -211,6 +231,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * be ready
    */
   protected boolean ready = true;
+
+  protected Locale locale;
 
   /**
    * Recursively builds Peer type information - which is not instance specific.
@@ -911,9 +933,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public File[] getResourceDirList() {
-    String resDir = getResourceDir();
-    File f = new File(resDir);
-    return f.listFiles();
+    return getResourceDirList(null);
   }
 
   /**
@@ -1026,12 +1046,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       interfaceSet = getInterfaceSet();
     }
 
-    // a "safety" if Service was created by new Service(name)
-    // we still want the local Runtime running
-    if (!Runtime.isRuntime(this)) {
-      Runtime.getInstance();
+    if (locale == null) {
+      if (!Runtime.isRuntime(this)) {
+        locale = Runtime.getInstance().getLocale();
+      } else {
+        // is runtime
+        locale = Locale.getDefault();
+      }
     }
 
+    // load appropriate localization properties based on current local language
+    loadLocalizations();
+    
     // merge all our peer keys into the dna
     // so that reservations are set with actual names if
     // necessary
@@ -1068,6 +1094,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       Runtime.register(registration);
     }
 
+  }
+
+  /**
+   * get a list of resource files in a resource path
+   * @param additionalPath
+   * @return
+   */
+  public File[] getResourceDirList(String additionalPath) {
+    String resDir = getResourceDir(getClass(), additionalPath);
+    File f = new File(resDir);
+    return f.listFiles();
   }
 
   /**
@@ -2842,5 +2879,126 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return false;
     
   }
+  
+  /**
+   * localize a key - details are
+   * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
+   * 
+   * @param key
+   * @return
+   */
+  public String localize(String key) {
+    return localize(key, (Object[])null);
+  }
+  
+  /**
+   * String format template processing localization
+   * 
+   * @param key
+   * @param args
+   * @return
+   */
+  public String localize(String key, Object ... args) {
+     if (key == null) {
+       log.error("localize(null) not allowed");
+       return null;
+     }     
+     key = key.toUpperCase();     
+     Object prop = localization.get(key);
+     
+     if (prop == null) {
+       prop = defaultLocalization.get(key);
+     }
+          
+     
+     if (prop == null) {
+       Runtime runtime = Runtime.getInstance();
+       // tried to resolve local to this service and failed
+       if (this != runtime) {
+         // if we are not runtime - we ask runtime
+         prop = runtime.localize(key, args);
+       } else if (this == runtime) {
+         // if we are runtime - we try default en
+         prop = runtime.localizeDefault(key);
+       }
+     }
+     if (prop == null) {
+       log.error("please help us get a good translation for {} in {}", key, Runtime.getInstance().getLocale().getTag());
+       return null;
+     }
+     if (args == null) {
+       return prop.toString();
+     } else {
+       return String.format(prop.toString(), args);
+     }
+  }
+  
+  public void loadLocalizations() {
+    
+    if (defaultLocalization == null) {
+      // default is always english :P
+      defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
+    }
+    
+    localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
+  }
 
+  /**
+   * set the current locale for this service
+   * - initial locale would have been set by Runtimes locale
+   * @param code
+   */
+  public void setLocale(String code) {
+    locale = new Locale(code);
+    log.info("{} new locale is {}", getName(), code);
+    loadLocalizations();
+    broadcastState();
+  }
+  
+  /**
+   * get country tag of current locale
+   * @return
+   */
+  public String getCountry() {
+    return locale.getCountry();
+  }
+
+  /**
+   * Java does regions string codes differently than other systems en_US vs
+   * en-US ... seems like there has been a lot of confusion on which delimiter
+   * to use This function is used to simplify all of that - since we are
+   * primarily interested in language and do not usually need the distinction
+   * between regions in this context
+   * 
+   * @return
+   */
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  /**
+   * return the current locale
+   */
+  public Locale getLocale() {
+    return locale;
+  }
+
+  /**
+   * get country name of current locale
+   * @return
+   */
+  public String getDisplayLanguage() {
+    return locale.getDisplayLanguage();
+  }
+
+  /**
+   * get current locale tag - this is of the form en-BR en-US
+   * including region
+   * 
+   * @return
+   */
+  public String getLocaleTag() {
+    return locale.getTag();
+  }
+  
 }
