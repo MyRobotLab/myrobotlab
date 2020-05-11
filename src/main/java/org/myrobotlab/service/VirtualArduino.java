@@ -109,9 +109,25 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       // this is also what happens if you press the reset button on 
       // the actual arduino.  (alternatively, we could create a new MrlComm instance.. 
       // and not rely on calling softReset()...
+      // make sure our serial port is ready for us.
+      if (virtual.getSerial() == null) {
+        log.warn("VIRTUAL UART WAS NULL!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        return;
+      }
       log.info("Starting up virtual arduino thread.");
       ino.getMrlComm().softReset();
       ino.setup();
+      // make sure the serial port is up and running ..  perhaps we should add a small sleep in here?
+      
+      // TODO: pool the serial device to make sure it's started & connected?
+      
+      
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
       log.info("Starting loop");
       isRunning = true;
 
