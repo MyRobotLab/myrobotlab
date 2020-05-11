@@ -61,20 +61,19 @@ public class PortStream extends Port {
       if (size < 1) {
         // no data to read.. just return null
         return null;
-      } else {
-        // ok, we have data! so, let's read 
-        // TODO: reuse the buffer.
-        byte[] data = new byte[size];
-        int numRead = in.read(data);
-        if (numRead != size) {
-          // Uh oh.. let's just log this warning, we shouldn't see it.
-          log.warn("Port Stream Read possible error.  numRead {} does not equal size {}", numRead, size);
-          return Arrays.copyOfRange(data, 0, numRead);
-        }
-        // TODO: test for byte alignment issues here.. can we rely on the available count?
-        // return Arrays.copyOfRange(data, 0, numRead);  ?
-        return data;
       }
+      // ok, we have data! so, let's read 
+      byte[] data = new byte[size];
+      int numRead = in.read(data);
+      if (numRead != size) {
+        // Uh oh.. let's just log this warning, we shouldn't see it.
+        log.warn("Port Stream Read possible error.  numRead {} does not equal size {}", numRead, size);
+        // return just the buffer of what we think was actually read.
+        return Arrays.copyOfRange(data, 0, numRead);
+      }
+      // Assume that all data was read properly and return the full buffer
+      return data;
+      
     } catch (IOException e) {
       log.warn("Interrupted PortStream in readBytes.  Perhaps port was closed?", e);
     }

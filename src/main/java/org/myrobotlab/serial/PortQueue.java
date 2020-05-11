@@ -81,11 +81,10 @@ public class PortQueue extends Port {
   }
 
   public void write(byte[] data) throws IOException {
-    // TODO: convert this to an output queue of byte ..
+    // convert this to match the output queue of integer by upcasting the byte array
     for (int i = 0; i < data.length; i++) {
       out.add(data[i] & 0xFF);
     }
-    //log.info("Writing Byte Array {} size:{}", data, out.size());
   }
   
   @Override

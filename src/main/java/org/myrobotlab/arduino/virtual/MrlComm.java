@@ -12,6 +12,7 @@ import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.slf4j.Logger;
@@ -273,15 +274,14 @@ public class MrlComm implements SerialDataListener {
     }
   }
 
-  public void begin(org.myrobotlab.service.Serial serial) {
-
+  public void begin(Serial serial) {
     // wire the serial port through to virtual message
     // TODO: consider creating a new virtual message instead?
     virtualMsg.begin(serial);
-
     // subscribe to the onBytes from the serial port!
+    // TODO: is this the right place to add the listener?
+    // Or should this be handled elsewhere / outside of this method.
     serial.addByteListener(this);
-
   }
 
   // > customMsg/[] msg
@@ -797,8 +797,7 @@ public class MrlComm implements SerialDataListener {
       boolean dataCount = false;
       for (int i = 0; i < pinList.size(); ++i) {
         Pin pin = pinList.get(i);
-        // TODO: is this also based on board delay?
-        if (pin.rate == 0 || (now > pin.lastUpdate + (BOARD_INFO_DELAY / pin.rate))) {
+        if (pin.rate == 0 || (now > pin.lastUpdate + (1000 / pin.rate))) {
           pin.lastUpdate = now;
           // TODO: move the analog read outside of this method and
           if (pin.type == Arduino.ANALOG) {

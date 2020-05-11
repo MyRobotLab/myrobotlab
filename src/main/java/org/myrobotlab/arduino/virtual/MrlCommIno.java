@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 public class MrlCommIno {
   
   public final static Logger log = LoggerFactory.getLogger(MrlCommIno.class);
-  
   transient Serial serial;// = new Serial();
   transient VirtualArduino virtual;
 

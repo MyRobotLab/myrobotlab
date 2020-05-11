@@ -91,7 +91,6 @@ public class ArduinoMsgGenerator {
   }
 
   // FIXME - before it comes a mess - send and recv templates !!!
-
   public void generateDefinitions(File idl) throws IOException {
 
     // load templates
@@ -412,8 +411,7 @@ public class ArduinoMsgGenerator {
     StringBuilder javaSendRecord = new StringBuilder("      if(record != null){");
     javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
-    // compiler check
-    // TODO: Replace the publishXX to be onXX for proper naming convention ..
+    // compiler check, make sure we have a compilation error if MrlCommPublisher is missing a method.
     StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      } else { \n         arduino." + name + "(");
     if (paramaters.length > 0) {
       javaCaseArduinoMethod.append(", ");
@@ -655,7 +653,6 @@ public class ArduinoMsgGenerator {
     javaCaseRecord.append("        try{\n");
     javaCaseRecord.append("          record.write(rxBuffer.toString().getBytes());\n");
     javaCaseRecord.append("          rxBuffer.setLength(0);\n");
-    // TODO: handle the exception here better?
     javaCaseRecord.append("        } catch (IOException e) {\n          log.warn(\"failed recording bytes.\", e); \n        }\n");
 
     // TODO
