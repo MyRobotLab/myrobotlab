@@ -1112,8 +1112,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
 
     for (String portName : connectedPorts.keySet()) {
-      log.info("Writing data to port {} data:{}", portName, data);
       Port writePort = connectedPorts.get(portName);
+      // log.info("Writing data to port {} data:{} -- WritePort:{}", portName, data, writePort);
       writePort.write(data);
     }
 

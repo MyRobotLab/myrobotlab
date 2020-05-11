@@ -13,6 +13,7 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.string.StringUtil;
+import org.python.jline.internal.Log;
 
 /**
  * <pre>
@@ -70,8 +71,6 @@ public class VirtualMsg {
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
   public static final int MRLCOMM_VERSION = 64;
-  private int ackMaxWaitMs = 1000;
-  private boolean waiting = false;
   // send buffer
   private int sendBufferSize = 0;
   private int sendBuffer[] = new int[MAX_MSG_SIZE];
@@ -81,7 +80,7 @@ public class VirtualMsg {
   private int msgSize = 0;
   // ------ device type mapping constants
   private int method = -1;
-  public boolean debug = true;
+  public boolean debug = false;
   // when using a real service, invoke should be true, for unit tests, this should be false.
   private boolean invoke = true;
   
@@ -291,10 +290,6 @@ public class VirtualMsg {
   transient private MrlComm arduino;
   
   transient private SerialDevice serial;
-  
-  public void processCommand(){
-    processCommand(ioCmd);
-  }
   
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
@@ -1516,8 +1511,8 @@ public class VirtualMsg {
   }
   
   public void onBytes(byte[] bytes) {
-    // TODO: This is a debug message only...
     if (debug) {
+      // debug message.. semi-human readable?
       String byteString = StringUtil.byteArrayToIntString(bytes);
       log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
@@ -1604,11 +1599,8 @@ public class VirtualMsg {
         ++errorHardwareToServiceRxCnt ;
         // error("msg structure violation %d", errorHardwareToServiceRxCnt);
         log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
-        // try again (clean up memory buffer)
-        // Logging.logError(e);
-        // perhpas we could find the first occurance of 170.. and then attempt to re-parse at that point.
-        // find the first occurance of 170 in the bytes
-        // subbytes
+        // TODO: perhaps we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // find the first occurance of 170 in the bytes subbytes
         // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
         i = i - byteCount.get()+1;
         log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
@@ -1616,15 +1608,13 @@ public class VirtualMsg {
         System.err.println("Try to consume more messages!");
         msgSize = 0;
         byteCount = new AtomicInteger(0);
-        // attempt to reprocess from the beginngin
-        // TODO: what about infinite loops!!!
+        // TODO: this is wonky.. what?! 
         i = 0;
         return;
         
         
       }
     }
-    // log.info("Done with onBytes method.");
     return;
   }
 
@@ -1637,13 +1627,10 @@ public class VirtualMsg {
   }
   
   void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
-
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
     }
-
-        baos.write(b8 & 0xFF);
-//    serial.write(b8 & 0xFF);
+    baos.write(b8 & 0xFF);
   }
   
   void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
@@ -1658,7 +1645,6 @@ public class VirtualMsg {
     if ((b16 < -32768) || (b16 > 32767)) {
       log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
     }
-
     appendMessage(baos, b16 >> 8 & 0xFF);
     appendMessage(baos, b16 & 0xFF);
   }
@@ -1693,7 +1679,6 @@ public class VirtualMsg {
   void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
     // write size
     appendMessage(baos, array.length & 0xFF);
-
     // write data
     for (int i = 0; i < array.length; ++i) {
       appendMessage(baos, array[i] & 0xFF);
@@ -1703,7 +1688,6 @@ public class VirtualMsg {
   void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
     // write size
     appendMessage(baos, array.length);
-
     // write data
     for (int i = 0; i < array.length; ++i) {
       appendMessage(baos, array[i]);
@@ -1731,7 +1715,6 @@ public class VirtualMsg {
         // wait for a pending ack to be received before we process our message.^M
         waitForAck();
       }
-
     }
     return message;
   }
@@ -1749,7 +1732,6 @@ public class VirtualMsg {
   }
   
   public void record() throws Exception {
-    
     if (record == null) {
       record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
     }
@@ -1760,6 +1742,7 @@ public class VirtualMsg {
       try {
         record.close();
       } catch (Exception e) {
+        log.info("Error closing recording stream. ", e);
       }
       record = null;
     }
@@ -1815,7 +1798,6 @@ public class VirtualMsg {
   }
   
   public void enableAcks(boolean b){
-    // disable local blocking
     ackEnabled = b;
     // if (!localOnly){
     // shutdown MrlComm from sending acks
@@ -1838,8 +1820,8 @@ public class VirtualMsg {
         }
         if (ackRecievedLock.pendingMessage) {
           log.error("Ack not received, ack timeout!");
-          // TODO: should we just reset and hope for the best?
-          // ackRecievedLock.acknowledged = true;
+          // TODO: should we just reset and hope for the best? maybe trigger a sync?
+          // ackRecievedLock.pendingMessage = false;
           arduino.ackTimeout();
         }
       }
@@ -1906,7 +1888,9 @@ public class VirtualMsg {
   }
 
   public void onConnect(String portName) {
-    log.info("On Connect Called in Msg.");
+    if (debug) {
+      log.info("On Connect Called in Msg.");
+    }
     // reset the parser...
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
@@ -1914,7 +1898,9 @@ public class VirtualMsg {
   }
 
   public void onDisconnect(String portName) {
-    log.info("On Disconnect Called in Msg.");
+    if (debug) {
+      log.info("On Disconnect Called in Msg.");
+    }
     // reset the parser... this might not be necessary.
     this.byteCount = new AtomicInteger(0);
     this.msgSize = 0;
