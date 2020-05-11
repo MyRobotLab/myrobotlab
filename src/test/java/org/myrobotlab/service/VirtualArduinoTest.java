@@ -4,10 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
 import java.util.List;
-
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -27,7 +24,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   private Msg msg = new Msg(this, null);
   String testPort = "testPort";
   Serial serial = (Serial)Runtime.start("dteSerial", "Serial");
-  private int numAcks = 0;
 
   @Override
   public Service createService() {
@@ -38,41 +34,34 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void testService() throws Exception {
-
-    // for unit testing,
+    // our local msg handle that parses the stream from the virtual arduino
+    // skip invoking in unit tests, instead directly call the callbacks to make unit tests easier.
     msg.setInvoke(false);
-    
-    
+    // our service to test
     VirtualArduino va = (VirtualArduino)service;
-    // there's a race condition... the virtual arduino service is starting up.. 
-    // if we call connect too quickly.. it fails with a null pointer because the peer service for serial isn't started.
-    Thread.sleep(1000);
+    // connect to the test uart/DCE port
     va.connect(testPort);
-
-    // so at this point, we expect that we could do something with the virtual arduino.. like open a serial port to the non-uart side of the 
-    // serial port and read some data coming back.
+    // create a serial port to read the DTE side of the virtual serial port.
     Serial serial = (Serial)Runtime.start("serial", "Serial");
+    // attach our test as a byte listener for the onBytes call.
     serial.addByteListener(this);
+    // connect to the actual DTE side of the virtual serial port.
     serial.connect(testPort);
-    // Ok.. now we have a serial port..
-    
-    // wait for the msg to get the clear to send.
-    Thread.sleep(2000);
-    
-    // lets flush an add servo message down the serial port
-    
-    
+    // TODO: We should probably wait for the begin message to be seen from the virtual arduino here before proceeding.
+    // servo attach method being written to the DTE side of the virtual port
     serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
-    
-    Thread.sleep(2000);
-    
-    
+    // TODO: there's a race condition here.. we seem to fail without a small sleep here!
+    Thread.sleep(5);
+    // get a handle to the virtual device that we just attached.
     Device d = va.getDevice(0);
-    // we should see some on bytes messages i would thinkg
-    Thread.sleep(100000);
+    // validate the device exists.
+    assertNotNull(d);
+    // make sure the device is actually a servo
+    assertEquals(Msg.DEVICE_TYPE_SERVO, d.type);
+    // TODO: test the rest of the devices / messages .
   }
 
-  
+
   public void testServiceA() throws Exception {
     // our msg class shouldn't be invoking for the unit test
     msg.setInvoke(false);
@@ -80,7 +69,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     VirtualArduino va = (VirtualArduino)service;
     // for unit tests.. skip invoking. call directly.
     va.mrlComm.getMsg().setInvoke(false);
-//    va.virtualMsg.setInvoke(false);
+    //    va.virtualMsg.setInvoke(false);
     // attach to the serial port for callbacks to this test.
     // connect the virtual arduino to the uart (DCE) port.
     va.connect(testPort);
@@ -112,15 +101,11 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(data);
     serial.flush();
     // we probably have a race condition here.. but lets see.
-    
     // the serial port needs to write to the port queue.. and the mrlcomm needs to be reading those bytes.
-    
     Thread.sleep(1000);
     Device d = va.getDevice(0);
     assertNotNull(d);
     // i'd like to see an ack come back!
-    
-    
     // other stuff like..
     serial.write(msg.servoMoveToMicroseconds(0, 1976));
     // TODO: meaningful assert
@@ -128,7 +113,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     // TODO: meaningful assert
     serial.write(msg.servoMoveToMicroseconds(0, 2020));
     // TODO: meaningful assert
-
     //  Thread.sleep(1000);
     // TODO: this ack received needs to come back from the arduino service currently..
     // but it should be pushe down into the internals of the msg class
@@ -148,11 +132,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void publishAck(Integer function) {
-    numAcks ++;
     log.info("Publish Ack for function {}", VirtualMsg.methodToString(function));
-    // TODO Auto-generated method stub
-    // we got an ack from the virtual arduino .. acknoledge that in the mirror real msg parser.
-   //  msg.ackReceived(function);
   }
 
   @Override
