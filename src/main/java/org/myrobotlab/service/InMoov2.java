@@ -1661,21 +1661,21 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public Double getUltraSonicRightDistance() {
-	if (ultraSonicRight != null) {
-	  return ultraSonicRight.range();
-	} else {
-	  warn("No UltraSonicRight attached");
-	  return 0.0;
-		}
+		if (ultraSonicRight != null) {
+		return ultraSonicRight.range();
+		} else {
+		warn("No UltraSonicRight attached");
+		return 0.0;
+			}
 	}
 
 	public Double getUltraSonicLeftDistance() {
-	if (ultraSonicLeft != null) {
-	  return ultraSonicLeft.range();
-	} else {
-	  warn("No UltraSonicLeft attached");
-	  return 0.0;
-		}
+		if (ultraSonicLeft != null) {
+		return ultraSonicLeft.range();
+		} else {
+		warn("No UltraSonicLeft attached");
+		return 0.0;
+			}
 	}
 	
 	//public void publishPin(Pin pin) {
@@ -2018,13 +2018,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	
 	public ServoMixer startServoMixer() {
 
-               servomixer = (ServoMixer) startPeer("servomixer");
-               isServoMixerActivated = true;
+		servomixer = (ServoMixer) startPeer("servomixer");
+		isServoMixerActivated = true;
 
-               speakBlocking(get("STARTINGSERVOMIXER"));
-               broadcastState();
-               return servomixer;
-        }
+		speakBlocking(get("STARTINGSERVOMIXER"));
+		broadcastState();
+		return servomixer;
+	}
 
 	public void stop() {
 		if (head != null) {
@@ -2150,9 +2150,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}	
 	
 	public void stopServoMixer() {
-			speakBlocking(get("STOPSERVOMIXER"));
-			releasePeer("servomixer");
-			isServoMixerActivated = false;
+		speakBlocking(get("STOPSERVOMIXER"));
+		releasePeer("servomixer");
+		isServoMixerActivated = false;
 	}
 
 	public void waitTargetPos() {
