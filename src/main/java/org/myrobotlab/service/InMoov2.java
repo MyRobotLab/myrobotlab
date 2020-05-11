@@ -629,16 +629,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public InMoov2Hand getLeftHand() {
 		return leftHand;
 	}
-	
-  @Override
-  public String getLanguage() {
-    return Runtime.getInstance().getLanguage();
-  }
-
-  @Override
-  public Locale getLocale() {
-    return Runtime.getInstance().getLocale();
-  }
 
 	@Override
 	public Map<String, Locale> getLocales() {
