@@ -74,9 +74,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
     // TODO - age ? child youth adult senior
 
-    /**
-     * Locale of the voice, if it has one
-     */
     Locale locale;
 
     /**
@@ -237,8 +234,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   
   boolean blocking = false;
   
-  protected Locale locale = null;
-
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
   // implementing service
