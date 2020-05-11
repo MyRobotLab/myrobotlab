@@ -69,9 +69,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		meta.addCategory("robot");
 
 		meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
+		meta.addPeer("opencv", "OpenCV", "opencv");
+		meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 
-        meta.addPeer("opencv", "OpenCV", "opencv");
-        meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
 		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 		meta.addPeer("pir", "Pir", "infrared sensor");
@@ -743,8 +743,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public boolean isServoMixerActivated() {
-        return isServoMixerActivated;
-        }
+		return isServoMixerActivated;
+	}	
 
 	public Set<String> listConfigFiles() {
 
@@ -1931,7 +1931,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	 * @return
 	 */
 	public UltrasonicSensor startUltraSonicRight(String port) {
-	  return startUltraSonicRight(port, 64, 63);
+		return startUltraSonicRight(port, 64, 63);
 	}
 
 	/**
@@ -1965,7 +1965,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	
 	 public UltrasonicSensor startUltraSonicLeft(String port) {
-	   return startUltraSonicLeft(port, 64, 63);
+		return startUltraSonicLeft(port, 64, 63);
 	 }
 
   public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
