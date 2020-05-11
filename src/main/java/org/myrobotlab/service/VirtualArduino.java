@@ -34,50 +34,39 @@ import org.slf4j.Logger;
 public class VirtualArduino extends Service implements PortPublisher, PortListener, PortConnector, SerialDataListener {
 
   private static final long serialVersionUID = 1L;
-
   public final static Logger log = LoggerFactory.getLogger(VirtualArduino.class);
 
   /**
    * The Java port of the MrlComm.ino script
    */
   transient MrlCommIno ino;
-
   transient MrlComm mrlComm;
-
   /**
    * our emulated electronic UART
    */
-
   transient Serial uart;
-
   /**
    * the unique board type key
    */
   String board;
   String aref;
-
   /**
    * address index of pinList
    */
   Map<Integer, PinDefinition> pinIndex = null;
-
   /**
    * name index of pinList
    */
   Map<String, PinDefinition> pinMap = null;
-
   String portName = "COM42";
-
   /**
    * should be ui widgetized
    */
   BoardInfo boardInfo;
-
   /**
    * thread to run the script
    */
   transient InoScriptRunner runner;
-
   transient FileOutputStream record = null;
 
   /**
@@ -116,7 +105,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     }
 
     public void run() {
-      isRunning = true;
       // prior to running reset, MrlComm would be reset,
       // this is also what happens if you press the reset button on 
       // the actual arduino.  (alternatively, we could create a new MrlComm instance.. 
@@ -125,6 +113,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       ino.getMrlComm().softReset();
       ino.setup();
       log.info("Starting loop");
+      isRunning = true;
+
       while (isRunning) {
         if (isRunning) {
           ino.loop();
@@ -151,6 +141,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     super(n, id);
   }
 
+  /**
+   * Connect to a serial port to the uart/DCE side of a virtual serial port.
+   */
   public void connect(String portName) throws IOException {
     if (portName == null) {
       log.warn("{}.connect(null) not valid", getName());
@@ -240,6 +233,17 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       runner = new InoScriptRunner(this, ino);
     }
     start();
+    // There is a small race condition. so wait for the runner to actually be started.
+    // TODO: remove this sleep statement, replace with a better lock.
+    while (!runner.isRunning()) {
+      try {
+        Thread.sleep(1);
+      } catch (InterruptedException e) {
+        log.warn("Interrupted virtual arduino.", e);
+        break;
+      }
+    }
+   
   }
 
   public void releaseService() {
