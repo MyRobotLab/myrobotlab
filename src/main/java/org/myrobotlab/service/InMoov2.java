@@ -1,10 +1,7 @@
 package org.myrobotlab.service;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,7 +16,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.inmoov.Utils;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -31,6 +28,7 @@ import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
@@ -150,34 +148,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 			LoggingFactory.init(Level.INFO);
 			Platform.setVirtual(true);
-			// Runtime.main(new String[] { "--install", "InMoov2" });
-			// Runtime.main(new String[] { "--interactive", "--id", "inmoov",
-			// "--install-dependency","fr.inmoov", "inmoov2", "latest", "zip"});
-			Runtime.main(new String[] { 
-					"--resource-override", 
-					"InMoov2=/lhome/grperry/github/mrl.develop/myrobotlab/src/main/resources/resource/InMoov2/resource/InMoov2",
-					"WebGui=/lhome/grperry/github/mrl.develop/myrobotlab/src/main/resources/resource/InMoov2/resource/WebGui",
-					"ProgramAB=/lhome/grperry/github/mrl.develop/myrobotlab/src/main/resources/resource/InMoov2/resource/ProgramAB",
-					"--interactive", "--id", "inmoov" });
-
-			String[] langs = java.util.Locale.getISOLanguages();
-
-			java.util.Locale[] locales = java.util.Locale.getAvailableLocales();
-			log.info("{}", locales.length);
-			for (java.util.Locale l : locales) {
-				log.info("------------------------");
-				log.info(CodecUtils.toJson(l));
-				log.info(l.getDisplayLanguage());
-				log.info(l.getLanguage());
-				log.info(l.getCountry());
-				log.info(l.getDisplayCountry());
-
-				log.info(CodecUtils.toJson(new Locale(l)));
-
-				if (l.getLanguage().equals("en")) {
-					log.info("here");
-				}
-			}
+			Runtime.main(new String[] {"--interactive", "--id", "inmoov" });
 
 			InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
 
@@ -294,8 +265,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	// transient InMoovEyelids eyelids; eyelids are in the head
 
 	transient InMoov2Hand leftHand;
-
-	Locale locale;
 
 	/**
 	 * supported locales
@@ -542,12 +511,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 	}
 
-	public String get(String param) {
-		if (lpVars.containsKey(param.toUpperCase())) {
-			return lpVars.get(param.toUpperCase());
-		}
+	public String get(String key) {
+	  String ret = localize(key);
+	  if (ret != null) {
+	    return ret;
+	  }
 		return "not yet translated";
-
 	}
 
 	public InMoov2Arm getArm(String side) {
@@ -576,12 +545,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return head;
 	}
 
-	/**
-	 * get current language
-	 */
-	public String getLanguage() {
-		return locale.getLanguage();
-	}
 
 	/**
 	 * finds most recent activity
@@ -634,11 +597,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	public InMoov2Hand getLeftHand() {
 		return leftHand;
-	}
-
-	@Override
-	public Locale getLocale() {
-		return locale;
 	}
 
 	@Override
@@ -779,33 +737,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	 * iterate over each txt files in the directory
 	 */
 	public void load(String locale) {
-		String extension = "lang";
-		File dir = Utils.makeDirectory(getResourceDir() + File.separator + "system" + File.separator + "languagePack"
-				+ File.separator + locale);
-		if (dir.exists()) {
-			lpVars.clear();
-			for (File f : dir.listFiles()) {
-				if (f.isDirectory()) {
-					continue;
-				}
-				if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
-					log.info("Inmoov languagePack load : {}", f.getName());
-					try {
-						BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-						for (String line = br.readLine(); line != null; line = br.readLine()) {
-							String[] parts = line.split("::");
-							if (parts.length > 1) {
-								lpVars.put(parts[0].toUpperCase(), parts[1]);
-							}
-						}
-					} catch (IOException e) {
-						log.error("LanguagePack : {}", e);
-					}
-				} else {
-					log.warn("{} is not a {} file", f.getAbsolutePath(), extension);
-				}
-			}
-		}
+		setLocale(locale);
 	}
 
 	// FIXME - what is this for ???
@@ -1148,18 +1080,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		setHeadSpeed(rothead, neck, eyeXSpeed, eyeYSpeed, jawSpeed, rollNeckSpeed);
 	}
 
-	/**
-	 * TODO : use system locale set language for InMoov service used by chatbot +
-	 * 
-	 * @param code
-	 * @return
-	 */
-	@Deprecated /* use setLocale */
-	public String setLanguage(String code) {
-		setLocale(code);
-		return code;
-	}
-
 	@Override
 	public void setLocale(String code) {
 
@@ -1169,27 +1089,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 
 		// filter of the set of supported locales
-		if (!locales.containsKey(code)) {
+		if (!Locale.hasLanguage(locales, code)) {
 			error("InMoov does not support %s only %s", code, locales.keySet());
 			return;
 		}
 
-		locale = new Locale(code);
-
-		speakBlocking(get("SETLANG"), "%s", locale.getDisplayLanguage());
-
-		// attempt to set all other language providers to the same language as me
-		List<String> providers = Runtime.getServiceNamesFromInterface(LocaleProvider.class);
-		for (String provider : providers) {
-			if (!provider.equals(getName())) {
-				log.info("{} setting locale to %s", provider, code);
-				send(provider, "setLocale", code);
-				send(provider, "broadcastState");
-			}
-		}
-
-		load(locale.getTag());
-
+		super.setLocale(code);
+    for (ServiceInterface si : Runtime.getLocalServices().values()) {
+      if (!si.equals(this)) {
+        si.setLocale(code);
+      }
+    }
 	}
 
 	public void setMute(boolean mute) {
@@ -1258,7 +1168,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public void speakBlocking(String speak) {
-		speakBlocking(speak, null);
+		speakBlocking(speak, (Object[])null);
 	}
 
 	// FIXME - publish text regardless if mouth exists ...
