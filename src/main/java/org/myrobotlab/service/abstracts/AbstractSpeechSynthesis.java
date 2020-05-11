@@ -1019,12 +1019,12 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return super.isReady();
   }
 
-  @Deprecated /* use setMute */
+  @Deprecated /* use setMute(b) */
   public void mute() {
     this.mute = true;
   }
 
-  @Deprecated /* use setMute */
+  @Deprecated /* use setMute(b) */
   public void unmute() {
     this.mute = false;
   }
@@ -1033,7 +1033,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     this.mute = b;
   }
   
-  
   public Boolean setBlocking(Boolean b) {
     blocking = b;
     return b;
@@ -1041,24 +1040,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   
   public boolean isMute() {
     return mute;
-  }
-  
-
-  @Override
-  public void setLocale(String code) {
-    locale = new Locale(code);
-    loadLocalizations(locale.getLanguage());
-    log.info("{} new locale is {}", getName(), code);
-  }
-
-  @Override
-  public String getLanguage() {
-    return Runtime.getInstance().getLanguage();
-  }
-
-  @Override
-  public Locale getLocale() {
-    return Runtime.getInstance().getLocale();
   }
 
   static public ServiceType getMetaData(String serviceType) {

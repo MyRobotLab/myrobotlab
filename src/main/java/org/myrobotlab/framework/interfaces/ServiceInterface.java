@@ -135,6 +135,7 @@ public interface ServiceInterface
   public String getFullName();
 
   public void loadLocalizations();
-  public void loadLocalizations(String tag);
+
+  public void setLocale(String code);
 
 }

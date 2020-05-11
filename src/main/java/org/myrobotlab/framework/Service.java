@@ -231,6 +231,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   protected boolean ready = true;
 
+  protected Locale locale;
+
   /**
    * Recursively builds Peer type information - which is not instance specific.
    * Which means it will not prefix any of the branches with a instance name
@@ -1046,9 +1048,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // a "safety" if Service was created by new Service(name)
     // we still want the local Runtime running
     if (!Runtime.isRuntime(this)) {
-      Runtime.getInstance();
+      locale = Runtime.getInstance().getLocale();      
+    } else {
+      // is runtime
+      locale = Locale.getDefault();
     }
 
+    // load appropriate localization properties based on current local language
+    loadLocalizations();
+    
     // merge all our peer keys into the dna
     // so that reservations are set with actual names if
     // necessary
@@ -1065,8 +1073,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    
-    loadLocalizations();
     
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
@@ -2925,22 +2931,73 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
        return String.format(prop.toString(), args);
      }
   }
-
-  public void loadLocalizations() {
-    loadLocalizations(null);
-  }
   
-  public void loadLocalizations(String language) {
+  public void loadLocalizations() {
     
     if (defaultLocalization == null) {
+      // default is always english :P
       defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
     }
-    if (this.getClass().equals(Runtime.class) && localization == null) {      
-      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + Locale.getDefault().getLanguage() + ".properties"));
-    } else {
-      Locale locale = (language == null)?Runtime.getInstance().getLocale():new Locale(language);
-      localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
-    }
+    
+    localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
+  }
+
+  /**
+   * set the current locale for this service
+   * - initial locale would have been set by Runtimes locale
+   * @param code
+   */
+  public void setLocale(String code) {
+    locale = new Locale(code);
+    log.info("{} new locale is {}", getName(), code);
+    loadLocalizations();
+    broadcastState();
+  }
+  
+  /**
+   * get country tag of current locale
+   * @return
+   */
+  public String getCountry() {
+    return locale.getCountry();
+  }
+
+  /**
+   * Java does regions string codes differently than other systems en_US vs
+   * en-US ... seems like there has been a lot of confusion on which delimiter
+   * to use This function is used to simplify all of that - since we are
+   * primarily interested in language and do not usually need the distinction
+   * between regions in this context
+   * 
+   * @return
+   */
+  public String getLanguage() {
+    return locale.getLanguage();
+  }
+
+  /**
+   * return the current locale
+   */
+  public Locale getLocale() {
+    return locale;
+  }
+
+  /**
+   * get country name of current locale
+   * @return
+   */
+  public String getDisplayLanguage() {
+    return locale.getDisplayLanguage();
+  }
+
+  /**
+   * get current locale tag - this is of the form en-BR en-US
+   * including region
+   * 
+   * @return
+   */
+  public String getLocaleTag() {
+    return locale.getTag();
   }
   
 }

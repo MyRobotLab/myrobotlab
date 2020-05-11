@@ -954,27 +954,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   @Override
-  public void setLocale(String code) {
-    Runtime.getInstance().setLocale(code);
-  }
-
-  @Override
-  public String getLanguage() {
-    return Runtime.getInstance().getLanguage();
-  }
-
-  @Override
-  public Locale getLocale() {
-    return Runtime.getInstance().getLocale();
-  }
-
-  @Override
   public Map<String, Locale> getLocales() {
 
     Map<String, Locale> ret = new TreeMap<>();
     for (BotInfo botInfo : bots.values()) {
       if (botInfo.properties.containsKey("locale")) {
-        Locale locale = new Locale(botInfo.properties.get("locale"));
+        locale = new Locale(botInfo.properties.get("locale"));
         ret.put(locale.getTag(), locale);
       }
     }
@@ -1063,6 +1048,27 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     meta.addDependency("org.apache.lucene", "lucene-analyzers-kuromoji", "8.4.1");
     meta.addCategory("ai", "control");
     return meta;
+  }
+  
+  public String getAimlFile(String botName, String name) {
+    BotInfo botInfo = getBotInfo(botName);
+    if (botInfo == null) {
+      error("cannot get bot %s", botName);
+      return null;
+    }
+    
+    File f = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), "aiml" + fs + name));
+    if (!f.exists()) {
+      error("cannot find file %s", f.getAbsolutePath());
+      return null;
+    }
+    String ret = null;
+    try {
+      FileIO.toString(f);
+    } catch (IOException e) {
+      log.error("getAimlFile threw", e);
+    }    
+    return ret;
   }
 
   public static void main(String args[]) {
