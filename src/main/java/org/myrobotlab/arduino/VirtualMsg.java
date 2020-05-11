@@ -1720,7 +1720,9 @@ public class VirtualMsg {
   }
   
   public void markPending() {
-    log.info("Setting pending flag.");
+    if (debug) {
+      log.info("Setting pending flag.");
+    }
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = true;
       ackRecievedLock.notifyAll();
