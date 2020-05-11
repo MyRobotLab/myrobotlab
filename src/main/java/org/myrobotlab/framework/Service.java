@@ -1046,13 +1046,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       interfaceSet = getInterfaceSet();
     }
 
-    // a "safety" if Service was created by new Service(name)
-    // we still want the local Runtime running
-    if (!Runtime.isRuntime(this)) {
-      locale = Runtime.getInstance().getLocale();      
-    } else {
-      // is runtime
-      locale = Locale.getDefault();
+    if (locale == null) {
+      if (!Runtime.isRuntime(this)) {
+        locale = Runtime.getInstance().getLocale();
+      } else {
+        // is runtime
+        locale = Locale.getDefault();
+      }
     }
 
     // load appropriate localization properties based on current local language
