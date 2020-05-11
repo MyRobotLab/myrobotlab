@@ -221,7 +221,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     try {
       // can only grab first 100 results
 
-      String url = "https://www.google.com/search?lr=lang_" + Runtime.getInstance().getLocaleTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+      String url = "https://www.google.com/search?lr=lang_" + locale.getTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
       String filename = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString());
 
       // FIXME - check for cache ??? or useCache boolean config ?
