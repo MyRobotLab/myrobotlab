@@ -376,16 +376,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   }
 
   @Override
-  public String getLanguage() {
-    return Runtime.getInstance().getLanguage();
-  }
-
-  @Override
-  public Locale getLocale() {
-    return Runtime.getInstance().getLocale();
-  }
-
-  @Override
   public Map<String, Locale> getLocales() {
     return Locale.getAvailableLanguages();
   }
