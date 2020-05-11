@@ -12,7 +12,7 @@ virtualServo01.loadModels('/resource/Intro/JMonkeyEngine/assets')
 # we set the rotation axe to the defined part
 virtualServo01.setRotation("servo01", "y")
 # we do our mapping to the part
-virtualServo01.setMapper("servo01", 0, 180, -2, -178)
+virtualServo01.setMapper("servo01", 0, 180, -2, -171)
 # we set our view on another part
 virtualServo01.cameraLookAt("servo")
 #virtualServo01.getNode("camera").move(3, 1, 4) # relative local axes are x,y,z
