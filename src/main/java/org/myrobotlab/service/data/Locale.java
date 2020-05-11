@@ -173,7 +173,21 @@ public class Locale {
     return getTag();
   } 
 
-  public static Properties loadLocalizations(String fullPath) {
+  final static public boolean hasLanguage(Map<String, Locale> locales, String language) {
+      if (language == null || locales == null) {
+        return false;
+      }
+      // let Locale parse the incoming string to be safe
+      Locale l = new Locale(language);
+      for (Locale locale : locales.values()) {
+        if (locale.getLanguage().contentEquals(l.getLanguage())) {
+          return true;
+        }
+      }
+      return false;
+  }
+  
+  final static public Properties loadLocalizations(String fullPath) {
     Properties props = new Properties();
     try {
       props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));

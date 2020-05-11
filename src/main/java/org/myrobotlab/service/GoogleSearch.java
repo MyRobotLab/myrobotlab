@@ -90,13 +90,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     excludeTextFilter.clear();
   }
 
-  @Override
-  public void setLocale(String code) {
-    // locale = new Locale(code);
-    Runtime.getInstance().setLocale(code);
-    log.info("language is {}", code);
-  }
-
   /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer

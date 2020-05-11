@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -242,11 +241,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   static String[] globalArgs;
 
   static Set<String> networkPeers = null;
-
-  /**
-   * current locale e.g. "en", "en-Br", "fr", "fr-FR", ... etc..
-   */
-  Locale locale;
 
   /**
    * available Locales
@@ -2140,40 +2134,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public void checkingForUpdates() {
     log.info("checking for updates");
   }
-
-  /**
-   * return the current locale
-   */
-  @Override
-  public Locale getLocale() {
-    return locale;
-  }
-
+  
   static public String getInputAsString(InputStream is) {
     try (java.util.Scanner s = new java.util.Scanner(is)) {
       return s.useDelimiter("\\A").hasNext() ? s.next() : "";
     }
   }
-
-  // start cli commands ----
-  // FIXME - CD AND PWD ARE "ALWAYS" LOCAL - the represent a state change
-  // associated with direct input (typically stdin)
-  // so they are property of the InProcessCli ***NOT*** Runtime
-  /**
-   * change working directory to new path FIXME - implement ???? it really has
-   * to be a function of the gateway "perhaps" it would be worthwhile to make
-   * static'ish ?
-   * 
-   * @param path
-   */
-  /*
-   * FIXME -- ALWAYS LOCAL !!!! public String cd(String path) { // cliCwd =
-   * path.trim(); if (stdInClient != null) { if (path != null) { path =
-   * path.trim(); } stdInClient.setPrefix(path); } return path; }
-   * 
-   * public String pwd() { if (stdInClient != null) { return
-   * stdInClient.getCwd(); } return null; }
-   */
 
   /**
    * list the contents of the current working directory
@@ -2695,26 +2661,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return r;
   }
 
-  @Override
-  public void setLocale(String code) {
-    locale = new Locale(code);
-    // attempt to reload all services localizations
-    Map<String, ServiceInterface> services = getLocalServices();
-    for (ServiceInterface service : services.values()) {
-      service.loadLocalizations(locale.getLanguage());
-    }
-    broadcastState();
-  }
-
-  @Override
-  public String getLanguage() {
-    return locale.getLanguage();
-  }
-
-  public String getCountry() {
-    return locale.getCountry();
-  }
-
   public Platform login(Platform platform) {
     info("runtime %s says \"hello\" %s", platform.getId(), platform);
 
@@ -2773,10 +2719,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return new SystemResources();
   }
 
-  public String getDisplayLanguage() {
-    return locale.getDisplayLanguage();
-  }
-
   /**
    * Return supported system languages
    */
@@ -2800,10 +2742,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   static public Security getSecurity() {
     return Runtime.security;
-  }
-
-  public String getLocaleTag() {
-    return locale.getTag();
   }
 
   public static Process exec(String... cmd) throws IOException {
@@ -3535,6 +3473,12 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   public Object localizeDefault(String key) {
     key = key.toUpperCase();
     return defaultLocalization.get(key);
+  }
+
+  public void setAllLocales(String code) {
+    for (ServiceInterface si : getLocalServices().values()) {
+        si.setLocale(code);
+    }
   }
 
 }

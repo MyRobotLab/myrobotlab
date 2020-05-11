@@ -34,6 +34,7 @@ public class LocalizeTest extends AbstractTest {
   @Test
   public void caseInsensitive() {
     // case insensitive
+    runtime.setLocale("en");
     String SHUTDOWN = runtime.localize("shutdown");
     assertEquals("the system is shutting down", SHUTDOWN);
   }
@@ -68,10 +69,10 @@ public class LocalizeTest extends AbstractTest {
     String BLAH = runtime.localize("BLAH");
     assertNull(BLAH);
     
-    
+    i01.setLocale("fr");
     String STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
     assertEquals("arduino coté gauche uniquement sélectionné", STARTINGLEFTONLY);
-    runtime.setLocale("it");
+    i01.setLocale("it");
     STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
     assertEquals("Soltanto la configurazione della parte sinistra  del robot è stata abilitata", STARTINGLEFTONLY);
     BLAH = i01.localize("BLAH");
