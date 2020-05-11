@@ -29,9 +29,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.data.Pin;
 import org.myrobotlab.service.interfaces.JoystickListener;
-import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.Simulator;
@@ -48,8 +46,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
 	// FIXME - why
+	@Deprecated
 	static boolean RobotCanMoveRandom = true;
 	private static final long serialVersionUID = 1L;
+	
+	public Arduino neopixelArduino = null;
 
 	static String speechRecognizer = "WebkitSpeechRecognition";
 
@@ -69,8 +70,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
 
-                meta.addPeer("eye", "OpenCV", "eye");
-                meta.addPeer("servomixer", "ServoMixer", "for making gestures");
+        meta.addPeer("opencv", "OpenCV", "opencv");
+        meta.addPeer("servomixer", "ServoMixer", "for making gestures");
 		meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
 		meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
 		meta.addPeer("pir", "Pir", "infrared sensor");
@@ -83,7 +84,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
 
-		meta.addPeer("brain", "ProgramAB", "brain");
+		meta.addPeer("chatBot", "ProgramAB", "chatBot");
 		meta.addPeer("simulator", "JMonkeyEngine", "simulator");
 
 		meta.addPeer("head", "InMoov2Head", "head");
@@ -100,7 +101,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		meta.addPeer("headTracking", "Tracking", "Head tracking system");
 
-		meta.sharePeer("headTracking.opencv", "eye", "OpenCV", "shared head OpenCV");
+		meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
 		// meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head
 		// Arduino"); NO !!!!
 		meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
@@ -189,7 +190,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 				return;
 			}
 
-			i01.startBrain();
+			i01.startChatBot();
 
 			i01.startAll("COM3", "COM4");
 			Runtime.start("python", "Python");
@@ -211,7 +212,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	boolean autoStartBrowser = false;
 
-	transient ProgramAB brain;
+	transient ProgramAB chatBot;
 
 	Set<String> configs = null;
 
@@ -219,7 +220,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	transient SpeechRecognizer ear;
 
-	transient OpenCV eye;
+	transient OpenCV opencv;
 
 	transient Tracking eyesTracking;
 	// waiting controable threaded gestures we warn user
@@ -237,10 +238,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	transient UltrasonicSensor ultraSonicLeft;
 	
 	transient Pir pir;
-	
-	private PinArrayControl pirArduino;
-
-	public Integer pirPin = null;
 
 	// transient ImageDisplay imageDisplay;
 
@@ -249,11 +246,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	 * auto-peer variable
 	 */
 
-	boolean isBrainActivated = false;
+	boolean isChatBotActivated = false;
 
 	boolean isEarActivated = false;
 
-	boolean isEyeActivated = false;
+	boolean isOpenCvActivated = false;
 
 	boolean isEyeLidsActivated = false;
 
@@ -288,9 +285,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	String lastGestureExecuted;
 
-	Long lastPirActivityTime = null;
-	
-	Long startSleep = null;
+	Long lastPirActivityTime;
 
 	transient InMoov2Arm leftArm;
 
@@ -691,8 +686,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public boolean isCameraOn() {
-		if (eye != null) {
-			if (eye.isCapturing()) {
+		if (opencv != null) {
+			if (opencv.isCapturing()) {
 				return true;
 			}
 		}
@@ -995,7 +990,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (ear != null) {
 			ear.lockOutAllGrammarExcept("power up");
 		}
-		startSleep = System.currentTimeMillis();
+
 		python.execMethod("power_down");
 	}
 
@@ -1175,13 +1170,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		// filter of the set of supported locales
 		if (!locales.containsKey(code)) {
-			error("InMooov does not support %s only %s", code, locales.keySet());
+			error("InMoov does not support %s only %s", code, locales.keySet());
 			return;
 		}
 
 		locale = new Locale(code);
 
-		speakBlocking("setting language to %s", locale.getDisplayLanguage());
+		speakBlocking(get("SETLANG"), "%s", locale.getDisplayLanguage());
 
 		// attempt to set all other language providers to the same language as me
 		List<String> providers = Runtime.getServiceNamesFromInterface(LocaleProvider.class);
@@ -1241,6 +1236,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public boolean setVirtual(boolean virtual) {
 		super.setVirtual(virtual);
 		Platform.setVirtual(virtual);
+		speakBlocking(get("STARTINGVIRTUALHARD"));
 		return virtual;
 	}
 
@@ -1248,7 +1244,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (mouth != null) {
 			mouth.setVoice(name);
 			voiceSelected = name;
-			speakBlocking("setting voice to %s", name);
+			speakBlocking(get("SETLANG"), "%s", name);
 		}
 	}
 
@@ -1292,9 +1288,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 	public void startAll(String leftPort, String rightPort) throws Exception {
 		startMouth();
-		startBrain();
+		startChatBot();
 
-		startHeadTracking();
+		// startHeadTracking();
 		// startEyesTracking();
 		// startOpenCV();
 		startEar();
@@ -1302,70 +1298,70 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		startServos(leftPort, rightPort);
 		// startMouthControl(head.jaw, mouth);
 
-		speakBlocking("startup sequence completed");
+		speakBlocking(get("STARTINGSEQUENCE"));
 	}
 
-	public ProgramAB startBrain() {
+	public ProgramAB startChatBot() {
 
 		try {
 
-			brain = (ProgramAB) startPeer("brain");
-			isBrainActivated = true;
+			chatBot = (ProgramAB) startPeer("chatBot");
+			isChatBotActivated = true;
 
 			speakBlocking(get("CHATBOTACTIVATED"));
 
 			// GOOD EXAMPLE ! - no type, uses name - does a set of subscriptions !
-			// attachTextPublisher(brain.getName());
+			// attachTextPublisher(chatBot.getName());
 
 			/*
-			 * not necessary - ear needs to be attached to mouth not brain if (ear != null)
-			 * { ear.attachTextListener(brain); }
+			 * not necessary - ear needs to be attached to mouth not chatBot if (ear != null)
+			 * { ear.attachTextListener(chatBot); }
 			 */
 
-			brain.attachTextPublisher(ear);
+			chatBot.attachTextPublisher(ear);
 
-			// this.attach(brain); FIXME - attach as a TextPublisher - then re-publish
+			// this.attach(chatBot); FIXME - attach as a TextPublisher - then re-publish
 			// FIXME - deal with language
 			// speakBlocking(get("CHATBOTACTIVATED"));
-			brain.repetitionCount(10);
-			brain.setPath(getResourceDir() + fs + "chatbot");
-			brain.startSession("default", locale.getTag());
+			chatBot.repetitionCount(10);
+			chatBot.setPath(getResourceDir() + fs + "chatbot");
+			chatBot.startSession("default", locale.getTag());
 			// reset some parameters to default...
-			brain.setPredicate("topic", "default");
-			brain.setPredicate("questionfirstinit", "");
-			brain.setPredicate("tmpname", "");
-			brain.setPredicate("null", "");
+			chatBot.setPredicate("topic", "default");
+			chatBot.setPredicate("questionfirstinit", "");
+			chatBot.setPredicate("tmpname", "");
+			chatBot.setPredicate("null", "");
 			// load last user session
-			if (!brain.getPredicate("name").isEmpty()) {
-				if (brain.getPredicate("lastUsername").isEmpty()
-						|| brain.getPredicate("lastUsername").equals("unknown")) {
-					brain.setPredicate("lastUsername", brain.getPredicate("name"));
+			if (!chatBot.getPredicate("name").isEmpty()) {
+				if (chatBot.getPredicate("lastUsername").isEmpty()
+						|| chatBot.getPredicate("lastUsername").equals("unknown")) {
+							chatBot.setPredicate("lastUsername", chatBot.getPredicate("name"));
 				}
 			}
-			brain.setPredicate("parameterHowDoYouDo", "");
+			chatBot.setPredicate("parameterHowDoYouDo", "");
 			try {
-				brain.savePredicates();
+				chatBot.savePredicates();
 			} catch (IOException e) {
 				log.error("saving predicates threw", e);
 			}
 			// start session based on last recognized person
-			if (!brain.getPredicate("default", "lastUsername").isEmpty()
-					&& !brain.getPredicate("default", "lastUsername").equals("unknown")) {
-				brain.startSession(brain.getPredicate("lastUsername"));
+			if (!chatBot.getPredicate("default", "lastUsername").isEmpty()
+					&& !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
+						chatBot.startSession(chatBot.getPredicate("lastUsername"));
 			}
 
 			htmlFilter = (HtmlFilter) startPeer("htmlFilter");// Runtime.start("htmlFilter",
 																// "HtmlFilter");
-			brain.attachTextListener(htmlFilter);
+			chatBot.attachTextListener(htmlFilter);
 			htmlFilter.attachTextListener((TextListener) getPeer("mouth"));
-			brain.attachTextListener(this);
+			chatBot.attachTextListener(this);
 		} catch (Exception e) {
-			speak("could not load brain");
+			speak("could not load chatBot");
 			error(e.getMessage());
 			speak(e.getMessage());
 		}
 		broadcastState();
-		return brain;
+		return chatBot;
 	}
 
 	public SpeechRecognizer startEar() {
@@ -1374,7 +1370,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		isEarActivated = true;
 
 		ear.attachSpeechSynthesis((SpeechSynthesis) getPeer("mouth"));
-		ear.attachTextListener(brain);
+		ear.attachTextListener(chatBot);
 
 		speakBlocking(get("STARTINGEAR"));
 		broadcastState();
@@ -1398,12 +1394,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	// FIXME - universal (good) way of handling all exceptions - ie - reporting
 	// back to the user the problem in a short concise way but have
 	// expandable detail in appropriate places
-	public OpenCV startEye() throws Exception {
+	public OpenCV startOpenCV() throws Exception {
 		speakBlocking(get("STARTINGOPENCV"));
-		eye = (OpenCV) startPeer("eye", "OpenCV");
-		subscribeTo(eye.getName(), "publishOpenCVData");
-		isEyeActivated = true;
-		return eye;
+		opencv = (OpenCV) startPeer("opencv", "OpenCV");
+		subscribeTo(opencv.getName(), "publishOpenCVData");
+		isOpenCvActivated = true;
+		return opencv;
 	}
 
 	public Tracking startEyesTracking() throws Exception {
@@ -1414,12 +1410,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public Tracking startEyesTracking(ServoControl eyeX, ServoControl eyeY) throws Exception {
-		if (eye == null) {
-			startEye();
+		if (opencv == null) {
+			startOpenCV();
 		}
 		speakBlocking(get("TRACKINGSTARTED"));
 		eyesTracking = (Tracking) this.startPeer("eyesTracking");
-		eyesTracking.connect(eye, head.eyeX, head.eyeY);
+		eyesTracking.connect(opencv, head.eyeX, head.eyeY);
 		return eyesTracking;
 	}
 
@@ -1460,7 +1456,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 				arduino.attach(head.eyeX);
 				arduino.attach(head.eyeY);
 				arduino.attach(head.jaw);
-				arduino.attach(head.rollNeck);
+				//FIXME rollNeck and eyelids must be connected to right controller
+				//arduino.attach(head.rollNeck);
+				//arduino.attach(head.eyelidLeft);
+				//arduino.attach(head.eyelidRight);
 
 			} catch (Exception e) {
 				error(e);
@@ -1478,8 +1477,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 
 	public void startHeadTracking() throws Exception {
-		if (eye == null) {
-			startEye();
+		if (opencv == null) {
+			startOpenCV();
 		}
 
 		if (head == null) {
@@ -1489,19 +1488,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		if (headTracking == null) {
 			speakBlocking(get("TRACKINGSTARTED"));
 			headTracking = (Tracking) this.startPeer("headTracking");
-			headTracking.connect(this.eye, head.rothead, head.neck);
+			headTracking.connect(this.opencv, head.rothead, head.neck);
 		}
 	}
 
 	public Tracking startHeadTracking(ServoControl rothead, ServoControl neck) throws Exception {
-		if (eye == null) {
-			startEye();
+		if (opencv == null) {
+			startOpenCV();
 		}
 
 		if (headTracking == null) {
 			speakBlocking(get("TRACKINGSTARTED"));
 			headTracking = (Tracking) this.startPeer("headTracking");
-			headTracking.connect(this.eye, rothead, neck);
+			headTracking.connect(this.opencv, rothead, neck);
 		}
 		return headTracking;
 	}
@@ -1586,7 +1585,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 
 		mouth.attachSpeechRecognizer(ear);
-		// mouth.attach(htmlFilter); // same as brain not needed
+		// mouth.attach(htmlFilter); // same as chatBot not needed
 
 		// this.attach((Attachable) mouth);
 		// if (ear != null) ....
@@ -1595,16 +1594,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
 		speakBlocking(get("STARTINGMOUTH"));
 		if (Platform.isVirtual()) {
-			speakBlocking("in virtual hardware mode");
+			speakBlocking(get("STARTINGVIRTUALHARD"));
 		}
 		speakBlocking(get("WHATISTHISLANGUAGE"));
 
 		return mouth;
-	}
-
-	@Deprecated /* use start eye */
-	public void startOpenCV() throws Exception {
-		startEye();
 	}
 
 	public InMoov2Arm startRightArm() {
@@ -1667,35 +1661,34 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public Double getUltraSonicRightDistance() {
-		if (ultraSonicRight != null) {
-			return ultraSonicRight.range();
-		} else {
-			warn("No UltraSonicRight attached");
-			return 0.0;
+	if (ultraSonicRight != null) {
+	  return ultraSonicRight.range();
+	} else {
+	  warn("No UltraSonicRight attached");
+	  return 0.0;
 		}
 	}
 
 	public Double getUltraSonicLeftDistance() {
-		if (ultraSonicLeft != null) {
-			return ultraSonicLeft.range();
-		} else {
-			warn("No UltraSonicLeft attached");
-			return 0.0;
+	if (ultraSonicLeft != null) {
+	  return ultraSonicLeft.range();
+	} else {
+	  warn("No UltraSonicLeft attached");
+	  return 0.0;
 		}
 	}
 	
-	public void publishPin(Pin pin) {
-		log.info("{} - {}", pin.pin, pin.value);
-		if (pin.value == 1) {
-		  lastPirActivityTime = System.currentTimeMillis();
-		}
-		// if its PIR & PIR is active & was sleeping - then wake up !
-		if (pirPin == pin.pin && startSleep != null && pin.value == 1) {
-		  // attach(); // good morning / evening / night... asleep for % hours
-		  powerUp();
-		}
-	}
-	
+	//public void publishPin(Pin pin) {
+		//log.info("{} - {}", pin.pin, pin.value);
+		//if (pin.value == 1) {
+			//lastPIRActivityTime = System.currentTimeMillis();
+		//}
+		/// if its PIR & PIR is active & was sleeping - then wake up !
+		//if (pin == pin.pin && startSleep != null && pin.value == 1) {
+			//powerUp();
+		//}
+	//}
+
 	public void startServos(String leftPort, String rightPort) throws Exception {
 		startHead(leftPort);
 		startLeftArm(leftPort);
@@ -1975,7 +1968,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	   return startUltraSonicLeft(port, 64, 63);
 	 }
 
-         public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
+  public UltrasonicSensor startUltraSonicLeft(String port, int trigPin, int echoPin) {
 		
 		if (ultraSonicLeft == null) {
 			speakBlocking(get("STARTINGULTRASONIC"));
@@ -2014,10 +2007,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 					speakBlocking(port);
 					Arduino right = (Arduino) startPeer("right");
 					right.connect(port);
-					right.enablePin(pin, 10);
-					pirArduino = right;
-					pirPin = pin;
-					right.addListener("publishPin", this.getName(), "publishPin");
+					right.attach(pir, pin);
 				} catch (Exception e) {
 					error(e);
 				}
@@ -2057,15 +2047,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		}
 	}
 
-	public void stopBrain() {
+	public void stopChatBot() {
 		speakBlocking(get("STOPCHATBOT"));
-		releasePeer("brain");
-		isBrainActivated = false;
+		releasePeer("chatBot");
+		isChatBotActivated = false;
 	}
 	
 	public void stopHead() {
 		speakBlocking(get("STOPHEAD"));
 		releasePeer("head");
+		releasePeer("mouthControl");
 		isHeadActivated = false;
 	}
 
@@ -2076,10 +2067,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		broadcastState();
 	}
 
-	public void stopEye() {
+	public void stopOpenCV() {
 		speakBlocking(get("STOPOPENCV"));
-		isEyeActivated = false;
-		releasePeer("eye");
+		isOpenCvActivated = false;
+		releasePeer("opencv");
 	}
 
 	public void stopGesture() {
@@ -2148,18 +2139,21 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		speakBlocking(get("STOPPIR"));
 		releasePeer("pir");
 		isPirActivated = false;
-		if (pirArduino != null && pirPin != null) {
-			pirArduino.disablePin(pirPin);
-			pirPin = null;
-			pirArduino = null;
-		}
 	}
+
+	public void stopNeopixelAnimation() {
+		if (neopixel != null && neopixelArduino != null) {
+		  neopixel.animationStop();
+		} else {
+		  warn("No Neopixel attached");
+		}
+	}	
 	
-        public void stopServoMixer() {
-                speakBlocking(get("STOPSERVOMIXER"));
-                releasePeer("servomixer");
-                isServoMixerActivated = false;
-        }
+	public void stopServoMixer() {
+			speakBlocking(get("STOPSERVOMIXER"));
+			releasePeer("servomixer");
+			isServoMixerActivated = false;
+	}
 
 	public void waitTargetPos() {
 		if (head != null) {
