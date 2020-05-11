@@ -118,7 +118,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       String encodedSearch = URLEncoder.encode(searchText, "UTF-8");
 
       // not sure if locale is supported tag probably is ....
-      String request = "https://google.com/search?lr=lang_" + Runtime.getInstance().getLocaleTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      String request = "https://google.com/search?lr=lang_" + locale.getTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
 
       // Fetch the page
       Document doc = Jsoup.connect(request).userAgent(USER_AGENT).get();
