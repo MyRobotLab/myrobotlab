@@ -24,7 +24,7 @@ public class BotInfo {
   private transient Bot bot;
   public Properties properties = new Properties();
   private transient ProgramAB programab;
-  // public Locale locale = new Locale("en-US");
+
   /**
    * base64 png
    */
