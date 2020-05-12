@@ -3,8 +3,6 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.util.List;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.arduino.VirtualMsg;
@@ -15,9 +13,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
-import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
-import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 
 // @Ignore
@@ -41,11 +37,21 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     msg.setInvoke(false);
     // our service to test
     VirtualArduino va = (VirtualArduino)service;
+    
+    
     // connect to the test uart/DCE port
     va.connect(testPort);
+    Thread.sleep(100);
+    // virtual arduino listens on virtual port + .UART as the DCE side of the interface.
+    assertEquals(testPort + ".UART", va.getPortName());
     // TODO: we should not invoke from virtual test land.
     // va.getMrlComm().getMsg().setInvoke(false);
     // create a serial port to read the DTE side of the virtual serial port.
+    // some basic validation stuff on the va..
+    assertNotNull(va.getPinList()); 
+    assertNotNull(va.board);
+    
+    
     Serial serial = (Serial)Runtime.start("serial", "Serial");
     // attach our test as a byte listener for the onBytes call.
     serial.addByteListener(this);
@@ -56,7 +62,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
     // TODO: there's a race condition here.. we seem to fail without a small sleep here!!!!
     // we need to let the virtual arduinos catch up and actually add the device.
-    Thread.sleep(100);
+    Thread.sleep(1000);
     // get a handle to the virtual device that we just attached.
     Device d = va.getDevice(0);
     // validate the device exists.
@@ -71,7 +77,20 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(msg.servoSetVelocity(0, 22));
     Thread.sleep(100);
     assertEquals(s.velocity, 22);
+    
+    // other Servo methods to test.
+    serial.write(msg.servoAttachPin(0, 11));
+    Thread.sleep(100);
+    assertEquals(11, s.pin);
     // TODO: we could test other virtual devices.
+    
+    serial.write(msg.servoDetachPin(0));
+    Thread.sleep(100);
+    assertFalse(s.enabled);
+    
+    va.disconnect();
+    Thread.sleep(100);
+    assertFalse(va.isConnected());
   }
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
@@ -89,8 +108,8 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public int[] publishCustomMsg(int[] msg) {
-    // TODO Auto-generated method stub
-    return null;
+    log.info("Publish Custom Msg: {}", msg);
+    return msg;
   }
 
   @Override
@@ -114,7 +133,6 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void publishI2cData(Integer deviceId, int[] data) {
-    // 
     log.info("Publish I2C - Device ID: {} Data: {}", deviceId, data);
   }
 

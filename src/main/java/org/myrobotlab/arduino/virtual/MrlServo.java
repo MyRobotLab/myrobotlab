@@ -175,7 +175,7 @@ public class MrlServo extends Device implements VirtualServo {
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
+    // TODO: give the servo a name
     return null;
   }
 
