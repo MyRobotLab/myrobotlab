@@ -455,7 +455,7 @@ public class OpenCV extends AbstractComputerVision {
     meta.addDependency("com.github.axet", "vget", "1.1.34");
 
     // yolo models
-    meta.addDependency("yolo", "yolov2", "v2", "zip");
+    meta.addDependency("yolo", "yolov2", "v3", "zip");
 
     return meta;
   }
