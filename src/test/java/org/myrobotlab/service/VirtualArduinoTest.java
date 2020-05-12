@@ -32,12 +32,17 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public void testService() throws Exception {
+    
+    
     // our local msg handle that parses the stream from the virtual arduino
     // skip invoking in unit tests, instead directly call the callbacks to make unit tests easier.
     msg.setInvoke(false);
     // our service to test
     VirtualArduino va = (VirtualArduino)service;
-    
+
+    // let's make sure the virtual arduino doesn't connect to a null port
+    // va.connect(null);
+    // assertFalse(va.isConnected());
     
     // connect to the test uart/DCE port
     va.connect(testPort);
@@ -62,7 +67,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
     // TODO: there's a race condition here.. we seem to fail without a small sleep here!!!!
     // we need to let the virtual arduinos catch up and actually add the device.
-    Thread.sleep(1000);
+    Thread.sleep(200);
     // get a handle to the virtual device that we just attached.
     Device d = va.getDevice(0);
     // validate the device exists.

@@ -121,10 +121,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       virtual.getSerial().addByteListener(virtual);
       ino.setup();
       // make sure the serial port is up and running ..  perhaps we should add a small sleep in here?
-      
-      // TODO: pool the serial device to make sure it's started & connected?
-      
-      
+      // TODO: poll the serial device to make sure it's started & connected?
       try {
         Thread.sleep(100);
       } catch (InterruptedException e) {
@@ -164,6 +161,17 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    * Connect to a serial port to the uart/DCE side of a virtual serial port.
    */
   public void connect(String portName) throws IOException {
+    
+    // TODO: remove this method from here!
+    initVirtualArduino();   
+    
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
     if (portName == null) {
       log.warn("{}.connect(null) not valid", getName());
       return;
@@ -178,6 +186,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
     // at this point we should also register ourselves as the byteListener for this uart.
     uart.addByteListener(this);
+    // TODO: after this is a good place to start the mrlCommIno runner.. isn't it?
   }
 
   static public ServiceType getMetaData() {
@@ -229,17 +238,20 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   public void startService() {
     super.startService();
     // first thing's first. let's create a virtual serial port for the uart/dce side 
+    // create our uart serial port service.
+    uart = (Serial) startPeer("uart");
+  }
+
+  private void initVirtualArduino() {
     try {
-      // create our uart serial port service.
-      uart = (Serial) startPeer("uart");
       // create the virtual port for our port name and connect it.
       uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-      // TODO: can we move all this into the connect method?
-      uart.addByteListener(this);
     } catch (IOException e) {
       log.error("Failed to create virtual uart port!", e);
       return;
     }
+    // TODO: can we move all this into the connect method?
+    uart.addByteListener(this);
     // second thing.. let's setup an mrlcommino.
     ino = new MrlCommIno(this);
     mrlComm = ino.getMrlComm();
@@ -265,7 +277,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
         break;
       }
     }
-   
   }
 
   public void releaseService() {
