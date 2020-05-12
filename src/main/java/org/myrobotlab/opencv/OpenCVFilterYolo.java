@@ -1,39 +1,29 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNetFromDarknet;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.commons.io.IOUtils;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_dnn.Net;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -56,7 +46,11 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   // int probability_index = 5;
   // yolo file locations
   // private String darknetHome = "c:/dev/workspace/darknet/";
-  public String darknetHome = "yolo";
+
+  // *** the 'correct' way ***
+  // public String darknetHome =
+  // FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"yolo");
+  public String darknetHome = "resource/OpenCV/yolo"; // FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"yolo");
   public String modelConfig = "yolov2.cfg";
   public String modelWeights = "yolov2.weights";
   public String modelNames = "coco.names";
@@ -64,11 +58,6 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   int classifierThreadCount = 0;
 
   DecimalFormat df2 = new DecimalFormat("#.###");
-
-  // TODO: store these somewhere as a resource / dependency ..
-  public String modelConfigUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov2.cfg";
-  public String modelWeightsUrl = "https://pjreddie.com/media/files/yolov2.weights";
-  public String modelNamesUrl = "https://raw.githubusercontent.com/pjreddie/darknet/master/data/coco.names";
 
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
@@ -90,84 +79,16 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     this(null);
   }
 
-  private void downloadYoloModel() {
-    log.info("downloadYoloModel - begin");
-    File yoloHome = new File(darknetHome);
-    if (!yoloHome.exists()) {
-      yoloHome.mkdirs();
-    }
-
-    // now we need to check the files in the directory exist.
-    // 3 files to check for
-    File modelConfigFile = new File(darknetHome + File.separator + modelConfig);
-    File modelWeightsFile = new File(darknetHome + File.separator + modelWeights);
-    // TODO: localize this? why not!
-    File modelNamesFile = new File(darknetHome + File.separator + modelNames);
-
-    if (!modelConfigFile.exists()) {
-      // download & cache!
-      downloadAndCache(modelConfigUrl, modelConfigFile, null);
-    }
-    if (!modelWeightsFile.exists()) {
-      // download & cache!
-      downloadAndCache(modelWeightsUrl, modelWeightsFile, "Large download 200mb +/-");
-    }
-    if (!modelNamesFile.exists()) {
-      // download & cache!
-      downloadAndCache(modelNamesUrl, modelNamesFile, null);
-    }
-    log.info("downloadYoloModel - end");
-
-  }
-
-  private void downloadAndCache(String uri, File location, String details) {
-    // TODO: clean up the error handling here.
-    log.info("downloadAndCache - begin");
-
-    log.info("Downloading {} to file location {}) {}", uri, location.getAbsolutePath(), details);
-    URL url = null;
-    try {
-      url = new URL(uri);
-    } catch (MalformedURLException e) {
-      log.warn("Invalid url passed! {}", uri);
-      e.printStackTrace();
-      return;
-    }
-    InputStream in = null;
-    try {
-      in = url.openStream();
-    } catch (IOException e) {
-      log.error("Error opening a connection to {} ", uri, e);
-      return;
-    }
-    DataInputStream dis = new DataInputStream(new BufferedInputStream(in));
-    try {
-      // open up the destination file for writing
-      FileOutputStream fos = new FileOutputStream(location);
-      IOUtils.copy(dis, fos);
-      fos.close();
-      dis.close();
-    } catch (IOException e) {
-      log.warn("Error downloading.", e);
-      // clean up a partially written file
-      if (location.exists()) {
-        log.warn("Partially downloaded file.. cleaning up");
-        location.delete();
-      }
-      return;
-    }
-    log.info("downloadAndCache - end");
-  }
-
   private void loadYolo() {
     log.info("loadYolo - begin");
 
-    // If the model isn't there, we should download it and cache it.
-    log.info("Staritng yolo download verification");
-    downloadYoloModel();
-    log.info("Completed downloading yolo model");
-    net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
-    log.info("Loaded yolo darknet model to opencv");
+    try {
+      net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
+      log.info("Loaded yolo darknet model to opencv");
+    } catch (Exception e) {
+      log.error("readNetFromDarknet could not read", e);
+      return;
+    }
     // load the class names
     try {
       classNames = loadClassNames(darknetHome + File.separator + modelNames);
@@ -275,15 +196,15 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
         Thread.sleep(1);
       } // while (running)
-      
+
     } catch (Exception e) {
       log.error("yolo thread threw", e);
     }
-    
+
     synchronized (lock) {
       classifier = null;
     }
-    
+
     log.info("yolo exiting classifier thread");
     log.info("run - end");
   }
@@ -338,6 +259,12 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
         // TODO: this filtering logic is probably wrong.
         if (val > 0.0) {
           String label = classNames.get(c - CONFIDENCE_INDEX - 1);
+          if (opencv != null) {
+            String localized = opencv.localize(label);
+            if (localized != null) {
+              label = localized;
+            }
+          }
           // System.out.println("Index : " + c + "->" + val + " label : " +
           // classNames.get(c-probability_index) );
           // let's just say this is something we've detected..
@@ -413,18 +340,18 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   @Override
   public void release() {
     // synchronized (lock) {
-      log.info("release - begin");
-      disable(); // blocks until ready
+    log.info("release - begin");
+    disable(); // blocks until ready
 
-      // while(isRunning){ sleep(30) .. check again }
-      // bleed out the thread before deallocating
+    // while(isRunning){ sleep(30) .. check again }
+    // bleed out the thread before deallocating
 
-      if (net != null) {
-        net.deallocate();
-        net = null;
-      }
-      log.info("release - end");
-   //  }
+    if (net != null) {
+      net.deallocate();
+      net = null;
+    }
+    log.info("release - end");
+    // }
   }
 
   volatile Object lock = new Object();
@@ -435,7 +362,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // already enabled
       return;
     }
-    log.info("enabling yolo");    
+    log.info("enabling yolo");
     synchronized (lock) {
       log.info("enable - begin");
       super.enable();
@@ -453,7 +380,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       // already disabled
       return;
     }
-    super.disable();    
+    super.disable();
     int waitTime = 0;
     while (classifier != null && waitTime < 1000) {
       ++waitTime;
