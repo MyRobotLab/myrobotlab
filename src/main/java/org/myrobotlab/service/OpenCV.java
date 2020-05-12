@@ -481,8 +481,8 @@ public class OpenCV extends AbstractComputerVision {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     LoggingFactory.init("info");
 
-   Runtime.start("gui", "SwingGui");
-    // Runtime.start("python", "Python");
+    Runtime.start("gui", "SwingGui");
+    Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
  //   WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
  //   webgui.autoStartBrowser(false);
