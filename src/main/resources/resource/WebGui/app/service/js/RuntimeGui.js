@@ -7,6 +7,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     this.updateState = function(service) {
         $scope.service = service
+        $scope.locale.selected = service.locale.language
         service.serviceData.categoryTypes["show all"] = {
             "name": "show all",
             "serviceTypes": []

@@ -1,7 +1,7 @@
 <div class="row">
     <span class="col-lg-6">
         <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
-        <span ng-show="!service.ready">Polly requires AWS Keys</span>
+        <span ng-show="!service.ready">Voice Rss requires AWS Keys</span>
     </span>
 </div>
 <div class="row">
@@ -19,10 +19,9 @@
 <div class="row" ng-show="!service.ready">
     <div class="col-lg-12">
         <form class="form-inline">
-            <input class="form-control" type="password" ng-model="key" placeholder="aws polly key" title="key name to identify secret">
-            <input class="form-control" type="password" ng-model="secret" placeholder="aws polly secret" title="Polly key and secret ">
-            <button class="btn btn-default" ng-click="msg.setKeys(key, secret);">set keys</button>
-            <a href="https://docs.aws.amazon.com/polly/latest/dg/authentication-and-access-control.html">how to get keys</a>
+            <input class="form-control" type="password" ng-model="key" placeholder="voice rss polly key" title="vss key">
+            <button class="btn btn-default" ng-click="msg.setKeys('voicerss.api.key', key);">set keys</button>
+            <a href="http://www.voicerss.org/login.aspx">how to get a key</a>
         </form>
     </div>
 </div>
