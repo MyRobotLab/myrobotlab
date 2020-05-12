@@ -1,9 +1,14 @@
 package org.myrobotlab.service;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -30,6 +35,34 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   private static final long serialVersionUID = 1L;
 
   /**
+   * peer services
+   */
+  transient public LeapMotion leap;
+  transient public ServoController controller;
+  transient public ServoControl thumb;
+  transient public ServoControl index;
+  transient public ServoControl majeure;
+  transient public ServoControl ringFinger;
+  transient public ServoControl pinky;
+  transient public ServoControl wrist;
+
+  // The pins for the finger tip sensors
+  public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
+  // public int[] sensorLastValues = new int[] {0,0,0,0,0};
+  public boolean sensorsEnabled = false;
+  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
+
+  /**
+   * list of names of possible controllers
+   */
+  public List<String> controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
+  public String controllerName;
+
+  boolean isAttached = false;
+
+  private int sensorPin;
+
+  /**
    * This static method returns all the details of the class without it having
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
@@ -54,7 +87,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     return meta;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -86,36 +119,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
   }
 
-  /**
-   * peer services
-   */
-  transient public LeapMotion leap;
-  transient public ServoController controller;
-  transient public ServoControl thumb;
-  transient public ServoControl index;
-  transient public ServoControl majeure;
-  transient public ServoControl ringFinger;
-  transient public ServoControl pinky;
-  transient public ServoControl wrist;
-
-
-  // The pins for the finger tip sensors
-  public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
-  // public int[] sensorLastValues = new int[] {0,0,0,0,0};
-  public boolean sensorsEnabled = false;
-  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
-
-
-  
-  /**
-   * list of names of possible controllers
-   */
-  controllers = Runtime.getServiceNamesFromInterface(ServoController.class);
-  public List<String> controllers;
-  public String controllerName;
-
-  boolean isAttached = false;  
-
   public InMoov2Hand(String n, String id) {
     super(n, id);
 
@@ -131,14 +134,11 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     ringFinger.setPin(5);
     pinky.setPin(6);
     wrist.setPin(7);
-    
+
     /*
-    thumb.setSensorPin(A0);
-    index.setSensorPin(A1);
-    majeure.setSensorPin(A2);
-    ringFinger.setSensorPin(A3);
-    pinky.setSensorPin(A4);
-    */
+     * thumb.setSensorPin(A0); index.setSensorPin(A1); majeure.setSensorPin(A2);
+     * ringFinger.setSensorPin(A3); pinky.setSensorPin(A4);
+     */
 
     // TOOD: what are the initial velocities?
     // Initial rest positions?
@@ -162,7 +162,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void bird() {
     moveTo(150.0, 180.0, 0.0, 180.0, 180.0, 90.0);
   }
-  
+
   public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
@@ -196,7 +196,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
     isAttached = false;
     return false;
-  }  
+  }
 
   @Override
   public void broadcastState() {
@@ -215,17 +215,16 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void closePinch() {
     moveTo(130, 140, 180, 180, 180);
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public void count() {
     one();
@@ -374,7 +373,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void one() {
     moveTo(150.0, 0.0, 180.0, 180.0, 180.0, 90.0);
   }
-  
+
   public void attach(String controllerName, int sensorPin) throws Exception {
     attach((ServoController) Runtime.getService(controllerName), sensorPin);
   }
@@ -383,29 +382,31 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     attach((ServoController) Runtime.getService(controllerName), Integer.parseInt(sensorPin));
   }
 
-  @Override
   public void attach(ServoController controller, int sensorPin) {
-    if (controller == null) {
-      error("setting null as controller");
-      return;
+    try {
+      if (controller == null) {
+        error("setting null as controller");
+        return;
+      }
+      if (isAttached) {
+        log.info("Sensor already attached");
+        return;
+      }
+
+      this.sensorPin = sensorPin;
+
+      controller.attach(controller);
+
+      log.info("{} setController {}", getName(), controller.getName());
+      this.controller = controller;
+      controllerName = this.controller.getName();
+      isAttached = true;
+      broadcastState();
+    } catch (Exception e) {
+      error(e);
     }
-    if (isAttached) {
-      log.info("Sensor already attached");
-      return;
-    }
-
-    this.sensorPin = sensorPin;
-
-    controller.attach(this, sensorPin);
-
-    log.info("{} setController {}", getName(), controller.getName());
-    this.controller = controller;
-    controllerName = this.controller.getName();
-    isAttached = true;
-    broadcastState();
   }
 
-  @Override
   public void detach(ServoController controller) {
     // let the controller you want to detach this device
     if (controller != null) {
@@ -420,7 +421,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   public void refresh() {
     broadcastState();
-  }  
+  }
 
   @Override
   public LeapData onLeapData(LeapData data) {
@@ -570,13 +571,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void setSensorPins(int thumbSensorPin, int indexSensorPin, int majeureSensorPin, int ringFingerSensorPin, int pinkySensorPin) {
     log.info("setSensorPins {} {} {} {} {}", thumbSensorPin, indexSensorPin, majeureSensorPin, ringFingerSensorPin, pinkySensorPin);
     /*
-    thumb.setSensorPin(thumbSensorPin);
-    index.setSensorPin(indexSensorPin);
-    majeure.setSensorPin(majeureSensorPin);
-    ringFinger.setSensorPin(ringFingerSensorPin);
-    pinky.setSensorPin(pinkySensorPin);
-    */
-  }  
+     * thumb.setSensorPin(thumbSensorPin); index.setSensorPin(indexSensorPin);
+     * majeure.setSensorPin(majeureSensorPin);
+     * ringFinger.setSensorPin(ringFingerSensorPin);
+     * pinky.setSensorPin(pinkySensorPin);
+     */
+  }
 
   public void setRest(double thumb, double index, double majeure, double ringFinger, double pinky) {
     setRest(thumb, index, majeure, ringFinger, pinky, null);
@@ -606,7 +606,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    
+
     this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);
     this.majeure.setSpeed(majeure);
@@ -688,7 +688,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   public void victory() {
     moveTo(150.0, 0.0, 0.0, 180.0, 180.0, 90.0);
   }
-  
+
   public void waitTargetPos() {
     thumb.waitTargetPos();
     index.waitTargetPos();
@@ -697,7 +697,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     pinky.waitTargetPos();
     wrist.waitTargetPos();
   }
-  
+
   @Override
   public void detach(String controllerName) {
     // TODO Auto-generated method stub
@@ -716,6 +716,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       ret.add(controller.getName());
     }
     return ret;
-  }  
+  }
 
 }
