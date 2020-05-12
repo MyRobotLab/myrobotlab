@@ -6,7 +6,7 @@ Language
 <div class="row">
     <div class="form-inline col-md-6">    
     <!-- {{locale}} -->
-            <ui-select ng-model="locale.selected" ng-change="msg.setLocale(locale.selected)" theme="bootstrap" style="width: 5em">
+            <ui-select ng-model="locale.selected" ng-change="msg.setAllLocales(locale.selected)" theme="bootstrap" style="width: 5em">
                 <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.value.displayLanguage}}</ui-select-match>
                 <ui-select-choices repeat="value.key as (key, value) in languages | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{value.value.displayLanguage}}&nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
             </ui-select>

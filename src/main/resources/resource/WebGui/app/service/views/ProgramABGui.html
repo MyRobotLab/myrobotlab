@@ -113,11 +113,12 @@
         &nbsp;<br/>
 
 <div ng-hide="status == null">
-						<span class="label label-info">info</span>
-                        {{status.name}} : {{status.key}} : {{status.detail}}                                  
-                        <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
+						<div class="row label label-info col-md-12">info
+                        {{status.detail}}                                  
+                        <button type="button" class="close" data-ng-click="status = null" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
+                        </div>
 </div>
 
 
