@@ -278,10 +278,6 @@ public class MrlComm implements SerialDataListener {
     // wire the serial port through to virtual message
     // TODO: consider creating a new virtual message instead?
     virtualMsg.begin(serial);
-    // subscribe to the onBytes from the serial port!
-    // TODO: is this the right place to add the listener?
-    // Or should this be handled elsewhere / outside of this method.
-    serial.addByteListener(this);
   }
 
   // > customMsg/[] msg

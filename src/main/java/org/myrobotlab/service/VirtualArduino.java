@@ -116,6 +116,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
       log.info("Starting up virtual arduino thread.");
       ino.getMrlComm().softReset();
+      
+      // add our byte listener...  TODO: push this up farther?
+      virtual.getSerial().addByteListener(virtual);
       ino.setup();
       // make sure the serial port is up and running ..  perhaps we should add a small sleep in here?
       
@@ -173,7 +176,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       uart.disconnect();
     }
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-    
+    // at this point we should also register ourselves as the byteListener for this uart.
+    uart.addByteListener(this);
   }
 
   static public ServiceType getMetaData() {
@@ -224,24 +228,26 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   @Override
   public void startService() {
     super.startService();
-    if (board == null) {
-      board = "uno";
-    }
-    // start the serial service that talks to our uart/DCE.
+    // first thing's first. let's create a virtual serial port for the uart/dce side 
     try {
       // create our uart serial port service.
       uart = (Serial) startPeer("uart");
       // create the virtual port for our port name and connect it.
       uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+      // TODO: can we move all this into the connect method?
+      uart.addByteListener(this);
     } catch (IOException e) {
       log.error("Failed to create virtual uart port!", e);
       return;
     }
-    // The virtual arduino service listens for bytes from the uart.
-    uart.addByteListener(this.getName());
-    log.info("uart {}", uart);
+    // second thing.. let's setup an mrlcommino.
     ino = new MrlCommIno(this);
     mrlComm = ino.getMrlComm();
+    
+    if (board == null) {
+      setBoardUno();
+    }
+    
     boardInfo = mrlComm.boardInfo;
     // TODO: make sure we obey what the board type is supposed to be!
     setBoard(Arduino.BOARD_TYPE_UNO);
@@ -493,10 +499,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public void onBytes(byte[] bytes) {
-    // TODO: why isn't this covered in the unit test?
-    // if we get bytes from the uart (DCE side) of the port.. we need to push them down to the virtual message.
-    log.info("VIRTUAL ARDUINO ON BYTES {} !!!!!!!!!!!!!!!!!!!!!!!!!!", bytes);
-    // This should relay to MrlComm .. which will push it down to virtualMsg
+    // It's the responsibility of VirtualArduino to relay the bytes down to mrlComm.
     mrlComm.onBytes(bytes);
   }
 
