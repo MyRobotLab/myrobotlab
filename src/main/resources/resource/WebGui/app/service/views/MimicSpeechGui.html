@@ -1,21 +1,28 @@
-{{service.voice.name}}
-
-<input type="text" class="form-control" ng-model="text"/>
-
-<nav class="navbar >
-    <div class="dropdown navbar-nav">
-        <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+<div class="row">
+    <span class="col-lg-6">
+        <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
+        <span ng-show="!service.ready">Mimic only currently supported on Windows</span>
+    </span>
+</div>
+<div class="row">
+    <ui-select class="col-lg-3 pull-left" ng-model="newVoice.selected" ng-change="msg.setVoice(newVoice.selected.key)" theme="bootstrap" style="width: 15em">
+        <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;voice&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.value.name}} {{$select.selected.value.locale.tag}} {{$select.selected.value.gender}}</ui-select-match>
+        <ui-select-choices repeat="(key, container) in service.voices | filter: $select.search">{{container.value.name}} {{container.value.locale.tag}} {{container.value.gender}}</ui-select-choices>
+    </ui-select>
+    <div class="col-md-4">
+       <form class="form-inline">
+        <input class="form-control" type="text" ng-model="text" ng-enter="speak(text);text=''" placeholder="enter text">
+        <button class="btn btn-default form-control" ng-click="speak(text);text=''">Speak</button>
+        </form>
     </div>
-
-    <div class="dropdown navbar-nav">
-        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">voices &nbsp;<span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-            <li ng-repeat="voice in service.voices">
-                <a href="#" ng-click="setVoice(voice)">{{voice.name}} {{voice.gender}} {{voice.local}}  {{voice.description}}</a>
-            </li>            
-        </ul>
+</div>
+<div class="row" ng-show="false">
+    <div class="col-lg-12">
+        <form class="form-inline">
+            <input class="form-control" type="password" ng-model="key" placeholder="aws polly key" title="key name to identify secret">
+            <input class="form-control" type="password" ng-model="secret" placeholder="aws polly secret" title="Polly key and secret ">
+            <button class="btn btn-default" ng-click="msg.setKeys(key, secret);">set keys</button>
+            <a href="https://docs.aws.amazon.com/polly/latest/dg/authentication-and-access-control.html">how to get keys</a>
+        </form>
     </div>
-</nav>
-
-
+</div>

@@ -2,13 +2,9 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -31,6 +27,7 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
 
   public MimicSpeech(String n, String id) {
     super(n, id);
+    setReady(Platform.getLocalInstance().isWindows());
   }
 
   static public ServiceType getMetaData() {
@@ -94,7 +91,12 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     // Voices available: kal awb_time kal16 awb rms slt ap
 
     // mimic -t "Hello" -voice slt
-    addVoice("Henry", "male", "en", "slt"); // Japanese
+    if (Platform.getLocalInstance().isWindows()) {
+      addVoice("Henry", "male", "en", "slt"); // Japanese
+    } else {
+      setReady(false);
+      error("MimicSpeech is currently only supported on Windows");
+    }
   }
 
 }

@@ -38,7 +38,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(WebkitSpeechRecognition.class.getCanonicalName());
+    ServiceType meta = new ServiceType(WebkitSpeechRecognition.class);
     meta.addDescription("Speech recognition using Google Chrome webkit");
     meta.addCategory("speech recognition");
     return meta;
@@ -48,6 +48,9 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
     LoggingFactory.init(Level.INFO);
 
     // Runtime.start("gui", "SwingGui");
+    Runtime runtime = Runtime.getInstance();
+    runtime.setLocale("de");
+    
     WebkitSpeechRecognition webkit = (WebkitSpeechRecognition) Runtime.start("webkit", "WebkitSpeechRecognition");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
