@@ -1001,7 +1001,7 @@
   <dependency>
     <groupId>yolo</groupId>
     <artifactId>yolov2</artifactId>
-    <version>v2</version>
+    <version>0.0.2</version>
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
