@@ -7,10 +7,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     // init
     $scope.controller = null
-    $scope.pinsList = []
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
+    $scope.selectedPin = null
 
     $scope.possibleController = null
     $scope.testTime = 300
@@ -26,6 +26,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     // TODO - should be able to build this based on
     // current selection of controller
     $scope.pinList = []
+    for (let i = 0; i < 58; ++i){
+        $scope.pinList.push(i)
+    }
+
+
     //slider config with callbacks
     $scope.pos = {
         value: 90,
@@ -111,7 +116,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
         $scope.limits.minValue = service.mapper.minIn
         $scope.limits.maxValue = service.mapper.maxIn
-        $scope.pinList = service.pinList
+        // $scope.pinList = service.pinList
     }
 
     this.onMsg = function(inMsg) {

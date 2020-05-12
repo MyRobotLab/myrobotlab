@@ -33,12 +33,9 @@
                             Pin
                           </td>
                           <td>
-                            <select class="form-control">
-                              <option value="" selected>1</option>
-                              <option value="">2</option>
-                              <option value="">3</option>
-                              <option value="">4</option>
-                            </select>
+                              <select class="form-control" ng-model="selectedPin" ng-options="item for item in pinList">
+                                 <option value="item">{{item}}</option>
+                              </select>
                           </td>
                           <td>
                             Enable
