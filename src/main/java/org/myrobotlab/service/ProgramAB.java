@@ -258,7 +258,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
     invoke("publishText", response.msg);
-    info("to: %s - %s", userName, response);
+    
     return response;
   }
 
@@ -268,12 +268,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   private BotInfo getBotInfo(String botName) {
     if (botName == null) {
-      log.error("getBotinfo(null) not valid");
+      error("getBotinfo(null) not valid");
       return null;
     }
     BotInfo botInfo = bots.get(botName);
     if (botInfo == null) {
-      log.error("botInfo({}) is null", botName);
+      error("botInfo(%s) is null", botName);
       return null;
     }
 
@@ -493,6 +493,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public void reloadSession(String userName, String botName) throws IOException {
     Session session = getSession(userName, botName);
     session.reload();
+    info("reloaded session %s <-> %s ", userName, botName);
   }
 
   /**

@@ -205,7 +205,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     meta.addCategory("display");
 
     meta.includeServiceInOneJar(true);
-    meta.addDependency("org.atmosphere", "nettosphere", "3.0.13");
+    meta.addDependency("org.atmosphere", "nettosphere", "3.2.1");
     meta.addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
 
     // MAKE NOTE !!! - we currently distribute myrobotlab.jar with a webgui
@@ -518,6 +518,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      * .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
      */
 
+    configBuilder.maxWebSocketFrameAggregatorContentLength(1048576);
     configBuilder.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport");
     configBuilder.initParam(ApplicationConfig.SCAN_CLASSPATH, "false");
     configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
