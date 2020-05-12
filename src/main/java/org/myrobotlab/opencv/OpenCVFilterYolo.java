@@ -79,41 +79,16 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
     this(null);
   }
 
-  private void checkFiles() {
-    log.info("checkFiles - begin");
-    File yoloHome = new File(darknetHome);
-    if (!yoloHome.exists()) {
-      yoloHome.mkdirs();
-    }
-
-    // now we need to check the files in the directory exist.
-    // 3 files to check for
-    File modelConfigFile = new File(darknetHome + File.separator + modelConfig);
-    File modelWeightsFile = new File(darknetHome + File.separator + modelWeights);
-    // TODO: localize this? why not!
-    File modelNamesFile = new File(darknetHome + File.separator + modelNames);
-
-    if (!modelConfigFile.exists()) {
-      log.error("model does not exists {}", modelConfigFile.getAbsolutePath());
-    }
-    if (!modelWeightsFile.exists()) {
-      log.error("weights do not exist {}", modelWeightsFile.getAbsolutePath());
-    }
-    if (!modelNamesFile.exists()) {
-      log.error("names do not exist {}", modelWeightsFile.getAbsolutePath());
-    }
-    log.info("checkFiles - end");
-  }
-
   private void loadYolo() {
     log.info("loadYolo - begin");
 
-    // If the model isn't there, we should download it and cache it.
-    log.info("Staritng yolo download verification");
-    checkFiles();
-    log.info("Completed downloading yolo model");
-    net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
-    log.info("Loaded yolo darknet model to opencv");
+    try {
+      net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
+      log.info("Loaded yolo darknet model to opencv");
+    } catch (Exception e) {
+      log.error("readNetFromDarknet could not read", e);
+      return;
+    }
     // load the class names
     try {
       classNames = loadClassNames(darknetHome + File.separator + modelNames);
