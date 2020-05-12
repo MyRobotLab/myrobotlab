@@ -436,17 +436,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (isSsl) {
         // String cipherSuite = "TLS_ECDH_anon_WITH_AES_128_CBC_SHA";
         // String cipherSuite = "TLS_RSA_WITH_AES_256_CBC_SHA256";
-        String [] cipherSuite= {"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256","TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_128_GCM_SHA256","TLS_DHE_DSS_WITH_AES_128_GCM_SHA256","TLS_DHE_DSS_WITH_AES_256_GCM_SHA384","TLS_DHE_RSA_WITH_AES_256_GCM_SHA384","TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256","TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA","TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384","TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384","TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA","TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA","TLS_DHE_RSA_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA256","TLS_DHE_RSA_WITH_AES_256_CBC_SHA256","TLS_DHE_DSS_WITH_AES_256_CBC_SHA","TLS_DHE_RSA_WITH_AES_256_CBC_SHA","TLS_RSA_WITH_AES_128_GCM_SHA256","TLS_RSA_WITH_AES_256_GCM_SHA384","TLS_RSA_WITH_AES_128_CBC_SHA256","TLS_RSA_WITH_AES_256_CBC_SHA256","TLS_RSA_WITH_AES_128_CBC_SHA","TLS_RSA_WITH_AES_256_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA256","TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA","TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA","TLS_SRP_SHA_WITH_AES_128_CBC_SHA","TLS_DHE_DSS_WITH_AES_128_CBC_SHA","TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA","TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA","TLS_RSA_WITH_CAMELLIA_256_CBC_SHA","TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA","TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA","TLS_RSA_WITH_CAMELLIA_128_CBC_SHA"};
+        String[] cipherSuite = { "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_128_GCM_SHA256", "TLS_DHE_DSS_WITH_AES_256_GCM_SHA384",
+            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", "TLS_DHE_RSA_WITH_AES_256_CBC_SHA", "TLS_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_RSA_WITH_AES_256_GCM_SHA384", "TLS_RSA_WITH_AES_128_CBC_SHA256", "TLS_RSA_WITH_AES_256_CBC_SHA256", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256", "TLS_SRP_SHA_DSS_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_RSA_WITH_AES_128_CBC_SHA", "TLS_SRP_SHA_WITH_AES_128_CBC_SHA",
+            "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_256_CBC_SHA",
+            "TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA", "TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA", "TLS_RSA_WITH_CAMELLIA_128_CBC_SHA" };
 
-        cipherSuite = new String[] {"TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA","TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"};
+        cipherSuite = new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA", "TLS_DHE_DSS_WITH_AES_256_CBC_SHA256" };
         SelfSignedCertificate ssc = new SelfSignedCertificate();
         SslContext sslCtx = SslContext.newServerContext(ssc.certificate(), ssc.privateKey());
         configBuilder.sslContext(createSSLContext2());// .sslContext(sslCtx);
-        // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2", "SSLv3"});
-
+        // ssl.setEnabledProtocols(new String[] {"TLSv1", "TLSv1.1", "TLSv1.2",
+        // "SSLv3"});
 
         // configBuilder.subProtocols("TLSv1.2");
-        //configBuilder.enabledCipherSuites(cipherSuite);
+        // configBuilder.enabledCipherSuites(cipherSuite);
         configBuilder.enabledCipherSuites(cipherSuite);
       }
     } catch (Exception e) {
@@ -462,7 +471,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // configBuilder.resource("./src/main/resources/resource/InMoov2/resource/WebGui/app");
     // clone InMoov2 at the same level as myrobotlab
 
-    // TODO - spin through dirs ? - look for any exact match for service file and add it as a resource ?
+    // TODO - spin through dirs ? - look for any exact match for service file
+    // and add it as a resource ?
     configBuilder.resource("../InMoov2/resource/WebGui/app");
 
     // for debugging - has higher priority
@@ -473,17 +483,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     configBuilder.resource("./src/main/resources/resource/WebGui");
     // v- this makes http://localhost:8888/Runtime.png worky
     configBuilder.resource("./src/main/resources/resource");
-    
+
     // for future references of resource - keep the html/js reference to
     // "resource/x" not "/resource/x" which breaks moving the app
     // FUTURE !!!
     configBuilder.resource("./src/main/resources");
 
-
     configBuilder.resource("./resource/WebGui/app");
     configBuilder.resource("./resource");
-    
-    
+
     // can't seem to make this work .mappingPath("resource/")
 
     // TO SUPPORT LEGACY - BEGIN
@@ -513,19 +521,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     configBuilder.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport");
     configBuilder.initParam(ApplicationConfig.SCAN_CLASSPATH, "false");
     configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
-    configBuilder.maxChunkContentLength(262144);
-    configBuilder.maxWebSocketFrameSize(262144);
+    configBuilder.maxChunkContentLength(1048576);
+    configBuilder.maxWebSocketFrameSize(1048576);
     // ips
-    
-    /*
-    SSLContext sslContext = createSSLContext();
 
-    if (sslContext != null) {
-      configBuilder.sslContext(sslContext);
-    }
-    // SessionSupport ss = new SessionSupport();
-     * */
-     
+    /*
+     * SSLContext sslContext = createSSLContext();
+     * 
+     * if (sslContext != null) { configBuilder.sslContext(sslContext); } //
+     * SessionSupport ss = new SessionSupport();
+     */
 
     configBuilder.build();
     return configBuilder;
@@ -691,7 +696,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (bodyData != null) {
 
         // decoding 1st pass - decodes the containers
-        Message msg = CodecUtils.fromJson(bodyData, Message.class);
+        Message msg = null;
+        try {
+          msg = CodecUtils.fromJson(bodyData, Message.class);
+        } catch (Exception e) {
+          error(e);
+          return;
+        }
         msg.setProperty("uuid", uuid);
 
         // log.info(String.format(">>> %s", msg));
@@ -933,7 +944,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void onReleased(String serviceName) {
     log.info("released {}", serviceName);
   }
-  
+
   public void onRegistered(Registration r) {
     ServiceInterface si = r.service;
     // new service
@@ -1101,9 +1112,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public void start() {
     try {
-      
+
       log.info("starting webgui service....");
-      
+
       if (port == null) {
         port = 8888;
       }
@@ -1217,21 +1228,23 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "python", "Python", "--invoke", "python", "execFile", "start.py"});
-      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
-      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro"});
-      Runtime.main(new String[] { "--interactive", "--id", "admin"});
-      
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
+      // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
+      // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
+      // "intro", "Intro"});
+      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
-      
+
       for (int i = 0; i < 1000; ++i) {
         webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -1267,8 +1280,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // arduino.connect("/dev/ttyACM0");
 
- 
-
       // Runtime.start("arduino", "Arduino");
       // arduino.connect("COMX");
 
@@ -1282,10 +1293,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void display(String image) {
     // FIXME
     // http/https can be proxied if necessary or even fetched,
-    // but what about "local" files - should they be copied to a temp directory that has webgui access ?
+    // but what about "local" files - should they be copied to a temp directory
+    // that has webgui access ?
     // e.g. copied to /data/WebGui/temp ?
     // send(getName(), "display", image);
-    Message msg = Message.createMessage(getName(), "webgui", "display", new Object[] {image});
+    Message msg = Message.createMessage(getName(), "webgui", "display", new Object[] { image });
     sendRemote(msg);
   }
 
