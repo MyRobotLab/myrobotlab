@@ -70,7 +70,7 @@ public class MrlComm implements SerialDataListener {
    */
   // The mighty device List. This contains all active devices that are attached
   // to the arduino.
-  LinkedList<Device> deviceList = new LinkedList<Device>();
+  volatile LinkedList<Device> deviceList = new LinkedList<Device>();
 
   private int digitalChangeWidth = 20;
   boolean heartbeatEnabled;
@@ -232,6 +232,7 @@ public class MrlComm implements SerialDataListener {
    */
   Device addDevice(Device device) {
     deviceList.add(device);
+    log.info("Added virtual device {}", device);
     return device;
   }
 

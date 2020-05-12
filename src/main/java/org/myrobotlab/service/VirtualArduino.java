@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
@@ -59,10 +58,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    */
   Map<String, PinDefinition> pinMap = null;
   String portName = "COM42";
-  /**
-   * should be ui widgetized
-   */
-  BoardInfo boardInfo;
   /**
    * thread to run the script
    */
@@ -116,21 +111,13 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
       log.info("Starting up virtual arduino thread.");
       ino.getMrlComm().softReset();
-      
       // add our byte listener...  TODO: push this up farther?
       virtual.getSerial().addByteListener(virtual);
       ino.setup();
       // make sure the serial port is up and running ..  perhaps we should add a small sleep in here?
       // TODO: poll the serial device to make sure it's started & connected?
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
       log.info("Starting loop");
       isRunning = true;
-
       while (isRunning) {
         if (isRunning) {
           ino.loop();
@@ -161,17 +148,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
    * Connect to a serial port to the uart/DCE side of a virtual serial port.
    */
   public void connect(String portName) throws IOException {
-    
-    // TODO: remove this method from here!
-    initVirtualArduino();   
-    
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-    
     if (portName == null) {
       log.warn("{}.connect(null) not valid", getName());
       return;
@@ -180,12 +156,34 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       log.info("already connected");
       return;
     }
-    if (uart != null && uart.isConnected()) {
-      uart.disconnect();
+    // create our ino script.  
+    ino = new MrlCommIno(this);
+    // grab a handle to the mrlcomm 
+    mrlComm = ino.getMrlComm();
+    if (board == null) {
+      setBoardUno();
+    }    
+    // update our board info
+    if (runner == null) {
+      runner = new InoScriptRunner(this, ino);
     }
-    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-    // at this point we should also register ourselves as the byteListener for this uart.
+    // register our selves to listen for the bytes 
     uart.addByteListener(this);
+    // connect the DCE/uart port side
+    uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
+    // create a new mrlcommino runner..
+    start();
+    // There is a small race condition. so wait for the runner to actually be started.
+    // TODO: remove this sleep statement, replace with a better lock.
+    while (!runner.isRunning()) {
+      try {
+        Thread.sleep(1);
+      } catch (InterruptedException e) {
+        log.warn("Interrupted virtual arduino.", e);
+        break;
+      }
+    }
+    // at this point we should also register ourselves as the byteListener for this uart.
     // TODO: after this is a good place to start the mrlCommIno runner.. isn't it?
   }
 
@@ -243,43 +241,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     uart = (Serial) startPeer("uart");
   }
 
-  private void initVirtualArduino() {
-    try {
-      // create the virtual port for our port name and connect it.
-      uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
-    } catch (IOException e) {
-      log.error("Failed to create virtual uart port!", e);
-      return;
-    }
-    // TODO: can we move all this into the connect method?
-    uart.addByteListener(this);
-    // second thing.. let's setup an mrlcommino.
-    ino = new MrlCommIno(this);
-    mrlComm = ino.getMrlComm();
-    
-    if (board == null) {
-      setBoardUno();
-    }
-    
-    boardInfo = mrlComm.boardInfo;
-    // TODO: make sure we obey what the board type is supposed to be!
-    setBoard(Arduino.BOARD_TYPE_UNO);
-    if (runner == null) {
-      runner = new InoScriptRunner(this, ino);
-    }
-    start();
-    // There is a small race condition. so wait for the runner to actually be started.
-    // TODO: remove this sleep statement, replace with a better lock.
-    while (!runner.isRunning()) {
-      try {
-        Thread.sleep(1);
-      } catch (InterruptedException e) {
-        log.warn("Interrupted virtual arduino.", e);
-        break;
-      }
-    }
-  }
-
   public void releaseService() {
     if (runner != null) {
       runner.stop();
@@ -324,18 +285,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   @Override
   public void onConnect(String portName) {
     log.info("ON CONNECT CALLED IN VIRTUAL ARDUINO!!!!!!!!!!!!!!!!! PORT NAME:{}", portName);
-    // Ok.. so we've been told to connect.. the uart is connected.. we need to make sure we reset the mrlcommino that is running.
-    if (runner.isRunning()) {
-      // Stop the mrlcomm runner.. and restart it..  we just got a serial port connect.
-      log.info("Stopping mrlcomm runner.");
-      stop();
-    }
-    log.info("starting MRL comm runner.");
-    // TODO: is there a race condition here?
-    mrlComm.softReset();
-    mrlComm.getMsg().publishMrlCommBegin(VirtualMsg.MRLCOMM_VERSION);
-    mrlComm.onConnect(portName);
-    start();
+    // TODO: consider something like restarting the MrlCommIno runner..
     // chain the connect
     invoke("publishConnect", portName);
   }
