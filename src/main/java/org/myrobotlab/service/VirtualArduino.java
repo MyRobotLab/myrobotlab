@@ -493,6 +493,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public void onBytes(byte[] bytes) {
+    // TODO: why isn't this covered in the unit test?
     // if we get bytes from the uart (DCE side) of the port.. we need to push them down to the virtual message.
     log.info("VIRTUAL ARDUINO ON BYTES {} !!!!!!!!!!!!!!!!!!!!!!!!!!", bytes);
     // This should relay to MrlComm .. which will push it down to virtualMsg
