@@ -3475,7 +3475,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return defaultLocalization.get(key);
   }
 
-  public void setAllLocales(String code) {
+  static public void setAllLocales(String code) {
     for (ServiceInterface si : getLocalServices().values()) {
         si.setLocale(code);
     }
