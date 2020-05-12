@@ -3,8 +3,18 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
     var _self = this
     var msg = this.msg
 
+	// new selected voice "container" - since it comes from a map next leaves are
+	// key & value ... value contains the entire voice selected
+    $scope.newVoice = {
+    	selected: null
+    }
+
     this.updateState = function(service) {
 		$scope.service = service
+		if (service.voice){
+			$scope.newVoice.selected = { 'key':service.voice.name, 'value':service.voice }			
+		}
+		$scope.$apply()
 	}
 
     // console.log('mary', $scope.service)
@@ -13,7 +23,6 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
         switch (inMsg.method) {
         case 'onState':
             _self.updateState(inMsg.data[0])
-            $scope.$apply()
             break
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
