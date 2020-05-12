@@ -52,6 +52,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
 
   public VoiceRss(String n, String id) {
     super(n, id);
+    setReady(getKey(VOICERSS_API_KEY) != null);
   }
 
   public Integer getRate() {
@@ -69,50 +70,10 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     this.rate = rate;
   }
 
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-    Runtime.start("gui", "SwingGui");
-    VoiceRss voicerss = (VoiceRss) Runtime.start("voicerss", "VoiceRss");
-
-    // add your api key
-    // use gui to do this, or force it here only ONCE :
-    // speech.setKeys("xxx");
-    // speech.setVoice("en-gb");
-    voicerss.setRate(0);
-
-    // TODO: fix the volume control
-    // speech.setVolume(0);
-    voicerss.speakBlocking("it works, yes I believe it does");
-    voicerss.speakBlocking("yes yes. oh good. excellent!");
-    voicerss.speakBlocking("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
-    voicerss.speakBlocking("I'm afraid I can't do that.");
-    voicerss.speak("I am your R 2 D 2 #R2D2#");
-  }
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    // ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(VoiceRss.class.getCanonicalName());
-    meta.addDescription("VoiceRss speech synthesis service.");
-    meta.addCategory("speech");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "cloud");
-    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.setCloudService(true);
-    meta.addDependency("com.voicerss", "tts", "1.0");
-    return meta;
-  }
-
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception {
-    if (isReady()) {
+
+    try {
       VoiceProvider tts = new VoiceProvider(getKey(VOICERSS_API_KEY));
       String fileName = getLocalFileName(toSpeak);
       VoiceParameters params = new VoiceParameters(URLEncoder.encode(toSpeak, "UTF-8"), getVoice().getVoiceProvider().toString()); // Languages.English_UnitedStates
@@ -124,6 +85,9 @@ public class VoiceRss extends AbstractSpeechSynthesis {
       byte[] b = tts.speech(params);
       FileIO.toFile(fileName, b);
       return new AudioData(fileName);
+    } catch (Exception e) {
+      error("could not retrieve audio file %s", e.getMessage());
+      setReady(false);
     }
     return null;
   }
@@ -163,6 +127,50 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Isabella", "female", "es-mx", "es-mx"); // Spanish (Mexico)
     addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
-
   }
+  
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return ServiceType - returns all the data
+   * 
+   */
+  static public ServiceType getMetaData() {
+    // ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData(VoiceRss.class.getCanonicalName());
+    meta.addDescription("VoiceRss speech synthesis service.");
+    meta.addCategory("speech");
+    meta.setSponsor("moz4r");
+    meta.addCategory("speech", "cloud");
+    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
+    meta.setCloudService(true);
+    meta.addDependency("com.voicerss", "tts", "1.0");
+    return meta;
+  }
+
+  public static void main(String[] args) {
+    LoggingFactory.init(Level.INFO);
+    // Runtime.start("gui", "SwingGui");
+    VoiceRss voicerss = (VoiceRss) Runtime.start("voicerss", "VoiceRss");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+
+    // add your api key
+    // use gui to do this, or force it here only ONCE :
+    // voicerss.setKey(VOICERSS_API_KEY, "xxxx");
+    voicerss.setVoice("en-gb");
+    voicerss.setRate(0);
+
+    // TODO: fix the volume control
+    // speech.setVolume(0);
+    voicerss.speak("it works, yes I believe it does");
+    voicerss.speak("yes yes. oh good. excellent!");
+    voicerss.speak("to be or not to be that is the question, weather tis nobler in the mind to suffer the slings and arrows of ");
+    voicerss.speak("I'm afraid I can't do that.");
+    voicerss.speak("I am your R 2 D 2 #R2D2#");
+  }
+
 }

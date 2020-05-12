@@ -70,6 +70,7 @@ public class Polly extends AbstractSpeechSynthesis {
   public void setKeys(String keyId, String keyIdSecret) {
     setKey(AMAZON_POLLY_USER_KEY, keyId);
     setKey(AMAZON_POLLY_USER_SECRET, keyIdSecret);
+    loadVoices();
   }
 
   /**
@@ -82,6 +83,8 @@ public class Polly extends AbstractSpeechSynthesis {
     if (polly == null) {
       error("cannot load voices - polly not initialized");
       return;
+    } else {
+      setReady(true);
     }
 
     // Create describe voices request.
@@ -95,6 +98,7 @@ public class Polly extends AbstractSpeechSynthesis {
       // stripAccents : Voices with accent seem no worky ( anymore )
       addVoice(StringUtils.stripAccents(awsImpl.getName()), awsImpl.getGender(), awsImpl.getLanguageCode(), awsImpl);
     }
+    broadcastState();
   }
 
   /**
