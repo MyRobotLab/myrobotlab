@@ -59,15 +59,13 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   /**
    * language of search and results
    */
-  Locale locale = null;
-
+  
   protected List<String> excludeTextFilter = new ArrayList<String>();
 
   public GoogleSearch(String n, String id) {
     super(n, id);
     Runtime runtime = Runtime.getInstance();
     runtime.getLanguage();
-    locale = runtime.getLocale();
     excludeTextFilter.add("Wikipedia");
     setLowerCase();
   }
@@ -90,12 +88,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   public void clearFilters() {
     excludeTextFilter.clear();
-  }
-
-  @Override
-  public void setLocale(String code) {
-    locale = new Locale(code);
-    log.info("language is {}", code);
   }
 
   /**
@@ -381,16 +373,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     }
     return ret;
 
-  }
-
-  @Override
-  public String getLanguage() {
-    return locale.getLanguage();
-  }
-
-  @Override
-  public Locale getLocale() {
-    return locale;
   }
 
   @Override
