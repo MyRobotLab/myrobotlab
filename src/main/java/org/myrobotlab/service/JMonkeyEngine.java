@@ -179,19 +179,18 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   boolean autoAttach = true;
 
-  // transient BulletAppState bulletAppState;
-
   final static String CAMERA = "camera";
+
   final static String ROOT = "root";
 
   transient Node camera = new Node(CAMERA);
 
-  transient Vector3f cameraDirection = new Vector3f();
-
   transient Camera cameraSettings;
 
   transient CameraNode camNode;
+  
   boolean ctrlLeftPressed = false;
+  
   String defaultAppType = "Jme3App";
 
   long deltaMs;
@@ -1876,6 +1875,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
     // app = jme.getApp();
     guiNode = app.getGuiNode();
+    // String x = guiNode.getName();
+    // guiNode.setName("menu");
     // Initialize the globals access so that the default
     // components can find what they need.
     GuiGlobals.initialize(app);
@@ -2262,6 +2263,22 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
+      
+      jme.addBox("box", 1.0, 1.0, 1.0, "fc8803", true);
+      jme.getNode(CAMERA).move(3, 1, 4);
+      jme.cameraLookAt("box");
+      jme.rotateOnAxis("camera", "y", 220.0, 1);
+      Node m = jme.getNode("Gui Node");
+      // jme.getNode("Gui Node").move(1,1,1);
+      jme.getMenuNode().move(1.0f, 3.0f, 2.0f);
+
+      
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.setPort(8887);
@@ -2274,15 +2291,9 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       // left.connect("COM4");
 
       Runtime.start("i01.head.jaw", "Servo");
-      
-
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
+            
       jme.setRotation("i01.head.jaw", "x");
 
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       for (int i = 0; i < 100; ++i) {
         jme.rotateOnAxis("i01.head.jaw", "x", 100);
@@ -2379,6 +2390,14 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+  
+  public Node getMenuNode() {
+    return guiNode;
+  }
+  
+  public void showMenu(boolean b) {
+    // TODO - implement !!!
   }
 
   @Override
