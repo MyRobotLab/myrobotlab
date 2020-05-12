@@ -1,4 +1,5 @@
-angular.module('mrlapp.service.MimicSpeechGui', []).controller('MimicSpeechGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
+angular.module('mrlapp.service.VoiceRssGui', []).controller('VoiceRssGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
+    $log.info('VoiceRssGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -44,6 +45,5 @@ angular.module('mrlapp.service.MimicSpeechGui', []).controller('MimicSpeechGuiCt
     }
 
     msg.subscribe(this)
-
 }
-]);
+])
