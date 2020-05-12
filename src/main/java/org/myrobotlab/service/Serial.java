@@ -1215,7 +1215,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   @Override
   public void flush() {
-
   }
 
   public int getRate() {

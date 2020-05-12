@@ -33,41 +33,31 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   @Override
   public void testService() throws Exception {
     
-    
     // our local msg handle that parses the stream from the virtual arduino
     // skip invoking in unit tests, instead directly call the callbacks to make unit tests easier.
     msg.setInvoke(false);
     // our service to test
     VirtualArduino va = (VirtualArduino)service;
-
-    // let's make sure the virtual arduino doesn't connect to a null port
-    // va.connect(null);
-    // assertFalse(va.isConnected());
-    
     // connect to the test uart/DCE port
     va.connect(testPort);
-    Thread.sleep(100);
     // virtual arduino listens on virtual port + .UART as the DCE side of the interface.
     assertEquals(testPort + ".UART", va.getPortName());
-    // TODO: we should not invoke from virtual test land.
-    // va.getMrlComm().getMsg().setInvoke(false);
-    // create a serial port to read the DTE side of the virtual serial port.
     // some basic validation stuff on the va..
     assertNotNull(va.getPinList()); 
     assertNotNull(va.board);
-    
     
     Serial serial = (Serial)Runtime.start("serial", "Serial");
     // attach our test as a byte listener for the onBytes call.
     serial.addByteListener(this);
     // connect to the actual DTE side of the virtual serial port.
     serial.connect(testPort);
+    Thread.sleep(100);
     // TODO: We should probably wait for the begin message to be seen from the virtual arduino here before proceeding.
     // servo attach method being written to the DTE side of the virtual port
     serial.write(msg.servoAttach(0, 7, 180, -1, "s1"));
     // TODO: there's a race condition here.. we seem to fail without a small sleep here!!!!
     // we need to let the virtual arduinos catch up and actually add the device.
-    Thread.sleep(200);
+    Thread.sleep(50);
     // get a handle to the virtual device that we just attached.
     Device d = va.getDevice(0);
     // validate the device exists.
@@ -77,25 +67,28 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
     serial.write(msg.servoMoveToMicroseconds(0, 1500));
     MrlServo s = (MrlServo)d;
     // TODO: there's a race condition here.  it takes a moment for the virtual device to respond.
-    Thread.sleep(100);
+    Thread.sleep(50);
     assertEquals(s.targetPosUs, 1500);
     serial.write(msg.servoSetVelocity(0, 22));
-    Thread.sleep(100);
+    Thread.sleep(50);
     assertEquals(s.velocity, 22);
     
     // other Servo methods to test.
     serial.write(msg.servoAttachPin(0, 11));
-    Thread.sleep(100);
+    Thread.sleep(50);
     assertEquals(11, s.pin);
-    // TODO: we could test other virtual devices.
     
     serial.write(msg.servoDetachPin(0));
-    Thread.sleep(100);
+    Thread.sleep(50);
     assertFalse(s.enabled);
     
     va.disconnect();
-    Thread.sleep(100);
+    Thread.sleep(50);
     assertFalse(va.isConnected());
+    
+    // TODO: we could test other virtual devices.    
+    // what else can we do?
+    
   }
 
   // These are all of the messages that the MrlComm/MrlCommIno can publish back to the arduino service.
