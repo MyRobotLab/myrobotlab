@@ -11,6 +11,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.currentUserName = ''
     $scope.utterance = ''
     $scope.currentSessionKey = null
+    $scope.status = null
 
     $scope.currentBotImage = null
 
@@ -67,6 +68,11 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         let data = inMsg.data[0]
 
         switch (inMsg.method) {
+
+        case 'onStatus':
+            $scope.status = data;
+            $scope.$apply()
+            break
 
         case 'onBotImage':
             $scope.currentBotImage = data;

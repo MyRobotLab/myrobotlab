@@ -1064,13 +1064,31 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
     String ret = null;
     try {
-      FileIO.toString(f);
+      ret = FileIO.toString(f);
     } catch (IOException e) {
       log.error("getAimlFile threw", e);
     }    
     return ret;
   }
 
+  public void saveAimlFile(String botName, String filename, String data) {
+    BotInfo botInfo = getBotInfo(botName);
+    if (botInfo == null) {
+      error("cannot get bot %s", botName);
+      return;
+    }
+    
+    File f = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), "aiml" + fs + filename));
+    
+    try {
+      FileIO.toFile(f, data.getBytes("UTF8"));
+      info("saved %s", filename);
+    } catch (IOException e) {
+      log.error("getAimlFile threw", e);
+    }    
+  }
+
+  
   public static void main(String args[]) {
     LoggingFactory.init("INFO");
     // Runtime.start("gui", "SwingGui");
