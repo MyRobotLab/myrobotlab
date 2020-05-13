@@ -21,20 +21,20 @@
 
                         <tr>
                           <td>
-                            <select class="form-control" ng-model="selectedLanguage" ng-change="setLanguage()">
+                            <select class="form-control" ng-model="selectedController" ng-change="setLanguage()">
                               <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
                             </select>
                           <td>
-                            <button class="btn btn-default" ng-click="attachController()">attach</button>
+                            <button class="btn btn-default" ng-click="attachController(selectedController, selectedPin)">attach</button>
                           <td>
                             <button class="btn btn-default">Remove</button>
                           </td>
                           <td>
                             Pin
                           </td>
-                          <td>
+                          <td>selected {{selectedPin}}
                               <select class="form-control" ng-model="selectedPin" ng-options="item for item in pinList">
-                                 <option value="item">{{item}}</option>
+                                 <option>{{item}}</option>
                               </select>
                           </td>
                           <td>
