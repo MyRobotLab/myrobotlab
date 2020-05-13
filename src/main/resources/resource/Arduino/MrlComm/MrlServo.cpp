@@ -91,15 +91,14 @@ void MrlServo::update() {
         // don't over shoot the target.
         currentPosUs = targetPosUs;
       }
-      if (!previousCurrentPosUs != (int)currentPosUs) {
+      // There was a change in the currentPosition
+      if (previousCurrentPosUs != (int)currentPosUs) {
         servo->writeMicroseconds((int)currentPosUs);
         publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
-        // if we're not sweeping, then we are stopped here.
-        if (!isSweeping) {
-          if ((int)currentPosUs == targetPosUs) {
+        // if we're not sweeping and we reached the target position., then we are stopped here.
+        if (!isSweeping && ((int)currentPosUs == targetPosUs)) {
             publishServoEvent(SERVO_EVENT_STOPPED);
             isMoving = false;
-          }
         }
       }
     } else {
