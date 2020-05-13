@@ -10,7 +10,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
-    $scope.selectedPin = null
 
     $scope.possibleController = null
     $scope.testTime = 300
@@ -193,7 +192,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         $scope.selectedController = name
         $scope.controller = name
     }
-    $scope.attachController = function() {
+    $scope.attachController = function(controller, pin) {
         $log.info("attachController")
 
         // FIXME - there needs to be some updates to handle the complexity of taking updates from the servo vs
@@ -202,7 +201,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         let pos = $scope.pos.value;
         // currently taken from the slider's value :P - not good if the slider's value is not good :(
 
-        msg.send('attach', $scope.possibleController, $scope.pin, pos)
+        msg.send('attach', controller, pin)
         // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }
