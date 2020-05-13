@@ -25,6 +25,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -229,7 +230,7 @@ public class Arduino extends AbstractMicrocontroller
 
   int mrlCommBegin = 0;
 
-  long syncStartTypeTs = System.currentTimeMillis();
+  private volatile boolean syncInProgress = false;
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -598,17 +599,19 @@ public class Arduino extends AbstractMicrocontroller
    * sync our device list with mrlcomm
    */
   public void sync() {
-    long now = System.currentTimeMillis();
-    if (now - syncStartTypeTs < 5000) {
-      log.error("===== we are in the middle of synching ... ==== talk to us in {} ms", 5000 - (now - syncStartTypeTs));
+    if (syncInProgress) {
+      log.warn("Alreadying calling sync!  Skipping this request");
       return;
     }
-    syncStartTypeTs = System.currentTimeMillis();
+    syncInProgress = true;
     log.warn("================================ sync !!! ==============================");
     try {
-      
       for (DeviceMapping device : deviceList.values()) {
-        reattach(device);
+        // invoke("reattach", device);
+        send(getName(), "reattach", device);
+       //  Thread.sleep(1000);
+
+       // reattach(device);
       }
 
       List<PinDefinition> list = getPinList();
@@ -621,6 +624,9 @@ public class Arduino extends AbstractMicrocontroller
     } catch (Exception e) {
       log.error("sync threw", e);
     }
+    syncInProgress = false;
+    log.info("Sync completed");
+
   }
 
   // > customMsg/[] msg
