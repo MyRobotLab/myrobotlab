@@ -607,9 +607,6 @@ public class Arduino extends AbstractMicrocontroller
     log.warn("================================ sync !!! ==============================");
     try {
       for (DeviceMapping device : deviceList.values()) {
-        // invoke("reattach", device);
-       //  send(getName(), "reattach", device);
-       //  Thread.sleep(1000);
        reattach(device);
       }
 
