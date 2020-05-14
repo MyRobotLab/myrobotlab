@@ -1418,6 +1418,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	public InMoov2Arm startLeftArm() {
 		return startLeftArm(null);
 	}
+	
+	public InMoov2Arm startLeftArm(String port, String type) throws Exception {
+                leftArm = startArm(LEFT, port, type);
+                return leftArm;
+        }
 
 	public InMoov2Arm startLeftArm(String port) {
 		// log.warn(InMoov.buildDNA(myKey, serviceClass))
