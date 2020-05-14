@@ -345,7 +345,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
           // BEGIN STANDARDIZE SUPERVISORS IMAGES INTO CACHE_DIR
           IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(ipImg, templateWidth, templateHeight);
 
-          IplImage copy = cvCreateImage(new CvSize(templateWidth, templateHeight), ipImg.depth(), ipImg.nChannels());
+          CvSize sz = new CvSize();
+          sz.width(templateWidth).height(templateHeight);
+          IplImage copy = cvCreateImage(sz, ipImg.depth(), ipImg.nChannels());
           // cvCopy(resizedImage, copy, null);
           cvSetZero(copy);
           IplImage merged = copier.copy(resizedImage, copy);
@@ -602,7 +604,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               // BOXES
               // this is the full data copy (color - original size - etc...)
               cvSetImageROI(image, r);
-              IplImage origBB = cvCreateImage(new CvSize(r.width(), r.height()), image.depth(), image.nChannels());
+              CvSize sz = new CvSize();
+              sz.width(r.width()).height(r.height());
+              IplImage origBB = cvCreateImage(sz, image.depth(), image.nChannels());
               cvCopy(image, origBB, null); // roi vs mask ?
 
               /**
@@ -622,7 +626,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
 
               // must "reset" ROI - seems to be "global" memory - affect
               // subsequent searches
-              r = new CvRect(0, 0, image.width(), image.width());
+              r = new CvRect();
+              r.x(0).y(0).width(image.width()).height(image.width());
               cvSetImageROI(image, r);
 
               // ====== BEGIN AUGMENT RESIZE FILTER TO DUMP CROPPED BOUNDING
@@ -634,8 +639,9 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               IplImage gray = cvCreateImage(origBB.cvSize(), 8, 1);
 
               IplImage resizedImage = OpenCVFilterResize.resizeImageMaintainAspect(gray, templateWidth, templateHeight);
-
-              IplImage template = cvCreateImage(new CvSize(templateWidth, templateHeight), gray.depth(), gray.nChannels());
+              CvSize sz2 = new CvSize();
+              sz2.width(templateWidth).height(templateHeight);
+              IplImage template = cvCreateImage(sz2, gray.depth(), gray.nChannels());
               // cvCopy(resizedImage, copy, null);
               cvSetZero(template);
               IplImage merged = copier.copy(resizedImage, template);

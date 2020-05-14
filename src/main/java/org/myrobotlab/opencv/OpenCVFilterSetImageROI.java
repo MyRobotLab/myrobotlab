@@ -54,7 +54,8 @@ public class OpenCVFilterSetImageROI extends OpenCVFilter {
   }
 
   public void setROI(int x, int y, int width, int height) {
-    rect = new CvRect(x, y, width, height);
+    rect = new CvRect();
+    rect.x(x).y(y).width(width).height(height);
   }
 
   @Override

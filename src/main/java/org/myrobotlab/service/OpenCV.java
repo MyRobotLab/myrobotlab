@@ -396,10 +396,10 @@ public class OpenCV extends AbstractComputerVision {
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
 
-    String javaCvVersion = "1.5.2";
+    String javaCvVersion = "1.5.3";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
-
+    
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {
