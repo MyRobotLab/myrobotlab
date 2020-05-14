@@ -1419,18 +1419,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 		return startLeftArm(null);
 	}
 	
-	public InMoov2Arm startLeftArm(String port, String type) throws Exception {
-		return startLeftArm(port, null);
-        }
-
-	public InMoov2Arm startLeftArm(String port) {
+	public InMoov2Arm startLeftArm(String port) throws Exception {
+		  return startLeftArm(port, null, null, null, null);
+	}
+	
+	public InMoov2Arm startLeftArm(String port, String type, Integer leftBicepPin, Integer leftOmoplatePin, Integer leftRotatePin, Integer leftShoulderPin) {
 		// log.warn(InMoov.buildDNA(myKey, serviceClass))
 		// speakBlocking(get("STARTINGHEAD") + " " + port);
 		// ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
-
 		speakBlocking(get("STARTINGLEFTARM"));
 		leftArm = (InMoov2Arm) startPeer("leftArm");
 		isLeftArmActivated = true;
+		if (leftOmoplatePin != null) {
+			leftArm.setPins(leftOmoplatePin, leftShoulderPin, leftRotatePin, leftBicepPin);
+		}
 
 		if (port != null) {
 			try {
