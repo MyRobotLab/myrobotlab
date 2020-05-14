@@ -93,25 +93,32 @@ public class MrlServo extends Device implements VirtualServo {
         if (isSweeping) {
           step = sweepStep;
         }
-        if (velocity < 0) { // when velocity < 0, it mean full speed ahead
+        if (velocity < 0) { 
+          // when velocity < 0, it mean full speed ahead
           step = targetPosUs - (int) currentPosUs;
-        } else if (currentPosUs > targetPosUs) {
+        } 
+        if (currentPosUs > targetPosUs) {
+          // check the direction of the update moving forward or backwards
           step *= -1;
         }
         int previousCurrentPosUs = (int) currentPosUs;
         currentPosUs += step;
         if ((step > 0.0 && (int) currentPosUs > targetPosUs) || (step < 0.0 && (int) currentPosUs < targetPosUs)) {
+          // don't over shoot the target.
           currentPosUs = targetPosUs;
         }
-        if (!(previousCurrentPosUs == (int) currentPosUs)) {
+        // There was a change in the currentPosition
+        if (previousCurrentPosUs != (int) currentPosUs) {
           writeMicroseconds((int) currentPosUs);
-          if ((int) currentPosUs == targetPosUs) {
+          publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+          if (!isSweeping && ((int) currentPosUs == targetPosUs)) {
             publishServoEvent(SERVO_EVENT_STOPPED);
-          } else {
-            publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+            isMoving = false;
           }
         }
       } else {
+        // current position is target position.
+        // if we're sweeping, flip our target position
         if (isSweeping) {
           if (targetPosUs == minUs) {
             targetPosUs = maxUs;
@@ -120,6 +127,7 @@ public class MrlServo extends Device implements VirtualServo {
           }
           sweepStep *= -1;
         } else {
+          // if we're not sweeping, we have arrived at our final destination.
           isMoving = false;
           publishServoEvent(SERVO_EVENT_STOPPED);
         }
@@ -132,8 +140,6 @@ public class MrlServo extends Device implements VirtualServo {
     isMoving = true;
     lastUpdate = millis();
     moveStart = lastUpdate;
-    publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
-    log.info("servo {} -> moveToMicroseconds {}", id, posUs);
   }
 
   void startSweep(int minUs, int maxUs, int step) {
@@ -175,7 +181,7 @@ public class MrlServo extends Device implements VirtualServo {
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
+    // TODO: give the servo a name
     return null;
   }
 

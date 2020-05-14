@@ -39,6 +39,7 @@ import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -67,11 +68,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public final static Integer BAUD_38400 = 38400;
   public final static Integer BAUD_57600 = 57600;
   public final static Integer BAUD_115200 = 115200;
-
-  /**
-   * deprecated hardware library
-   */
-  final public static String HARDWARE_LIBRARY_RXTX = "org.myrobotlab.serial.PortRXTX";
 
   /**
    * different hardware library - hotspot only
@@ -193,15 +189,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   
   transient TcpSerialHub tcpSerialHub = new TcpSerialHub();
 
-  public static String bytesToHex(byte[] bytes) {
-    char[] hexChars = new char[bytes.length * 2];
-    for (int j = 0; j < bytes.length; j++) {
-      int v = bytes[j] & 0xFF;
-      hexChars[j * 2] = hexArray[v >>> 4];
-      hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-    }
-    return new String(hexChars);
-  }
+
 
   /**
    * list of RX listeners - if "local" they will be immediately called back by
@@ -263,7 +251,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public void addByteListener(SerialDataListener listener) {
-    addByteListener(listener.getName());
+    log.info("Adding a Byte listener... {} publishes to {}", getName(), listener.getName());
+    listeners.put(listener.getName(), listener);
   }
 
   /**
@@ -279,6 +268,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * @param name
    */
   public void addByteListener(String name) {
+    log.info("Add Byte Listener for Name {}", name);
     ServiceInterface si = Runtime.getService(name);
     
     if (si == null) {
@@ -288,10 +278,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
     if (si != null && SerialDataListener.class.isAssignableFrom(si.getClass()) && si.isLocal()) {
       // local optimization
-      listeners.put(si.getName(), (SerialDataListener) si);
+      addByteListener((SerialDataListener) si);
     } else {
+      // TODO: review this section here..  we might have double publishing going on.
       // pub sub
       addListener("publishRX", name, "onByte");
+      addListener("publishBytes", name, "onBytes");
       addListener("publishConnect", name, "onConnect");
       addListener("publishDisconnect", name, "onDisconnect");
     }
@@ -579,10 +571,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (uart == null) {
       uart = (Serial) Runtime.start(String.format("%s.UART", myPort.replace("/", "_")), "Serial");
     }
-
     uart.connectPort(uPort, uart);
-
     log.info("connectToVirtualUart - creating uart {} <--> {}", myPort, uartPort);
+    // returning the serial service that is connected to the DCE side of the virtual port.
     return uart;
   }
 
@@ -638,7 +629,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       return HARDWARE_LIBRARY_ANDROID_BLUETOOTH;
     } else {
       return HARDWARE_LIBRARY_JSSC;
-      // return HARDWARE_LIBRARY_RXTX; buh bye !!
     }
   }
 
@@ -742,6 +732,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public boolean isConnected() {
+    // really?  shouldn't this be something like...
+    // if the port is actually connected?
     return portName != null;
   }
 
@@ -755,27 +747,40 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * 
    */
   @Override
-  public final Integer onByte(Integer newByte) throws IOException {
-    newByte = newByte & 0xff;
-    ++rxCount;
-
-    // publish the rx byte !
-    invoke("publishRX", newByte);
-
-    if (blockingRX.size() < BUFFER_SIZE) {
-      blockingRX.add(newByte);
+  public void onBytes(byte[] bytes) {
+    if (bytes == null) {
+      return;
     }
-    
-    tcpSerialHub.broadcast(newByte);
-
-    if (recordRx != null) {
-      // potentially variety of formats can be supported here
-      recordRx.write(String.format(" %02X", newByte).getBytes());
+    if (listeners.size() ==0) {
+      log.warn("No Listeners !!!  we are invoking publishBytes.. data is likely getting dropped? ");
     }
-
-    return newByte;
+    invoke("publishBytes", bytes);
+    // String byteIntString = StringUtil.byteArrayToIntString(bytes);
+    // log.info("On bytes called len: {}  data: {}" , bytes.length, byteIntString);
+    for (int i = 0 ; i < bytes.length; i ++) {
+      Integer newByte = bytes[i] & 0xff;
+      ++rxCount;
+      // publish the rx byte !
+      invoke("publishRX", newByte);
+      if (blockingRX.size() < BUFFER_SIZE) {
+        blockingRX.add(newByte);
+      }
+      try {
+        tcpSerialHub.broadcast(newByte);
+      } catch (IOException e) {
+        log.warn("Error broadcasting to tcp serial hub", e);
+      }
+      if (recordRx != null) {
+        // potentially variety of formats can be supported here
+        try {
+          recordRx.write(String.format(" %02X", newByte).getBytes());
+        } catch (IOException e) {
+          log.warn("Error writing to recordRx", e);
+        }
+      }
+    }
   }
-
+  
   @Override
   public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
@@ -811,7 +816,18 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portNames;
   }
 
-  
+
+  /**
+   * publish a byte array of data that was read from the serial port.
+   * 
+   * @param bytes
+   * @return
+   */
+  public byte[] publishBytes(byte[] bytes) {
+    // log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
+    return bytes;
+  }
+
   /**
    * Publishing receive data to and end point
    * @param data
@@ -838,19 +854,38 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   @Override
   synchronized public int read() throws IOException, InterruptedException {
-
     if (timeoutMS == null) {
       return blockingRX.take();
     }
-
     Integer newByte = blockingRX.poll(timeoutMS, TimeUnit.MILLISECONDS);
     if (newByte == null) {
       String error = String.format("%d ms timeout was reached - no data", timeoutMS);
       error(error);
       throw new IOException(error);
     }
-
     return newByte;
+  }
+  
+
+  /**
+   * return a byte array represending all the input pending data at the time it's called.
+   * If there is no input data, null is returned.
+   * 
+   * @return
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  synchronized public byte[] readBytes() throws IOException, InterruptedException {
+    int size = blockingRX.size();
+    if (size == 0) {
+      return null;
+    } else {
+      byte[] data = new byte[size];
+      for (int i = 0; i < size; i++) {
+        data[i] = blockingRX.take().byteValue();
+      }
+      return data;
+    }
   }
 
   // FIXME add timeout parameter (with default)
@@ -1071,9 +1106,22 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   @Override
   public void write(byte[] data) throws Exception {
-    for (int i = 0; i < data.length; ++i) {
-      write(data[i] & 0xff); // recently removed - & 0xFF
+    
+    if (data == null) {
+      return;
     }
+
+    for (String portName : connectedPorts.keySet()) {
+      Port writePort = connectedPorts.get(portName);
+      // log.info("Writing data to port {} data:{} -- WritePort:{}", portName, data, writePort);
+      writePort.write(data);
+    }
+
+    // TODO: invoke publishTX with the array?
+    for (int i = 0 ; i < data.length;i++) {
+      invoke("publishTX", (int)data[i]);
+    }
+    
   }
   
   public void writeInt(int b) throws Exception {
@@ -1099,28 +1147,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     ++txCount;
     if (recordTx != null) {
       recordTx.write(String.format(" %02X", b).getBytes());
-    }
-  }
-
-  synchronized public void write(int[] data) throws Exception {
-    // If the port is JSSC we can just write the array.
-    for (String portName : connectedPorts.keySet()) {
-      Port writePort = connectedPorts.get(portName);
-      // take advantage to write the array in one call.
-      writePort.write(data);
-      // still need to publishtx..
-      // TODO: make publishTX publish an int array. not one at a time.
-      for (int i = 0; i < data.length; ++i) {
-        // main line TX
-        invoke("publishTX", data[i]);
-        ++txCount;
-      }
-    }
-
-    if (recordTx != null) {
-      for (int i = 0; i < data.length; ++i) {
-        recordTx.write(data[i]);
-      }
     }
   }
 
@@ -1189,7 +1215,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   @Override
   public void flush() {
-
   }
 
   public int getRate() {

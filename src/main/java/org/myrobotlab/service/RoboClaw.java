@@ -2374,9 +2374,10 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   @Override
-  public Integer onByte(Integer b) throws IOException {
-    log.debug(String.format("onByte %02X", b));
-    return b;
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      log.debug(String.format("onByte %02X", bytes[i] & 0xFF));
+    }
   }
 
   @Override

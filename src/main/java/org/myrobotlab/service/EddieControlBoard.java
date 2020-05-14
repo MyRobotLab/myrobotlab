@@ -438,9 +438,8 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
   }
 
   @Override
-  public final Integer onByte(Integer newByte) throws IOException {
-    info("%s onByte %s", getName(), newByte);
-    return newByte;
+  public void onBytes(byte[] bytes) {
+    info("%s onBytes %s", getName(), bytes);
   }
 
   @Override

@@ -1,15 +1,19 @@
 package org.myrobotlab.arduino;
 
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.arduino.virtual.MrlComm;
+import org.myrobotlab.string.StringUtil;
+import org.python.jline.internal.Log;
 
 /**
  * <pre>
@@ -19,16 +23,16 @@ import org.myrobotlab.arduino.virtual.MrlComm;
  which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
  with the cpp template (src/resource/Arduino/generate/Msg.java.template)
 
- 	Schema Type Conversions
+   Schema Type Conversions
 
-	Schema      ARDUINO					Java							Range
-	none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
-	boolean		boolean					boolean							0 1
-    b16			int						int (short)						2 bytes	-32,768 to 32,767
-    b32			long					int								4 bytes -2,147,483,648 to 2,147,483, 647
-    bu32		unsigned long			long							0 to 4,294,967,295
-    str			char*, size				String							variable length
-    []			byte[], size			int[]							variable length
+  Schema      ARDUINO          Java              Range
+  none    byte/unsigned char    int (cuz Java byte bites)    1 byte - 0 to 255
+  boolean    boolean          boolean              0 1
+    b16      int            int (short)            2 bytes  -32,768 to 32,767
+    b32      long          int                4 bytes -2,147,483,648 to 2,147,483, 647
+    bu32    unsigned long      long              0 to 4,294,967,295
+    str      char*, size        String              variable length
+    []      byte[], size      int[]              variable length
 
  All message editing should be done in the arduinoMsg.schema
 
@@ -46,7 +50,7 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
@@ -61,44 +65,40 @@ import org.slf4j.Logger;
 
 public class VirtualMsg {
 
-	public static final int MAX_MSG_SIZE = 64;
-	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 63;
-	
-	int ackMaxWaitMs = 1000;
-  
-  	boolean waiting = false;
-	
-	
-	// send buffer
-  int sendBufferSize = 0;
-  int sendBuffer[] = new int[MAX_MSG_SIZE];
-  
+  // TODO: pick a more reasonable timeout.. 3 seconds is high.
+  private static final int ACK_TIMEOUT = 3000;
+  public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
+  public static final int MAX_MSG_SIZE = 64;
+  public static final int MAGIC_NUMBER = 170; // 10101010
+  public static final int MRLCOMM_VERSION = 64;
+  // send buffer
+  private int sendBufferSize = 0;
+  private int sendBuffer[] = new int[MAX_MSG_SIZE];
   // recv buffer
-  int ioCmd[] = new int[MAX_MSG_SIZE];
+  private int ioCmd[] = new int[MAX_MSG_SIZE];
+  private AtomicInteger byteCount = new AtomicInteger(0);
+  private int msgSize = 0;
+  // ------ device type mapping constants
+  private int method = -1;
+  public boolean debug = false;
+  // when using a real service, invoke should be true, for unit tests, this should be false.
+  private boolean invoke = true;
   
-  int byteCount = 0;
-  int msgSize = 0;
-
-	// ------ device type mapping constants
-	int method = -1;
-	public boolean debug = false;
-	boolean invoke = true;
-	
-	boolean ackEnabled = false;
-	
-	 public static class AckLock {
-	    // first is always true - since there
-	    // is no msg to be acknowledged...
-	    volatile boolean acknowledged = true;
-	  }
-	 
-	transient AckLock ackRecievedLock = new AckLock();
-	
-	// recording related
-	transient FileOutputStream record = null;
-	transient StringBuilder rxBuffer = new StringBuilder();
-	transient StringBuilder txBuffer = new StringBuilder();	
+  private int errorServiceToHardwareRxCnt = 0;
+  private int errorHardwareToServiceRxCnt = 0;
+  
+  boolean ackEnabled = false;
+  private volatile boolean clearToSend = true;
+  public static class AckLock {
+    // track if there is a pending message, when sending a message
+    // this goes to true. when getting an ack it goes to false.
+    volatile boolean pendingMessage = false;
+  }
+  transient AckLock ackRecievedLock = new AckLock();
+  // recording related
+  transient OutputStream record = null;
+  transient StringBuilder rxBuffer = new StringBuilder();
+  transient StringBuilder txBuffer = new StringBuilder();  
 
   public static final int DEVICE_TYPE_UNKNOWN   =     0;
   public static final int DEVICE_TYPE_ARDUINO   =     1;
@@ -110,7 +110,7 @@ public class VirtualMsg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
-		
+    
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
@@ -228,7 +228,7 @@ public class VirtualMsg {
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
  */
-	
+  
   // public void getBoardInfo(){}
   // public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
   // public void setDebug(Boolean enabled/*bool*/){}
@@ -272,39 +272,52 @@ public class VirtualMsg {
   // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
-	
+  
+  
 
-	
-	public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
+  public VirtualMsg(MrlComm arduino, SerialDevice serial) {
+    this.arduino = arduino;
+    this.serial = serial;
+  }
+  
+  public void begin(SerialDevice serial){
+    this.serial = serial;
+  }
 
-	public VirtualMsg(MrlComm arduino, SerialDevice serial) {
-		this.arduino = arduino;
-		this.serial = serial;
-	}
-	
-	public void begin(SerialDevice serial){
-	  this.serial = serial;
-	}
+  // transient private Msg instance;
 
-	// transient private Msg instance;
-
-	// ArduinoSerialCallBacks - TODO - extract interface
-	transient private MrlComm arduino;
-	
-	transient private SerialDevice serial;
-	
-	public void setInvoke(boolean b){
-	  invoke = b;
-	}
-	
-	public void processCommand(){
-	  processCommand(ioCmd);
-	}
-	
-	public void processCommand(int[] ioCmd) {
-		int startPos = 0;
-		method = ioCmd[startPos];
-		switch (method) {
+  // ArduinoSerialCallBacks - TODO - extract interface
+  transient private MrlComm arduino;
+  
+  transient private SerialDevice serial;
+  
+  public void processCommand(int[] ioCmd) {
+    int startPos = 0;
+    method = ioCmd[startPos];
+    // always process mrlbegin..
+    if (debug) { 
+      log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    }
+    
+    if (method == PUBLISH_ACK) {
+      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // call publishAck on the MrlCommPublisher
+      Integer function = ioCmd[startPos+1]; // bu8
+      ackReceived(function);
+    }
+    
+    if (method != PUBLISH_MRL_COMM_BEGIN) {
+      if (!clearToSend) {
+        log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
+        System.err.println("\nDumping command not clear to send.\n");
+        return;
+      }
+    } else {
+      // Process!
+      log.info("Clear to process!!!!!!!!!!!!!!!!!!");
+      this.clearToSend = true;
+    }
+    switch (method) {
     case GET_BOARD_INFO: {
       if(invoke){
         arduino.invoke("getBoardInfo");
@@ -821,33 +834,28 @@ public class VirtualMsg {
       }
       break;
     }
-		
-		}
-	}
-	
+    
+    }
+  }
+  
 
-	// Java-land --to--> MrlComm
+  // Java-land --to--> MrlComm
 
-	public synchronized void publishMRLCommError(String errorMsg/*str*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + (1 + errorMsg.length())); // size
-      write(PUBLISH_MRLCOMM_ERROR); // msgType = 1
-      write(errorMsg);
+  public synchronized byte[] publishMRLCommError(String errorMsg/*str*/) {
+    if (debug) {
+      log.info("Sending Message: publishMRLCommError to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + errorMsg.length())); // size
+      appendMessage(baos, PUBLISH_MRLCOMM_ERROR); // msgType = 1
+      appendMessage(baos, errorMsg);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishMRLCommError");
         txBuffer.append("/");
@@ -857,36 +865,33 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishMRLCommError threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishMRLCommError threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
-      write(PUBLISH_BOARD_INFO); // msgType = 3
-      write(version);
-      write(boardType);
-      writeb16(microsPerLoop);
-      writeb16(sram);
-      write(activePins);
-      write(deviceSummary);
+  public synchronized byte[] publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: publishBoardInfo to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2 + 1 + (1 + deviceSummary.length)); // size
+      appendMessage(baos, PUBLISH_BOARD_INFO); // msgType = 3
+      appendMessage(baos, version);
+      appendMessage(baos, boardType);
+      appendMessageb16(baos, microsPerLoop);
+      appendMessageb16(baos, sram);
+      appendMessage(baos, activePins);
+      appendMessage(baos, deviceSummary);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishBoardInfo");
         txBuffer.append("/");
@@ -906,31 +911,28 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishBoardInfo threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishBoardInfo threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishAck(Integer function/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(PUBLISH_ACK); // msgType = 9
-      write(function);
+  public synchronized byte[] publishAck(Integer function/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: publishAck to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, PUBLISH_ACK); // msgType = 9
+      appendMessage(baos, function);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishAck");
         txBuffer.append("/");
@@ -940,33 +942,30 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishAck threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishAck threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 4 + 1 + 4); // size
-      write(PUBLISH_ECHO); // msgType = 11
-      writef32(myFloat);
-      write(myByte);
-      writef32(secondFloat);
+  public synchronized byte[] publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    if (debug) {
+      log.info("Sending Message: publishEcho to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4 + 1 + 4); // size
+      appendMessage(baos, PUBLISH_ECHO); // msgType = 11
+      appendMessagef32(baos, myFloat);
+      appendMessage(baos, myByte);
+      appendMessagef32(baos, secondFloat);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishEcho");
         txBuffer.append("/");
@@ -980,31 +979,28 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishEcho threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishEcho threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishCustomMsg(int[] msg/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + (1 + msg.length)); // size
-      write(PUBLISH_CUSTOM_MSG); // msgType = 13
-      write(msg);
+  public synchronized byte[] publishCustomMsg(int[] msg/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: publishCustomMsg to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + msg.length)); // size
+      appendMessage(baos, PUBLISH_CUSTOM_MSG); // msgType = 13
+      appendMessage(baos, msg);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishCustomMsg");
         txBuffer.append("/");
@@ -1014,32 +1010,29 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishCustomMsg threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishCustomMsg threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + (1 + data.length)); // size
-      write(PUBLISH_I2C_DATA); // msgType = 19
-      write(deviceId);
-      write(data);
+  public synchronized byte[] publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: publishI2cData to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_I2C_DATA); // msgType = 19
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishI2cData");
         txBuffer.append("/");
@@ -1051,31 +1044,28 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishI2cData threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishI2cData threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishDebug(String debugMsg/*str*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + (1 + debugMsg.length())); // size
-      write(PUBLISH_DEBUG); // msgType = 28
-      write(debugMsg);
+  public synchronized byte[] publishDebug(String debugMsg/*str*/) {
+    if (debug) {
+      log.info("Sending Message: publishDebug to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + debugMsg.length())); // size
+      appendMessage(baos, PUBLISH_DEBUG); // msgType = 28
+      appendMessage(baos, debugMsg);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishDebug");
         txBuffer.append("/");
@@ -1085,31 +1075,28 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishDebug threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishDebug threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishPinArray(int[] data/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + (1 + data.length)); // size
-      write(PUBLISH_PIN_ARRAY); // msgType = 29
-      write(data);
+  public synchronized byte[] publishPinArray(int[] data/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: publishPinArray to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_PIN_ARRAY); // msgType = 29
+      appendMessage(baos, data);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishPinArray");
         txBuffer.append("/");
@@ -1119,34 +1106,31 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishPinArray threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishPinArray threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 2 + 2); // size
-      write(PUBLISH_SERVO_EVENT); // msgType = 40
-      write(deviceId);
-      write(eventType);
-      writeb16(currentPos);
-      writeb16(targetPos);
+  public synchronized byte[] publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: publishServoEvent to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2); // size
+      appendMessage(baos, PUBLISH_SERVO_EVENT); // msgType = 40
+      appendMessage(baos, deviceId);
+      appendMessage(baos, eventType);
+      appendMessageb16(baos, currentPos);
+      appendMessageb16(baos, targetPos);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishServoEvent");
         txBuffer.append("/");
@@ -1162,32 +1146,29 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishServoEvent threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishServoEvent threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + (1 + data.length)); // size
-      write(PUBLISH_SERIAL_DATA); // msgType = 43
-      write(deviceId);
-      write(data);
+  public synchronized byte[] publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: publishSerialData to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, PUBLISH_SERIAL_DATA); // msgType = 43
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishSerialData");
         txBuffer.append("/");
@@ -1199,32 +1180,29 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishSerialData threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishSerialData threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-      write(PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
-      write(deviceId);
-      writeb16(echoTime);
+  public synchronized byte[] publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: publishUltrasonicSensorData to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, echoTime);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishUltrasonicSensorData");
         txBuffer.append("/");
@@ -1236,32 +1214,29 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishUltrasonicSensorData threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishUltrasonicSensorData threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-      write(PUBLISH_ENCODER_DATA); // msgType = 54
-      write(deviceId);
-      writeb16(position);
+  public synchronized byte[] publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: publishEncoderData to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, PUBLISH_ENCODER_DATA); // msgType = 54
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, position);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishEncoderData");
         txBuffer.append("/");
@@ -1273,31 +1248,28 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishEncoderData threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishEncoderData threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void publishMrlCommBegin(Integer version/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(PUBLISH_MRL_COMM_BEGIN); // msgType = 55
-      write(version);
+  public synchronized byte[] publishMrlCommBegin(Integer version/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: publishMrlCommBegin to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, PUBLISH_MRL_COMM_BEGIN); // msgType = 55
+      appendMessage(baos, version);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> publishMrlCommBegin");
         txBuffer.append("/");
@@ -1307,14 +1279,16 @@ public class VirtualMsg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("publishMrlCommBegin threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("publishMrlCommBegin threw",e);
+      return null;
+    }
+  }
 
 
-	public static String methodToString(int method) {
-		switch (method) {
+  public static String methodToString(int method) {
+    switch (method) {
     case PUBLISH_MRLCOMM_ERROR:{
       return "publishMRLCommError";
     }
@@ -1484,47 +1458,47 @@ public class VirtualMsg {
       return "servoStop";
     }
 
-		default: {
-			return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
+    default: {
+      return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
 
-		} // default
-		}
-	}
+    } // default
+    }
+  }
 
-	public String str(int[] buffer, int start, int size) {
-		byte[] b = new byte[size];
-		for (int i = start; i < start + size; ++i){
-			b[i - start] = (byte)(buffer[i] & 0xFF);
-		}
-		return new String(b);
-	}
+  public String str(int[] buffer, int start, int size) {
+    byte[] b = new byte[size];
+    for (int i = start; i < start + size; ++i){
+      b[i - start] = (byte)(buffer[i] & 0xFF);
+    }
+    return new String(b);
+  }
 
-	public int[] subArray(int[] buffer, int start, int size) {		
-		return Arrays.copyOfRange(buffer, start, start + size);
-	}
+  public int[] subArray(int[] buffer, int start, int size) {    
+    return Arrays.copyOfRange(buffer, start, start + size);
+  }
 
-	// signed 16 bit bucket
-	public int b16(int[] buffer, int start/*=0*/) {
-		return  (short)(buffer[start] << 8) + buffer[start + 1];
-	}
-	
-	// signed 32 bit bucket
-	public int b32(int[] buffer, int start/*=0*/) {
-		return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-	}
-	
-	// unsigned 32 bit bucket
-	public long bu32(int[] buffer, int start/*=0*/) {
-		long ret = ((buffer[start + 0] << 24)
-				+ (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-		if (ret < 0){
-			return 4294967296L + ret;
-		}
-		
-		return ret;
-	}
+  // signed 16 bit bucket
+  public int b16(int[] buffer, int start/*=0*/) {
+    return  (short)(buffer[start] << 8) + buffer[start + 1];
+  }
+  
+  // signed 32 bit bucket
+  public int b32(int[] buffer, int start/*=0*/) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  }
+  
+  // unsigned 32 bit bucket
+  public long bu32(int[] buffer, int start/*=0*/) {
+    long ret = ((buffer[start + 0] << 24)
+        + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+    if (ret < 0){
+      return 4294967296L + ret;
+    }
+    
+    return ret;
+  }
 
   // float 32 bit bucket
   public float f32(int[] buffer, int start/*=0*/) {
@@ -1536,48 +1510,112 @@ public class VirtualMsg {
     return f;
   }
   
-  public boolean readMsg() throws Exception {
-    // handle serial data begin
-    int bytesAvailable = serial.available();
-    if (bytesAvailable > 0) {
-      //publishDebug("RXBUFF:" + String(bytesAvailable));
-      // now we should loop over the available bytes .. not just read one by one.
-      for (int i = 0; i < bytesAvailable; i++) {
-        // read the incoming byte:
-        int newByte = serial.read();
-        //publishDebug("RX:" + String(newByte));
-        ++byteCount;
-        // checking first byte - beginning of message?
-        if (byteCount == 1 && newByte != VirtualMsg.MAGIC_NUMBER) {
-          publishError(F("error serial"));
-          // reset - try again
-          byteCount = 0;
-          // return false;
-        }
-        if (byteCount == 2) {
-          // get the size of message
-          // todo check msg < 64 (MAX_MSG_SIZE)
-          if (newByte > 64) {
-            // TODO - send error back
-            byteCount = 0;
-            continue; // GroG - I guess  we continue now vs return false on error conditions?
+  public void onBytes(byte[] bytes) {
+    if (debug) {
+      // debug message.. semi-human readable?
+      String byteString = StringUtil.byteArrayToIntString(bytes);
+      log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
+    }
+    // this gives us the current full buffer that was read from the seral
+    for (int i = 0 ; i < bytes.length; i++) {
+      // For now, let's just call onByte for each byte upcasted as an int.
+      Integer newByte = bytes[i] & 0xFF;
+      try {
+        byteCount.incrementAndGet();
+        if (byteCount.get() == 1) {
+          if (newByte != MAGIC_NUMBER) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
+            // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
           }
-          msgSize = newByte;
+          continue;
+        } else if (byteCount.get() == 2) {
+          // get the size of message
+          if (newByte > 64) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            // This is an error scenario.. we should reset our byte count also.
+            // error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt ));
+            log.error("Arduino->MRL error {} rx sz errors", ++errorServiceToHardwareRxCnt);
+            continue;
+          }
+          msgSize = newByte.intValue();
+        } else if (byteCount.get() == 3) {
+          // This is the method..
+          int method = newByte.intValue();
+          if (methodToString(method).startsWith("ERROR")) {
+            // we've got an error scenario here.. reset the parser and try again!
+            log.error("Arduino->MRL error unknown method error. resetting parser.");
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            continue;
+          }
+          
+          // If we're not clear to send, we need to unlock if this is a begin message.
+          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
+            // Clear to send!!
+            log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
+            clearToSend = true;
+          } 
+          
+          if (!clearToSend) {
+            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            // We opened the port, and we got some data that isn't a Begin message.
+            // so, I think we need to reset the parser and continue processing bytes...
+            // there will be errors until the next magic byte is seen.
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            continue;
+          }
+          // we are in a valid parse state.    
+          ioCmd[byteCount.get() - 3] = method;
+        } else if (byteCount.get() > 3) {
+          // This is the body of the message copy it to the buffer
+          ioCmd[byteCount.get() - 3] = newByte.intValue();
+        } else {
+          // the case where byteCount is negative?! not got.  You should probably never see this.
+          log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
+          //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
+          continue;
         }
-        if (byteCount > 2) {
-          // fill in msg data - (2) headbytes -1 (offset)
-          ioCmd[byteCount - 3] = newByte;
+        // we have a complete message here.
+        if (byteCount.get() == 2 + msgSize) {
+          // we've received a full message
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
+          if (debug) {
+            log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          }
+          // process the command.
+          processCommand(actualCommand);
+          publishAck(method);
+          // re-init parser
+          Arrays.fill(ioCmd, 0); // optimize remove
+          msgSize = 0;
+          byteCount = new AtomicInteger(0);
         }
-        // if received header + msg
-        if (byteCount == 2 + msgSize) {
-          // we've reach the end of the command, just return true .. we've got it
-          byteCount = 0;
-          return true;
-        }
+      } catch (Exception e) {
+        ++errorHardwareToServiceRxCnt ;
+        // error("msg structure violation %d", errorHardwareToServiceRxCnt);
+        log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
+        // TODO: perhaps we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // find the first occurance of 170 in the bytes subbytes
+        // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
+        i = i - byteCount.get()+1;
+        log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
+        log.error("Original Byte Array: {}", StringUtil.byteArrayToIntString(bytes));
+        System.err.println("Try to consume more messages!");
+        msgSize = 0;
+        byteCount = new AtomicInteger(0);
+        // TODO: this is wonky.. what?! 
+        i = 0;
+        return;
+        
+        
       }
-    } // if Serial.available
-      // we only partially read a command.  (or nothing at all.)
-    return false;
+    }
+    return;
   }
 
   String F(String msg) {
@@ -1588,104 +1626,132 @@ public class VirtualMsg {
     log.error(error);
   }
   
-	void write(int b8) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
+    if ((b8 < 0) || (b8 > 255)) {
+      log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
+    }
+    baos.write(b8 & 0xFF);
+  }
+  
+  void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
+    if (b1) {
+      appendMessage(baos, 1);
+    } else {
+      appendMessage(baos, 0);
+    }
+  }
 
-		if ((b8 < 0) || (b8 > 255)) {
-			log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
-		}
+  void appendMessageb16(ByteArrayOutputStream baos, int b16) throws Exception {
+    if ((b16 < -32768) || (b16 > 32767)) {
+      log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
+    }
+    appendMessage(baos, b16 >> 8 & 0xFF);
+    appendMessage(baos, b16 & 0xFF);
+  }
 
-		serial.write(b8 & 0xFF);
-	}
-
-	void writebool(boolean b1) throws Exception {
-		if (b1) {
-			serial.write(1);
-		} else {
-			serial.write(0);
-		}
-	}
-
-	void writeb16(int b16) throws Exception {
-		if ((b16 < -32768) || (b16 > 32767)) {
-			log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
-		}
-
-		write(b16 >> 8 & 0xFF);
-		write(b16 & 0xFF);
-	}
-
-	void writeb32(int b32) throws Exception {
-		write(b32 >> 24 & 0xFF);
-		write(b32 >> 16 & 0xFF);
-		write(b32 >> 8 & 0xFF);
-		write(b32 & 0xFF);
-	}
-	
-	void writef32(float f32) throws Exception {
+  void appendMessageb32(ByteArrayOutputStream baos, int b32) throws Exception {
+    appendMessage(baos, b32 >> 24 & 0xFF);
+    appendMessage(baos, b32 >> 16 & 0xFF);
+    appendMessage(baos, b32 >> 8 & 0xFF);
+    appendMessage(baos, b32 & 0xFF);
+  }
+  
+  void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    write(f[3] & 0xFF);
-    write(f[2] & 0xFF);
-    write(f[1] & 0xFF);
-    write(f[0] & 0xFF);
-	}
-	
-	void writebu32(long b32) throws Exception {
-		write((int)(b32 >> 24 & 0xFF));
-		write((int)(b32 >> 16 & 0xFF));
-		write((int)(b32 >> 8 & 0xFF));
-		write((int)(b32 & 0xFF));
-	}
+    appendMessage(baos, f[3] & 0xFF);
+    appendMessage(baos, f[2] & 0xFF);
+    appendMessage(baos, f[1] & 0xFF);
+    appendMessage(baos, f[0] & 0xFF);
+  }
+  
+  void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
+    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
+    appendMessage(baos, (int)(b32 & 0xFF));
+  }
 
-	void write(String str) throws Exception {
-		write(str.getBytes());
-	}
+  void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
+    appendMessage(baos, str.getBytes());
+  }
 
-	void write(int[] array) throws Exception {
-		// write size
-		write(array.length & 0xFF);
+  void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
+    // write size
+    appendMessage(baos, array.length & 0xFF);
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(baos, array[i] & 0xFF);
+    }
+  }
 
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			write(array[i] & 0xFF);
-		}
-	}
+  void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
+    // write size
+    appendMessage(baos, array.length);
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(baos, array[i]);
+    }
+  }
+  
+  synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
+    byte[] message = baos.toByteArray();
+    if (ackEnabled) {
+      // wait for a pending ack to be received before we process our message.^M
+      waitForAck();
+    }
+    // write data if serial not null.
+    if (serial != null) {
+      // mark it pending before we write the data.
+      if (ackEnabled){
+        // flip our flag because we're going to send the message now.
+        // TODO: is this deadlocked because it's synchronized?!
+        // TODO: should this be set regardless of if the serial is null?
+        markPending();
+      }
+      serial.write(message);
+      // TODO: if there's an exception, we should clear our pending status?
+      if (ackEnabled) {
+        // wait for a pending ack to be received before we process our message.^M
+        waitForAck();
+      }
+    }
+    return message;
+  }
+  
+  public void markPending() {
+    if (debug) {
+      log.info("Setting pending flag.");
+    }
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = true;
+      ackRecievedLock.notifyAll();
+    }
+  }
+  
+  public boolean isRecording() {
+    return record != null;
+  }
+  
+  public void record() throws Exception {
+    if (record == null) {
+      record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
+    }
+  }
 
-	void write(byte[] array) throws Exception {
-		// write size
-		write(array.length);
-
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			write(array[i]);
-		}
-	}
-	
-	
-	public boolean isRecording() {
-		return record != null;
-	}
-	
-
-	public void record() throws Exception {
-		
-		if (record == null) {
-			record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
-		}
-	}
-
-	public void stopRecording() {
-		if (record != null) {
-			try {
-				record.close();
-			} catch (Exception e) {
-			}
-			record = null;
-		}
-	}
-	
-	public static String deviceTypeToString(int typeId) {
-		switch(typeId){
+  public void stopRecording() {
+    if (record != null) {
+      try {
+        record.close();
+      } catch (Exception e) {
+        log.info("Error closing recording stream. ", e);
+      }
+      record = null;
+    }
+  }
+  
+  public static String deviceTypeToString(int typeId) {
+    switch(typeId){
     case 0 :  {
       return "unknown";
 
@@ -1726,58 +1792,55 @@ public class VirtualMsg {
       return "Encoder";
 
     }
-		
-		default: {
-			return "unknown";
-		}
-		}
-	}
+    
+    default: {
+      return "unknown";
+    }
+    }
+  }
   
   public void enableAcks(boolean b){
-    // disable local blocking
-	  ackEnabled = b;
-	  // if (!localOnly){
-	  // shutdown MrlComm from sending acks
-	  // below is a method only in Msg.java not in VirtualMsg.java
-	  // it depends on the definition of enableAck in arduinoMsg.schema  
-	  // enableAck(b);
-	  // }
-	}
-	
-	public void waitForAck(){
-	  if (!ackEnabled || ackRecievedLock.acknowledged){
-	    return;
-	  }
-    synchronized (ackRecievedLock) {
-      try {
-        long ts = System.currentTimeMillis();
-        // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
-        // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
-      } catch (InterruptedException e) {// don't care}
-      }
-
-      if (!ackRecievedLock.acknowledged) {
-        //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
-        log.error("Ack not received");
-        // part of resetting ?
-        // ackRecievedLock.acknowledged = true;
-        arduino.invoke("noAck");
+    ackEnabled = b;
+    // if (!localOnly){
+    // shutdown MrlComm from sending acks
+    // below is a method only in Msg.java not in VirtualMsg.java
+    // it depends on the definition of enableAck in arduinoMsg.schema  
+    // enableAck(b);
+    // }
+  }
+  
+  public void waitForAck(){
+    if (!ackEnabled) {
+      return;
+    }
+    // if there's a pending message, we need to wait for the ack to be received.
+    if (ackRecievedLock.pendingMessage) {
+      synchronized (ackRecievedLock) {
+        try {
+          ackRecievedLock.wait(ACK_TIMEOUT);
+        } catch (InterruptedException e) {
+        }
+        if (ackRecievedLock.pendingMessage) {
+          log.error("Ack not received, ack timeout!");
+          // TODO: should we just reset and hope for the best? maybe trigger a sync?
+          // ackRecievedLock.pendingMessage = false;
+          arduino.ackTimeout();
+        }
       }
     }
-	}
-	
-	public void ackReceived(int function){
-	   synchronized (ackRecievedLock) {
-	      ackRecievedLock.acknowledged = true;
-	      ackRecievedLock.notifyAll();
-	    }
-	}
-	
-	public int getMethod(){
-	  return method;
-	}
-	
+  }
+  
+  public void ackReceived(int function) {
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = false;
+      ackRecievedLock.notifyAll();
+    }
+  }
+  
+  public int getMethod(){
+    return method;
+  }
+  
 
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
@@ -1787,59 +1850,104 @@ public class VirtualMsg {
   public int[] getBuffer() {    
     return sendBuffer;
   }
-	
-	public static void main(String[] args) {
-		try {
+  
+  public static void main(String[] args) {
+    try {
+      // FIXME - Test service started or reference retrieved
+      // FIXME - subscribe to publishError
+      // FIXME - check for any error
+      // FIXME - basic design - expected state is connected and ready -
+      // between classes it
+      // should connect - also dumping serial comm at different levels so
+      // virtual arduino in
+      // Python can model "real" serial comm
+      String port = "COM10";
+      LoggingFactory.init(Level.INFO);
+      /*
+      Runtime.start("gui","SwingGui");
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+      virtual.connectVirtualUart(port, port + "UART");
+      */
+      MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
+      Servo servo01 = (Servo)Runtime.start("servo01","Servo");
+      /*
+      arduino.connect(port);
+      // test pins
+      arduino.enablePin(5);
+      arduino.disablePin(5);
+      // test status list enabled
+      arduino.enableBoardStatus(true);
+      servo01.attach(arduino, 8);
+      servo01.moveTo(30);
+      servo01.moveTo(130);
+      arduino.enableBoardStatus(false);
+      */
+      // test ack
+      // test heartbeat
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
-			// FIXME - Test service started or reference retrieved
-			// FIXME - subscribe to publishError
-			// FIXME - check for any error
-			// FIXME - basic design - expected state is connected and ready -
-			// between classes it
-			// should connect - also dumping serial comm at different levels so
-			// virtual arduino in
-			// Python can model "real" serial comm
-			String port = "COM10";
+  public void onConnect(String portName) {
+    if (debug) {
+      log.info("On Connect Called in Msg.");
+    }
+    // reset the parser...
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    ackReceived(-1);
+  }
 
-			LoggingFactory.init(Level.INFO);
-			
-			/*
-			Runtime.start("gui","SwingGui");
-			VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
-			virtual.connectVirtualUart(port, port + "UART");
-			*/
-			
-			MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
-			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
-			
-			/*
-			arduino.connect(port);
-			
-			// test pins
-			arduino.enablePin(5);
-			
-			arduino.disablePin(5);
-			
-			// test status list enabled
-			arduino.enableBoardStatus(true);
-			
-			servo01.attach(arduino, 8);
-			
-			servo01.moveTo(30);
-			servo01.moveTo(130);
-			
-			arduino.enableBoardStatus(false);
-			*/
-			// test ack
-			
-			// test heartbeat
-			
-			
+  public void onDisconnect(String portName) {
+    if (debug) {
+      log.info("On Disconnect Called in Msg.");
+    }
+    // reset the parser... this might not be necessary.
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    ackReceived(-1);
+  }
 
-		} catch (Exception e) {
-			log.error("main threw", e);
-		}
+  public static boolean isFullMessage(byte[] bytes) {
+    // Criteria that a sequence of bytes could be parsed as a complete message.
+    // can't be null
+    if (bytes == null) 
+      return false;
+    // it's got to be at least 3 bytes long.  magic + method + size
+    if (bytes.length <= 2) 
+      return false;
+    // first byte has to be magic
+    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER) 
+      return false;
+    
+    int method = bytes[1] & 0xFF;
+    String strMethod = Msg.methodToString(method); 
+    // only known methods. 
+    // TODO: make the methodToString return null for an unknown lookup.
+    if (strMethod.startsWith("ERROR")) 
+      return false;
+    
+    // now it's got to be the proper length
+    int length = bytes[1] & 0xFF;
+    // max message size is 64 bytes
+    if (length > 64)
+      return false;
 
-	}
+    // it's a exactly a full message or a message and more.
+    if (bytes.length >= length+2)
+      return true;
+
+    
+    return false;
+  }
+
+  public boolean isClearToSend() {
+    return clearToSend;
+  }
+  
+  public void setInvoke(boolean b){	
+    invoke = b;	
+  }
 
 }

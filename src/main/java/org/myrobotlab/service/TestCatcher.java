@@ -89,9 +89,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * but use a callback thread from the other service as an optimization onByte
    * is one of those methods
    */
-  @Override
-  public Integer onByte(Integer b) {
-    return b;
+  public void onBytes(byte[] b) {
+    // NoOp
   }
 
   /*
