@@ -25,13 +25,11 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.io.IOException;
-
 import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface SerialDataListener extends NameProvider, QueueReporter, PortListener {
 
-  // FIXME - Integer object because no method cache
-  // FIXME - byte[] onBytes(byte[] bytes)
-  public Integer onByte(Integer b) throws IOException;
+  // TODO: other lifecycle methods like connected / disconnected
+  public void onBytes(byte[] bytes);
+  
 }

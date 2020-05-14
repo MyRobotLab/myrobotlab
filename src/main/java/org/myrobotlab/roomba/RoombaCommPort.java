@@ -224,18 +224,18 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
    * org.myrobotlab.roomba.Z#serialEvent(org.myrobotlab.serial.SerialDeviceEvent
    * )
    */
+  
   @Override
-  public Integer onByte(Integer newByte) {
-
-    buffer[bufferLast++] = (byte) newByte.intValue();
-    if (bufferLast == 26) {
-      bufferLast = 0;
-      System.arraycopy(buffer, 0, sensor_bytes, 0, 26);
-      computeSensors();
+  public void onBytes(byte[] bytes) {
+    for (int i = 0; i < bytes.length; i++) {
+      Integer newByte = bytes[i] & 0xFF;
+      buffer[bufferLast++] = (byte) newByte.intValue();
+      if (bufferLast == 26) {
+        bufferLast = 0;
+        System.arraycopy(buffer, 0, sensor_bytes, 0, 26);
+        computeSensors();
+      }
     }
-
-    return newByte;
-
   }
 
   /**
@@ -260,13 +260,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   @Override
   public boolean send(byte[] bytes) {
     try {
-      // BLECH - conversion to support silly send(byte[] bytes)
-      int[] ints = new int[bytes.length];
-      for (int i = 0; i < ints.length; ++i) {
-        ints[i] = bytes[i];
-      }
-      serial.write(ints);
-      // if( flushOutput ) port.flush(); // hmm, not sure if a good idea
+      serial.write(bytes);
     } catch (Exception e) { // null pointer or serial port dead
       e.printStackTrace();
     }

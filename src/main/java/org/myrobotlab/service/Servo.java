@@ -25,11 +25,7 @@
 
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.logging.Level;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
 

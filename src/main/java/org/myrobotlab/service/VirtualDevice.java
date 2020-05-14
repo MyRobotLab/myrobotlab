@@ -130,10 +130,8 @@ public class VirtualDevice extends Service implements SerialDataListener {
     return connectVirtualUart(null, null);
   }
 
-  @Override
-  public Integer onByte(Integer b) throws IOException {
+  public void onByte(Integer b) {
     log.info("{}.onByte {}", getName(), b);
-    return null;
   }
 
   @Override
@@ -253,6 +251,14 @@ public class VirtualDevice extends Service implements SerialDataListener {
 
     } catch (Exception e) {
       Logging.logError(e);
+    }
+  }
+
+  @Override
+  public void onBytes(byte[] bytes) {
+    // TODO Auto-generated method stub
+    for (int i = 0 ; i < bytes.length; i ++) {
+      onByte(bytes[i]&0xFF);
     }
   }
 

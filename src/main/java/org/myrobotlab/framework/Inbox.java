@@ -82,7 +82,7 @@ public class Inbox implements Serializable {
 
       if (msgBox.size() > maxQueue) {
         bufferOverrun = true;
-        log.warn("{} inbox BUFFER OVERRUN dumping msg size {} - {}", name, msgBox.size(), msg.method);
+        log.warn("inbox size {} BUFFER OVERRUN dumping msg from {} To {}.{}", msgBox.size(), msg.sender, msg.name, msg.method);
       } else {
         msgBox.addFirst(msg);
         // Logging.logTime(String.format("inbox - %s size %d", name,
