@@ -119,7 +119,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
 
   int winSize = 15;
 
-  Mat zeroPoints = toMat(IplImage.create(new CvSize(0, 0), 32, 2));
+  Mat zeroPoints = toMat(IplImage.create(new CvSize().width(0).height(0), 32, 2));
 
   private long currentPntCnt;
 
@@ -131,6 +131,7 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
     super(name);
     // Loader.load(opencv_java.class);
     // initialize to 0 set of points
+    
     cornersA = zeroPoints;
   }
 
@@ -164,16 +165,16 @@ public class OpenCVFilterLKOpticalTrack extends OpenCVFilter {
   public Mat resize(Mat toResize, int amount) {
 
     FloatIndexer idx = toResize.createIndexer();
-    Mat tmp = toMat(IplImage.create(new CvSize(1, (int) idx.size(0) + amount), 32, 2));
+    CvSize sz = new CvSize();
+    sz.width(1).height((int)idx.size(0) + amount);
+    Mat tmp = toMat(IplImage.create(sz, 32, 2));
     FloatIndexer newIdx = tmp.createIndexer();
-
     // copy contents
     for (int i = 0; i < idx.size(0); i++) {
       newIdx.put(i, 0, idx.get(i,0));
       newIdx.put(i, 1, idx.get(i,1));
       log.info("here");
     }
-
     toResize.release();
     newIdx.release();
     idx.release();
