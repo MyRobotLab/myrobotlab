@@ -201,7 +201,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         let pos = $scope.pos.value;
         // currently taken from the slider's value :P - not good if the slider's value is not good :(
 
-        msg.send('attach', controller, pin)
+        msg.send('attach', controller, pin, pos)
         // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }

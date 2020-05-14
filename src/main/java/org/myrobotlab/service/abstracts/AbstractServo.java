@@ -65,9 +65,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
 
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
 
+      Runtime.start("webgui", "WebGui");
+      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       mega.connect("COM7");
       // mega.setBoardMega();
@@ -132,6 +134,39 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
   }
   
+  /**
+   * ControllerConfig - this map of controller config is the data shared between the 
+   * ServoControl and ServoController.  Its needed by the controller to
+   * drive the details of what the ServoControl wants to get done.
+   * For Arduino its a pin, for JMonkey it only needs to be the name of the 
+   * ServoControl ... Different controllers may have different config 
+   * requirements.  If more data is needed, it might be necessary to derive
+   * from this config class a class that contains all the appropriate data
+   */
+  class ControllerConfig implements Comparable<ControllerConfig> {
+    public String controlName;
+    public String controllerName;
+    public String pin;
+    public Double pos;
+    
+    public ControllerConfig(String controlName, String contollerName, Integer pin, Double pos, Double speed) {
+      this.controlName = controlName;
+      this.controllerName = contollerName;
+      this.pin = (pin == null)?null:pin.toString();
+      this.pos = pos;
+    }
+    
+    public int compareTo(ControllerConfig o) { 
+      if (o == null || controllerName == null || pin == null) {
+        return -1;
+      }
+      if (controllerName.equals(o.controllerName) && pin == o.pin) {
+        return 0;
+      }
+      return -1;
+    }
+  }
+  
   // FIXME - should be renamed - autoDisableDefault
   // FIXME - setAutoDisableDefault should be used and this should be protected
   static public boolean autoDisableDefault = false;
@@ -158,7 +193,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * set of currently subscribed servo controllers
    */
-  protected Set<String> controllers = new TreeSet<>();
+  protected Set<ControllerConfig> controllers = new TreeSet<>();
 
   /**
    * the "current" position of the servo - this never gets updated from
@@ -435,8 +470,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * complexity service should use NAME not a direct reference to
    * ServoController !!!!
    */
-  public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
-
+  public void attachServoController(String servoController, Integer pin, Double pos, Double speed) {
+    ControllerConfig sc = new ControllerConfig(getName(), servoController, pin, pos, speed);
     if (controllers.contains(sc)) {
       log.info("{} already attached", sc);
       return;
@@ -458,20 +493,20 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
 
     // the subscribes .... or addListeners in this case ...
-    addListener("publishServoMoveTo", sc);
-    addListener("publishServoStop", sc);
-    // addListener("publishServoStopped", sc);
-    addListener("publishServoWriteMicroseconds", sc);
-    addListener("publishServoSetSpeed", sc);
-    addListener("publishServoEnable", sc);
-    addListener("publishServoDisable", sc);
+    addListener("publishServoMoveTo", servoController);
+    addListener("publishServoStop", servoController);
+    // addListener("publishServoStopped", servoController);
+    addListener("publishServoWriteMicroseconds", servoController);
+    addListener("publishServoSetSpeed", servoController);
+    addListener("publishServoEnable", servoController);
+    addListener("publishServoDisable", servoController);
 
     controllers.add(sc);
     enabled = true; // <-- how to deal with this ? "real" controllers usually
                     // need an enable/energize command
     
     // FIXME sc NEEDS TO BE FULL NAME !!!
-    send(sc, "attachServoControl", this);
+    send(servoController, "attachServoControl", this);
 
     broadcastState();
   }
@@ -481,9 +516,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   public void detach() {
     disable();
-    Set<String> copy = new HashSet<>(controllers);
-    for (String sc : copy) {
-      detach(sc);
+    Set<ControllerConfig> copy = new HashSet<>(controllers);
+    for (ControllerConfig sc : copy) {
+      detach(sc.controllerName);
     }
   }
 
@@ -551,7 +586,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Set<String> getControllers() {
-    return controllers;
+    Set<String> ret = new TreeSet<>();
+    for (ControllerConfig cc : controllers) {
+      ret.add(cc.controllerName);
+    }
+    return ret;
   }
 
   @Override
