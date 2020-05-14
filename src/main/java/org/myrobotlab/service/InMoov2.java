@@ -1420,8 +1420,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 	}
 	
 	public InMoov2Arm startLeftArm(String port, String type) throws Exception {
-                leftArm = startArm(LEFT, port, type);
-                return leftArm;
+		return startLeftArm(port, null);
         }
 
 	public InMoov2Arm startLeftArm(String port) {
