@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -54,17 +54,30 @@ public class PortStream extends Port {
     // the "pure" Java (non-JNI/JNA) world...
     return new ArrayList<String>();
   }
-
-  @Override
-  public int read() throws IOException {
-    return in.read();
-  }
-
-  // WORTHLESS INPUTSTREAM FUNCTION !! -- because if the size of the buffer
-  // is ever bigger than the read and no end of stream has occurred
-  // it will block forever :P
-  public int read(byte[] data) throws IOException {
-    return in.read(data);
+  
+  public byte[] readBytes() {
+    try {
+      int size = in.available();
+      if (size < 1) {
+        // no data to read.. just return null
+        return null;
+      }
+      // ok, we have data! so, let's read 
+      byte[] data = new byte[size];
+      int numRead = in.read(data);
+      if (numRead != size) {
+        // Uh oh.. let's just log this warning, we shouldn't see it.
+        log.warn("Port Stream Read possible error.  numRead {} does not equal size {}", numRead, size);
+        // return just the buffer of what we think was actually read.
+        return Arrays.copyOfRange(data, 0, numRead);
+      }
+      // Assume that all data was read properly and return the full buffer
+      return data;
+      
+    } catch (IOException e) {
+      log.warn("Interrupted PortStream in readBytes.  Perhaps port was closed?", e);
+    }
+    return null;
   }
 
   public void setInputStream(InputStream in) {
@@ -88,11 +101,10 @@ public class PortStream extends Port {
     out.flush();
   }
 
-  public void write(int[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
-    for (int i = 0; i < data.length; i++) {
-      out.write(data[i]);
-    }
+  public void write(byte[] data) throws IOException {
+    out.write(data);
+    // TODO: should we flush here?
+    out.flush();
   }
 
   @Override

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -46,13 +45,32 @@ public class PortQueue extends Port {
     return new ArrayList<String>();
   }
 
-  @Override
-  public int read() throws IOException, InterruptedException {
-    return in.take();
+  /**
+   * Returns a byte array containing what's available on the in queue.
+   * Null if no data is available.
+   * This reads bytes from the output queue.  That data written to the queue
+   * by MrlCommIno can be read here and taken off the queue.
+   */
+  public byte[] readBytes() {
+    try {
+      // here we should take as many bytes as there are to return.
+      int size = in.size();
+      if (size == 0) {
+        // no data to process.
+        return null;
+      }
+      byte[] data = new byte[size];
+      for (int i = 0 ; i < size; i++) {
+        data[i] = in.take().byteValue();
+      }
+      return data;
+    } catch (InterruptedException e) {
+      // log.debug("Interrupted PortQueue in readBytes.");
+      return null;
+    }
   }
-
+  
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
-
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
   }
@@ -60,17 +78,15 @@ public class PortQueue extends Port {
   @Override
   public void write(int data) throws IOException {
     out.add(data);
-    // WOW - PipedOutputStream auto flushes about 1 time every second :P
-    // we force flushing here !
   }
 
-  public void write(int[] data) throws IOException {
-    // TODO: is there a more effecient way to do this?
+  public void write(byte[] data) throws IOException {
+    // convert this to match the output queue of integer by upcasting the byte array
     for (int i = 0; i < data.length; i++) {
-      write(data[i]);
+      out.add(data[i] & 0xFF);
     }
   }
-
+  
   @Override
   public boolean isHardware() {
     return false;

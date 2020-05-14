@@ -26,14 +26,18 @@ MrlServo::~MrlServo() {
 // this method "may" be called with a pin or pin & pos depending on
 // config size
 bool MrlServo::attach(byte pin, int initPosUs, int initVelocity){
-  // msg->publishDebug("MrlServo.deviceAttach !");
+  msg->publishDebug("MrlServo.attach !");
+  // set the initial position for the servo.
   servo->writeMicroseconds(initPosUs);
+  // current position is initial position
   currentPosUs = initPosUs;
+  // we have arrived
   targetPosUs = initPosUs;
+  // this is the velocity, however the servo will move to the initial position as fast as possible.
   velocity = initVelocity;
   this->pin = pin;
+  // attach the servo to the pin!
   servo->attach(pin);
-  //publishServoEvent(SERVO_EVENT_STOPPED);
   return true;
 }
 
@@ -51,6 +55,7 @@ void MrlServo::update() {
   //it may have an imprecision of +- 1 due to the conversion of currentPosUs to int
   if (isMoving) {
     if ((int)currentPosUs != targetPosUs) {
+      // msg->publishDebug("UPDATE");
       long deltaTime = millis() - lastUpdate;
       lastUpdate = millis();
       float _velocity = velocity;
@@ -62,6 +67,9 @@ void MrlServo::update() {
         }
       }
       if(targetPosUs > 500) {
+        // target position less than 500 is considered an angle!
+        // if the target position is greater than 500 we assume it's microseconds
+        // and as a result, our velicity needs to be mapped from degrees to microseconds.
         _velocity = map(_velocity, 0, 180, 544, 2400) - 544;
       }
       float step = _velocity * deltaTime;
@@ -69,45 +77,48 @@ void MrlServo::update() {
       if (isSweeping) {
         step = sweepStep;
       }
-      if (velocity < 0) { // when velocity < 0, it mean full speed ahead
+      if (velocity < 0) {
+    	// when velocity < 0, it mean full speed ahead
         step = targetPosUs - (int)currentPosUs;
       }
-      else if (currentPosUs > targetPosUs) {
+      if (currentPosUs > targetPosUs) {
+        // check the direction of the update moving forward or backwards
         step *=-1;
       }
       int previousCurrentPosUs = (int)currentPosUs;
       currentPosUs += step;
       if ((step > 0.0 && (int)currentPosUs > targetPosUs) || (step < 0.0 && (int)currentPosUs < targetPosUs)) {
+        // don't over shoot the target.
         currentPosUs = targetPosUs;
       }
-      if (!(previousCurrentPosUs == (int)currentPosUs)) {
+      // There was a change in the currentPosition
+      if (previousCurrentPosUs != (int)currentPosUs) {
         servo->writeMicroseconds((int)currentPosUs);
-        if ((int)currentPosUs == targetPosUs) {
-          publishServoEvent(SERVO_EVENT_STOPPED);
-        }
-        else {
-          publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+        publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+        // if we're not sweeping and we reached the target position., then we are stopped here.
+        if (!isSweeping && ((int)currentPosUs == targetPosUs)) {
+            publishServoEvent(SERVO_EVENT_STOPPED);
+            isMoving = false;
         }
       }
-    }
-    else {
+    } else {
+    	// current position is target position.
+      // if we're sweeping, flip our target position
       if (isSweeping) {
         if (targetPosUs == minUs) {
           targetPosUs = maxUs;
-        }
-        else {
+        } else {
           targetPosUs = minUs;
         }
         sweepStep *= -1;
-      }
-      else {
+      } else {
+    	// if we're not sweeping, we have arrived at our final destination.
         isMoving = false;
         publishServoEvent(SERVO_EVENT_STOPPED);
       }
     }
   }
 }
-
 
 void MrlServo::moveToMicroseconds(int posUs) {
   if (servo == NULL){ 
@@ -117,7 +128,6 @@ void MrlServo::moveToMicroseconds(int posUs) {
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
-  publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
 }
 
 void MrlServo::startSweep(int minUs, int maxUs, int step) {
@@ -134,12 +144,10 @@ void MrlServo::stop() {
   isSweeping = false;
 }
 
-
 void MrlServo::stopSweep() {
   isMoving = false;
   isSweeping = false;
 }
-
 
 void MrlServo::setVelocity(int velocity) {
   this->velocity = velocity;

@@ -19,13 +19,14 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.slf4j.Logger;
 
 public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 63;
+  static final Integer MRLCOMM_VERSION = 64;
 
   private String ackEnabled = "true";
 
@@ -90,7 +91,6 @@ public class ArduinoMsgGenerator {
   }
 
   // FIXME - before it comes a mess - send and recv templates !!!
-
   public void generateDefinitions(File idl) throws IOException {
 
     // load templates
@@ -220,12 +220,20 @@ public class ArduinoMsgGenerator {
 
     idlToJava = idlToJava.replace("%arduino%", "arduino");
     idlToJava = idlToJava.replace("%javaClass%", "Msg");
-    idlToJava = idlToJava.replace("%javaArduinoClass%", "Arduino");
+    idlToJava = idlToJava.replace("%javaArduinoClass%", MrlCommPublisher.class.getSimpleName());
+    // Msg doesn't publish acks back to MrlComm
+    idlToJava = idlToJava.replace("%publishAcks%", "");
+    // on startup Msg needs to see an MrlBeginMessage before it's clear to send data.
+    idlToJava = idlToJava.replace("%clearToSend%", "false");
 
     virtualJava = virtualJava.replace("%arduino%", "virtual");
     virtualJava = virtualJava.replace("%javaClass%", "VirtualMsg");
     virtualJava = virtualJava.replace("%javaArduinoClass%", "MrlComm");
     virtualJava = virtualJava.replace("%ackEnabled%", "false");
+    // virtual message should publish an ack after each processCommand call.
+    virtualJava = virtualJava.replace("%publishAcks%", "publishAck(method);");
+    // virtual message doesn't need to wait for a begin message to be clear to send.
+    virtualJava = virtualJava.replace("%clearToSend%", "true");
 
     fileSnr.put("%ackEnabled%", ackEnabled );
     // process substitutions
@@ -386,7 +394,7 @@ public class ArduinoMsgGenerator {
     StringBuilder javaMethodParameters = new StringBuilder();
     StringBuilder cppMethodParameters = new StringBuilder();
     StringBuilder cppWrite = new StringBuilder("  write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
-    StringBuilder javaWrite = new StringBuilder("      write(" + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
+    StringBuilder javaWrite = new StringBuilder("      appendMessage(baos, " + CodecUtils.toUnderScore(name) + "); // msgType = " + msgIndex + "\n");
 
     String arduinoOrMrlComm = (keywords.contains(name)) ? "" : "mrlComm->";
     StringBuilder cppCaseHeader = new StringBuilder("  case " + CodecUtils.toUnderScore(name) + ": { // " + name + "\n");
@@ -394,7 +402,7 @@ public class ArduinoMsgGenerator {
     StringBuilder cppCaseArduinoMethod = new StringBuilder("      " + arduinoOrMrlComm + name + "(");
 
     StringBuilder javaCaseHeader = new StringBuilder("    case " + CodecUtils.toUnderScore(name) + ": {\n");
-    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){");
+    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){"); 
     javaCaseArduinoMethod.append("\n        arduino.invoke(\"" + name + "\"");
 
     StringBuilder javaCaseRecord = new StringBuilder("      if(record != null){");
@@ -403,7 +411,7 @@ public class ArduinoMsgGenerator {
     StringBuilder javaSendRecord = new StringBuilder("      if(record != null){");
     javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
-    // compiler check
+    // compiler check, make sure we have a compilation error if MrlCommPublisher is missing a method.
     StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      } else { \n         arduino." + name + "(");
     if (paramaters.length > 0) {
       javaCaseArduinoMethod.append(", ");
@@ -480,7 +488,7 @@ public class ArduinoMsgGenerator {
 
         // cppWrite.append(" writestr(" + paramName + ");\n");
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("      write(" + paramName + ");\n");
+        javaWrite.append("      appendMessage(baos, " + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length())");
 
@@ -489,14 +497,14 @@ public class ArduinoMsgGenerator {
       } else if (idlParamType.equals("[]")) {
 
         cppWrite.append("  write((byte*)" + paramName + ", " + paramName + "Size);\n");
-        javaWrite.append("      write(" + paramName + ");\n");
+        javaWrite.append("      appendMessage(baos, " + paramName + ");\n");
 
         javaWriteMsgSize.append(" + (1 + " + paramName + ".length)");
 
         cppWriteMsgSize.append(" + (1 + " + paramName + "Size)");
       } else {
         cppWrite.append("  write" + idlParamType + "(" + paramName + ");\n");
-        javaWrite.append("      write" + idlParamType + "(" + paramName + ");\n");
+        javaWrite.append("      appendMessage" + idlParamType + "(baos, " + paramName + ");\n");
         cppWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
         javaWriteMsgSize.append(" + " + getCppTypeSize(idlParamType));
       }
@@ -641,11 +649,11 @@ public class ArduinoMsgGenerator {
       javaMethod = javaMethod.replace(search, snr.get(search));
     }
 
-    javaCaseRecord.append("      rxBuffer.append(\"\\n\");\n");
-    javaCaseRecord.append("      try{\n");
-    javaCaseRecord.append("        record.write(rxBuffer.toString().getBytes());\n");
-    javaCaseRecord.append("        rxBuffer.setLength(0);\n");
-    javaCaseRecord.append("      }catch(IOException e){}\n");
+    javaCaseRecord.append("        rxBuffer.append(\"\\n\");\n");
+    javaCaseRecord.append("        try{\n");
+    javaCaseRecord.append("          record.write(rxBuffer.toString().getBytes());\n");
+    javaCaseRecord.append("          rxBuffer.setLength(0);\n");
+    javaCaseRecord.append("        } catch (IOException e) {\n          log.warn(\"failed recording bytes.\", e); \n        }\n");
 
     // TODO
     if (dir == '<') {
@@ -655,8 +663,10 @@ public class ArduinoMsgGenerator {
       methodSnr.put("cppHandleCase", "");
       methodSnr.put("cppGeneratedCallBacks", "");
 
-      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"
-          + javaCaseRecord + "      }\n" + javaCaseFooter);
+      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"+
+                     javaCaseRecord + "      }\n" + javaCaseFooter);
+      
+      
       methodSnr.put("javaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("javaMethod", "");
 
@@ -678,8 +688,9 @@ public class ArduinoMsgGenerator {
       methodSnr.put("javaGeneratedCallBack", "");
 
       // vJava send methods
-      methodSnr.put("vJavaHandleCase",
-          javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
+      methodSnr.put("vJavaHandleCase",javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
+      
+      
       methodSnr.put("vJavaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("vJavaMethod", "");
 

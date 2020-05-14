@@ -18,12 +18,8 @@ import org.slf4j.Logger;
 public abstract class Port implements Runnable, SerialControl {
 
   public final static Logger log = LoggerFactory.getLogger(Port.class);
-
-  String portName;
-
+  public String portName;
   transient HashMap<String, SerialDataListener> listeners = new HashMap<>();
-
-  static int pIndex = 0;
 
   /**
    * Thread for reading if required - in case of PortQueue and PortStream (but
@@ -31,34 +27,26 @@ public abstract class Port implements Runnable, SerialControl {
    */
   transient Thread readingThread = null;
   boolean listening = false;
-  
-
-  public boolean debug = true;
-  public boolean debugTX = true;
+  public boolean debug = false;
+  public boolean debugTX = false;
   public boolean debugRX = false;
-
   QueueStats stats = new QueueStats();
-
   // hardware serial port details
-  // default convention over configuration
-  // int rate = 57600;
   int rate = 115200;
   int dataBits = 8;
   int stopBits = 1;
   int parity = 0;
-
   int txErrors;
   int rxErrors;
+  private boolean isOpen = false;
 
-  boolean isOpen = false;
 
-  // FIXME - find a better way to handle this
-  // necessary - to be able to invoke
-  // "nameless" port implementation to query "hardware" ports
-  // overloading a "Port" and a PortQuery - :P
-  public Port() {
-  }
-
+  /** 
+   * Default constructor for a port at a minimum requires a port name.  Typically something like COM4 or /dev/ttyACM0 
+   * or even a virtual port name.
+   * 
+   * @param portName
+   */
   public Port(String portName) {
     this.stats.name = portName;
     this.portName = portName;
@@ -74,13 +62,12 @@ public abstract class Port implements Runnable, SerialControl {
   }
 
   public void close() {
-
+    isOpen = false;
     listening = false;
     if (readingThread != null) {
       readingThread.interrupt();
     }
     readingThread = null;
-
     log.info("closed port {}", portName);
   }
 
@@ -125,8 +112,7 @@ public abstract class Port implements Runnable, SerialControl {
   public void listen(Map<String, SerialDataListener> listeners) {
     this.listeners.putAll(listeners);
     if (readingThread == null) {
-      ++pIndex;
-      readingThread = new Thread(this, String.format("%s.portListener %s", portName, pIndex));
+      readingThread = new Thread(this, String.format("%s.portListener", portName));
       readingThread.start();
     } else {
       log.info("{} already listening", portName);
@@ -144,40 +130,52 @@ public abstract class Port implements Runnable, SerialControl {
     isOpen = true;
   }
 
-  abstract public int read() throws Exception;
-
+  abstract public byte[] readBytes() throws Exception;
   /**
    * reads from Ports input stream and puts it on the Serials main RX line - to
    * be published and buffered - PortJSSC uses the thread of the library to "push" serial data
    */
   @Override
   public void run() {
-
-    log.info("listening on port {}", portName);
+    // JSSC port doesn't need this, it has it's own thread that publishes SerialEvents for us.
+    log.info("Listening on port {}", portName);
     listening = true;
-    Integer newByte = -1;
     try {
-      while (listening && ((newByte = read()) > -1)) { // "real" java byte
-        // 255 / -1 will
-        // kill this
-        // log.error(String.format("%d",newByte));
-        for (String key : listeners.keySet()) {
-          listeners.get(key).onByte(newByte);
-          // log.info(String.format("%d",newByte));
+      while (listening) {
+        // read everything that's available on the port.
+        byte[] buffer = readBytes();
+        if (buffer == null) { 
+          // We want to have a small delay to spare the cpu,
+          // give it a millisecond for data to arrive.
+          Thread.sleep(1);
+          continue;
         }
-        ++stats.total;
-        if (stats.total % stats.interval == 0) {
-
-          stats.ts = System.currentTimeMillis();
-          stats.delta = stats.ts - stats.lastTS;
-          stats.lineSpeed = (8 * stats.interval) / stats.delta;
-          for (String key : listeners.keySet()) {
-            listeners.get(key).updateStats(stats);
+        // debug
+        if (debug && debugRX) {
+          log.info("RX Data: {}", buffer);
+        }
+        // we have data.. let's publish it.
+        if (listeners.size() == 0) {
+          log.warn("NO LISTENERS for serial port {} data getting dropped! {}", portName, buffer);
+        }
+        for (String key : listeners.keySet()) {
+          listeners.get(key).onBytes(buffer);
+        }
+        // TODO: better stats.. for now.. keeping previous behavior.
+        for (int i = 0; i<buffer.length;i++) {
+          ++stats.total;
+          if (stats.total % stats.interval == 0) {
+            stats.ts = System.currentTimeMillis();
+            stats.delta = stats.ts - stats.lastTS;
+            stats.lineSpeed = (8 * stats.interval) / stats.delta;
+            for (String key : listeners.keySet()) {
+              listeners.get(key).updateStats(stats);
+            }
+            stats.lastTS = stats.ts;
           }
-          stats.lastTS = stats.ts;
         }
       }
-      log.info("{} no longer listening - last byte {} ", portName, newByte);
+      log.info("Port: {} no longer listening.", portName);
     } catch (InterruptedException e) {
       log.info("port {} interrupted - stopping listener", portName);
     } catch (Exception e1) {
@@ -217,7 +215,7 @@ public abstract class Port implements Runnable, SerialControl {
    */
   abstract public void write(int b) throws Exception;
 
-  abstract public void write(int[] data) throws Exception;
+  abstract public void write(byte[] data) throws Exception;
 
   public boolean setParams(int rate, int dataBits, int stopBits, int parity) throws Exception {
     log.debug("setSerialPortParams {} {} {} {}", rate, dataBits, stopBits, parity);
