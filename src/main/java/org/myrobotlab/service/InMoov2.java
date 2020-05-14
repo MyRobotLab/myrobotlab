@@ -110,6 +110,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     return meta;
   }
+  
+  /**
+   * execute an Intro resource script
+   * @param introScriptName
+   */
+  public void execScript(String introScriptName) {
+    try {
+      Python p = (Python)Runtime.start("python", "Python");
+      String script = getResourceAsString(introScriptName);
+      p.exec(script, true);
+    } catch (Exception e) {
+      error("unable to execute script %s", introScriptName); 
+    }
+  }
 
   /**
    * This method will load a python file into the python interpreter.
