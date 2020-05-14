@@ -1,14 +1,21 @@
 package org.myrobotlab.arduino.virtual;
 
+import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
+import org.slf4j.Logger;
+
 
 public class MrlCommIno {
-  transient Serial Serial;// = new Serial();
+  
+  public final static Logger log = LoggerFactory.getLogger(MrlCommIno.class);
+  transient Serial serial;// = new Serial();
   transient VirtualArduino virtual;
 
   public MrlCommIno(VirtualArduino virtual) {
     this.virtual = virtual;
+    this.serial = virtual.getSerial();
     this.mrlComm = new MrlComm(virtual);
   }
 
@@ -64,11 +71,11 @@ public class MrlCommIno {
    * Here we default out serial port to 115.2kbps.
    */
   public void setup() {
-
-    // Serial.begin(115200);
-
+    log.info("Setup loop called.  Starting virtual mrlcomm script.");
     // start with standard serial & rate
-    mrlComm.begin(Serial);
+    mrlComm.begin(serial);
+    // msg->publishMrlCommBegin(MRLCOMM_VERSION);
+    mrlComm.getMsg().publishMrlCommBegin(Msg.MRLCOMM_VERSION);
   }
 
   /**
@@ -78,13 +85,9 @@ public class MrlCommIno {
    * @throws Exception
    *           - error if processing of a command blows up for some reason.
    */
-  public void loop() throws Exception {
-    // get a command and process it from
-    // the serial port (if available.)
-    // wdt_disable();
-    if (mrlComm.readMsg()) {
-      mrlComm.processCommand();
-    }
+  public void loop() {
+    // This is NoOp, real messages are read in the onBytes of VirtualMsg
+    mrlComm.readMsg();
     // update devices
     mrlComm.updateDevices();
     // send back load time and memory

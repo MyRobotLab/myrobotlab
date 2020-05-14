@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.myrobotlab.arduino.Msg.MAGIC_NUMBER;
 import static org.myrobotlab.arduino.Msg.MAX_MSG_SIZE;
 import static org.myrobotlab.arduino.Msg.MRLCOMM_VERSION;
 
@@ -26,6 +25,7 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
+import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
@@ -52,6 +52,7 @@ import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -71,7 +72,7 @@ import org.slf4j.Logger;
 
 public class Arduino extends AbstractMicrocontroller
     implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
-    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher {
+    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -170,7 +171,6 @@ public class Arduino extends AbstractMicrocontroller
 
   private long boardInfoRequestTs;
 
-  int byteCount;
   @Deprecated /*
                * should develop a MrlSerial on Arduinos and
                * Arduino.getSerial("s1")
@@ -187,11 +187,6 @@ public class Arduino extends AbstractMicrocontroller
    * they will be referenced by name OR by index
    */
   transient Map<String, DeviceMapping> deviceList = new ConcurrentHashMap<String, DeviceMapping>();
-
-  // FIXME - use
-  int errorServiceToHardwareRxCnt = 0;
-
-  int errorHardwareToServiceRxCnt = 0;
 
   I2CBus i2cBus = null;
 
@@ -217,11 +212,7 @@ public class Arduino extends AbstractMicrocontroller
 
   public transient Msg msg;
 
-  int msgSize;
-
   Integer nextDeviceId = 0;
-
-  int numAck = 0;
 
   /**
    * Serial service - the Arduino's serial connection
@@ -239,7 +230,7 @@ public class Arduino extends AbstractMicrocontroller
 
   int mrlCommBegin = 0;
 
-  long syncStartTypeTs = System.currentTimeMillis();
+  private volatile boolean syncInProgress = false;
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -346,6 +337,7 @@ public class Arduino extends AbstractMicrocontroller
   synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {
     DeviceMapping map = new DeviceMapping(device, attachConfig);
     map.setId(nextDeviceId);
+    log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}",  device.getName(), device.getClass().getSimpleName(), map);
     deviceList.put(device.getName(), map);
     deviceIndex.put(nextDeviceId, map);
     ++nextDeviceId;
@@ -607,17 +599,15 @@ public class Arduino extends AbstractMicrocontroller
    * sync our device list with mrlcomm
    */
   public void sync() {
-    long now = System.currentTimeMillis();
-    if (now - syncStartTypeTs < 5000) {
-      log.error("===== we are in the middle of synching ... ==== talk to us in {} ms", 5000 - (now - syncStartTypeTs));
+    if (syncInProgress) {
+      log.warn("Alreadying calling sync!  Skipping this request");
       return;
     }
-    syncStartTypeTs = System.currentTimeMillis();
+    syncInProgress = true;
     log.warn("================================ sync !!! ==============================");
     try {
-      
       for (DeviceMapping device : deviceList.values()) {
-        reattach(device);
+       reattach(device);
       }
 
       List<PinDefinition> list = getPinList();
@@ -630,6 +620,9 @@ public class Arduino extends AbstractMicrocontroller
     } catch (Exception e) {
       log.error("sync threw", e);
     }
+    syncInProgress = false;
+    log.info("Sync completed");
+
   }
 
   // > customMsg/[] msg
@@ -1265,6 +1258,8 @@ public class Arduino extends AbstractMicrocontroller
       serial = (Serial) startPeer("serial");
       msg = new Msg(this, serial);
       serial.addByteListener(this);
+    } else {
+      log.warn("Init serial called and we already have a msg class!");
     }
   }
 
@@ -1438,83 +1433,19 @@ public class Arduino extends AbstractMicrocontroller
    *
    */
 
-  // FIXME - onByte(int[] data)
-  @Override
-  public Integer onByte(Integer newByte) {
-    try {
-      /**
-       * Archtype InputStream read - rxtxLib does not have this straightforward
-       * design, but the details of how it behaves is is handled in the Serial
-       * service and we are given a unified interface
-       *
-       * The "read()" is data taken from a blocking queue in the Serial service.
-       * If we want to support blocking functions in Arduino then we'll
-       * "publish" to our local queues
-       */
-      // TODO: consider reading more than 1 byte at a time ,and make this
-      // callback onBytes or something like that.
-
-      ++byteCount;
-      if (log.isDebugEnabled()) {
-        log.info("onByte {} \tbyteCount \t{}", newByte, byteCount);
-      }
-      if (byteCount == 1) {
-        if (newByte != MAGIC_NUMBER) {
-          byteCount = 0;
-          msgSize = 0;
-          Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
-          warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
-          // dump.setLength(0);
-        }
-        return newByte;
-      } else if (byteCount == 2) {
-        // get the size of message
-        if (newByte > 64) {
-          byteCount = 0;
-          msgSize = 0;
-          error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt));
-          return newByte;
-        }
-        msgSize = newByte.intValue();
-        // dump.append(String.format("MSG|SZ %d", msgSize));
-      } else if (byteCount > 2) {
-        // remove header - fill msg data - (2) headbytes -1
-        // (offset)
-        // dump.append(String.format("|P%d %d", byteCount,
-        // newByte));
-        ioCmd[byteCount - 3] = newByte.intValue();
-      } else {
-        // the case where byteCount is negative?! not got.
-        error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
-        return newByte;
-      }
-      if (byteCount == 2 + msgSize) {
-        // we've received a full message
-
-        msg.processCommand(ioCmd);
-
-        // Our 'first' getBoardInfo may not receive a acknowledgement
-        // so this should be disabled until boadInfo is valid
-
-        // clean up memory/buffers
-        msgSize = 0;
-        byteCount = 0;
-        Arrays.fill(ioCmd, 0); // optimize remove
-      }
-    } catch (Exception e) {
-      ++errorHardwareToServiceRxCnt;
-      error("msg structure violation %d", errorHardwareToServiceRxCnt);
-      log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount));
-      // try again (clean up memory buffer)
-      msgSize = 0;
-      byteCount = 0;
-      Logging.logError(e);
-    }
-    return newByte;
+  public synchronized void onBytes(byte[] bytes) {
+    // log.info("On Bytes called in Arduino. {}", bytes);
+    // These bytes arrived from the serial port data, push them down into the msg parser.
+    // if a full message is detected, the publish(Function) method will be directly called on
+    // this arduino instance.
+    msg.onBytes(bytes);
   }
 
   @Override
-  public void onConnect(String portName) {
+  public synchronized void onConnect(String portName) {
+    // Pass this serial port notification down to the msg parser
+    msg.onConnect(portName);
+    log.info("{} onConnect for port {}", getName(), portName);
     info("%s connected to %s", getName(), portName);
     // chained...
     invoke("publishConnect", portName);
@@ -1526,8 +1457,8 @@ public class Arduino extends AbstractMicrocontroller
 
   @Override
   public void onDisconnect(String portName) {
+    msg.onDisconnect(portName);
     info("%s disconnected from %s", getName(), portName);
-    // enableAck(false);
     enableBoardInfo(false);
     // chained...
     invoke("publishDisconnect", portName);
@@ -1535,11 +1466,9 @@ public class Arduino extends AbstractMicrocontroller
 
   public void openMrlComm(String path) {
     try {
-
       if (!setArduinoPath(path)) {
         return;
       }
-
       String mrlCommFiles = null;
       if (FileIO.isJar()) {
         mrlCommFiles = getResourceDir() + "/Arduino/MrlComm";
@@ -1618,11 +1547,9 @@ public class Arduino extends AbstractMicrocontroller
 
   // < publishAck/function
   public void publishAck(Integer function/* byte */) {
-    log.debug("Message Ack received: =={}==", Msg.methodToString(function));
-
-    msg.ackReceived(function);
-
-    numAck++;
+    if (msg.debug) {
+      log.info("{} Message Ack received: =={}==", getName(), Msg.methodToString(function));
+    }
   }
 
   // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/[]
@@ -1651,17 +1578,18 @@ public class Arduino extends AbstractMicrocontroller
       broadcastState();
     }
 
-    if (boardInfo != null) {
-      DeviceSummary[] ds = boardInfo.getDeviceSummary();
-      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
-        sync();
-      }
-    }
+    // TODO: consider, can we really just re-sync when we see begin only.. ?  feels better/safer.
+//    if (boardInfo != null) {
+//      DeviceSummary[] ds = boardInfo.getDeviceSummary();
+//      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
+//        log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}", deviceList, ds);
+//        invoke("sync");
+//      }
+//    }
 
     // we send here - because this is a "command" message, and we don't want the
     // possibility of
     // block this "status" msgs
-    // send(getName(),"sync", boardInfo);
     lastBoardInfo = boardInfo;
     return boardInfo;
   }
@@ -1748,7 +1676,8 @@ public class Arduino extends AbstractMicrocontroller
    */
   // < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
-    log.error(errorMsg);
+    warn("MrlCommError: " + errorMsg);
+    log.error("MRLCommError: {}", errorMsg);
     return errorMsg;
   }
 
@@ -1898,8 +1827,6 @@ public class Arduino extends AbstractMicrocontroller
     // reset Java-land
     deviceIndex.clear();
     deviceList.clear();
-    errorHardwareToServiceRxCnt = 0;
-    errorServiceToHardwareRxCnt = 0;
   }
 
   /**
@@ -2289,21 +2216,28 @@ public class Arduino extends AbstractMicrocontroller
     return deviceList;
   }
 
-  public void noAck() {
-    log.error("no Ack we are resetting the serial port !");
-    /*
-     * String portName = getPortName(); disconnect(); sleep(1000);
-     * connect(portName);
-     */
+  public void ackTimeout() {
+    log.warn("Ack Timeout seen.  TODO: consider resetting the com port, reconnecting and re syncing all devices.");
   }
 
   public void publishMrlCommBegin(Integer version) {
-    log.info("publishMrlCommBegin ({}) - going to sync", version);
-    sync();
+    // If we were already connected up and clear to send.. this is a problem.. it means the board was reset on it.
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
+      // At this point we need to reset!
+      mrlCommBegin = 0;
     }
     ++mrlCommBegin;
+    // log.info("Skipping Sync!  TODO: uncomment me.");
+    // This needs to be non-blocking
+    // If we have devices, we need to sync them.
+    // The device list always has "Arduino" in it for some reason..
+    if (deviceList.size() > 1) {
+      log.info("Need to sync devices to mrlcomm. Num Devices: {} Devices: {}", deviceList.size(), deviceList);
+      send(getName(), "sync");
+    } else {
+      log.info("no devices to sync, clear to resume.");
+    }
   }
 
   /**

@@ -1,15 +1,19 @@
 package org.myrobotlab.arduino;
 
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.arduino.virtual.MrlComm;
+import org.myrobotlab.string.StringUtil;
+import org.python.jline.internal.Log;
 
 /**
  * <pre>
@@ -19,20 +23,20 @@ import org.myrobotlab.arduino.virtual.MrlComm;
  which combines the MrlComm message schema (src/resource/Arduino/arduinoMsg.schema)
  with the cpp template (src/resource/Arduino/generate/Msg.java.template)
 
- 	Schema Type Conversions
+   Schema Type Conversions
 
-	Schema      ARDUINO					Java							Range
-	none		byte/unsigned char		int (cuz Java byte bites)		1 byte - 0 to 255
-	boolean		boolean					boolean							0 1
-    b16			int						int (short)						2 bytes	-32,768 to 32,767
-    b32			long					int								4 bytes -2,147,483,648 to 2,147,483, 647
-    bu32		unsigned long			long							0 to 4,294,967,295
-    str			char*, size				String							variable length
-    []			byte[], size			int[]							variable length
+  Schema      ARDUINO          Java              Range
+  none    byte/unsigned char    int (cuz Java byte bites)    1 byte - 0 to 255
+  boolean    boolean          boolean              0 1
+    b16      int            int (short)            2 bytes  -32,768 to 32,767
+    b32      long          int                4 bytes -2,147,483,648 to 2,147,483, 647
+    bu32    unsigned long      long              0 to 4,294,967,295
+    str      char*, size        String              variable length
+    []      byte[], size      int[]              variable length
 
  All message editing should be done in the arduinoMsg.schema
 
- The binary wire format of an Arduino is:
+ The binary wire format of an MrlCommPublisher is:
 
  MAGIC_NUMBER|MSG_SIZE|METHOD_NUMBER|PARAM0|PARAM1 ...
  
@@ -46,14 +50,14 @@ import org.myrobotlab.service.VirtualArduino;
 
 import java.io.FileOutputStream;
 import java.util.Arrays;
-import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.slf4j.Logger;
 
 /**
- * Singlton messaging interface to an Arduino
+ * Singlton messaging interface to an MrlCommPublisher
  *
  * @author GroG
  *
@@ -61,44 +65,40 @@ import org.slf4j.Logger;
 
 public class Msg {
 
-	public static final int MAX_MSG_SIZE = 64;
-	public static final int MAGIC_NUMBER = 170; // 10101010
-	public static final int MRLCOMM_VERSION = 63;
-	
-	int ackMaxWaitMs = 1000;
-  
-  	boolean waiting = false;
-	
-	
-	// send buffer
-  int sendBufferSize = 0;
-  int sendBuffer[] = new int[MAX_MSG_SIZE];
-  
+  // TODO: pick a more reasonable timeout.. 3 seconds is high.
+  private static final int ACK_TIMEOUT = 3000;
+  public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
+  public static final int MAX_MSG_SIZE = 64;
+  public static final int MAGIC_NUMBER = 170; // 10101010
+  public static final int MRLCOMM_VERSION = 64;
+  // send buffer
+  private int sendBufferSize = 0;
+  private int sendBuffer[] = new int[MAX_MSG_SIZE];
   // recv buffer
-  int ioCmd[] = new int[MAX_MSG_SIZE];
+  private int ioCmd[] = new int[MAX_MSG_SIZE];
+  private AtomicInteger byteCount = new AtomicInteger(0);
+  private int msgSize = 0;
+  // ------ device type mapping constants
+  private int method = -1;
+  public boolean debug = false;
+  // when using a real service, invoke should be true, for unit tests, this should be false.
+  private boolean invoke = true;
   
-  int byteCount = 0;
-  int msgSize = 0;
-
-	// ------ device type mapping constants
-	int method = -1;
-	public boolean debug = false;
-	boolean invoke = true;
-	
-	boolean ackEnabled = true;
-	
-	 public static class AckLock {
-	    // first is always true - since there
-	    // is no msg to be acknowledged...
-	    volatile boolean acknowledged = true;
-	  }
-	 
-	transient AckLock ackRecievedLock = new AckLock();
-	
-	// recording related
-	transient FileOutputStream record = null;
-	transient StringBuilder rxBuffer = new StringBuilder();
-	transient StringBuilder txBuffer = new StringBuilder();	
+  private int errorServiceToHardwareRxCnt = 0;
+  private int errorHardwareToServiceRxCnt = 0;
+  
+  boolean ackEnabled = true;
+  private volatile boolean clearToSend = false;
+  public static class AckLock {
+    // track if there is a pending message, when sending a message
+    // this goes to true. when getting an ack it goes to false.
+    volatile boolean pendingMessage = false;
+  }
+  transient AckLock ackRecievedLock = new AckLock();
+  // recording related
+  transient OutputStream record = null;
+  transient StringBuilder rxBuffer = new StringBuilder();
+  transient StringBuilder txBuffer = new StringBuilder();  
 
   public static final int DEVICE_TYPE_UNKNOWN   =     0;
   public static final int DEVICE_TYPE_ARDUINO   =     1;
@@ -110,7 +110,7 @@ public class Msg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
-		
+    
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
@@ -228,7 +228,7 @@ public class Msg {
 /**
  * These methods will be invoked from the Msg class as callbacks from MrlComm.
  */
-	
+  
   // public void publishMRLCommError(String errorMsg/*str*/){}
   // public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
   // public void publishAck(Integer function/*byte*/){}
@@ -242,39 +242,52 @@ public class Msg {
   // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
   // public void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/){}
   // public void publishMrlCommBegin(Integer version/*byte*/){}
-	
+  
+  
 
-	
-	public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
+  public Msg(MrlCommPublisher arduino, SerialDevice serial) {
+    this.arduino = arduino;
+    this.serial = serial;
+  }
+  
+  public void begin(SerialDevice serial){
+    this.serial = serial;
+  }
 
-	public Msg(Arduino arduino, SerialDevice serial) {
-		this.arduino = arduino;
-		this.serial = serial;
-	}
-	
-	public void begin(SerialDevice serial){
-	  this.serial = serial;
-	}
+  // transient private Msg instance;
 
-	// transient private Msg instance;
-
-	// ArduinoSerialCallBacks - TODO - extract interface
-	transient private Arduino arduino;
-	
-	transient private SerialDevice serial;
-	
-	public void setInvoke(boolean b){
-	  invoke = b;
-	}
-	
-	public void processCommand(){
-	  processCommand(ioCmd);
-	}
-	
-	public void processCommand(int[] ioCmd) {
-		int startPos = 0;
-		method = ioCmd[startPos];
-		switch (method) {
+  // ArduinoSerialCallBacks - TODO - extract interface
+  transient private MrlCommPublisher arduino;
+  
+  transient private SerialDevice serial;
+  
+  public void processCommand(int[] ioCmd) {
+    int startPos = 0;
+    method = ioCmd[startPos];
+    // always process mrlbegin..
+    if (debug) { 
+      log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
+    }
+    
+    if (method == PUBLISH_ACK) {
+      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // call publishAck on the MrlCommPublisher
+      Integer function = ioCmd[startPos+1]; // bu8
+      ackReceived(function);
+    }
+    
+    if (method != PUBLISH_MRL_COMM_BEGIN) {
+      if (!clearToSend) {
+        log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
+        System.err.println("\nDumping command not clear to send.\n");
+        return;
+      }
+    } else {
+      // Process!
+      log.info("Clear to process!!!!!!!!!!!!!!!!!!");
+      this.clearToSend = true;
+    }
+    switch (method) {
     case PUBLISH_MRLCOMM_ERROR: {
       String errorMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
       startPos += 1 + ioCmd[startPos+1];
@@ -287,11 +300,13 @@ public class Msg {
         rxBuffer.append("< publishMRLCommError");
         rxBuffer.append("/");
         rxBuffer.append(errorMsg);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -328,11 +343,13 @@ public class Msg {
         rxBuffer.append(activePins);
         rxBuffer.append("/");
         rxBuffer.append(Arrays.toString(deviceSummary));
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -349,11 +366,13 @@ public class Msg {
         rxBuffer.append("< publishAck");
         rxBuffer.append("/");
         rxBuffer.append(function);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -378,11 +397,13 @@ public class Msg {
         rxBuffer.append(myByte);
         rxBuffer.append("/");
         rxBuffer.append(secondFloat);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -399,11 +420,13 @@ public class Msg {
         rxBuffer.append("< publishCustomMsg");
         rxBuffer.append("/");
         rxBuffer.append(Arrays.toString(msg));
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -424,11 +447,13 @@ public class Msg {
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
         rxBuffer.append(Arrays.toString(data));
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -445,11 +470,13 @@ public class Msg {
         rxBuffer.append("< publishDebug");
         rxBuffer.append("/");
         rxBuffer.append(debugMsg);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -466,11 +493,13 @@ public class Msg {
         rxBuffer.append("< publishPinArray");
         rxBuffer.append("/");
         rxBuffer.append(Arrays.toString(data));
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -499,11 +528,13 @@ public class Msg {
         rxBuffer.append(currentPos);
         rxBuffer.append("/");
         rxBuffer.append(targetPos);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -524,11 +555,13 @@ public class Msg {
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
         rxBuffer.append(Arrays.toString(data));
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -549,11 +582,13 @@ public class Msg {
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
         rxBuffer.append(echoTime);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -574,11 +609,13 @@ public class Msg {
         rxBuffer.append(deviceId);
         rxBuffer.append("/");
         rxBuffer.append(position);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
@@ -595,41 +632,38 @@ public class Msg {
         rxBuffer.append("< publishMrlCommBegin");
         rxBuffer.append("/");
         rxBuffer.append(version);
-      rxBuffer.append("\n");
-      try{
-        record.write(rxBuffer.toString().getBytes());
-        rxBuffer.setLength(0);
-      }catch(IOException e){}
+        rxBuffer.append("\n");
+        try{
+          record.write(rxBuffer.toString().getBytes());
+          rxBuffer.setLength(0);
+        } catch (IOException e) {
+          log.warn("failed recording bytes.", e); 
+        }
       }
 
       break;
     }
-		
-		}
-	}
-	
+    
+    }
+  }
+  
 
-	// Java-land --to--> MrlComm
+  // Java-land --to--> MrlComm
 
-	public synchronized void getBoardInfo() {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1); // size
-      write(GET_BOARD_INFO); // msgType = 2
+  public synchronized byte[] getBoardInfo() {
+    if (debug) {
+      log.info("Sending Message: getBoardInfo to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, GET_BOARD_INFO); // msgType = 2
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> getBoardInfo");
         txBuffer.append("\n");
@@ -637,33 +671,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("getBoardInfo threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("getBoardInfo threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 2); // size
-      write(ENABLE_PIN); // msgType = 4
-      write(address);
-      write(type);
-      writeb16(rate);
+  public synchronized byte[] enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: enablePin to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2); // size
+      appendMessage(baos, ENABLE_PIN); // msgType = 4
+      appendMessage(baos, address);
+      appendMessage(baos, type);
+      appendMessageb16(baos, rate);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> enablePin");
         txBuffer.append("/");
@@ -677,31 +708,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("enablePin threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("enablePin threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setDebug(Boolean enabled/*bool*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(SET_DEBUG); // msgType = 5
-      writebool(enabled);
+  public synchronized byte[] setDebug(Boolean enabled/*bool*/) {
+    if (debug) {
+      log.info("Sending Message: setDebug to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SET_DEBUG); // msgType = 5
+      appendMessagebool(baos, enabled);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setDebug");
         txBuffer.append("/");
@@ -711,31 +739,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setDebug threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setDebug threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setSerialRate(Integer rate/*b32*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 4); // size
-      write(SET_SERIAL_RATE); // msgType = 6
-      writeb32(rate);
+  public synchronized byte[] setSerialRate(Integer rate/*b32*/) {
+    if (debug) {
+      log.info("Sending Message: setSerialRate to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4); // size
+      appendMessage(baos, SET_SERIAL_RATE); // msgType = 6
+      appendMessageb32(baos, rate);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setSerialRate");
         txBuffer.append("/");
@@ -745,30 +770,27 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setSerialRate threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setSerialRate threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void softReset() {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1); // size
-      write(SOFT_RESET); // msgType = 7
+  public synchronized byte[] softReset() {
+    if (debug) {
+      log.info("Sending Message: softReset to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, SOFT_RESET); // msgType = 7
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> softReset");
         txBuffer.append("\n");
@@ -776,31 +798,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("softReset threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("softReset threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void enableAck(Boolean enabled/*bool*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(ENABLE_ACK); // msgType = 8
-      writebool(enabled);
+  public synchronized byte[] enableAck(Boolean enabled/*bool*/) {
+    if (debug) {
+      log.info("Sending Message: enableAck to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ENABLE_ACK); // msgType = 8
+      appendMessagebool(baos, enabled);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> enableAck");
         txBuffer.append("/");
@@ -810,33 +829,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("enableAck threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("enableAck threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 4 + 1 + 4); // size
-      write(ECHO); // msgType = 10
-      writef32(myFloat);
-      write(myByte);
-      writef32(secondFloat);
+  public synchronized byte[] echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+    if (debug) {
+      log.info("Sending Message: echo to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 4 + 1 + 4); // size
+      appendMessage(baos, ECHO); // msgType = 10
+      appendMessagef32(baos, myFloat);
+      appendMessage(baos, myByte);
+      appendMessagef32(baos, secondFloat);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> echo");
         txBuffer.append("/");
@@ -850,31 +866,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("echo threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("echo threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void customMsg(int[] msg/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + (1 + msg.length)); // size
-      write(CUSTOM_MSG); // msgType = 12
-      write(msg);
+  public synchronized byte[] customMsg(int[] msg/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: customMsg to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + (1 + msg.length)); // size
+      appendMessage(baos, CUSTOM_MSG); // msgType = 12
+      appendMessage(baos, msg);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> customMsg");
         txBuffer.append("/");
@@ -884,31 +897,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("customMsg threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("customMsg threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void deviceDetach(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(DEVICE_DETACH); // msgType = 14
-      write(deviceId);
+  public synchronized byte[] deviceDetach(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: deviceDetach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, DEVICE_DETACH); // msgType = 14
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> deviceDetach");
         txBuffer.append("/");
@@ -918,32 +928,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("deviceDetach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("deviceDetach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(I2C_BUS_ATTACH); // msgType = 15
-      write(deviceId);
-      write(i2cBus);
+  public synchronized byte[] i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: i2cBusAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, I2C_BUS_ATTACH); // msgType = 15
+      appendMessage(baos, deviceId);
+      appendMessage(baos, i2cBus);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cBusAttach");
         txBuffer.append("/");
@@ -955,33 +962,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cBusAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("i2cBusAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1); // size
-      write(I2C_READ); // msgType = 16
-      write(deviceId);
-      write(deviceAddress);
-      write(size);
+  public synchronized byte[] i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: i2cRead to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, I2C_READ); // msgType = 16
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, size);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cRead");
         txBuffer.append("/");
@@ -995,33 +999,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cRead threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("i2cRead threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + (1 + data.length)); // size
-      write(I2C_WRITE); // msgType = 17
-      write(deviceId);
-      write(deviceAddress);
-      write(data);
+  public synchronized byte[] i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: i2cWrite to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, I2C_WRITE); // msgType = 17
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, data);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cWrite");
         txBuffer.append("/");
@@ -1035,34 +1036,31 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cWrite threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("i2cWrite threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1 + 1); // size
-      write(I2C_WRITE_READ); // msgType = 18
-      write(deviceId);
-      write(deviceAddress);
-      write(readSize);
-      write(writeValue);
+  public synchronized byte[] i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: i2cWriteRead to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, I2C_WRITE_READ); // msgType = 18
+      appendMessage(baos, deviceId);
+      appendMessage(baos, deviceAddress);
+      appendMessage(baos, readSize);
+      appendMessage(baos, writeValue);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> i2cWriteRead");
         txBuffer.append("/");
@@ -1078,33 +1076,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("i2cWriteRead threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("i2cWriteRead threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 4); // size
-      write(NEO_PIXEL_ATTACH); // msgType = 20
-      write(deviceId);
-      write(pin);
-      writeb32(numPixels);
+  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 4); // size
+      appendMessage(baos, NEO_PIXEL_ATTACH); // msgType = 20
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
+      appendMessageb32(baos, numPixels);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelAttach");
         txBuffer.append("/");
@@ -1118,36 +1113,33 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1 + 1 + 1 + 2); // size
-      write(NEO_PIXEL_SET_ANIMATION); // msgType = 21
-      write(deviceId);
-      write(animation);
-      write(red);
-      write(green);
-      write(blue);
-      writeb16(speed);
+  public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelSetAnimation to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+      appendMessage(baos, NEO_PIXEL_SET_ANIMATION); // msgType = 21
+      appendMessage(baos, deviceId);
+      appendMessage(baos, animation);
+      appendMessage(baos, red);
+      appendMessage(baos, green);
+      appendMessage(baos, blue);
+      appendMessageb16(baos, speed);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelSetAnimation");
         txBuffer.append("/");
@@ -1167,32 +1159,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelSetAnimation threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelSetAnimation threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + (1 + buffer.length)); // size
-      write(NEO_PIXEL_WRITE_MATRIX); // msgType = 22
-      write(deviceId);
-      write(buffer);
+  public synchronized byte[] neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: neoPixelWriteMatrix to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + buffer.length)); // size
+      appendMessage(baos, NEO_PIXEL_WRITE_MATRIX); // msgType = 22
+      appendMessage(baos, deviceId);
+      appendMessage(baos, buffer);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> neoPixelWriteMatrix");
         txBuffer.append("/");
@@ -1204,32 +1193,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("neoPixelWriteMatrix threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("neoPixelWriteMatrix threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(ANALOG_WRITE); // msgType = 23
-      write(pin);
-      write(value);
+  public synchronized byte[] analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: analogWrite to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, ANALOG_WRITE); // msgType = 23
+      appendMessage(baos, pin);
+      appendMessage(baos, value);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> analogWrite");
         txBuffer.append("/");
@@ -1241,32 +1227,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("analogWrite threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("analogWrite threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(DIGITAL_WRITE); // msgType = 24
-      write(pin);
-      write(value);
+  public synchronized byte[] digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: digitalWrite to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, DIGITAL_WRITE); // msgType = 24
+      appendMessage(baos, pin);
+      appendMessage(baos, value);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> digitalWrite");
         txBuffer.append("/");
@@ -1278,31 +1261,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("digitalWrite threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("digitalWrite threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void disablePin(Integer pin/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(DISABLE_PIN); // msgType = 25
-      write(pin);
+  public synchronized byte[] disablePin(Integer pin/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: disablePin to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, DISABLE_PIN); // msgType = 25
+      appendMessage(baos, pin);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> disablePin");
         txBuffer.append("/");
@@ -1312,30 +1292,27 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("disablePin threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("disablePin threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void disablePins() {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1); // size
-      write(DISABLE_PINS); // msgType = 26
+  public synchronized byte[] disablePins() {
+    if (debug) {
+      log.info("Sending Message: disablePins to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1); // size
+      appendMessage(baos, DISABLE_PINS); // msgType = 26
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> disablePins");
         txBuffer.append("\n");
@@ -1343,32 +1320,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("disablePins threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("disablePins threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(PIN_MODE); // msgType = 27
-      write(pin);
-      write(mode);
+  public synchronized byte[] pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: pinMode to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, PIN_MODE); // msgType = 27
+      appendMessage(baos, pin);
+      appendMessage(baos, mode);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> pinMode");
         txBuffer.append("/");
@@ -1380,32 +1354,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("pinMode threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("pinMode threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(SET_TRIGGER); // msgType = 30
-      write(pin);
-      write(triggerValue);
+  public synchronized byte[] setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: setTrigger to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SET_TRIGGER); // msgType = 30
+      appendMessage(baos, pin);
+      appendMessage(baos, triggerValue);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setTrigger");
         txBuffer.append("/");
@@ -1417,32 +1388,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setTrigger threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setTrigger threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(SET_DEBOUNCE); // msgType = 31
-      write(pin);
-      write(delay);
+  public synchronized byte[] setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: setDebounce to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SET_DEBOUNCE); // msgType = 31
+      appendMessage(baos, pin);
+      appendMessage(baos, delay);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setDebounce");
         txBuffer.append("/");
@@ -1454,35 +1422,32 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setDebounce threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setDebounce threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
-      write(SERVO_ATTACH); // msgType = 32
-      write(deviceId);
-      write(pin);
-      writeb16(initPos);
-      writeb16(initVelocity);
-      write(name);
+  public synchronized byte[] servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
+    if (debug) {
+      log.info("Sending Message: servoAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 2 + 2 + (1 + name.length())); // size
+      appendMessage(baos, SERVO_ATTACH); // msgType = 32
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
+      appendMessageb16(baos, initPos);
+      appendMessageb16(baos, initVelocity);
+      appendMessage(baos, name);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoAttach");
         txBuffer.append("/");
@@ -1500,32 +1465,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(SERVO_ATTACH_PIN); // msgType = 33
-      write(deviceId);
-      write(pin);
+  public synchronized byte[] servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: servoAttachPin to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SERVO_ATTACH_PIN); // msgType = 33
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pin);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoAttachPin");
         txBuffer.append("/");
@@ -1537,31 +1499,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoAttachPin threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoAttachPin threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoDetachPin(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(SERVO_DETACH_PIN); // msgType = 34
-      write(deviceId);
+  public synchronized byte[] servoDetachPin(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: servoDetachPin to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_DETACH_PIN); // msgType = 34
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoDetachPin");
         txBuffer.append("/");
@@ -1571,32 +1530,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoDetachPin threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoDetachPin threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-      write(SERVO_SET_VELOCITY); // msgType = 35
-      write(deviceId);
-      writeb16(velocity);
+  public synchronized byte[] servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: servoSetVelocity to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_SET_VELOCITY); // msgType = 35
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, velocity);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSetVelocity");
         txBuffer.append("/");
@@ -1608,34 +1564,31 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSetVelocity threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoSetVelocity threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1 + 1); // size
-      write(SERVO_SWEEP_START); // msgType = 36
-      write(deviceId);
-      write(min);
-      write(max);
-      write(step);
+  public synchronized byte[] servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: servoSweepStart to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1); // size
+      appendMessage(baos, SERVO_SWEEP_START); // msgType = 36
+      appendMessage(baos, deviceId);
+      appendMessage(baos, min);
+      appendMessage(baos, max);
+      appendMessage(baos, step);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSweepStart");
         txBuffer.append("/");
@@ -1651,31 +1604,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSweepStart threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoSweepStart threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoSweepStop(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(SERVO_SWEEP_STOP); // msgType = 37
-      write(deviceId);
+  public synchronized byte[] servoSweepStop(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: servoSweepStop to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_SWEEP_STOP); // msgType = 37
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSweepStop");
         txBuffer.append("/");
@@ -1685,32 +1635,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSweepStop threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoSweepStop threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-      write(SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
-      write(deviceId);
-      writeb16(target);
+  public synchronized byte[] servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: servoMoveToMicroseconds to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, target);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoMoveToMicroseconds");
         txBuffer.append("/");
@@ -1722,32 +1669,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoMoveToMicroseconds threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoMoveToMicroseconds threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 2); // size
-      write(SERVO_SET_ACCELERATION); // msgType = 39
-      write(deviceId);
-      writeb16(acceleration);
+  public synchronized byte[] servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: servoSetAcceleration to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 2); // size
+      appendMessage(baos, SERVO_SET_ACCELERATION); // msgType = 39
+      appendMessage(baos, deviceId);
+      appendMessageb16(baos, acceleration);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoSetAcceleration");
         txBuffer.append("/");
@@ -1759,32 +1703,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoSetAcceleration threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoSetAcceleration threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(SERIAL_ATTACH); // msgType = 41
-      write(deviceId);
-      write(relayPin);
+  public synchronized byte[] serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: serialAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, SERIAL_ATTACH); // msgType = 41
+      appendMessage(baos, deviceId);
+      appendMessage(baos, relayPin);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> serialAttach");
         txBuffer.append("/");
@@ -1796,32 +1737,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("serialAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("serialAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + (1 + data.length)); // size
-      write(SERIAL_RELAY); // msgType = 42
-      write(deviceId);
-      write(data);
+  public synchronized byte[] serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: serialRelay to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + (1 + data.length)); // size
+      appendMessage(baos, SERIAL_RELAY); // msgType = 42
+      appendMessage(baos, deviceId);
+      appendMessage(baos, data);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> serialRelay");
         txBuffer.append("/");
@@ -1833,33 +1771,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("serialRelay threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("serialRelay threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1); // size
-      write(ULTRASONIC_SENSOR_ATTACH); // msgType = 44
-      write(deviceId);
-      write(triggerPin);
-      write(echoPin);
+  public synchronized byte[] ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_ATTACH); // msgType = 44
+      appendMessage(baos, deviceId);
+      appendMessage(baos, triggerPin);
+      appendMessage(baos, echoPin);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorAttach");
         txBuffer.append("/");
@@ -1873,31 +1808,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("ultrasonicSensorAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
-      write(deviceId);
+  public synchronized byte[] ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorStartRanging to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStartRanging");
         txBuffer.append("/");
@@ -1907,31 +1839,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorStartRanging threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("ultrasonicSensorStartRanging threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
-      write(deviceId);
+  public synchronized byte[] ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: ultrasonicSensorStopRanging to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> ultrasonicSensorStopRanging");
         txBuffer.append("/");
@@ -1941,31 +1870,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("ultrasonicSensorStopRanging threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("ultrasonicSensorStopRanging threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setAref(Integer type/*b16*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 2); // size
-      write(SET_AREF); // msgType = 48
-      writeb16(type);
+  public synchronized byte[] setAref(Integer type/*b16*/) {
+    if (debug) {
+      log.info("Sending Message: setAref to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 2); // size
+      appendMessage(baos, SET_AREF); // msgType = 48
+      appendMessageb16(baos, type);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setAref");
         txBuffer.append("/");
@@ -1975,33 +1901,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setAref threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setAref threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + (1 + pins.length)); // size
-      write(MOTOR_ATTACH); // msgType = 49
-      write(deviceId);
-      write(type);
-      write(pins);
+  public synchronized byte[] motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
+    if (debug) {
+      log.info("Sending Message: motorAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + (1 + pins.length)); // size
+      appendMessage(baos, MOTOR_ATTACH); // msgType = 49
+      appendMessage(baos, deviceId);
+      appendMessage(baos, type);
+      appendMessage(baos, pins);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorAttach");
         txBuffer.append("/");
@@ -2015,32 +1938,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("motorAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(MOTOR_MOVE); // msgType = 50
-      write(deviceId);
-      write(pwr);
+  public synchronized byte[] motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: motorMove to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, MOTOR_MOVE); // msgType = 50
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pwr);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorMove");
         txBuffer.append("/");
@@ -2052,32 +1972,29 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorMove threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("motorMove threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1); // size
-      write(MOTOR_MOVE_TO); // msgType = 51
-      write(deviceId);
-      write(pos);
+  public synchronized byte[] motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: motorMoveTo to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1); // size
+      appendMessage(baos, MOTOR_MOVE_TO); // msgType = 51
+      appendMessage(baos, deviceId);
+      appendMessage(baos, pos);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> motorMoveTo");
         txBuffer.append("/");
@@ -2089,33 +2006,30 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("motorMoveTo threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("motorMoveTo threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1 + 1 + 1); // size
-      write(ENCODER_ATTACH); // msgType = 52
-      write(deviceId);
-      write(type);
-      write(pin);
+  public synchronized byte[] encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: encoderAttach to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1 + 1 + 1); // size
+      appendMessage(baos, ENCODER_ATTACH); // msgType = 52
+      appendMessage(baos, deviceId);
+      appendMessage(baos, type);
+      appendMessage(baos, pin);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> encoderAttach");
         txBuffer.append("/");
@@ -2129,31 +2043,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("encoderAttach threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("encoderAttach threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void setZeroPoint(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(SET_ZERO_POINT); // msgType = 53
-      write(deviceId);
+  public synchronized byte[] setZeroPoint(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: setZeroPoint to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SET_ZERO_POINT); // msgType = 53
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> setZeroPoint");
         txBuffer.append("/");
@@ -2163,31 +2074,28 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("setZeroPoint threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("setZeroPoint threw",e);
+      return null;
+    }
+  }
 
-	public synchronized void servoStop(Integer deviceId/*byte*/) {
-		try {
-		  if (ackEnabled){
-		    if (waiting) {
-		      // another thread and request is waiting
-		      // we are going to cancel
-		      return;
-		    }
-		    waitForAck();
-		  }		  
-			write(MAGIC_NUMBER);
-			write(1 + 1); // size
-      write(SERVO_STOP); // msgType = 56
-      write(deviceId);
+  public synchronized byte[] servoStop(Integer deviceId/*byte*/) {
+    if (debug) {
+      log.info("Sending Message: servoStop to {}", serial.getName());
+    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try {
+      appendMessage(baos, MAGIC_NUMBER);
+      appendMessage(baos, 1 + 1); // size
+      appendMessage(baos, SERVO_STOP); // msgType = 56
+      appendMessage(baos, deviceId);
  
-     if (ackEnabled){
-       // we just wrote - block threads sending
-       // until they get an ack
-       ackRecievedLock.acknowledged = false;
-     }
+      byte[] message = sendMessage(baos);
+      if (ackEnabled){
+        waitForAck();
+      }
       if(record != null){
         txBuffer.append("> servoStop");
         txBuffer.append("/");
@@ -2197,14 +2105,16 @@ public class Msg {
         txBuffer.setLength(0);
       }
 
-	  } catch (Exception e) {
-	  			log.error("servoStop threw",e);
-	  }
-	}
+      return message;
+	} catch (Exception e) {
+      log.error("servoStop threw",e);
+      return null;
+    }
+  }
 
 
-	public static String methodToString(int method) {
-		switch (method) {
+  public static String methodToString(int method) {
+    switch (method) {
     case PUBLISH_MRLCOMM_ERROR:{
       return "publishMRLCommError";
     }
@@ -2374,47 +2284,47 @@ public class Msg {
       return "servoStop";
     }
 
-		default: {
-			return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
+    default: {
+      return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
 
-		} // default
-		}
-	}
+    } // default
+    }
+  }
 
-	public String str(int[] buffer, int start, int size) {
-		byte[] b = new byte[size];
-		for (int i = start; i < start + size; ++i){
-			b[i - start] = (byte)(buffer[i] & 0xFF);
-		}
-		return new String(b);
-	}
+  public String str(int[] buffer, int start, int size) {
+    byte[] b = new byte[size];
+    for (int i = start; i < start + size; ++i){
+      b[i - start] = (byte)(buffer[i] & 0xFF);
+    }
+    return new String(b);
+  }
 
-	public int[] subArray(int[] buffer, int start, int size) {		
-		return Arrays.copyOfRange(buffer, start, start + size);
-	}
+  public int[] subArray(int[] buffer, int start, int size) {    
+    return Arrays.copyOfRange(buffer, start, start + size);
+  }
 
-	// signed 16 bit bucket
-	public int b16(int[] buffer, int start/*=0*/) {
-		return  (short)(buffer[start] << 8) + buffer[start + 1];
-	}
-	
-	// signed 32 bit bucket
-	public int b32(int[] buffer, int start/*=0*/) {
-		return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-	}
-	
-	// unsigned 32 bit bucket
-	public long bu32(int[] buffer, int start/*=0*/) {
-		long ret = ((buffer[start + 0] << 24)
-				+ (buffer[start + 1] << 16)
-				+ (buffer[start + 2] << 8) + buffer[start + 3]);
-		if (ret < 0){
-			return 4294967296L + ret;
-		}
-		
-		return ret;
-	}
+  // signed 16 bit bucket
+  public int b16(int[] buffer, int start/*=0*/) {
+    return  (short)(buffer[start] << 8) + buffer[start + 1];
+  }
+  
+  // signed 32 bit bucket
+  public int b32(int[] buffer, int start/*=0*/) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  }
+  
+  // unsigned 32 bit bucket
+  public long bu32(int[] buffer, int start/*=0*/) {
+    long ret = ((buffer[start + 0] << 24)
+        + (buffer[start + 1] << 16)
+        + (buffer[start + 2] << 8) + buffer[start + 3]);
+    if (ret < 0){
+      return 4294967296L + ret;
+    }
+    
+    return ret;
+  }
 
   // float 32 bit bucket
   public float f32(int[] buffer, int start/*=0*/) {
@@ -2426,48 +2336,112 @@ public class Msg {
     return f;
   }
   
-  public boolean readMsg() throws Exception {
-    // handle serial data begin
-    int bytesAvailable = serial.available();
-    if (bytesAvailable > 0) {
-      //publishDebug("RXBUFF:" + String(bytesAvailable));
-      // now we should loop over the available bytes .. not just read one by one.
-      for (int i = 0; i < bytesAvailable; i++) {
-        // read the incoming byte:
-        int newByte = serial.read();
-        //publishDebug("RX:" + String(newByte));
-        ++byteCount;
-        // checking first byte - beginning of message?
-        if (byteCount == 1 && newByte != VirtualMsg.MAGIC_NUMBER) {
-          publishError(F("error serial"));
-          // reset - try again
-          byteCount = 0;
-          // return false;
-        }
-        if (byteCount == 2) {
-          // get the size of message
-          // todo check msg < 64 (MAX_MSG_SIZE)
-          if (newByte > 64) {
-            // TODO - send error back
-            byteCount = 0;
-            continue; // GroG - I guess  we continue now vs return false on error conditions?
+  public void onBytes(byte[] bytes) {
+    if (debug) {
+      // debug message.. semi-human readable?
+      String byteString = StringUtil.byteArrayToIntString(bytes);
+      log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
+    }
+    // this gives us the current full buffer that was read from the seral
+    for (int i = 0 ; i < bytes.length; i++) {
+      // For now, let's just call onByte for each byte upcasted as an int.
+      Integer newByte = bytes[i] & 0xFF;
+      try {
+        byteCount.incrementAndGet();
+        if (byteCount.get() == 1) {
+          if (newByte != MAGIC_NUMBER) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
+            // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
           }
-          msgSize = newByte;
+          continue;
+        } else if (byteCount.get() == 2) {
+          // get the size of message
+          if (newByte > 64) {
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            // This is an error scenario.. we should reset our byte count also.
+            // error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt ));
+            log.error("Arduino->MRL error {} rx sz errors", ++errorServiceToHardwareRxCnt);
+            continue;
+          }
+          msgSize = newByte.intValue();
+        } else if (byteCount.get() == 3) {
+          // This is the method..
+          int method = newByte.intValue();
+          if (methodToString(method).startsWith("ERROR")) {
+            // we've got an error scenario here.. reset the parser and try again!
+            log.error("Arduino->MRL error unknown method error. resetting parser.");
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            continue;
+          }
+          
+          // If we're not clear to send, we need to unlock if this is a begin message.
+          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
+            // Clear to send!!
+            log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
+            clearToSend = true;
+          } 
+          
+          if (!clearToSend) {
+            log.warn("NOT CLEAR TO SEND! resetting parser!");
+            // We opened the port, and we got some data that isn't a Begin message.
+            // so, I think we need to reset the parser and continue processing bytes...
+            // there will be errors until the next magic byte is seen.
+            byteCount = new AtomicInteger(0);
+            msgSize = 0;
+            continue;
+          }
+          // we are in a valid parse state.    
+          ioCmd[byteCount.get() - 3] = method;
+        } else if (byteCount.get() > 3) {
+          // This is the body of the message copy it to the buffer
+          ioCmd[byteCount.get() - 3] = newByte.intValue();
+        } else {
+          // the case where byteCount is negative?! not got.  You should probably never see this.
+          log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
+          //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
+          continue;
         }
-        if (byteCount > 2) {
-          // fill in msg data - (2) headbytes -1 (offset)
-          ioCmd[byteCount - 3] = newByte;
+        // we have a complete message here.
+        if (byteCount.get() == 2 + msgSize) {
+          // we've received a full message
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
+          if (debug) {
+            log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
+          }
+          // process the command.
+          processCommand(actualCommand);
+          
+          // re-init parser
+          Arrays.fill(ioCmd, 0); // optimize remove
+          msgSize = 0;
+          byteCount = new AtomicInteger(0);
         }
-        // if received header + msg
-        if (byteCount == 2 + msgSize) {
-          // we've reach the end of the command, just return true .. we've got it
-          byteCount = 0;
-          return true;
-        }
+      } catch (Exception e) {
+        ++errorHardwareToServiceRxCnt ;
+        // error("msg structure violation %d", errorHardwareToServiceRxCnt);
+        log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
+        // TODO: perhaps we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // find the first occurance of 170 in the bytes subbytes
+        // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
+        i = i - byteCount.get()+1;
+        log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
+        log.error("Original Byte Array: {}", StringUtil.byteArrayToIntString(bytes));
+        System.err.println("Try to consume more messages!");
+        msgSize = 0;
+        byteCount = new AtomicInteger(0);
+        // TODO: this is wonky.. what?! 
+        i = 0;
+        return;
+        
+        
       }
-    } // if Serial.available
-      // we only partially read a command.  (or nothing at all.)
-    return false;
+    }
+    return;
   }
 
   String F(String msg) {
@@ -2478,104 +2452,132 @@ public class Msg {
     log.error(error);
   }
   
-	void write(int b8) throws Exception {
+  void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
+    if ((b8 < 0) || (b8 > 255)) {
+      log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
+    }
+    baos.write(b8 & 0xFF);
+  }
+  
+  void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
+    if (b1) {
+      appendMessage(baos, 1);
+    } else {
+      appendMessage(baos, 0);
+    }
+  }
 
-		if ((b8 < 0) || (b8 > 255)) {
-			log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
-		}
+  void appendMessageb16(ByteArrayOutputStream baos, int b16) throws Exception {
+    if ((b16 < -32768) || (b16 > 32767)) {
+      log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
+    }
+    appendMessage(baos, b16 >> 8 & 0xFF);
+    appendMessage(baos, b16 & 0xFF);
+  }
 
-		serial.write(b8 & 0xFF);
-	}
-
-	void writebool(boolean b1) throws Exception {
-		if (b1) {
-			serial.write(1);
-		} else {
-			serial.write(0);
-		}
-	}
-
-	void writeb16(int b16) throws Exception {
-		if ((b16 < -32768) || (b16 > 32767)) {
-			log.error("writeByte overrun - should be  -32,768 <= value <= 32,767 - value = {}", b16);
-		}
-
-		write(b16 >> 8 & 0xFF);
-		write(b16 & 0xFF);
-	}
-
-	void writeb32(int b32) throws Exception {
-		write(b32 >> 24 & 0xFF);
-		write(b32 >> 16 & 0xFF);
-		write(b32 >> 8 & 0xFF);
-		write(b32 & 0xFF);
-	}
-	
-	void writef32(float f32) throws Exception {
+  void appendMessageb32(ByteArrayOutputStream baos, int b32) throws Exception {
+    appendMessage(baos, b32 >> 24 & 0xFF);
+    appendMessage(baos, b32 >> 16 & 0xFF);
+    appendMessage(baos, b32 >> 8 & 0xFF);
+    appendMessage(baos, b32 & 0xFF);
+  }
+  
+  void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
     //  int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
-    write(f[3] & 0xFF);
-    write(f[2] & 0xFF);
-    write(f[1] & 0xFF);
-    write(f[0] & 0xFF);
-	}
-	
-	void writebu32(long b32) throws Exception {
-		write((int)(b32 >> 24 & 0xFF));
-		write((int)(b32 >> 16 & 0xFF));
-		write((int)(b32 >> 8 & 0xFF));
-		write((int)(b32 & 0xFF));
-	}
+    appendMessage(baos, f[3] & 0xFF);
+    appendMessage(baos, f[2] & 0xFF);
+    appendMessage(baos, f[1] & 0xFF);
+    appendMessage(baos, f[0] & 0xFF);
+  }
+  
+  void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
+    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
+    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
+    appendMessage(baos, (int)(b32 & 0xFF));
+  }
 
-	void write(String str) throws Exception {
-		write(str.getBytes());
-	}
+  void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
+    appendMessage(baos, str.getBytes());
+  }
 
-	void write(int[] array) throws Exception {
-		// write size
-		write(array.length & 0xFF);
+  void appendMessage(ByteArrayOutputStream baos, int[] array) throws Exception {
+    // write size
+    appendMessage(baos, array.length & 0xFF);
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(baos, array[i] & 0xFF);
+    }
+  }
 
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			write(array[i] & 0xFF);
-		}
-	}
+  void appendMessage(ByteArrayOutputStream baos, byte[] array) throws Exception {
+    // write size
+    appendMessage(baos, array.length);
+    // write data
+    for (int i = 0; i < array.length; ++i) {
+      appendMessage(baos, array[i]);
+    }
+  }
+  
+  synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
+    byte[] message = baos.toByteArray();
+    if (ackEnabled) {
+      // wait for a pending ack to be received before we process our message.^M
+      waitForAck();
+    }
+    // write data if serial not null.
+    if (serial != null) {
+      // mark it pending before we write the data.
+      if (ackEnabled){
+        // flip our flag because we're going to send the message now.
+        // TODO: is this deadlocked because it's synchronized?!
+        // TODO: should this be set regardless of if the serial is null?
+        markPending();
+      }
+      serial.write(message);
+      // TODO: if there's an exception, we should clear our pending status?
+      if (ackEnabled) {
+        // wait for a pending ack to be received before we process our message.^M
+        waitForAck();
+      }
+    }
+    return message;
+  }
+  
+  public void markPending() {
+    if (debug) {
+      log.info("Setting pending flag.");
+    }
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = true;
+      ackRecievedLock.notifyAll();
+    }
+  }
+  
+  public boolean isRecording() {
+    return record != null;
+  }
+  
+  public void record() throws Exception {
+    if (record == null) {
+      record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
+    }
+  }
 
-	void write(byte[] array) throws Exception {
-		// write size
-		write(array.length);
-
-		// write data
-		for (int i = 0; i < array.length; ++i) {
-			write(array[i]);
-		}
-	}
-	
-	
-	public boolean isRecording() {
-		return record != null;
-	}
-	
-
-	public void record() throws Exception {
-		
-		if (record == null) {
-			record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
-		}
-	}
-
-	public void stopRecording() {
-		if (record != null) {
-			try {
-				record.close();
-			} catch (Exception e) {
-			}
-			record = null;
-		}
-	}
-	
-	public static String deviceTypeToString(int typeId) {
-		switch(typeId){
+  public void stopRecording() {
+    if (record != null) {
+      try {
+        record.close();
+      } catch (Exception e) {
+        log.info("Error closing recording stream. ", e);
+      }
+      record = null;
+    }
+  }
+  
+  public static String deviceTypeToString(int typeId) {
+    switch(typeId){
     case 0 :  {
       return "unknown";
 
@@ -2616,58 +2618,55 @@ public class Msg {
       return "Encoder";
 
     }
-		
-		default: {
-			return "unknown";
-		}
-		}
-	}
+    
+    default: {
+      return "unknown";
+    }
+    }
+  }
   
   public void enableAcks(boolean b){
-    // disable local blocking
-	  ackEnabled = b;
-	  // if (!localOnly){
-	  // shutdown MrlComm from sending acks
-	  // below is a method only in Msg.java not in VirtualMsg.java
-	  // it depends on the definition of enableAck in arduinoMsg.schema  
-	  // enableAck(b);
-	  // }
-	}
-	
-	public void waitForAck(){
-	  if (!ackEnabled || ackRecievedLock.acknowledged){
-	    return;
-	  }
-    synchronized (ackRecievedLock) {
-      try {
-        long ts = System.currentTimeMillis();
-        // log.info("***** starting wait *****");
-        ackRecievedLock.wait(2000);
-        // log.info("*****  waited {} ms *****", (System.currentTimeMillis() - ts));
-      } catch (InterruptedException e) {// don't care}
-      }
-
-      if (!ackRecievedLock.acknowledged) {
-        //log.error("Ack not received : {} {}", Msg.methodToString(ioCmd[0]), numAck);
-        log.error("Ack not received");
-        // part of resetting ?
-        // ackRecievedLock.acknowledged = true;
-        arduino.invoke("noAck");
+    ackEnabled = b;
+    // if (!localOnly){
+    // shutdown MrlComm from sending acks
+    // below is a method only in Msg.java not in VirtualMsg.java
+    // it depends on the definition of enableAck in arduinoMsg.schema  
+    // enableAck(b);
+    // }
+  }
+  
+  public void waitForAck(){
+    if (!ackEnabled) {
+      return;
+    }
+    // if there's a pending message, we need to wait for the ack to be received.
+    if (ackRecievedLock.pendingMessage) {
+      synchronized (ackRecievedLock) {
+        try {
+          ackRecievedLock.wait(ACK_TIMEOUT);
+        } catch (InterruptedException e) {
+        }
+        if (ackRecievedLock.pendingMessage) {
+          log.error("Ack not received, ack timeout!");
+          // TODO: should we just reset and hope for the best? maybe trigger a sync?
+          // ackRecievedLock.pendingMessage = false;
+          arduino.ackTimeout();
+        }
       }
     }
-	}
-	
-	public void ackReceived(int function){
-	   synchronized (ackRecievedLock) {
-	      ackRecievedLock.acknowledged = true;
-	      ackRecievedLock.notifyAll();
-	    }
-	}
-	
-	public int getMethod(){
-	  return method;
-	}
-	
+  }
+  
+  public void ackReceived(int function) {
+    synchronized (ackRecievedLock) {
+      ackRecievedLock.pendingMessage = false;
+      ackRecievedLock.notifyAll();
+    }
+  }
+  
+  public int getMethod(){
+    return method;
+  }
+  
 
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
@@ -2677,59 +2676,104 @@ public class Msg {
   public int[] getBuffer() {    
     return sendBuffer;
   }
-	
-	public static void main(String[] args) {
-		try {
+  
+  public static void main(String[] args) {
+    try {
+      // FIXME - Test service started or reference retrieved
+      // FIXME - subscribe to publishError
+      // FIXME - check for any error
+      // FIXME - basic design - expected state is connected and ready -
+      // between classes it
+      // should connect - also dumping serial comm at different levels so
+      // virtual arduino in
+      // Python can model "real" serial comm
+      String port = "COM10";
+      LoggingFactory.init(Level.INFO);
+      /*
+      Runtime.start("gui","SwingGui");
+      VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+      virtual.connectVirtualUart(port, port + "UART");
+      */
+      MrlCommPublisher arduino = (MrlCommPublisher)Runtime.start("arduino","MrlCommPublisher");
+      Servo servo01 = (Servo)Runtime.start("servo01","Servo");
+      /*
+      arduino.connect(port);
+      // test pins
+      arduino.enablePin(5);
+      arduino.disablePin(5);
+      // test status list enabled
+      arduino.enableBoardStatus(true);
+      servo01.attach(arduino, 8);
+      servo01.moveTo(30);
+      servo01.moveTo(130);
+      arduino.enableBoardStatus(false);
+      */
+      // test ack
+      // test heartbeat
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
 
-			// FIXME - Test service started or reference retrieved
-			// FIXME - subscribe to publishError
-			// FIXME - check for any error
-			// FIXME - basic design - expected state is connected and ready -
-			// between classes it
-			// should connect - also dumping serial comm at different levels so
-			// virtual arduino in
-			// Python can model "real" serial comm
-			String port = "COM10";
+  public void onConnect(String portName) {
+    if (debug) {
+      log.info("On Connect Called in Msg.");
+    }
+    // reset the parser...
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    ackReceived(-1);
+  }
 
-			LoggingFactory.init(Level.INFO);
-			
-			/*
-			Runtime.start("gui","SwingGui");
-			VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
-			virtual.connectVirtualUart(port, port + "UART");
-			*/
-			
-			Arduino arduino = (Arduino)Runtime.start("arduino","Arduino");
-			Servo servo01 = (Servo)Runtime.start("servo01","Servo");
-			
-			/*
-			arduino.connect(port);
-			
-			// test pins
-			arduino.enablePin(5);
-			
-			arduino.disablePin(5);
-			
-			// test status list enabled
-			arduino.enableBoardStatus(true);
-			
-			servo01.attach(arduino, 8);
-			
-			servo01.moveTo(30);
-			servo01.moveTo(130);
-			
-			arduino.enableBoardStatus(false);
-			*/
-			// test ack
-			
-			// test heartbeat
-			
-			
+  public void onDisconnect(String portName) {
+    if (debug) {
+      log.info("On Disconnect Called in Msg.");
+    }
+    // reset the parser... this might not be necessary.
+    this.byteCount = new AtomicInteger(0);
+    this.msgSize = 0;
+    ackReceived(-1);
+  }
 
-		} catch (Exception e) {
-			log.error("main threw", e);
-		}
+  public static boolean isFullMessage(byte[] bytes) {
+    // Criteria that a sequence of bytes could be parsed as a complete message.
+    // can't be null
+    if (bytes == null) 
+      return false;
+    // it's got to be at least 3 bytes long.  magic + method + size
+    if (bytes.length <= 2) 
+      return false;
+    // first byte has to be magic
+    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER) 
+      return false;
+    
+    int method = bytes[1] & 0xFF;
+    String strMethod = Msg.methodToString(method); 
+    // only known methods. 
+    // TODO: make the methodToString return null for an unknown lookup.
+    if (strMethod.startsWith("ERROR")) 
+      return false;
+    
+    // now it's got to be the proper length
+    int length = bytes[1] & 0xFF;
+    // max message size is 64 bytes
+    if (length > 64)
+      return false;
 
-	}
+    // it's a exactly a full message or a message and more.
+    if (bytes.length >= length+2)
+      return true;
+
+    
+    return false;
+  }
+
+  public boolean isClearToSend() {
+    return clearToSend;
+  }
+  
+  public void setInvoke(boolean b){	
+    invoke = b;	
+  }
 
 }
