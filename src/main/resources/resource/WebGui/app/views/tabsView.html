@@ -39,7 +39,7 @@
         top: 6px;
         width: 178px;
     }
-
+/* old
     #handleOpen{
         position: inherit;
         left: 6px;
@@ -52,6 +52,7 @@
         padding-left: 20px;
         visibility: hidden;
     }
+    */
 
     #handleClose{
         position: absolute;
@@ -239,7 +240,14 @@
     </div>
     <!-- end mySidenavContainer -->
 
+    <!--
     <span id="handleOpen" onmouseenter="openNav()" onclick="openNav()" class="glyphicon glyphicon-eject"></span>
+    -->
+    <div id="handleOpen" onmouseenter="openNav()" onclick="openNav()">
+        <div class="menuName270">Give me a name CONTROL PANEL or something short (:</div>
+    </div>
+
+
 
     <!-- start main -->
     <div id="main">
