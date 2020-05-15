@@ -112,16 +112,16 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
   
   /**
-   * execute an Intro resource script
-   * @param introScriptName
+   * execute a resource script
+   * @param someScriptName
    */
-  public void execScript(String introScriptName) {
+  public void execScript(String someScriptName) {
     try {
       Python p = (Python)Runtime.start("python", "Python");
-      String script = getResourceAsString(introScriptName);
+      String script = getResourceAsString(someScriptName);
       p.exec(script, true);
     } catch (Exception e) {
-      error("unable to execute script %s", introScriptName); 
+      error("unable to execute script %s", someScriptName); 
     }
   }
 
