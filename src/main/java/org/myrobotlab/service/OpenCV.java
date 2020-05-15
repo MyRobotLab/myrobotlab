@@ -395,11 +395,9 @@ public class OpenCV extends AbstractComputerVision {
     meta.addCategory("video", "vision", "sensors");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
     meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
-
     String javaCvVersion = "1.5.3";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
-    
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
     if (gpu) {
@@ -425,11 +423,8 @@ public class OpenCV extends AbstractComputerVision {
       // <classifier>windows-x86_64-gpu</classifier>
       // </dependency>
     }
-
     // sarxos webcam
     meta.addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
-    // meta.exclude("");
-
     // FaceRecognizer no worky if missing it
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer frame grabber
@@ -438,22 +433,12 @@ public class OpenCV extends AbstractComputerVision {
     // jipcam use commons-lang-1.0 it break marySpeech
     meta.exclude("commons-lang", "commons-lang");
     meta.addDependency("commons-lang", "commons-lang", "2.6");
-
-    // TODO: should be something about yolo here too..
-    // maybe make the yolo filter download the model and cache it?
-    // or have it as a dependency
-    // TODO: the yolo model files are too large for artifactory.. it's limited
-    // to 100mb currently
-
     // the haar / hog / lp classifier xml files for opencv from the MRL repo
     meta.addDependency("opencv", "opencv_classifiers", "0.0.2", "zip");
-
     // the DNN Face Detection module
     meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.1", "zip");
-
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
-
     // yolo models
     meta.addDependency("yolo", "yolov2", "0.0.2", "zip");
 
