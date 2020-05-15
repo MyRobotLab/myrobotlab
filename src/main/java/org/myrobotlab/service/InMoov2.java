@@ -128,6 +128,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * This method will load a python file into the python interpreter.
    */
+  @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
     File f = new File(file);
     Python p = (Python) Runtime.getService("python");
