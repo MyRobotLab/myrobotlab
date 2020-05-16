@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
@@ -30,6 +29,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.openni.OpenNiData;
+import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoData;
@@ -511,8 +511,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   @Override
-  public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
-    return angleMap;
+  public AngleData publishJointAngle(AngleData angle) {
+    return angle;
   }
 
   public double[][] publishJointPositions(double[][] jointPositionMap) {
