@@ -57,7 +57,7 @@
                             <span>
                                 Sweep
                                 <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
-                                <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="!service.isSweeping?msg.stop():sweep()" on="" off="" size="btn-lg"/>
+                                <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
                             </span>
                             <span>
                                 Speed

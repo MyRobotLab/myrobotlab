@@ -1198,6 +1198,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
+    broadcastState();
   }
 
   @Override
@@ -1208,10 +1209,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     syncedServos.add(sc.getName());
   }
 
-  @Override
+  @Override /* FIXME ! - either this or fullSpeed should be deprecated */
   public void unsetSpeed() {
-    speed = null;
-    
+    fullSpeed();
   }
 
   @Override
