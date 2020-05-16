@@ -447,7 +447,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     servo.rest();
     */
 
-    assertTrue(servo.getControllers().contains(arduino01.getName()));
+    assertTrue(servo.getController().contains(arduino01.getName()));
 
     servo.moveTo(0.0);
     // assertEquals(virtual.servoMoveTo(0));
@@ -460,12 +460,12 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
 
     // detach
     servo.detach();
-    assertTrue("detach did not remove controller", servo.getControllers().size() == 0);
+    assertNull("detach did not remove controller", servo.getController());
 
     // assertEquals("servoDetach/7/0\n", uart.decode());
     arduino01.attach(servo);
-    log.info("{}", servo.getControllers());
-    assertTrue("arduino did not attach to servo correctly", servo.getControllers().contains(arduino01.getName()));
+    log.info("{}", servo.getController());
+    assertTrue("arduino did not attach to servo correctly", servo.getController().contains(arduino01.getName()));
 
     servo.moveTo(10.0);
 
