@@ -143,7 +143,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
             		// finally render the scene.
             		render();
             		break;
-                case 'onJointAngles':
+                case 'onJointAngle':
                 	$log.info("On Joint Angles..");
                 	$scope.angles = msg.data[0];
                 	$scope.$apply();
@@ -178,7 +178,7 @@ angular.module('mrlapp.service.InverseKinematics3DGui', [])
         
         
         mrl.subscribe($scope.service.name, 'publishJointPositions');
-        mrl.subscribe($scope.service.name, 'publishJointAngles');
+        mrl.subscribe($scope.service.name, 'publishJointAngle');
         mrl.subscribe($scope.service.name, 'publishTracking');
 //        $scope.panel.initDone();
         

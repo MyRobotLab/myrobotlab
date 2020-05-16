@@ -22,7 +22,9 @@ import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.EncoderControl;
+import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoData;
@@ -50,10 +52,12 @@ import org.slf4j.Logger;
  *         The mapper accepts inputs, the controller needs mapper outputs.
  *         Nothing outside of the servo controller should need the mapper
  *         outputs.
+ *         
+ *         TODO - make a publishing interface which publishes "CONTROL" angles vs status of angles
  * 
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, EncoderPublisher {
+public abstract class AbstractServo extends Service implements ServoControl, EncoderPublisher, IKJointAnglePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -65,9 +69,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
 
-      Runtime.start("gui", "SwingGui");
+      // Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
 
+      Runtime.start("webgui", "WebGui");
+      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       mega.connect("COM7");
       // mega.setBoardMega();
@@ -158,7 +164,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * set of currently subscribed servo controllers
    */
-  protected Set<String> controllers = new TreeSet<>();
+  // protected Set<String> controllers = new TreeSet<>();
+  String controller;
 
   /**
    * the "current" position of the servo - this never gets updated from
@@ -417,6 +424,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     attach(controllerName, pin, pos, null);
   }
 
+  @Override
+  public AngleData publishJointAngle(AngleData angle) {
+    return angle;
+  }
+
   // @Override
   // FIXME - decide how attach will work or wont with extra parameters
   public void attach(String controllerName, Integer pin, Double pos, Double speed) {
@@ -437,7 +449,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
 
-    if (controllers.contains(sc)) {
+    if (controller != null && controller.equals(sc)) {
       log.info("{} already attached", sc);
       return;
     }
@@ -466,7 +478,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
 
-    controllers.add(sc);
+    controller = sc;
     enabled = true; // <-- how to deal with this ? "real" controllers usually
                     // need an enable/energize command
     
@@ -480,11 +492,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * disables and detaches from all controllers
    */
   public void detach() {
-    disable();
-    Set<String> copy = new HashSet<>(controllers);
-    for (String sc : copy) {
-      detach(sc);
-    }
+      detach(controller);
   }
 
   @Override
@@ -499,7 +507,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   public void detach(String sc) {
     
-    if (!controllers.contains(sc)) {
+    if (controller != null && !controller.equals(sc)) {
       log.info("{} already detached from {}", getName(), sc);
       return;
     }
@@ -513,7 +521,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     removeListener("publishServoEnable", sc);
     removeListener("publishServoDisable", sc);
 
-    controllers.remove(sc);
+    controller = null;
     
     disable();
    
@@ -550,8 +558,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public Set<String> getControllers() {
-    return controllers;
+  public String getController() {
+    return controller;
   }
 
   @Override
@@ -637,11 +645,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   public boolean isAttached(Attachable attachable) {
-    return controllers.contains(attachable.getName());
+    return controller != null && controller.equals(attachable.getName());
   }
 
   public boolean isAttached(String name) {
-    return controllers.contains(name);
+    return controller != null && controller.equals(name);
   }
 
   @Override
@@ -727,6 +735,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       if (publishEncoderData) {
         invoke("publishEncoderData", data);
       }
+      
+      invoke("publishJointAngle", new AngleData(getName(), data.value));
 
       // FIXME - these should be Deprecated - and publishEncoderData used if
       // necessary
@@ -891,11 +901,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
 
-    for (String controller : this.getControllers()) {
-      // TODO: just have a direct reference to the controllers 
-      // avoid this type cast and runtime lookup!!!!!
-      ((ServoController)Runtime.getService(controller)).onServoMoveTo(this);
-    }
+    // GroG: I think in the long run this direct call vs using invoke/send is less preferrable
+    // thinking on a distributed network level you can't do this when the other thing is in
+    // a different process
+    ((ServoController)Runtime.getService(controller)).onServoMoveTo(this);
+      
     // invoke("publishServoMoveTo", this);
     broadcastState();
 

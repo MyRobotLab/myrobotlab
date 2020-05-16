@@ -365,7 +365,7 @@ public class DHLink implements Serializable {
   
   /**
    * This represents the difference in angles between the DH model and the real world encoder/joint angle for the link.
-   * This value will be added to the IK solved angles prior to invoking publishJointAngles.
+   * This value will be added to the IK solved angles prior to invoking publishJointAngle.
    * @return
    */
   public double getOffset() {
