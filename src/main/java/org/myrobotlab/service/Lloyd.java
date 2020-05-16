@@ -500,8 +500,8 @@ public class Lloyd extends Service {
     // oculusRift.addListener("publishRightHandPosition", rightIK.getName(),
     // "onPoint");
 
-    leftIK.addListener("publishJointAngles", getName(), "onLeftJointAngles");
-    rightIK.addListener("publishJointAngles", getName(), "onRightJointAngles");
+    leftIK.addListener("publishJointAngle", getName(), "onLeftJointAngle");
+    rightIK.addListener("publishJointAngle", getName(), "onRightJointAngle");
 
   }
 

@@ -6,6 +6,6 @@ public interface IKJointAnglePublisher {
 
   public String getName();
 
-  public AngleData publishJointAngles(AngleData angle);
+  public AngleData publishJointAngle(AngleData angle);
 
 }

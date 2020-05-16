@@ -425,7 +425,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public AngleData publishJointAngles(AngleData angle) {
+  public AngleData publishJointAngle(AngleData angle) {
     return angle;
   }
 
@@ -736,7 +736,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
         invoke("publishEncoderData", data);
       }
       
-      invoke("publishJointAngles", new AngleData(getName(), data.value));
+      invoke("publishJointAngle", new AngleData(getName(), data.value));
 
       // FIXME - these should be Deprecated - and publishEncoderData used if
       // necessary
