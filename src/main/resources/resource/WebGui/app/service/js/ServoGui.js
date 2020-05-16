@@ -11,7 +11,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.min = 0
     $scope.max = 180
 
-    $scope.possibleController = null
+    $scope.possibleControllers = null
     $scope.testTime = 300
     $scope.sliderEnabled = false
 
@@ -93,15 +93,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service
-        if (service.targetPos == null) {// $scope.pos.value = service.rest
-        } else {// $scope.pos.value = service.targetPos            
-        }
+        $scope.service = service  
+        $scope.selectedController = service.controller
 
-        if (service.controller != null) {
-            $scope.possibleController = service.controller
-        }
-        $scope.controller = service.controller
+        // these 
         $scope.speed = service.speed
         $scope.pin = service.pin
         $scope.rest = service.rest
@@ -130,7 +125,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             // but perhaps its come to mean
             // feedback from the service.moveTo
         case 'onRefreshControllers':
-            $scope.possibleController = data
+            $scope.possibleControllers = data
             $scope.$apply()
             break
         case 'onServoData':
@@ -165,10 +160,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         return "black"
     }
 
-    $scope.isAttached = function() {
-        return $scope.service.controller != null
-    }
-
     $scope.update = function(speed, rest, min, max) {
         msg.send("setSpeed", speed)
         msg.send("setRest", rest)
@@ -187,11 +178,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.sweep = function() {
         msg.send('sweep')
     }
-    $scope.setSelectedController = function(name) {
-        $log.info('setSelectedController - ' + name)
-        $scope.selectedController = name
-        $scope.controller = name
-    }
+
     $scope.attachController = function(controller, pin) {
         $log.info("attachController")
 

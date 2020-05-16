@@ -22,6 +22,7 @@ import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.WebGui;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -67,15 +68,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      // Platform.setVirtual(true);
 
       // Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
 
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
       
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("COM7");
+      // mega.connect("/dev/ttyACM0");
       // mega.setBoardMega();
 
       Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
@@ -87,7 +90,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       double max = 170;
       double speed = 5; // degree/s
 
-      servo03.attach(mega, 8, 38.0);
+      // servo03.attach(mega, 8, 38.0);
 
       // servo03.sweep(min, max, speed);
 

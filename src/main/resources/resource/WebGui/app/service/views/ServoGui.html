@@ -20,12 +20,12 @@
                             <table class="table">
                                 <tr>
                                     <td>
-                                        <select ng-disabled="service.controller" class="form-control" ng-model="service.controller">
-                                            <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
+                                        <select ng-disabled="service.controller" class="form-control" ng-model="selectedController">
+                                            <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
                                     <td>
                                     <td><!-- TODO - send pos ! ??? -->
-                                    <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(service.controller, service.pin)">attach</button>
+                                    <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
                                     <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
                                     </td>
                                     <td>Pin</td>
@@ -36,7 +36,7 @@
                                     </td>
                                     <td>Enable</td>
                                     <td>
-                                        <toggle class="miniBTN" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
+                                        <toggle class="miniBTN" ng-model="service.enabled" ng-change="service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
                                     </td>
                                 </tr>
                             </table>
@@ -51,17 +51,11 @@
                         <form class="form-inline">
                             <span>
                                 Blocking              
-                            
-                                
-                                
                                 <!-- ---- FIXME ---- -->
                                 <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
                             </span>
                             <span>
                                 Sweep
-                            
-                                
-                                
                                 <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                 <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="!service.isSweeping?msg.stop():sweep()" on="" off="" size="btn-lg"/>
                             </span>
