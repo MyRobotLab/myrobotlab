@@ -9,8 +9,7 @@
                             <nav class="settingsbar preventDragSelect">
                                 <span>
                                     <h6>
-                                        You need to attach one or more controllers to a servo.<br/>For example real and virtual controller.
-                                    
+                                        You need to attach a controller to a servo.<br/>For example real and virtual controller.
                                     </h6>
                                 </span>
                             </nav>
@@ -21,16 +20,17 @@
                             <table class="table">
                                 <tr>
                                     <td>
-                                        <select class="form-control" ng-model="selectedController" ng-change="setLanguage()">
+                                        <select ng-disabled="service.controller" class="form-control" ng-model="service.controller">
                                             <option ng-repeat="controller in possibleController" value="{{controller}}">{{controller}} </option>
                                         </select>
                                     <td>
-                                        <button class="btn btn-default" ng-click="attachController(selectedController, selectedPin)">attach</button>
-                                    <td>
-                                        <button class="btn btn-default">Remove</button>
+                                    <td><!-- TODO - send pos ! ??? -->
+                                    <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(service.controller, service.pin)">attach</button>
+                                    <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
                                     </td>
                                     <td>Pin</td>
-                                    <td><select class="form-control" ng-model="selectedPin" ng-options="item for item in pinList">
+                                    <td>
+                                        <select class="form-control" ng-model="service.pin" ng-options="item for item in pinList">
                                             <option>{{item}}</option>
                                         </select>
                                     </td>
@@ -38,44 +38,12 @@
                                     <td>
                                         <toggle class="miniBTN" ng-model="service.enabled" ng-change="!service.enabled?msg.enable():msg.disable()" on="enabled" off="disabled"/></toggle>
                                     </td>
-                                </tr>                                                      
+                                </tr>
                             </table>
-                            <hr>
-                            <button class="btn btn-default">+ Add new controller</button>
-                            <div ng-repeat="c in service.controllers">
-                                <span class="col-md-1"/>
-                                <span class="col-md-2">{{c}}</span>
-                                <span class="col-md-1">Pin</span>
-                                <span class="col-md-1">{{pin}}</span>
-                                <span class="col-md-1">
-                                    <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
-                                </span>
-                            </div>
                         </div>
                         <!-- /.col-md-12 -->
                     </div>
                     <!-- /.row -->
-                    <br/>
-                    <br/>
-                    <br/>
-                    <br/>
-                    <!-- ------- Temporal for test ------ -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <span style="background-color: #FF5555; display: inline-block;">
-                                Temp
-                    <tr ng-repeat="c in service.controllers"></tr>
-                                <span>
-                                    <attach title="Type or select controller" ng-model="possibleController" interface="org.myrobotlab.service.interfaces.ServoController"/>
-                                </span>
-                                <button class="btn btn-default btn-xs" ng-show="!isAttached()" ng-click="attachController()">attach</button>
-                                <button class="btn btn-premium btn-xs" ng-click="msg.detach(c)">detach</button>
-                            </span>
-                        </div>
-                        <!-- /.col-md-6 -->
-                    </div>
-                    <!-- /.row -->
-                    <!-- /Temp ------------ -->
                 </uib-tab>
                 <uib-tab heading="Basic" select="refreshSlider()">
                     <!-- ------------------ Basic ------------------ -->
@@ -85,12 +53,14 @@
                                 Blocking              
                             
                                 
+                                
                                 <!-- ---- FIXME ---- -->
                                 <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
                             </span>
                             <span>
                                 Sweep
                             
+                                
                                 
                                 <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                 <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="!service.isSweeping?msg.stop():sweep()" on="" off="" size="btn-lg"/>
@@ -138,6 +108,7 @@
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED                         
                         
+                                            
                                             
                                             
                                             </div>
@@ -235,6 +206,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED
+                                            
                                             
                                             
                                             </div>
