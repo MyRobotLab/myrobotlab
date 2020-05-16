@@ -15,6 +15,7 @@ import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
+import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -239,9 +240,10 @@ success = true; // FIXME change object to send error tolerance - let the robot d
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
       angleMap.put(jointName, (double) angle % 360.0F);
+      invoke("publishJointAngles", new AngleData(jointName, (double) angle % 360.0F));
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
-    invoke("publishJointAngles", angleMap);
+    // invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -362,9 +364,8 @@ success = true; // FIXME change object to send error tolerance - let the robot d
   }
 
   @Override
-  public Map<String, Double> publishJointAngles(HashMap<String, Double> angleMap) {
-    // TODO Auto-generated method stub
-    return angleMap;
+  public AngleData publishJointAngles(AngleData angleData) {
+    return angleData;
   }
 
   public double[][] publishJointPositions(double[][] jointPositionMap) {

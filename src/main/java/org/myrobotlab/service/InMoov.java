@@ -1232,9 +1232,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           calibrationWriter.write(s.getName() + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
           // if there's a controller reattach it at rest
 
-          for (String controller : s.getControllers()) {
-            calibrationWriter.write(s.getName() + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
-          }
+          calibrationWriter.write(s.getName() + ".attach(\"" + s.getController() + "\"," + s.getPin() + "," + s.getRest() + ")\n");
 
           if (s.getAutoDisable()) {
             calibrationWriter.write(s.getName() + ".setAutoDisable(True)\n");
