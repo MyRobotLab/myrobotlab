@@ -1427,3 +1427,59 @@ padding: 0px;
 }
 
 /*   -/Table Header Rotation th 45º and Speech recognition style */
+
+
+/* new handleOpen */
+#handleOpen{
+    position: absolute;
+    left: -11px;
+    top: 52px;
+    float: left;
+    /* border-style: solid; */
+    /* border: groove; */
+    width: 80px;
+    /* height: 300px; */
+    display: block;
+    background-color: #f00;
+    z-index: 90;
+    cursor: pointer;
+    /* font-size: 28px; */
+    /* color: #b3b3b3; */
+    /* width: 184px; */
+    /* padding-right: 30px; */
+    /* height: fit-content; */
+    /* display: block; */
+    /* padding-bottom: 32px; */
+    /* padding-left: 0px; */
+    /* padding-top: 34px; */
+    /* visibility: hidden; */
+    /* margin-left: 0px; */
+    /* background-repeat: no-repeat; */
+    /* background-position: left bottom; */
+    /* background-image: url("../service/views/sideNavPull2.png"); */
+}
+
+#handleOpen .menuName270{
+    /* width: fit-content; */
+    min-width: 164px;
+    position: absolute;
+    right: 0px;
+    /* left: 0px; */
+    padding-left: 35px;
+    padding-right: 10px;
+    padding-top: 11px;
+    transform-origin: 100%  0%;
+    transform: rotate(-90deg) translate(0%, -150%);
+    color: #777;
+    margin-left: 0px;
+    line-height: 20px;
+    height: 53px;
+    background-image: url(../service/views/sideNavPull270.png);
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    font-weight: normal;
+    letter-spacing: 4px;
+    white-space: nowrap;
+    font-size: 13px;
+    font-family: Arial, Helvetica, sans-serif!important;
+}
