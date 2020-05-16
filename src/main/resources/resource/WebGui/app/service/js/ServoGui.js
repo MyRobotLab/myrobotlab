@@ -26,7 +26,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     // current selection of controller
     $scope.pinList = []
     for (let i = 0; i < 58; ++i){
-        $scope.pinList.push(i)
+        $scope.pinList.push(i +'') // make strings 
     }
 
 
@@ -211,11 +211,5 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')
-
-    // no longer needed - interfaces now travel with a service
-    // var runtimeName = mrl.getRuntime().name
-    // mrl.subscribe(runtimeName, 'getServiceNamesFromInterface')
-    // mrl.subscribeToServiceMethod(this.onMsg, runtimeName, 'getServiceNamesFromInterface')
-    // mrl.sendTo(runtimeName, 'getServiceNamesFromInterface', 'org.myrobotlab.service.interfaces.ServoController')
 }
 ])
