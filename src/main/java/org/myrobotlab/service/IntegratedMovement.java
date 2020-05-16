@@ -511,8 +511,8 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   @Override
-  public AngleData publishJointAngles(AngleData angleMap) {
-    return angleMap;
+  public AngleData publishJointAngle(AngleData angle) {
+    return angle;
   }
 
   public double[][] publishJointPositions(double[][] jointPositionMap) {

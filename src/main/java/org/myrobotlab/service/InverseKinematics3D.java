@@ -240,10 +240,9 @@ success = true; // FIXME change object to send error tolerance - let the robot d
       // - 180 to + 180 ?
       double angle = MathUtils.radToDeg(theta) + l.getOffset();
       angleMap.put(jointName, (double) angle % 360.0F);
-      invoke("publishJointAngles", new AngleData(jointName, (double) angle % 360.0F));
+      invoke("publishJointAngle", new AngleData(jointName, (double) angle % 360.0F));
       log.info("Servo : {}  Angle : {}", jointName, angleMap.get(jointName));
     }
-    // invoke("publishJointAngles", angleMap);
     // we want to publish the joint positions
     // this way we can render on the web gui..
     double[][] jointPositionMap = createJointPositionMap(name);
@@ -280,7 +279,7 @@ success = true; // FIXME change object to send error tolerance - let the robot d
   
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
-      addListener("publishJointAngles", attachable.getName(), "onJointAngles");
+      addListener("publishJointAngle", attachable.getName(), "onJointAngle");
     }
   }
 
@@ -332,7 +331,7 @@ success = true; // FIXME change object to send error tolerance - let the robot d
       // leftArm.omoplate.setMinMax(0, 180);
       // attach the publish joint angles to the on JointAngles for the inmoov
       // arm.
-      inversekinematics.addListener("publishJointAngles", leftArm.getName(), "onJointAngles");
+      inversekinematics.addListener("publishJointAngle", leftArm.getName(), "onJointAngle");
     }
 
     // Runtime.createAndStart("gui", "SwingGui");
@@ -364,7 +363,7 @@ success = true; // FIXME change object to send error tolerance - let the robot d
   }
 
   @Override
-  public AngleData publishJointAngles(AngleData angleData) {
+  public AngleData publishJointAngle(AngleData angleData) {
     return angleData;
   }
 
