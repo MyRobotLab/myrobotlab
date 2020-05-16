@@ -534,12 +534,10 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         // FIXME - Servo supports multiple controllers - the UI needs a
         // multi-select perhaps
-        String controllerName = null;
-        for (String controller : servo.getControllers()) {
-        lastController = controller;
-        controllerName = controller;
-        }
+        String controllerName = servo.getController();
+        lastController = controllerName;
 
+        
         moving.setVisible(servo.isMoving());
 
         enabledIcon.setVisible(servo.isEnabled());

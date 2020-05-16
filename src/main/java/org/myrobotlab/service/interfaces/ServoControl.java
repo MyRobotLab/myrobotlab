@@ -25,8 +25,6 @@
 
 package org.myrobotlab.service.interfaces;
 
-import java.util.Set;
-
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
@@ -73,7 +71,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return
    */
-  Set<String> getControllers();
+  String getController();
 
   /**
    * returns the encoder attached to this ServoControl
