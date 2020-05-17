@@ -817,7 +817,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   public static ServiceInterface getService(String inName) {
-
+    if (inName == null) {
+      return null;
+    }
+    
     String name = getFullName(inName);
 
     if (!registry.containsKey(name)) {
@@ -3363,6 +3366,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   static public String getFullName(String shortname) {
+    if (shortname == null) {
+      return null;
+    }
     if (shortname.contains("@")) {
       // already long form
       return shortname;
