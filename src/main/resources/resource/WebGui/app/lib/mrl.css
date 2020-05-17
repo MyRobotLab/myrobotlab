@@ -1483,3 +1483,34 @@ padding: 0px;
     font-size: 13px;
     font-family: Arial, Helvetica, sans-serif!important;
 }
+
+.speedSlider{
+  width: 108px !important;
+  vertical-align: middle !important;
+}
+.autoDisableSlider{
+  width: 108px !important;
+  vertical-align: middle !important;
+}
+
+.tableBasic td {
+  white-space: nowrap;
+  vertical-align: middle !important;
+  /* padding: 8px !important; */
+  text-align: right;
+}
+
+.tableBasic td:nth-child(1) {
+  width: 122px;
+  text-align: left;
+}
+.tableBasic td:nth-child(2) {
+text-align: left;
+}
+.tableBasic td:nth-child(3) {
+  width: 210px;
+}
+.tableBasic td:nth-child(4) {
+  width: 264px;
+  text-align: right;
+}
