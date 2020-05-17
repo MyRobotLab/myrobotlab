@@ -2,14 +2,15 @@
 <div class="servoContent">
     <div class="row">
         <div class="col-md-12">
-            <uib-tabset>
-                <uib-tab heading="Controller" select="refreshSlider()">
+            <uib-tabset active="activeTabIndex">
+                <uib-tab heading="Controller" index="0">
                     <div class="row">
                         <div class="col-md-12">
                             <nav class="settingsbar preventDragSelect">
                                 <span>
                                     <h6>
                                         You need to attach a controller to a servo.<br/>For example real and virtual controller.
+                                    
                                     </h6>
                                 </span>
                             </nav>
@@ -24,9 +25,10 @@
                                             <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
                                     <td>
-                                    <td><!-- TODO - send pos ! ??? -->
-                                    <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
-                                    <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
+                                    <td>
+                                        <!-- TODO - send pos ! ??? -->
+                                        <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
+                                        <button ng-show="service.controller" class="btn btn-default" ng-click="msg.detach()">detach</button>
                                     </td>
                                     <td>Pin</td>
                                     <td>
@@ -45,46 +47,41 @@
                     </div>
                     <!-- /.row -->
                 </uib-tab>
-                <uib-tab heading="Basic" select="refreshSlider()">
+                <uib-tab heading="Basic" index="1">
                     <!-- ------------------ Basic ------------------ -->
                     <table class="table tableBasic preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
                                 <td>
                                     Blocking              
+                                    
                                     <!-- ---- FIXME ---- -->
                                     <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
                                 </td>
                                 <td>
                                     Sweep
+                                    
                                     <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                     <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
                                 </td>
                                 <td>
                                     Speed
-                                    <!--
-                                        <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
-                                   
-                                    <input type="range" min="1" max="501" value="40" class="speedSlider" onchange="speedSlider({{service.name}}, this.value)">
-                                -->
-                                    <rzslider class="custom-slider3 speedSlider" ng-click="" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
-                                        
+                                    <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
                                 </td>
                                 <td>
                                     Auto-disable
-                                    <toggle ng-model="toggleAutoDisable" class="miniBTN" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>                                    
-                                    <!--input type="range" min="1" max="501" value="4" class="autoDisableSlider" ng-change="autoDisableSlider(alue)"-->
+                                    <toggle ng-model="service.autoDisable" class="miniBTN" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
                                     <rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
-                                </td>                               
+                                </td>
                             </tr>
                             <tr class="valuesRow">
-                                <td></td><td></td>
-                                <td>Speed = {{speedSlider.value}}</td>
-                                <td>Timeout = {{autoDisableSlider.value}} ms</td>
+                                <td></td>
+                                <td></td>
+                                <td>Speed = {{speedDisplay}} °/s</td>
+                                <td>Timeout = {{autoDisableSlider.value}} s</td>
                             </tr>
                         </tbody>
                     </table>
-              
                     <div class="row">
                         <div class="col-md-12">
                             <div class="verticalSpacerBasic">
@@ -109,6 +106,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED     
+                                            
                                             </div>
                                         </div>
                                     </div>
@@ -126,7 +124,7 @@
                     <!-- /.row -->
                     <!-- <div class="verticalSpacer"></div> -->
                 </uib-tab>
-                <uib-tab heading="Advanced" select="refreshSlider()">
+                <uib-tab heading="Advanced" index="2">
                     <!-- ------------------ Advanced ------------------ -->
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
@@ -204,6 +202,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED                                            
+                                            
                                             </div>
                                         </div>
                                     </div>
@@ -227,16 +226,15 @@
     <!-- /.row -->
 </div>
 <script>
-function speedSlider(servo, value){
-    if(value==501){
-        value = "<b>Max Speed</b>";
-    }else{
-        value = 'Speed = ' + value + 'º per second';
+    function speedSlider(servo, value) {
+        if (value == 501) {
+            value = "<b>Max Speed</b>";
+        } else {
+            value = 'Speed = ' + value + 'º per second';
+        }
+        document.getElementById("speedValue" + servo).textContent = value;
+        // And set de value in angular
     }
-    document.getElementById("speedValue"+servo).textContent = value;
-    // And set de value in angular
-}
 </script>
-
 <!-- /#servoContent -->
 <!-- /ServoGui.html -->
