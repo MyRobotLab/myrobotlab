@@ -64,22 +64,23 @@
                                     Speed
                                     <!--
                                         <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
-                                    -->
+                                   
                                     <input type="range" min="1" max="501" value="40" class="speedSlider" onchange="speedSlider({{service.name}}, this.value)">
+                                -->
+                                    <rzslider class="custom-slider3 speedSlider" ng-click="" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
                                         
                                 </td>
                                 <td>
                                     Auto-disable
                                     <toggle ng-model="toggleAutoDisable" class="miniBTN" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>                                    
                                     <!--input type="range" min="1" max="501" value="4" class="autoDisableSlider" ng-change="autoDisableSlider(alue)"-->
-                                    <rzslider class="custom-slider sliderPosition" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
+                                    <rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
                                 </td>                               
                             </tr>
                             <tr class="valuesRow">
                                 <td></td><td></td>
-                                <td>Speed = <span id="speedValue{{service.name}}"></span></td>
-                                <td>
-                                Timeout = <span id="autoDisableSlider.value"></span> {{autoDisableSlider.value}} ms</td>
+                                <td>Speed = {{speedSlider.value}}</td>
+                                <td>Timeout = {{autoDisableSlider.value}} ms</td>
                             </tr>
                         </tbody>
                     </table>
