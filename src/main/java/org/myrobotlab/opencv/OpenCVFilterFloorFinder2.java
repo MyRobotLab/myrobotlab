@@ -198,7 +198,9 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
           // log.debug("box {}", box);
 
           if (origin == null) {
-            origin = new CvPoint(width / 2, 10 /* height ?? */);
+            origin = new CvPoint();
+            origin.x(width/2);
+            origin.y(10 /* height?? */);
           }
 
           if (publishPolygon) {

@@ -120,8 +120,8 @@ public class TesseractOcr extends Service {
     ServiceType meta = new ServiceType(TesseractOcr.class);
     meta.addDescription("Optical character recognition - the ability to read");
     meta.addCategory("ai","vision");
-    meta.addDependency("org.bytedeco", "tesseract", "4.1.0-1.5.2");
-    meta.addDependency("org.bytedeco", "tesseract-platform", "4.1.0-1.5.2");
+    meta.addDependency("org.bytedeco", "tesseract", "4.1.1-1.5.3");
+    meta.addDependency("org.bytedeco", "tesseract-platform", "4.1.1-1.5.3");
     return meta;
   }
 
