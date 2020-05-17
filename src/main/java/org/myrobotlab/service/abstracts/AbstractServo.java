@@ -984,12 +984,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sc;
   }
 
-  /**
-   * BEHOLD THE NEW PUBLISHING INTERFACE POINTS !!!!! Subscribers can now
-   * subscribe to servo command events, which allows the ability for the
-   * framework to take care of all the details of multiple consumers/controllers
-   */
-
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
     return sc;

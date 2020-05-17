@@ -6,7 +6,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     var firstTime = true
 
     // init
-    $scope.controller = null
     $scope.pin = null
     $scope.min = 0
     $scope.max = 180
@@ -14,11 +13,14 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.possibleControllers = null
     $scope.testTime = 300
     $scope.sliderEnabled = false
+    $scope.speedDisplay = 0
 
     $scope.speed = null
 
+    $scope.activeTabIndex = 0
+
     $scope.speedSlider = {
-        value: 90,
+        value: 501,
         options: {
             floor: 1,
             ceil: 501,
@@ -28,7 +30,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             onStart: function() {},
             onChange: function() {
                 if ($scope.sliderEnabled) {
-                    msg.send('moveTo', $scope.pos.value)
+                    if ($scope.speedSlider.value == 501){
+                        msg.send('fullSpeed')
+                    } else {
+                        msg.send('setSpeed', $scope.speedSlider.value)    
+                    }                    
                 }
             },
             onEnd: function() {}
@@ -38,17 +44,17 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     $scope.autoDisable = null
 
     $scope.autoDisableSlider = {
-        value: 90,
+        value: 3,
         options: {
             floor: 1,
-            ceil: 500,
+            ceil: 10,
             minLimit: 1,
-            maxLimit: 500,
+            maxLimit: 10,
             hideLimitLabels: true,
             onStart: function() {},
             onChange: function() {
                 if ($scope.sliderEnabled) {
-                    msg.send('moveTo', $scope.pos.value)
+                    msg.send('setIdleTimeout', $scope.autoDisableSlider.value * 1000)
                 }
             },
             onEnd: function() {}
@@ -137,14 +143,34 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
         $scope.autoDisable = service.autoDisable
 
-        // these 
-        $scope.speed = service.speed
+        // done correctly - speedDisplay is a 'status' display !
+        // its NOT used to set 'control' speed - control is sent
+        // from the ui interface - but the ui component does not display what it sent
+        // speedDisplay displays what was recieved - and is currently set
+        if (service.speed){
+            $scope.speedDisplay = service.speed
+        } else {
+            $scope.speedDisplay = 'Max'
+        }
+
         $scope.pin = service.pin
         $scope.rest = service.rest
 
+        // ui initialization - good idea !
         if (firstTime) {
             $scope.pos.value = service.currentPos
             $scope.sliderEnabled = true
+
+            // init ui components
+            if (service.speed){
+                $scope.speedSlider.value = service.speed
+            } else {
+                $scope.speedSlider.value = 501 // ui max limit
+            }
+            
+
+            $scope.activeTabIndex = service.controller == null?0:1
+            
             firstTime = false
         }
 
