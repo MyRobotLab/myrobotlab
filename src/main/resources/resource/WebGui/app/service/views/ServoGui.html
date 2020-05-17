@@ -67,8 +67,8 @@
                             <span class="lastColumn">
                                 Auto-disable &nbsp;
                                 <!-- FIXME -->
-                                <input type="text" class="form-control" placeholder="3" ng-model="time"/>
-                                &nbsp;sec &nbsp;<toggle ng-model="toggleAutoDisable" class="miniBTN" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>
+                                <input type="text" class="form-control" style="width:40px;" ng-model="service.idleTimeout"/>
+                                &nbsp;ms &nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" ng-change="setAutoDisable()" on="" off="" size="btn-lg"/>
                                 <!--          
                               <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
                             -->
