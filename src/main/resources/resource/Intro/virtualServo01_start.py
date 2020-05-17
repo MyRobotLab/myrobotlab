@@ -5,10 +5,13 @@
 # more info @: http://myrobotlab.org/service/JMonkeyEngine
 #########################################
 
+from org.myrobotlab.framework import Service
+from org.myrobotlab.service import Intro
+
 # start the service
 virtualServo01 = Runtime.start('virtualServo01','JMonkeyEngine')
 # we load the model from path
-virtualServo01.loadModels('resource/Intro/JMonkeyEngine/assets')
+virtualServo01.loadModels(Service.getResourceDir('Intro','JMonkeyEngine/assets'))
 # we set the rotation axe to the defined part
 virtualServo01.setRotation("servo01", "y")
 # we do our mapping to the part

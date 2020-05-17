@@ -17,6 +17,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     $scope.speed = null
 
+    $scope.autoDisable = null
+
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
     // in control mode we take updates by the user
@@ -25,10 +27,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     // TODO - should be able to build this based on
     // current selection of controller
     $scope.pinList = []
-    for (let i = 0; i < 58; ++i){
-        $scope.pinList.push(i +'') // make strings 
+    for (let i = 0; i < 58; ++i) {
+        $scope.pinList.push(i + '')
+        // make strings 
     }
-
 
     //slider config with callbacks
     $scope.pos = {
@@ -80,21 +82,24 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         }
     }
 
-    $scope.refreshSlider = function () {
-        $timeout(function () {
+    $scope.refreshSlider = function() {
+        $timeout(function() {
             $scope.$broadcast('rzSliderForceRender');
         });
-    };
-    
+    }
+    ;
+
     // trying to fix the slider refresh
-    $scope.$on('$stateChangeSuccess', function () {
+    $scope.$on('$stateChangeSuccess', function() {
         refreshSlider();
     });
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service  
+        $scope.service = service
         $scope.selectedController = service.controller
+
+        $scope.autoDisable = service.autoDisable
 
         // these 
         $scope.speed = service.speed
@@ -156,10 +161,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     }
 
-    $scope.getSelectionBarColor = function() {
-        return "black"
-    }
-
     $scope.update = function(speed, rest, min, max) {
         msg.send("setSpeed", speed)
         msg.send("setRest", rest)
@@ -168,6 +169,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     $scope.setPin = function(inPin) {
         $scope.pin = inPin
+    }
+
+    $scope.setAutoDisable = function() {
+        msg.send("setIdleTimeout", $scope.service.idleTimeout)
+        msg.send("setAutoDisable", $scope.service.autoDisable)
     }
 
     // regrettably the onMethodMap dynamic
