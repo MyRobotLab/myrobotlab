@@ -4,7 +4,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -544,7 +543,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public void enable() {
     enabled = true;
     // invoke("publishServoEnable", this);
-    ((ServoController) Runtime.getService(controller)).onServoEnable(this);
+    ServoController sc = (ServoController)Runtime.getService(controller);
+    if (sc != null) {
+      sc.onServoEnable(this);
+    }
     broadcastState();
   }
 
@@ -903,7 +905,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.info("controller is null");
       // FIXME - need to still go through the default 'move'
     } else {
-      ((ServoController) Runtime.getService(controller)).onServoMoveTo(this);
+      ServoController sc = (ServoController)Runtime.getService(controller);
+      if (sc != null) {
+        sc.onServoMoveTo(this);
+      }
     }
 
     // invoke("publishServoMoveTo", this);

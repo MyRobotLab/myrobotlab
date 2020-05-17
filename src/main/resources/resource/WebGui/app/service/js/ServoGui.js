@@ -30,11 +30,11 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             onStart: function() {},
             onChange: function() {
                 if ($scope.sliderEnabled) {
-                    if ($scope.speedSlider.value == 501){
+                    if ($scope.speedSlider.value == 501) {
                         msg.send('fullSpeed')
                     } else {
-                        msg.send('setSpeed', $scope.speedSlider.value)    
-                    }                    
+                        msg.send('setSpeed', $scope.speedSlider.value)
+                    }
                 }
             },
             onEnd: function() {}
@@ -60,7 +60,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             onEnd: function() {}
         }
     }
-    
+
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
     // in control mode we take updates by the user
@@ -147,7 +147,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         // its NOT used to set 'control' speed - control is sent
         // from the ui interface - but the ui component does not display what it sent
         // speedDisplay displays what was recieved - and is currently set
-        if (service.speed){
+        if (service.speed) {
             $scope.speedDisplay = service.speed
         } else {
             $scope.speedDisplay = 'Max'
@@ -162,16 +162,20 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.sliderEnabled = true
 
             // init ui components
-            if (service.speed){
+            if (service.speed) {
                 $scope.speedSlider.value = service.speed
             } else {
-                $scope.speedSlider.value = 501 // ui max limit
+                $scope.speedSlider.value = 501
+                // ui max limit
             }
-            
 
-            $scope.activeTabIndex = service.controller == null?0:1
-            
+            $scope.activeTabIndex = service.controller == null ? 0 : 1
+
             firstTime = false
+
+            $timeout(function() {
+                $scope.$broadcast('rzSliderForceRender')
+            })
         }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
@@ -260,7 +264,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }
-
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")

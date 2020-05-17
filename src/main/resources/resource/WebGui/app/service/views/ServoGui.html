@@ -153,7 +153,7 @@
                                 <td>Invert</td>
                                 <td>
                                     <!-- ---- FIXME ---- -->
-                                    <toggle ng-model="toggleInvert" class="miniBTN" title="This will invert servo direction" ng-change="!service.isInverted?msg.isInverted(false):msg.isInverted(true)" on="" off="" size="btn-lg"/>
+                                    <toggle ng-model="service.mapper.inverted" class="miniBTN" title="This will invert servo direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
                                 </td>
                                 <td>Encoder</td>
                                 <td>
