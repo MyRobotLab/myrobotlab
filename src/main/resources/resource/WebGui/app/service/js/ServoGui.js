@@ -19,6 +19,23 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
     $scope.autoDisable = null
 
+   $scope.autoDisableSlider = {
+        value: 90,
+        options: {
+            floor: 1,
+            ceil: 500,
+            minLimit: 1,
+            maxLimit: 500,
+            onStart: function() {},
+            onChange: function() {
+                if ($scope.sliderEnabled) {
+                    msg.send('moveTo', $scope.pos.value)
+                }
+            },
+            onEnd: function() {}
+        }
+    }
+
     // mode is either "status" or "control"
     // in status mode we take updates by the servo and its events
     // in control mode we take updates by the user
@@ -198,6 +215,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
         // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }
+
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")

@@ -47,36 +47,43 @@
                 </uib-tab>
                 <uib-tab heading="Basic" select="refreshSlider()">
                     <!-- ------------------ Basic ------------------ -->
-                    <nav class="settingsbar preventDragSelect">
-                        <form class="form-inline">
-                            <span>
-                                Blocking              
-                                <!-- ---- FIXME ---- -->
-                                <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
-                            </span>
-                            <span>
-                                Sweep
-                                <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
-                                <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
-                            </span>
-                            <span>
-                                Speed
-                            <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
-                                &deg;/s &nbsp;<button class="btn btn-speed" ng-click="setSpeed(speed)">Set</button>
-                            </span>
-                            <span class="lastColumn">
-                                Auto-disable &nbsp;
-                                <!-- FIXME -->
-                                <input type="text" class="form-control" style="width:40px;" ng-model="service.idleTimeout"/>
-                                &nbsp;ms &nbsp;<toggle ng-model="service.autoDisable" class="miniBTN" ng-change="setAutoDisable()" on="" off="" size="btn-lg"/>
-                                <!--          
-                              <input type="checkbox" {{(service.autoDisable)?" checked ":"  "}}  autocomplete="off" ng-click="msg.setAutoDisable(!service.autoDisable)">
-                            -->
-                                <!-- ---- can we set timeout on toggle Auto-disable ON? ---- -->
-                                <!-- ---- or we need a (Set) button? ---- -->
-                            </span>
-                        </form>
-                    </nav>
+                    <table class="table tableBasic preventDragSelect" style="margin-bottom: 0px!important;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    Blocking              
+                                    <!-- ---- FIXME ---- -->
+                                    <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
+                                </td>
+                                <td>
+                                    Sweep
+                                    <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
+                                    <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
+                                </td>
+                                <td>
+                                    Speed
+                                    <!--
+                                        <input type="text" class="form-control" placeholder="500" ng-model="speed" style="width:40px;"/>
+                                    -->
+                                    <input type="range" min="1" max="501" value="40" class="speedSlider" onchange="speedSlider({{service.name}}, this.value)">
+                                        
+                                </td>
+                                <td>
+                                    Auto-disable
+                                    <toggle ng-model="toggleAutoDisable" class="miniBTN" ng-change="!service.AutoDisable?msg.isEnabled():msg.setAutoDisable(time)" on="" off="" size="btn-lg"/>                                    
+                                    <!--input type="range" min="1" max="501" value="4" class="autoDisableSlider" ng-change="autoDisableSlider(alue)"-->
+                                    <rzslider class="custom-slider sliderPosition" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
+                                </td>                               
+                            </tr>
+                            <tr class="valuesRow">
+                                <td></td><td></td>
+                                <td>Speed = <span id="speedValue{{service.name}}"></span></td>
+                                <td>
+                                Timeout = <span id="autoDisableSlider.value"></span> {{autoDisableSlider.value}} ms</td>
+                            </tr>
+                        </tbody>
+                    </table>
+              
                     <div class="row">
                         <div class="col-md-12">
                             <div class="verticalSpacerBasic">
@@ -100,11 +107,7 @@
                                             <!-- Energized -->
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
-                                                ENERGIZED                         
-                        
-                                            
-                                            
-                                            
+                                                ENERGIZED     
                                             </div>
                                         </div>
                                     </div>
@@ -199,10 +202,7 @@
                                             <!-- Energized -->
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
-                                                ENERGIZED
-                                            
-                                            
-                                            
+                                                ENERGIZED                                            
                                             </div>
                                         </div>
                                     </div>
@@ -225,5 +225,17 @@
     </div>
     <!-- /.row -->
 </div>
+<script>
+function speedSlider(servo, value){
+    if(value==501){
+        value = "<b>Max Speed</b>";
+    }else{
+        value = 'Speed = ' + value + 'º per second';
+    }
+    document.getElementById("speedValue"+servo).textContent = value;
+    // And set de value in angular
+}
+</script>
+
 <!-- /#servoContent -->
 <!-- /ServoGui.html -->
