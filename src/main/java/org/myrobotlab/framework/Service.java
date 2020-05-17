@@ -883,7 +883,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param additionalPath
    * @return
    */
-  static private String getResourceDir(String serviceType, String additionalPath) {
+  static public String getResourceDir(String serviceType, String additionalPath) {
     
     // setting resource directory
     String resourceDir = "resource" + fs + serviceType;
