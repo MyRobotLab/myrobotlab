@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log', '$timeout', '$scope', 'mrl', function($log, $timeout, $scope, mrl) {
-    $log.info('ServoGuiCtrl')
+angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$timeout', '$scope', 'mrl', function($timeout, $scope, mrl) {
+    console.info('ServoGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -207,7 +207,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
             break
         case 'addListener':
             // wtf?
-            $log.info("Add listener called")
+            console.info("Add listener called")
             $scope.status = data
             $scope.$apply()
             break
@@ -217,7 +217,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
 
             break
         default:
-            $log.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
+            console.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
 
@@ -248,7 +248,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$log'
     }
 
     $scope.attachController = function(controller, pin) {
-        $log.info("attachController")
+        console.info("attachController")
 
         // FIXME - there needs to be some updates to handle the complexity of taking updates from the servo vs
         // taking updates from the UI ..  some of this would be clearly solved with a (control/status) button

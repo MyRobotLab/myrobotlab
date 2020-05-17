@@ -4,6 +4,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -542,7 +543,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   public void enable() {
     enabled = true;
-    invoke("publishServoEnable", this);
+    // invoke("publishServoEnable", this);
+    ((ServoController) Runtime.getService(controller)).onServoEnable(this);
     broadcastState();
   }
 
@@ -824,22 +826,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
     targetPos = mapper.calcOutput(newPos);
 
-    // work on confused info below
-    if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know
-                                       // if this servo was disabled through
-                                       // timer or not
-      // if (newPos != lastPos || !getAutoDisable()) {
-      if (targetPos != currentPos || !isEnabled()) {
-        enable();
-      }
-    }
-
-    /*
-     * if (currentPos != targetPos) {
-     * log.info("{} command to move {} but already there", getName(),
-     * targetPos); return; }
-     */
-
     /**
      * <pre>
      * 
@@ -1046,6 +1032,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     } else {
       purgeTask("idleDisable");
       idleDisabled = false;
+      enable();
     }
 
     if (valueChanged) {
