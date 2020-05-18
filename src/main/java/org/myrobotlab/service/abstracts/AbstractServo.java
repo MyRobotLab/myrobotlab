@@ -622,9 +622,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getTargetOutput() {
-    if (targetPos == null) {
-      targetPos = rest;
-    }
     targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
@@ -872,6 +869,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
 
     targetOutput = getTargetOutput();
+    log.info("pos {} output {}", targetPos, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
 
     isMoving = true;
