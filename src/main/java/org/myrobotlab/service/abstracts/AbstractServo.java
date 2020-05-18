@@ -1,13 +1,10 @@
 package org.myrobotlab.service.abstracts;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.myrobotlab.framework.Config;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -22,6 +19,7 @@ import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.WebGui;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -52,8 +50,9 @@ import org.slf4j.Logger;
  *         The mapper accepts inputs, the controller needs mapper outputs.
  *         Nothing outside of the servo controller should need the mapper
  *         outputs.
- *         
- *         TODO - make a publishing interface which publishes "CONTROL" angles vs status of angles
+ * 
+ *         TODO - make a publishing interface which publishes "CONTROL" angles
+ *         vs status of angles
  * 
  *
  */
@@ -67,15 +66,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     try {
 
       LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
+      // Platform.setVirtual(true);
 
       // Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
 
-      Runtime.start("webgui", "WebGui");
-      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      mega.connect("COM7");
+      // mega.connect("/dev/ttyACM0");
       // mega.setBoardMega();
 
       Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
@@ -87,7 +88,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       double max = 170;
       double speed = 5; // degree/s
 
-      servo03.attach(mega, 8, 38.0);
+      // servo03.attach(mega, 8, 38.0);
 
       // servo03.sweep(min, max, speed);
 
@@ -137,17 +138,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.error("main threw", e);
     }
   }
-  
+
   // FIXME - should be renamed - autoDisableDefault
   // FIXME - setAutoDisableDefault should be used and this should be protected
   static public boolean autoDisableDefault = false;
-  
+
   @Deprecated /* use setAutoDisableDefault */
   static public boolean enableAutoDisable(boolean b) {
     autoDisableDefault = b;
     return b;
   }
-  
+
   static public boolean setAutoDisableDefault(boolean b) {
     autoDisableDefault = b;
     return b;
@@ -208,7 +209,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * was disabled through a human or event which "manually" disabled the servo,
    * the servo SHOULD NOT be enabled next move - this is an internal field
    */
-  protected boolean idleDisabled = false;
+  private boolean idleDisabled = false;
 
   /**
    * if autoDisable is true - then after any move a timer is set to disable the
@@ -345,7 +346,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
     currentPos = targetPos = rest;
-    
+
     mapper.setMinMax(0, 180);
 
     // create our default TimeEncoder
@@ -453,7 +454,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.info("{} already attached", sc);
       return;
     }
-    
+
     // update pin if non-null value supplied
     if (pin != null) {
       setPin(pin);
@@ -481,7 +482,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     controller = sc;
     enabled = true; // <-- how to deal with this ? "real" controllers usually
                     // need an enable/energize command
-    
+
     // FIXME sc NEEDS TO BE FULL NAME !!!
     send(sc, "attachServoControl", this);
 
@@ -492,7 +493,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * disables and detaches from all controllers
    */
   public void detach() {
-      detach(controller);
+    detach(controller);
   }
 
   @Override
@@ -506,7 +507,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   public void detach(String sc) {
-    
+
     if (controller != null && !controller.equals(sc)) {
       log.info("{} already detached from {}", getName(), sc);
       return;
@@ -522,12 +523,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     removeListener("publishServoDisable", sc);
 
     controller = null;
-    
+
     disable();
-   
+
     send(sc, "detach", getName());
     sleep(500);
-    
+
     broadcastState();
   }
 
@@ -541,7 +542,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   public void enable() {
     enabled = true;
-    invoke("publishServoEnable", this);
+    // invoke("publishServoEnable", this);
+    ServoController sc = (ServoController)Runtime.getService(controller);
+    if (sc != null) {
+      sc.onServoEnable(this);
+    }
     broadcastState();
   }
 
@@ -617,9 +622,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getTargetOutput() {
-    if (targetPos == null) {
-      targetPos = rest;
-    }
     targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
@@ -735,7 +737,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       if (publishEncoderData) {
         invoke("publishEncoderData", data);
       }
-      
+
       invoke("publishJointAngle", new AngleData(getName(), data.value));
 
       // FIXME - these should be Deprecated - and publishEncoderData used if
@@ -823,22 +825,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
     targetPos = mapper.calcOutput(newPos);
 
-    // work on confused info below
-    if (!isEnabled() && autoDisable) { // FIXME - still not right - need to know
-                                       // if this servo was disabled through
-                                       // timer or not
-      // if (newPos != lastPos || !getAutoDisable()) {
-      if (targetPos != currentPos || !isEnabled()) {
-        enable();
-      }
-    }
-
-    /*
-     * if (currentPos != targetPos) {
-     * log.info("{} command to move {} but already there", getName(),
-     * targetPos); return; }
-     */
-
     /**
      * <pre>
      * 
@@ -883,6 +869,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
 
     targetOutput = getTargetOutput();
+    log.info("pos {} output {}", targetPos, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
 
     isMoving = true;
@@ -901,11 +888,27 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
     }
 
-    // GroG: I think in the long run this direct call vs using invoke/send is less preferrable
-    // thinking on a distributed network level you can't do this when the other thing is in
+    // GroG: I think in the long run this direct call vs using invoke/send is
+    // less preferrable
+    // thinking on a distributed network level you can't do this when the other
+    // thing is in
     // a different process
-    ((ServoController)Runtime.getService(controller)).onServoMoveTo(this);
-      
+
+    // This still need adjustment - if we do not mandate jme must be a servo
+    // controller
+    // then this control needs to be able to broadcast "control" angles !!! -
+    // and that
+    // might be without a controller !
+    if (controller == null) {
+      log.info("controller is null");
+      // FIXME - need to still go through the default 'move'
+    } else {
+      ServoController sc = (ServoController)Runtime.getService(controller);
+      if (sc != null) {
+        sc.onServoMoveTo(this);
+      }
+    }
+
     // invoke("publishServoMoveTo", this);
     broadcastState();
 
@@ -970,12 +973,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sc;
   }
 
-  /**
-   * BEHOLD THE NEW PUBLISHING INTERFACE POINTS !!!!! Subscribers can now
-   * subscribe to servo command events, which allows the ability for the
-   * framework to take care of all the details of multiple consumers/controllers
-   */
-
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
     return sc;
@@ -1004,7 +1001,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * will disable then detach this servo from all controllers
    */
-  public void releaseService() {    
+  public void releaseService() {
     if (encoder != null) {
       encoder.disable();
     }
@@ -1038,6 +1035,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     } else {
       purgeTask("idleDisable");
       idleDisabled = false;
+      enable();
     }
 
     if (valueChanged) {
@@ -1046,8 +1044,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   public int setIdleTimeout(int idleTimeout) {
-    this.idleTimeout = idleTimeout;
-    broadcastState();
+    if (this.idleTimeout != idleTimeout) {
+      this.idleTimeout = idleTimeout;
+      broadcastState();
+    }
     return idleTimeout;
   }
 
@@ -1195,6 +1195,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
+    broadcastState();
   }
 
   @Override
@@ -1205,10 +1206,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     syncedServos.add(sc.getName());
   }
 
-  @Override
+  @Override /* FIXME ! - either this or fullSpeed should be deprecated */
   public void unsetSpeed() {
-    speed = null;
-    
+    fullSpeed();
   }
 
   @Override
@@ -1230,7 +1230,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   }
 
-  
+
   public void writeMicroseconds(int uS) {
     invoke("publishServoWriteMicroseconds", this, uS);
   }
