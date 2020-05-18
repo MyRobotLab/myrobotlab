@@ -272,7 +272,7 @@ padding: 0px;
 }
 .servoContent .btn-input{
   background-color: #92ca7f;
-  /* width: 35px; */
+  width: 66px;
   height: 26px;
   font-size: smaller;
   text-align: center;
@@ -284,7 +284,7 @@ padding: 0px;
 
 .servoContent .btn-output{
   background-color: #61b6b9;
-  /* width: 36px; */
+  width: 66px;
   height: 26px;
   font-size: smaller;
   text-align: center;
@@ -296,7 +296,7 @@ padding: 0px;
 
 .servoContent .btn-rest{
   background-color:#e48b53;
-  /* width: 35px; */
+  width: 66px;
   height: 26px;
   font-size: smaller;
   text-align: center;
@@ -343,7 +343,7 @@ padding: 0px;
 }
 .tableAdvanced tr:nth-child(2) td {
    text-align: right;
-   padding-right: 14px !important;
+   padding-right: 30px !important;
 }
 
 .tableLimits td {
@@ -372,28 +372,36 @@ padding: 0px;
    text-align: left;
    margin-left: 0px;
    height: 22px;
+   width: 42px;
 }
 .tableLimits td:nth-child(2) {
-   width: 40px;
+   width: 80px;
 }
 .tableLimits td:nth-child(3) {
-   width: 40px;
+   width: 80px;
+}
+.tableLimits td:nth-child(4) {
+   /* width: 60px; */
+}
+.tableLimits td:nth-child(5) {
+   width: 64px;
 }
 .tableLimits td:nth-child(6) {
-   width: 40px;
+   width: 60px;
 }
 .tableLimits td:nth-child(7) {
+   width: 80px;
+}
+.tableLimits td:nth-child(8) {
+   /* width: 80px; */
+}
+.tableLimits td:nth-child(9) {
    width: 40px;
 }
 .tableLimits td:nth-child(10) {
-   width: 40px;
+   width: 80px;
 }
-.tableLimits td:nth-child(11) {
-   width: 30px;
-}
-.tableLimits td:nth-child(13) {
-   text-align: right;   
-}
+
 .valuesRow{
   height: 10px;
   padding: 0px;
