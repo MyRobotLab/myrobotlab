@@ -34,7 +34,14 @@ public class EncoderData {
   }
 
   public String toString() {
-    return String.format("%s %s %d", source, pin, value);
+    StringBuilder sb = new StringBuilder();
+    sb.append("[EncoderData: source:");
+    sb.append(source);
+    sb.append(" pin:");
+    sb.append(pin);
+    sb.append(" value:");
+    sb.append(value);
+    return sb.toString();
   }
 
 }

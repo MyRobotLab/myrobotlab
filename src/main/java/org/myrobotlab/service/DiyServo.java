@@ -819,9 +819,9 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       motor.attach(arduino);
 
       Thread.sleep(1000);
-      // let's start the encoder!!
-      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); // new
-                                                                                         // Amt203Encoder("encoder");
+      // let's start the encoder!! Amt203Encoder("encoder");
+      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); 
+                                                                                         
       encoder.setPin(3);
 
       arduino.attach(encoder);

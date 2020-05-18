@@ -36,8 +36,7 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init("INFO");
-
-    String port = "COM3";
+    String port = "COM4";
     Runtime.start("gui", "SwingGui");
     Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
     ard.connect(port);
@@ -47,7 +46,6 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
     ard.attach(encoder);
     Thread.sleep(10000);
     encoder.setZeroPoint();
-    
     log.info("Here we are..");
   }
 

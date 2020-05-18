@@ -102,13 +102,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Double getMax();
 
   /**
-   * returns max speed if set
-   * 
-   * @return - speed
-   */
-  Double getMaxSpeed();
-
-  /**
    * gets the min X of the mapper (input)
    * 
    * @return min x
@@ -318,8 +311,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setInverted(Boolean invert);
 
   void setMapper(Mapper m);
-
-  void setMaxSpeed(Double speed);
 
   /**
    * limits input of servo - to prevent damage or problems if servos should not

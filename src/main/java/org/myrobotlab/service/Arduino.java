@@ -354,7 +354,8 @@ public class Arduino extends AbstractMicrocontroller
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
-    Integer deviceId = null;
+    // need to get a new device id!  wtf is this !
+    // let's get the max current id
     // send data to micro-controller
 
     // TODO: update this with some enum of various encoder types..
@@ -370,11 +371,10 @@ public class Arduino extends AbstractMicrocontroller
     } else {
       error("unknown encoder type {}", encoder.getClass().getName());
     }
-    attachDevice(encoder, new Object[] { address }); // FIXME - don't know why
-                                                     // this is necessary -
-                                                     // Attachable is only
-                                                     // needed
-    msg.encoderAttach(deviceId, type, address);
+    // attach the virtual representation of the device and get an id for it.
+    DeviceMapping m = attachDevice(encoder, new Object[] { address }); 
+    // send the attach method with our device id.
+    msg.encoderAttach(m.getId(), type, address);
 
     encoder.attach(this);
 
@@ -1628,11 +1628,14 @@ public class Arduino extends AbstractMicrocontroller
 
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
+    log.info("Publish Encoder Data {}", data);
     return data;
   }
 
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
+    // Also need to log this
+    
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
     if (ec instanceof Amt203Encoder) {
@@ -1641,11 +1644,16 @@ public class Arduino extends AbstractMicrocontroller
     } else if (ec instanceof As5048AEncoder) {
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
+      double angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
+      log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
 
     EncoderData data = new EncoderData(ec.getName(), pin, position);
+//    log.info("Publish Encoder Data Raw {}", data);
+    
+    // TODO: all this code needs to move out of here!
     return data;
   }
 
