@@ -535,13 +535,11 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
         // multi-select perhaps
         String controllerName = servo.getController();
         lastController = controllerName;
-
-        
         moving.setVisible(servo.isMoving());
-
         enabledIcon.setVisible(servo.isEnabled());
 
-        double maxSpd = (servo.getMaxSpeed() == null) ? 500.0 : servo.getMaxSpeed();
+        // TODO: KW review/remove this if possible in the UI?  maxSpeed should go away. there is only "fullSpeed" 
+        double maxSpd =  500.0;
         maxSpeed.setText(String.format("%.1f", maxSpd));
         speedSlider.setMaximum((int) maxSpd);
 

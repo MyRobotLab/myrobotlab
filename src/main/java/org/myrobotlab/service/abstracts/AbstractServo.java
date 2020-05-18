@@ -62,111 +62,20 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   private static final long serialVersionUID = 1L;
 
-  public static void main(String[] args) throws InterruptedException {
-    try {
-
-      LoggingFactory.init(Level.INFO);
-      // Platform.setVirtual(true);
-
-      // Runtime.start("gui", "SwingGui");
-      // Runtime.start("python", "Python");
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      // mega.connect("/dev/ttyACM0");
-      // mega.setBoardMega();
-
-      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
-
-      double pos = 78;
-      servo03.setPosition(pos);
-
-      double min = 3;
-      double max = 170;
-      double speed = 5; // degree/s
-
-      // servo03.attach(mega, 8, 38.0);
-
-      // servo03.sweep(min, max, speed);
-
-      /*
-       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
-       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
-       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
-       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
-       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
-       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
-       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
-       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
-       * Runtime.start("servo12", "Servo");
-       */
-      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
-
-      /*
-       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
-       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
-       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
-       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
-       * servo12.attach(mega, 12, 38.0);
-       */
-
-      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
-      // "TestCatcher");
-      // servo03.attach((ServoDataListener)catcher);
-
-      // servo.setPin(12);
-
-      /*
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
-       */
-
-      // servo.sweepDelay = 3;
-      // servo.save();
-      // servo.load();
-      // servo.save();
-      // log.info("sweepDely {}", servo.sweepDelay);
-
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
-
-  // FIXME - should be renamed - autoDisableDefault
-  // FIXME - setAutoDisableDefault should be used and this should be protected
-  static public boolean autoDisableDefault = false;
-
-  @Deprecated /* use setAutoDisableDefault */
-  static public boolean enableAutoDisable(boolean b) {
-    autoDisableDefault = b;
-    return b;
-  }
-
-  static public boolean setAutoDisableDefault(boolean b) {
-    autoDisableDefault = b;
-    return b;
-  }
+  // TODO: KW: Use only setIdleTimeout and setAutoDisable 
 
   /**
    * The automatic disabling of the servo in idleTimeout ms This de-energizes
-   * the servo
+   * the servo.  By default this is disabled.
    * 
-   * FIXME - poorly named enableAutoDisable
    */
-  protected Boolean autoDisable = autoDisableDefault;
+  protected Boolean autoDisable = false;
 
   /**
-   * set of currently subscribed servo controllers
+   * The current servo controller that this servo is attached to.
+   * TODO: move this to Servo.java , DiyServo doesn't care about this detail.
    */
-  // protected Set<String> controllers = new TreeSet<>();
-  String controller;
+  private String controller;
 
   /**
    * the "current" position of the servo - this never gets updated from
@@ -209,11 +118,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * was disabled through a human or event which "manually" disabled the servo,
    * the servo SHOULD NOT be enabled next move - this is an internal field
    */
+  // TODO: KW: simplify this logic to avoid the need of this additional boolean here.
   private boolean idleDisabled = false;
 
   /**
    * if autoDisable is true - then after any move a timer is set to disable the
    * servo. if the servo is idle for any length of time after
+   * Default timeout is 3000 milliseconds
+   * 
    */
   int idleTimeout = 3000;
 
@@ -248,7 +160,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * maximum speed default is 500 degrees per second or operating speed of 60
    * degrees in 0.12 seconds
    */
-  protected Double maxSpeed = 500.0;
+  // protected Double maxSpeed = 500.0;
 
   /**
    * the 'pin' for this Servo - it is Integer because it can be in a state of
@@ -587,10 +499,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return mapper.getMax();
   }
 
-  @Override
-  public Double getMaxSpeed() {
-    return maxSpeed;
-  }
+//  @Override
+//  public Double getMaxSpeed() {
+//    return maxSpeed;
+//  }
 
   @Override
   public Double getMin() {
@@ -1063,17 +975,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     broadcastState();
   }
 
-  @Override
-  public void setMaxSpeed(Double maxSpeed) {
-    this.maxSpeed = maxSpeed;
-    broadcastState();
-  }
-
-  /* decide on one deprecate the other ! */
-  @Deprecated
-  public void setMaxVelocity(Double maxSpeed) {
-    setMaxSpeed(maxSpeed);
-  }
+  // TODO: KW: max speed/velocity are gone.  use fullSpeed() 
 
   @Override
   // SEE - http://myrobotlab.org/content/servo-limits
@@ -1129,10 +1031,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       return;
     }
 
-    if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond > maxSpeed) {
-      speed = maxSpeed;
-      log.info("Trying to set speed to a value greater than max speed");
-    }
+    // KW: TODO: technically the Arduino will read this speed as a 16 bit int.. so max Speed is 32,767 ...
+    //    if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond > maxSpeed) {
+    //      speed = maxSpeed;
+    //      log.info("Trying to set speed to a value greater than max speed");
+    //    }
     speed = degreesPerSecond;
     invoke("publishServoSetSpeed", this);
     broadcastState();
@@ -1235,4 +1138,82 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     invoke("publishServoWriteMicroseconds", this, uS);
   }
 
+  public static void main(String[] args) throws InterruptedException {
+    try {
+
+      LoggingFactory.init(Level.INFO);
+      // Platform.setVirtual(true);
+
+      // Runtime.start("gui", "SwingGui");
+      // Runtime.start("python", "Python");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      // mega.connect("/dev/ttyACM0");
+      // mega.setBoardMega();
+
+      Servo servo03 = (Servo) Runtime.start("servo03", "Servo");
+
+      double pos = 78;
+      servo03.setPosition(pos);
+
+      double min = 3;
+      double max = 170;
+      double speed = 5; // degree/s
+
+      // servo03.attach(mega, 8, 38.0);
+
+      // servo03.sweep(min, max, speed);
+
+      /*
+       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
+       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
+       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
+       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
+       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
+       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
+       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
+       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
+       * Runtime.start("servo12", "Servo");
+       */
+      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
+
+      /*
+       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
+       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
+       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
+       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
+       * servo12.attach(mega, 12, 38.0);
+       */
+
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
+      // "TestCatcher");
+      // servo03.attach((ServoDataListener)catcher);
+
+      // servo.setPin(12);
+
+      /*
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       */
+
+      // servo.sweepDelay = 3;
+      // servo.save();
+      // servo.load();
+      // servo.save();
+      // log.info("sweepDely {}", servo.sweepDelay);
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+
+  
 }
