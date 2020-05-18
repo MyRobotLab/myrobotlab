@@ -53,14 +53,7 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    Blocking              
-                                    
-                                    <!-- ---- FIXME ---- -->
-                                    <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
-                                </td>
-                                <td>
-                                    Sweep
-                                    
+                                    Sweep                                    
                                     <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                     <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
                                 </td>
@@ -68,17 +61,10 @@
                                     Speed
                                     <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
                                 </td>
-                                <td>
-                                    Auto-disable
-                                    <toggle ng-model="service.autoDisable" class="miniBTN" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
-                                    <rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
-                                </td>
                             </tr>
                             <tr class="valuesRow">
                                 <td></td>
-                                <td></td>
                                 <td>Speed = {{speedDisplay}} °/s</td>
-                                <td>Timeout = {{autoDisableSlider.value}} s</td>
                             </tr>
                         </tbody>
                     </table>
@@ -124,34 +110,100 @@
                     <!-- /.row -->
                     <!-- <div class="verticalSpacer"></div> -->
                 </uib-tab>
-                <uib-tab heading="Advanced" index="2">
-                    <!-- ------------------ Advanced ------------------ -->
+                <uib-tab heading="Limits" index="2">
+                    <!-- ------------------ Limits ------------------ -->
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
                                 <td>Input</td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="setMinMax({service.currentPos.toFixed(2)},143)">Min</button>
+                                    <button class="btn btn-input" ng-click="setMinMax({service.currentPos.toFixed(2)},143)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="">Max</button>
+                                    <button class="btn btn-input" ng-click="">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Output</td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.setMinMax({service.currentPos.toFixed(2)},143)">Min</button>
+                                    <button class="btn btn-output" ng-click="msg.setMinMax({service.currentPos.toFixed(2)},143)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.setMinMax(8,{service.currentPos.toFixed(2)})">Max</button>
+                                    <button class="btn btn-output" ng-click="msg.setMinMax(8,{service.currentPos.toFixed(2)})">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Rest</td>
                                 <td>
-                                    <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set</button>
+                                    <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set Rest</button>
                                 </td>
+                            </tr>
+                            <tr class="valuesRow">
                                 <td></td>
-                                <td>Invert</td>
+                                <td class="inputColor preventDragSelect">{{limits.minValue}}</td>
+                                <td class="inputColor preventDragSelect">{{limits.maxValue}}</td>
+                                <td></td><td></td>
+                                <td class="outputColor preventDragSelect">{{limits.minValue}}</td>
+                                <td class="outputColor preventDragSelect">{{limits.maxValue}}</td>
+                                <td></td><td></td>
+                                <td class="restColor preventDragSelect">{{rest}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="verticalSpacerLimits">
+                    <!-- spacer to get the same vertical position of slider in Basic Tab -->
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="sliderContainer">
+                                <!-- sliderContainer -->
+                                <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
+                                <div class="limitsZone">
+                                    <!-- servo status -->
+                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
+                                        <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
+                                        <div class="servoCursor"></div>
+                                    </div>
+                                    <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
+                                        Rest
+                                    <div class="restCursor"></div>
+                                    </div>
+                                    <div ng-show="service.enabled" class="preventDragSelect">
+                                        <div class="energizedZone">
+                                            <!-- Energized -->
+                                            <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                                <span class="glyphicon glyphicon-flash"></span>
+                                                ENERGIZED                                            
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                                    <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(60*100/180)}}%)); width: calc(100% - ({{100 -((120-60)*100/180)}}%));"></div>
+                                    <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
+                                </div>
+                                <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+                            </div>
+                            <!-- /sliderContainer -->
+                        </div>
+                        <!-- /.col-md-12 -->
+                    </div>
+                    <!-- /.row -->
+                </uib-tab>
+                <uib-tab heading="Advanced" index="3">
+                    <!-- ------------------ Advanced ------------------ -->
+                    <table class="table tableAdvanced preventDragSelect">
+                        <tbody>
+                            <tr>
                                 <td>
+                                    Auto-disable
+                                    <toggle ng-model="service.autoDisable" class="miniBTN" ng-change="msg.setAutoDisable(service.autoDisable)" on="" off="" size="btn-lg"/>
+                                    <rzslider class="custom-slider3 autoDisableSlider" ng-click="" rz-slider-model="autoDisableSlider.value" rz-slider-options="autoDisableSlider.options"/>
+                                </td>
+                                <td>
+                                    Blocking                                    
+                                    <!-- ---- FIXME ---- -->
+                                    <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
+                                </td>
+                                <td>Invert
                                     <!-- ---- FIXME ---- -->
                                     <toggle ng-model="service.mapper.inverted" class="miniBTN" title="This will invert servo direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
                                 </td>
@@ -163,17 +215,8 @@
                                 </td>
                             </tr>
                             <tr class="valuesRow">
-                                <td></td>
-                                <td class="inputColor preventDragSelect">{{limits.minValue}}</td>
-                                <td class="inputColor preventDragSelect">{{limits.maxValue}}</td>
-                                <td></td>
-                                <td></td>
-                                <td class="outputColor preventDragSelect">{{limits.minValue}}</td>
-                                <td class="outputColor preventDragSelect">{{limits.maxValue}}</td>
-                                <td></td>
-                                <td></td>
-                                <td class="restColor preventDragSelect">{{rest}}</td>
-                                <td colspan="5"></td>
+                                <td>Timeout = {{autoDisableSlider.value}} s</td>
+                                <td colspan="4"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -193,7 +236,7 @@
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
                                         Rest
-                    <div class="restCursor"></div>
+                                    <div class="restCursor"></div>
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
                                         <div class="energizedZone">
