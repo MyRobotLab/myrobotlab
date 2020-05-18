@@ -978,6 +978,13 @@ public class Deeplearning4j extends Service {
     ServiceType meta = new ServiceType(Deeplearning4j.class.getCanonicalName());
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
+    
+    // Force javacpp 1.5.3 to resolve conflict between dl4j and javacv
+    String javaCppVersion = "1.5.3";
+    meta.addDependency("org.bytedeco", "javacpp", javaCppVersion);
+    meta.addDependency("org.bytedeco", "openblas", "0.3.9-"+javaCppVersion);
+    
+    // dl4j deps.
     meta.addDependency("org.deeplearning4j", "deeplearning4j-core", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-zoo", dl4jVersion);
     meta.addDependency("org.deeplearning4j", "deeplearning4j-nn", dl4jVersion);

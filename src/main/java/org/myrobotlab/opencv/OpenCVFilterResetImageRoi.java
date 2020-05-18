@@ -55,7 +55,8 @@ public class OpenCVFilterResetImageRoi extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
-    CvRect r = new CvRect(0, 0, image.width(), image.width());
+    CvRect r = new CvRect();
+    r.x(0).y(0).width(image.width()).height(image.width());
     cvSetImageROI(image, r);
     return image;
   }

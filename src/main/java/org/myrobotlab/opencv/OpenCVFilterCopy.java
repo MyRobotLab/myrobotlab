@@ -90,13 +90,15 @@ public class OpenCVFilterCopy extends OpenCVFilter {
   public CvRect getMinRoi(IplImage src, IplImage dst) {
     int minWidth = (src.width() < dst.width()) ? src.width() : dst.width();
     int minHeight = (src.height() < dst.height()) ? src.height() : dst.height();
-    CvRect rect = new CvRect(0, 0, minWidth, minHeight);
+    CvRect rect = new CvRect();
+    rect.x(0).y(0).width(minWidth).height(minHeight);
     return rect;
   }
 
   // FIXME - if dst == null - create src sized copy
   public IplImage copyWithRoi(IplImage src, IplImage dst, int roiX, int roiY, int roiWidth, int roiHeight) {
-    CvRect roiRect = new CvRect(roiX, roiY, roiWidth, roiHeight);
+    CvRect roiRect = new CvRect();
+    roiRect.x(roiX).y(roiY).width(roiWidth).height(roiHeight);
     cvSetImageROI(dst, roiRect);
 
     // cvCopy(src, dst, null);
