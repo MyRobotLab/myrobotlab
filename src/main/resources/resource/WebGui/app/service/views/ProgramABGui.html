@@ -1,157 +1,109 @@
-<style>
-    #log-console {
-        background-color: black;
-        color: white;
-        font: 1.3rem Inconsolata, monospace;
-        border-radius: 10px;
-        margin-top: 10px;
-        margin-right: 10px;
-    }
-</style>
 <div class="col-md-12 row">
-    <div class="col-md-6">
-        <table class="table table-striped">
+    <div id="tableProgramABtopContainer">
+        <table class="tableProgramABtop">
             <tr>
-                <td>
-                    <form class="form-inline">
-                        <span ng-show="getCurrentSession() != null">
-                            <select class="btn btn-default dropdown-toggle" ng-model="currentSessionKey" ng-onchange="setSessionKey()" ng-options="key as key for (key, value) in service.sessions"></select>
-                            <button class="btn btn-default pull-right" ng-click="showPredicates=!showPredicates">
-                                <span class="glyphicon glyphicon-menu-hamburger"></span>
-                            </button>
-                            <img ng-src="{{getCurrentSession()['predicates']['img']}}"/>
-                        </span>
-                        <input class="form-control" tabindex="1" type="text" ng-model="service.currentUserName" placeholder="{{service.currentUserName}}" ng-blur="msg.setCurrentUserName(service.currentUserName)"/>
-                    </form>
+                <td rowspan="3">
+                    <img class="photo" ng-src="{{getBotInfo()['img']}}"/>
                 </td>
                 <td>
-                    <!-- bot -->
-                    <form class="form-inline">
-                        <select class="btn btn-default dropdown-toggle" ng-model="service.currentBotName" ng-change="msg.setCurrentBotName(service.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
-                        <button ng-show="!addBot" class="btn btn-default" ng-click="addBot=true">add bot</button>
-                        <input ng-show="addBot" class="form-control" type="text" ng-model="newBotPath" placeholder="c:\path\to\bot\folder" press-enter="speak()"/>
-                        <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false">cancel</button>
-                        <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false;msg.addBotPath(newBotPath)">add bot folder</button>
-                        <button class="btn btn-default" ng-click="msg.reload()">reload aiml</button>
-                        <button class="btn btn-default pull-right" ng-click="showBotProperties=!showBotProperties">
-                            <span class="glyphicon glyphicon-menu-hamburger"></span>
-                        </button>
-                    </form>
-                    <table class="table table-striped">
-                        <tr>
-                            <td>
-                                <img ng-src="{{getBotInfo()['img']}}"/>
-                                <br/>
-                                locale {{getProperty('locale')}}<br/>
-                            </td>
-                            <td>{{getProperty('description')}}</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>path</td>
-                            <td>{{getBotInfo()['path'].path}}</td>
-                            <td></td>
-                            <td>
-                                <a ng-click="edit.properties = !edit.properties">
-                                    <span class="glyphicon glyphicon-pencil"></span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr ng-show="showBotProperties">
-                            <td colspan="4">
-                                <uib-tabset active="active">
-                                    <uib-tab heading="Properties">
-                                        <table class="table table-striped">
-                                            <tr ng-show="edit.properties">
-                                                <td>
-                                                    <input class="form-control" type="text" ng-model="newKey" placeholder="new key"/>
-                                                </td>
-                                                <td>
-                                                    <input class="form-control" type="text" ng-model="newValue" placeholder="new value" ng-enter="msg.setBotProperty(newKey, newValue);msg.broadcastState();newKey='';newValue=''"/>
-                                                </td>
-                                                <td class="pull-right"></td>
-                                                <td>
-                                                    <button class="btn btn-default form-control" type="text" ng-click="msg.setBotProperty(newKey, newValue);msg.broadcastState();newKey='';newValue=''">add</button>
-                                                </td>
-                                            </tr>
-                                            <tr ng-show="showBotProperties" ng-repeat="(key, value) in getProperties()">
-                                                <!-- tr ng-show="showBotProperties" ng-repeat="prop in botProperties | orderBy:'name'" -->
-                                                <td>
-                                                    <span ng-show="!edit.properties">{{key}}</span>
-                                                    <span ng-show="edit.properties">
-                                                        <input class="form-control" type="text" ng-model="key" ng-blur="msg.setBotProperty(key, value)"/>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span ng-show="!edit.properties">{{value}}</span>
-                                                    <span ng-show="edit.properties">
-                                                        <input class="form-control" type="text" ng-model="value" ng-enter="msg.setBotProperty(key, value)" ng-blur="msg.setBotProperty(key, value)"/>
-                                                    </span>
-                                                </td>
-                                                <td class="pull-right"></td>
-                                                <td>
-                                                    <a ng-click="removeBotProperty(key);">
-                                                        <span class="glyphicon glyphicon-remove"></span>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </uib-tab>
-                                    <uib-tab heading="Predicates">TODO !!!!
-                                </uib-tab>
-                                </uib-tabset>
-                            </td>
-                        </tr>
-                    </table>
+                    <select class="btn btn-default dropdown-toggle" ng-model="service.currentBotName" ng-change="msg.setCurrentBotName(service.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
+                </td>
+                <td></td><td></td>
+                <td>   
+                    <input class="form-control text-capitalize userField" tabindex="1" type="text" ng-model="service.currentUserName" placeholder="{{service.currentUserName}}" ng-blur="msg.setCurrentUserName(service.currentUserName)"/>                
+                </td>
+                <td rowspan="3">
+                    <span ng-show="getCurrentSession() != null">
+                        <img class="photo" ng-src="{{getCurrentSession()['predicates']['img']}}"/>
+                    </span>
+                    <span ng-show="getCurrentSession() == null">
+                        <img class="photo" src="../service/img/user_unknown.png" />
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button ng-show="!addBot" class="btn btn-default" ng-click="addBot=true">add bot</button>
+                   <input ng-show="addBot" class="form-control typeFolderField" type="text" ng-model="newBotPath" placeholder="c:\path\to\bot\folder" press-enter="speak()"/><br>
+                    <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false">cancel</button>
+                    <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false;msg.addBotPath(newBotPath)">add bot folder</button>
+                </td>
+                <td colspan="2">
+                </td>
+            </tr>
+            <tr>
+                <td><span class="glyphicon glyphicon-globe"></span> locale {{getProperty('locale')}}
+                </td>
+                <td><button class="btn btn-default pull-right" ng-click="msg.reload()"><span class="glyphicon glyphicon-refresh"></span> Bot</button>
+                </td>
+                <td colspan="2">
+                    <span><img src="../service/img/ico_message.png" />
+                    <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(utterance)" placeholder="type here"/></span>
                 </td>
             </tr>
         </table>
-        <input class="form-control col-md-6" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(utterance)" placeholder="type here"/>
-        <br/>
-        &nbsp;<br/>
-        &nbsp;
-        <i>
-            <b>{{lastResponse}}</b>
-        </i>
-        <br/>
-        &nbsp;<br/>
+    </div>
+    <div id="buttonMoreInfo">
+            <img src="../service/img/more_info.png" onclick="showMoreInfo()">
+    </div>
+    <!-- info -->
+    <div class="tablemoreInfo">
+        <table class="tableProgramABinfo">
+            <tr>
+                <td>
+                    <div>
+                        <h3>{{service.currentBotName}}</h3>
+                        <br>
+                        <span class="glyphicon glyphicon-folder-open"></span>
+                        <h6>{{getBotInfo()['path'].path}}</h6><br>        
+                        {{getProperty('description')}}<br>
+                        {{getProperty('description')}}<br>
+                        {{getProperty('description')}}
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <h3>{{service.currentUserName}}</h3>
+                        <br>
+                        <span class="glyphicon glyphicon-folder-open"></span>
+                        <h6>(user path)</h6><br>
+                        {{getProperty('description')}}<br>
+                        {{getProperty('description')}}<br>
+                        {{getProperty('description')}}
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div id="buttonHideInfo">
+            <span onclick="hideMoreInfo()"><img src="../service/img/hide_info.png" onclik="hideMoreInfo()"></span>
+        </div>
+    </div>
+    
+
+    <div class="chatBalloonBotLast">
+        <div class="chatContent">
+            {{lastResponse}}
+        </div>
+    </div>
+
+    <div class="programABstatusBalloon">
         <div ng-hide="status == null">
             <div ng-class="getStatusLabel(status.level)">
-                {{status.detail}}                                  
-                
+                {{status.detail}}
                 <button type="button" class="close" data-ng-click="status = null" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
         </div>
     </div>
-</div>
-<!-- main tabset -->
-<div class="row col-md-12">
-    <div class="col-md-6">
-        <uib-tabset ng-init="tabs.selected = 1" active="tabs.selected">
-            <uib-tab index="0" heading="Conversations">
-                <div class="col-md-12" class="row">
-                    <table class="table">
-                        <tr>
-                            <td>
-                                <table class="table table-striped">
-                                    <tr ng-repeat="chatContent in chatLog track by $index">
-                                        <td nowrap>
-                                            <b>{{chatContent.name}} : </b>
-                                        </td>
-                                        <td>
-                                            <div ng-bind-html="chatContent.text"></div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </uib-tab>
-            <uib-tab index="1" heading="Debug">
+
+
+    <!-- tableBottom -->
+
+    <table class="tableBottom">
+        <tr>
+            <td>
+                Debug
                 <div id="log-console">
                     <br/>
                     <div ng-repeat="logContent in log track by $index">
@@ -162,21 +114,112 @@
                     </div>
                     <br/>
                 </div>
-            </uib-tab>
-            <uib-tab index="2" heading="Edit">
-                <button class="btn btn-xs btn-info" ng-click="saveAimlFile(aimlFile)">Save</button>
-                <div ng-model="aimlFileData.data" style="height: 500px;width: 100%;" id="$index" ui-ace="{
-		                                       useWrapMode : false,
-		                                       showGutter: true,		                                       
-                                               theme:'chrome',
-		                                       mode: 'xml',
-		                                       firstLineNumber: 1,
-		                                       onLoad: aceLoaded,		                                       
-		                                       onChange: aceChanged}"></div>
-            </uib-tab>
-        </uib-tabset>
-    </div>
+            </td>
+            <td>
+                <div class="rightPannel">
+                    <!-- TABS -->
+                    <uib-tabset ng-init="tabs.selected = 1" active="tabs.selected">
+                        <uib-tab index="0" heading="Chat">
+                            <div class="col-md-12 tabContainer">
+                                <table class="tableChat">
+                                    <tr ng-repeat="chatContent in chatLog track by $index">
+                                        <td>
+                                            <div class="chatBalloon{{chatContent.type}}">
+                                                <div class="chatContent" ng-bind-html="chatContent.text">
+                                                </div>
+                                            </div>     
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </uib-tab>
+                        
+                        <uib-tab index="2" heading="Edit">
+                            <div class="col-md-12">
+                                <button class="btn btn-xs btn-info" ng-click="saveAimlFile(aimlFile)">Save</button>
+                                <div ng-model="aimlFileData.data" style="height: 128px;width: 100%;" id="$index" ui-ace="{
+                                                               useWrapMode : false,
+                                                               showGutter: true,                                               
+                                                               theme:'chrome',
+                                                               mode: 'xml',
+                                                               firstLineNumber: 1,
+                                                               onLoad: aceLoaded,                                              
+                                                               onChange: aceChanged}">
+                               </div>
+                           </div>
+                        </uib-tab>
+                        <uib-tab index="3" heading="Bot Properties">
+                            <div class="col-md-12 tabContainer">
+                                <table class="table table-striped">
+                                    <tr xxxng-show="edit.properties">
+                                        <td>
+                                            <input class="form-control" type="text" ng-model="newKey" placeholder="new key"/>
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" ng-model="newValue" placeholder="new value" ng-enter="msg.setBotProperty(newKey, newValue);msg.broadcastState();newKey='';newValue=''"/>
+                                        </td>
+                                        <td class="pull-right"></td>
+                                        <td>
+                                            <button class="btn btn-default form-control" type="text" ng-click="msg.setBotProperty(newKey, newValue);msg.broadcastState();newKey='';newValue=''">add</button>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="showBotProperties" ng-repeat="(key, value) in getProperties()">
+                                        <!-- tr ng-show="showBotProperties" ng-repeat="prop in botProperties | orderBy:'name'" -->
+                                        <td>
+                                            <span ng-show="!edit.properties">{{key}}</span>
+                                            <span ng-show="edit.properties">
+                                                <input class="form-control" type="text" ng-model="key" ng-blur="msg.setBotProperty(key, value)"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span ng-show="!edit.properties">{{value}}</span>
+                                            <span ng-show="edit.properties">
+                                                <input class="form-control" type="text" ng-model="value" ng-enter="msg.setBotProperty(key, value)" ng-blur="msg.setBotProperty(key, value)"/>
+                                            </span>
+                                        </td>
+                                        <td class="pull-right"></td>
+                                        <td>
+                                            <a ng-click="removeBotProperty(key);">
+                                                <span class="glyphicon glyphicon-remove"></span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </uib-tab>
+                        <uib-tab index="4" heading="Session Properties">
+                            <div class="col-md-12 tabContainer">
+                                TODO !!!!
+                            </div>
+                        </uib-tab>
+                    </uib-tabset>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
+<!-- ------ -->
+
+<script>
+function hideMoreInfo() {
+    var x = document.getElementsByClassName("tablemoreInfo");
+    x[0].style.top = "20px";
+    x[0].style.transform = "scaleY(0.5)";
+    //document.getElementsByClassName("tablemoreInfo").style.top = "20px";
+    //document.getElementsByClassName("tablemoreInfo").style.transform = "scaleY(0.5)";
+}
+function showMoreInfo() {
+    var x = document.getElementsByClassName("tablemoreInfo");
+    x[0].style.top = "150px";
+    x[0].style.transform = "scaleY(1)";
+    //document.getElementsByClassName("tablemoreInfo").style.top = "152px";
+    //document.getElementsByClassName("tablemoreInfo").style.transform = "scaleY(1)";
+}
+</script>
+
+
+
+
 <script type="text/ng-template" id="startDialog.html">
     
     
