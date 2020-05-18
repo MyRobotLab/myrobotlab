@@ -92,6 +92,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         case 'onRequest':
             var textData = data
             $scope.chatLog.unshift({
+                type: 'User',
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
             })
@@ -101,6 +102,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         case 'onText':
             var textData = data
             $scope.chatLog.unshift({
+                type: 'Bot',
                 name: $scope.service.currentBotName,
                 text: $sce.trustAsHtml(textData)
             })
