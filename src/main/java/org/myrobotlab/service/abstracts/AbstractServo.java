@@ -3,23 +3,17 @@ package org.myrobotlab.service.abstracts;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.sensor.TimeEncoder;
-import org.myrobotlab.service.Arduino;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Servo;
-import org.myrobotlab.service.WebGui;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
@@ -53,7 +47,6 @@ import org.slf4j.Logger;
  * 
  *         TODO - make a publishing interface which publishes "CONTROL" angles
  *         vs status of angles
- * 
  *
  */
 public abstract class AbstractServo extends Service implements ServoControl, EncoderPublisher, IKJointAnglePublisher {
@@ -61,8 +54,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
   private static final long serialVersionUID = 1L;
-
-  // TODO: KW: Use only setIdleTimeout and setAutoDisable 
 
   /**
    * The automatic disabling of the servo in idleTimeout ms This de-energizes
@@ -157,12 +148,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   protected Mapper mapper = new MapperLinear(0, 180, 0, 180);
 
   /**
-   * maximum speed default is 500 degrees per second or operating speed of 60
-   * degrees in 0.12 seconds
-   */
-  // protected Double maxSpeed = 500.0;
-
-  /**
    * the 'pin' for this Servo - it is Integer because it can be in a state of
    * 'not set' or null.
    * 
@@ -210,7 +195,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * the calculated output for the servo
    */
-  protected Double targetOutput;
+//  protected Double targetOutput;
 
   /**
    * the requested INPUT position of the servo
@@ -504,7 +489,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getTargetOutput() {
-    targetOutput = mapper.calcOutput(targetPos);
+    Double targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
 
@@ -608,8 +593,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // the motor ?)
     // FIXME - configurable accuracy difference ? ie - when your in the range of
     // 0.02 - then they are considered equal ?
-    int t = targetPos.intValue();
-    int c = currentPos.intValue();
     boolean equal = Math.abs(targetPos - currentPos) < 0.1;
     // if (targetPos.equals(currentPos)) {
     if (equal) {
@@ -731,7 +714,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       isBlocking = true;
     }
-    targetOutput = getTargetOutput();
+    Double targetOutput = getTargetOutput();
     log.info("pos {} output {}", targetPos, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
     isMoving = true;
@@ -1060,7 +1043,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // while (this.pos != this.targetPos) {
     // Some sleep perhaps?
     // TODO:
-    // }
+    // }  
   }
 
   public void writeMicroseconds(int uS) {
