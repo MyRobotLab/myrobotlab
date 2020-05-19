@@ -18,6 +18,9 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     $scope.tabs = {
         "selected": 1
     }
+    $scope.tabsRight = {
+        "selected": 1
+    }
 
     // active tab index
     // $scope.active = 0
