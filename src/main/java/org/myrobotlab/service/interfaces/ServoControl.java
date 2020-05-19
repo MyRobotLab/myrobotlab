@@ -174,9 +174,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   Double getTargetPos();
 
-  @Deprecated
-  Double getVelocity();
-
   /**
    * When moveBlocking is in motion, not only should it block the calling thread
    * until the end of the move, it should also prevent (cancel) other threads
@@ -359,19 +356,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setRest(Double rest);
 
   /**
-   * set the speed of the servo
+   * set the speed of the servo measured in degrees per second.
    * 
-   * @param d
+   * @param degreesPerSecond
    */
-  void setSpeed(Double d);
-
-  /**
-   * @param speed
-   *          degrees per second rotational speed cm per second linear
-   * 
-   */
-  @Deprecated
-  void setVelocity(Double speed);
+  void setSpeed(Double degreesPerSecond);
 
   /**
    * stops the servo if currently in motion servo must be moving at incremental

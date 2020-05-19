@@ -513,8 +513,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return targetPos;
   }
 
-  @Deprecated /* this is really speed - velocity is a vector */
-  @Override
+  @Deprecated /* use getSpeed() */
   public Double getVelocity() {
     return speed;
   }
@@ -980,7 +979,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Deprecated /* this is really speed not velocity, velocity is a vector */
-  @Override
   public void setVelocity(Double degreesPerSecond) {
     setSpeed(degreesPerSecond);
   }
@@ -1125,7 +1123,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       // servo.load();
       // servo.save();
       // log.info("sweepDely {}", servo.sweepDelay);
-
     } catch (Exception e) {
       log.error("main threw", e);
     }
