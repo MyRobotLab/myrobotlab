@@ -232,8 +232,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * Interpolator
    * 
    */
-  // TODO: KW remove this.  I don't think we ever set it to false usefully.
-  private boolean useServoControllerSpeedControl = true;
 
   public AbstractServo(String n, String id) {
     super(n, id);
@@ -641,9 +639,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       // log.info("encoder data says -> stopped");
     } else {
       isMoving = true;
-      if (useServoControllerSpeedControl) {
-        invoke("publishMoveTo", this);
-      }
+      invoke("publishMoveTo", this);
       // FIXME - is this necessary ?
       invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
