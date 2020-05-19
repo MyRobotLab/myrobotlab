@@ -381,11 +381,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void unsync(ServoControl sc);
   
   /**
-   * uset speed - speed control is removed
-   */
-  void unsetSpeed();
-
-  /**
    * waitTargetPos is used by a global moveToBlocking command - pos usually is 0
    * - 180 a global moveToBlocking is a method that use multiple servo at same
    * time and wait every servo for last position arrived
@@ -417,7 +412,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void attachServoController(String sc, Integer pin, Double pos, Double speed);
 
   /**
-   * remove speed control
+   * disable speed control and move the servos at full speed.
    */
   void fullSpeed();
 

@@ -1041,7 +1041,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     syncedServos.add(sc.getName());
   }
 
-  @Override /* FIXME ! - either this or fullSpeed should be deprecated */
+  @Deprecated /* Use fullSpeed() instead. */
   public void unsetSpeed() {
     fullSpeed();
   }
