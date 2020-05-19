@@ -565,7 +565,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
       // dhLink.setState(Servo.SERVO_EVENT_STOPPED);
-      dhLink.setVelocity(servo.getVelocity());
+      dhLink.setVelocity(servo.getSpeed());
       dhLink.setTargetPos(servo.getPos());
       dhLink.servoMin = minAngle;// servo.getMinInput();
       dhLink.servoMax = maxAngle;// servo.getMaxInput();
