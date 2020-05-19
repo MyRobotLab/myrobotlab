@@ -428,7 +428,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     targetPos = pos;
-    targetOutput = getTargetOutput();
+    Double targetOutput = getTargetOutput();
 
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
@@ -559,7 +559,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     if (targetPos == null) {
       targetPos = rest;
     }
-    targetOutput = mapper.calcOutput(targetPos);
+    Double targetOutput = mapper.calcOutput(targetPos);
     return targetOutput;
   }
 
