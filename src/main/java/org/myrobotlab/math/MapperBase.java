@@ -59,11 +59,6 @@ public abstract class MapperBase implements Serializable, Mapper {
   abstract public Double calcOutput(Double in);
 
   @Override
-  public Double getMax() {
-    return this.maxIn;
-  }
-
-  @Override
   public Double getMaxX() {
     return maxX;
   }
@@ -71,11 +66,6 @@ public abstract class MapperBase implements Serializable, Mapper {
   @Override
   public Double getMaxY() {
     return maxY;
-  }
-
-  @Override
-  public Double getMin() {
-    return this.minIn;
   }
 
   @Override
@@ -110,108 +100,6 @@ public abstract class MapperBase implements Serializable, Mapper {
     this.minX = (maxX == null) ? null : maxX.doubleValue();
     this.minY = (minY == null) ? null : minY.doubleValue();
     this.maxY = (maxY == null) ? null : maxY.doubleValue();
-  }
-
-  /**
-   * merge sets any values which have not already been set - useful when one
-   * service wishes to control the input range and a different service should
-   * control the output range e.g. motorControl.map(motorController.getMap())
-   * where motorControl wants -1.0, 1.0 on the input range and motorController
-   * range might be -128, 128 like the SaberTooth motor controller
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
-   */
-  @Override
-  public void merge(Double minX, Double maxX, Double minY, Double maxY) {
-    if (this.minX == null) {
-      this.minX = minX;
-    }
-    if (this.maxX == null) {
-      this.maxX = maxX;
-    }
-    if (this.minY == null) {
-      this.minY = minY;
-    }
-    if (this.maxY == null) {
-      this.maxY = maxY;
-    }
-  }
-
-  /**
-   * merge sets any values which have not already been set - useful when one
-   * service wishes to control the input range and a different service should
-   * control the output range e.g. motorControl.map(motorController.getMap())
-   * where motorControl wants -1.0, 1.0 on the input range and motorController
-   * range might be -128, 128 like the SaberTooth motor controller
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
-   */
-  @Override
-  public void merge(Integer minX, Integer maxX, Integer minY, Integer maxY) {
-    if (this.minX == null) {
-      this.minX = (minX == null) ? null : minX.doubleValue();
-    }
-    if (this.maxX == null) {
-      this.maxX = (maxX == null) ? null : maxX.doubleValue();
-    }
-    if (this.minY == null) {
-      this.minY = (minY == null) ? null : minY.doubleValue();
-    }
-    if (this.maxY == null) {
-      this.maxY = (maxY == null) ? null : maxY.doubleValue();
-    }
-  }
-
-  /**
-   * Merging leaves the original if set and sets the original with the new
-   * values if the original is null
-   */
-  @Override
-  public void merge(Mapper in) {
-    if (MapperBase.class.isAssignableFrom(in.getClass())) {
-      MapperBase other = (MapperBase) in;
-      if (minX == null) {
-        minX = other.minX;
-      }
-      if (maxX == null) {
-        maxX = other.maxX;
-      }
-      if (minY == null) {
-        minY = other.minY;
-      }
-      if (maxY == null) {
-        maxY = other.maxY;
-      }
-      if (this.minIn == null) {
-        this.minIn = other.minIn;
-      }
-      if (this.maxIn == null) {
-        this.maxIn = other.maxIn;
-      }
-    } else {
-      log.error("don't know how to merge %s into a MapperLinear mapper", in.getClass().getCanonicalName());
-    }
-  }
-
-  /**
-   * everything set back to null
-   */
-  public void reset() {
-    minX = null;
-    maxX = null;
-    minY = null;
-    maxY = null;
-
-    minIn = null;
-    maxIn = null;
-
-    inverted = false;
   }
 
   /**

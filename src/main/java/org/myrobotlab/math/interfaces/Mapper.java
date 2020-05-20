@@ -20,52 +20,42 @@ public interface Mapper {
   Double calcOutput(Double in);
 
   /**
-   * the the max input limit
+   * This is the input minimum value for the mapper.
    * 
    * @return
    */
-  Double getMax();
-
+  public Double getMinX();
+  
   /**
-   * get part of the ratio range If you want limits use getMin and getMax
+   * This is the maximum input value for the mapper.
    * 
    * @return
    */
   public Double getMaxX();
 
   /**
-   * get part of the ratio range If you want limits use getMin and getMax
-   * 
-   * @return
-   */
-  public Double getMaxY();
-
-  /**
-   * get the min input limit
-   * 
-   * @return
-   */
-  Double getMin();
-
-  /**
-   * get part of the ratio range If you want limits use getMin and getMax
-   * 
-   * @return
-   */
-  public Double getMinX();
-
-  /**
-   * get part of the ratio range If you want limits use getMin and getMax
+   * This is the minimum output value that the mapper will return
+   * assuming the input falls between minX and maxX.
    * 
    * @return
    */
   public Double getMinY();
 
   /**
-   * returns if the mapper is currently inverted
+   * This is the maximum output value that the mapper will return
+   * assuming the input falls between minX and maxX
    * 
    * @return
    */
+  
+  public Double getMaxY();
+
+  /**
+   * Returns true if the minY is greater than the maxY
+   * 
+   * @return
+   */
+  
   boolean isInverted();
 
   /**
@@ -87,21 +77,6 @@ public interface Mapper {
    * @param maxY
    */
   void map(Integer minX, Integer maxX, Integer minY, Integer maxY);
-
-  /**
-   * Merges non null values of "other" mapper with this mapper's null fields.
-   * useful for setting values in MotorControl from "default" values in
-   * MotorControllers. Since the MotorControl doesn't know what would be an
-   * appropriate mapping value e.g -1,1 =&lt; ?,? the minY and maxY are left
-   * null until a "merge" is done in the attach of the AbstractMotorController.
-   * 
-   * When a Sabertooth motor controller is "attached" to a MotorControl the
-   * merge produces -1,1 =&lt; -127, 127 which is appropriate.
-   * 
-   * @param other
-   *          - other mapper
-   */
-  void merge(Mapper other);
 
   /**
    * nullifying limits
@@ -130,25 +105,5 @@ public interface Mapper {
    * @param max
    */
   void setMinMax(Integer min, Integer max);
-
-  /**
-   * merges any non null values to values passed in
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
-   */
-  void merge(Double minX, Double maxX, Double minY, Double maxY);
-
-  /**
-   * merges any non null values to values passed in
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
-   */
-  void merge(Integer minX, Integer maxX, Integer minY, Integer maxY);
 
 }

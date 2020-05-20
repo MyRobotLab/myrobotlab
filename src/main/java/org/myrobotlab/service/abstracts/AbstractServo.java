@@ -456,12 +456,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getMax() {
-    return mapper.getMax();
+    return mapper.getMaxX();
   }
 
   @Override
   public Double getMin() {
-    return mapper.getMin();
+    return mapper.getMinX();
   }
 
   @Override
@@ -998,12 +998,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   public void sweep(Double min, Double max, Double speed) {
     if (min == null) {
-      sweepMin = mapper.getMin();
+      sweepMin = mapper.getMinX();
     } else {
       sweepMin = min;
     }
     if (max == null) {
-      sweepMax = mapper.getMax();
+      sweepMax = mapper.getMaxX();
     } else {
       sweepMax = max;
     }
