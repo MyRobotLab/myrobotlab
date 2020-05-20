@@ -15,7 +15,7 @@ public abstract class MapperBase implements Serializable, Mapper {
    * a convienence method to invert Y output
    */
   public boolean inverted = false;
-  public boolean clipInput = true;
+  public boolean clip = true;
 /**
  * a mapper takes an a range of inputs minX to maxX
  *  applies some math to it and calculates an output Y that falls in the range 
@@ -100,27 +100,29 @@ public abstract class MapperBase implements Serializable, Mapper {
   }
 
   /**
-   * set limits which will clip input to these values if setMinMax (-1.0, 1.0)
-   * values sent through the calcOutput(value) if &gt; max or &lt; min will be set to
-   * max and min respectively
+   * set limits output scaling limit of the mapper.  
+   * Setting minY and maxY respectively.  for a linear mapper,
+   * if an input is passed in between minX and maxX the output will be 
+   * constrained between minY and maxY.
+   * 
    */
   @Override
-  public void setMinMax(double minInput, double maxInput) {
-    this.minX = minInput;
-    this.maxX = maxInput;
+  public void setMinMax(double minY, double maxY) {
+    this.minY = minY;
+    this.maxY = maxY;
   }
 
   @Override
-  public void setMinMax(int min, int max) {
-    setMinMax((double)min, (double)max);
+  public void setMinMax(int minY, int maxY) {
+    setMinMax((double)minY, (double)maxY);
   }
 
-  public boolean isClipInput() {
-    return clipInput;
+  public boolean isClip() {
+    return clip;
   }
 
-  public void setClipInput(boolean clipInput) {
-    this.clipInput = clipInput;
+  public void setClip(boolean clip) {
+    this.clip = clip;
   }
 
   public String toString() {

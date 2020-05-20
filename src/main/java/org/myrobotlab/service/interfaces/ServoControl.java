@@ -95,16 +95,16 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   Mapper getMapper();
 
   /**
-   * gets the Max X of the mapper (input)
+   * gets the Max Y of the mapper (output)
    * 
-   * @return max x
+   * @return maxY
    */
   Double getMax();
 
   /**
-   * gets the min X of the mapper (input)
+   * gets the minY of the mapper (output)
    * 
-   * @return min x
+   * @return minY
    */
   Double getMin();
 
@@ -310,16 +310,17 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setMapper(Mapper m);
 
   /**
-   * limits input of servo - to prevent damage or problems if servos should not
+   * This specifies the output limits for the mapper.  It specifies the minY and maxY
+   * When an input is passed in the minX to minX range , the output will be between minY and maxY.
    * move their full range
    * 
-   * @param min
-   *          min value
-   * @param max
-   *          max value
+   * @param minY
+   *          minY value
+   * @param maxY
+   *          maxY value
    * 
    */
-  void setMinMax(Double min, Double max);
+  void setMinMax(double minY, double maxY);
 
   /**
    * set the pin of the servo this does not 'attach' energize the pin only set

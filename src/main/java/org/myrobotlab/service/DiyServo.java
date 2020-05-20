@@ -480,7 +480,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   @Override
-  public void setMinMax(Double min, Double max) {
+  public void setMinMax(double min, double max) {
     map(min, max, min, max);
   }
 

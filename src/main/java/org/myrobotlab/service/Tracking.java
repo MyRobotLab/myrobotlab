@@ -330,6 +330,7 @@ public class Tracking extends Service {
             TrackingServoData x = servoControls.get("x");
             TrackingServoData y = servoControls.get("y");
             double xpos = x.servoControl.getPos();
+            // TODO: kw review that this should actually be the input maxX not the getMax maxY.
             if (xpos + x.scanStep >= x.servoControl.getMax() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMin() && x.scanStep < 0) {
               x.scanStep *= -1;
               double newY = y.servoControl.getMin() + (Math.random() * (y.servoControl.getMax() - y.servoControl.getMin()));
