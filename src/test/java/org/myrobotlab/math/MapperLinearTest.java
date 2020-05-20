@@ -142,27 +142,26 @@ public class MapperLinearTest {
     // it has no idea what controller it will interface with - but "wants" to
     // have a standard
     // front end map of -1.0 to 1.0
-    control.map(-1.0, 1.0, null, null);
+    control.map(-1.0, 1.0, -1.0, 1.0);
 
     // sabertooth
     Mapper controller = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
     controller.setMinMax(-0.9, 0.9);
 
     // to be done in abstract (Yay!)
-   // control.merge(controller);
+    // control.merge(controller);
 
     // verify the results of the merge
-//    assertEquals(0.9, control.getMaxX(), 0);
-//    assertEquals(-0.9, control.getMinX(), 0);
-//    
-//    assertEquals(127.0, control.getMaxY(), 0);
-//    assertEquals(-127.0, control.getMinY(), 0);
+    //    assertEquals(0.9, control.getMaxX(), 0);
+    //    assertEquals(-0.9, control.getMinX(), 0);
+    //    
+    //    assertEquals(127.0, control.getMaxY(), 0);
+    //    assertEquals(-127.0, control.getMinY(), 0);
 
-
-    assertEquals(null, control.calcOutput(null), null);
-  //  assertEquals(114.29999999999998, control.calcOutput(3.0), 0.01);
-  //   assertEquals(-114.3, control.calcOutput(-3.0), 0.01);
-
+    // TODO: kw: Not valid to have a null for an input to mapper.  converted to primitives.
+    // assertEquals(null, control.calcOutput(null), null);
+    // assertEquals(114.29999999999998, control.calcOutput(3.0), 0.01);
+    // assertEquals(-114.3, control.calcOutput(-3.0), 0.01);
     // invert it
     
     control.setInverted(true);

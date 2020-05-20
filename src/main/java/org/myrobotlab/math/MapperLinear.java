@@ -3,6 +3,13 @@ package org.myrobotlab.math;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
+/**
+ * This class provides a basic linear mapping between an input and an output. 
+ * The input is a range from minX to maxX.
+ * The output is a range from minY to maxY.
+ * The inputs will be scaled from the input range to the output range.
+ * Inputs that fall outside of the input range will be clipped to be minX/maxX values.
+ */
 public final class MapperLinear extends MapperBase {
 
   public final static Logger log = LoggerFactory.getLogger(MapperLinear.class);
@@ -12,31 +19,27 @@ public final class MapperLinear extends MapperBase {
     super();
   }
 
-  public MapperLinear(Integer minX, Integer maxX, Integer minY, Integer maxY) {
+  public MapperLinear(int minX, int maxX, int minY, int maxY) {
     super(minX, maxX, minY, maxY);
   }
   
-  public MapperLinear(Double minX, Double maxX, Double minY, Double maxY) {
+  public MapperLinear(double minX, double maxX, double minY, double maxY) {
     super(minX, maxX, minY, maxY);
   }
 
   @Override
-  public Double calcOutput(Double in) {
-    if (in == null) {
-      log.warn("calcOutput(null)");
-      return in;
-    }
-    in = clipValue(in, minX, maxX);
+  public double calcOutput(double input) {
+    input = clipValue(input, minX, maxX);
     if (!inverted) {
-      return minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
+      return minY + ((input - minX) * (maxY - minY)) / (maxX - minX);
     } else {
-      return minY + ((in - maxX) * (maxY - minY)) / (minX - maxX);
+      return minY + ((input - maxX) * (maxY - minY)) / (minX - maxX);
     }
   }
 
   // make sure value lies between the min/max value
-  private static Double clipValue(Double value, Double min, Double max) {
-    // clip the input
+  private static double clipValue(double value, double min, double max) {
+    // clip the value
     if (value < min) {
       return min;
     } else if (value > max) {
@@ -47,16 +50,14 @@ public final class MapperLinear extends MapperBase {
   }
   
   @Override
-  final public Double calcInput(Double out) { 
+  final public double calcInput(double out) { 
     // the output value needs to be between minY and maxY
     out = clipValue(out, minY, maxY);
-    Double in = null;
     if (!inverted) {
-      in = minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
+      return minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
     } else {
-      in = minX + ((out + minY) * (maxX - minX)) / (minY - maxY); 
+      return minX + ((out + minY) * (maxX - minX)) / (minY - maxY); 
     }
-    return in;
   }
 
 }

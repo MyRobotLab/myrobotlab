@@ -14,7 +14,7 @@ public abstract class MapperBase implements Serializable, Mapper {
   /**
    * a convienence method to invert Y output
    */
-  boolean inverted = false;
+  public boolean inverted = false;
 
 /**
  * a mapper takes an a range of inputs minX to maxX
@@ -25,10 +25,10 @@ public abstract class MapperBase implements Serializable, Mapper {
  *  move to the MapperLinear class to make this interface generic.
  * 
  */
-  Double minX;
-  Double maxX;
-  Double minY;
-  Double maxY;
+  public double minX;
+  public double maxX;
+  public double minY;
+  public double maxY;
 
   /**
    * non-parameterized constructor for "un-set" mapper use the merge function to
@@ -37,38 +37,37 @@ public abstract class MapperBase implements Serializable, Mapper {
   public MapperBase() {
   }
 
-  public MapperBase(Double minX, Double maxX, Double minY, Double maxY) {
+  public MapperBase(double minX, double maxX, double minY, double maxY) {
     map(minX, maxX, minY, maxY);
   }
 
-  public MapperBase(Integer minX, Integer maxX, Integer minY, Integer maxY) {
-    map((minX == null) ? null : minX.doubleValue(), (maxX == null) ? null : maxX.doubleValue(), (minY == null) ? null : minY.doubleValue(),
-        (maxY == null) ? null : maxY.doubleValue());
+  public MapperBase(int minX, int maxX, int minY, int maxY) {
+    map((double)minX, (double)maxX,(double)minY,(double)maxY);
   }
 
   @Override
-  abstract public Double calcInput(Double out);
+  abstract public double calcInput(double out);
 
   @Override
-  abstract public Double calcOutput(Double in);
+  abstract public double calcOutput(double in);
 
   @Override
-  public Double getMaxX() {
+  public double getMaxX() {
     return maxX;
   }
 
   @Override
-  public Double getMaxY() {
+  public double getMaxY() {
     return maxY;
   }
 
   @Override
-  public Double getMinX() {
+  public double getMinX() {
     return minX;
   }
 
   @Override
-  public Double getMinY() {
+  public double getMinY() {
     return minY;
   }
 
@@ -81,7 +80,7 @@ public abstract class MapperBase implements Serializable, Mapper {
    * sets mapping and both input and output limits
    */
   @Override
-  public void map(Double minX, Double maxX, Double minY, Double maxY) {
+  public void map(double minX, double maxX, double minY, double maxY) {
     this.minX = minX;
     this.maxX = maxX;
     this.minY = minY;
@@ -89,11 +88,8 @@ public abstract class MapperBase implements Serializable, Mapper {
   }
 
   @Override
-  public void map(Integer minX, Integer maxX, Integer minY, Integer maxY) {
-    this.minX = (minX == null) ? null : minX.doubleValue();
-    this.minX = (maxX == null) ? null : maxX.doubleValue();
-    this.minY = (minY == null) ? null : minY.doubleValue();
-    this.maxY = (maxY == null) ? null : maxY.doubleValue();
+  public void map(int minX, int maxX, int minY, int maxY) {
+    map((double)minX, (double)maxX,(double)minY,(double)maxY);
   }
 
   /**
@@ -109,14 +105,14 @@ public abstract class MapperBase implements Serializable, Mapper {
    * max and min respectively
    */
   @Override
-  public void setMinMax(Double minInput, Double maxInput) {
+  public void setMinMax(double minInput, double maxInput) {
     this.minX = minInput;
     this.maxX = maxInput;
   }
 
   @Override
-  public void setMinMax(Integer min, Integer max) {
-    setMinMax((min == null) ? null : min.doubleValue(), (max == null) ? null : max.doubleValue());
+  public void setMinMax(int min, int max) {
+    setMinMax((double)min, (double)max);
   }
 
   public String toString() {

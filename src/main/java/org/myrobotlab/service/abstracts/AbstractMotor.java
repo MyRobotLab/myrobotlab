@@ -116,7 +116,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
-    mapper.map(-1.0, 1.0, null, null);
+    mapper.map(-1.0, 1.0, -1.0, 1.0);
   }
 
   public void onRegistered(Registration s) {
