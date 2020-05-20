@@ -233,7 +233,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
     currentPos = targetPos = rest;
-    mapper.setMinMax(0, 180);
+    // TODO: this value is default already.
+    // mapper.setMinMax(0, 180);
     // create our default TimeEncoder
     if (encoder == null) {
       encoder = new TimeEncoder(this);
@@ -456,12 +457,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getMax() {
-    return mapper.getMaxX();
+    return mapper.getMaxY();
   }
 
   @Override
   public Double getMin() {
-    return mapper.getMinX();
+    return mapper.getMinY();
   }
 
   @Override
@@ -900,8 +901,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   // SEE - http://myrobotlab.org/content/servo-limits
-  public void setMinMax(Double min, Double max) {
-    mapper.setMinMax(min, max);
+  public void setMinMax(double minY, double maxY) {
+    mapper.setMinMax(minY, maxY);
     broadcastState();
   }
 

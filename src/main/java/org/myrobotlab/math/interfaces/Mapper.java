@@ -86,12 +86,13 @@ public interface Mapper {
   void setInverted(boolean invert);
 
   /**
-   * set limits on input
+   * set limits on output of the mapper
+   * This sets the 
    * 
-   * @param minIn
-   * @param maxIn
+   * @param minY
+   * @param maxY
    */
-  void setMinMax(double minIn, double maxIn);
+  void setMinMax(double minY, double maxY);
 
   /**
    * Integer form of setting limits
@@ -102,15 +103,16 @@ public interface Mapper {
   void setMinMax(int min, int max);
   
   /**
-   * If true this will make sure that input values are clipped
-   * otherwise, the input values are not clipped which means output values are unbounded. 
+   * If true this will make sure that input values are clipped to the range specified as 
+   * minX and maxX.  The resulting computed values will also be constrained to minY and maxY
+   * If false, inputs and outputs will not be clipped, but rather a normal linear mapping will apply.
    */
-  void setClipInput(boolean clipInput);
+  void setClip(boolean clip);
 
   /**
-   * Return true if the mapper is set to clip the input values.  otherwise false.
+   * Return true if the mapper is set to clip the input and output values.  otherwise false.
    */
-  boolean isClipInput();
+  boolean isClip();
 
   
 }
