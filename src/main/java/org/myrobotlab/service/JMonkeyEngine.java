@@ -870,7 +870,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
     float result = rawAngle;
     if (data.mapper != null) {
-      result = data.mapper.calcInput((double)rawAngle).floatValue();
+      result = Double.valueOf(data.mapper.calcInput((double)rawAngle)).floatValue();
     }
     return result;
   }

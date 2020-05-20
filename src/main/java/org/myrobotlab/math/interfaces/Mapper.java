@@ -8,7 +8,7 @@ public interface Mapper {
    * @param out
    * @return
    */
-  Double calcInput(Double out);
+  double calcInput(double out);
 
   /**
    * main method of the Mapper - ratio of ranges are applied in addition to any
@@ -17,21 +17,21 @@ public interface Mapper {
    * @param in
    * @return
    */
-  Double calcOutput(Double in);
+  double calcOutput(double in);
 
   /**
    * This is the input minimum value for the mapper.
    * 
    * @return
    */
-  public Double getMinX();
+  public double getMinX();
   
   /**
    * This is the maximum input value for the mapper.
    * 
    * @return
    */
-  public Double getMaxX();
+  public double getMaxX();
 
   /**
    * This is the minimum output value that the mapper will return
@@ -39,7 +39,7 @@ public interface Mapper {
    * 
    * @return
    */
-  public Double getMinY();
+  public double getMinY();
 
   /**
    * This is the maximum output value that the mapper will return
@@ -48,7 +48,7 @@ public interface Mapper {
    * @return
    */
   
-  public Double getMaxY();
+  public double getMaxY();
 
   /**
    * Returns true if the minY is greater than the maxY
@@ -66,7 +66,7 @@ public interface Mapper {
    * setting input or output limits
    * 
    */
-  void map(Double minX, Double maxX, Double minY, Double maxY);
+  void map(double minX, double maxX, double minY, double maxY);
 
   /**
    * Integer form of map
@@ -76,7 +76,7 @@ public interface Mapper {
    * @param minY
    * @param maxY
    */
-  void map(Integer minX, Integer maxX, Integer minY, Integer maxY);
+  void map(int minX, int maxX, int minY, int maxY);
 
   /**
    * Inverts the calculation multiplies the output by -1
@@ -91,7 +91,7 @@ public interface Mapper {
    * @param minIn
    * @param maxIn
    */
-  void setMinMax(Double minIn, Double maxIn);
+  void setMinMax(double minIn, double maxIn);
 
   /**
    * Integer form of setting limits
@@ -99,6 +99,6 @@ public interface Mapper {
    * @param min
    * @param max
    */
-  void setMinMax(Integer min, Integer max);
+  void setMinMax(int min, int max);
 
 }
