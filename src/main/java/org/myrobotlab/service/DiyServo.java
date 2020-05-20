@@ -357,10 +357,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return lastActivityTimeTs;
   }
 
-  public Double getMax() {
-    return mapper.getMax();
-  }
-
   public Double getPos() {
     if (targetPos == null) {
       return rest;
