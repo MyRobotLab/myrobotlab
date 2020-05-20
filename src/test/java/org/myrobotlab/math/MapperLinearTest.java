@@ -41,7 +41,6 @@ public class MapperLinearTest {
     
     mapper.map(-1.0, 1.0, 10.0, -10.0 );
     log.info("mapper {}", mapper);
-    mapper.resetLimits();
     assertEquals( -22.0, mapper.calcOutput(-2.2), 0.0);
     assertEquals( -1.1, mapper.calcInput(-11.0), 0.0);
     mapper.setMinMax(-1.0, 1.0);
@@ -188,12 +187,7 @@ public class MapperLinearTest {
     assertEquals(-20.0, control.calcOutput(-1.0), 0);
     assertEquals(20.0, control.calcOutput(1.0), 0);
     
-    
-    control.map(-1.0, 1.0, -200.0, 200.0);
-
-    // unset limits
-    control.resetLimits();
- 
+    control.map(-1.0, 1.0, -200.0, 200.0); 
 
     assertEquals(1000.0, control.calcOutput(5.0), 0);
     assertEquals(-1000.0, control.calcOutput(-5.0), 0);

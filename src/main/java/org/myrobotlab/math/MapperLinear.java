@@ -1,8 +1,6 @@
 package org.myrobotlab.math;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.interfaces.Mapper;
 import org.slf4j.Logger;
 
 public final class MapperLinear extends MapperBase {
@@ -22,62 +20,43 @@ public final class MapperLinear extends MapperBase {
     super(minX, maxX, minY, maxY);
   }
 
-
   @Override
   public Double calcOutput(Double in) {
-
     if (in == null) {
       log.warn("calcOutput(null)");
       return in;
     }
-
-    boolean willCalculate = (minX != null && maxX != null && minY != null && maxY != null);
-
-    if (willCalculate) {
-
-      if (minIn != null && in < minIn) {
-        in = minIn;
-      }
-
-      if (maxIn != null && in > maxIn) {
-        in = maxIn;
-      }
-
-      if (!inverted) {
-        return minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
-      } else {
-        return minY + ((in - maxX) * (maxY - minY)) / (minX - maxX);
-      }
+    in = clipValue(in, minX, maxX);
+    if (!inverted) {
+      return minY + ((in - minX) * (maxY - minY)) / (maxX - minX);
+    } else {
+      return minY + ((in - maxX) * (maxY - minY)) / (minX - maxX);
     }
-    return in;
+  }
+
+  // make sure value lies between the min/max value
+  private static Double clipValue(Double value, Double min, Double max) {
+    // clip the input
+    if (value < min) {
+      return min;
+    } else if (value > max) {
+      return max;
+    } else {
+      return value;
+    }
   }
   
   @Override
   final public Double calcInput(Double out) { 
-    
-    boolean willCalculate = (minX != null && maxX != null && minY != null && maxY != null);
-
-    if (willCalculate) {
-
-      Double in = null;
-      
-      if (!inverted) {
-        in = minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
-      } else {
-        in = minX + ((out + minY) * (maxX - minX)) / (minY - maxY); 
-      }
-     
-      if (minIn != null && in < minIn) {
-        in = minIn;
-      }
-
-      if (maxIn != null && in > maxIn) {
-        in = maxIn;
-      }
-
-      return in;
+    // the output value needs to be between minY and maxY
+    out = clipValue(out, minY, maxY);
+    Double in = null;
+    if (!inverted) {
+      in = minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
+    } else {
+      in = minX + ((out + minY) * (maxX - minX)) / (minY - maxY); 
     }
-    return out;
+    return in;
   }
 
 }
