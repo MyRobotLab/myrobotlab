@@ -1613,11 +1613,14 @@ padding: 0px;
 }
 
 .photo{
+  width: 128px !important;
+  height: 128px !important;
   border-radius: 6px;
   border-style: solid;
   border-width: 1px;
   border-color: #d0d0d0;
   background-color: #FFFFFF;
+  box-sizing: border-box;
 }
 .tableBasic td {
   white-space: nowrap;
@@ -1645,7 +1648,7 @@ padding: 0px;
   width: 882px;
   position: relative;
   height: 142px;
-  padding: 4px;
+  /* padding: 4px; */
   z-index: 140;
   margin-top: 10px;
   border-top-style: solid;
@@ -1653,38 +1656,41 @@ padding: 0px;
   border-color: #cccccc;
 }
 
-.tableProgramABtop td:nth-child(1) {
-  width: 138px;
+.tableProgramABtop tr:nth-child(1) td:nth-child(1){
+  width: 142px;
   vertical-align: top;
-  padding: 4px;
+  padding-left: 5px;
+  padding-top: 5px;
+  text-align: left;
+}
+.tableProgramABtop tr:nth-child(1) td:nth-child(4){
+  width: 142px;
+  vertical-align: top;
+  padding-right: 5px;
+  padding-top: 5px;
+  text-align: right;
 }
 .tableProgramABtop td:nth-child(2) {
-  width: 140px;
+  width: 297px;
   padding: 4px;
   vertical-align: top;
 }
 .tableProgramABtop td:nth-child(3) {
-  width: 140px;
+  width: 287px;
   text-align: right;
 }
-.tableProgramABtop td:nth-child(4) {
-  width: 146px;
+.shortDescription{
+  overflow: hidden;
+  height: 63px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
-.tableProgramABtop td:nth-child(5) {
-  text-align: right;
-  width: 155px;
-  vertical-align: top;
-  padding: 4px;
-}
-.tableProgramABtop td:nth-child(6) {
-  width: 138px;
-  padding: 4px;
-  text-align: right;
-}
+
 #buttonMoreInfo {
   width: 882px;
   text-align: center;
-  cursor: pointer;
 }
 #buttonHideInfo{
   width: 882px;
@@ -1694,7 +1700,6 @@ padding: 0px;
   border-top-color: #e6e6e6;
   border-top-style: solid;
   border-top-width: 2px;
-  cursor: pointer;
 }
 #buttonHideInfo img{
   vertical-align: top;
@@ -1730,9 +1735,6 @@ padding: 0px;
 
 
 .tableProgramABinfo td > div {
-  height: 140px;
-  overflow-y:scroll;
-  overflow-x:hidden;
   padding-right: 8px;
   padding-left: 8px;
   padding-top: 4px;
@@ -1754,13 +1756,11 @@ padding: 0px;
 }
 
 .tablemoreInfo{
-  position: absolute;
-  top: 70px;
+  position: relative;
+  top: -30px;
   transform-origin: 0 0;
-  transform: scaleY(0.5);
   z-index: 10;
-  /* display: block; */
-  transition: 1s;
+  /* transition: 1s; */
 }
 #buttonMoreInfo{
   z-index: 1;
@@ -1852,7 +1852,7 @@ padding: 0px;
   height: calc(100vh - 475px);
 }
 .typeHereField{
-  width: 249px;
+  width: 253px;
 }
 .userField{
  width: 120px; 
@@ -1861,7 +1861,7 @@ padding: 0px;
  width: 100px; 
 }
 .typeFolderField{
-  width: 266px;
+  width: 279px;
 }
 .chatBalloonBotLast {
   background-color: #e1f1ff;

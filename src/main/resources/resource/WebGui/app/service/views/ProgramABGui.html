@@ -12,9 +12,13 @@
                     <img class="photo" ng-src="{{getBotInfo()['img']}}"/>
                 </td>
                 <td>
-                    <select class="btn btn-default dropdown-toggle" ng-model="service.currentBotName" ng-change="msg.setCurrentBotName(service.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-default" ng-click="addBot=true" title="Add new Bot"><span class="glyphicon glyphicon-plus"></span></button>
+                        <button class="btn btn-default" ng-click="msg.reload()" title="Reload Bot"><span class="glyphicon glyphicon-refresh"></span></button><select class="btn btn-default dropdown-toggle" ng-model="service.currentBotName" ng-change="msg.setCurrentBotName(service.currentBotName)" ng-options="key as key for (key, value) in service.bots"></select>
+                    <div>
                 </td>
-                <td></td><td></td>
+
+                
                 <td>   
                     <input class="form-control text-capitalize userField" tabindex="1" type="text" ng-model="service.currentUserName" placeholder="{{service.currentUserName}}" ng-blur="msg.setCurrentUserName(service.currentUserName)"/>                
                 </td>
@@ -28,32 +32,32 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
-                    <button ng-show="!addBot" class="btn btn-default" ng-click="addBot=true">add bot</button>
-                   <input ng-show="addBot" class="form-control typeFolderField" type="text" ng-model="newBotPath" placeholder="c:\path\to\bot\folder" press-enter="speak()"/><br>
-                    <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false">cancel</button>
-                    <button ng-show="addBot" class="btn btn-default" ng-click="addBot=false;msg.addBotPath(newBotPath)">add bot folder</button>
+                <td>
+                    <div ng-show="!addBot" class="shortDescription">English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical, cryptanalyst, philosopher</div>
+                   <div ng-show="addBot">
+                        <input class="form-control typeFolderField" type="text" ng-model="newBotPath" placeholder="c:\path\to\bot\folder" press-enter="speak()"/><br>
+                        <button class="btn btn-default" ng-click="addBot=false">cancel</button>
+                        <button class="btn btn-default" ng-click="addBot=false;msg.addBotPath(newBotPath)">add bot folder</button>
+                    </div>
                 </td>
-                <td colspan="2">
+                <td>
                 </td>
             </tr>
             <tr>
                 <td><span class="glyphicon glyphicon-globe"></span> locale {{getProperty('locale')}}
                 </td>
-                <td><button class="btn btn-default pull-right" ng-click="msg.reload()"><span class="glyphicon glyphicon-refresh"></span> Bot</button>
-                </td>
-                <td colspan="2">
+                <td>
                     <span><img src="../service/img/ico_message.png" />
                     <input class="form-control typeHereField" tabindex="2" type="text" ng-model="utterance" name="utterance" id="utterance" ng-init="" press-enter="getSessionResponse(utterance)" placeholder="type here"/></span>
                 </td>
             </tr>
         </table>
     
-        <div id="buttonMoreInfo">
-                <img src="../service/img/more_info.png" onclick="showMoreInfo()">
+        <div id="buttonMoreInfo" >
+             <a href="#" ng-click="tablemoreInfo=true"><img src="../service/img/more_info.png" ></a>
         </div>
         <!-- info -->
-        <div class="tablemoreInfo">
+        <div class="tablemoreInfo" ng-show="tablemoreInfo">
             <table class="tableProgramABinfo">
                 <tr>
                     <td>
@@ -62,26 +66,19 @@
                             <br>
                             <span class="glyphicon glyphicon-folder-open"></span>
                             <h6>{{getBotInfo()['path'].path}}</h6><br>        
-                            {{getProperty('description')}}<br>
-                            {{getProperty('description')}}<br>
-                            {{getProperty('description')}}
+                            {{getProperty('description')}}<br><br>
                         </div>
                     </td>
                     <td>
                         <div>
-                            <h3>{{service.currentUserName}}</h3>
-                            <br>
-                            <span class="glyphicon glyphicon-folder-open"></span>
-                            <h6>(user path)</h6><br>
-                            {{getProperty('description')}}<br>
-                            {{getProperty('description')}}<br>
-                            {{getProperty('description')}}
+                            <h3>{{service.currentUserName}}</h3><br>
+                            {{getProperty('description')}}<br><br>                          
                         </div>
                     </td>
                 </tr>
             </table>
             <div id="buttonHideInfo">
-                <span onclick="hideMoreInfo()"><img src="../service/img/hide_info.png" onclik="hideMoreInfo()"></span>
+                <a href="#" ng-click="tablemoreInfo=false"><img src="../service/img/hide_info.png"></a>
             </div>
         </div>
         
@@ -253,18 +250,7 @@
 </div>
 <!-- ------ -->
 
-<script>
-function hideMoreInfo() {
-    var x = document.getElementsByClassName("tablemoreInfo");
-    x[0].style.top = "70px";
-    x[0].style.transform = "scaleY(0.5)";
-}
-function showMoreInfo() {
-    var x = document.getElementsByClassName("tablemoreInfo");
-    x[0].style.top = "152px";
-    x[0].style.transform = "scaleY(1)";
-}
-</script>
+
 
 
 <script type="text/ng-template" id="startDialog.html">
