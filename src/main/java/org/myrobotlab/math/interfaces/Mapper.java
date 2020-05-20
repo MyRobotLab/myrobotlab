@@ -79,11 +79,6 @@ public interface Mapper {
   void map(Integer minX, Integer maxX, Integer minY, Integer maxY);
 
   /**
-   * nullifying limits
-   */
-  void resetLimits();
-
-  /**
    * Inverts the calculation multiplies the output by -1
    * 
    * @param invert

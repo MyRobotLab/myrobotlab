@@ -16,25 +16,19 @@ public abstract class MapperBase implements Serializable, Mapper {
    */
   boolean inverted = false;
 
-  /**
-   * 4 values which are related to the ratio of mapping range x over range y.
-   * They are Double values because there is the possibility of them not being
-   * set. This allows values of sub-types services to be merged in. For example
-   * an abstract service might have x range set but not y. map(-1.0, 1.0, null,
-   * null) and the sub-type concrete service can have actual values. Sabertooth
-   * would mapper.merge(null, null, 128, -128) as an example
-   */
-  Double maxIn;
-  Double maxX;
-  Double maxY;
-  Double minIn;
-
-  /**
-   * These are min and max input values. Values outside of this range will be
-   * "clipped"
-   */
+/**
+ * a mapper takes an a range of inputs minX to maxX
+ *  applies some math to it and calculates an output Y that falls in the range 
+ *  of minY to maxY.
+ *  
+ *  Note:This is really specific only to the linear mapper.  and will/should
+ *  move to the MapperLinear class to make this interface generic.
+ * 
+ */
   Double minX;
+  Double maxX;
   Double minY;
+  Double maxY;
 
   /**
    * non-parameterized constructor for "un-set" mapper use the merge function to
@@ -115,9 +109,9 @@ public abstract class MapperBase implements Serializable, Mapper {
    * max and min respectively
    */
   @Override
-  public void setMinMax(Double min, Double max) {
-    this.minIn = min;
-    this.maxIn = max;
+  public void setMinMax(Double minInput, Double maxInput) {
+    this.minX = minInput;
+    this.maxX = maxInput;
   }
 
   @Override
@@ -125,14 +119,8 @@ public abstract class MapperBase implements Serializable, Mapper {
     setMinMax((min == null) ? null : min.doubleValue(), (max == null) ? null : max.doubleValue());
   }
 
-  @Override
-  public void resetLimits() {
-    minIn = null;
-    maxIn = null;
-  }
-
   public String toString() {
-    return String.format(" map(%.2f,%.2f,%.2f,%.2f) => %.2f < o < %.2f inverted %b", minX, maxX, minY, maxY, minIn, maxIn, inverted);
+    return String.format(" map(%.2f,%.2f,%.2f,%.2f) inverted %b", minX, maxX, minY, maxY, inverted);
   }
 
 }
