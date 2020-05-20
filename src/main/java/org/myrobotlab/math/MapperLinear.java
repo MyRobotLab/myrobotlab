@@ -29,7 +29,9 @@ public final class MapperLinear extends MapperBase {
 
   @Override
   public double calcOutput(double input) {
-    input = clipValue(input, minX, maxX);
+    if (isClipInput()) {
+      input = clipValue(input, minX, maxX);
+    }
     if (!inverted) {
       return minY + ((input - minX) * (maxY - minY)) / (maxX - minX);
     } else {
@@ -40,10 +42,12 @@ public final class MapperLinear extends MapperBase {
   // make sure value lies between the min/max value
   private static double clipValue(double value, double min, double max) {
     // clip the value
-    if (value < min) {
-      return min;
-    } else if (value > max) {
-      return max;
+    // TODO: test to make sure min is actually min.
+    
+    if (value < Math.min(min,max)) {
+      return Math.min(min,max);
+    } else if (value > Math.max(min, max)) {
+      return Math.max(min,max);
     } else {
       return value;
     }
@@ -52,7 +56,9 @@ public final class MapperLinear extends MapperBase {
   @Override
   final public double calcInput(double out) { 
     // the output value needs to be between minY and maxY
-    out = clipValue(out, minY, maxY);
+    if (isClipInput()) {
+      out = clipValue(out, minY, maxY);
+    }
     if (!inverted) {
       return minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
     } else {

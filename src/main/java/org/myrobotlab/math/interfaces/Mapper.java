@@ -100,5 +100,17 @@ public interface Mapper {
    * @param max
    */
   void setMinMax(int min, int max);
+  
+  /**
+   * If true this will make sure that input values are clipped
+   * otherwise, the input values are not clipped which means output values are unbounded. 
+   */
+  void setClipInput(boolean clipInput);
 
+  /**
+   * Return true if the mapper is set to clip the input values.  otherwise false.
+   */
+  boolean isClipInput();
+
+  
 }

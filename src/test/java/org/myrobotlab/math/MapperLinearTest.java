@@ -19,6 +19,7 @@ public class MapperLinearTest {
 
     Mapper mapper = new MapperLinear();
     mapper.map(-1.0, 1.0, -1.0, 1.0);
+    mapper.setClipInput(false);
     double result = mapper.calcOutput(0.5);
     assertEquals(0.5, result, 0);
     
@@ -28,6 +29,7 @@ public class MapperLinearTest {
     
     
     mapper.setMinMax(-1.0, 1.0);
+    mapper.setClipInput(true);
     assertEquals( -1.0, mapper.calcInput( mapper.calcOutput(-2.3)), 0.01);
  
     mapper.setInverted(true);
@@ -40,10 +42,12 @@ public class MapperLinearTest {
     assertEquals(1.0, mapper.calcInput(-7.0), 0.01);
     
     mapper.map(-1.0, 1.0, 10.0, -10.0 );
+    mapper.setClipInput(false);
     log.info("mapper {}", mapper);
     assertEquals( -22.0, mapper.calcOutput(-2.2), 0.0);
     assertEquals( -1.1, mapper.calcInput(-11.0), 0.0);
     mapper.setMinMax(-1.0, 1.0);
+    mapper.setClipInput(true);
     assertEquals( -1.0, mapper.calcInput(-11.0), 0.0);
   }
 
@@ -76,11 +80,14 @@ public class MapperLinearTest {
     mapper.map(-1.0, 1.0, -1.0, 1.0);
     mapper.setMinMax(-0.6, 0.6);
     mapper.setInverted(true);
+   
     
-    assertEquals(-0.6, mapper.calcOutput(1.0), 0);
-    assertEquals(-0.6, mapper.calcOutput(0.7), 0);
-    assertEquals(0.5, mapper.calcOutput(-0.5), 0);
-    assertEquals(-0.6, mapper.calcOutput(1.5), 0);
+    // input is clipped to 0.6 and computes the output as being minY because it's inverted.
+    assertEquals(-1.0, mapper.calcOutput(1.0), 0);
+    assertEquals(-1.0, mapper.calcOutput(0.7), 0);
+    assertEquals(0.833, mapper.calcOutput(-0.5), 0.01);
+    // input clipped to 0.6 and mapped to the minY because it's iverted.
+    assertEquals(-1.0, mapper.calcOutput(1.5), 0);
 
     // this is what a non-inverted mapper does with
     // the same values
@@ -88,11 +95,14 @@ public class MapperLinearTest {
     mapper2.map(-1.0, 1.0, -1.0, 1.0);
     // mapper2.setInverted(true);
     mapper2.setMinMax(-0.7, 0.7);
-   
-    assertEquals(0.7, mapper2.calcOutput(1.0), 0);
-    assertEquals(0.7, mapper2.calcOutput(0.7), 0);
-    assertEquals(-0.5, mapper2.calcOutput(-0.5), 0);
-    assertEquals(0.7, mapper2.calcOutput(1.5), 0);
+    // input is clipped to 0.7 and output is pegged to max out.
+    assertEquals(1.0, mapper2.calcOutput(1.0), 0);
+    // input equals max input and is clipped at output to 1.0
+    assertEquals(1.0, mapper2.calcOutput(0.7), 0);
+    // input is in valid input range and scaled / mapped to -1 to 1 output.
+    assertEquals(-0.7142, mapper2.calcOutput(-0.5), 0.01);
+    // input is above the max input, clipped and mapped to max output.
+    assertEquals(1.0, mapper2.calcOutput(1.5), 0);
 
     // asymmetrical
     MapperLinear mapper3 = new MapperLinear();
@@ -116,7 +126,7 @@ public class MapperLinearTest {
     MapperLinear mapper = new MapperLinear();
 
     mapper.map(-1.0, 1.0, -1.0, 1.0);
-    
+    mapper.setClipInput(false);
     assertEquals(8.0, mapper.calcOutput(8.0), 0);
     assertEquals(20.0, mapper.calcOutput(20.0), 0); 
     assertEquals(-3.0, mapper.calcOutput(-3.0), 0);
@@ -125,10 +135,9 @@ public class MapperLinearTest {
     assertEquals(100.0, mapper.calcOutput(100.0), 0);
     
     mapper.setMinMax(0.0, 0.9);
-    
-    assertEquals(0, mapper.calcOutput(-0.9), 0);
-    assertEquals(0.9, mapper.calcOutput(1.0), 0.01);
-       // mapper.reset();
+    mapper.setClipInput(true);
+    assertEquals(-1.0, mapper.calcOutput(-0.9), 0);
+    assertEquals(1.0, mapper.calcOutput(1.0), 0.01);
     // remove all input/output restrictions
     
   }
@@ -143,7 +152,7 @@ public class MapperLinearTest {
     // have a standard
     // front end map of -1.0 to 1.0
     control.map(-1.0, 1.0, -1.0, 1.0);
-
+    control.setClipInput(false);
     // sabertooth
     Mapper controller = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
     controller.setMinMax(-0.9, 0.9);
@@ -187,7 +196,7 @@ public class MapperLinearTest {
     assertEquals(20.0, control.calcOutput(1.0), 0);
     
     control.map(-1.0, 1.0, -200.0, 200.0); 
-
+    
     assertEquals(1000.0, control.calcOutput(5.0), 0);
     assertEquals(-1000.0, control.calcOutput(-5.0), 0);
 
@@ -199,6 +208,8 @@ public class MapperLinearTest {
     // reversed stretched map with limits
     control.map(-1.0, 1.0, 20.0, -20.0);
     control.setMinMax(-1.0, 1.0);
+    control.setClipInput(true);
+    
     assertEquals(20.0, control.calcOutput(-5.0), 0);
     assertEquals(-20.0, control.calcOutput(5.0), 0);
 
