@@ -15,6 +15,8 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.currentBotImage = null
 
+    $scope.aimlEditor = null
+
     $scope.tabs = {
         "selected": 1
     }
@@ -237,6 +239,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.aceLoaded = function(_editor) {
         // _editor.setReadOnly(true);
+        $scope.aimlEditor = _editor
         console.log('aceLoaded')
     }
 

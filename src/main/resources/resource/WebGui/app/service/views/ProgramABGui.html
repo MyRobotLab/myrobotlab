@@ -125,6 +125,7 @@
                                 <uib-tab index="2" heading="Edit">
                                     <div class="tabContainer">
                                         <button class="btn btn-xs btn-info" ng-click="saveAimlFile(aimlFile)">Save</button>
+                                        <button class="btn btn-xs btn-info" ng-click="aimlEditor.execCommand('find')">Find</button>
                                         <div ng-model="aimlFileData.data" class="editAIML" id="$index" ui-ace="{
                                                                        useWrapMode : false,
                                                                        showGutter: true,                                               
