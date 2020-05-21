@@ -227,7 +227,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
      */
     // if no position could be loaded - set to rest
     // we have no "historical" info - assume we are @ rest
-    currentPos = targetPos = rest;
+    targetPos = rest;    
+    
     // TODO: this value is default already.
     // mapper.setMinMax(0, 180);
     // create our default TimeEncoder
@@ -240,7 +241,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
         currentPos = targetPos = savedPos;
       }
-    }
+    }    
+    currentPos = mapper.calcOutput(targetPos);
   }
 
   /**
@@ -582,7 +584,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   public void onEncoderData(EncoderData data) {
     // log.info("onEncoderData - {}", data.value); - helpful to debug
-    currentPos = data.value;
+    currentPos = data.angle;
     // TODO test on type of encoder to handle differently if necessary
     // TODO - where does resolution or accuracy managed ? (in the encoder or in
     // the motor ?)
@@ -598,7 +600,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       if (publishEncoderData) {
         invoke("publishEncoderData", data);
       }
-      invoke("publishJointAngle", new AngleData(getName(), data.value));
+      invoke("publishJointAngle", new AngleData(getName(), data.angle));
       // FIXME - these should be Deprecated - and publishEncoderData used if
       // necessary
       invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentPos);
@@ -713,7 +715,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), getTargetPos(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
     }
     // GroG: I think in the long run this direct call vs using invoke/send is
     // less preferrable
@@ -915,7 +917,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void setPosition(Double pos) {
-    currentPos = targetPos = pos;
+    // currentPos = targetPos = pos;
+    // i think this is desired
+    targetPos = pos;
+    currentPos = mapper.calcOutput(pos);
     if (encoder != null) {
       if (encoder instanceof TimeEncoder)
         ((TimeEncoder) encoder).setPos(pos);

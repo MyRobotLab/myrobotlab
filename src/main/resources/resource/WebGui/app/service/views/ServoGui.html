@@ -117,32 +117,32 @@
                             <tr>
                                 <td>Input</td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="setMinMax({service.currentPos.toFixed(2)},143)">Set Min</button>
+                                    <button class="btn btn-input" ng-click="setMinMax(service.currentPos, service.mapper.maxX)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="">Set Max</button>
+                                    <button class="btn btn-input" ng-click="setMinMax(service.mapper.minX, service.currentPos)">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Output</td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.setMinMax({service.currentPos.toFixed(2)},143)">Set Min</button>
+                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.currentPos, service.mapper.maxY)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.setMinMax(8,{service.currentPos.toFixed(2)})">Set Max</button>
+                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.mapper.minY, service.currentPos)">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Rest</td>
                                 <td>
-                                    <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos.toFixed(2))">Set Rest</button>
+                                    <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos)">Set Rest</button>
                                 </td>
                             </tr>
                             <tr class="valuesRow">
                                 <td></td>
-                                <td class="inputColor preventDragSelect">{{limits.minValue}}</td>
-                                <td class="inputColor preventDragSelect">{{limits.maxValue}}</td>
+                                <td class="inputColor preventDragSelect">{{service.mapper.minX}}</td>
+                                <td class="inputColor preventDragSelect">{{service.mapper.maxX}}</td>
                                 <td></td><td></td>
-                                <td class="outputColor preventDragSelect">{{limits.minValue}}</td>
-                                <td class="outputColor preventDragSelect">{{limits.maxValue}}</td>
+                                <td class="outputColor preventDragSelect">{{service.mapper.minY}}</td>
+                                <td class="outputColor preventDragSelect">{{service.mapper.maxY}}</td>
                                 <td></td><td></td>
                                 <td class="restColor preventDragSelect">{{rest}}</td>
                             </tr>

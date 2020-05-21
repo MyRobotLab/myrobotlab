@@ -110,10 +110,14 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.setMinMax = function() {
+    $scope.setMinMax = function(min, max) {
+        console.log('setMinMax ', min, max)
+        msg.send('setMinMax', min, max)
+        /*
         if ($scope.statusControlMode == 'control') {
             msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
         }
+        */
     }
 
     $scope.setSpeed = function(speed) {

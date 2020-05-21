@@ -256,8 +256,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
           }
 
           // log.info(String.format("new pos %.2f", estimatedPos)); helpful to
-          // debug
-          EncoderData d = new EncoderData(name, null, estimatedPos);
+          // - Kwatters - SHOULD PROBABLY BE -> EncoderData(name, null, targetPos, estimatedPos) !!!
+          EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
 
           positions.setPosition(name, estimatedPos);
           servo.onEncoderData(d);
@@ -266,7 +266,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
         // when we are leaving - its a "finished move"
         // log.info("finished moved");
-        EncoderData d = new EncoderData(name, null, estimatedPos);
+        EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
         servo.onEncoderData(d);
         positions.setPosition(name, estimatedPos);
       }
