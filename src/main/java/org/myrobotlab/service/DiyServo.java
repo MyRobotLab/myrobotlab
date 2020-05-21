@@ -289,6 +289,9 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
+  // TODO: KW moved from base class.  should remove it here too.
+  private double currentPosInput = 0;
+  
   /**
    * Constructor
    * 
@@ -358,11 +361,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public Double getPos() {
-    if (targetPos == null) {
-      return rest;
-    } else {
-      return MathUtils.round(targetPos, roundPos);
-    }
+    return MathUtils.round(targetPos, roundPos);
   }
 
   // FIXME - change to enabled()
@@ -424,7 +423,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     targetPos = pos;
-    Double targetOutput = getTargetOutput();
+    double targetOutput = getTargetOutput();
 
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
@@ -551,12 +550,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
 
   @Override
-  public Double getTargetOutput() {
-    if (targetPos == null) {
-      targetPos = rest;
-    }
-    Double targetOutput = mapper.calcOutput(targetPos);
-    return targetOutput;
+  public double getTargetOutput() {
+    return mapper.calcOutput(targetPos);
   }
 
   /*

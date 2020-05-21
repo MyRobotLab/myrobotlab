@@ -170,9 +170,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return the target output position
    */
-  Double getTargetOutput();
+  double getTargetOutput();
 
-  Double getTargetPos();
+  double getTargetPos();
 
   /**
    * When moveBlocking is in motion, not only should it block the calling thread
@@ -221,7 +221,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param maxY
    *          - max output
    */
-  void map(Double minX, Double maxX, Double minY, Double maxY);
+  void map(double minX, double maxX, double minY, double maxY);
 
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
