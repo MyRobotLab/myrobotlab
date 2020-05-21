@@ -190,6 +190,27 @@ public class ServoTest extends AbstractTest {
     System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!");
   }
 
+  
+  @Test
+  public void invertTest() {
+    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
+
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);  
+    servo01.attach(arduino01, 8, 40.0);
+    servo01.enable();
+    servo01.setRest(90.0);
+    servo01.rest();
+    servo01.moveTo(30.0);
+    assertEquals(30, servo01.getTargetOutput().intValue());
+    servo01.setInverted(true);
+    assertEquals(150, servo01.getTargetOutput().intValue());
+    servo01.moveTo(20.0);
+    assertEquals(160, servo01.getTargetOutput().intValue());
+    servo01.setInverted(false);
+    assertEquals(20, servo01.getTargetOutput().intValue());
+  }
+  
 
   @Test
   public void testServo() throws Exception {
