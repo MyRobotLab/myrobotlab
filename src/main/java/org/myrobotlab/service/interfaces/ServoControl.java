@@ -99,14 +99,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return maxY
    */
-  Double getMax();
+  double getMax();
 
   /**
    * gets the minY of the mapper (output)
    * 
    * @return minY
    */
-  Double getMin();
+  double getMin();
 
   /**
    * configuration method - a method the controller will call when the servo is
@@ -123,30 +123,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   String getPin();
 
   /**
-   * Unmapped current position of the servo. This can be incrementally updated
-   * by an encoder.
-   * 
-   * A possible better solution might be to use ServoData to get the position
-   * through time which a controller with speed control can provide, so as the
-   * servo is told incrementally where to go - it sends that command back as an
-   * event which sets the "current" position.
-   * 
-   * This is a read only current position reported from the ServoControl. If a
-   * mapper calculation is supplied to generate output - and the ServoController
-   * uses it, and the ServoController sends back current position it "must" be
-   * in the form of the original input range
-   *
-   * set by feedback encoders if available - this is typically updated during
-   * movement - a read-only value
-   * 
-   * @return the current position as a Double
+   * @return the current position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
    */
-  Double getPos();
+  double getPos();
 
   /**
    * @return the current rest position value
    */
-  Double getRest();
+  double getRest();
 
   /**
    * Return current speed if set - if speed/speed control is not being use it is
@@ -170,9 +154,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return the target output position
    */
-  Double getTargetOutput();
+  double getTargetOutput();
 
-  Double getTargetPos();
+  double getTargetPos();
 
   /**
    * When moveBlocking is in motion, not only should it block the calling thread
@@ -221,7 +205,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param maxY
    *          - max output
    */
-  void map(Double minX, Double maxX, Double minY, Double maxY);
+  void map(double minX, double maxX, double minY, double maxY);
 
   /**
    * moveToBlocking is a basic move command of the servo - usually is 0 - 180
@@ -346,7 +330,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @param pos
    */
-  void setPosition(Double pos);
+  void setPosition(double pos);
 
   /**
    * @param rest
@@ -354,7 +338,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          explicitly set. Position the servo will move to when method
    *          servo.rest() is called
    */
-  void setRest(Double rest);
+  void setRest(double rest);
 
   /**
    * set the speed of the servo measured in degrees per second.

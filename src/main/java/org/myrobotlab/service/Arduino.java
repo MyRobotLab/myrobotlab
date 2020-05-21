@@ -459,14 +459,9 @@ public class Arduino extends AbstractMicrocontroller
     }
 
     int pin = getAddress(servo.getPin());
-    // targetOutput is ALWAYS ALWAYS degrees
-    Double targetOutput = servo.getTargetOutput();
-    
-    if (targetOutput == null) {
-      log.info("targetOutput null - not moving servo");
-      return;
-    }
-    
+    // targetOutput is never null and is the input requested angle in degrees for the servo.
+    // defaulting to the rest angle.
+    double targetOutput = servo.getTargetOutput();
     double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
 
     // add a device to our deviceList
