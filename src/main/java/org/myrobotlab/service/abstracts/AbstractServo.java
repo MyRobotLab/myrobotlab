@@ -908,7 +908,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public void setPosition(Double pos) {
+  public void setPosition(double pos) {
     currentPos = targetPos = pos;
     if (encoder != null) {
       if (encoder instanceof TimeEncoder)
@@ -918,7 +918,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public void setRest(Double rest) {
+  public void setRest(double rest) {
     this.rest = rest;
     broadcastState();
   }
