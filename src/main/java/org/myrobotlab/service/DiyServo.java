@@ -360,7 +360,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return lastActivityTimeTs;
   }
 
-  public Double getPos() {
+  public double getPos() {
     return MathUtils.round(targetPos, roundPos);
   }
 
