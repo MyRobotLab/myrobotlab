@@ -460,15 +460,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   /**
-   * this value is always only set by an encoder - if available
+   * Returns the current position of the servo as computed/updated by the encoder
    */
   @Override
-  public Double getPos() {
+  public double getPos() {
     return currentPos;
   }
-
+  
   @Override
-  public Double getRest() {
+  public double getRest() {
     return rest;
   }
 
