@@ -628,15 +628,15 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         // MAP MIN/MAX INPUT/OUTPUT
         // In the inverted case, these are reversed
-        moveTo.setMinimum(servo.getMin().intValue());
-        moveTo.setMaximum(servo.getMax().intValue());
+        moveTo.setMinimum(Double.valueOf(servo.getMin()).intValue());
+        moveTo.setMaximum(Double.valueOf(servo.getMax()).intValue());
 
-        if (mapInput.getLowValue() != servo.getMin().intValue()) {
-          mapInput.setLowValue(servo.getMin().intValue());
+        if (mapInput.getLowValue() != Double.valueOf(servo.getMin()).intValue()) {
+          mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
         }
 
-        if (mapInput.getHighValue() != servo.getMax().intValue()) {
-          mapInput.setHighValue(servo.getMax().intValue());
+        if (mapInput.getHighValue() != Double.valueOf(servo.getMax()).intValue()) {
+          mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
         }
 
 
@@ -651,8 +651,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
         minPos.setText(String.format("%.1f", servo.getMin()));
         maxPos.setText(String.format("%.1f", servo.getMax()));
        
-        mapInput.setLowValue(servo.getMin().intValue());
-        mapInput.setHighValue(servo.getMax().intValue());
+        mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
+        mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
        
         addListeners();
       }

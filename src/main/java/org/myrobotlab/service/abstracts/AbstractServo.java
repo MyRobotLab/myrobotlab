@@ -445,12 +445,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public Double getMax() {
+  public double getMax() {
     return mapper.getMaxY();
   }
 
   @Override
-  public Double getMin() {
+  public double getMin() {
     return mapper.getMinY();
   }
 

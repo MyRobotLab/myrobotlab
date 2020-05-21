@@ -99,14 +99,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return maxY
    */
-  Double getMax();
+  double getMax();
 
   /**
    * gets the minY of the mapper (output)
    * 
    * @return minY
    */
-  Double getMin();
+  double getMin();
 
   /**
    * configuration method - a method the controller will call when the servo is
