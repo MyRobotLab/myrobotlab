@@ -330,7 +330,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @param pos
    */
-  void setPosition(Double pos);
+  void setPosition(double pos);
 
   /**
    * @param rest
@@ -338,7 +338,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    *          explicitly set. Position the servo will move to when method
    *          servo.rest() is called
    */
-  void setRest(Double rest);
+  void setRest(double rest);
 
   /**
    * set the speed of the servo measured in degrees per second.
