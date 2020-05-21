@@ -73,12 +73,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * "command" methods such as moveTo - its always status information, and its
    * typically updated from an encoder of some form
    */
-  protected Double currentPos;
-
-  /**
-   * set by encoders
-   */
-  protected Double currentPosInput = null;
+  protected double currentPos;
 
   /**
    * if enabled then a pwm pulse is keeping the servo at the current position,
@@ -164,7 +159,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * default rest is 90 default target position will be 90 if not specified
    */
-  protected Double rest = 90.0;
+  protected double rest = 90.0;
 
   /**
    * speed of the servo - null is no speed control
@@ -195,7 +190,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * the requested INPUT position of the servo
    */
-  protected Double targetPos;
+  protected double targetPos;
 
   /**
    * if true - a single moveTo command will be published for servo controllers
@@ -271,7 +266,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
     if (enc.equals(encoder)) {
       log.info("encoder {} already attached", enc.getName());
-      return;
     }
     encoder = enc;
     enc.attach(this);
@@ -453,12 +447,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public Double getMax() {
+  public double getMax() {
     return mapper.getMaxY();
   }
 
   @Override
-  public Double getMin() {
+  public double getMin() {
     return mapper.getMinY();
   }
 
@@ -468,15 +462,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   /**
-   * this value is always only set by an encoder - if available
+   * Returns the current position of the servo as computed/updated by the encoder
    */
   @Override
-  public Double getPos() {
+  public double getPos() {
     return currentPos;
   }
-
+  
   @Override
-  public Double getRest() {
+  public double getRest() {
     return rest;
   }
 
@@ -486,12 +480,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public Double getTargetOutput() {
+  public double getTargetOutput() {
     return mapper.calcOutput(targetPos);    
   }
 
   @Override
-  public Double getTargetPos() {
+  public double getTargetPos() {
     return targetPos;
   }
 
@@ -542,7 +536,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public void map(Double minX, Double maxX, Double minY, Double maxY) {
+  public void map(double minX, double maxX, double minY, double maxY) {
     mapper = new MapperLinear(minX, maxX, minY, maxY);
     broadcastState();
   }
@@ -916,7 +910,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public void setPosition(Double pos) {
+  public void setPosition(double pos) {
     // currentPos = targetPos = pos;
     // i think this is desired
     targetPos = pos;
@@ -929,7 +923,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  public void setRest(Double rest) {
+  public void setRest(double rest) {
     this.rest = rest;
     broadcastState();
   }

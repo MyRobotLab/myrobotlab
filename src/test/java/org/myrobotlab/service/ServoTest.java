@@ -202,13 +202,13 @@ public class ServoTest extends AbstractTest {
     servo01.setRest(90.0);
     servo01.rest();
     servo01.moveTo(30.0);
-    assertEquals(30, servo01.getTargetOutput().intValue());
+    assertEquals(30.0, servo01.getTargetOutput(), 0.001);
     servo01.setInverted(true);
-    assertEquals(150, servo01.getTargetOutput().intValue());
+    assertEquals(150.0, servo01.getTargetOutput(), 0.001);
     servo01.moveTo(20.0);
-    assertEquals(160, servo01.getTargetOutput().intValue());
+    assertEquals(160.0, servo01.getTargetOutput(), 0.001);
     servo01.setInverted(false);
-    assertEquals(20, servo01.getTargetOutput().intValue());
+    assertEquals(20.0, servo01.getTargetOutput(), 0.001);
   }
   
 
