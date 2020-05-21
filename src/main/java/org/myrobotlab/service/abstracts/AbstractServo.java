@@ -193,11 +193,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   protected Set<String> syncedServos = new LinkedHashSet<>();
 
   /**
-   * the calculated output for the servo
-   */
-//  protected Double targetOutput;
-
-  /**
    * the requested INPUT position of the servo
    */
   protected Double targetPos;
@@ -490,8 +485,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double getTargetOutput() {
-    Double targetOutput = mapper.calcOutput(targetPos);
-    return targetOutput;
+    return mapper.calcOutput(targetPos);    
   }
 
   @Override
@@ -644,7 +638,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * @param blocking
    * @param timeoutMs
    */
-  protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
+  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
     // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
@@ -653,19 +647,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // this function
     // even with no hardware encoder a servo can have a TimeEncoder from which
     // position would be guessed - but
-    // it would not be "set" here !
-    // breakMoveToBlocking=true;
-    // synchronized (moveToBlocked) {
-    // moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
-    // }
-    // enableAutoEnable is "always" on - if you want to stop a motor from
-    // working use .lock()
-    // which is part of the motor command set ... once you lock a motor you
-    // can't do anything until you unlock it
-    if (newPos == null) {
-      log.info("{} processing a null move - will not move", getName());
-      return false;
-    }
+    
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
@@ -676,7 +658,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.info("cannot moveTo {} not enabled", getName());
       return false;
     }
-    targetPos = mapper.calcOutput(newPos);
+    targetPos = newPos;
+    log.info("pos {} output {}", targetPos, getTargetOutput());
+    
     /**
      * <pre>
      * 
@@ -715,8 +699,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       isBlocking = true;
     }
-    Double targetOutput = getTargetOutput();
-    log.info("pos {} output {}", targetPos, targetOutput);
+    
+    
     lastActivityTimeTs = System.currentTimeMillis();
     isMoving = true;
     // "real" encoders are electrically hooked up to the servo and get their

@@ -63,7 +63,7 @@ public final class MapperLinear extends MapperBase {
     if (!inverted) {
       return minX + ((out - minY) * (maxX - minX)) / (maxY - minY);
     } else {
-      return minX + ((out + minY) * (maxX - minX)) / (minY - maxY); 
+      return maxX + ((out - minY) * (maxX - minX)) / (minY - maxY); 
     }
   }
 
