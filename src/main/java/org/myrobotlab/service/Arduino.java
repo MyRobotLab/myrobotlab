@@ -1644,19 +1644,20 @@ public class Arduino extends AbstractMicrocontroller
     
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
+    Double angle = null;
     if (ec instanceof Amt203Encoder) {
       // type = 0;
       pin = ((Amt203Encoder) ec).getPin();
     } else if (ec instanceof As5048AEncoder) {
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
-      double angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
+      angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
       log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
 
-    EncoderData data = new EncoderData(ec.getName(), pin, position);
+    EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
 //    log.info("Publish Encoder Data Raw {}", data);
     
     // TODO: all this code needs to move out of here!

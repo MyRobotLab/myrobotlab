@@ -125,7 +125,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // mocked out encoder data to publish.
     log.info("Device ID:{} Position:{}", deviceId, position);
-    EncoderData data = new EncoderData("Test-" + deviceId, "TEST1", position);
+    EncoderData data = new EncoderData("Test-" + deviceId, null, new Double(position),  new Double(position));
     return data;
   }
 
