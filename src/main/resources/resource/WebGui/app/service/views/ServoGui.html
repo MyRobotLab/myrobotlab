@@ -176,9 +176,9 @@
                                         </div>
                                     </div>
                                     <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
-                                    <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(60*100/180)}}%)); width: calc(100% - ({{100 -((120-60)*100/180)}}%));"></div>
+                                    <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));"></div>
                                     <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
-                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
+                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));"></div>
                                 </div>
                                 <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
                                 <br>
@@ -186,8 +186,8 @@
                                 <rzslider class="custom-slider sliderPosition" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
                                 <br>
                                 Input                                     
-                                 - {{lockInputOutput?'Locked':'UnLocked'}}
-                                 <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="setLock(lockInputOutput)" on="Locked" off="UnLocked"></toggle>
+                                 - {{lockInputOutput?'Locked':'UnLocked'}} {{lockInputOutput}}
+                                 <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="toggleLock()" on="Locked" off="UnLocked"></toggle>
                                 <rzslider class="custom-slider inputColor" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
                                 <br>
                                 Output
