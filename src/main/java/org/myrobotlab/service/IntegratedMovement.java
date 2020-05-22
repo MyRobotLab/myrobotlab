@@ -562,13 +562,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
       // servo.addIKServoEventListener(this);
-      dhLink.addPositionValue(servo.getPos());
+      dhLink.addPositionValue(servo.getCurrentInputPos());
       // TODO: kw: review that these should actually be the input minX / maxX  .. not the output mapping values here.
       dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
       // dhLink.setState(Servo.SERVO_EVENT_STOPPED);
       dhLink.setVelocity(servo.getSpeed());
-      dhLink.setTargetPos(servo.getPos());
+      dhLink.setTargetPos(servo.getCurrentInputPos());
       dhLink.servoMin = minAngle;// servo.getMinInput();
       dhLink.servoMax = maxAngle;// servo.getMaxInput();
       dhLink.hasServo = true;

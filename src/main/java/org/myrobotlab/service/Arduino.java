@@ -1888,7 +1888,7 @@ public class Arduino extends AbstractMicrocontroller
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
     int us = degreeToMicroseconds(servo.getTargetOutput());
-    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getCurrentInputPos(), us);
     msg.servoMoveToMicroseconds(deviceId, us);
   }
 

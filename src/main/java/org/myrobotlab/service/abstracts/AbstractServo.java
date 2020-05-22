@@ -69,11 +69,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   private String controller;
 
   /**
-   * the "current" position of the servo - this never gets updated from
+   * the "current" OUTPUT position of the servo - this never gets updated from
    * "command" methods such as moveTo - its always status information, and its
    * typically updated from an encoder of some form
    */
-  protected double currentPos;
+  protected double currentOutputPos;
 
   /**
    * if enabled then a pwm pulse is keeping the servo at the current position,
@@ -234,10 +234,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       Double savedPos = encoder.getPos();
       if (savedPos != null) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
-        currentPos = targetPos = savedPos;
+        currentOutputPos = targetPos = savedPos;
       }
     }    
-    currentPos = mapper.calcOutput(targetPos);
+    currentOutputPos = mapper.calcOutput(targetPos);
   }
 
   /**
@@ -465,9 +465,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * Returns the current position of the servo as computed/updated by the encoder
    */
   @Override
-  public double getPos() {
-    return currentPos;
+  public double getCurrentInputPos() {
+    return mapper.calcInput(currentOutputPos);
   }
+  
+  @Override
+  public double getCurrentOutputPos() {    
+    return currentOutputPos;
+  }
+
   
   @Override
   public double getRest() {
@@ -566,25 +572,26 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   public Double moveToBlocking(Double pos) {
     processMove(pos, true, null);
-    return currentPos; // should be requested pos - unless timeout occured
+    return mapper.calcInput(currentOutputPos); // should be requested pos - unless timeout occured
   }
 
   @Override
   public Double moveToBlocking(Double newPos, Long timeoutMs) {
     processMove(newPos, true, timeoutMs);
-    return currentPos; // should be requested pos - unless timeout occured
+    return mapper.calcInput(currentOutputPos); // should be requested pos - unless timeout occured
   }
 
   @Override
   public void onEncoderData(EncoderData data) {
     // log.info("onEncoderData - {}", data.value); - helpful to debug
-    currentPos = data.angle;
+    currentOutputPos = data.angle;
     // TODO test on type of encoder to handle differently if necessary
     // TODO - where does resolution or accuracy managed ? (in the encoder or in
     // the motor ?)
     // FIXME - configurable accuracy difference ? ie - when your in the range of
     // 0.02 - then they are considered equal ?
-    boolean equal = Math.abs(targetPos - currentPos) < 0.1;
+    double currentInputPos = mapper.calcInput(currentOutputPos);
+    boolean equal = Math.abs(targetPos - currentInputPos) < 0.1; // kwatters correct ??
     // if (targetPos.equals(currentPos)) {
     if (equal) {
       synchronized (this) {
@@ -597,7 +604,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
       // FIXME - these should be Deprecated - and publishEncoderData used if
       // necessary
-      invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentPos);
+      invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentInputPos);
       invoke("publishServoStopped", this);
       // new feature - saving the last position
       // save(); <-- BAD !!
@@ -614,7 +621,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       isMoving = true;
       invoke("publishMoveTo", this);
       // FIXME - is this necessary ?
-      invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentPos);
+      invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos);
       // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
     }
   }
@@ -709,7 +716,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
     }
     // GroG: I think in the long run this direct call vs using invoke/send is
     // less preferrable
@@ -914,7 +921,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // currentPos = targetPos = pos;
     // i think this is desired
     targetPos = pos;
-    currentPos = mapper.calcOutput(pos);
+    currentOutputPos = mapper.calcInput(pos);
     if (encoder != null) {
       if (encoder instanceof TimeEncoder)
         ((TimeEncoder) encoder).setPos(pos);
@@ -955,7 +962,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public void stop() {
     isSweeping = false;
     // FIXME - figure out the appropriate thing to do for a TimeEncoder ????
-    processMove(getPos(), false, null);
+    processMove(getCurrentInputPos(), false, null);
     invoke("publishServoStop", this);
     broadcastState();
   }

@@ -235,8 +235,8 @@ public class InMoovHead extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(),
-        jaw.getPos(), rollNeck.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(), eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(),
+        jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
   }
 
 
@@ -511,12 +511,12 @@ public class InMoovHead extends Service {
      * error("arduino not connected"); }
      */
 
-    rothead.moveTo(rothead.getPos() + 2);
-    neck.moveTo(neck.getPos() + 2);
-    eyeX.moveTo(eyeX.getPos() + 2);
-    eyeY.moveTo(eyeY.getPos() + 2);
-    jaw.moveTo(jaw.getPos() + 2);
-    rollNeck.moveTo(rollNeck.getPos() + 2);
+    rothead.moveTo(rothead.getCurrentInputPos() + 2);
+    neck.moveTo(neck.getCurrentInputPos() + 2);
+    eyeX.moveTo(eyeX.getCurrentInputPos() + 2);
+    eyeY.moveTo(eyeY.getCurrentInputPos() + 2);
+    jaw.moveTo(jaw.getCurrentInputPos() + 2);
+    rollNeck.moveTo(rollNeck.getCurrentInputPos() + 2);
   }
 
   /**
