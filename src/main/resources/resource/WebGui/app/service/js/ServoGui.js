@@ -16,6 +16,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     $scope.speedDisplay = 0
 
     $scope.speed = null
+    $scope.lockInputOutput = true
 
     $scope.activeTabIndex = 0
 
@@ -92,7 +93,24 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.limits = {
+    $scope.restSlider = {
+        value: 0,
+        options: {
+            floor: 0,
+            ceil: 180,
+            step: 1,
+            showTicks: false,
+            onStart: function() {},
+            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
+            onChange: function() {
+                // $scope.setMinMax()
+                msg.send('setRest', $scope.restSlider.value)
+            },
+            onEnd: function() {}
+        }
+    }
+
+    $scope.inputSlider = {
         minValue: 0,
         maxValue: 180,
         options: {
@@ -103,8 +121,32 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
-                $scope.setMinMax()
-                //msg.send('setMinMax', $scope.limits.minValue, $scope.limits.maxValue)
+                if ($scope.lockInputOutput) {
+                    $scope.outputSlider.minValue = $scope.inputSlider.minValue
+                    $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
+                }
+                msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+            },
+            onEnd: function() {}
+        }
+    }
+
+    $scope.outputSlider = {
+        minValue: 0,
+        maxValue: 180,
+        options: {
+            floor: 0,
+            ceil: 180,
+            step: 1,
+            showTicks: false,
+            onStart: function() {},
+            /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
+            onChange: function() {
+                if ($scope.lockInputOutput) {
+                    $scope.inputSlider.minValue = $scope.outputSlider.minValue
+                    $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
+                }
+                msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
             },
             onEnd: function() {}
         }
@@ -129,16 +171,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     }
 
     $scope.refreshSlider = function() {
-        $timeout(function() {
+        setTimeout(function() {
             $scope.$broadcast('rzSliderForceRender');
-        });
+        }, 20)
     }
-    ;
-
-    // trying to fix the slider refresh
-    $scope.$on('$stateChangeSuccess', function() {
-        refreshSlider();
-    });
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -158,33 +194,40 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
 
         $scope.pin = service.pin
-        $scope.rest = service.rest
 
         // ui initialization - good idea !
+        // first time is 'status' - otherwise control
         if (firstTime) {
+
+            $scope.restSlider.value = service.rest
+
             $scope.pos.value = service.currentOutputPos
             $scope.sliderEnabled = true
 
-            // init ui components
-            if (service.speed) {
-                $scope.speedSlider.value = service.speed
-            } else {
-                $scope.speedSlider.value = 501
-                // ui max limit
-            }
-
             $scope.activeTabIndex = service.controller == null ? 0 : 1
+
+            $scope.inputSlider.minValue = service.mapper.minX
+            $scope.inputSlider.maxValue = service.mapper.maxX
+            $scope.outputSlider.minValue = service.mapper.minY
+            $scope.outputSlider.maxValue = service.mapper.maxY
 
             firstTime = false
 
+            // BELOW NECESSARY?
             $timeout(function() {
                 $scope.$broadcast('rzSliderForceRender')
             })
         }
 
+        // init ui components
+        if (service.speed) {
+            $scope.speedSlider.value = service.speed
+        } else {
+            $scope.speedSlider.value = 501
+            // ui max limit
+        }
+
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
-        $scope.limits.minValue = service.mapper.minIn
-        $scope.limits.maxValue = service.mapper.maxIn
         // $scope.pinList = service.pinList
     }
 
@@ -204,27 +247,19 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.$apply()
             break
         case 'onEncoderData':
-                $scope.service.currentOutputPos = data.angle
-                $scope.$apply()
+            $scope.service.currentOutputPos = data.angle
+            $scope.$apply()
             break
 
         case 'onServoData':
-        /*  FIXME - use this to display servo 'intention' move stop etc
+            console.info("servoData")
+            console.info(data)
+            /*  FIXME - use this to display servo 'intention' move stop etc
             if ($scope.statusControlMode == 'status') {
                 $scope.service.currentOutputPos = data.pos
                 $scope.$apply()
             }
-        */            
-            break
-        case 'onStatus':
-            $scope.status = data
-            $scope.$apply()
-            break
-        case 'addListener':
-            // wtf?
-            console.info("Add listener called")
-            $scope.status = data
-            $scope.$apply()
+        */
             break
         case 'onMoveTo':
             // FIXME - whole servo is sent ? - maybe not a bad thing, but there should probably be more
@@ -235,13 +270,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             console.info("ERROR - unhandled method " + $scope.name + " Method " + inMsg.method)
             break
         }
-
-    }
-
-    $scope.update = function(speed, rest, min, max) {
-        msg.send("setSpeed", speed)
-        msg.send("setRest", rest)
-        msg.send("setMinMax", min, max)
     }
 
     $scope.setPin = function(inPin) {

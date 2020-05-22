@@ -14,7 +14,7 @@ public class ServoData {
   final public Double pos;
 
   static public enum ServoStatus {
-    SERVO_START, SERVO_POSITION_UPDATE, SERVO_STOPPED;
+    SERVO_START, SERVO_STOPPED;
   }
 
   public ServoData(final ServoStatus state, final String name, final Double pos) {

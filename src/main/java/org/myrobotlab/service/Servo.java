@@ -147,9 +147,9 @@ public class Servo extends AbstractServo implements ServoControl {
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
-    // GroG: I think in the long run this direct call vs using invoke/send is
+    // grog: I think in the long run this direct call vs using invoke/send is
     // less preferrable
     // thinking on a distributed network level you can't do this when the other
     // thing is in
