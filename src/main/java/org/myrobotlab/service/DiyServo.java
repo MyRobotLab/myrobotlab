@@ -360,10 +360,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return lastActivityTimeTs;
   }
 
-  public double getcurrentOutputPos() {
-    return MathUtils.round(targetPos, roundPos);
-  }
-
   // FIXME - change to enabled()
   public Boolean isAttached() {
     return isAttached;
@@ -593,6 +589,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
+    // TODO: kw:  is this computing the "mapped" velocity? or the calibrated "output" speed of the servo?
     currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentOutputPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
@@ -608,6 +605,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       targetPos = mapper.calcInput(currentOutputPos);
       broadcastState();
     }
+    // TODO: kw: this seems wrong. the input position should be the invsere mapped input position.
     currentOutputPos = currentPosInput;
 
   }
@@ -768,10 +766,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public void stopService() {
     super.stopService();
     disable();
-  }
-
-  public Double getLastPos() {
-    return currentOutputPos;
   }
 
   public static void main(String[] args) throws InterruptedException {
