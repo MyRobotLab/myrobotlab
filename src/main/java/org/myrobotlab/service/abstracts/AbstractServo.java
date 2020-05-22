@@ -151,12 +151,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   protected String pin;
 
   /**
-   * if the servo uses a internal timer encoder - this will allow encoder data
-   * to be published
-   */
-  protected boolean publishEncoderData;
-
-  /**
    * default rest is 90 default target position will be 90 if not specified
    */
   protected double rest = 90.0;
@@ -191,6 +185,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * the requested INPUT position of the servo
    */
   protected double targetPos;
+  
+  protected double actualAngleDeltaError = 0.1;
 
   /**
    * if true - a single moveTo command will be published for servo controllers
@@ -592,25 +588,23 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // FIXME - configurable accuracy difference ? ie - when your in the range of
     // 0.02 - then they are considered equal ?
     double currentInputPos = mapper.calcInput(currentOutputPos);
-    // TODO: kw: make this threshold configurable. 0.1 is the desired angle vs the actual angle.
-    boolean equal = Math.abs(targetPos - currentInputPos) < 0.1;
-    // if (targetPos.equals(currentPos)) {
+    
+    // assuming this came from TimeEncoder - we re-calculate input and then publish it
+    data.value = currentInputPos;    
+    invoke("publishEncoderData", data);
+    
+    boolean equal = Math.abs(targetPos - currentInputPos) < actualAngleDeltaError;
+
     if (equal) {
       synchronized (this) {
         this.notifyAll();
       }
       isMoving = false;
-      if (publishEncoderData) {
-        invoke("publishEncoderData", data);
-      }
+      
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
-      // FIXME - these should be Deprecated - and publishEncoderData used if
-      // necessary
       invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentInputPos);
       invoke("publishServoStopped", this);
-      // new feature - saving the last position
-      // save(); <-- BAD !!
-      // servo has stopped its move ... (or best guess estimate it has)
+
       // if currently configured to autoDisable - the timer starts now
       if (autoDisable) {
         // we cancel any pre-existing timer if it exists
@@ -618,13 +612,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
         // and start our countdown
         addTaskOneShot(idleTimeout, "idleDisable");
       }
-      // log.info("encoder data says -> stopped");
+      
     } else {
       isMoving = true;
-      invoke("publishMoveTo", this);
-      // FIXME - is this necessary ?
-      invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos);
-      // log.info("encoder data says -> moving {} {}", currentPos, targetPos);
+      // invoke("publishMoveTo", this); grog: WRONG ! on every encoder update .. no !
+      // invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos); grog: WRONG !
     }
   }
 
