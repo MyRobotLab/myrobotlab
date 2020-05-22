@@ -26,8 +26,10 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoController;
 
 /**
  * @author GroG
@@ -59,6 +61,125 @@ public class Servo extends AbstractServo implements ServoControl {
   public Servo(String n, String id) {
     super(n, id);
   }
+  
+  /**
+   * max complexity moveTo
+   * 
+   * FIXME - move is more general and could be the "max" complexity method with
+   * positional information supplied
+   * 
+   * @param newPos
+   * @param blocking
+   * @param timeoutMs
+   */
+  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
+    // FIXME - implement encoder blocking ...
+    // FIXME - when and what should a servo publish and when ?
+    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
+    // the servo, targetPos is
+    // the desired position of the servo - currentPos should NEVER be set in
+    // this function
+    // even with no hardware encoder a servo can have a TimeEncoder from which
+    // position would be guessed - but
+    
+    if (idleDisabled && !enabled) {
+      // if the servo was disable with a timer - re-enable it
+      enable();
+    }
+    // purge any timers currently in process
+    purgeTask("idleDisable");
+    if (!enabled) {
+      log.info("cannot moveTo {} not enabled", getName());
+      return false;
+    }
+    targetPos = newPos;
+    log.info("pos {} output {}", targetPos, getTargetOutput());
+    
+    /**
+     * <pre>
+     * 
+     * BLOCKING 
+     *   
+     *   if isBlocking already, and incoming request is not blocking - we cancel it 
+     *   if isBlocking already, and incoming request is a blocking one - we block it
+     *   if not currently blocking, and incoming request is blocking - we start blocking 
+     *               with default encoder until it - unblocks or max-timeout is reached
+     * 
+     * </pre>
+     *
+     */
+    if (isBlocking && !blocking) {
+      // if isBlocking already, and incoming request is not blocking - we cancel
+      log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
+      return false;
+    }
+    if (isBlocking && blocking) {
+      // if isBlocking already, and incoming request is a blocking one - we
+      // block it
+      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
+      synchronized (this) {
+        try {
+          this.wait();
+        } catch (InterruptedException e) {
+          /* don't care */}
+      }
+      return false;
+    }
+    if (!isBlocking && blocking) {
+      // if not currently blocking, and incoming request is blocking - we start
+      // blocking with default encoder until it - unblocks or max-timeout is
+      // reached - if timeout not specified - we block until an encoder unblocks
+      // us
+      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
+      isBlocking = true;
+    }
+    
+    
+    lastActivityTimeTs = System.currentTimeMillis();
+    isMoving = true;
+    // "real" encoders are electrically hooked up to the servo and get their
+    // events through
+    // data lines - faux encoders need to be told in software when servos begin
+    // movement
+    // usually knowing about encoder type is "bad" but the timer encoder is the
+    // default native encoder
+    Long blockingTimeMs = null;
+    if (encoder != null && encoder instanceof TimeEncoder) {
+      TimeEncoder timeEncoder = (TimeEncoder) encoder;
+      // calculate trajectory calculates and processes this move
+      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
+    }
+    // GroG: I think in the long run this direct call vs using invoke/send is
+    // less preferrable
+    // thinking on a distributed network level you can't do this when the other
+    // thing is in
+    // a different process
+    // This still need adjustment - if we do not mandate jme must be a servo
+    // controller
+    // then this control needs to be able to broadcast "control" angles !!! -
+    // and that
+    // might be without a controller !
+    if (controller == null) {
+      log.info("controller is null");
+      // FIXME - need to still go through the default 'move'
+    } else {
+      ServoController sc = (ServoController)Runtime.getService(controller);
+      if (sc != null) {
+        sc.onServoMoveTo(this);
+      }
+    }
+    // invoke("publishServoMoveTo", this);
+    broadcastState();
+    if (isBlocking) {
+      // our thread did a blocking call - we will wait until encoder notifies us
+      // to continue or timeout (if supplied) has been reached
+      sleep(blockingTimeMs);
+      isBlocking = false;
+    }
+    return true;
+  }
+
+
   
   /**
    * This static method returns all the details of the class without it having
