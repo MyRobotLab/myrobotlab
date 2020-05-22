@@ -152,6 +152,10 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
+    $scope.toggleLock = function(){
+        $scope.lockInputOutput = !$scope.lockInputOutput
+    }
+
     $scope.setMinMax = function(min, max) {
         console.log('setMinMax ', min, max)
         msg.send('setMinMax', min, max)
