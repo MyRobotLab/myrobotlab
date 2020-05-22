@@ -234,6 +234,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       Double savedPos = encoder.getPos();
       if (savedPos != null) {
         log.info("found previous values for {} setting initial position to {}", getName(), savedPos);
+        // TODO: kw: output position shouldn't be set to the targetPos..
         currentOutputPos = targetPos = savedPos;
       }
     }    
@@ -591,7 +592,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     // FIXME - configurable accuracy difference ? ie - when your in the range of
     // 0.02 - then they are considered equal ?
     double currentInputPos = mapper.calcInput(currentOutputPos);
-    boolean equal = Math.abs(targetPos - currentInputPos) < 0.1; // kwatters correct ??
+    // TODO: kw: make this threshold configurable. 0.1 is the desired angle vs the actual angle.
+    boolean equal = Math.abs(targetPos - currentInputPos) < 0.1;
     // if (targetPos.equals(currentPos)) {
     if (equal) {
       synchronized (this) {
