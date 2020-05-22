@@ -250,8 +250,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(),
-        omoplate.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(), shoulder.getCurrentInputPos(),
+        omoplate.getCurrentInputPos());
   }
 
   public ServoControl getShoulder() {
@@ -380,10 +380,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
      * connect(baseAddress, address) with overloaded connect("0x48- if
      * (!arduino.isConnected()) { error("arduino not connected"); }
      */
-    bicep.moveTo(bicep.getPos() + 2);
-    rotate.moveTo(rotate.getPos() + 2);
-    shoulder.moveTo(shoulder.getPos() + 2);
-    omoplate.moveTo(omoplate.getPos() + 2);
+    bicep.moveTo(bicep.getCurrentInputPos() + 2);
+    rotate.moveTo(rotate.getCurrentInputPos() + 2);
+    shoulder.moveTo(shoulder.getCurrentInputPos() + 2);
+    omoplate.moveTo(omoplate.getCurrentInputPos() + 2);
     sleep(300);
   }
 

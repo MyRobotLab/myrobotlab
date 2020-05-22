@@ -329,7 +329,7 @@ public class Tracking extends Service {
             log.info("Scan enabled...");
             TrackingServoData x = servoControls.get("x");
             TrackingServoData y = servoControls.get("y");
-            double xpos = x.servoControl.getPos();
+            double xpos = x.servoControl.getCurrentInputPos();
             // TODO: kw review that this should actually be the input maxX not the getMax maxY.
             if (xpos + x.scanStep >= x.servoControl.getMax() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMin() && x.scanStep < 0) {
               x.scanStep *= -1;
@@ -438,7 +438,7 @@ public class Tracking extends Service {
         // of values between services.
         tsd.currentServoPos += pid.getOutput(tsd.name);
         tsd.servoControl.moveTo(tsd.currentServoPos);
-        tsd.currentServoPos = tsd.servoControl.getPos();
+        tsd.currentServoPos = tsd.servoControl.getCurrentInputPos();
       } else {
         log.warn("{} data under-run", tsd.servoControl.getName());
       }
@@ -545,8 +545,8 @@ public class Tracking extends Service {
     tsd.servoControl = servo;
     tsd.axis = axis;
     servoControls.put(axis, tsd);
-    tsd.currentServoPos = servo.getPos();
-    log.info("Tracking attach : Axis : {} Servo {} current position {}", axis, servo.getName(), servo.getPos());
+    tsd.currentServoPos = servo.getCurrentInputPos();
+    log.info("Tracking attach : Axis : {} Servo {} current position {}", axis, servo.getName(), servo.getCurrentInputPos());
   }
 
   public void attach(ServoControl x, ServoControl y) {

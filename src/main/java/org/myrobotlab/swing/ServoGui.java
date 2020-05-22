@@ -529,7 +529,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         removeListeners();
 
-        currentPos.setText(String.format("%.1f", servo.getPos()));
+        currentPos.setText(String.format("%.1f", servo.getCurrentInputPos()));
 
         // FIXME - Servo supports multiple controllers - the UI needs a
         // multi-select perhaps

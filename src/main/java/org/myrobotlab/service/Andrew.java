@@ -413,10 +413,10 @@ public class Andrew extends Service {
   public void setHeadPosition(double neckTiltAngle, double neckPanAngle) {
 
     if (neckTiltAngle == -1) {
-      neckTiltAngle = neckTiltServo.getPos();
+      neckTiltAngle = neckTiltServo.getCurrentInputPos();
     }
     if (neckPanAngle == -1) {
-      neckPanAngle = neckPanServo.getPos();
+      neckPanAngle = neckPanServo.getCurrentInputPos();
     }
 
     neckTiltServo.moveTo(neckTiltAngle);
@@ -442,19 +442,19 @@ public class Andrew extends Service {
 
     // TODO protect against self collision
     if (shoulderAngle == -1) {
-      shoulderAngle = rightShoulderServo.getPos();
+      shoulderAngle = rightShoulderServo.getCurrentInputPos();
     }
     if (armAngle == -1) {
-      armAngle = rightArmServo.getPos();
+      armAngle = rightArmServo.getCurrentInputPos();
     }
     if (bicepsAngle == -1) {
-      armAngle = rightBicepsServo.getPos();
+      armAngle = rightBicepsServo.getCurrentInputPos();
     }
     if (ElbowAngle == -1) {
-      ElbowAngle = rightElbowServo.getPos();
+      ElbowAngle = rightElbowServo.getCurrentInputPos();
     }
     if (wristAngle == -1) {
-      wristAngle = rightWristServo.getPos();
+      wristAngle = rightWristServo.getCurrentInputPos();
     }
 
     rightShoulderServo.moveTo(shoulderAngle);
@@ -481,19 +481,19 @@ public class Andrew extends Service {
   public void setLeftArmPosition(double shoulderAngle, double armAngle, double bicepsAngle, double ElbowAngle, double wristAngle) {
     // TODO protect against self collision with -> servoName.getPos()
     if (shoulderAngle == -1) {
-      shoulderAngle = leftShoulderServo.getPos();
+      shoulderAngle = leftShoulderServo.getCurrentInputPos();
     }
     if (armAngle == -1) {
-      armAngle = leftArmServo.getPos();
+      armAngle = leftArmServo.getCurrentInputPos();
     }
     if (bicepsAngle == -1) {
-      armAngle = leftBicepsServo.getPos();
+      armAngle = leftBicepsServo.getCurrentInputPos();
     }
     if (ElbowAngle == -1) {
-      ElbowAngle = leftElbowServo.getPos();
+      ElbowAngle = leftElbowServo.getCurrentInputPos();
     }
     if (wristAngle == -1) {
-      wristAngle = leftWristServo.getPos();
+      wristAngle = leftWristServo.getCurrentInputPos();
     }
 
     leftShoulderServo.moveTo(shoulderAngle);
@@ -509,19 +509,19 @@ public class Andrew extends Service {
    */
   public void setLeftHandPosition(double thumbAngle, double indexAngle, double middleAngle, double ringAngle, double pinkyAngle) {
     if (thumbAngle == -1) {
-      thumbAngle = leftThumbServo.getPos();
+      thumbAngle = leftThumbServo.getCurrentInputPos();
     }
     if (indexAngle == -1) {
-      indexAngle = leftIndexServo.getPos();
+      indexAngle = leftIndexServo.getCurrentInputPos();
     }
     if (middleAngle == -1) {
-      middleAngle = leftMiddleServo.getPos();
+      middleAngle = leftMiddleServo.getCurrentInputPos();
     }
     if (ringAngle == -1) {
-      ringAngle = leftRingServo.getPos();
+      ringAngle = leftRingServo.getCurrentInputPos();
     }
     if (pinkyAngle == -1) {
-      pinkyAngle = leftPinkyServo.getPos();
+      pinkyAngle = leftPinkyServo.getCurrentInputPos();
     }
 
     leftThumbServo.moveTo(thumbAngle);
@@ -537,19 +537,19 @@ public class Andrew extends Service {
    */
   public void setRightHandPosition(double thumbAngle, double indexAngle, double middleAngle, double ringAngle, double pinkyAngle) {
     if (thumbAngle == -1) {
-      thumbAngle = rightThumbServo.getPos();
+      thumbAngle = rightThumbServo.getCurrentInputPos();
     }
     if (indexAngle == -1) {
-      indexAngle = rightIndexServo.getPos();
+      indexAngle = rightIndexServo.getCurrentInputPos();
     }
     if (middleAngle == -1) {
-      middleAngle = rightMiddleServo.getPos();
+      middleAngle = rightMiddleServo.getCurrentInputPos();
     }
     if (ringAngle == -1) {
-      ringAngle = rightRingServo.getPos();
+      ringAngle = rightRingServo.getCurrentInputPos();
     }
     if (pinkyAngle == -1) {
-      pinkyAngle = rightPinkyServo.getPos();
+      pinkyAngle = rightPinkyServo.getCurrentInputPos();
     }
 
     rightThumbServo.moveTo(thumbAngle);
@@ -1111,13 +1111,13 @@ public class Andrew extends Service {
     }
 
     script.append(indentSpace);
-    script.append(String.format("Andrew.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getPos(), rightArmServo.getPos(), rightBicepsServo.getPos(),
-        rightElbowServo.getPos(), rightWristServo.getPos()));
+    script.append(String.format("Andrew.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getCurrentInputPos(), rightArmServo.getCurrentInputPos(), rightBicepsServo.getCurrentInputPos(),
+        rightElbowServo.getCurrentInputPos(), rightWristServo.getCurrentInputPos()));
     script.append(indentSpace);
-    script.append(String.format("Andrew.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getPos(), leftArmServo.getPos(), leftBicepsServo.getPos(), leftElbowServo.getPos(),
-        leftWristServo.getPos()));
+    script.append(String.format("Andrew.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getCurrentInputPos(), leftArmServo.getCurrentInputPos(), leftBicepsServo.getCurrentInputPos(), leftElbowServo.getCurrentInputPos(),
+        leftWristServo.getCurrentInputPos()));
     script.append(indentSpace);
-    script.append(String.format("Andrew.setHeadPosition(%f,%f)\n", neckTiltServo.getPos(), neckPanServo.getPos()));
+    script.append(String.format("Andrew.setHeadPosition(%f,%f)\n", neckTiltServo.getCurrentInputPos(), neckPanServo.getCurrentInputPos()));
 
     send("python", "appendScript", script.toString());
 

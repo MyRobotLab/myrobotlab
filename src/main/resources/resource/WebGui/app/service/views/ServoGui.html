@@ -117,10 +117,10 @@
                             <tr>
                                 <td>Input</td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="setMinMax(service.currentPos, service.mapper.maxX)">Set Min</button>
+                                    <button class="btn btn-input" ng-click="msg.map(service.targetPos, service.mapper.maxX, service.mapper.minY, service.mapper.maxY)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="setMinMax(service.mapper.minX, service.currentPos)">Set Max</button>
+                                    <button class="btn btn-input" ng-click="msg.map(service.mapper.minX, service.targetPos, service.mapper.minY, service.mapper.maxY)">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Output</td>

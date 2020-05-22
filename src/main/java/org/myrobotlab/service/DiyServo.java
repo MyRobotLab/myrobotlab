@@ -360,7 +360,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return lastActivityTimeTs;
   }
 
-  public double getPos() {
+  public double getcurrentOutputPos() {
     return MathUtils.round(targetPos, roundPos);
   }
 
@@ -395,7 +395,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(currentPos);
+    double lastPosInput = mapper.calcInput(currentOutputPos);
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -593,7 +593,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentPos) * (500 / sampleTime))), roundPos);
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentOutputPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
 
@@ -604,11 +604,11 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
-    if (!isEnabled() && MathUtils.round(currentPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(currentPos);
+    if (!isEnabled() && MathUtils.round(currentOutputPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = mapper.calcInput(currentOutputPos);
       broadcastState();
     }
-    currentPos = currentPosInput;
+    currentOutputPos = currentPosInput;
 
   }
 
@@ -771,7 +771,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public Double getLastPos() {
-    return currentPos;
+    return currentOutputPos;
   }
 
   public static void main(String[] args) throws InterruptedException {

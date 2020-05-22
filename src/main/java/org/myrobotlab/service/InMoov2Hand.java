@@ -321,8 +321,8 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
     String side = getName().contains("left") ? "left" : "right";
-    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(),
-        ringFinger.getPos(), pinky.getPos(), wrist.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(), majeure.getCurrentInputPos(),
+        ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
   }
 
   public void hangTen() {
@@ -663,12 +663,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   public void test() {
-    thumb.moveTo(thumb.getPos() + 2);
-    index.moveTo(index.getPos() + 2);
-    majeure.moveTo(majeure.getPos() + 2);
-    ringFinger.moveTo(ringFinger.getPos() + 2);
-    pinky.moveTo(pinky.getPos() + 2);
-    wrist.moveTo(wrist.getPos() + 2);
+    thumb.moveTo(thumb.getCurrentInputPos() + 2);
+    index.moveTo(index.getCurrentInputPos() + 2);
+    majeure.moveTo(majeure.getCurrentInputPos() + 2);
+    ringFinger.moveTo(ringFinger.getCurrentInputPos() + 2);
+    pinky.moveTo(pinky.getCurrentInputPos() + 2);
+    wrist.moveTo(wrist.getCurrentInputPos() + 2);
 
     info("test completed");
   }

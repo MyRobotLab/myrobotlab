@@ -609,7 +609,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           setInverted.setSelected(false);
         }
 
-        Double pos = servo.getPos();
+        Double pos = servo.getCurrentInputPos();
         if (pos != null) {
           boundPos.setText(Double.toString(pos));
           slider.setValue(pos.intValue());

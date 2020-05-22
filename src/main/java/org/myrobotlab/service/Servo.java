@@ -85,13 +85,15 @@ public class Servo extends AbstractServo implements ServoControl {
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
       
-      //Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
-      Runtime.start("webgui", "WebGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
       
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      Servo pan = (Servo) Runtime.start("pan", "Servo");
+      // Servo pan = (Servo) Runtime.start("pan", "Servo");
 
       boolean done = true;
       if (done) {
@@ -102,7 +104,7 @@ public class Servo extends AbstractServo implements ServoControl {
       // mega.setBoardMega();
             
       
-      log.info("servo pos {}", tilt.getPos());
+      log.info("servo pos {}", tilt.getCurrentInputPos());
       
       // double pos = 170;
       // servo03.setPosition(pos);
@@ -177,7 +179,5 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
-
-  
 
 }

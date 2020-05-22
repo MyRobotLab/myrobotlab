@@ -123,10 +123,15 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   String getPin();
 
   /**
-   * @return the current position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
+   * @return the current input position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
    */
-  double getPos();
+  double getCurrentInputPos();
 
+  /**
+   * @return the current output "real" position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
+   */
+  double getCurrentOutputPos();
+  
   /**
    * @return the current rest position value
    */
@@ -325,7 +330,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setPin(String pin);
 
   /**
-   * This method sets the position without "moving" the servo. Typically, this
+   * This method sets the input position without "moving" the servo. Typically, this
    * is useful for setting the initial position of the servo during startup
    * 
    * @param pos
