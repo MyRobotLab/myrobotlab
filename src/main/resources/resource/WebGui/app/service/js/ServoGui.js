@@ -162,7 +162,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
         // ui initialization - good idea !
         if (firstTime) {
-            $scope.pos.value = service.currentPos
+            $scope.pos.value = service.currentOutputPos
             $scope.sliderEnabled = true
 
             // init ui components
@@ -205,7 +205,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             break
         case 'onServoData':
             if ($scope.statusControlMode == 'status') {
-                $scope.service.currentPos = data.pos
+                $scope.service.currentOutputPos = data.pos
                 $scope.$apply()
             }
             break

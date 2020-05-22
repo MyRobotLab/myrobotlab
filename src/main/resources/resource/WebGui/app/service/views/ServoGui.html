@@ -78,8 +78,8 @@
                                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
                                 <div class="limitsZone">
                                     <!-- servo status -->
-                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
+                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentOutputPos.toFixed(2)*100/180)}}%) + 1px));">
+                                        <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
@@ -125,15 +125,15 @@
                                 <td></td>
                                 <td>Output</td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.currentPos, service.mapper.maxY)">Set Min</button>
+                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.currentOutputPos, service.mapper.maxY)">Set Min</button>
                                 </td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.mapper.minY, service.currentPos)">Set Max</button>
+                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.mapper.minY, service.currentOutputPos)">Set Max</button>
                                 </td>
                                 <td></td>
                                 <td>Rest</td>
                                 <td>
-                                    <button class="btn btn-rest" ng-click="msg.setRest(service.currentPos)">Set Rest</button>
+                                    <button class="btn btn-rest" ng-click="msg.setRest(service.targetPos)">Set Rest</button>
                                 </td>
                             </tr>
                             <tr class="valuesRow">
@@ -158,8 +158,8 @@
                                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
                                 <div class="limitsZone">
                                     <!-- servo status -->
-                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
+                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentOutputPos.toFixed(2)*100/180)}}%) + 1px));">
+                                        <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
@@ -230,8 +230,8 @@
                                 <!--<div ng-show="!service.enabled" id="servoMask"></div>-->
                                 <div class="limitsZone">
                                     <!-- servo status -->
-                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentPos.toFixed(2)*100/180)}}%) + 1px));">
-                                        <span class="preventDragSelect">{{service.currentPos.toFixed(2)}}º</span>
+                                    <div class="servoPosition" class="preventDragSelect" style="left: calc(100% - (({{100 -(service.currentOutputPos.toFixed(2)*100/180)}}%) + 1px));">
+                                        <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
