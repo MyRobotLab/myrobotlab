@@ -857,4 +857,10 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     setVelocity(d);
   }
 
+  @Override /* grog: TODO ? */
+  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
 }

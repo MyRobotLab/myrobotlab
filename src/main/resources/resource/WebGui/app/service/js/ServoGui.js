@@ -204,10 +204,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.$apply()
             break
         case 'onEncoderData':
-            // if ($scope.statusControlMode == 'status') {
                 $scope.service.currentOutputPos = data.angle
                 $scope.$apply()
-            // }
             break
 
         case 'onServoData':

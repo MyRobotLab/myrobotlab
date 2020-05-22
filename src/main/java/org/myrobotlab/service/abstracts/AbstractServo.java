@@ -66,7 +66,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * The current servo controller that this servo is attached to.
    * TODO: move this to Servo.java , DiyServo doesn't care about this detail.
    */
-  private String controller;
+  protected String controller;
 
   /**
    * the "current" OUTPUT position of the servo - this never gets updated from
@@ -105,7 +105,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * the servo SHOULD NOT be enabled next move - this is an internal field
    */
   // TODO: KW: simplify this logic to avoid the need of this additional boolean here.
-  private boolean idleDisabled = false;
+  // grog: I doubt it can be simplified - the javadoc was clear in the requirements - non-trivial
+  protected boolean idleDisabled = false;
 
   /**
    * if autoDisable is true - then after any move a timer is set to disable the
@@ -125,7 +126,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * status only field - updated by encoder
    */
-  boolean isMoving = false;
+  protected boolean isMoving = false;
 
   /**
    * controls if the servo is sweeping
@@ -582,11 +583,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public void onEncoderData(EncoderData data) {
     // log.info("onEncoderData - {}", data.value); - helpful to debug
     currentOutputPos = data.angle;
-    // TODO test on type of encoder to handle differently if necessary
-    // TODO - where does resolution or accuracy managed ? (in the encoder or in
-    // the motor ?)
-    // FIXME - configurable accuracy difference ? ie - when your in the range of
-    // 0.02 - then they are considered equal ?
     double currentInputPos = mapper.calcInput(currentOutputPos);
     
     // assuming this came from TimeEncoder - we re-calculate input and then publish it
@@ -623,123 +619,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public void onRegistered(Registration s) {
     refreshControllers();
     broadcastState();
-  }
-
-  /**
-   * max complexity moveTo
-   * 
-   * FIXME - move is more general and could be the "max" complexity method with
-   * positional information supplied
-   * 
-   * @param newPos
-   * @param blocking
-   * @param timeoutMs
-   */
-  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
-    // FIXME - implement encoder blocking ...
-    // FIXME - when and what should a servo publish and when ?
-    // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
-    // the servo, targetPos is
-    // the desired position of the servo - currentPos should NEVER be set in
-    // this function
-    // even with no hardware encoder a servo can have a TimeEncoder from which
-    // position would be guessed - but
-    
-    if (idleDisabled && !enabled) {
-      // if the servo was disable with a timer - re-enable it
-      enable();
-    }
-    // purge any timers currently in process
-    purgeTask("idleDisable");
-    if (!enabled) {
-      log.info("cannot moveTo {} not enabled", getName());
-      return false;
-    }
-    targetPos = newPos;
-    log.info("pos {} output {}", targetPos, getTargetOutput());
-    
-    /**
-     * <pre>
-     * 
-     * BLOCKING 
-     *   
-     *   if isBlocking already, and incoming request is not blocking - we cancel it 
-     *   if isBlocking already, and incoming request is a blocking one - we block it
-     *   if not currently blocking, and incoming request is blocking - we start blocking 
-     *               with default encoder until it - unblocks or max-timeout is reached
-     * 
-     * </pre>
-     *
-     */
-    if (isBlocking && !blocking) {
-      // if isBlocking already, and incoming request is not blocking - we cancel
-      log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
-      return false;
-    }
-    if (isBlocking && blocking) {
-      // if isBlocking already, and incoming request is a blocking one - we
-      // block it
-      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
-      synchronized (this) {
-        try {
-          this.wait();
-        } catch (InterruptedException e) {
-          /* don't care */}
-      }
-      return false;
-    }
-    if (!isBlocking && blocking) {
-      // if not currently blocking, and incoming request is blocking - we start
-      // blocking with default encoder until it - unblocks or max-timeout is
-      // reached - if timeout not specified - we block until an encoder unblocks
-      // us
-      log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
-      isBlocking = true;
-    }
-    
-    
-    lastActivityTimeTs = System.currentTimeMillis();
-    isMoving = true;
-    // "real" encoders are electrically hooked up to the servo and get their
-    // events through
-    // data lines - faux encoders need to be told in software when servos begin
-    // movement
-    // usually knowing about encoder type is "bad" but the timer encoder is the
-    // default native encoder
-    Long blockingTimeMs = null;
-    if (encoder != null && encoder instanceof TimeEncoder) {
-      TimeEncoder timeEncoder = (TimeEncoder) encoder;
-      // calculate trajectory calculates and processes this move
-      blockingTimeMs = timeEncoder.calculateTrajectory(getCurrentInputPos(), /*getTargetPos()*/ getTargetOutput(), getSpeed());
-    }
-    // GroG: I think in the long run this direct call vs using invoke/send is
-    // less preferrable
-    // thinking on a distributed network level you can't do this when the other
-    // thing is in
-    // a different process
-    // This still need adjustment - if we do not mandate jme must be a servo
-    // controller
-    // then this control needs to be able to broadcast "control" angles !!! -
-    // and that
-    // might be without a controller !
-    if (controller == null) {
-      log.info("controller is null");
-      // FIXME - need to still go through the default 'move'
-    } else {
-      ServoController sc = (ServoController)Runtime.getService(controller);
-      if (sc != null) {
-        sc.onServoMoveTo(this);
-      }
-    }
-    // invoke("publishServoMoveTo", this);
-    broadcastState();
-    if (isBlocking) {
-      // our thread did a blocking call - we will wait until encoder notifies us
-      // to continue or timeout (if supplied) has been reached
-      sleep(blockingTimeMs);
-      isBlocking = false;
-    }
-    return true;
   }
 
   /**
@@ -783,6 +662,16 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
     return sd;
   }
+  
+  /**
+   * Derived dervo type will need to implement the details of processing a move
+   * 
+   * @param newPos
+   * @param blocking
+   * @param timeoutMs
+   * @return
+   */
+  abstract protected boolean processMove(double newPos, boolean blocking, Long timeoutMs);
 
   @Override
   public ServoControl publishServoDisable(ServoControl sc) {
