@@ -203,11 +203,20 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.possibleControllers = data
             $scope.$apply()
             break
+        case 'onEncoderData':
+            // if ($scope.statusControlMode == 'status') {
+                $scope.service.currentOutputPos = data.angle
+                $scope.$apply()
+            // }
+            break
+
         case 'onServoData':
+        /*  FIXME - use this to display servo 'intention' move stop etc
             if ($scope.statusControlMode == 'status') {
                 $scope.service.currentOutputPos = data.pos
                 $scope.$apply()
             }
+        */            
             break
         case 'onStatus':
             $scope.status = data
@@ -271,6 +280,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoData")
+    msg.subscribe("publishEncoderData")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')
