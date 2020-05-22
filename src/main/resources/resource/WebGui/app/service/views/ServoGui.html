@@ -47,13 +47,14 @@
                     </div>
                     <!-- /.row -->
                 </uib-tab>
-                <uib-tab heading="Basic" index="1">
+                <uib-tab select="refreshSlider()" heading="Basic" index="1">
                     <!-- ------------------ Basic ------------------ -->
                     <table class="table tableBasic preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
                                 <td>
                                     Sweep                                    
+                                    
                                     <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                     <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
                                 </td>
@@ -82,7 +83,7 @@
                                         <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
-                                    <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
+                                    <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
                                         Rest
                                     <div class="restCursor"></div>
                                     </div>
@@ -92,6 +93,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED     
+                                            
                                             
                                             </div>
                                         </div>
@@ -110,41 +112,38 @@
                     <!-- /.row -->
                     <!-- <div class="verticalSpacer"></div> -->
                 </uib-tab>
-                <uib-tab heading="Limits" index="2">
+                <uib-tab select="refreshSlider()" heading="Limits" index="2">
                     <!-- ------------------ Limits ------------------ -->
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
                                 <td>Input</td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="msg.map(service.targetPos, service.mapper.maxX, service.mapper.minY, service.mapper.maxY)">Set Min</button>
+                                    <label class="label btn-rest">
+                                        Rest <br>{{service.rest}} 
+                                    </label>
                                 </td>
                                 <td>
-                                    <button class="btn btn-input" ng-click="msg.map(service.mapper.minX, service.targetPos, service.mapper.minY, service.mapper.maxY)">Set Max</button>
+                                    <label class="label btn-input">
+                                        Min<br>{{service.mapper.minX}} 
+                                    </label>
                                 </td>
-                                <td></td>
+                                <td>
+                                    <label class="label btn-input">
+                                        Max<br>{{service.mapper.maxX}} 
+                                    </label>
+                                </td>
                                 <td>Output</td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.currentOutputPos, service.mapper.maxY)">Set Min</button>
+                                    <label class="label btn-output">
+                                        Min<br>{{service.mapper.minY}} 
+                                    </label>
                                 </td>
                                 <td>
-                                    <button class="btn btn-output" ng-click="msg.map(service.mapper.minX, service.mapper.maxX, service.mapper.minY, service.currentOutputPos)">Set Max</button>
+                                    <label class="label btn-output">
+                                        Min<br>{{service.mapper.maxY}} 
+                                    </label>
                                 </td>
-                                <td></td>
-                                <td>Rest</td>
-                                <td>
-                                    <button class="btn btn-rest" ng-click="msg.setRest(service.targetPos)">Set Rest</button>
-                                </td>
-                            </tr>
-                            <tr class="valuesRow">
-                                <td></td>
-                                <td class="inputColor preventDragSelect">{{service.mapper.minX}}</td>
-                                <td class="inputColor preventDragSelect">{{service.mapper.maxX}}</td>
-                                <td></td><td></td>
-                                <td class="outputColor preventDragSelect">{{service.mapper.minY}}</td>
-                                <td class="outputColor preventDragSelect">{{service.mapper.maxY}}</td>
-                                <td></td><td></td>
-                                <td class="restColor preventDragSelect">{{rest}}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -162,7 +161,7 @@
                                         <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
-                                    <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
+                                    <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
                                         Rest
                                     <div class="restCursor"></div>
                                     </div>
@@ -172,6 +171,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED                                            
+                                            
                                             </div>
                                         </div>
                                     </div>
@@ -181,6 +181,18 @@
                                     <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(33*100/180)}}%)); width: calc(100% - ({{100 -((172-33)*100/180)}}%));"></div>
                                 </div>
                                 <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+                                <br>
+                                Rest
+                                <rzslider class="custom-slider sliderPosition" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
+                                <br>
+                                Input                                     
+                                 - {{lockInputOutput?'Locked':'UnLocked'}}
+                                 <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="setLock(lockInputOutput)" on="Locked" off="UnLocked"></toggle>
+                                <rzslider class="custom-slider inputColor" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
+                                <br>
+                                Output
+                                <rzslider class="custom-slider inputColor" rz-slider-model="outputSlider.minValue" rz-slider-high="outputSlider.maxValue" rz-slider-options="outputSlider.options"/>
+                                <br>
                             </div>
                             <!-- /sliderContainer -->
                         </div>
@@ -188,7 +200,7 @@
                     </div>
                     <!-- /.row -->
                 </uib-tab>
-                <uib-tab heading="Advanced" index="3">
+                <uib-tab select="refreshSlider()" heading="Advanced" index="3">
                     <!-- ------------------ Advanced ------------------ -->
                     <table class="table tableAdvanced preventDragSelect">
                         <tbody>
@@ -200,10 +212,13 @@
                                 </td>
                                 <td>
                                     Blocking                                    
+                                    
                                     <!-- ---- FIXME ---- -->
                                     <toggle ng-model="toggleBlocking" class="miniBTN" title="Servo will block until the current moveTo is finished" ng-change="!service.isBlocking?msg.isBlocking(false):msg.isBlocking(true)" on="" off="" size="btn-lg"/>
                                 </td>
-                                <td>Invert
+                                <td>
+                                    Invert
+                                    
                                     <!-- ---- FIXME ---- -->
                                     <toggle ng-model="service.mapper.inverted" class="miniBTN" title="This will invert servo direction" ng-change="msg.setInverted(service.mapper.inverted)" on="" off="" size="btn-lg"/>
                                 </td>
@@ -234,7 +249,7 @@
                                         <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
-                                    <div class="restLabel" style="left: calc(100% - (({{100 -(rest*100/180)}}%) + 1px));">
+                                    <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
                                         Rest
                                     <div class="restCursor"></div>
                                     </div>
@@ -244,6 +259,7 @@
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
                                                 ENERGIZED                                            
+                                            
                                             
                                             </div>
                                         </div>
