@@ -33,7 +33,7 @@
             </tr>
             <tr>
                 <td>
-                    <div ng-show="!addBot" class="shortDescription">English mathematician, computer scientist, logician, cryptanalyst, philosopher, and theoretical, cryptanalyst, philosopher</div>
+                    <div ng-show="!addBot" class="shortDescription">{{getProperty('shortDescription')}}</div>
                    <div ng-show="addBot">
                         <input class="form-control typeFolderField" type="text" ng-model="newBotPath" placeholder="c:\path\to\bot\folder" press-enter="speak()"/><br>
                         <button class="btn btn-default" ng-click="addBot=false">cancel</button>
@@ -72,7 +72,7 @@
                     <td>
                         <div>
                             <h3>{{service.currentUserName}}</h3><br>
-                            {{getProperty('description')}}<br><br>                          
+                            {{getPredicates('description')}}<br><br>                          
                         </div>
                     </td>
                 </tr>
