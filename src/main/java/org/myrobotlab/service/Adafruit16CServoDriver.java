@@ -141,7 +141,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
     // TODO Auto-generated method stub
-    servo.publishServoData(ServoStatus.SERVO_POSITION_UPDATE, currentOutput);
+    servo.publishServoData(ServoStatus.SERVO_START, currentOutput);
     return currentOutput;
   }
 

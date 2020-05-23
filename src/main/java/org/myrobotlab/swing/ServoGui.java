@@ -513,7 +513,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       @Override
       public void run() {
         currentPos.setText(String.format("%.1f", data.pos));
-        if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
+        // grog: FIXME - ServoStatus no longer is encoder data - it only has stop & start
+        if (ServoStatus.SERVO_START.equals(data.state)) {
           moving.setVisible(true);
         } else {
           moving.setVisible(false);

@@ -696,7 +696,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   public ServoData publishServoData(Integer eventType, double currentPos) {
-    ServoData sd = new ServoData(ServoStatus.SERVO_POSITION_UPDATE, getName(), currentPos);
+    ServoData sd = new ServoData(ServoStatus.SERVO_START, getName(), currentPos);
     return sd;
   }
 
