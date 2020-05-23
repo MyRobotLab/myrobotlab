@@ -32,7 +32,7 @@ angular.module('mrlapp.service.MotorGui', []).controller('MotorGuiCtrl', ['$scop
                 $scope.newPin1 = service.config.rightPin;
             }
         }
-        $scope.position = service.currentPos;
+        $scope.position = service.currentOutputPos;
         $scope.isAttached = !(angular.isUndefined(service.controllerName) || service.controllerName === null );
         // combo boxes need a "passthrough" model 
         // and should not be assigned the service variable to the model

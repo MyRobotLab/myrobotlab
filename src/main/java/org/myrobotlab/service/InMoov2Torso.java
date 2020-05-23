@@ -101,7 +101,7 @@ public class InMoov2Torso extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(), lowStom.getCurrentInputPos());
   }
 
   public void moveTo(double topStom, double midStom, double lowStom) {
@@ -174,9 +174,9 @@ public class InMoov2Torso extends Service {
 
   public void test() {
 
-    topStom.moveTo(topStom.getPos() + 2);
-    midStom.moveTo(midStom.getPos() + 2);
-    lowStom.moveTo(lowStom.getPos() + 2);
+    topStom.moveTo(topStom.getCurrentInputPos() + 2);
+    midStom.moveTo(midStom.getCurrentInputPos() + 2);
+    lowStom.moveTo(lowStom.getCurrentInputPos() + 2);
 
     moveTo(35.0, 45.0, 55.0);
   }

@@ -8,7 +8,7 @@ public interface Mapper {
    * @param out
    * @return
    */
-  Double calcInput(Double out);
+  double calcInput(double out);
 
   /**
    * main method of the Mapper - ratio of ranges are applied in addition to any
@@ -17,55 +17,45 @@ public interface Mapper {
    * @param in
    * @return
    */
-  Double calcOutput(Double in);
+  double calcOutput(double in);
 
   /**
-   * the the max input limit
+   * This is the input minimum value for the mapper.
    * 
    * @return
    */
-  Double getMax();
-
+  public double getMinX();
+  
   /**
-   * get part of the ratio range If you want limits use getMin and getMax
+   * This is the maximum input value for the mapper.
    * 
    * @return
    */
-  public Double getMaxX();
+  public double getMaxX();
 
   /**
-   * get part of the ratio range If you want limits use getMin and getMax
+   * This is the minimum output value that the mapper will return
+   * assuming the input falls between minX and maxX.
    * 
    * @return
    */
-  public Double getMaxY();
+  public double getMinY();
 
   /**
-   * get the min input limit
+   * This is the maximum output value that the mapper will return
+   * assuming the input falls between minX and maxX
    * 
    * @return
    */
-  Double getMin();
+  
+  public double getMaxY();
 
   /**
-   * get part of the ratio range If you want limits use getMin and getMax
+   * Returns true if the minY is greater than the maxY
    * 
    * @return
    */
-  public Double getMinX();
-
-  /**
-   * get part of the ratio range If you want limits use getMin and getMax
-   * 
-   * @return
-   */
-  public Double getMinY();
-
-  /**
-   * returns if the mapper is currently inverted
-   * 
-   * @return
-   */
+  
   boolean isInverted();
 
   /**
@@ -76,7 +66,7 @@ public interface Mapper {
    * setting input or output limits
    * 
    */
-  void map(Double minX, Double maxX, Double minY, Double maxY);
+  void map(double minX, double maxX, double minY, double maxY);
 
   /**
    * Integer form of map
@@ -86,27 +76,7 @@ public interface Mapper {
    * @param minY
    * @param maxY
    */
-  void map(Integer minX, Integer maxX, Integer minY, Integer maxY);
-
-  /**
-   * Merges non null values of "other" mapper with this mapper's null fields.
-   * useful for setting values in MotorControl from "default" values in
-   * MotorControllers. Since the MotorControl doesn't know what would be an
-   * appropriate mapping value e.g -1,1 =&lt; ?,? the minY and maxY are left
-   * null until a "merge" is done in the attach of the AbstractMotorController.
-   * 
-   * When a Sabertooth motor controller is "attached" to a MotorControl the
-   * merge produces -1,1 =&lt; -127, 127 which is appropriate.
-   * 
-   * @param other
-   *          - other mapper
-   */
-  void merge(Mapper other);
-
-  /**
-   * nullifying limits
-   */
-  void resetLimits();
+  void map(int minX, int maxX, int minY, int maxY);
 
   /**
    * Inverts the calculation multiplies the output by -1
@@ -116,12 +86,13 @@ public interface Mapper {
   void setInverted(boolean invert);
 
   /**
-   * set limits on input
+   * set limits on output of the mapper
+   * This sets the 
    * 
-   * @param minIn
-   * @param maxIn
+   * @param minY
+   * @param maxY
    */
-  void setMinMax(Double minIn, Double maxIn);
+  void setMinMax(double minY, double maxY);
 
   /**
    * Integer form of setting limits
@@ -129,26 +100,19 @@ public interface Mapper {
    * @param min
    * @param max
    */
-  void setMinMax(Integer min, Integer max);
+  void setMinMax(int min, int max);
+  
+  /**
+   * If true this will make sure that input values are clipped to the range specified as 
+   * minX and maxX.  The resulting computed values will also be constrained to minY and maxY
+   * If false, inputs and outputs will not be clipped, but rather a normal linear mapping will apply.
+   */
+  void setClip(boolean clip);
 
   /**
-   * merges any non null values to values passed in
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
+   * Return true if the mapper is set to clip the input and output values.  otherwise false.
    */
-  void merge(Double minX, Double maxX, Double minY, Double maxY);
+  boolean isClip();
 
-  /**
-   * merges any non null values to values passed in
-   * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
-   */
-  void merge(Integer minX, Integer maxX, Integer minY, Integer maxY);
-
+  
 }

@@ -609,15 +609,15 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           setInverted.setSelected(false);
         }
 
-        Double pos = servo.getPos();
+        Double pos = servo.getCurrentInputPos();
         if (pos != null) {
           boundPos.setText(Double.toString(pos));
           slider.setValue(pos.intValue());
         }
 
         // In the inverted case, these are reversed
-        slider.setMinimum(servo.getMin().intValue());
-        slider.setMaximum(servo.getMax().intValue());
+        slider.setMinimum(Double.valueOf(servo.getMin()).intValue());
+        slider.setMaximum(Double.valueOf(servo.getMax()).intValue());
 
         posMin.setText(servo.getMin() + "");
         posMax.setText(servo.getMax() + "");
@@ -626,12 +626,12 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         disableDelayGrace.setText(servo.disableDelayGrace + "");
 
         if (servo.getMin() < mapInputSliderMinValue) {
-          mapInputSliderMinValue = servo.getMin().intValue();
+          mapInputSliderMinValue = Double.valueOf(servo.getMin()).intValue();
           mapInputSlider.setMinimum(mapInputSliderMinValue);
         }
 
         if (servo.getMax() > mapInputSliderMaxValue) {
-          mapInputSliderMaxValue = servo.getMax().intValue();
+          mapInputSliderMaxValue = Double.valueOf(servo.getMax()).intValue();
           mapInputSlider.setMaximum(mapInputSliderMaxValue);
         }
 
@@ -643,8 +643,8 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
         maxInput.setText(servo.getMax() + "");
   
 
-        mapInputSlider.setLowValue(servo.getMin().intValue());
-        mapInputSlider.setHighValue(servo.getMax().intValue());
+        mapInputSlider.setLowValue(Double.valueOf(servo.getMin()).intValue());
+        mapInputSlider.setHighValue(Double.valueOf(servo.getMax()).intValue());
       
         if (servo.isSweeping()) {
           sweepButton.setText("stop");

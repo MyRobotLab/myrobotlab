@@ -710,6 +710,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public boolean isUltraSonicLeftActivated() {
     return isUltraSonicLeftActivated;
   }
+		// by default all servos will auto-disable
+		// TODO: KW : make peer servo services for InMoov2 have the auto disable behavior.
+		// Servo.setAutoDisableDefault(true);
 
   public boolean isServoMixerActivated() {
     return isServoMixerActivated;

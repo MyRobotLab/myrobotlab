@@ -289,6 +289,9 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public transient static final int SERVO_EVENT_STOPPED = 1;
   public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
+  // TODO: KW moved from base class.  should remove it here too.
+  private double currentPosInput = 0;
+  
   /**
    * Constructor
    * 
@@ -357,18 +360,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return lastActivityTimeTs;
   }
 
-  public Double getMax() {
-    return mapper.getMax();
-  }
-
-  public Double getPos() {
-    if (targetPos == null) {
-      return rest;
-    } else {
-      return MathUtils.round(targetPos, roundPos);
-    }
-  }
-
   // FIXME - change to enabled()
   public Boolean isAttached() {
     return isAttached;
@@ -400,7 +391,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       moveToBlocked.notify(); // Will wake up MoveToBlocked.wait()
     }
     deltaVelocity = 1;
-    double lastPosInput = mapper.calcInput(currentPos);
+    double lastPosInput = mapper.calcInput(currentOutputPos);
 
     if (motorControl == null) {
       error(String.format("%s's controller is not set", getName()));
@@ -428,7 +419,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     targetPos = pos;
-    targetOutput = getTargetOutput();
+    double targetOutput = getTargetOutput();
 
     pid.setSetpoint(pidKey, targetOutput);
     lastActivityTimeTs = System.currentTimeMillis();
@@ -484,7 +475,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   @Override
-  public void setMinMax(Double min, Double max) {
+  public void setMinMax(double min, double max) {
     map(min, max, min, max);
   }
 
@@ -555,12 +546,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
 
   @Override
-  public Double getTargetOutput() {
-    if (targetPos == null) {
-      targetPos = rest;
-    }
-    targetOutput = mapper.calcOutput(targetPos);
-    return targetOutput;
+  public double getTargetOutput() {
+    return mapper.calcOutput(targetPos);
   }
 
   /*
@@ -602,7 +589,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentPos) * (500 / sampleTime))), roundPos);
+    // TODO: kw:  is this computing the "mapped" velocity? or the calibrated "output" speed of the servo?
+    currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentOutputPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
 
@@ -613,11 +601,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // offline feedback ! if diy servo is disabled
     // useful to "learn" gestures ( later ... ) or simply start a moveTo() at
     // real lastPos & sync with UI
-    if (!isEnabled() && MathUtils.round(currentPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
-      targetPos = mapper.calcInput(currentPos);
+    if (!isEnabled() && MathUtils.round(currentOutputPos, roundPos) != MathUtils.round(currentPosInput, roundPos)) {
+      targetPos = mapper.calcInput(currentOutputPos);
       broadcastState();
     }
-    currentPos = currentPosInput;
+    // TODO: kw: this seems wrong. the input position should be the invsere mapped input position.
+    currentOutputPos = currentPosInput;
 
   }
 
@@ -779,10 +768,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     disable();
   }
 
-  public Double getLastPos() {
-    return currentPos;
-  }
-
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.getInstance().configure();
@@ -819,9 +804,9 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       motor.attach(arduino);
 
       Thread.sleep(1000);
-      // let's start the encoder!!
-      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); // new
-                                                                                         // Amt203Encoder("encoder");
+      // let's start the encoder!! Amt203Encoder("encoder");
+      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); 
+                                                                                         
       encoder.setPin(3);
 
       arduino.attach(encoder);
@@ -870,6 +855,12 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   @Override
   public void setSpeed(Double d) {
     setVelocity(d);
+  }
+
+  @Override /* grog: TODO ? */
+  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
+    // TODO Auto-generated method stub
+    return false;
   }
 
 }
