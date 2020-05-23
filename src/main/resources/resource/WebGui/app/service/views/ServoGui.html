@@ -119,11 +119,6 @@
                             <tr>
                                 <td>Input</td>
                                 <td>
-                                    <label class="label btn-rest">
-                                        Rest <br>{{service.rest}} 
-                                    </label>
-                                </td>
-                                <td>
                                     <label class="label btn-input">
                                         Min<br>{{service.mapper.minX}} 
                                     </label>
@@ -131,6 +126,11 @@
                                 <td>
                                     <label class="label btn-input">
                                         Max<br>{{service.mapper.maxX}} 
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="label btn-rest">
+                                        Rest <br>{{service.rest}} 
                                     </label>
                                 </td>
                                 <td>Output</td>
@@ -141,7 +141,7 @@
                                 </td>
                                 <td>
                                     <label class="label btn-output">
-                                        Min<br>{{service.mapper.maxY}} 
+                                        Max<br>{{service.mapper.maxY}} 
                                     </label>
                                 </td>
                             </tr>
@@ -186,7 +186,7 @@
                                 <rzslider class="custom-slider sliderPosition" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
                                 <br>
                                 Input                                     
-                                 - {{lockInputOutput?'Locked':'UnLocked'}} {{lockInputOutput}}
+                                 - {{lockInputOutput?'UnLocked':'Locked'}} {{lockInputOutput}}
                                  <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="toggleLock()" on="Locked" off="UnLocked"></toggle>
                                 <rzslider class="custom-slider inputColor" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
                                 <br>
