@@ -54,6 +54,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
   private static final long serialVersionUID = 1L;
+  
+  /**
+   * setting the default for all new servos
+   */
+  protected static boolean autoDisableDefault = false;
 
   /**
    * The automatic disabling of the servo in idleTimeout ms This de-energizes
@@ -236,6 +241,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       }
     }    
     currentOutputPos = mapper.calcOutput(targetPos);
+    autoDisable = autoDisableDefault;
   }
 
   /**
@@ -922,6 +928,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   public void writeMicroseconds(int uS) {
     invoke("publishServoWriteMicroseconds", this, uS);
+  }
+
+  public static void setAutoDisableDefault(boolean b) {
+    autoDisableDefault = b;
   }
 
 }

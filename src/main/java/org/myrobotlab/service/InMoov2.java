@@ -345,6 +345,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // peers to start on construction
     // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
+  
+
 
   @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
