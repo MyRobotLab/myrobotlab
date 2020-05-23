@@ -530,19 +530,17 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         removeListeners();
 
-        currentPos.setText(String.format("%.1f", servo.getPos()));
+        currentPos.setText(String.format("%.1f", servo.getCurrentInputPos()));
 
         // FIXME - Servo supports multiple controllers - the UI needs a
         // multi-select perhaps
         String controllerName = servo.getController();
         lastController = controllerName;
-
-        
         moving.setVisible(servo.isMoving());
-
         enabledIcon.setVisible(servo.isEnabled());
 
-        double maxSpd = (servo.getMaxSpeed() == null) ? 500.0 : servo.getMaxSpeed();
+        // TODO: KW review/remove this if possible in the UI?  maxSpeed should go away. there is only "fullSpeed" 
+        double maxSpd =  500.0;
         maxSpeed.setText(String.format("%.1f", maxSpd));
         speedSlider.setMaximum((int) maxSpd);
 
@@ -631,15 +629,15 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         // MAP MIN/MAX INPUT/OUTPUT
         // In the inverted case, these are reversed
-        moveTo.setMinimum(servo.getMin().intValue());
-        moveTo.setMaximum(servo.getMax().intValue());
+        moveTo.setMinimum(Double.valueOf(servo.getMin()).intValue());
+        moveTo.setMaximum(Double.valueOf(servo.getMax()).intValue());
 
-        if (mapInput.getLowValue() != servo.getMin().intValue()) {
-          mapInput.setLowValue(servo.getMin().intValue());
+        if (mapInput.getLowValue() != Double.valueOf(servo.getMin()).intValue()) {
+          mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
         }
 
-        if (mapInput.getHighValue() != servo.getMax().intValue()) {
-          mapInput.setHighValue(servo.getMax().intValue());
+        if (mapInput.getHighValue() != Double.valueOf(servo.getMax()).intValue()) {
+          mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
         }
 
 
@@ -654,8 +652,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
         minPos.setText(String.format("%.1f", servo.getMin()));
         maxPos.setText(String.format("%.1f", servo.getMax()));
        
-        mapInput.setLowValue(servo.getMin().intValue());
-        mapInput.setHighValue(servo.getMax().intValue());
+        mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
+        mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
        
         addListeners();
       }

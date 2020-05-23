@@ -744,12 +744,12 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
       Node node = nodes.get(partName);
       Mapper map = maps.get(partName);
       map.setMinMax(servo.getMin(), servo.getMax());
-      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getPos());
+      double angle = -map.calcOutput(servo.getRest()) + map.calcOutput(servo.getCurrentInputPos());
       angle *= Math.PI / 180;
       Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
       Vector3f rotAngle = rotMask.mult((float) angle);
       node.rotate(rotAngle.x, rotAngle.y, rotAngle.z);
-      node.setUserData("currentAngle", map.calcOutput(servo.getPos()));
+      node.setUserData("currentAngle", map.calcOutput(servo.getCurrentInputPos()));
       nodes.put(partName, node);
       servoToNode.put(servo.getName(), node);
       maps.put(partName, map);

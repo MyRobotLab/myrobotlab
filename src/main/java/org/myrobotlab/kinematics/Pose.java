@@ -26,7 +26,7 @@ public class Pose {
     this.createdDate = new Date();
     List<String> servoNames = new ArrayList<String>();
     for (ServoControl sc : servos) {
-      positions.put(sc.getName(), sc.getPos());
+      positions.put(sc.getName(), sc.getCurrentInputPos());
       speeds.put(sc.getName(),  sc.getSpeed());
       servoNames.add(sc.getName());
     }

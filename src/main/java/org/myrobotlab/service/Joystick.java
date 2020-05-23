@@ -166,7 +166,7 @@ public class Joystick extends Service {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = mappers.get(id).calcOutput((double)input).floatValue();
+              input = Double.valueOf(mappers.get(id).calcOutput((double)input)).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);

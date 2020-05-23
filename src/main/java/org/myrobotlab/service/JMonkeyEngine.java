@@ -434,7 +434,9 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     if (service.getType().equals("org.myrobotlab.service.Servo")) {
       // what to do here - there are several options 
       ServoControl sc = (ServoControl)Runtime.getService(name);
-      sc.attachServoController(getName(), null, null, sc.getMaxSpeed());
+      // TODO: KW removed maxSpeed here.. plumb the rest of that through the interface and remove this null
+      // potentially this shouldn't be the max speed, but the current speed to attach.
+      sc.attachServoController(getName(), null, null, null);
     }
 
     // backward attach ?
@@ -868,7 +870,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
     float result = rawAngle;
     if (data.mapper != null) {
-      result = data.mapper.calcInput((double)rawAngle).floatValue();
+      result = Double.valueOf(data.mapper.calcInput((double)rawAngle)).floatValue();
     }
     return result;
   }

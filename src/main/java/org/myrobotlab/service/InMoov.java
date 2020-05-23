@@ -1275,7 +1275,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
         if (ServoControl.class.isAssignableFrom(service.getClass())) {
-          double pos = ((ServoControl) service).getPos();
+          double pos = ((ServoControl) service).getCurrentInputPos();
           gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
         }
       }
