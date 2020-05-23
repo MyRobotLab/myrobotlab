@@ -30,7 +30,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.StateSaver;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderListener;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 
 public interface ServoControl extends AbsolutePositionControl, EncoderListener, Attachable, StateSaver, org.myrobotlab.framework.interfaces.StatePublisher {
 
@@ -246,7 +246,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param currentPosUs
    * @return
    */
-  ServoData publishServoData(ServoStatus eventType, Double currentPosUs);
+  ServoEvent publishServoEvent(ServoStatus eventType, Double currentPosUs);
 
   ServoControl publishServoSetSpeed(ServoControl sc);
 

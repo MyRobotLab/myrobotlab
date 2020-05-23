@@ -28,7 +28,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             _self.updateState(inMsg.data[0])
             $scope.$apply()
             break
-        case 'onServoData':
+        case 'onServoEvent':
             var data = inMsg.data[0];
             $scope.sliders[data.name].value = data.pos;
             $scope.$apply()
@@ -66,8 +66,8 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
                 // dynamically add callback subscriptions
                 // these are "intermediate" subscriptions in that they
                 // don't send a subscribe down to service .. yet 
-                // that must already be in place (and is in the case of Servo.publishServoData)
-                msg.subscribeTo(_self, servo.name, 'publishServoData')
+                // that must already be in place (and is in the case of Servo.publishServoEvent)
+                msg.subscribeTo(_self, servo.name, 'publishServoEvent')
 
             }
             $scope.$apply()

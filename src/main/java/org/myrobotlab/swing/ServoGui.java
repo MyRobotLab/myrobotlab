@@ -70,8 +70,8 @@ import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
@@ -484,13 +484,13 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   @Override
   public void subscribeGui() {
     subscribe("publishMoveTo");
-    subscribe("publishServoData");
+    subscribe("publishServoEvent");
   }
 
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishMoveTo");
-    unsubscribe("publishServoData");
+    unsubscribe("publishServoEvent");
   }
 
   /**
@@ -507,12 +507,12 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
     });
   }
 
-  public void onServoData(final ServoData data) {
+  public void onServoEvent(final ServoEvent data) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         currentPos.setText(String.format("%.1f", data.pos));
-        if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
+        if (ServoStatus.SERVO_STARTED.equals(data.state)) {
           moving.setVisible(true);
         } else {
           moving.setVisible(false);
@@ -843,7 +843,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       // String python = LangUtils.toPython();
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
       TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-      /// servo.attach((ServoDataListener) catcher);
+      /// servo.attach((ServoEventListener) catcher);
 
       catcher.exportAll("export.py");
 
