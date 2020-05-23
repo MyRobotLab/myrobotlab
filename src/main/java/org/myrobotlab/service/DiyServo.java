@@ -46,8 +46,8 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -138,11 +138,11 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
                   // ok targetPos is reached ( with tolerance )
                   if (nbSamePosInputSinceX >= 3 || getTargetOutput() == targetPos) {
-                    publishServoData(SERVO_EVENT_STOPPED, getTargetOutput());
+                    publishServoEvent(SERVO_EVENT_STOPPED, getTargetOutput());
                   } else {
 
                     if (getTargetOutput() != targetPos) {
-                      publishServoData(SERVO_EVENT_POSITION_UPDATE, getTargetOutput());
+                      publishServoEvent(SERVO_EVENT_STARTED, getTargetOutput());
                     }
 
                   }
@@ -286,8 +286,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
    */
   public int disableDelayGrace = 1000;
 
+  public transient static final int SERVO_EVENT_STARTED = 0;
   public transient static final int SERVO_EVENT_STOPPED = 1;
-  public transient static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
   // TODO: KW moved from base class.  should remove it here too.
   private double currentPosInput = 0;
@@ -695,8 +695,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
   }
 
-  public ServoData publishServoData(Integer eventType, double currentPos) {
-    ServoData sd = new ServoData(ServoStatus.SERVO_POSITION_UPDATE, getName(), currentPos);
+  public ServoEvent publishServoEvent(Integer eventType, double currentPos) {
+    ServoEvent sd = new ServoEvent(ServoStatus.SERVO_STARTED, getName(), currentPos);
     return sd;
   }
 

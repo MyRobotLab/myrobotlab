@@ -15,8 +15,8 @@ public class MrlMotor extends Device {
 
   public final static Logger log = LoggerFactory.getLogger(MrlMotor.class);
 
+  public static final int SERVO_EVENT_STARTED = 0;
   public static final int SERVO_EVENT_STOPPED = 1;
-  public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
   VirtualMotor motor; // motor pointer - in case our device is a motor
   public int pin;
@@ -108,7 +108,7 @@ public class MrlMotor extends Device {
           if ((int) currentPosUs == targetPosUs) {
             publishMotorEvent(SERVO_EVENT_STOPPED);
           } else {
-            publishMotorEvent(SERVO_EVENT_POSITION_UPDATE);
+            publishMotorEvent(SERVO_EVENT_STARTED);
           }
         }
       } else {

@@ -70,7 +70,7 @@ public class Msg {
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 64;
+  public static final int MRLCOMM_VERSION = 65;
   // send buffer
   private int sendBufferSize = 0;
   private int sendBuffer[] = new int[MAX_MSG_SIZE];

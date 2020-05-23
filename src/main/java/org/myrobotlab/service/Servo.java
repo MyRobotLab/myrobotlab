@@ -271,7 +271,7 @@ public class Servo extends AbstractServo implements ServoControl {
       */
       
       // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
-      // servo03.attach((ServoDataListener)catcher);
+      // servo03.attach((ServoEventListener)catcher);
       
       // servo.setPin(12);
       

@@ -19,8 +19,8 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -598,7 +598,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       isMoving = false;
       
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
-      invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentInputPos);
+      invoke("publishServoEvent", ServoStatus.SERVO_STOPPED, currentInputPos);
       invoke("publishServoStopped", this);
 
       // if currently configured to autoDisable - the timer starts now
@@ -612,7 +612,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     } else {
       isMoving = true;
       // invoke("publishMoveTo", this); grog: WRONG ! on every encoder update .. no !
-      // invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos); grog: WRONG !
+      // invoke("publishServoEvent", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos); grog: WRONG !
     }
   }
 
@@ -643,9 +643,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
                * not used nor wanted - subscribers should be either
                * EncoderListener or ServoController
                */
-  public ServoData publishServoData(ServoStatus status, Double currentPosUs) {
+  public ServoEvent publishServoEvent(ServoStatus status, Double currentPosUs) {
     double pos = microsecondsToDegree(currentPosUs);
-    ServoData sd = new ServoData(status, getName(), pos);
+    ServoEvent sd = new ServoEvent(status, getName(), pos);
     lastActivityTimeTs = System.currentTimeMillis();
     // log.debug("status {} pos {}", status, pos);
 
@@ -887,7 +887,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
-    broadcastState();
+    // broadcastState(); // grog: probably not necessary
   }
 
   @Override
