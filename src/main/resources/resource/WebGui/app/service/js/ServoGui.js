@@ -3,6 +3,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     var _self = this
     var msg = this.msg
 
+    // mode is either "status" or "control"
+    // in status mode we take updates by the servo and its events
+    // in control mode we take updates by the user
+    // $scope.mode = "status"; now statusControlMode
+
+    // useful for initialization of components
     var firstTime = true
 
     // init
@@ -61,55 +67,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             onEnd: function() {}
         }
     }
-
-    $scope.activeTabIndex = 0
-
-    $scope.speedSlider = {
-        value: 501,
-        options: {
-            floor: 1,
-            ceil: 501,
-            minLimit: 1,
-            maxLimit: 501,
-            hideLimitLabels: true,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    if ($scope.speedSlider.value == 501) {
-                        msg.send('fullSpeed')
-                    } else {
-                        msg.send('setSpeed', $scope.speedSlider.value)
-                    }
-                }
-            },
-            onEnd: function() {}
-        }
-    }
-
-    $scope.autoDisable = null
-
-    $scope.autoDisableSlider = {
-        value: 3,
-        options: {
-            floor: 1,
-            ceil: 10,
-            minLimit: 1,
-            maxLimit: 10,
-            hideLimitLabels: true,
-            onStart: function() {},
-            onChange: function() {
-                if ($scope.sliderEnabled) {
-                    msg.send('setIdleTimeout', $scope.autoDisableSlider.value * 1000)
-                }
-            },
-            onEnd: function() {}
-        }
-    }
-
-    // mode is either "status" or "control"
-    // in status mode we take updates by the servo and its events
-    // in control mode we take updates by the user
-    // $scope.mode = "status"; now statusControlMode
 
     // TODO - should be able to build this based on
     // current selection of controller
@@ -196,7 +153,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.toggleLock = function(){
+    $scope.toggleLock = function() {
         $scope.lockInputOutput = !$scope.lockInputOutput
     }
 
@@ -242,6 +199,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
 
         $scope.pin = service.pin
+
+        $scope.pos.options.minLimit = service.mapper.minX
+        $scope.pos.options.maxLimit = service.mapper.maxX
+
+        $scope.restSlider.options.minLimit = service.mapper.minX
+        $scope.restSlider.options.maxLimit = service.mapper.maxX
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control
