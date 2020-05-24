@@ -15,7 +15,7 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.IntegratedMovement;
 import org.myrobotlab.service.IntegratedMovement.ObjectPointLocation;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
 /**
@@ -580,7 +580,7 @@ public class IMEngine extends Thread implements Genetic {
     return pOut;
   }
 
-  public void updateLinksPosition(ServoData data) {
+  public void updateLinksPosition(ServoEvent data) {
     if (noUpdatePosition)
       return;
     for (DHLink l : arm.getLinks()) {
@@ -698,7 +698,7 @@ public class IMEngine extends Thread implements Genetic {
           decodedGenome.add(null);
           continue;
         }
-        // if (link.getState() == Servo.SERVO_EVENT_POSITION_UPDATE) {
+        // if (link.getState() == Servo.SERVO_EVENT_STARTED) {
         //  decodedGenome.add(link.getTargetPos());
         //   continue;
         // }

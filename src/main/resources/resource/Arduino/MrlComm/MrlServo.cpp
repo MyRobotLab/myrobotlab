@@ -94,7 +94,7 @@ void MrlServo::update() {
       // There was a change in the currentPosition
       if (previousCurrentPosUs != (int)currentPosUs) {
         servo->writeMicroseconds((int)currentPosUs);
-        publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+        // publishServoEvent(SERVO_EVENT_STARTED);
         // if we're not sweeping and we reached the target position., then we are stopped here.
         if (!isSweeping && ((int)currentPosUs == targetPosUs)) {
             publishServoEvent(SERVO_EVENT_STOPPED);
@@ -128,6 +128,7 @@ void MrlServo::moveToMicroseconds(int posUs) {
   isMoving = true;
   lastUpdate = millis();
   moveStart = lastUpdate;
+  publishServoEvent(SERVO_EVENT_STARTED);
 }
 
 void MrlServo::startSweep(int minUs, int maxUs, int step) {
@@ -137,16 +138,19 @@ void MrlServo::startSweep(int minUs, int maxUs, int step) {
   targetPosUs = maxUs;
   isMoving = true;
   isSweeping = true;
+  publishServoEvent(SERVO_EVENT_STARTED);
 }
 
 void MrlServo::stop() {
   isMoving = false;
   isSweeping = false;
+  publishServoEvent(SERVO_EVENT_STOPPED);
 }
 
 void MrlServo::stopSweep() {
   isMoving = false;
   isSweeping = false;
+  publishServoEvent(SERVO_EVENT_STOPPED);
 }
 
 void MrlServo::setVelocity(int velocity) {

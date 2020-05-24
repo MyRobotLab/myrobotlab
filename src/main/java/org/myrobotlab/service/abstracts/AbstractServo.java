@@ -19,8 +19,8 @@ import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -604,7 +604,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       isMoving = false;
       
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
-      invoke("publishServoData", ServoStatus.SERVO_STOPPED, currentInputPos);
+//      invoke("publishServoEvent", ServoStatus.SERVO_STOPPED, currentInputPos);
       invoke("publishServoStopped", this);
 
       // if currently configured to autoDisable - the timer starts now
@@ -617,8 +617,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       
     } else {
       isMoving = true;
-      // invoke("publishMoveTo", this); grog: WRONG ! on every encoder update .. no !
-      // invoke("publishServoData", ServoStatus.SERVO_POSITION_UPDATE, currentInputPos); grog: WRONG !
     }
   }
 
@@ -644,28 +642,31 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sc;
   }
 
-  @Override
-  @Deprecated /*
-               * not used nor wanted - subscribers should be either
-               * EncoderListener or ServoController
-               */
-  public ServoData publishServoData(ServoStatus status, Double currentPosUs) {
-    double pos = microsecondsToDegree(currentPosUs);
-    ServoData sd = new ServoData(status, getName(), pos);
+  public ServoEvent publishServoEvent(ServoStatus status, Double currentPosUs) {
+    double posDegrees = microsecondsToDegree(currentPosUs);
+    ServoEvent sd = new ServoEvent(status, getName(), posDegrees);
     lastActivityTimeTs = System.currentTimeMillis();
-    // log.debug("status {} pos {}", status, pos);
 
     if (isSweeping) {
-      if (sweepingToMax && pos >= sweepMax - 1) { // handle overshoot ?
-        sweepingToMax = false;
-        moveTo(sweepMin);
-      }
-      if (!sweepingToMax && pos <= sweepMin + 1) { // handle overshoot ?
-        sweepingToMax = true;
-        moveTo(sweepMax);
+    if (status == ServoStatus.SERVO_STOPPED) {
+      double inputPos = mapper.calcInput(currentOutputPos);
+      
+      // We got a stop event from the servo - which "should" be 
+      // the end of a sweep.  "Should" be.
+      // If our current position from the encoder says we
+      // are closer to one side vs the other .. we go to the
+      // opposite side.
+      
+      double deltaMin = Math.abs(inputPos - sweepMin);
+      double deltaMax = Math.abs(inputPos - sweepMax);
+      
+      if (deltaMin < deltaMax ) {
+        send(getName(), "moveTo", sweepMax);
+      } else {
+        send(getName(), "moveTo", sweepMin);
       }
     }
-
+    }
     return sd;
   }
   
@@ -776,9 +777,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  // SEE - http://myrobotlab.org/content/servo-limits
-  public void setMinMax(double minY, double maxY) {
-    mapper.setMinMax(minY, maxY);
+  public void setMinMax(double minXY, double maxXY) {
+    mapper.map(minXY, maxXY,minXY, maxXY);
     broadcastState();
   }
 
@@ -893,7 +893,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
-    broadcastState();
+    // broadcastState(); // grog: probably not necessary
   }
 
   @Override

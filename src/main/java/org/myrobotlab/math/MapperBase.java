@@ -100,21 +100,22 @@ public abstract class MapperBase implements Serializable, Mapper {
   }
 
   /**
-   * set limits output scaling limit of the mapper.  
-   * Setting minY and maxY respectively.  for a linear mapper,
-   * if an input is passed in between minX and maxX the output will be 
-   * constrained between minY and maxY.
-   * 
+   * set limits for both the input and output of the mapper.  
+   * Calling this will set the minimum input and the minimum output to minXY
+   * The maximum input and maximum output values will be set to maxXY 
+   * Inputs and outputs will be constrained by the same minXY and maxXY value. 
    */
   @Override
-  public void setMinMax(double minY, double maxY) {
-    this.minY = minY;
-    this.maxY = maxY;
+  public void setMinMax(double minXY, double maxXY) {
+    this.minX = minXY;
+    this.maxX = maxXY;
+    this.minY = minXY;
+    this.maxY = maxXY;
   }
 
   @Override
-  public void setMinMax(int minY, int maxY) {
-    setMinMax((double)minY, (double)maxY);
+  public void setMinMax(int minXY, int maxXY) {
+    setMinMax((double)minXY, (double)maxXY);
   }
 
   public boolean isClip() {

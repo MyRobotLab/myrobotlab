@@ -32,7 +32,7 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.slf4j.Logger;
 
 /**
@@ -53,7 +53,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    */
   public class SpeedControl extends Thread {
 
-    volatile ServoData servoData;
+    volatile ServoEvent ServoEvent;
     String name;
     long now;
     long lastExecution;
@@ -61,8 +61,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
     public SpeedControl(String name) {
       super(String.format("%s.SpeedControl", name));
-      servoData = servoMap.get(name);
-      servoData.isMoving = true;
+      ServoEvent = servoMap.get(name);
+      ServoEvent.isMoving = true;
 
       this.name = name;
     }
@@ -71,64 +71,64 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     public void run() {
 
       log.info("Speed control started for {}", name);
-      servoData = servoMap.get(name);
-      log.debug("Moving from {} to {} at {} degrees/second", servoData.currentOutput, servoData.targetOutput, servoData.velocity);
-      publishServoEvent(servoData.servo, 2, servoData.currentOutput);
+      ServoEvent = servoMap.get(name);
+      log.debug("Moving from {} to {} at {} degrees/second", ServoEvent.currentOutput, ServoEvent.targetOutput, ServoEvent.velocity);
+      publishServoEvent(ServoEvent.servo, 2, ServoEvent.currentOutput);
       try {
         lastExecution = System.currentTimeMillis();
         double _velocity;
-        if (servoData.acceleration == -1) {
-          _velocity = servoData.velocity;
+        if (ServoEvent.acceleration == -1) {
+          _velocity = ServoEvent.velocity;
         } else {
           _velocity = 0;
         }
-        while (servoData.isMoving && servoData.isEnergized) {
+        while (ServoEvent.isMoving && ServoEvent.isEnergized) {
           now = System.currentTimeMillis();
           deltaTime = now - lastExecution;
-          if (servoData.acceleration != -1) {
-            _velocity = _velocity + (servoData.acceleration * deltaTime * 0.001);
-            if (_velocity > servoData.velocity) {
-              _velocity = servoData.velocity;
+          if (ServoEvent.acceleration != -1) {
+            _velocity = _velocity + (ServoEvent.acceleration * deltaTime * 0.001);
+            if (_velocity > ServoEvent.velocity) {
+              _velocity = ServoEvent.velocity;
             }
           }
 
-          if (servoData.currentOutput < servoData.targetOutput) { // Move
+          if (ServoEvent.currentOutput < ServoEvent.targetOutput) { // Move
             // in
             // positive
             // direction
-            servoData.currentOutput += (_velocity * deltaTime) * 0.001;
-            if (servoData.currentOutput >= servoData.targetOutput) {
-              servoData.currentOutput = servoData.targetOutput;
-              servoData.isMoving = false;
+            ServoEvent.currentOutput += (_velocity * deltaTime) * 0.001;
+            if (ServoEvent.currentOutput >= ServoEvent.targetOutput) {
+              ServoEvent.currentOutput = ServoEvent.targetOutput;
+              ServoEvent.isMoving = false;
             }
-          } else if (servoData.currentOutput > servoData.targetOutput) { // Move
+          } else if (ServoEvent.currentOutput > ServoEvent.targetOutput) { // Move
             // in
             // negative
             // direction
-            servoData.currentOutput -= (_velocity * deltaTime * 0.001);
-            if (servoData.currentOutput <= servoData.targetOutput) {
-              servoData.currentOutput = servoData.targetOutput;
-              servoData.isMoving = false;
+            ServoEvent.currentOutput -= (_velocity * deltaTime * 0.001);
+            if (ServoEvent.currentOutput <= ServoEvent.targetOutput) {
+              ServoEvent.currentOutput = ServoEvent.targetOutput;
+              ServoEvent.isMoving = false;
             }
           } else {
             // We have reached the position so shutdown the thread
-            servoData.isMoving = false;
+            ServoEvent.isMoving = false;
             log.debug("This line should not repeat");
           }
-          int pulseWidthOff = SERVOMIN + (int) (servoData.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
-          setServo(servoData.pin, pulseWidthOff);
-          publishServoEvent(servoData.servo, 2, servoData.currentOutput);
+          int pulseWidthOff = SERVOMIN + (int) (ServoEvent.currentOutput * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
+          setServo(ServoEvent.pin, pulseWidthOff);
+          publishServoEvent(ServoEvent.servo, 2, ServoEvent.currentOutput);
           // Sleep 100ms before sending next position
           lastExecution = now;
-          log.debug("Sent {} using a {} tick at velocity {}", servoData.currentOutput, deltaTime, _velocity);
+          log.debug("Sent {} using a {} tick at velocity {}", ServoEvent.currentOutput, deltaTime, _velocity);
           Thread.sleep(50);
         }
-        publishServoEvent(servoData.servo, 1, servoData.currentOutput);
-        log.info("publishServoEvent : {} , event {}, currentOutput {}", servoData.servo.getName(), 1, servoData.currentOutput);
+        publishServoEvent(ServoEvent.servo, 1, ServoEvent.currentOutput);
+        log.info("publishServoEvent : {} , event {}, currentOutput {}", ServoEvent.servo.getName(), 1, ServoEvent.currentOutput);
         log.info("Shuting down SpeedControl");
 
       } catch (Exception e) {
-        servoData.isMoving = false;
+        ServoEvent.isMoving = false;
         if (e instanceof InterruptedException) {
           log.debug("Shuting down SpeedControl");
         } else {
@@ -141,7 +141,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
     // TODO Auto-generated method stub
-    servo.publishServoData(ServoStatus.SERVO_START, currentOutput);
+    servo.publishServoEvent(ServoStatus.SERVO_STARTED, currentOutput);
     return currentOutput;
   }
 
@@ -240,7 +240,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    *       few extra values are needed
    */
 
-  class ServoData implements Serializable {
+  class ServoEvent implements Serializable {
    
     private static final long serialVersionUID = 1L;
     String pin;
@@ -257,7 +257,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     ServoControl servo;
   }
 
-  transient HashMap<String, ServoData> servoMap = new HashMap<String, ServoData>();
+  transient HashMap<String, ServoEvent> servoMap = new HashMap<String, ServoEvent>();
 
   // Motor related constants
   public static final int MOTOR_FORWARD = 1;
@@ -434,28 +434,28 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void onServoMoveTo(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
+    ServoEvent ServoEvent = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
-      setPWMFreq(servoData.pin, defaultPwmFreq);
+      setPWMFreq(ServoEvent.pin, defaultPwmFreq);
     }
 
-    if (servoData.isEnergized) {
+    if (ServoEvent.isEnergized) {
       // Move at max speed
-      if (servoData.velocity == null || servoData.velocity == -1) {
+      if (ServoEvent.velocity == null || ServoEvent.velocity == -1) {
         log.debug("Ada move at max speed");
-        servoData.currentOutput = servo.getTargetOutput();
-        servoData.targetOutput = servo.getTargetOutput();
+        ServoEvent.currentOutput = servo.getTargetOutput();
+        ServoEvent.targetOutput = servo.getTargetOutput();
         log.debug("servoWrite {} deviceAddress {} targetOutput {}", servo.getName(), deviceAddress, servo.getTargetOutput());
         int pulseWidthOff = SERVOMIN + (int) (servo.getTargetOutput() * (int) ((float) SERVOMAX - (float) SERVOMIN) / (float) (180));
         setServo(servo.getPin(), pulseWidthOff);
-        publishServoEvent(servoData.servo, 1, servoData.targetOutput);
+        publishServoEvent(ServoEvent.servo, 1, ServoEvent.targetOutput);
       } else {
-        log.debug("Ada move at velocity {} degrees/s", servoData.velocity);
-        servoData.targetOutput = servo.getTargetOutput();
+        log.debug("Ada move at velocity {} degrees/s", ServoEvent.velocity);
+        ServoEvent.targetOutput = servo.getTargetOutput();
         // Start a thread to handle the speed for this servo
-        if (servoData.isMoving == false) {
-          servoData.speedcontrol = new SpeedControl(servo.getName());
-          servoData.speedcontrol.start();
+        if (ServoEvent.isMoving == false) {
+          ServoEvent.speedcontrol = new SpeedControl(servo.getName());
+          ServoEvent.speedcontrol.start();
         }
       }
     }
@@ -463,9 +463,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void onServoWriteMicroseconds(ServoControl servo, int uS) {
-    ServoData servoData = servoMap.get(servo.getName());
+    ServoEvent ServoEvent = servoMap.get(servo.getName());
     if (!pwmFreqSet) {
-      setPWMFreq(servoData.pin, defaultPwmFreq);
+      setPWMFreq(ServoEvent.pin, defaultPwmFreq);
     }
 
     int pin = getAddress(servo.getPin());
@@ -664,8 +664,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void onServoSetSpeed(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
-    servoData.velocity = servo.getSpeed();
+    ServoEvent ServoEvent = servoMap.get(servo.getName());
+    ServoEvent.velocity = servo.getSpeed();
   }
 
   public List<PinDefinition> getPinList() {
@@ -736,9 +736,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     // This will fail because the pin data has not yet been set in Servo
     // servoNameToPin.put(servo.getName(), servo.getPin());
     String servoName = servo.getName();
-    ServoData servoData = new ServoData();
-    servoData.pin = (int) conf[0];
-    servoMap.put(servoName, servoData);
+    ServoEvent ServoEvent = new ServoEvent();
+    ServoEvent.pin = (int) conf[0];
+    servoMap.put(servoName, ServoEvent);
     invoke("publishAttachedDevice", servoName);
   }
   */
@@ -834,14 +834,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.info("servo {} already attached", servo.getName());
       return;
     }
-    ServoData servoData = new ServoData();
-    servoData.pin = servo.getPin();
-    servoData.targetOutput = servo.getTargetOutput();
-    servoData.currentOutput = servo.getTargetOutput();
-    servoData.velocity = servo.getSpeed();
-    servoData.isEnergized = true;
-    servoData.servo = servo;
-    servoMap.put(servo.getName(), servoData);
+    ServoEvent ServoEvent = new ServoEvent();
+    ServoEvent.pin = servo.getPin();
+    ServoEvent.targetOutput = servo.getTargetOutput();
+    ServoEvent.currentOutput = servo.getTargetOutput();
+    ServoEvent.velocity = servo.getSpeed();
+    ServoEvent.isEnergized = true;
+    ServoEvent.servo = servo;
+    servoMap.put(servo.getName(), ServoEvent);
     servo.attach(this);
   }
 
@@ -935,14 +935,14 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
  
   @Override
   public void onServoDisable(ServoControl servo) {
-    ServoData servoData = servoMap.get(servo.getName());
-    if (servoData == null) {
+    ServoEvent ServoEvent = servoMap.get(servo.getName());
+    if (ServoEvent == null) {
       log.error("servo data {} could not get servo from map", servo.getName());
       return;
     }
-    setPWM(servoData.pin, 4096, 0);
-    servoData.isEnergized = false;
-    log.info("Pin : " + servoData.pin + " detached from " + servo.getName());
+    setPWM(ServoEvent.pin, 4096, 0);
+    ServoEvent.isEnergized = false;
+    log.info("Pin : " + ServoEvent.pin + " detached from " + servo.getName());
   }
 
   // currently not a "real" motor control - it has to wait for merging of Servo

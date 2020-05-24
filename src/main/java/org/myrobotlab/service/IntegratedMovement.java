@@ -32,7 +32,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
@@ -639,7 +639,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     collisionItems.removeIgnore(object1, object2);
   }
 
-  public void onIKServoEvent(ServoData data) {
+  public void onIKServoEvent(ServoEvent data) {
     Mapper map = maps.get(data.name);
     // data.pos = map.calcOutput(data.pos);
     // data.targetPos = map.calcOutput(data.targetPos);
