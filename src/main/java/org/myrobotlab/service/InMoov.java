@@ -44,7 +44,7 @@ import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -916,7 +916,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
   }
 
-  public void onIKServoEvent(ServoData data) {
+  public void onIKServoEvent(ServoEvent data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }

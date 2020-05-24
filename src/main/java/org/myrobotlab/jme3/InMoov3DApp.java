@@ -14,7 +14,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
 import com.jme3.app.SimpleApplication;
@@ -48,7 +48,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
   transient public final static Logger log = LoggerFactory.getLogger(InMoov3DApp.class);
 
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
-  private Queue<ServoData> eventQueue = new ConcurrentLinkedQueue<ServoData>();
+  private Queue<ServoEvent> eventQueue = new ConcurrentLinkedQueue<ServoEvent>();
   private transient HashMap<String, Node> servoToNode = new HashMap<String, Node>();
   private HashMap<String, Mapper> maps = new HashMap<>();
   private transient Service service = null;
@@ -612,7 +612,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
    * @param initialAngle : initial angle of rotation of the part (in radian)
    */
 
-  public void updatePosition(ServoData event) {
+  public void updatePosition(ServoEvent event) {
     eventQueue.add(event);
   }
 
@@ -631,7 +631,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
     }
 
     while (eventQueue.size() > 0) {
-      ServoData event = eventQueue.remove();
+      ServoEvent event = eventQueue.remove();
       if (servoToNode.containsKey(event.name)) {
         Node node = servoToNode.get(event.name);
         Vector3f rotMask = new Vector3f((float) node.getUserData("rotationMask_x"), (float) node.getUserData("rotationMask_y"), (float) node.getUserData("rotationMask_z"));
