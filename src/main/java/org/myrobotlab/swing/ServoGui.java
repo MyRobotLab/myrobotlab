@@ -121,8 +121,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   JButton restButton = new JButton("rest");
   JTextField speed = new JTextField("         ");
   JTextField rest = new JTextField("");
-
-  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif");
+  
+  ImageIcon movingIcon = Util.getImageIcon(Service.getResourceDir(Servo.class),"gifOk.gif");
 
   JLabel moving = new JLabel(movingIcon);
 
