@@ -235,6 +235,13 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     wrist.setRest(90.0);
     wrist.setPosition(90.0);
     
+    thumb.setAutoDisable(true);
+    index.setAutoDisable(true);
+    majeure.setAutoDisable(true);
+    ringFinger.setAutoDisable(true);
+    pinky.setAutoDisable(true);
+    wrist.setAutoDisable(true);
+    
     setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
   }
 
