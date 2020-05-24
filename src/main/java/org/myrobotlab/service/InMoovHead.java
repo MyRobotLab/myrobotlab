@@ -103,6 +103,14 @@ public class InMoovHead extends Service {
     eyeY.setPosition(90.0);
 
     setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
+    
+    neck.setAutoDisable(true);
+    rollNeck.setAutoDisable(true);
+    rothead.setAutoDisable(true);
+    jaw.setAutoDisable(true);
+    eyeX.setAutoDisable(true);
+    eyeY.setAutoDisable(true);
+    
   }
 
   /*
