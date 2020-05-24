@@ -179,6 +179,10 @@ public class Servo extends AbstractServo implements ServoControl {
     return true;
   }
 
+  @Deprecated
+  public void enableAutoDisable(boolean value) {
+    setAutoDisable(value);
+  }
 
   
   /**
