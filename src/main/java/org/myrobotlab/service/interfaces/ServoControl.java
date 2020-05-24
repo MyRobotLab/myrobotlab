@@ -299,17 +299,19 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setMapper(Mapper m);
 
   /**
-   * This specifies the output limits for the mapper.  It specifies the minY and maxY
-   * When an input is passed in the minX to minX range , the output will be between minY and maxY.
-   * move their full range
+   * This specifies both the input and the output limits for the mapper.
+   * It specifies the minY and maxY
+   * This method is deprecated, as it's ambigious as to the behavior.
+   * use map(minXY,maxXY,minXY,maxXY) instead
    * 
-   * @param minY
-   *          minY value
+   * @param minXY
+   *          minXY value
    * @param maxY
-   *          maxY value
+   *          maxXY value
    * 
    */
-  void setMinMax(double minY, double maxY);
+  @Deprecated
+  void setMinMax(double minXY, double maxXY);
 
   /**
    * set the pin of the servo this does not 'attach' energize the pin only set

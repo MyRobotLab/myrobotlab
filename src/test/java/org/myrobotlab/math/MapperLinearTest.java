@@ -48,7 +48,7 @@ public class MapperLinearTest {
     assertEquals( -1.1, mapper.calcInput(-11.0), 0.0);
     mapper.setMinMax(-1.0, 1.0);
     mapper.setClip(true);
-    assertEquals( -1.0, mapper.calcInput(-11.0), 0.0);
+    assertEquals( 1.0, mapper.calcInput(-11.0), 0.0);
   }
 
   @Test
@@ -83,11 +83,11 @@ public class MapperLinearTest {
    
     
     // input is clipped to 0.6 and computes the output as being minY because it's inverted.
-    assertEquals(-1.0, mapper.calcOutput(1.0), 0);
-    assertEquals(-1.0, mapper.calcOutput(0.7), 0);
-    assertEquals(0.833, mapper.calcOutput(-0.5), 0.01);
+    assertEquals(-0.6, mapper.calcOutput(1.0), 0);
+    assertEquals(-0.6, mapper.calcOutput(0.7), 0);
+    assertEquals(0.5, mapper.calcOutput(-0.5), 0.01);
     // input clipped to 0.6 and mapped to the minY because it's iverted.
-    assertEquals(-1.0, mapper.calcOutput(1.5), 0);
+    assertEquals(-.6, mapper.calcOutput(1.5), 0);
 
     // this is what a non-inverted mapper does with
     // the same values
@@ -96,13 +96,13 @@ public class MapperLinearTest {
     // mapper2.setInverted(true);
     mapper2.setMinMax(-0.7, 0.7);
     // input is clipped to 0.7 and output is pegged to max out.
-    assertEquals(1.0, mapper2.calcOutput(1.0), 0);
+    assertEquals(0.7, mapper2.calcOutput(1.0), 0);
     // input equals max input and is clipped at output to 1.0
-    assertEquals(1.0, mapper2.calcOutput(0.7), 0);
+    assertEquals(0.7, mapper2.calcOutput(0.7), 0);
     // input is in valid input range and scaled / mapped to -1 to 1 output.
-    assertEquals(-0.7142, mapper2.calcOutput(-0.5), 0.01);
+    assertEquals(-0.5, mapper2.calcOutput(-0.5), 0.01);
     // input is above the max input, clipped and mapped to max output.
-    assertEquals(1.0, mapper2.calcOutput(1.5), 0);
+    assertEquals(0.7, mapper2.calcOutput(1.5), 0);
 
     // asymmetrical
     MapperLinear mapper3 = new MapperLinear();
@@ -136,8 +136,8 @@ public class MapperLinearTest {
     
     //mapper.setMinMax(0.0, 0.9);
     mapper.setClip(true);
-    assertEquals(-1.0, mapper.calcOutput(-0.9), 0);
-    assertEquals(1.0, mapper.calcOutput(1.0), 0.01);
+    assertEquals(-0.9, mapper.calcOutput(-0.9), 0.00);
+    assertEquals(1.0, mapper.calcOutput(1.1), 0.01);
     // remove all input/output restrictions
     
   }

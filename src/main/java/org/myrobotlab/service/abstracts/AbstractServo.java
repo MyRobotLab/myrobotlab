@@ -771,9 +771,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
-  // SEE - http://myrobotlab.org/content/servo-limits
-  public void setMinMax(double minY, double maxY) {
-    mapper.setMinMax(minY, maxY);
+  public void setMinMax(double minXY, double maxXY) {
+    mapper.map(minXY, maxXY,minXY, maxXY);
     broadcastState();
   }
 
