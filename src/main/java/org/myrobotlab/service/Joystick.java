@@ -50,7 +50,7 @@ import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
 
 import net.java.games.input.ControllerEnvironment;
-import net.java.games.input.Rumbler;
+// import net.java.games.input.Rumbler; grog: raspi no support
 
 /**
  * Joystick - The joystick service supports reading data from buttons and
@@ -79,7 +79,7 @@ public class Joystick extends Service {
 
   List<Component> hardwareComponents; // holds the
 
-  transient Rumbler[] hardwareRumblers;
+  // transient Rumbler[] hardwareRumblers; grog:raspi no support
 
   transient InputPollingThread pollingThread = null;
 
@@ -357,12 +357,12 @@ public class Joystick extends Service {
   public void setRumbler(boolean switchOn) {
     if (rumblerIdx != -1) {
       if (switchOn)
-        hardwareRumblers[rumblerIdx].rumble(0.8f); // almost full on for
+       // grog: no raspi support hardwareRumblers[rumblerIdx].rumble(0.8f); // almost full on for
       // last
       // rumbler
-      else
+     // else
         // switch off
-        hardwareRumblers[rumblerIdx].rumble(0.0f);
+        // grog: no raspi support hardwareRumblers[rumblerIdx].rumble(0.0f);
       rumblerOn = switchOn; // record rumbler's new status
     }
   } // end of setRumbler()
