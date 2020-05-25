@@ -38,6 +38,7 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.joystick.Component;
@@ -45,7 +46,6 @@ import org.myrobotlab.joystick.Controller;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.JoystickData;
 import org.slf4j.Logger;
 
@@ -415,6 +415,10 @@ public class Joystick extends Service {
     meta.addCategory("control","telerobotics");
     meta.addDependency("net.java.jinput", "jinput", "2.0.7");
     meta.addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
+    Platform platform = Platform.getLocalInstance();
+    if (platform.isArm()) {
+      meta.addDependency("jinput-natives", "jinput-natives-armv7.hfp", "2.0.7", "zip");
+    }
     // meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");
     // meta.addArtifact("net.java.jinput", "natives-windows");
     // meta.addArtifact("net.java.jinput", "natives-linux");
