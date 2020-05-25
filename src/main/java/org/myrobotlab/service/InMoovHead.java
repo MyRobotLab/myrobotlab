@@ -82,13 +82,13 @@ public class InMoovHead extends Service {
   }
 
   private void initServoDefaults() {
-    neck.setMinMax((double)20, (double)160);
-    rollNeck.setMinMax((double)20, (double)160);
-    rothead.setMinMax((double)30, (double)150);
+    neck.setMinMax((double)20, (double)160); //this is wrong, this values are for the input, not for the output
+    rollNeck.setMinMax((double)20, (double)160); //this is wrong, this values are for the input, not for the output
+    rothead.setMinMax((double)30, (double)150); //this is wrong, this values are for the input, not for the output
     // reset by mouth control
-    jaw.setMinMax((double)10, (double)25);
-    eyeX.setMinMax((double)60, (double)120);
-    eyeY.setMinMax((double)60, (double)120);
+    jaw.setMinMax((double)10, (double)25); //this is wrong, this values are for the input, not for the output
+    eyeX.setMinMax((double)60, (double)120); //this is wrong, this values are for the input, not for the output
+    eyeY.setMinMax((double)60, (double)120); //this is wrong, this values are for the input, not for the output
     neck.setRest(90.0);
     neck.setPosition(90.0);
     rollNeck.setRest(90.0);

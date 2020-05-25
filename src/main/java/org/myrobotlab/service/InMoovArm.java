@@ -167,10 +167,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     if (omoplate.getPin() == null)
       omoplate.setPin(DEFAULT_OMOPLATE_PIN);
 
-    bicep.setMinMax(5.0, 90.0);
-    rotate.setMinMax(40.0, 180.0);
+    bicep.setMinMax(5.0, 90.0);  //this is wrong, this values are for the input, not for the output
+    rotate.setMinMax(40.0, 180.0);  //this is wrong, this values are for the input, not for the output
     shoulder.setMinMax(0.0, 180.0);
-    omoplate.setMinMax(10.0, 80.0);
+    omoplate.setMinMax(10.0, 80.0);  //this is wrong, this values are for the input, not for the output
 
     bicep.setRest(5.0);
     bicep.setPosition(5.0);
