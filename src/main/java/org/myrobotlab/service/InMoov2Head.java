@@ -44,22 +44,28 @@ public class InMoov2Head extends Service {
     // Config will be managed by LangUtils
     startPeers();
 
-    jaw.setMinMax(10.0, 25.0);
+    jaw.setMinMax(0.0, 180.0);
+    jaw.setMap(10.0, 25.0, 0.0, 180.0);
     jaw.setRest(10.0);
 
-    eyeX.setMinMax(60.0, 120.0);
+    eyeX.setMinMax(0.0, 180.0);
+    eyeX.setMap(60.0, 120.0, 0.0, 180.0);
     eyeX.setRest(90.0);
 
-    eyeY.setMinMax(60.0, 120.0);
+    eyeY.setMinMax(0.0, 180.0);
+    eyeY.setMap(60.0, 120.0, 0.0, 180.0);
     eyeY.setRest(90.0);
 
-    rollNeck.setMinMax(20.0, 160.0);
+    rollNeck.setMinMax(0.0, 180.0);
+    rollNeck.setMap(20.0, 160.0, 0.0, 180.0);
     rollNeck.setRest(90.0);
 
-    neck.setMinMax(20.0, 160.0);
+    neck.setMinMax(0.0, 180.0);
+    neck.setMap(20.0, 160.0, 0.0, 180.0);
     neck.setRest(90.0);
 
-    rothead.setMinMax(20.0, 160.0);
+    rothead.setMinMax(0.0, 180.0);
+    rothead.setMap(20.0, 160.0, 0.0, 180.0);
     rothead.setRest(90.0);
 
     neck.setPin(12);
