@@ -57,7 +57,7 @@ public class InMoov2Head extends Service {
     eyeY.setRest(90.0);
 
     rollNeck.setMinMax(20.0, 160.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
-    rollNeck.setMinMax(20.0, 160.0, 0.0, 180.0);
+    //rollNeck.setMinMax(20.0, 160.0, 0.0, 180.0);
     rollNeck.setRest(90.0);
 
     neck.setMinMax(20.0, 160.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
