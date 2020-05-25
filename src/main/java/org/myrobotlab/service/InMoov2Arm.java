@@ -135,10 +135,15 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     shoulder.setPin(10);
     omoplate.setPin(11);
 
-    bicep.setMinMax(5.0, 90.0);
-    rotate.setMinMax(40.0, 180.0);
+    bicep.setMinMax(0.0, 180.0);
+    rotate.setMinMax(0.0, 180.0);
     shoulder.setMinMax(0.0, 180.0);
-    omoplate.setMinMax(10.0, 80.0);
+    omoplate.setMinMax(0.0, 180.0);
+
+    bicep.setMap(5.0, 90.0, 0.0, 180.0);
+    rotate.setMap(40.0, 180.0, 0.0, 180.0);
+    shoulder.setMap(0.0, 180.0, 0.0, 180.0);
+    omoplate.setMap(10.0, 80.0, 0.0, 180.0);
 
     bicep.setRest(5.0);
     rotate.setRest(90.0);
