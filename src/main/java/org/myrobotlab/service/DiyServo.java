@@ -272,7 +272,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   double maxPower = 1.0;
   double minPower = -1.0;
 
-  Mapper powerMap = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
+  transient Mapper powerMap = new MapperLinear(-1.0, 1.0, -255.0, 255.0);
 
   public String disableDelayIfVelocity;
 
