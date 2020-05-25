@@ -166,19 +166,21 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     LoggingFactory.init(Level.INFO);
 
-    boolean done = false;
+    boolean done = true;
 
     Runtime.main(new String[] { "--interactive", "--id", "admin" });
     Platform.setVirtual(true);
 
-    // Runtime.start("gui", "SwingGui");
+    Runtime.start("gui", "SwingGui");
     
     Python python = (Python) Runtime.start("python", "Python");
     python.loadServiceScript("InMoov");
+    /*
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.setPort(8887);
     webgui.autoStartBrowser(false);
     webgui.startService();
+    */
 
     // webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
 
@@ -198,13 +200,15 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startMouth();
     i01.startEar();
 
+    /*
     webgui.autoStartBrowser(false);
     webgui.startService();
     webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
     HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    */
     i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
-    i01.chatBot.addTextListener(htmlFilter);
-    htmlFilter.addListener("publishText", "i01", "speak");
+    // i01.chatBot.addTextListener(htmlFilter);
+    // htmlFilter.addListener("publishText", "i01", "speak");
     i01.chatBot.attach((Attachable) i01.ear);
     i01.startBrain();
     i01.startHead(leftPort);

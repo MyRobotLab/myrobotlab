@@ -94,7 +94,7 @@ public class Joystick extends Service {
   /**
    * non-transient serializable definition
    */
-  Map<String, Mapper> mappers = new HashMap<String, Mapper>();
+  Map<String, MapperLinear> mappers = new HashMap<String, MapperLinear>();
   Map<String, Component> components = null;
 
   String controller;
@@ -286,7 +286,7 @@ public class Joystick extends Service {
   }
 
   public void map(String name, double x0, double x1, double y0, double y1) {
-    Mapper mapper = new MapperLinear(x0, x1, y0, y1);
+    MapperLinear mapper = new MapperLinear(x0, x1, y0, y1);
     mappers.put(name, mapper);
   }
 
