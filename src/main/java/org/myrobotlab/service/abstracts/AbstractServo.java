@@ -114,7 +114,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * Default timeout is 3000 milliseconds
    * 
    */
-  int idleTimeout = 3000;
+  protected int idleTimeout = 3000;
 
   /**
    * if the servo is doing a blocking call - it will block other blocking calls
