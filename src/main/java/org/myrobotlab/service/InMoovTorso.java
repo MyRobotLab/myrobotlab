@@ -86,8 +86,8 @@ public class InMoovTorso extends Service {
     if (lowStom.getPin() == null)
       lowStom.setPin(DEFAULT_LOWSTOM_PIN);
     
-    topStom.setMinMax(60.0, 120.0);
-    midStom.setMinMax(0.0, 180.0);
+    topStom.setMinMax(60.0, 120.0); //this is wrong, this values are for the input, not for the output
+    midStom.setMinMax(0.0, 180.0);  
     lowStom.setMinMax(0.0, 180.0);
     topStom.setRest(90.0);
     topStom.setPosition(90.0);
