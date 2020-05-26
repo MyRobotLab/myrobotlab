@@ -58,14 +58,31 @@
                                     <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
                                     <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
                                 </td>
-                                <td>
+                                <td colspan="2">
                                     Speed
                                     <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
                                 </td>
                             </tr>
                             <tr class="valuesRow">
-                                <td></td>
-                                <td>Speed = {{speedDisplay}} °/s</td>
+                                <td colspan="2">
+                                    <div class="servoReferences">
+                                        <div class="outputColor">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Output 
+                                        </div> 
+                                        <div class="inputColor">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Input 
+                                        </div> 
+                                        <div class="restColor" ng-click="msg.rest()">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Rest 
+                                        </div> 
+                                    </div>
+                                </td>
+                                <td>
+                                     <div class="dataColor">Speed = {{speedDisplay}} °/s</div> 
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -92,15 +109,11 @@
                                             <!-- Energized -->
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
-                                                ENERGIZED     
-                                            
-                                            
+                                                ENERGIZED
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
                                     <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));"></div>
-                                    <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
                                     <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));"></div>
                                 </div>
                                 <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
@@ -145,6 +158,24 @@
                                     </label>
                                 </td>
                             </tr>
+                            <tr class="valuesRow">
+                                <td colspan="7">
+                                    <div class="servoReferences">
+                                        <div class="outputColor">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Output 
+                                        </div> 
+                                        <div class="inputColor">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Input 
+                                        </div> 
+                                        <div class="restColor" ng-click="msg.rest()">
+                                            <span class="glyphicon glyphicon-stop"></span>
+                                            Rest 
+                                        </div> 
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                     <div class="verticalSpacerLimits">
@@ -161,40 +192,52 @@
                                         <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
-                                    <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
-                                        Rest
-                                    <div class="restCursor"></div>
+                                    <div class="restLabel restLabelLimits" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">                       
+                                       <span class="glyphicon glyphicon-triangle-left"></span> {{service.rest}}  <span class="glyphicon glyphicon-triangle-right"></span>
+                                        <div class="restCursor"></div>       
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
                                         <div class="energizedZone">
                                             <!-- Energized -->
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
-                                                ENERGIZED                                            
-                                            
+                                                ENERGIZED
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
+                                    
                                     <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));"></div>
-                                    <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
                                     <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));"></div>
                                 </div>
-                                <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
-                                <br>
-                                Rest
-                                <rzslider class="custom-slider sliderPosition" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
-                                <br>
-                                Input                                     
-                                 - {{lockInputOutput?'UnLocked':'Locked'}} {{lockInputOutput}}
-                                 <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="toggleLock()" on="Locked" off="UnLocked"></toggle>
-                                <rzslider class="custom-slider inputColor" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
-                                <br>
-                                Output
-                                <rzslider class="custom-slider inputColor" rz-slider-model="outputSlider.minValue" rz-slider-high="outputSlider.maxValue" rz-slider-options="outputSlider.options"/>
-                                <br>
+                                <div class="rzPos">
+                                    <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
+                                </div>
+                                <div class="rzRest">
+                                    <rzslider title="Set Rest position" class="custom-slider" rz-slider-model="restSlider.value" rz-slider-options="restSlider.options"/>
+                                </div>                                
+                                <div class="rzInput">
+                                    <rzslider title="Set input limits" class="custom-slider sliderPosition" rz-slider-model="inputSlider.minValue" rz-slider-high="inputSlider.maxValue" rz-slider-options="inputSlider.options"/>
+                                </div>                                
+                                <div class="rzOutput">
+                                    <rzslider title="Set output limits" class="custom-slider" rz-slider-model="outputSlider.minValue" rz-slider-high="outputSlider.maxValue" rz-slider-options="outputSlider.options"/>
+                                </div>
+                                <div class="lockInputOutputButton" ng-model="lockInputOutput">
+                                    <div ng-show="lockInputOutput">
+                                        <img src="../service/img/inPutLocked.png" ng-click="toggleLock()" title="Input limits are locked with output">
+                                    </div>
+                                    <div ng-show="!lockInputOutput">
+                                        <img src="../service/img/inPutUnLocked.png" ng-click="toggleLock()" title="Input limits are unlocked with output">
+                                    </div>   
+                                </div>
                             </div>
+                            
                             <!-- /sliderContainer -->
+                            <!--
+                            Input                                     
+                             - {{lockInputOutput?'UnLocked':'Locked'}} {{lockInputOutput}}
+                             <toggle class="miniBTN" title="Input limits will be locked with output" ng-model="lockInputOutput" ng-change="toggleLock()" on="Locked" off="UnLocked"></toggle>
+                            -->
+                            
                         </div>
                         <!-- /.col-md-12 -->
                     </div>
@@ -251,22 +294,18 @@
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
                                         Rest
-                                    <div class="restCursor"></div>
+                                    <div class="restCursor"></div>      
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
                                         <div class="energizedZone">
                                             <!-- Energized -->
                                             <div title="the servo is energized" class="energizedBar progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                                                 <span class="glyphicon glyphicon-flash"></span>
-                                                ENERGIZED                                            
-                                            
-                                            
+                                                ENERGIZED      
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- <div id="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
                                     <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));"></div>
-                                    <!-- <div id="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(limits.minValue*100/180)}}%)); width: calc(100% - ({{100 -((limits.maxValue-limits.minValue)*100/180)}}%));"></div> -->
                                     <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));"></div>
                                 </div>
                                 <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
