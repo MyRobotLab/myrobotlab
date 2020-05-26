@@ -44,22 +44,28 @@ public class InMoov2Head extends Service {
     // Config will be managed by LangUtils
     startPeers();
 
-    jaw.setMinMax(10.0, 25.0);
+    jaw.setMinMax(10.0, 25.0); // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //jaw.setMinMax(10.0, 25.0, 0.0, 180.0);
     jaw.setRest(10.0);
 
-    eyeX.setMinMax(60.0, 120.0);
+    eyeX.setMinMax(60.0, 120.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //eyeX.setMinMax(60.0, 120.0, 0.0, 180.0);
     eyeX.setRest(90.0);
 
-    eyeY.setMinMax(60.0, 120.0);
+    eyeY.setMinMax(60.0, 120.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //eyeY.setMinMax(60.0, 120.0, 0.0, 180.0);
     eyeY.setRest(90.0);
 
-    rollNeck.setMinMax(20.0, 160.0);
+    rollNeck.setMinMax(20.0, 160.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //rollNeck.setMinMax(20.0, 160.0, 0.0, 180.0);
     rollNeck.setRest(90.0);
 
-    neck.setMinMax(20.0, 160.0);
+    neck.setMinMax(20.0, 160.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //neck.setMinMax(20.0, 160.0, 0.0, 180.0);
     neck.setRest(90.0);
 
-    rothead.setMinMax(20.0, 160.0);
+    rothead.setMinMax(20.0, 160.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //rothead.setMinMax(20.0, 160.0, 0.0, 180.0);
     rothead.setRest(90.0);
 
     neck.setPin(12);
