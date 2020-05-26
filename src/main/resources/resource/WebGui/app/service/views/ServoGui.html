@@ -66,17 +66,17 @@
                             <tr class="valuesRow">
                                 <td colspan="2">
                                     <div class="servoReferences">
-                                        <div class="outputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Output 
-                                        </div> 
                                         <div class="inputColor">
                                             <span class="glyphicon glyphicon-stop"></span>
-                                            Input 
+                                            Input   
                                         </div> 
-                                        <div class="restColor" ng-click="msg.rest()">
+                                        <div class="restColor">
+                                            <span class="glyphicon glyphicon-stop" ng-click="msg.rest()" title="Go to Rest"></span>
+                                            Rest
+                                        </div> 
+                                        <div class="outputColor">
                                             <span class="glyphicon glyphicon-stop"></span>
-                                            Rest 
+                                            Output
                                         </div> 
                                     </div>
                                 </td>
@@ -130,52 +130,38 @@
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
                             <tr>
-                                <td>Input</td>
+                                <td class="bigLabel inputColor">Input</td>
+                                <td class="inputColor">Min</td>
                                 <td>
-                                    <label class="label btn-input">
-                                        Min<br>{{service.mapper.minX}} 
-                                    </label>
+
+                                    <!-- {{service.mapper.minX}} -->
+                                    <input type="number" min="0" max="180" ng-model="service.mapper.minX" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
+                                <td class="inputColor">Max</td>
                                 <td>
-                                    <label class="label btn-input">
-                                        Max<br>{{service.mapper.maxX}} 
-                                    </label>
+                                    <!-- {{service.mapper.maxX}} -->
+                                    <input type="number" min="0" max="180" ng-model="service.mapper.maxX" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
+                                <td></td>
+                                <td class="bigLabel restColor">
+                                    Rest</td>
                                 <td>
-                                    <label class="label btn-rest">
-                                        Rest <br>{{service.rest}} 
-                                    </label>
+                                    <!-- {{service.rest}} -->
+                                    <input type="number" min="0" max="180" ng-model="service.rest" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
-                                <td>Output</td>
+                                <td></td>
+                                <td class="bigLabel outputColor">Output</td>
+                                <td class="outputColor">Min</td>
                                 <td>
-                                    <label class="label btn-output">
-                                        Min<br>{{service.mapper.minY}} 
-                                    </label>
+                                    <!-- {{service.mapper.minY}} -->
+                                    <input type="number" min="0" max="180" ng-model="service.mapper.minY" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
+                                <td class="outputColor">Max</td>
                                 <td>
-                                    <label class="label btn-output">
-                                        Max<br>{{service.mapper.maxY}} 
-                                    </label>
+                                    <!-- {{service.mapper.maxY}} -->
+                                    <input type="number" min="0" max="180" ng-model="service.mapper.maxY" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
-                            </tr>
-                            <tr class="valuesRow">
-                                <td colspan="7">
-                                    <div class="servoReferences">
-                                        <div class="outputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Output 
-                                        </div> 
-                                        <div class="inputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Input 
-                                        </div> 
-                                        <div class="restColor" ng-click="msg.rest()">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Rest 
-                                        </div> 
-                                    </div>
-                                </td>
-                            </tr>
+                            </tr>                            
                         </tbody>
                     </table>
                     <div class="verticalSpacerLimits">
