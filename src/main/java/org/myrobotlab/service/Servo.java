@@ -87,7 +87,16 @@ public class Servo extends AbstractServo implements ServoControl {
       enable();
     }
     // purge any timers currently in process
+    // if currently configured to autoDisable - the timer starts now
+    // we cancel any pre-existing timer if it exists
     purgeTask("idleDisable");
+    if (autoDisable) {
+      // and start our countdown
+      addTaskOneShot(idleTimeout, "idleDisable");
+    }
+
+    
+    
     if (!enabled) {
       log.info("cannot moveTo {} not enabled", getName());
       return false;
