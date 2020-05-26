@@ -101,6 +101,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
@@ -119,6 +120,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
+            noSwitching: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
@@ -140,6 +143,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
+            noSwitching: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
