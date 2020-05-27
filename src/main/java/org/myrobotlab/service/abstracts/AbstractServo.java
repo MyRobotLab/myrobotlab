@@ -777,6 +777,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   @Override
+  public void setMinMaxOutput(double minY, double maxY) {
+    mapper.map(mapper.getMinX(), mapper.getMaxX(),minY, maxY);
+    broadcastState();
+  }
+  
+  @Override
   public void setMinMax(double minXY, double maxXY) {
     mapper.map(minXY, maxXY,minXY, maxXY);
     broadcastState();

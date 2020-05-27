@@ -43,9 +43,9 @@ public class InMoov2Torso extends Service {
     midStom.setPin(28);
     lowStom.setPin(29);
 
-    topStom.setMinMax(60.0, 120.0);
-    midStom.setMinMax(0.0, 180.0);
-    lowStom.setMinMax(0.0, 180.0);
+    topStom.map(60.0, 120.0, 60.0, 120.0);
+    midStom.map(0.0, 180.0, 0.0, 180.0);
+    lowStom.map(0.0, 180.0, 0.0, 180.0);
     topStom.setRest(90.0);
     topStom.setPosition(90.0);
     midStom.setRest(90.0);
@@ -142,10 +142,21 @@ public class InMoov2Torso extends Service {
     return true;
   }
 
+  /**
+   * Sets the output min/max values for all servos in the torso.  input limits on servos
+   * are not modified in this method.
+   * 
+   * @param topStomMin
+   * @param topStomMax
+   * @param midStomMin
+   * @param midStomMax
+   * @param lowStomMin
+   * @param lowStomMax
+   */
   public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
-    topStom.setMinMax(topStomMin, topStomMax);
-    midStom.setMinMax(midStomMin, midStomMax);
-    lowStom.setMinMax(lowStomMin, lowStomMax);
+    topStom.setMinMaxOutput(topStomMin, topStomMax);
+    midStom.setMinMaxOutput(midStomMin, midStomMax);
+    lowStom.setMinMaxOutput(lowStomMin, lowStomMax);
   }
 
   // ------------- added set pins

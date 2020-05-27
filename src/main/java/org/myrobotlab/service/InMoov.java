@@ -1220,7 +1220,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           // first detach the servo.
           calibrationWriter.write("# Servo Config : " + s.getName() + "\n");
           calibrationWriter.write(s.getName() + ".detach()\n");
-          calibrationWriter.write(s.getName() + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
+          calibrationWriter.write(s.getName() + ".setMinMaxOutput(" + s.getMin() + "," + s.getMax() + ")\n");
           calibrationWriter.write(s.getName() + ".setVelocity(" + s.getSpeed() + ")\n");
           calibrationWriter.write(s.getName() + ".setRest(" + s.getRest() + ")\n");
           if (s.getPin() != null) {
