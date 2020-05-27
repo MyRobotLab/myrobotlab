@@ -750,11 +750,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
   }
 
+  // TODO: consider moving these to the ServoControl interface.
   public int setIdleTimeout(int idleTimeout) {
     if (this.idleTimeout != idleTimeout) {
       this.idleTimeout = idleTimeout;
       broadcastState();
     }
+    return idleTimeout;
+  }
+  
+  // Getter for the current idleTimeout setting.
+  public int getIdleTimeout() {
     return idleTimeout;
   }
 

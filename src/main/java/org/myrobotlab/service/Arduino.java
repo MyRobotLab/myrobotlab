@@ -1857,6 +1857,7 @@ public class Arduino extends AbstractMicrocontroller
     Integer deviceId = getDeviceId(servo);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      return;
     }
     if (isConnected()) {
       msg.servoAttachPin(deviceId, getAddress(servo.getPin()));
