@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.test.AbstractTest;
 
 /**
