@@ -43,13 +43,13 @@ public class InMoov2Torso extends Service {
     midStom.setPin(28);
     lowStom.setPin(29);
 
-    topStom.setMinMax(60.0, 120.0); // this is wrong, this values are for the input, not for the output, see bellow exemple
-    midStom.setMinMax(0.0, 180.0); 
-    lowStom.setMinMax(0.0, 180.0); 
+    //topStom.setMinMax(60.0, 120.0); // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //midStom.setMinMax(0.0, 180.0); 
+    //lowStom.setMinMax(0.0, 180.0); 
 
-    //topStom.setMinMax(60.0, 120.0, 0.0, 180.0);
-    //midStom.setMinMax(0.0, 180.0, 0.0, 180.0);
-    //lowStom.setMinMax(0.0, 180.0, 0.0, 180.0);
+    topStom.map(60.0, 120.0, 0.0, 180.0);
+    midStom.map(0.0, 180.0, 0.0, 180.0);
+    lowStom.map(0.0, 180.0, 0.0, 180.0);
 
     topStom.setRest(90.0);
     topStom.setPosition(90.0);
