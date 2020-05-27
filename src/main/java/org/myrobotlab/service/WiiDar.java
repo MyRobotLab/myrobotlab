@@ -490,24 +490,5 @@ public class WiiDar extends Service {
     sweeperThread = null;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(WiiDar.class.getCanonicalName());
-    meta.addDescription("ranging using a wiimote");
-    // meta.addDependency("wiiuse.wiimote", "0.12b");
-
-    meta.addDependency("wiiusej", "wiiusej", "wiiusej");
-    meta.addCategory("sensors");
-    // no longer have hardware for this ...
-    meta.setAvailable(false);
-    return meta;
-  }
 
 }

@@ -245,20 +245,4 @@ public class DatabaseConnector extends AbstractConnector {
     this.idField = idField;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(DatabaseConnector.class.getCanonicalName());
-    meta.addDescription("This service will run a select statement against a database and return the rows as documents to be published");
-    meta.addCategory("ingest");
-    return meta;
-  }
-
 }

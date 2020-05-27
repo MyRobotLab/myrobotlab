@@ -74,22 +74,6 @@ public class Log extends Service implements Appender<ILoggingEvent> {
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Log.class.getCanonicalName());
-    meta.addDescription("Logging Service helpful in diagnostics");
-    meta.addCategory("framework");
-
-    return meta;
-  }
   
   /**
    * log file name

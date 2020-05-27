@@ -25,7 +25,6 @@
 
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -185,26 +184,10 @@ public class Servo extends AbstractServo implements ServoControl {
   }
 
   
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Servo.class);
-    meta.addDescription("General hobby servo control with absolute positioning");
-    meta.addCategory("motor", "control", "servo");
-    meta.setAvailable(true);
-
-    return meta;
-  }
-  
   public static void main(String[] args) throws InterruptedException {
     try {
+      
+      // log.info("{}","blah$Blah".contains("$"));
 
       Runtime.main(new String[] { "--interactive", "--id", "servo"});
       // LoggingFactory.init(Level.INFO);

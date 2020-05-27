@@ -1,9 +1,14 @@
 package org.myrobotlab.string;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.myrobotlab.io.FileIO;
 
 public class StringUtil {
 
@@ -79,7 +84,22 @@ public class StringUtil {
     return new String(hexChars);
   }
 
-  public static void main(String[] args) throws ClassNotFoundException {
+  public static void main(String[] args) throws ClassNotFoundException, IOException {
+    
+    
+    
+    File serviceDir = new File("src/main/java/org/myrobotlab/service");
+    String template = FileIO.toString("template.java");
+    for (File f : serviceDir.listFiles()) {
+      if (f.isDirectory()) {
+        continue;
+      }
+      String serviceType = f.getName().substring(0, f.getName().length() - 5);
+      String out = template.replace("{ServiceType}", serviceType);
+      FileOutputStream fos = new FileOutputStream("src/main/java/org/myrobotlab/service/meta/" + serviceType + "Meta.java");
+      fos.write(out.getBytes());
+      fos.close();
+    }
 
     String methodName = StringUtil.StringToMethodName("hello all you freaks");
     methodName = StringUtil.StringToMethodName("thisIsATest over here");

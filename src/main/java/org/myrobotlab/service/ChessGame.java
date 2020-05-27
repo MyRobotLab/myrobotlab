@@ -213,21 +213,5 @@ public class ChessGame extends Service {
     return hmoveMsg;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(ChessGame.class.getCanonicalName());
-    meta.addDescription("interface to a Chess game");
-    meta.addCategory("game");
-    meta.addDependency("ChessBoard", "ChessBoard", "1.0.0");
-    return meta;
-  }
 
 }

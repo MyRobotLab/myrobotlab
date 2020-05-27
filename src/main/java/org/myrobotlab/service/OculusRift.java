@@ -499,41 +499,6 @@ public class OculusRift extends Service implements PointPublisher {
     return point;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(OculusRift.class);
-    meta.addDescription("The Oculus Rift Head Tracking Service");
-    meta.addCategory("video", "control", "sensors", "telerobotics");
-    // make sure the open cv instance share each others streamer..
-    // meta.sharePeer("leftOpenCV.streamer", "streamer", "VideoStreamer",
-    // "shared left streamer");
-    // meta.sharePeer("rightOpenCV.streamer", "streamer", "VideoStreamer",
-    // "shared right streamer");
-
-    meta.addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
-    // meta.sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing
-    // left eye camera");
-    meta.addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
-    // compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
-
-    meta.addDependency("slick-util", "slick-util", "1.0.0");
-    meta.addDependency("org.saintandreas", "jovr", "1.8.0.0");
-    meta.addDependency("org.saintandreas", "glamour-lwjgl", "1.0.8");
-    meta.addDependency("org.saintandreas", "math", "1.0.4");
-    meta.addDependency("org.saintandreas", "oria-resources", "1.0.4");
-    meta.exclude("org.slf4j", "slf4j-api");
-    meta.exclude("org.lwjgl.lwjgl", "lwjgl");
-    meta.exclude("com.google.guava", "guava");
-    return meta;
-  }
 
   public static void main(String s[]) {
     // LoggingFactory.init("INFO");

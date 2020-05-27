@@ -127,22 +127,5 @@ public class TestThrower extends Service {
     return data;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(TestThrower.class.getCanonicalName());
-    meta.addDescription("TestThrower is used with TestCatcher to test messaging");
-    meta.setAvailable(false);
-    meta.addCategory("testing", "framework");
-
-    return meta;
-  }
 
 }

@@ -623,9 +623,10 @@ public class FileIO {
         }
 
         String urlStr = String.format("jar:file:%s!/%s", root, jarEntry.getName());
+        boolean isSubDir = (src.split("/").length + 1 < jarEntry.getName().split("/").length);
 
-        if (jarEntry.isDirectory()) {
-          log.info("match on directory url {}", urlStr);
+        if (jarEntry.isDirectory() || (isSubDir && !recurse) ||  jarEntry.getName().contains("$")) {
+          log.info("filtering out {}", urlStr);
         } else {
           log.info("adding url {}", urlStr);
           URL url = new URL(urlStr);

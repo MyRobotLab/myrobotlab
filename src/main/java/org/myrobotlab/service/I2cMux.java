@@ -154,23 +154,7 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     return readBuffer.length;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(I2cMux.class.getCanonicalName());
-    meta.addDescription("Multiplexer for i2c to be able to use multiple i2c devices");
-    meta.addCategory("i2c", "control");
-    meta.setAvailable(true);
-    meta.setSponsor("Mats");
-    return meta;
-  }
 
   @Override
   public void attachI2CControl(I2CControl control) {

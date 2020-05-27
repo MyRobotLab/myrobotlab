@@ -143,20 +143,4 @@ public class VideoStreamer
     stop();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(VideoStreamer.class.getCanonicalName());
-    meta.addDescription("Video streaming service");
-    meta.addCategory("video", "display");
-    return meta;
-  }
-
 }

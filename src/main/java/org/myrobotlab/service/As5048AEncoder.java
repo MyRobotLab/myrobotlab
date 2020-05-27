@@ -26,12 +26,6 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
     log.warn("Setting the Zero point not supported on AS5048A because memory register is OTP");
   }
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(As5048AEncoder.class.getCanonicalName());
-    meta.addDescription("AS5048A Encoder - 14 bit - Absolute position encoder");
-    meta.addCategory("encoder", "sensors");
-    return meta;
-  }
 
   public static void main(String[] args) throws Exception {
 

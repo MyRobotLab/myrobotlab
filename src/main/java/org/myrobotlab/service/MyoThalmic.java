@@ -410,24 +410,6 @@ public class MyoThalmic extends Service implements DeviceListener, MyoDataListen
     log.info("onWarmupCompleted {} {}", unkown, warmUpResult);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MyoThalmic.class.getCanonicalName());
-    meta.addDescription("Myo service to control with the Myo armband");
-    meta.addCategory("control", "sensors");
-
-    meta.addDependency("com.github.nicholasastuart", "myo-java", "0.9.1");
-    return meta;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

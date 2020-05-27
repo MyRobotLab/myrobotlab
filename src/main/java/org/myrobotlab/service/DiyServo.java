@@ -649,23 +649,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     this.powerLevel = power;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(DiyServo.class.getCanonicalName());
-    meta.addDescription("Controls a motor so that it can be used as a Servo");
-    meta.addCategory("control", "servo");
-    meta.addPeer("motor", "MotorDualPwm", "MotorControl service");
-    meta.addPeer("pid", "Pid", "PID service");
-    return meta;
-  }
 
   @Override
   public Double moveToBlocking(Double pos) {

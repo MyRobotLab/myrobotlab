@@ -874,23 +874,5 @@ public class Gps extends Service implements SerialDataListener {
     info("%s disconnected from %s", getName(), portName);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Gps.class.getCanonicalName());
-    meta.addDescription("parses NMEA sentences coming in over a Serial service");
-    meta.addCategory("location", "sensors");
-    meta.addPeer("serial", "Serial", "serial port for GPS");
-    meta.setLicenseApache();
-
-    return meta;
-  }
 
 }

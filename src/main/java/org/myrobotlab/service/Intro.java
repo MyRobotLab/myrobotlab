@@ -48,22 +48,6 @@ public class Intro extends Service {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Intro.class);
-    meta.addDescription("Introduction to MyRobotlab");
-    meta.setAvailable(true);
-    meta.addCategory("general");
-    return meta;
-  }
 
   public void checkInstalled(String forTutorial, String serviceType) {
     Runtime runtime = Runtime.getInstance();

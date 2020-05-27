@@ -510,28 +510,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return arm;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoovArm.class.getCanonicalName());
-    meta.addDescription("the InMoov Arm Service");
-    meta.addCategory("robot");
-
-    meta.addPeer("bicep", "Servo", "Bicep servo");
-    meta.addPeer("rotate", "Servo", "Rotate servo");
-    meta.addPeer("shoulder", "Servo", "Shoulder servo");
-    meta.addPeer("omoplate", "Servo", "Omoplate servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-
-    return meta;
-  }
 
   public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {
     this.bicep.setSpeed(bicep);

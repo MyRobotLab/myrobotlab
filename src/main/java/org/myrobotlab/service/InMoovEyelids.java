@@ -239,17 +239,6 @@ public class InMoovEyelids extends Service {
     eyelidright.setAutoDisable(param);
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoovEyelids.class);
-    meta.addDescription("InMoov Eyelids");
-    meta.addCategory("robot");
-
-    meta.addPeer("eyelidleft", "Servo", "eyelidleft or both servo");
-    meta.addPeer("eyelidright", "Servo", "Eyelid right servo");
-
-    return meta;
-  }
 
   public void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
     if (eyelidleft != null) {

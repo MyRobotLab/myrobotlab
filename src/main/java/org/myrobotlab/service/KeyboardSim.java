@@ -135,19 +135,5 @@ public class KeyboardSim extends Service {
     keysim.pressAndRelease(new int[] { KeyEvent.VK_SHIFT, KeyEvent.VK_A }, 1000);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(KeyboardSim.class.getCanonicalName());
-    meta.addDescription("simulate keyboard interactions");
-    meta.addCategory("control");
-    return meta;
-  }
 
 }

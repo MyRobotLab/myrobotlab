@@ -1338,27 +1338,6 @@ public class Agent extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Agent.class.getCanonicalName());
-    meta.addDescription("responsible for spawning a MRL process. Agent can also terminate, respawn and control the spawned process");
-    meta.addCategory("framework");
-    meta.setSponsor("GroG");
-    meta.setLicenseApache();
-
-    // meta.includeServiceInOneJar(true);
-
-    return meta;
-  }
-
-  /**
    * First method JVM executes when myrobotlab.jar is in jar form.
    * 
    * --agent "--logLevel DEBUG --service webgui WebGui"

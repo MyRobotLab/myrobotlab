@@ -353,20 +353,5 @@ public class Lidar extends Service implements SerialDataListener {
     info("%s disconnected from %s", getName(), portName);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Lidar.class.getCanonicalName());
-    meta.addDescription("The Lidar Service - Light Detection And Ranging");
-    meta.addCategory("sensors");
-
-    return meta;
-  }
 }

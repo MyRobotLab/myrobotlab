@@ -527,31 +527,6 @@ public class InMoovHead extends Service {
     rollNeck.moveTo(rollNeck.getCurrentInputPos() + 2);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoovHead.class.getCanonicalName());
-    meta.addDescription("InMoov Head Service");
-    meta.addCategory("robot");
-
-    meta.addPeer("jaw", "Servo", "Jaw servo");
-    meta.addPeer("eyeX", "Servo", "Eyes pan servo");
-    meta.addPeer("eyeY", "Servo", "Eyes tilt servo");
-    meta.addPeer("rothead", "Servo", "Head pan servo");
-    meta.addPeer("neck", "Servo", "Head tilt servo");
-    meta.addPeer("rollNeck", "Servo", "rollNeck Mod servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-
-    return meta;
-  }
-
   public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
 
     setVelocity(headXSpeed, headYSpeed, eyeXSpeed, eyeYSpeed, jawSpeed, null);

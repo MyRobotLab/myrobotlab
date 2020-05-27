@@ -640,27 +640,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     return pinMap;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Adafruit16CServoDriver.class.getCanonicalName());
-    meta.addDescription("controls 16 pwm pins for 16 servos/LED or 8 motors");
-    meta.addCategory("shield", "servo", "pwm");
-    meta.setSponsor("Mats");
-    // meta.addDependency("com.pi4j.pi4j", "1.1-SNAPSHOT");
-    /*
-     * meta.addPeer("arduino", "Arduino", "our Arduino"); meta.addPeer("raspi",
-     * "RasPi", "our RasPi");
-     */
-    return meta;
-  }
 
   @Override
   public void onServoSetSpeed(ServoControl servo) {

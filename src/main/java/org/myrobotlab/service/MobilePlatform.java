@@ -353,24 +353,6 @@ public class MobilePlatform extends Service {
     return headingCurrent;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MobilePlatform.class);
-    meta.addDescription(
-        "used to encapsulate many of the functions and formulas regarding 2 motor platforms encoders and other feedback mechanisms can be added to provide heading, location and other information");
-    meta.addCategory("robot", "control");
-    meta.setAvailable(false);
-
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);

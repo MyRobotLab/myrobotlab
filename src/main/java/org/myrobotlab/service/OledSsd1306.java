@@ -841,23 +841,6 @@ public class OledSsd1306 extends Service implements I2CControl {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(OledSsd1306.class.getCanonicalName());
-    meta.addDescription("OLED driver using SSD1306 driver and the i2c protocol");
-    meta.addCategory("i2c", "control");
-    meta.setAvailable(true);
-    meta.setSponsor("Mats");
-    return meta;
-  }
 
   @Override
   public boolean isAttached(String name) {

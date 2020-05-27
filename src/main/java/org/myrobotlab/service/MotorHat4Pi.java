@@ -102,15 +102,4 @@ public class MotorHat4Pi extends AbstractMotor {
     hat.attach(raspi, "1", "0x60");
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MotorHat4Pi.class.getCanonicalName());
-    meta.addDescription("Motor service for the Raspi Motor HAT");
-    meta.addCategory("motor");
-    meta.addPeer("hat", "AdafruitMotorHat4Pi", "Motor HAT");
-    meta.setAvailable(true);
-
-    return meta;
-  }
-
 }
