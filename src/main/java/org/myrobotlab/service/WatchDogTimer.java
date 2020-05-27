@@ -343,24 +343,6 @@ public class WatchDogTimer extends Service {
     stop();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(WatchDogTimer.class);
-    meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("safety");
-    return meta;
-  }
 
   public void addCheckPoint(String watchDogName) {
     CheckPointWorker cpw = null;

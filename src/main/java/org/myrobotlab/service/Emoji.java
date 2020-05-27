@@ -266,28 +266,6 @@ public class Emoji extends Service
 
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Emoji.class);
-    meta.addDescription("used as a general template");
-
-    meta.addPeer("display", "ImageDisplay", "image display");
-    meta.addPeer("http", "HttpClient", "downloader");
-    meta.addPeer("fsm", "FiniteStateMachine", "emotional state machine");
-
-    // meta.setAvailable(false);
-    meta.addCategory("general");
-    return meta;
-  }
-
   @Override
   public void onText(String text) {
     // FIXME - look for emotional words

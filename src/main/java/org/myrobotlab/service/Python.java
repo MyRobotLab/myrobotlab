@@ -203,25 +203,6 @@ public class Python extends Service {
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Python.class.getCanonicalName());
-    meta.addDescription("the Jython script engine compatible with pure Python 2.7 scripts");
-    meta.addCategory("programming", "control");
-
-    meta.includeServiceInOneJar(true);
-    meta.addDependency("org.python", "jython-standalone", "2.7.1");
-    return meta;
-  }
-
-  /**
    * FIXME - buildtime package in resources pyrobotlab python service urls -
    * created for referencing script
    */

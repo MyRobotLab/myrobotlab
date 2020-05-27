@@ -518,24 +518,6 @@ public class Tracking extends Service {
     rest();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Tracking.class.getCanonicalName());
-    meta.addDescription("uses a video input and vision library to visually track objects");
-    meta.addCategory("vision", "video", "sensors", "control");
-    meta.addPeer("pid", "Pid", "Pid service - for all your pid needs");
-    meta.addPeer("opencv", "OpenCV", "Tracking OpenCV instance");
-    return meta;
-  }
-
   public void attach(ServoControl servo, String axis) {
     if (!(axis.equals("x") || axis.equals("y"))) {
       log.info("Axis must be x or y");

@@ -30,25 +30,6 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     setReady(Platform.getLocalInstance().isWindows());
   }
 
-  static public ServiceType getMetaData() {
-
-    // ServiceType meta = new ServiceType(MimicSpeech.class.getCanonicalName());
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(MimicSpeech.class.getCanonicalName());
-
-    meta.addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");
-    meta.addCategory("speech", "sound");
-    meta.addDependency("mycroftai.mimic", "mimic_win64", "1.0", "zip");
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
-    meta.addCategory("speech", "sound");
-
-    meta.setSponsor("Kwatters");
-    // meta.addDependency("marytts", "5.2");
-    // meta.addDependency("com.sun.speech.freetts", "1.2");
-    // meta.addDependency("opennlp", "1.6");
-    // TODO: build it for all platforms and add it to the repo as a zip file
-    // so each os can download a pre-built version of mimic ...
-    return meta;
-  }
 
   public static void main(String[] args) throws Exception {
     Runtime.start("gui", "SwingGui");

@@ -377,24 +377,6 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(RoboClaw.class);
-    meta.addDescription("interface for the powerful RoboClaw motor controller");
-    meta.addCategory("motor", "control");
-    meta.addPeer("serial", "Serial", "Serial Port");
-
-    return meta;
-  }
-
-  /**
    * RoboClaw is a serial device, so it has a PortConnector interface.
    */
   @Override

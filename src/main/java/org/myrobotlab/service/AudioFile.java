@@ -511,36 +511,6 @@ public class AudioFile extends Service {
   public void setMute(boolean mute) {
     this.mute = mute;
   }
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(AudioFile.class.getCanonicalName());
-    meta.addDescription("can play audio files on multiple tracks");
-    meta.addCategory("sound","music");
-
-    meta.addDependency("javazoom", "jlayer", "1.0.1");
-    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
-    meta.addDependency("com.googlecode.soundlibs", "vorbisspi", "1.0.3.3"); // is
-    // this
-    // being
-    // used
-    // ?
-
-    /*
-     * meta.addDependency("javazoom.spi", "1.9.5");
-     * meta.addDependency("javazoom.jl.player", "1.0.1");
-     * meta.addDependency("org.tritonus.share.sampled.floatsamplebuffer",
-     * "0.3.6");
-     */
-    return meta;
-  }
 
 }

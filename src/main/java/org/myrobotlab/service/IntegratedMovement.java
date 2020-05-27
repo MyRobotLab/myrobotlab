@@ -519,26 +519,6 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     return jointPositionMap;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(IntegratedMovement.class.getCanonicalName());
-    meta.addDescription("a 3D kinematics service supporting D-H parameters");
-    meta.addCategory("robot", "control");
-    meta.addPeer("openni", "OpenNi", "Kinect service");
-    meta.addDependency("inmoov.fr", "inmoov", "1.1.22", "zip");
-    meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
-    meta.setAvailable(true);
-    return meta;
-  }
-
   public void setDHLink(String arm, String name, double d, double theta, double r, double alpha) {
     if (engines.containsKey(arm)) {
       DHLink dhLink = new DHLink(name, d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));

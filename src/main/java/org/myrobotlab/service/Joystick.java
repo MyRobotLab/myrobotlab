@@ -400,31 +400,6 @@ public class Joystick extends Service {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Joystick.class.getCanonicalName());
-    meta.addDescription("service allows interfacing with a keyboard, joystick or gamepad");
-    meta.addCategory("control","telerobotics");
-    meta.addDependency("net.java.jinput", "jinput", "2.0.7");
-    meta.addDependency("jinput-natives", "jinput-natives", "2.0.7", "zip");
-    Platform platform = Platform.getLocalInstance();
-    if (platform.isArm()) {
-      meta.addDependency("jinput-natives", "jinput-natives-armv7.hfp", "2.0.7", "zip");
-    }
-    // meta.addDependency("net.java.jinput", "jinput-platform", "2.0.7");
-    // meta.addArtifact("net.java.jinput", "natives-windows");
-    // meta.addArtifact("net.java.jinput", "natives-linux");
-    // meta.addArtifact("")
-    return meta;
-  }
 
   /*
    * Map<String, Set<RelativePositionControl>> axisConsumers = new
@@ -542,6 +517,12 @@ public class Joystick extends Service {
     try {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
       Runtime.start("gui", "SwingGui");
 
       joy.setController(2);

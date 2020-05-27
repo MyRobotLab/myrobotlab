@@ -172,22 +172,6 @@ public class Git extends Service {
     return ret;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Git.class);
-    meta.addDescription("used to manage source code");
-    meta.addCategory("programming");
-    return meta;
-  }
-
   public void sync(String location, String url) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
     sync(location, url, "master");
   }

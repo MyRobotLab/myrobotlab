@@ -631,29 +631,6 @@ public class Sphinx extends AbstractSpeechRecognizer {
   }
 
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Sphinx.class.getCanonicalName());
-    meta.addDescription("open source pure Java speech recognition");
-    meta.addCategory("speech recognition");
-
-    // details here ...
-    // https://cmusphinx.github.io/wiki/tutorialsphinx4/
-    // meta.addDependency("javax.speech.recognition", "1.0");
-    // meta.addDependency("edu.cmu.sphinx", "4-1.0beta6");
-    meta.addDependency("edu.cmu.sphinx", "sphinx4-core", "5prealpha-SNAPSHOT");
-    meta.addDependency("edu.cmu.sphinx", "sphinx4-data", "5prealpha-SNAPSHOT");
-    return meta;
-  }
-
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");

@@ -205,21 +205,4 @@ public class SensorMonitor extends Service {
 
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(SensorMonitor.class.getCanonicalName());
-    meta.addDescription("sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion");
-    meta.addCategory("sensors", "display");
-
-    return meta;
-  }
-
 }

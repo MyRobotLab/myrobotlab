@@ -711,23 +711,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
     return pinDef;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Mpr121.class);
-    meta.addDescription("MPR121 Touch sensor & LED Driver");
-    meta.addCategory("shield", "sensors", "i2c");
-    meta.setSponsor("Mats");
-    meta.setAvailable(false);
-    return meta;
-  }
 
   @Override
   // TODO Implement individula sample rates per pin

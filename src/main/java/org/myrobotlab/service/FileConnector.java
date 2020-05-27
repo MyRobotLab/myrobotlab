@@ -102,21 +102,6 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
     this.directory = directory;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(FileConnector.class.getCanonicalName());
-    meta.addDescription("This connector will scan all the files in a directory and production documents");
-    meta.addCategory("ingest");
-
-    return meta;
-  }
 
 }

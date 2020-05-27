@@ -83,21 +83,6 @@ public class IndianTts extends AbstractSpeechSynthesis {
     return audioData;
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
-    meta.addDescription("Hindi text to speech support - requires keys");
-    meta.setCloudService(true);
-    meta.addCategory("speech","cloud");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "sound");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
-    
-    meta.setRequiresKeys(true);
-
-    return meta;
-  }
-
   public void setKeys(String keyId, String keyIdSecret) {
     Security security = Runtime.getSecurity();
     security.setKey(INDIANTTS_USER_USERID, keyId);

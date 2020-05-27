@@ -72,12 +72,11 @@ public class ServiceData implements Serializable {
       // - generate it and put it in
       // getRoot()/resource/framework/serviceData.json
 
-
       // if we're not in a jar we are in an IDE.
 
       // First check the .myrobotlab/serviceData.json dir.
       File jsonFile = new File(serviceDataCacheFileName);
-      if (jsonFile.exists() ) {
+      if (jsonFile.exists()) {
         // load it and return!
         String data = null;
         try {
@@ -89,41 +88,21 @@ public class ServiceData implements Serializable {
         log.info("Returning serviceData.json from {}", jsonFile);
         return localInstance;
       } else {
-        // it didn't exist, lets either load it from the jar or generate it!
-        if (FileIO.isJar()) {
-          log.info("Extracting serviceData.json from myrobotlab.jar");
-          // extract it from the jar.
-          String extractFrom = "/resource/framework/serviceData.json";
-          jsonFile.getParentFile().mkdirs();
-          try {
-            FileIO.extract(extractFrom, jsonFile.getAbsolutePath());
-          } catch (IOException e) {
-            log.warn("Error extracting serviceData.json from myrobotlab.jar", e);
-          }
 
-          // at this point we should be able to load it from the extracted serviceData.json
-          String data = null;
-          try {
-            data = FileIO.toString(jsonFile);
-          } catch (IOException e) {
-            log.warn("Error reading serviceData.json from location {}", jsonFile.getAbsolutePath());
-          }
-          localInstance = CodecUtils.fromJson(data, ServiceData.class);
-          return localInstance;
-
-        } else {
-          // we are running in an IDE and haven't generated/saved the serviceData.json yet.
-          try {
-            // This must only be run as part of the build or from your IDE.  It will not work when running from a jar.
-            localInstance = ServiceData.generate();
-            localInstance.save();
-            log.info("saved generated serviceData.json to {}", serviceDataCacheFileName);
-          } catch (IOException e1) {
-            log.error("Unable to generate the serivceData.json file!!");
-            // This is a fatal issue. I think we should exit the jvm here.
-          }
-          return localInstance;
+        // we are running in an IDE and haven't generated/saved the
+        // serviceData.json yet.
+        try {
+          // This must only be run as part of the build or from your IDE. It
+          // will not work when running from a jar.
+          localInstance = ServiceData.generate();
+          localInstance.save();
+          log.info("saved generated serviceData.json to {}", serviceDataCacheFileName);
+        } catch (IOException e1) {
+          log.error("Unable to generate the serivceData.json file!!");
+          // This is a fatal issue. I think we should exit the jvm here.
         }
+        return localInstance;
+
       }
     }
   }
@@ -159,9 +138,8 @@ public class ServiceData implements Serializable {
       String fullClassName = services.get(i);
       log.debug("querying {}", fullClassName);
       try {
-        Class<?> theClass = Class.forName(fullClassName);
-        Method method = theClass.getMethod("getMetaData");
-        ServiceType serviceType = (ServiceType) method.invoke(null);
+
+        ServiceType serviceType = (ServiceType) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getName())) {
           log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
@@ -343,9 +321,31 @@ public class ServiceData implements Serializable {
     return st.getDependencies();
   }
 
-  public static void main(String[] args) {
+  public static ServiceType getMetaData(String serviceTypeName) {
     try {
 
+      if (!serviceTypeName.contains(".")) {
+        serviceTypeName = String.format("org.myrobotlab.service.meta.%sMeta", serviceTypeName);
+      } else {
+        int pos = serviceTypeName.lastIndexOf(".");
+        String serviceName = serviceTypeName.substring(pos + 1);
+        serviceTypeName = serviceTypeName.substring(0, pos) + ".meta." + serviceName + "Meta";
+      }
+
+      Class<?> theClass = Class.forName(serviceTypeName);
+      Method method = theClass.getMethod("getMetaData");
+      ServiceType serviceType = (ServiceType) method.invoke(null);
+      return serviceType;
+      
+    } catch (Exception e) {
+      log.error("getMetaData threw {}.getMetaData() does not exist", serviceTypeName, e);
+    }
+
+    return null;
+  }
+
+  public static void main(String[] args) {
+    try {
       // LoggingFactory.init(); - don't change logging for mvn
       String path = "";
       if (args.length > 0) {

@@ -196,23 +196,6 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     return busVoltage;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(AdafruitIna219.class.getCanonicalName());
-    meta.addDescription("measures voltage and current of a circuit");
-    meta.setLicenseApache();
-    meta.addCategory("shield", "sensors", "i2c");
-    meta.setSponsor("Mats");
-    return meta;
-  }
 
   // This section contains all the new attach logic
   @Override

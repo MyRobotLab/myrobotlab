@@ -16,71 +16,11 @@ import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.slf4j.Logger;
 
-/**
- * <pre>
- * FIXME  
- *        - auto-start peers
- *        - "easy" sensor fusion -  multi-callback channels lead to a single channel
- *        - FIXME - aiml integration
- *        - FIXME - running in mute mode - "Hello Greg, I had a problem starting today/most recent update/this evening - would you like to hear the log?"
- *        - FIXME - sorry to bother you, but I have several problems - could I tell you what they are ?"
- *        - virtual joystick 
- *        - FULL path displayed in ProgramAB "bots" 
- *        - jostick control of motors !!!! get it f*ing moving again !! 
- *        - NAVIGATE !!
- *        - FIXME - moveTo(35) // 35 cm using "all" encoders send to sensor fusion
- *        
- * -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=8080 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=8080
- *  FOSCAM WORKY !!! - for IPCamera frame grabber
- * 
- * http://admin:admin@192.168.0.37/videostream.cgi?user=admin(and)pwd=admin
- *
- * </pre>
- * 
- * @author GroG
- *
- */
 public class WorkE extends Service implements StatusListener {
 
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
 
   static final long serialVersionUID = 1L;
-
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(WorkE.class);
-
-    meta.addPeer("git", "Git", "synching repos");
-
-    // motor control - output
-    meta.addPeer("joystick ", "Joystick", "joystick control");
-    meta.addPeer("controller", "Sabertooth", "motor controller");
-    meta.addPeer("motorLeft", "MotorPort", "left motor");
-    meta.addPeer("motorRight", "MotorPort", "right motor");
-
-    meta.addPeer("webgui", "WebGui", "web interface");
-
-    // vision - input
-    // TODO - going to have several "spouts" - and bolts (storm analogy)
-    meta.addPeer("cv ", "OpenCV", "computer vision");// webcam spout
-    // meta.addPeer("leftFoscam ", "OpenCV", "computer vision");// webcam spout
-
-    // speech - output
-    meta.addPeer("mouth ", "Polly", "mouth");
-
-    // ear - input
-    meta.addPeer("ear", "WebkitSpeechRecognition", "ear");
-
-    // brain - input/output
-    meta.addPeer("brain", "ProgramAB", "ear");
-
-    // emoji - output
-    meta.addPeer("emoji", "Emoji", "emotional state machine");
-
-    meta.addDescription("the worke bot !");
-    meta.addCategory("robot");
-    return meta;
-  }
 
   public static void main(String[] args) {
     try {
