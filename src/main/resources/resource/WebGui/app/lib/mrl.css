@@ -81,7 +81,7 @@ table, th, td {
 
 
 
-.sliderContainer{position: relative;/* background-color: aqua; *//* padding-top: 10px; */top: 0px;/* width: calc(100% - 100px); */height: 145px;width: 600px;left: 40px;}
+.sliderContainer{position: relative;/* background-color: aqua; *//* padding-top: 10px; */top: 0px;/* width: calc(100% - 100px); */height: 145px;width: 600px;left: 50px;}
 
 .restLabel{
   position: absolute;
@@ -504,7 +504,7 @@ outline: none!important;
   content: "";
   position: absolute;
   right: 0px;
-  top: -33px;
+  top: -35px;
   width: 0;
   z-index: 99;
   height: 0;
@@ -527,7 +527,7 @@ outline: none!important;
   content: "";
   position: absolute;
   right: -15px;
-  top: -33px;
+  top: -36px;
   width: 0;
   z-index: 99;
   height: 0;
@@ -578,7 +578,7 @@ outline: none!important;
 .rzInput .custom-slider2.rzslider .rz-selection {background: #edf6e9;height: 34px;top: -13px;}
 .lockInputOutputButton{
   position: relative;
-  top: -204px;
+  top: -203px;
   left: -63px;
   width: 37px;
   height: 71px;
@@ -678,7 +678,7 @@ cursor: col-resize;
   font-weight: normal;
   z-index: 80;
   text-indent: 9px;
-  background-color: #FFFFFF;
+  background-color: transparent;
   visibility: visible!important;
 }
 
@@ -695,7 +695,7 @@ cursor: col-resize;
   left: 20px;
   margin-left: 39px;
   visibility: visible!important;
-  background-color: #FFFFFF;
+  background-color: transparent;
 }
 
 .sliderLimits {
@@ -745,8 +745,9 @@ background: #999;
 }
 .rzRest{
   position: relative;
-  top: -83px;
+  top: -89px;
   opacity: 0;
+  z-index: 80;
 }
 .rzRest .custom-slider .rz-bar-wrapper {
   height: 20px;
@@ -754,7 +755,7 @@ background: #999;
 }
 .rzInput{
   position: relative;
-  top: -121px;
+  top: -127px;
   z-index: 10;
 }
 .rzOutput{
@@ -790,7 +791,7 @@ background: #999;
 }
 
 .limitsZone .restLabelLimits{
-  top: -68px;
+  top: -74px;
   /* display: flex; */
   margin-left: -31px;
   font-size: larger;
@@ -803,7 +804,7 @@ background: #999;
 .limitsZone .restLabelLimits .restCursor{
   left: 12px;
   top: 19px;
-  height: 41px;
+  height: 47px;
 }
 .limitsZone .restCursor{
   height: 25px;
@@ -818,7 +819,7 @@ background: #cecece;
 height: 4px;
 }
 .rzPos .custom-slider.rzslider .rz-pointer:before {content: "";position: absolute;right: -10px;top: -6px;/* width: 1px; */z-index: 99;height: 0;border-right: 10px solid transparent;border-left: 10px solid transparent;border-bottom: 10px solid #2a611e;}
-.rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 40px;top: -13px;}
+.rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 52px;top: -17px;}
 .rzOutput .custom-slider.rzslider .rz-selection {background: #e4f3f3;height: 51px;top: -11px;}
 
 .rzInput .custom-slider.rzslider .rz-bubble:nth-child(7) {
@@ -830,7 +831,7 @@ height: 4px;
   display: flex;
   text-align: right;
   z-index: 8;
-  top: -19px;
+  top: -22px;
   background-color: transparent;
   border-width: 0px;
   visibility: visible !important;
@@ -844,7 +845,7 @@ height: 4px;
   padding-left: 20px;
   z-index: 8;
   text-indent: 24px;
-  top: -19px;
+  top: -22px;
   background: transparent;
   border-width: 0px;
 }
