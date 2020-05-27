@@ -31,11 +31,6 @@ public class ServoLang extends LangUtils {
       sb.append("# " + name + ".setPin(" + s.getPin() + ")\n");
     }
 
-    Mapper mapper = s.getMapper();
-    
-    
-    // save the servo map
-    sb.append(name + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
     // if there's a controller reattach it at rest
     // FIXME - there is the initial position vs rest - they potentially are very different
     /*
@@ -51,6 +46,8 @@ public class ServoLang extends LangUtils {
     */
     if (s.getAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
+    } else {
+      sb.append(name + ".setAutoDisable(False)\n");      
     }
     return sb.toString();
   }
