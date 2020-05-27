@@ -2,16 +2,20 @@ package org.myrobotlab.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.test.AbstractTest;
 
 /**
  * 
- * @author GroG FIXME - test one servo against EVERY TYPE OF CONTROLLER
+ * @author GroG / kwatters 
+ * 
+ * FIXME - test one servo against EVERY TYPE OF CONTROLLER
  *         (virtualized) !!!! iterate through all types
  * 
  *         FIXME - what is expected behavior when a s1 is attached at pin 3,
@@ -24,7 +28,7 @@ public class ServoTest extends AbstractTest {
   static final String port01 = "COM9";
   Integer pin = 5;
 
-  @Test
+  // @Test
   public void testAttach() throws Exception {
     // FIXME - test state change - mrl gets restarted arduino doesn't what
     // happens - how to handle gracefully
@@ -32,16 +36,13 @@ public class ServoTest extends AbstractTest {
     // FIXME - make abstract class from interfaces to attempt to do Java 8
     // interfaces with default
     // creation ...
-
     // Adafruit16CServoDriver afdriverx = (Adafruit16CServoDriver)
     // Runtime.start("afdriver", "Adafruit16CServoDriver");
     Servo servo01 = (Servo) Runtime.start("s1", "Servo");
     Servo servo02 = (Servo) Runtime.start("s2", "Servo");
     // initialize an arduinos
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    
     arduino01.connect(port01);
-    
     
     // because I'm just so tired of race conditions !
     // just friggen wait 1/2 a second
@@ -130,7 +131,6 @@ public class ServoTest extends AbstractTest {
     servo01.moveTo(130.0);
 
     // servo02.attach(afdriver, 8);
-
     // this is valid
     // FIXME --- THIS IS NOT RE-ENTRANT !!!
     // servo01.attach(arduino01, 8, 40); // this attaches the device, calls
@@ -138,7 +138,6 @@ public class ServoTest extends AbstractTest {
     // FIXME --- THIS IS NOT RE-ENTRANT !!!
     // servo02.attach(afdriver, 8, 40);
     // IS IT Equivalent to this ?
-
     // energize to different pin
     // servo01.attach(7);
     arduino01.setDebug(true);
@@ -184,17 +183,10 @@ public class ServoTest extends AbstractTest {
     //servo01.releaseService();
     //servo02.releaseService();
   }
-
-  @Test
-  public void testAllControllers() {
-    System.out.println("ServoTest.testAllControllers() -> FIXME - implement !!!");
-  }
-
   
   @Test
   public void invertTest() {
     Servo servo01 = (Servo) Runtime.start("s1", "Servo");
-
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);  
     servo01.attach(arduino01, 8, 40.0);
@@ -209,8 +201,7 @@ public class ServoTest extends AbstractTest {
     assertEquals(160.0, servo01.getTargetOutput(), 0.001);
     servo01.setInverted(false);
     assertEquals(20.0, servo01.getTargetOutput(), 0.001);
-  }
-  
+  }  
 
   @Test
   public void testServo() throws Exception {
@@ -277,17 +268,18 @@ public class ServoTest extends AbstractTest {
 
   }
 
+  @Test
+  public void releaseService() {
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    // Release the servo.
+    servo01.releaseService();
+    assertNull(Runtime.getService("servo01"));
+  }
 
   @Test
   public void testAutoDisable() throws Exception {
-    if (!isHeadless()) {
-      // Runtime.start("gui", "SwingGui");
-      // Runtime.start("gui", "WebGui");
-    }
-    
+    // Start the test servo.
     Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
-    servo01.releaseService();
-
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
 
@@ -296,11 +288,24 @@ public class ServoTest extends AbstractTest {
     servo01.setPin(pin);
     
     arduino01.attach(servo01);
+    // TODO: remove this sleep and make sure we don't have race conditions.
     sleep(100);
+    assertTrue("verifying servo is attached to the arduino.", servo01.isAttached("arduino01"));
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
+    
+    // Disable auto disable.. and move the servo.
     servo01.setAutoDisable(false);
-    servo01.setSpeed(50.0);
     assertFalse("setting autoDisable false", servo01.getAutoDisable());
+
+    // choose a speed for this test.  
+    servo01.setSpeed(50.0);
+    
+    // we should move it and make sure it remains enabled. 
+    Thread.sleep(servo01.getIdleTimeout() + 100);
+    assertTrue("Servo should be enabled.", servo01.isEnabled());
+    
+    // Ok. now if we disable.. and move the servo.. it should be disabled after a certain amount of time.
+    
     servo01.setAutoDisable(true);
     log.warn("thread list {}", getThreadNames());
     assertTrue("setting autoDisable true", servo01.getAutoDisable());
