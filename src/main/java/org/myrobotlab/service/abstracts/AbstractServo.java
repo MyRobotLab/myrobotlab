@@ -119,7 +119,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * Default timeout is 3000 milliseconds
    * 
    */
-  int idleTimeout = 3000;
+  protected int idleTimeout = 3000;
 
   /**
    * if the servo is doing a blocking call - it will block other blocking calls
@@ -756,11 +756,17 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     }
   }
 
+  // TODO: consider moving these to the ServoControl interface.
   public int setIdleTimeout(int idleTimeout) {
     if (this.idleTimeout != idleTimeout) {
       this.idleTimeout = idleTimeout;
       broadcastState();
     }
+    return idleTimeout;
+  }
+  
+  // Getter for the current idleTimeout setting.
+  public int getIdleTimeout() {
     return idleTimeout;
   }
 
@@ -776,6 +782,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     broadcastState();
   }
 
+  @Override
+  public void setMinMaxOutput(double minY, double maxY) {
+    mapper.map(mapper.getMinX(), mapper.getMaxX(),minY, maxY);
+    broadcastState();
+  }
+  
   @Override
   public void setMinMax(double minXY, double maxXY) {
     mapper.map(minXY, maxXY,minXY, maxXY);

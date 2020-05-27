@@ -82,13 +82,13 @@ public class InMoovHead extends Service {
   }
 
   private void initServoDefaults() {
-    neck.setMinMax((double)20, (double)160);
-    rollNeck.setMinMax((double)20, (double)160);
-    rothead.setMinMax((double)30, (double)150);
+    neck.map(20, 160, 20, 160);
+    rollNeck.map(20, 160, 20, 160);
+    rothead.map(30, 150, 30, 150);
     // reset by mouth control
-    jaw.setMinMax((double)10, (double)25);
-    eyeX.setMinMax((double)60, (double)120);
-    eyeY.setMinMax((double)60, (double)120);
+    jaw.map(10, 25, 10, 25);
+    eyeX.map(60, 120, 60, 120);
+    eyeY.map(60, 120, 60, 120);
     neck.setRest(90.0);
     neck.setPosition(90.0);
     rollNeck.setRest(90.0);
@@ -396,14 +396,31 @@ public class InMoovHead extends Service {
   public void enableAutoEnable(Boolean param) {
   }
 
+  /**
+   * Sets the output min/max values for all servos in the inmoov head.
+   * input limits are not modified.
+   * 
+   * @param headXMin
+   * @param headXMax
+   * @param headYMin
+   * @param headYMax
+   * @param eyeXMin
+   * @param eyeXMax
+   * @param eyeYMin
+   * @param eyeYMax
+   * @param jawMin
+   * @param jawMax
+   * @param rollNeckMin
+   * @param rollNeckMax
+   */
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
       double jawMax, double rollNeckMin, double rollNeckMax) {
-    rothead.setMinMax(headXMin, headXMax);
-    neck.setMinMax(headYMin, headYMax);
-    eyeX.setMinMax(eyeXMin, eyeXMax);
-    eyeY.setMinMax(eyeYMin, eyeYMax);
-    jaw.setMinMax(jawMin, jawMax);
-    rollNeck.setMinMax(rollNeckMin, rollNeckMax);
+    rothead.setMinMaxOutput(headXMin, headXMax);
+    neck.setMinMaxOutput(headYMin, headYMax);
+    eyeX.setMinMaxOutput(eyeXMin, eyeXMax);
+    eyeY.setMinMaxOutput(eyeYMin, eyeYMax);
+    jaw.setMinMaxOutput(jawMin, jawMax);
+    rollNeck.setMinMaxOutput(rollNeckMin, rollNeckMax);
   }
 
   // ----- initialization end --------
@@ -474,34 +491,34 @@ public class InMoovHead extends Service {
     
     if (jaw == null) {
       jaw = (ServoControl) startPeer("jaw");
-      jaw.setMinMax(10.0, 25.0);
+      jaw.map(10.0, 25.0, 10.0, 25.0);
       jaw.setRest(10.0);
     }
     if (eyeX == null) {
       eyeX = (ServoControl) startPeer("eyeX");
-      eyeX.setMinMax(60.0, 120.0);
+      eyeX.map(60.0, 120.0, 60.0, 120.0);
       eyeX.setRest(90.0);
     }
     if (eyeY == null) {
       eyeY = (ServoControl) startPeer("eyeY");
-      eyeY.setMinMax(60.0, 120.0);
+      eyeY.map(60.0, 120.0, 60.0, 120.0);
       eyeY.setRest(90.0);
     }
     if (rollNeck == null) {
       rollNeck = (ServoControl) startPeer("rollNeck");
-      rollNeck.setMinMax(20.0, 160.0);
+      rollNeck.map(20.0, 160.0, 20.0, 160.0);
       rollNeck.setRest(90.0);
 
     }
     if (neck == null) {
       neck = (ServoControl) startPeer("neck");
-      neck.setMinMax(20.0, 160.0);
+      neck.map(20.0, 160.0, 20.0, 160.0);
       neck.setRest(90.0);
     }
 
     if (rothead == null) {
       rothead = (ServoControl) startPeer("rothead");
-      rothead.setMinMax(20.0, 160.0);
+      rothead.map(20.0, 160.0, 20.0, 160.0);
       rothead.setRest(90.0);
     }
 

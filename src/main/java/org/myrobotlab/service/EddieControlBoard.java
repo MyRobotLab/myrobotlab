@@ -64,7 +64,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
   int sampleCount = 0;
-  Mapper mapper = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
+  MapperLinear mapper = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
   float leftMotorPower = 0.0f;
 
   float rightMotorPower = 0.0f;
