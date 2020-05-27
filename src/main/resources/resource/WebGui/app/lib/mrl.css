@@ -441,7 +441,7 @@ padding: 2px;
 background: #9dd2ff;
 }
 
-.custom-slider.rzslider .rz-pointer {width: 1px;height: 25px;top: 11px;
+.custom-slider.rzslider .rz-pointer {/* width: 1px; */height: 25px;top: 14px;
 /* to remove the default positioning */bottom: 0px;background-color: #999;/* border-top-left-radius: 3px; *//* border-top-right-radius: 3px; */}
 
 .lastColumn{
@@ -527,7 +527,7 @@ outline: none!important;
   content: "";
   position: absolute;
   right: -15px;
-  top: -36px;
+  top: -35px;
   width: 0;
   z-index: 99;
   height: 0;
@@ -578,7 +578,7 @@ outline: none!important;
 .rzInput .custom-slider2.rzslider .rz-selection {background: #edf6e9;height: 34px;top: -13px;}
 .lockInputOutputButton{
   position: relative;
-  top: -203px;
+  top: -180px;
   left: -63px;
   width: 37px;
   height: 71px;
@@ -638,7 +638,7 @@ cursor: col-resize;
 }
 
 .custom-slider.rzslider .rz-bubble:nth-child(6) {
-  bottom: -12px;
+  bottom: 6px;
   padding: 3px 6px;
   color: #55637d;
   cursor: none;
@@ -743,30 +743,42 @@ background: #999;
 .servoReferences > div{
   padding-right: 35px;
 }
+.rzPos{
+  top: 0px;
+  position: relative;
+}
 .rzRest{
   position: relative;
-  top: -89px;
+  top: -117px;
   opacity: 0;
   z-index: 80;
+  background-color: aquamarine;
+  height: 30px;
+  margin: 0px;
 }
+.rzRest > div{
+  margin: 0px;
+}
+
 .rzRest .custom-slider .rz-bar-wrapper {
   height: 20px;
-  top: -19px;
+  top: -43px;
 }
 .rzInput{
   position: relative;
-  top: -127px;
+  top: -103px;
   z-index: 10;
 }
 .rzOutput{
   position: relative;
   z-index: 10;
-  top: -105px;
+  top: -81px;
 }
 .rzRest .custom-slider.rzslider .rz-bar {
-  background: #FFFFFF;
+  /* background: #b76363; */
   width: 100%;
-  top: 12px;
+  top: 76px;
+  height: 20px;
 }
 
 .rzInput .custom-slider.rzslider .rz-bar {
@@ -819,8 +831,8 @@ background: #cecece;
 height: 4px;
 }
 .rzPos .custom-slider.rzslider .rz-pointer:before {content: "";position: absolute;right: -10px;top: -6px;/* width: 1px; */z-index: 99;height: 0;border-right: 10px solid transparent;border-left: 10px solid transparent;border-bottom: 10px solid #2a611e;}
-.rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 52px;top: -17px;}
-.rzOutput .custom-slider.rzslider .rz-selection {background: #e4f3f3;height: 51px;top: -11px;}
+.rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 56px;top: -17px;}
+.rzOutput .custom-slider.rzslider .rz-selection {background: #e4f3f3;height: 59px;top: -19px;}
 
 .rzInput .custom-slider.rzslider .rz-bubble:nth-child(7) {
   bottom: 22px;
