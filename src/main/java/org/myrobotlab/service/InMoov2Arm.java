@@ -135,15 +135,15 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     shoulder.setPin(10);
     omoplate.setPin(11);
 
-    bicep.setMinMax(5.0, 90.0); // this is wrong, this values are for the input, not for the output, see bellow exemple 
-    rotate.setMinMax(40.0, 180.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
-    shoulder.setMinMax(0.0, 180.0);  
-    omoplate.setMinMax(10.0, 80.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //bicep.setMinMax(5.0, 90.0); // this is wrong, this values are for the input, not for the output, see bellow exemple 
+    //rotate.setMinMax(40.0, 180.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
+    //shoulder.setMinMax(0.0, 180.0);  
+    //omoplate.setMinMax(10.0, 80.0);  // this is wrong, this values are for the input, not for the output, see bellow exemple
 
-    //bicep.setMinMax(5.0, 90.0, 0.0, 180.0);
-    //rotate.setMinMax(40.0, 180.0, 0.0, 180.0);
-    //shoulder.setMinMax(0.0, 180.0, 0.0, 180.0);
-    //omoplate.setMinMax(10.0, 80.0, 0.0, 180.0);
+    bicep.map(5.0, 90.0, 0.0, 180.0);
+    rotate.map(40.0, 180.0, 0.0, 180.0);
+    shoulder.map(0.0, 180.0, 0.0, 180.0);
+    omoplate.map(10.0, 80.0, 0.0, 180.0);
 
     bicep.setRest(5.0);
     rotate.setRest(90.0);
