@@ -210,6 +210,15 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
         $scope.restSlider.options.minLimit = service.mapper.minX
         $scope.restSlider.options.maxLimit = service.mapper.maxX
+        if($scope.restSlider.value < $scope.inputSlider.minValue){
+            $scope.restSlider.value = $scope.inputSlider.minValue
+            msg.send('setRest', $scope.restSlider.value)
+        }
+        if($scope.restSlider.value > $scope.inputSlider.maxValue){
+            $scope.restSlider.value = $scope.inputSlider.maxValue
+            msg.send('setRest', $scope.restSlider.value)
+        }
+
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control

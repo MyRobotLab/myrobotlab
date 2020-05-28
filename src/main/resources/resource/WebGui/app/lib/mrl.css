@@ -762,12 +762,15 @@ background: #999;
 
 .rzRest .custom-slider .rz-bar-wrapper {
   height: 20px;
-  top: -43px;
+  top: 32px;
 }
 .rzInput{
   position: relative;
   top: -103px;
   z-index: 10;
+}
+.rzOutput .rzslider .rz-bar-wrapper {
+    height: 40px;
 }
 .rzOutput{
   position: relative;
@@ -777,7 +780,7 @@ background: #999;
 .rzRest .custom-slider.rzslider .rz-bar {
   /* background: #b76363; */
   width: 100%;
-  top: 76px;
+  top: 77px;
   height: 20px;
 }
 
@@ -787,7 +790,7 @@ background: #999;
   top: 12px;
 }
 .rzInput .rzslider .rz-bar-wrapper {
-  height: 20px;
+  height: 38px;
 }
 .rzOutput .custom-slider.rzslider .rz-bar {
   background: #FFFFFF;
@@ -1042,6 +1045,7 @@ border-right-color: #f4f4f4;
 .limitNumbersFieldInput{
   width: 52px;
   color: #FFFFFF;
+  text-align: right;
   padding-right: 0px;
   background-color: #92ca7f;
   border-radius: 4px;
@@ -1052,6 +1056,7 @@ border-right-color: #f4f4f4;
   width: 52px;
   color: #FFFFFF;
   padding-right: 0px;
+  text-align: right;
   background-color: #e48b53;
   border-radius: 4px;
   color: white;
@@ -1061,6 +1066,7 @@ border-right-color: #f4f4f4;
 .limitNumbersFieldOutput{
   width: 52px;
   color: #FFFFFF;
+  text-align: right;
   padding-right: 0px;
   background-color: #61b6b9;
   border-radius: 4px;
