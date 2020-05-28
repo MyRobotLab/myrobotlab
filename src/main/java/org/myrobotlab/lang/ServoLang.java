@@ -2,7 +2,6 @@ package org.myrobotlab.lang;
 
 import java.text.DecimalFormat;
 
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Servo;
 
 
@@ -19,8 +18,10 @@ public class ServoLang extends LangUtils {
     // sb.append(name + ".detach()\n");
     sb.append("# sets initial position of servo before moving\n");
     sb.append("# in theory this is the position of the servo when this file was created\n");
-    sb.append(name + String.format(".setPosition(%s)\n", f.format(s.getPos())));
-    sb.append(name + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
+    sb.append(name + String.format(".setPosition(%s)\n", f.format(s.getCurrentInputPos())));
+    sb.append(name + ".map(" + s.getMapper().getMinX() + "," + s.getMapper().getMaxX() + "," +
+                               s.getMapper().getMinY() + "," + s.getMapper().getMaxY() + ")\n");
+    // TODO: add mapper isClipped()
     sb.append(name + ".setInverted(" + toPython(s.isInverted()) + ")\n");
     sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
     sb.append(name + ".setRest(" + s.getRest() + ")\n");
@@ -30,11 +31,6 @@ public class ServoLang extends LangUtils {
       sb.append("# " + name + ".setPin(" + s.getPin() + ")\n");
     }
 
-    Mapper mapper = s.getMapper();
-    
-    
-    // save the servo map
-    sb.append(name + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
     // if there's a controller reattach it at rest
     // FIXME - there is the initial position vs rest - they potentially are very different
     /*
@@ -48,8 +44,10 @@ public class ServoLang extends LangUtils {
       sb.append(name + ".attach(\"" + controller + "\")\n");
     }
     */
-    if (s.getAutoDisable()) {
+    if (s.isAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
+    } else {
+      sb.append(name + ".setAutoDisable(False)\n");      
     }
     return sb.toString();
   }

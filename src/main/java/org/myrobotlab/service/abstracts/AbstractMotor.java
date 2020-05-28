@@ -116,7 +116,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // so that we "try" to maintain a standard default of -1.0 <=> 1.0 with same
     // input limits
     // "bottom" half of the mapper will be set by the controller
-    mapper.map(-1.0, 1.0, null, null);
+    mapper.map(-1.0, 1.0, -1.0, 1.0);
   }
 
   public void onRegistered(Registration s) {
@@ -324,7 +324,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     this.controller = controller;
     this.controllerName = controller.getName();
-    this.mapper.merge(controller.getDefaultMapper());
+    // TODO: KW: set a reasonable mapper.  for pwm motor it's probable -1 to 1 to 0 to 255 ? not sure.
+    this.mapper = controller.getDefaultMapper();
 
     broadcastState();
     controller.attach(this);

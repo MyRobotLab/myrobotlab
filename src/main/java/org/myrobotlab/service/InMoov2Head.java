@@ -44,22 +44,22 @@ public class InMoov2Head extends Service {
     // Config will be managed by LangUtils
     startPeers();
 
-    jaw.setMinMax(10.0, 25.0);
+    jaw.map(10.0, 25.0, 10.0, 25.0);
     jaw.setRest(10.0);
 
-    eyeX.setMinMax(60.0, 120.0);
+    eyeX.map(60.0, 120.0, 60.0, 120.0);
     eyeX.setRest(90.0);
 
-    eyeY.setMinMax(60.0, 120.0);
+    eyeY.map(60.0, 120.0, 60.0, 120.0);
     eyeY.setRest(90.0);
 
-    rollNeck.setMinMax(20.0, 160.0);
+    rollNeck.map(20.0, 160.0, 20.0, 160.0);
     rollNeck.setRest(90.0);
 
-    neck.setMinMax(20.0, 160.0);
+    neck.map(20.0, 160.0, 20.0, 160.0);
     neck.setRest(90.0);
 
-    rothead.setMinMax(20.0, 160.0);
+    rothead.map(20.0, 160.0, 20.0, 160.0);
     rothead.setRest(90.0);
 
     neck.setPin(12);
@@ -70,13 +70,13 @@ public class InMoov2Head extends Service {
     //FIXME rollNeck must be connected to right controller on pin 12 not on pin 30
     rollNeck.setPin(30);
 
-    neck.setMinMax(20.0, 160.0);
-    rollNeck.setMinMax(20.0, 160.0);
-    rothead.setMinMax(30.0, 150.0);
+    neck.map(20.0, 160.0, 20.0, 160.0);
+    rollNeck.map(20.0, 160.0, 20.0, 160.0);
+    rothead.map(30.0, 150.0, 30.0, 150.0);
     // reset by mouth control
-    jaw.setMinMax(10.0, 25.0);
-    eyeX.setMinMax(60.0, 120.0);
-    eyeY.setMinMax(60.0, 120.0);
+    jaw.map(10.0, 25.0, 10.0, 25.0);
+    eyeX.map(60.0, 120.0, 60.0, 120.0);
+    eyeY.map(60.0, 120.0, 60.0, 120.0);
     neck.setRest(90.0);
     neck.setPosition(90.0);
     rollNeck.setRest(90.0);
@@ -184,8 +184,8 @@ public class InMoov2Head extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getPos(), rothead.getPos(), eyeX.getPos(), eyeY.getPos(),
-        jaw.getPos(), rollNeck.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(), eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(),
+        jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
   }
 
   public boolean isValid() {
@@ -343,14 +343,30 @@ public class InMoov2Head extends Service {
     eyelidRight.setAutoDisable(param);
   }
 
+  /**
+   * Set the put min and max values for all servoes in the head.  input limits are not modified.
+   * 
+   * @param headXMin
+   * @param headXMax
+   * @param headYMin
+   * @param headYMax
+   * @param eyeXMin
+   * @param eyeXMax
+   * @param eyeYMin
+   * @param eyeYMax
+   * @param jawMin
+   * @param jawMax
+   * @param rollNeckMin
+   * @param rollNeckMax
+   */
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
       double jawMax, double rollNeckMin, double rollNeckMax) {
-    rothead.setMinMax(headXMin, headXMax);
-    neck.setMinMax(headYMin, headYMax);
-    eyeX.setMinMax(eyeXMin, eyeXMax);
-    eyeY.setMinMax(eyeYMin, eyeYMax);
-    jaw.setMinMax(jawMin, jawMax);
-    rollNeck.setMinMax(rollNeckMin, rollNeckMax);
+    rothead.setMinMaxOutput(headXMin, headXMax);
+    neck.setMinMaxOutput(headYMin, headYMax);
+    eyeX.setMinMaxOutput(eyeXMin, eyeXMax);
+    eyeY.setMinMaxOutput(eyeYMin, eyeYMax);
+    jaw.setMinMaxOutput(jawMin, jawMax);
+    rollNeck.setMinMaxOutput(rollNeckMin, rollNeckMax);
   }
 
   public void setSpeed(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -381,12 +397,12 @@ public class InMoov2Head extends Service {
   }
 
   public void test() {
-    rothead.moveTo(rothead.getPos() + 2);
-    neck.moveTo(neck.getPos() + 2);
-    eyeX.moveTo(eyeX.getPos() + 2);
-    eyeY.moveTo(eyeY.getPos() + 2);
-    jaw.moveTo(jaw.getPos() + 2);
-    rollNeck.moveTo(rollNeck.getPos() + 2);
+    rothead.moveTo(rothead.getCurrentInputPos() + 2);
+    neck.moveTo(neck.getCurrentInputPos() + 2);
+    eyeX.moveTo(eyeX.getCurrentInputPos() + 2);
+    eyeY.moveTo(eyeY.getCurrentInputPos() + 2);
+    jaw.moveTo(jaw.getCurrentInputPos() + 2);
+    rollNeck.moveTo(rollNeck.getCurrentInputPos() + 2);
     eyelidLeft.moveTo(179.0);
     sleep(300);
     eyelidRight.moveToBlocking(1.0);

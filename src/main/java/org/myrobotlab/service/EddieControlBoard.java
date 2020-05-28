@@ -64,7 +64,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   HashMap<String, Float> lastSensorValues = new HashMap<String, Float>();
   int sampleCount = 0;
-  Mapper mapper = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
+  MapperLinear mapper = new MapperLinear(-1.0, 1.0, -127.0, 127.0);
   float leftMotorPower = 0.0f;
 
   float rightMotorPower = 0.0f;
@@ -178,11 +178,11 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
 
   public void go(double left, double right) throws Exception {
     log.info("go {} {}", left, right);
-    int l = mapper.calcOutput(left).intValue();
+    int l = Double.valueOf(mapper.calcOutput(left)).intValue();
     if (l > 127) {
       l = 128 - l;
     }
-    int r = mapper.calcOutput(right).intValue();
+    int r = Double.valueOf(mapper.calcOutput(right)).intValue();
     if (r > 127) {
       r = 128 - r;
     }

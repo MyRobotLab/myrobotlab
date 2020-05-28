@@ -45,6 +45,7 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   }
 
   public Double publishEncoderAngle(Double angle) {
+    log.info("Publish Encoder Angle : {}", angle);
     return angle;
   }
 
@@ -58,7 +59,8 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     // TODO: maybe use nanoTime? how accurate is this.
     long now = System.currentTimeMillis();
     long delta = now - lastUpdate;
-    Double angle = 360.0 * data.value / resolution;
+    Double angle = 360.0 * data.angle / resolution;
+    log.info("Angle : {}", angle );
     if (delta > 0) {
       // we can compute velocity since the last update
       // This computes the change in degrees per second that the encoder is

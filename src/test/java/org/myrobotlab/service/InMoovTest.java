@@ -176,7 +176,7 @@ public class InMoovTest extends AbstractServiceTest implements PinArrayListener 
     i01.setHandVelocity("left", -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
     i01.setTorsoVelocity(-1.0, -1.0, -1.0);
     i01.setHeadVelocity(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
-    double testVelocity = i01.leftArm.omoplate.getVelocity();
+    double testVelocity = i01.leftArm.omoplate.getSpeed();
 
     Assert.assertEquals("Omoplate velocity not -1", -1.0, testVelocity, 0.001);
 

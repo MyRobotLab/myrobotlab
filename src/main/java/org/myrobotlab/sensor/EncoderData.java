@@ -18,23 +18,40 @@ public class EncoderData {
   public String source;
   
   /**
-   * data from the encoder - typically current position
+   * Computed absolute angle from the encoder - IF THIS IS NOT 
+   * COMPUTED AS ABSOLUTE ANGLE IT SHOULD BE LEFT NULL !!!
    */
-  public Double value;
+  public Double angle;
+  
+  /**
+   * raw value of the encoder - this is the tick from the encoder can be
+   * whatever the encoder supports - required value
+   */
+  public double value = 0.0;
   
   /**
    * time data was generated
    */
   public long timestamp;
 
-  public EncoderData(String source, String pin, double value) {
+  public EncoderData(String source, String pin, double value, Double angle) {
     this.timestamp = System.currentTimeMillis();
     this.source = source;
     this.value = value;
+    this.angle = angle;
   }
 
   public String toString() {
-    return String.format("%s %s %d", source, pin, value);
+    StringBuilder sb = new StringBuilder();
+    sb.append("[EncoderData: source:");
+    sb.append(source);
+    sb.append(" pin:");
+    sb.append(pin);
+    sb.append(" value:");
+    sb.append(value);
+    sb.append(" angle:");
+    sb.append(angle);
+    return sb.toString();
   }
 
 }

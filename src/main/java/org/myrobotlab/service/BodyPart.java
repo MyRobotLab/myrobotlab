@@ -180,7 +180,7 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
 
   public void setVelocity(Double... servoVelocity) {
     for (int i = 0; i < servoVelocity.length && i < getAcuators(this.getIntanceName()).size(); i++) {
-      getAcuators(this.getIntanceName()).get(i).setVelocity(servoVelocity[i]);
+      getAcuators(this.getIntanceName()).get(i).setSpeed(servoVelocity[i]);
     }
   }
 

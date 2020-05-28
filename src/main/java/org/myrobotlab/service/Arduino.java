@@ -25,20 +25,18 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.i2c.I2CBus;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.math.MapperLinear;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
 import org.myrobotlab.service.data.DeviceMapping;
@@ -65,6 +63,7 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
@@ -354,7 +353,8 @@ public class Arduino extends AbstractMicrocontroller
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
-    Integer deviceId = null;
+    // need to get a new device id!  wtf is this !
+    // let's get the max current id
     // send data to micro-controller
 
     // TODO: update this with some enum of various encoder types..
@@ -370,11 +370,10 @@ public class Arduino extends AbstractMicrocontroller
     } else {
       error("unknown encoder type {}", encoder.getClass().getName());
     }
-    attachDevice(encoder, new Object[] { address }); // FIXME - don't know why
-                                                     // this is necessary -
-                                                     // Attachable is only
-                                                     // needed
-    msg.encoderAttach(deviceId, type, address);
+    // attach the virtual representation of the device and get an id for it.
+    DeviceMapping m = attachDevice(encoder, new Object[] { address }); 
+    // send the attach method with our device id.
+    msg.encoderAttach(m.getId(), type, address);
 
     encoder.attach(this);
 
@@ -459,7 +458,8 @@ public class Arduino extends AbstractMicrocontroller
     }
 
     int pin = getAddress(servo.getPin());
-    // targetOutput is ALWAYS ALWAYS degrees
+    // targetOutput is never null and is the input requested angle in degrees for the servo.
+    // defaulting to the rest angle.
     double targetOutput = servo.getTargetOutput();
     double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
 
@@ -1259,7 +1259,8 @@ public class Arduino extends AbstractMicrocontroller
       msg = new Msg(this, serial);
       serial.addByteListener(this);
     } else {
-      log.warn("Init serial called and we already have a msg class!");
+      // TODO: figure out why this gets called so often.
+      log.info("Init serial we already have a msg class.");
     }
   }
 
@@ -1628,24 +1629,33 @@ public class Arduino extends AbstractMicrocontroller
 
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
+    log.info("Publish Encoder Data {}", data);
     return data;
   }
 
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
+    // Also need to log this
+    
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
+    Double angle = null;
     if (ec instanceof Amt203Encoder) {
       // type = 0;
       pin = ((Amt203Encoder) ec).getPin();
     } else if (ec instanceof As5048AEncoder) {
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
+      angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
+      log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
 
-    EncoderData data = new EncoderData(ec.getName(), pin, position);
+    EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
+//    log.info("Publish Encoder Data Raw {}", data);
+    
+    // TODO: all this code needs to move out of here!
     return data;
   }
 
@@ -1765,15 +1775,10 @@ public class Arduino extends AbstractMicrocontroller
     return serialData;
   }
 
-  @Deprecated /**
-               * Controllers should publish EncoderData - Servos can change that
-               * into ServoData and publish REMOVED BY GROG - use TimeEncoder !
-               */
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      // REMOVED BY GROG - use time encoder !((ServoControl)
-      // getDevice(deviceId)).publishServoData(ServoStatus.SERVO_POSITION_UPDATE,
-      // (double) currentPos);
+      ((ServoControl)getDevice(deviceId)).publishServoEvent(ServoStatus.values()[eventType], (double) currentPos);
+      log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
     }
@@ -1853,6 +1858,7 @@ public class Arduino extends AbstractMicrocontroller
     Integer deviceId = getDeviceId(servo);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      return;
     }
     if (isConnected()) {
       msg.servoAttachPin(deviceId, getAddress(servo.getPin()));
@@ -1878,7 +1884,7 @@ public class Arduino extends AbstractMicrocontroller
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
     int us = degreeToMicroseconds(servo.getTargetOutput());
-    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getPos(), us);
+    log.debug("servoMoveToMicroseconds servo {} id {} {}->{} us", servo.getName(), deviceId, servo.getCurrentInputPos(), us);
     msg.servoMoveToMicroseconds(deviceId, us);
   }
 
