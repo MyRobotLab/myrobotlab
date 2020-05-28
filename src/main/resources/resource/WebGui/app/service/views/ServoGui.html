@@ -135,31 +135,31 @@
                                 <td>
 
                                     <!-- {{service.mapper.minX}} -->
-                                    <input type="number" min="0" max="180" ng-model="service.mapper.minX" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-model="inputSlider.minValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td class="inputColor">Max</td>
                                 <td>
                                     <!-- {{service.mapper.maxX}} -->
-                                    <input type="number" min="0" max="180" ng-model="service.mapper.maxX" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-model="inputSlider.maxValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td></td>
                                 <td class="bigLabel restColor">
                                     <span ng-click="msg.rest()" title="Go to Rest">Rest</span></td>
                                 <td>
                                     <!-- {{service.rest}} -->
-                                    <input type="number" min="0" max="180" ng-model="service.rest" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-model="restSlider.value" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td></td>
                                 <td class="bigLabel outputColor">Output</td>
                                 <td class="outputColor">Min</td>
                                 <td>
                                     <!-- {{service.mapper.minY}} -->
-                                    <input type="number" min="0" max="180" ng-model="service.mapper.minY" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-model="outputSlider.minValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td class="outputColor">Max</td>
                                 <td>
                                     <!-- {{service.mapper.maxY}} -->
-                                    <input type="number" min="0" max="180" ng-model="service.mapper.maxY" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-model="outputSlider.maxValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                             </tr>                            
                         </tbody>
@@ -178,8 +178,8 @@
                                         <span class="preventDragSelect">{{service.currentOutputPos.toFixed(2)}}º</span>
                                         <div class="servoCursor"></div>
                                     </div>
-                                    <div class="restLabel restLabelLimits" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">                       
-                                       <span class="glyphicon glyphicon-triangle-left"></span> {{service.rest}}  <span class="glyphicon glyphicon-triangle-right"></span>
+                                    <div class="restLabel restLabelLimits" style="left: calc(100% - (({{100 -(restSlider.value*100/180)}}%) + 1px));">                       
+                                       <span class="glyphicon glyphicon-triangle-left"></span> {{restSlider.value}}  <span class="glyphicon glyphicon-triangle-right"></span>
                                         <div class="restCursor"></div>       
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
@@ -192,8 +192,8 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minY*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxY-service.mapper.minY)*100/180)}}%));"></div>
-                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(service.mapper.minX*100/180)}}%)); width: calc(100% - ({{100 -((service.mapper.maxX-service.mapper.minX)*100/180)}}%));"></div>
+                                    <div class="outputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(outputSlider.minValue*100/180)}}%)); width: calc(100% - ({{100 -((outputSlider.maxValue-outputSlider.minValue)*100/180)}}%));"></div>
+                                    <div class="inputLimit" class="preventDragSelect" style="left: calc(100% - ({{100 -(inputSlider.minValue*100/180)}}%)); width: calc(100% - ({{100 -((inputSlider.maxValue-inputSlider.minValue)*100/180)}}%));"></div>
                                 </div>
                                 <div class="rzPos">
                                     <rzslider class="custom-slider2 sliderPosition" rz-slider-model="pos.value" rz-slider-options="pos.options"/>
