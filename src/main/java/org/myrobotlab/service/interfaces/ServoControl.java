@@ -60,11 +60,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void enable();
 
   /**
-   * getAutoDisable return value set by setAutoDisable
+   * isAutoDisable return value set by setAutoDisable
    * 
    * @return Boolean
    */
-  boolean getAutoDisable();
+  boolean isAutoDisable();
 
   /**
    * name of the current controllers - empty if not set
@@ -161,6 +161,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   double getTargetOutput();
 
+  /**
+   * This method returns the input target position of the servo.  This is the 
+   * input position that the servo was requested to move to.
+   * 
+   * @return
+   */
   double getTargetPos();
 
   /**
@@ -312,6 +318,18 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   @Deprecated
   void setMinMax(double minXY, double maxXY);
+  
+  /**
+   *  Helper function that can be used to set the output limits on an existing mapper.
+   *  This will leave the input limits unchanged on the mapper and it will set the output
+   *  minY and maxY values on the mapper.
+   *  
+   *  @param minY
+   *          the output minimum value of the mapper
+   *  @param maxY
+   *          the output maxiumum value of the mapper.
+   */
+  void setMinMaxOutput(double minY, double maxY);
 
   /**
    * set the pin of the servo this does not 'attach' energize the pin only set

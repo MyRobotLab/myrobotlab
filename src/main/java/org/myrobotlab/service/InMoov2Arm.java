@@ -113,10 +113,10 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     shoulder.setPin(10);
     omoplate.setPin(11);
 
-    bicep.setMinMax(5.0, 90.0);
-    rotate.setMinMax(40.0, 180.0);
-    shoulder.setMinMax(0.0, 180.0);
-    omoplate.setMinMax(10.0, 80.0);
+    bicep.map(5.0, 90.0, 5.0, 90.0);
+    rotate.map(40.0, 180.0, 40.0, 180.0);
+    shoulder.map(0.0, 180.0, 0.0, 180.0);
+    omoplate.map(10.0, 80.0, 10.0, 80.0);
 
     bicep.setRest(5.0);
     rotate.setRest(90.0);
@@ -316,11 +316,24 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     this.bicep = bicep;
   }
 
+  /**
+   * This method sets the output min/max limits for all of the servos in the arm.
+   * Input limits are unchanged.
+   * 
+   * @param bicepMin
+   * @param bicepMax
+   * @param rotateMin
+   * @param rotateMax
+   * @param shoulderMin
+   * @param shoulderMax
+   * @param omoplateMin
+   * @param omoplateMax
+   */
   public void setLimits(double bicepMin, double bicepMax, double rotateMin, double rotateMax, double shoulderMin, double shoulderMax, double omoplateMin, double omoplateMax) {
-    bicep.setMinMax(bicepMin, bicepMax);
-    rotate.setMinMax(rotateMin, rotateMax);
-    shoulder.setMinMax(shoulderMin, shoulderMax);
-    omoplate.setMinMax(omoplateMin, omoplateMax);
+    bicep.setMinMaxOutput(bicepMin, bicepMax);
+    rotate.setMinMaxOutput(rotateMin, rotateMax);
+    shoulder.setMinMaxOutput(shoulderMin, shoulderMax);
+    omoplate.setMinMaxOutput(omoplateMin, omoplateMax);
   }
 
   public void setOmoplate(ServoControl omoplate) {
