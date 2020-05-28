@@ -1729,9 +1729,15 @@
           </fileset>
           <fileset>
             <directory>data</directory>
+            <includes>
+            <include>**</include>
+            </includes>
           </fileset>
           <fileset>
             <directory>resource</directory>
+            <includes>
+            <include>**</include>
+            </includes>
           </fileset>
           <fileset>
             <directory>src/main/resources/resource/framework</directory>
