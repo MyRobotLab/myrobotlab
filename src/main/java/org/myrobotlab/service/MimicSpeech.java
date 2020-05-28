@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
