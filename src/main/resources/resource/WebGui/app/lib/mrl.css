@@ -1046,6 +1046,7 @@ border-right-color: #f4f4f4;
   background-color: #92ca7f;
   border-radius: 4px;
   color: white;
+  border: 0px;
 }
 .limitNumbersFieldRest{
   width: 52px;
@@ -1054,6 +1055,8 @@ border-right-color: #f4f4f4;
   background-color: #e48b53;
   border-radius: 4px;
   color: white;
+  border-color: #e48b53;
+  border: 0px;
 }
 .limitNumbersFieldOutput{
   width: 52px;
@@ -1062,6 +1065,8 @@ border-right-color: #f4f4f4;
   background-color: #61b6b9;
   border-radius: 4px;
   color: white;
+  border-color: #61b6b9;
+  border: 0px;
 }
 
 .inputColor{color: #92ca7f;font-size: 14px;font-weight: bold;font-family: Arial, Helvetica, sans-serif!important;}
