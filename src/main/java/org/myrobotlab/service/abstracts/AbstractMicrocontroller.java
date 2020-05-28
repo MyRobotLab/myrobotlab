@@ -262,7 +262,6 @@ public abstract class AbstractMicrocontroller extends Service implements Microco
     // from this time forward - do not attempt to "auto-set"
     userBoardType = board; 
     
-    log.warn("setting board to type {}", board);
     this.board = board;
     // we don't invoke, because
     // it might get into a race condition
