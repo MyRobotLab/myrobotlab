@@ -673,7 +673,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * @param timeoutMs
    * @return
    */
-  abstract protected boolean processMove(double newPos, boolean blocking, Long timeoutMs);
+  abstract protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs);
 
   @Override
   public ServoControl publishServoDisable(ServoControl sc) {
