@@ -142,7 +142,7 @@ public class FileIO {
    * @throws IOException
    */
   static public final void copy(File src, File dst) throws IOException {
-    log.warn("copying from {} to {}", src, dst);
+    log.info("copying from {} to {}", src, dst);
     if (!src.isDirectory()) {
       byte[] b = toByteArray(src);
       if (dst.exists() && dst.isDirectory()) {

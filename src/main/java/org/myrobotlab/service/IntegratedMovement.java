@@ -32,7 +32,7 @@ import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;
@@ -553,6 +553,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
   }
 
   public void setDHLink(String arm, ServoControl servo, double d, double theta, double r, double alpha) {
+    // TODO: kw verify the servo max here should actually be minX maxX .. not these values here.
     setDHLink(arm, servo, d, theta, r, alpha, servo.getMin(), servo.getMax());
   }
 
@@ -561,12 +562,13 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
       IMEngine engine = engines.get(arm);
       DHLink dhLink = new DHLink(servo.getName(), d, r, MathUtils.degToRad(theta), MathUtils.degToRad(alpha));
       // servo.addIKServoEventListener(this);
-      dhLink.addPositionValue(servo.getPos());
+      dhLink.addPositionValue(servo.getCurrentInputPos());
+      // TODO: kw: review that these should actually be the input minX / maxX  .. not the output mapping values here.
       dhLink.setMin(MathUtils.degToRad(theta + servo.getMin()));
       dhLink.setMax(MathUtils.degToRad(theta + servo.getMax()));
       // dhLink.setState(Servo.SERVO_EVENT_STOPPED);
-      dhLink.setVelocity(servo.getVelocity());
-      dhLink.setTargetPos(servo.getPos());
+      dhLink.setVelocity(servo.getSpeed());
+      dhLink.setTargetPos(servo.getCurrentInputPos());
       dhLink.servoMin = minAngle;// servo.getMinInput();
       dhLink.servoMax = maxAngle;// servo.getMaxInput();
       dhLink.hasServo = true;
@@ -637,7 +639,7 @@ public class IntegratedMovement extends Service implements IKJointAnglePublisher
     collisionItems.removeIgnore(object1, object2);
   }
 
-  public void onIKServoEvent(ServoData data) {
+  public void onIKServoEvent(ServoEvent data) {
     Mapper map = maps.get(data.name);
     // data.pos = map.calcOutput(data.pos);
     // data.targetPos = map.calcOutput(data.targetPos);

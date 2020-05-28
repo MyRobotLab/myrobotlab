@@ -179,7 +179,7 @@ public class InMoovEyelids extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getPos(), eyelidright.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveEyelids(%.2f,%.2f)\n", inMoovServiceName, eyelidleft.getCurrentInputPos(), eyelidright.getCurrentInputPos());
   }
 
   public void moveTo(double eyelidleftPos, double eyelidrightPos) {

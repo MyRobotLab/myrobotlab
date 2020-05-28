@@ -158,30 +158,37 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   private void initServoDefaults() {
-    if (bicep.getPin() == null)
+    // if the pins aren't set, we will assume they haven't been initialized and we should
+    // specify the normal inmoov default values.
+    if (bicep.getPin() == null) {
       bicep.setPin(DEFAULT_BICEP_PIN);
-    if (rotate.getPin() == null)
+      bicep.map(5.0, 90.0, 5.0, 90.0);
+      bicep.setRest(5.0);
+      bicep.setPosition(5.0);
+      bicep.setAutoDisable(true);
+    }
+    if (rotate.getPin() == null) {
       rotate.setPin(DEFAULT_ROTATE_PIN);
-    if (shoulder.getPin() == null)
+      rotate.map(40.0, 180.0, 40.0, 180.0);
+      rotate.setRest(90.0);
+      rotate.setPosition(90.0);
+      rotate.setAutoDisable(true);
+    }
+    if (shoulder.getPin() == null) {
       shoulder.setPin(DEFAULT_SHOULDER_PIN);
-    if (omoplate.getPin() == null)
+      shoulder.map(0.0, 180.0, 0.0, 180.0);
+      shoulder.setRest(30.0);
+      shoulder.setPosition(30.0);
+      shoulder.setAutoDisable(true);
+    }
+    if (omoplate.getPin() == null) {
       omoplate.setPin(DEFAULT_OMOPLATE_PIN);
-
-    bicep.setMinMax(5.0, 90.0);
-    rotate.setMinMax(40.0, 180.0);
-    shoulder.setMinMax(0.0, 180.0);
-    omoplate.setMinMax(10.0, 80.0);
-
-    bicep.setRest(5.0);
-    bicep.setPosition(5.0);
-    rotate.setRest(90.0);
-    rotate.setPosition(90.0);
-    shoulder.setRest(30.0);
-    shoulder.setPosition(30.0);
-    omoplate.setRest(10.0);
-    omoplate.setPosition(10.0);
-
-    setVelocity(20.0, 20.0, 20.0, 20.0);
+      omoplate.map(10.0, 80.0, 10.0, 80.0);
+      omoplate.setRest(10.0);
+      omoplate.setPosition(10.0);
+      omoplate.setAutoDisable(true);
+    }
+    setSpeed(20.0, 20.0, 20.0, 20.0);
   }
 
   @Deprecated
@@ -250,8 +257,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getPos(), rotate.getPos(), shoulder.getPos(),
-        omoplate.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(), shoulder.getCurrentInputPos(),
+        omoplate.getCurrentInputPos());
   }
 
   public ServoControl getShoulder() {
@@ -311,11 +318,24 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.bicep = bicep;
   }
 
+  /**
+   * This method sets the output limits on all servos for the inmoov arm.
+   * Input limits are not modified in this method.
+   * 
+   * @param bicepMin
+   * @param bicepMax
+   * @param rotateMin
+   * @param rotateMax
+   * @param shoulderMin
+   * @param shoulderMax
+   * @param omoplateMin
+   * @param omoplateMax
+   */
   public void setLimits(double bicepMin, double bicepMax, double rotateMin, double rotateMax, double shoulderMin, double shoulderMax, double omoplateMin, double omoplateMax) {
-    bicep.setMinMax(bicepMin, bicepMax);
-    rotate.setMinMax(rotateMin, rotateMax);
-    shoulder.setMinMax(shoulderMin, shoulderMax);
-    omoplate.setMinMax(omoplateMin, omoplateMax);
+    bicep.setMinMaxOutput(bicepMin, bicepMax);
+    rotate.setMinMaxOutput(rotateMin, rotateMax);
+    shoulder.setMinMaxOutput(shoulderMin, shoulderMax);
+    omoplate.setMinMaxOutput(omoplateMin, omoplateMax);
   }
 
   public void setOmoplate(ServoControl omoplate) {
@@ -345,9 +365,7 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     this.side = side;
   }
 
-  @Deprecated
   public void setSpeed(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    log.warn("setspeed deprecated please use setvelocity");
     this.bicep.setSpeed(bicep);
     this.rotate.setSpeed(rotate);
     this.shoulder.setSpeed(shoulder);
@@ -380,10 +398,10 @@ public class InMoovArm extends Service implements IKJointAngleListener {
      * connect(baseAddress, address) with overloaded connect("0x48- if
      * (!arduino.isConnected()) { error("arduino not connected"); }
      */
-    bicep.moveTo(bicep.getPos() + 2);
-    rotate.moveTo(rotate.getPos() + 2);
-    shoulder.moveTo(shoulder.getPos() + 2);
-    omoplate.moveTo(omoplate.getPos() + 2);
+    bicep.moveTo(bicep.getCurrentInputPos() + 2);
+    rotate.moveTo(rotate.getCurrentInputPos() + 2);
+    shoulder.moveTo(shoulder.getCurrentInputPos() + 2);
+    omoplate.moveTo(omoplate.getCurrentInputPos() + 2);
     sleep(300);
   }
 
@@ -527,11 +545,9 @@ public class InMoovArm extends Service implements IKJointAngleListener {
     return meta;
   }
 
+  @Deprecated /* use setSpeed instead. */
   public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    this.bicep.setSpeed(bicep);
-    this.rotate.setSpeed(rotate);
-    this.shoulder.setSpeed(shoulder);
-    this.omoplate.setSpeed(omoplate);
+    setSpeed(bicep, rotate, shoulder, omoplate);
   }
 
   public void setController(ServoController controller) {

@@ -14,8 +14,8 @@ public class MrlServo extends Device implements VirtualServo {
 
   public final static Logger log = LoggerFactory.getLogger(MrlServo.class);
 
+  public static final int SERVO_EVENT_STARTED = 0;
   public static final int SERVO_EVENT_STOPPED = 1;
-  public static final int SERVO_EVENT_POSITION_UPDATE = 2;
 
   public int pin;
   public boolean isMoving;
@@ -110,7 +110,7 @@ public class MrlServo extends Device implements VirtualServo {
         // There was a change in the currentPosition
         if (previousCurrentPosUs != (int) currentPosUs) {
           writeMicroseconds((int) currentPosUs);
-          publishServoEvent(SERVO_EVENT_POSITION_UPDATE);
+          publishServoEvent(SERVO_EVENT_STARTED);
           if (!isSweeping && ((int) currentPosUs == targetPosUs)) {
             publishServoEvent(SERVO_EVENT_STOPPED);
             isMoving = false;

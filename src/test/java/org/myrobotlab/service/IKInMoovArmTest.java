@@ -33,10 +33,10 @@ public class IKInMoovArmTest extends AbstractTest {
     testArm.onJointAngles(angleMap);
 
     // the actual angles for the inmoov arm servos.
-    System.out.println("OMO: " + testArm.omoplate.getPos());
-    System.out.println("SHO: " + testArm.shoulder.getPos());
-    System.out.println("ROT: " + testArm.rotate.getPos());
-    System.out.println("BIC: " + testArm.bicep.getPos());
+    System.out.println("OMO: " + testArm.omoplate.getCurrentInputPos());
+    System.out.println("SHO: " + testArm.shoulder.getCurrentInputPos());
+    System.out.println("ROT: " + testArm.rotate.getCurrentInputPos());
+    System.out.println("BIC: " + testArm.bicep.getCurrentInputPos());
 
     // assertEquals((Integer)0, testArm.bicep.getPos());
     // assertEquals((Integer)90, testArm.rotate.getPos());

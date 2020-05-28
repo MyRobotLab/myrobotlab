@@ -93,19 +93,19 @@ public class Tracking extends Service {
   transient public OpenCV opencv;
 
   // transient public ServoControl x, y;
-  private class TrackingServoData {
+  private class TrackingServoEvent {
     transient ServoControl servoControl = null;
     int scanStep = 2;
     Double currentServoPos;
     String name;
     String axis;
 
-    TrackingServoData(String name) {
+    TrackingServoEvent(String name) {
       this.name = name;
     }
   }
 
-  transient private HashMap<String, TrackingServoData> servoControls = new HashMap<String, TrackingServoData>();
+  transient private HashMap<String, TrackingServoEvent> servoControls = new HashMap<String, TrackingServoEvent>();
 
   // statistics
   public int updateModulus = 1;
@@ -266,7 +266,7 @@ public class Tracking extends Service {
 
   public void rest() {
     log.info("rest");
-    for (TrackingServoData sc : servoControls.values()) {
+    for (TrackingServoEvent sc : servoControls.values()) {
    
         Double velocity = sc.servoControl.getSpeed();
         sc.servoControl.setSpeed(20.0);
@@ -327,9 +327,10 @@ public class Tracking extends Service {
           faceFoundFrameCount = 0;
           if (scan) {
             log.info("Scan enabled...");
-            TrackingServoData x = servoControls.get("x");
-            TrackingServoData y = servoControls.get("y");
-            double xpos = x.servoControl.getPos();
+            TrackingServoEvent x = servoControls.get("x");
+            TrackingServoEvent y = servoControls.get("y");
+            double xpos = x.servoControl.getCurrentInputPos();
+            // TODO: kw review that this should actually be the input maxX not the getMax maxY.
             if (xpos + x.scanStep >= x.servoControl.getMax() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMin() && x.scanStep < 0) {
               x.scanStep *= -1;
               double newY = y.servoControl.getMin() + (Math.random() * (y.servoControl.getMax() - y.servoControl.getMin()));
@@ -428,7 +429,7 @@ public class Tracking extends Service {
     // directly ???
     // if I'm at my min & and the target is further min - don't compute
     // pid
-    for (TrackingServoData tsd : servoControls.values()) {
+    for (TrackingServoEvent tsd : servoControls.values()) {
       pid.setInput(tsd.axis, targetPoint.get(tsd.axis));
       if (pid.compute(tsd.name)) {
         // TODO: verify this.. we want the pid output to be the input for our
@@ -437,7 +438,7 @@ public class Tracking extends Service {
         // of values between services.
         tsd.currentServoPos += pid.getOutput(tsd.name);
         tsd.servoControl.moveTo(tsd.currentServoPos);
-        tsd.currentServoPos = tsd.servoControl.getPos();
+        tsd.currentServoPos = tsd.servoControl.getCurrentInputPos();
       } else {
         log.warn("{} data under-run", tsd.servoControl.getName());
       }
@@ -540,12 +541,12 @@ public class Tracking extends Service {
       log.info("Axis must be x or y");
       return;
     }
-    TrackingServoData tsd = new TrackingServoData(axis);
+    TrackingServoEvent tsd = new TrackingServoEvent(axis);
     tsd.servoControl = servo;
     tsd.axis = axis;
     servoControls.put(axis, tsd);
-    tsd.currentServoPos = servo.getPos();
-    log.info("Tracking attach : Axis : {} Servo {} current position {}", axis, servo.getName(), servo.getPos());
+    tsd.currentServoPos = servo.getCurrentInputPos();
+    log.info("Tracking attach : Axis : {} Servo {} current position {}", axis, servo.getName(), servo.getCurrentInputPos());
   }
 
   public void attach(ServoControl x, ServoControl y) {

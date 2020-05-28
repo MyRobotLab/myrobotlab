@@ -208,34 +208,44 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   private void initServoDefaults() {
-    if (thumb.getPin() == null)
+    if (thumb.getPin() == null) {
       thumb.setPin(DEFAULT_THUMB_PIN);
-    if (index.getPin() == null)
+      thumb.setRest(2.0);
+      thumb.setPosition(2.0);
+      thumb.setAutoDisable(true);
+    }
+    if (index.getPin() == null) {
       index.setPin(DEFAULT_INDEX_PIN);
-    if (majeure.getPin() == null)
+      index.setRest(2.0);
+      index.setPosition(2.0);
+      index.setAutoDisable(true);
+    }
+    if (majeure.getPin() == null) {
       majeure.setPin(DEFAULT_MAJEURE_PIN);
-    if (ringFinger.getPin() == null)
+      majeure.setRest(2.0);
+      majeure.setPosition(2.0);
+      majeure.setAutoDisable(true);
+    }
+    if (ringFinger.getPin() == null) {
       ringFinger.setPin(DEFAULT_RINGFINGER_PIN);
-    if (pinky.getPin() == null)
+      ringFinger.setRest(2.0);
+      ringFinger.setPosition(2.0);
+      ringFinger.setAutoDisable(true);
+    }
+    if (pinky.getPin() == null) {
       pinky.setPin(DEFAULT_PINKY_PIN);
-    if (wrist.getPin() == null)
+      pinky.setRest(2.0);
+      pinky.setPosition(2.0);
+      pinky.setAutoDisable(true);
+    }
+    if (wrist.getPin() == null) {
         wrist.setPin(DEFAULT_WRIST_PIN);    
-    // TOOD: what are the initial velocities?
-    // Initial rest positions?    
-    thumb.setRest(2.0);
-    thumb.setPosition(2.0);
-    index.setRest(2.0);
-    index.setPosition(2.0);
-    majeure.setRest(2.0);
-    majeure.setPosition(2.0);
-    ringFinger.setRest(2.0);
-    ringFinger.setPosition(2.0);
-    pinky.setRest(2.0);
-    pinky.setPosition(2.0);
-    wrist.setRest(90.0);
-    wrist.setPosition(90.0);
-    
-    setVelocity(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
+        wrist.setRest(90.0);
+        wrist.setPosition(90.0);
+        wrist.setAutoDisable(true);
+    }
+    // force initial finger speed to 45 deg/sec
+    setSpeed(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
   }
 
   public void count() {
@@ -328,8 +338,8 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getPos(), index.getPos(), majeure.getPos(),
-        ringFinger.getPos(), pinky.getPos(), wrist.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(), majeure.getCurrentInputPos(),
+        ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
   }
 
   public String getSide() {
@@ -513,9 +523,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     this.side = side;
   }
 
-  @Deprecated
   public void setSpeed(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    log.warn("setspeed deprecated please use setvelocity");
     this.thumb.setSpeed(thumb);
     this.index.setSpeed(index);
     this.majeure.setSpeed(majeure);
@@ -596,12 +604,12 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       }
     }
 
-    thumb.moveTo(thumb.getPos() + 2);
-    index.moveTo(index.getPos() + 2);
-    majeure.moveTo(majeure.getPos() + 2);
-    ringFinger.moveTo(ringFinger.getPos() + 2);
-    pinky.moveTo(pinky.getPos() + 2);
-    wrist.moveTo(wrist.getPos() + 2);
+    thumb.moveTo(thumb.getCurrentInputPos() + 2);
+    index.moveTo(index.getCurrentInputPos() + 2);
+    majeure.moveTo(majeure.getCurrentInputPos() + 2);
+    ringFinger.moveTo(ringFinger.getCurrentInputPos() + 2);
+    pinky.moveTo(pinky.getCurrentInputPos() + 2);
+    wrist.moveTo(wrist.getCurrentInputPos() + 2);
 
     info("test completed");
   }
@@ -648,19 +656,9 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     return meta;
   }
 
+  @Deprecated /* use set speed */
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
-    if (thumb != null)
-      this.thumb.setSpeed(thumb);
-    if (index != null)
-      this.index.setSpeed(index);
-    if (majeure != null)
-      this.majeure.setSpeed(majeure);
-    if (ringFinger != null)
-      this.ringFinger.setSpeed(ringFinger);
-    if (pinky != null)
-      this.pinky.setSpeed(pinky);
-    if (wrist != null)
-      this.wrist.setSpeed(wrist);
+    setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
   }
 
   public void setController(ServoController servoController) {

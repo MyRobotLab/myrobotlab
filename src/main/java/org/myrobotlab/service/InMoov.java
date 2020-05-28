@@ -44,7 +44,7 @@ import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
@@ -166,19 +166,21 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
     LoggingFactory.init(Level.INFO);
 
-    boolean done = false;
+    boolean done = true;
 
     Runtime.main(new String[] { "--interactive", "--id", "admin" });
     Platform.setVirtual(true);
 
-    // Runtime.start("gui", "SwingGui");
+    Runtime.start("gui", "SwingGui");
     
     Python python = (Python) Runtime.start("python", "Python");
     python.loadServiceScript("InMoov");
+    /*
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.setPort(8887);
     webgui.autoStartBrowser(false);
     webgui.startService();
+    */
 
     // webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
 
@@ -198,13 +200,15 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startMouth();
     i01.startEar();
 
+    /*
     webgui.autoStartBrowser(false);
     webgui.startService();
     webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
     HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
+    */
     i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
-    i01.chatBot.addTextListener(htmlFilter);
-    htmlFilter.addListener("publishText", "i01", "speak");
+    // i01.chatBot.addTextListener(htmlFilter);
+    // htmlFilter.addListener("publishText", "i01", "speak");
     i01.chatBot.attach((Attachable) i01.ear);
     i01.startBrain();
     i01.startHead(leftPort);
@@ -916,7 +920,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     unsubscribe(python.getName(), "publishStatus", this.getName(), "onGestureStatus");
   }
 
-  public void onIKServoEvent(ServoData data) {
+  public void onIKServoEvent(ServoEvent data) {
     if (vinMoovApp != null) {
       vinMoovApp.updatePosition(data);
     }
@@ -1216,7 +1220,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           // first detach the servo.
           calibrationWriter.write("# Servo Config : " + s.getName() + "\n");
           calibrationWriter.write(s.getName() + ".detach()\n");
-          calibrationWriter.write(s.getName() + ".setMinMax(" + s.getMin() + "," + s.getMax() + ")\n");
+          calibrationWriter.write(s.getName() + ".setMinMaxOutput(" + s.getMin() + "," + s.getMax() + ")\n");
           calibrationWriter.write(s.getName() + ".setVelocity(" + s.getSpeed() + ")\n");
           calibrationWriter.write(s.getName() + ".setRest(" + s.getRest() + ")\n");
           if (s.getPin() != null) {
@@ -1234,7 +1238,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
 
           calibrationWriter.write(s.getName() + ".attach(\"" + s.getController() + "\"," + s.getPin() + "," + s.getRest() + ")\n");
 
-          if (s.getAutoDisable()) {
+          if (s.isAutoDisable()) {
             calibrationWriter.write(s.getName() + ".setAutoDisable(True)\n");
           }
         }
@@ -1275,7 +1279,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       // we want all servos that are currently in the system?
       for (ServiceInterface service : Runtime.getServices()) {
         if (ServoControl.class.isAssignableFrom(service.getClass())) {
-          double pos = ((ServoControl) service).getPos();
+          double pos = ((ServoControl) service).getCurrentInputPos();
           gestureWriter.write("  " + service.getName() + ".moveTo(" + pos + ")\n");
         }
       }

@@ -371,7 +371,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     JPanel uploadPanel = new JPanel(new BorderLayout());
     String mrlIno = null;
     try {
-      pathToMrlComm.setText(FileIO.gluePaths(Service.getResourceDir(Arduino.class),"/Arduino/MrlComm/MrlComm.ino"));
+      pathToMrlComm.setText(FileIO.gluePaths(Service.getResourceDir(Arduino.class),"/MrlComm/MrlComm.ino"));
       mrlIno = FileIO.toString(pathToMrlComm.getText());
     } catch (Exception e) {
       log.warn("MrlComm.ino not found", e);

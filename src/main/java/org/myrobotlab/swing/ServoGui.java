@@ -70,8 +70,8 @@ import org.myrobotlab.service.VirtualArduino;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoData;
-import org.myrobotlab.service.interfaces.ServoData.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.swing.widget.CheckBoxTitledBorder;
 import org.slf4j.Logger;
 
@@ -121,8 +121,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   JButton restButton = new JButton("rest");
   JTextField speed = new JTextField("         ");
   JTextField rest = new JTextField("");
-
-  ImageIcon movingIcon = Util.getImageIcon("Servo/gifOk.gif");
+  
+  ImageIcon movingIcon = Util.getImageIcon(Service.getResourceDir(Servo.class),"gifOk.gif");
 
   JLabel moving = new JLabel(movingIcon);
 
@@ -484,13 +484,13 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   @Override
   public void subscribeGui() {
     subscribe("publishMoveTo");
-    subscribe("publishServoData");
+    subscribe("publishServoEvent");
   }
 
   @Override
   public void unsubscribeGui() {
     unsubscribe("publishMoveTo");
-    unsubscribe("publishServoData");
+    unsubscribe("publishServoEvent");
   }
 
   /**
@@ -507,12 +507,12 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
     });
   }
 
-  public void onServoData(final ServoData data) {
+  public void onServoEvent(final ServoEvent data) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
         currentPos.setText(String.format("%.1f", data.pos));
-        if (ServoStatus.SERVO_POSITION_UPDATE.equals(data.state)) {
+        if (ServoStatus.SERVO_STARTED.equals(data.state)) {
           moving.setVisible(true);
         } else {
           moving.setVisible(false);
@@ -529,19 +529,17 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         removeListeners();
 
-        currentPos.setText(String.format("%.1f", servo.getPos()));
+        currentPos.setText(String.format("%.1f", servo.getCurrentInputPos()));
 
         // FIXME - Servo supports multiple controllers - the UI needs a
         // multi-select perhaps
         String controllerName = servo.getController();
         lastController = controllerName;
-
-        
         moving.setVisible(servo.isMoving());
-
         enabledIcon.setVisible(servo.isEnabled());
 
-        double maxSpd = (servo.getMaxSpeed() == null) ? 500.0 : servo.getMaxSpeed();
+        // TODO: KW review/remove this if possible in the UI?  maxSpeed should go away. there is only "fullSpeed" 
+        double maxSpd =  500.0;
         maxSpeed.setText(String.format("%.1f", maxSpd));
         speedSlider.setMaximum((int) maxSpd);
 
@@ -588,7 +586,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           enabledIcon.setVisible(false);
         }
 
-        if (servo.getAutoDisable()) {
+        if (servo.isAutoDisable()) {
           autoDisable.setSelected(true);
           setIdleTimeEnabled(true);
         } else {
@@ -630,15 +628,15 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         // MAP MIN/MAX INPUT/OUTPUT
         // In the inverted case, these are reversed
-        moveTo.setMinimum(servo.getMin().intValue());
-        moveTo.setMaximum(servo.getMax().intValue());
+        moveTo.setMinimum(Double.valueOf(servo.getMin()).intValue());
+        moveTo.setMaximum(Double.valueOf(servo.getMax()).intValue());
 
-        if (mapInput.getLowValue() != servo.getMin().intValue()) {
-          mapInput.setLowValue(servo.getMin().intValue());
+        if (mapInput.getLowValue() != Double.valueOf(servo.getMin()).intValue()) {
+          mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
         }
 
-        if (mapInput.getHighValue() != servo.getMax().intValue()) {
-          mapInput.setHighValue(servo.getMax().intValue());
+        if (mapInput.getHighValue() != Double.valueOf(servo.getMax()).intValue()) {
+          mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
         }
 
 
@@ -653,8 +651,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
         minPos.setText(String.format("%.1f", servo.getMin()));
         maxPos.setText(String.format("%.1f", servo.getMax()));
        
-        mapInput.setLowValue(servo.getMin().intValue());
-        mapInput.setHighValue(servo.getMax().intValue());
+        mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
+        mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
        
         addListeners();
       }
@@ -845,7 +843,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
       // String python = LangUtils.toPython();
       // Files.write(Paths.get("export.py"), python.toString().getBytes());
       TestCatcher catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-      /// servo.attach((ServoDataListener) catcher);
+      /// servo.attach((ServoEventListener) catcher);
 
       catcher.exportAll("export.py");
 

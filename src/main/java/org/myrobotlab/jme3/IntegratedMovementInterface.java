@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.kinematics.CollisionItem;
 import org.myrobotlab.kinematics.Point;
-import org.myrobotlab.service.interfaces.ServoData;
+import org.myrobotlab.service.interfaces.ServoEvent;
 
 import com.jme3.system.AppSettings;
 
@@ -17,7 +17,7 @@ import com.jme3.system.AppSettings;
  *
  */
 public interface IntegratedMovementInterface {
-  public void updatePosition(ServoData event);
+  public void updatePosition(ServoEvent event);
 
   public void setService(Service service);
 

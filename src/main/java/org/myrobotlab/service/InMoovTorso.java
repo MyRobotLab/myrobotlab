@@ -79,24 +79,29 @@ public class InMoovTorso extends Service {
 
   private void initServoDefaults() {
     
-    if (topStom.getPin() == null) 
+    if (topStom.getPin() == null) {
       topStom.setPin(DEFAULT_TOPSTOM_PIN);
-    if (midStom.getPin() == null)
-        midStom.setPin(DEFAULT_MIDSTOM_PIN);
-    if (lowStom.getPin() == null)
+      topStom.map(60.0, 120.0, 60.0, 120.0);
+      topStom.setRest(90.0);
+      topStom.setPosition(90.0);
+      topStom.setAutoDisable(true);
+    }
+    if (midStom.getPin() == null) {
+      midStom.setPin(DEFAULT_MIDSTOM_PIN);
+      midStom.map(0.0, 180.0, 0.0, 180.0);
+      midStom.setRest(90.0);
+      midStom.setPosition(90.0);
+      midStom.setAutoDisable(true);
+    }
+    if (lowStom.getPin() == null) {
       lowStom.setPin(DEFAULT_LOWSTOM_PIN);
+      lowStom.map(0.0, 180.0, 0.0, 180.0);
+      lowStom.setRest(90.0);
+      lowStom.setPosition(90.0);
+      lowStom.setAutoDisable(true);
+    }
     
-    topStom.setMinMax(60.0, 120.0);
-    midStom.setMinMax(0.0, 180.0);
-    lowStom.setMinMax(0.0, 180.0);
-    topStom.setRest(90.0);
-    topStom.setPosition(90.0);
-    midStom.setRest(90.0);
-    midStom.setPosition(90.0);
-    lowStom.setRest(90.0);
-    lowStom.setPosition(90.0);
-    
-    setVelocity(5.0, 5.0, 5.0);
+    setSpeed(5.0, 5.0, 5.0);
     
   }
 
@@ -215,7 +220,7 @@ public class InMoovTorso extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getPos(), midStom.getPos(), lowStom.getPos());
+    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(), lowStom.getCurrentInputPos());
   }
 
 
@@ -257,10 +262,21 @@ public class InMoovTorso extends Service {
     return true;
   }
 
+  /**
+   * Sets the output min and max limits for all servos in the torso.  input limits
+   * are not changed. 
+   * 
+   * @param topStomMin
+   * @param topStomMax
+   * @param midStomMin
+   * @param midStomMax
+   * @param lowStomMin
+   * @param lowStomMax
+   */
   public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
-    topStom.setMinMax(topStomMin, topStomMax);
-    midStom.setMinMax(midStomMin, midStomMax);
-    lowStom.setMinMax(lowStomMin, lowStomMax);
+    topStom.setMinMaxOutput(topStomMin, topStomMax);
+    midStom.setMinMaxOutput(midStomMin, midStomMax);
+    lowStom.setMinMaxOutput(lowStomMin, lowStomMax);
   }
 
   // ------------- added set pins
@@ -280,9 +296,7 @@ public class InMoovTorso extends Service {
      */
   }
 
-  @Deprecated
   public void setSpeed(Double topStom, Double midStom, Double lowStom) {
-    log.warn("setspeed deprecated please use setvelocity");
     this.topStom.setSpeed(topStom);
     this.midStom.setSpeed(midStom);
     this.lowStom.setSpeed(lowStom);
@@ -299,9 +313,9 @@ public class InMoovTorso extends Service {
      * if (!arduino.isConnected()) { error("arduino not connected"); }
      */
 
-    topStom.moveTo(topStom.getPos() + 2);
-    midStom.moveTo(midStom.getPos() + 2);
-    lowStom.moveTo(lowStom.getPos() + 2);
+    topStom.moveTo(topStom.getCurrentInputPos() + 2);
+    midStom.moveTo(midStom.getCurrentInputPos() + 2);
+    lowStom.moveTo(lowStom.getCurrentInputPos() + 2);
 
     moveTo(35.0, 45.0, 55.0);
     String move = getScript("i01");
@@ -317,22 +331,18 @@ public class InMoovTorso extends Service {
    * 
    */
   static public ServiceType getMetaData() {
-
     ServiceType meta = new ServiceType(InMoovTorso.class.getCanonicalName());
     meta.addDescription("InMoov Torso");
     meta.addCategory("robot");
-
     meta.addPeer("topStom", "Servo", "Top Stomach servo");
     meta.addPeer("midStom", "Servo", "Mid Stomach servo");
     meta.addPeer("lowStom", "Servo", "Low Stomach servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for torso");
-
     return meta;
   }
 
+  @Deprecated /* use setSpeed instead. */
   public void setVelocity(Double topStom, Double midStom, Double lowStom) {
-    this.topStom.setSpeed(topStom);
-    this.midStom.setSpeed(midStom);
-    this.lowStom.setSpeed(lowStom);
+    setSpeed(topStom, midStom, lowStom);
   }
 }
