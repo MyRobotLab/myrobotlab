@@ -135,6 +135,34 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
+    $scope.inputFieldMin = function(){
+        if ($scope.lockInputOutput) {
+            $scope.outputSlider.minValue = $scope.inputSlider.minValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.inputFieldMax = function(){
+        if ($scope.lockInputOutput) {
+            $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.outputFieldMin = function(){
+        if ($scope.lockInputOutput) {
+            $scope.inputSlider.minValue = $scope.outputSlider.minValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.outputFieldMax = function(){
+        if ($scope.lockInputOutput) {
+            $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.restField = function(){
+        msg.send('setRest', $scope.restSlider.value)
+    }
+
     $scope.outputSlider = {
         minValue: 0,
         maxValue: 180,

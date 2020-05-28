@@ -135,31 +135,31 @@
                                 <td>
 
                                     <!-- {{service.mapper.minX}} -->
-                                    <input type="number" min="0" max="180" ng-model="inputSlider.minValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-change="inputFieldMin()" ng-model="inputSlider.minValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td class="inputColor">Max</td>
                                 <td>
                                     <!-- {{service.mapper.maxX}} -->
-                                    <input type="number" min="0" max="180" ng-model="inputSlider.maxValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-change="inputFieldMax()" ng-model="inputSlider.maxValue" class="limitNumbersFieldInput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td></td>
                                 <td class="bigLabel restColor">
                                     <span ng-click="msg.rest()" title="Go to Rest">Rest</span></td>
                                 <td>
                                     <!-- {{service.rest}} -->
-                                    <input type="number" min="0" max="180" ng-model="restSlider.value" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-change="restField()" ng-model="restSlider.value" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td></td>
                                 <td class="bigLabel outputColor">Output</td>
                                 <td class="outputColor">Min</td>
                                 <td>
                                     <!-- {{service.mapper.minY}} -->
-                                    <input type="number" min="0" max="180" ng-model="outputSlider.minValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-change="outputFieldMin()" ng-model="outputSlider.minValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                                 <td class="outputColor">Max</td>
                                 <td>
                                     <!-- {{service.mapper.maxY}} -->
-                                    <input type="number" min="0" max="180" ng-model="outputSlider.maxValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
+                                    <input type="number" min="0" max="180" ng-change="outputFieldMax()" ng-model="outputSlider.maxValue" class="limitNumbersFieldOutput ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
                                 </td>
                             </tr>                            
                         </tbody>
