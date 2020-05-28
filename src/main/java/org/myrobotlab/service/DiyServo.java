@@ -399,7 +399,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     if (!isEnabled()) {
-      if (pos != lastPosInput || !getAutoDisable()) {
+      if (pos != lastPosInput || !isAutoDisable()) {
         enable();
       }
     }
