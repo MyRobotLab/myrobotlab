@@ -3,6 +3,7 @@ package org.myrobotlab.service.meta;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.slf4j.Logger;
 
 public class IndianTtsMeta {
@@ -17,8 +18,8 @@ public class IndianTtsMeta {
    * 
    */
   static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType("org.myrobotlab.service.IndianTts");
+    
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.IndianTts");
     Platform platform = Platform.getLocalInstance();
     
     meta.addDescription("Hindi text to speech support - requires keys");

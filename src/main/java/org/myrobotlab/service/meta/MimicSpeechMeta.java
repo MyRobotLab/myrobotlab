@@ -3,6 +3,7 @@ package org.myrobotlab.service.meta;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.slf4j.Logger;
 
 public class MimicSpeechMeta {
@@ -18,7 +19,7 @@ public class MimicSpeechMeta {
    */
   static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.MimicSpeech");
+    ServiceType meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.MimicSpeech");
     Platform platform = Platform.getLocalInstance();
     
 
