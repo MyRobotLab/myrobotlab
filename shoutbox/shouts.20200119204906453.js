@@ -1,1 +1,0 @@
-{"from":"hello","type":"TYPE_USER","msg":"ahoy !","clientId":"hello"},{"from":"hello","type":"TYPE_USER","msg":"do","clientId":"hello"}
