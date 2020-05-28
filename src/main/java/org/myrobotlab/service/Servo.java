@@ -86,7 +86,16 @@ public class Servo extends AbstractServo implements ServoControl {
       enable();
     }
     // purge any timers currently in process
+    // if currently configured to autoDisable - the timer starts now
+    // we cancel any pre-existing timer if it exists
     purgeTask("idleDisable");
+    if (autoDisable) {
+      // and start our countdown
+      addTaskOneShot(idleTimeout, "idleDisable");
+    }
+
+    
+    
     if (!enabled) {
       log.info("cannot moveTo {} not enabled", getName());
       return false;
@@ -107,20 +116,22 @@ public class Servo extends AbstractServo implements ServoControl {
      * </pre>
      *
      */
+    // TODO: this block isn't tested by ServoTest
     if (isBlocking && !blocking) {
       // if isBlocking already, and incoming request is not blocking - we cancel
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+    // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
-      // if isBlocking already, and incoming request is a blocking one - we
-      // block it
+      // if isBlocking already, and incoming request is a blocking one - we block it
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       synchronized (this) {
         try {
           this.wait();
         } catch (InterruptedException e) {
-          /* don't care */}
+          /* don't care */
+        }
       }
       return false;
     }

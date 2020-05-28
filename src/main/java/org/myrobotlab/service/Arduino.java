@@ -1243,7 +1243,8 @@ public class Arduino extends AbstractMicrocontroller
       msg = new Msg(this, serial);
       serial.addByteListener(this);
     } else {
-      log.warn("Init serial called and we already have a msg class!");
+      // TODO: figure out why this gets called so often.
+      log.info("Init serial we already have a msg class.");
     }
   }
 
@@ -1841,6 +1842,7 @@ public class Arduino extends AbstractMicrocontroller
     Integer deviceId = getDeviceId(servo);
     if (deviceId == null) {
       log.warn("servoEnable servo {} does not have a corresponding device currently - did you attach?", servo.getName());
+      return;
     }
     if (isConnected()) {
       msg.servoAttachPin(deviceId, getAddress(servo.getPin()));

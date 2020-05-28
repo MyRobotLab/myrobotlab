@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 
 /**
  * 
- * @author GroG
+ * @author GroG, and many others.
+ * 
  * 
  *         There was (in the past) great confusion about position of the servo.
  *         To make things clear - you must think of 2 different sets of data.
@@ -114,7 +115,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    * Default timeout is 3000 milliseconds
    * 
    */
-  int idleTimeout = 3000;
+  protected int idleTimeout = 3000;
 
   /**
    * if the servo is doing a blocking call - it will block other blocking calls
@@ -352,7 +353,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     enabled = true; // <-- how to deal with this ? "real" controllers usually
                     // need an enable/energize command
     // FIXME sc NEEDS TO BE FULL NAME !!!
-    send(sc, "attachServoControl", this);
+    // TODO: there is a race condition here.. we need to know that 
+    // the servo control ackowledged this.
+    sendBlocking(sc, "attachServoControl", this);
+    // TOOD: we need to wait here for the servo controller to acknowledge that it was attached.
+    
     broadcastState();
   }
 
@@ -413,14 +418,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   }
 
   public void fullSpeed() {
-    log.info("disabling speed control");
-    speed = null;
-    invoke("publishServoSetSpeed", this);
-    broadcastState();
+    setSpeed(null);
   }
 
   @Override
-  public boolean getAutoDisable() {
+  public boolean isAutoDisable() {
     return autoDisable;
   }
 
@@ -569,8 +571,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public Double moveToBlocking(Double pos) {
-    processMove(pos, true, null);
-    return mapper.calcInput(currentOutputPos); // should be requested pos - unless timeout occured
+    return moveToBlocking(pos, null);
   }
 
   @Override
@@ -734,27 +735,31 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
    */
   @Override
   public void setAutoDisable(Boolean autoDisable) {
-    boolean valueChanged = !this.autoDisable.equals(autoDisable);
-    this.autoDisable = autoDisable;
     if (autoDisable) {
-      // FIXME - will need to know if disabled manually (by user) or by timer
-      // (re-enable-able with move)
+      // schedule the disable
       addTaskOneShot(idleTimeout, "idleDisable");
     } else {
       purgeTask("idleDisable");
       idleDisabled = false;
-      enable();
     }
+    boolean valueChanged = !this.autoDisable.equals(autoDisable);
+    this.autoDisable = autoDisable;
     if (valueChanged) {
       broadcastState();
     }
   }
 
+  // TODO: consider moving these to the ServoControl interface.
   public int setIdleTimeout(int idleTimeout) {
     if (this.idleTimeout != idleTimeout) {
       this.idleTimeout = idleTimeout;
       broadcastState();
     }
+    return idleTimeout;
+  }
+  
+  // Getter for the current idleTimeout setting.
+  public int getIdleTimeout() {
     return idleTimeout;
   }
 
@@ -770,6 +775,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     broadcastState();
   }
 
+  @Override
+  public void setMinMaxOutput(double minY, double maxY) {
+    mapper.map(mapper.getMinX(), mapper.getMaxX(),minY, maxY);
+    broadcastState();
+  }
+  
   @Override
   public void setMinMax(double minXY, double maxXY) {
     mapper.map(minXY, maxXY,minXY, maxXY);
@@ -822,7 +833,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Config
   public void setSpeed(Double degreesPerSecond) {
     if (degreesPerSecond == null) {
-      fullSpeed();
+      log.info("disabling speed control");
+      speed = null;
+      invoke("publishServoSetSpeed", this);
+      broadcastState();
       return;
     }
     // KW: TODO: technically the Arduino will read this speed as a 16 bit int.. so max Speed is 32,767 ...

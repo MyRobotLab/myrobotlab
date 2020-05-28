@@ -399,7 +399,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     }
 
     if (!isEnabled()) {
-      if (pos != lastPosInput || !getAutoDisable()) {
+      if (pos != lastPosInput || !isAutoDisable()) {
         enable();
       }
     }
@@ -474,6 +474,16 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     broadcastState();
   }
 
+  /**
+   * update the output min/max for the mapper
+   * input values to the mapper are unchanged.
+   */
+  @Override
+  public void setMinMaxOutput(double minY, double maxY) {
+    mapper.map(mapper.getMinX(), mapper.getMaxX(), minY, maxY);
+    broadcastState();
+  }
+  
   @Override
   public void setMinMax(double min, double max) {
     map(min, max, min, max);

@@ -586,7 +586,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           enabledIcon.setVisible(false);
         }
 
-        if (servo.getAutoDisable()) {
+        if (servo.isAutoDisable()) {
           autoDisable.setSelected(true);
           setIdleTimeEnabled(true);
         } else {

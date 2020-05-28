@@ -597,7 +597,7 @@ public class DiyServoGui extends ServiceGui implements ActionListener {
           imageenabled.setVisible(false);
         }
 
-        if (servo.getAutoDisable()) {
+        if (servo.isAutoDisable()) {
           autoDisable.setSelected(true);
         } else {
           autoDisable.setSelected(false);
