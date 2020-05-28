@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
 
 /**
@@ -27,164 +28,9 @@ public class ServoTest extends AbstractTest {
   static final String port01 = "COM9";
   Integer pin = 5;
 
-  // @Test
-  public void testAttach() throws Exception {
-    // FIXME - test state change - mrl gets restarted arduino doesn't what
-    // happens - how to handle gracefully
-    // FIXME - test enabled Events
-    // FIXME - make abstract class from interfaces to attempt to do Java 8
-    // interfaces with default
-    // creation ...
-    // Adafruit16CServoDriver afdriverx = (Adafruit16CServoDriver)
-    // Runtime.start("afdriver", "Adafruit16CServoDriver");
-    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
-    Servo servo02 = (Servo) Runtime.start("s2", "Servo");
-    // initialize an arduinos
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);
-    
-    // because I'm just so tired of race conditions !
-    // just friggen wait 1/2 a second
-//    Service.sleep(500);
-  
-    log.warn("arduino01 connected {}", arduino01.isConnected());
-
-    Serial serial = arduino01.getSerial();
-    // really I have to call refresh first ? :P
-    log.info("ports {}", Arrays.toString(serial.getPortNames().toArray()));
-
-    servo01.moveTo(30.0);
-    servo01.attach(arduino01, 8, 40.0);
-    servo01.attach(arduino01, 8, 30.0);
-
-    servo02.attach(arduino01, 7, 40.0);
-    // servo01.eventsEnable();
-    // FIXME is attach re-entrant ???
-    servo01.broadcastState();
-    servo02.broadcastState();
-
-    // sub speed single move
-    servo01.moveTo(30.0);
-    servo01.moveTo(31.0);
-    servo01.moveTo(30.0);
-    servo01.moveTo(31.0);
-    servo01.moveTo(30.0);
-
-    servo01.setSpeed(3.0);
-    servo01.moveTo(130.0);
-    servo02.moveTo(130.0);
-    servo01.setSpeed(30.0);
-    servo01.moveTo(30.0);
-    servo02.moveTo(30.0);
-
-    arduino01.setDebug(true);
-
-    // detaching the device
-    servo01.detach(arduino01); // test servo02.detach(arduino01);
-    // error ?
-    // servo02.detach(afdriver); // TEST CASE - THIS FAILED - THEN RE-ATTACHED
-    // DID SPLIT BRAIN FIXME
-    servo02.detach(arduino01);
-
-    // errors / boundary cases
-    // servo01.attach(arduino01, 8, 40);
-    servo02.attach(arduino01, 8, 40.0); // same pin?
-    servo01.attach(arduino01, 7, 40.0); // already attached ?
-
-    servo01.moveTo(130.0);
-    servo02.moveTo(130.0);
-    servo01.moveTo(30.0);
-    servo02.moveTo(30.0);
-
-    servo01.broadcastState();
-    servo02.broadcastState();
-
-    servo01.setSpeed(0.2);
-    servo02.setSpeed(0.2);
-    servo01.moveTo(130.0);
-    servo02.moveTo(130.0);
-    servo01.moveTo(30.0);
-    servo02.moveTo(30.0);
-    servo01.moveTo(130.0);
-    servo01.setSpeed(1.0);
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-
-    servo01.detach();
-
-    // no move after detach test
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-
-    servo01.attach(arduino01);
-
-    // move after detach/re-attach
-    servo01.enable();
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-    servo01.moveTo(30.0);
-    servo01.moveTo(130.0);
-
-    // servo02.attach(afdriver, 8);
-    // this is valid
-    // FIXME --- THIS IS NOT RE-ENTRANT !!!
-    // servo01.attach(arduino01, 8, 40); // this attaches the device, calls
-    // Servo.attach(8), then Servo.write(40)
-    // FIXME --- THIS IS NOT RE-ENTRANT !!!
-    // servo02.attach(afdriver, 8, 40);
-    // IS IT Equivalent to this ?
-    // energize to different pin
-    // servo01.attach(7);
-    arduino01.setDebug(true);
-
-    servo01.moveTo(130.0);
-    servo01.moveTo(30.0);
-    // servo02.attach(7.0);
-
-    // servo move methods
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-
-    servo02.detach();
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-
-    arduino01.attach(servo02);
-    servo02.enable();
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-
-    // servo detach
-    servo01.disable();
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-
-    // should re-attach
-    // with the same pin & pos
-    servo01.enable();
-    servo02.enable();
-
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-    servo02.moveTo(30.0);
-    servo02.moveTo(130.0);
-    
-    //servo01.releaseService();
-    //servo02.releaseService();
-  }
-  
   @Test
-  public void invertTest() {
+  public void invertTest() throws Exception {
+    // verify the outputs are inverted as expected.
     Servo servo01 = (Servo) Runtime.start("s1", "Servo");
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);  
@@ -285,35 +131,129 @@ public class ServoTest extends AbstractTest {
     servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
+    servo01.setPosition(0.0);
     
     arduino01.attach(servo01);
-    // TODO: remove this sleep and make sure we don't have race conditions.
-    sleep(100);
     assertTrue("verifying servo is attached to the arduino.", servo01.isAttached("arduino01"));
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     
     // Disable auto disable.. and move the servo.
     servo01.setAutoDisable(false);
-    assertFalse("setting autoDisable false", servo01.getAutoDisable());
-
+    assertFalse("setting autoDisable false", servo01.isAutoDisable());
     // choose a speed for this test.  
-    servo01.setSpeed(50.0);
+    servo01.setSpeed(180.0);
     
-    // we should move it and make sure it remains enabled. 
-    Thread.sleep(servo01.getIdleTimeout() + 100);
-    assertTrue("Servo should be enabled.", servo01.isEnabled());
-    
+    // set the timeout to 1/2 a second for the unit test.
     // Ok. now if we disable.. and move the servo.. it should be disabled after a certain amount of time.
-    
+    servo01.setIdleTimeout(500);
+    assertEquals(500, servo01.getIdleTimeout());
     servo01.setAutoDisable(true);
+    servo01.moveTo(1.0);
+    // we should move it and make sure it remains enabled. 
+    sleep(servo01.getIdleTimeout() + 500);
+    assertTrue("Servo should be disabled.", !servo01.isEnabled());
+    
+        
     log.warn("thread list {}", getThreadNames());
-    assertTrue("setting autoDisable true", servo01.getAutoDisable());
-    servo01.moveTo(130.0);
-    log.warn("thread list {}", getThreadNames());
-    sleep(8000); // waiting for disable
-    log.warn("thread list {}", getThreadNames());
+    assertTrue("setting autoDisable true", servo01.isAutoDisable());
+    servo01.moveTo(2.0);
+    sleep(servo01.getIdleTimeout()+500); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
+    
+    assertEquals(2.0, servo01.getCurrentInputPos(), 0.0001);
 
   }
 
+  @Test
+  public void moveToBlockingTest() throws Exception {
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);
+
+    servo01.setPosition(0.0);
+    // 60 degrees per second.. move from 0 to 180 in 3 seconds
+    servo01.setSpeed(60.0);
+    servo01.setPin(7);
+    arduino01.attach(servo01);
+    
+    long start = System.currentTimeMillis();
+    servo01.moveToBlocking(180.0);
+    long delta = System.currentTimeMillis() - start;
+    assertTrue("Move to blocking should have taken more than 3 seconds.", delta > 3000);
+  }
+  
+  @Test
+  public void testHelperMethods() throws Exception {
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);
+
+    servo01.setPosition(0.0);
+    // 60 degrees per second.. move from 0 to 180 in 3 seconds
+    servo01.setSpeed(60.0);
+    servo01.setPin(7);
+    servo01.attach("arduino01", 8, 1.0, 360.0);
+    assertEquals("arduino01", servo01.getController());
+    assertEquals(Integer.valueOf(8).toString(), servo01.getPin());
+
+    servo01.unsetSpeed();
+    assertNull("Speed should be unset", servo01.getSpeed());
+    
+    // verify that setMinMax sets both the input and output min/max values.
+    servo01.setMinMax(10, 20);
+    Mapper m = servo01.getMapper();
+    assertEquals(10, m.getMinX(), 0.001);
+    assertEquals(10, m.getMinY(), 0.001);
+    assertEquals(20, m.getMaxX(), 0.001);
+    assertEquals(20, m.getMaxY(), 0.001);
+
+    // now let's update the output mapping only.
+    servo01.setMinMaxOutput(90, 180);
+    assertEquals(10, m.getMinX(), 0.001);
+    assertEquals(20, m.getMaxX(), 0.001);
+    assertEquals(90, m.getMinY(), 0.001);
+    assertEquals(180, m.getMaxY(), 0.001);
+    
+    servo01.map(0, 180, 42, 43);
+    m = servo01.getMapper();
+    assertEquals(0, m.getMinX(), 0.001);
+    assertEquals(180, m.getMaxX(), 0.001);
+    assertEquals(42, m.getMinY(), 0.001);
+    assertEquals(43, m.getMaxY(), 0.001);
+    
+    assertEquals(42, servo01.getMin(), 0.001);
+    assertEquals(43, servo01.getMax(), 0.001);
+    
+    servo01.moveTo(90.0);
+    assertEquals(90.0, servo01.getTargetPos(), 0.001);
+    
+    servo01.setSpeed(180.0);
+    // servo velocity is speed now.. 
+    assertEquals(180.0, servo01.getVelocity(), 0.001);
+
+    servo01.setVelocity(90.0);
+    // servo velocity is speed now.. 
+    assertEquals(90.0, servo01.getSpeed(), 0.001);
+
+    // by default the servo is not inverted
+    assertFalse(servo01.isInverted());
+    
+    servo01.setInverted(true);
+    assertTrue(servo01.isInverted());
+   
+    // you know for ol' times sake.
+    servo01.enableAutoDisable(true);
+    assertTrue(servo01.isAutoDisable());
+   
+  }
+
+  // TODO: test sweeping
+  // TODO: test stopping a servo in the middle of a movement.
+  // TOOD: implement and test waitTargetPos for servo.
+  // TODO: publishMoveTo doesn't get exercised in this test
+  // TODO: publishServoEnable is not exercised
+  // TODO: publishServoMoveTo
+  // TODO: publishServoStop
+  // TODO: setting a custom mapper 
+  
 }

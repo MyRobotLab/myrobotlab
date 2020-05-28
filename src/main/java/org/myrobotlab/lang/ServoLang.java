@@ -2,7 +2,6 @@ package org.myrobotlab.lang;
 
 import java.text.DecimalFormat;
 
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Servo;
 
 
@@ -22,6 +21,7 @@ public class ServoLang extends LangUtils {
     sb.append(name + String.format(".setPosition(%s)\n", f.format(s.getCurrentInputPos())));
     sb.append(name + ".map(" + s.getMapper().getMinX() + "," + s.getMapper().getMaxX() + "," +
                                s.getMapper().getMinY() + "," + s.getMapper().getMaxY() + ")\n");
+    // TODO: add mapper isClipped()
     sb.append(name + ".setInverted(" + toPython(s.isInverted()) + ")\n");
     sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
     sb.append(name + ".setRest(" + s.getRest() + ")\n");
@@ -44,7 +44,7 @@ public class ServoLang extends LangUtils {
       sb.append(name + ".attach(\"" + controller + "\")\n");
     }
     */
-    if (s.getAutoDisable()) {
+    if (s.isAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
     } else {
       sb.append(name + ".setAutoDisable(False)\n");      

@@ -1259,7 +1259,8 @@ public class Arduino extends AbstractMicrocontroller
       msg = new Msg(this, serial);
       serial.addByteListener(this);
     } else {
-      log.warn("Init serial called and we already have a msg class!");
+      // TODO: figure out why this gets called so often.
+      log.info("Init serial we already have a msg class.");
     }
   }
 
