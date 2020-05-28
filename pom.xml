@@ -1728,6 +1728,12 @@
             <followSymlinks>false</followSymlinks>
           </fileset>
           <fileset>
+            <directory>data</directory>
+          </fileset>
+          <fileset>
+            <directory>resource</directory>
+          </fileset>
+          <fileset>
             <directory>src/main/resources/resource/framework</directory>
             <includes>
               <include>**/serviceData.json</include>
