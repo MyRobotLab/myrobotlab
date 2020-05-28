@@ -1723,7 +1723,7 @@
           <fileset>
             <directory>libraries</directory>
             <includes>
-              <include>repo.json</include>
+              <include>**</include>
             </includes>
             <followSymlinks>false</followSymlinks>
           </fileset>
