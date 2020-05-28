@@ -224,8 +224,10 @@ public class AudioProcessor extends Thread {
       } else {
         log.error("line is null !");
       }
-
+    } catch (LineUnavailableException lineError) {
+      audioFile.warn("output audio line was not found - is audio enabled?");
     } catch (Exception e) {
+      audioFile.error(e.getMessage());
       log.error(e.getMessage(), e);
       if (audioFile != null) {
     	if (e instanceof LineUnavailableException) {
