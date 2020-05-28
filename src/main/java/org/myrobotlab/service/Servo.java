@@ -117,20 +117,22 @@ public class Servo extends AbstractServo implements ServoControl {
      * </pre>
      *
      */
+    // TODO: this block isn't tested by ServoTest
     if (isBlocking && !blocking) {
       // if isBlocking already, and incoming request is not blocking - we cancel
       log.info("{} is currently blocking - ignoring request to moveTo({})", getName(), newPos);
       return false;
     }
+    // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
-      // if isBlocking already, and incoming request is a blocking one - we
-      // block it
+      // if isBlocking already, and incoming request is a blocking one - we block it
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       synchronized (this) {
         try {
           this.wait();
         } catch (InterruptedException e) {
-          /* don't care */}
+          /* don't care */
+        }
       }
       return false;
     }
@@ -213,105 +215,40 @@ public class Servo extends AbstractServo implements ServoControl {
   }
   
   public static void main(String[] args) throws InterruptedException {
-    try {
-
-      Runtime.main(new String[] { "--interactive", "--id", "servo"});
-      // LoggingFactory.init(Level.INFO);
-      // Platform.setVirtual(true);
-      
-      // Runtime.start("python", "Python");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-      
-      
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
-      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-
-      mega.connect("/dev/ttyACM1");
-      // mega.setBoardMega();
-            
-      
-      log.info("servo pos {}", tilt.getCurrentInputPos());
-      
-      // double pos = 170;
-      // servo03.setPosition(pos);
-      tilt.setPin(3);
-      
-      double min = 3;
-      double max = 170;
-      double speed = 60; // degree/s
-      
-      mega.attach(tilt);
-      // mega.attach(servo03,3);
-      
-      for (int i = 0; i < 100 ; ++i) {
-        tilt.moveTo(20.0);
-      }
-      
-      tilt.sweep(min, max, speed);
-      
-      /*
-      Servo servo04 = (Servo) Runtime.start("servo04", "Servo");
-      Servo servo05 = (Servo) Runtime.start("servo05", "Servo");
-      Servo servo06 = (Servo) Runtime.start("servo06", "Servo");
-      Servo servo07 = (Servo) Runtime.start("servo07", "Servo");
-      Servo servo08 = (Servo) Runtime.start("servo08", "Servo");
-      Servo servo09 = (Servo) Runtime.start("servo09", "Servo");
-      Servo servo10 = (Servo) Runtime.start("servo10", "Servo");
-      Servo servo11 = (Servo) Runtime.start("servo11", "Servo");
-      Servo servo12 = (Servo) Runtime.start("servo12", "Servo");
-      */
-      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
-
-     // servo03.attach(mega, 8, 38.0);
-      /*
-      servo04.attach(mega, 4, 38.0);
-      servo05.attach(mega, 5, 38.0);
-      servo06.attach(mega, 6, 38.0);
-      servo07.attach(mega, 7, 38.0);
-      servo08.attach(mega, 8, 38.0);
-      servo09.attach(mega, 9, 38.0);
-      servo10.attach(mega, 10, 38.0);
-      servo11.attach(mega, 11, 38.0);
-      servo12.attach(mega, 12, 38.0);
-      */
-      
-      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
-      // servo03.attach((ServoEventListener)catcher);
-      
-      // servo.setPin(12);
-      
-      /*
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      */
-      
-      // servo.sweepDelay = 3;
-      // servo.save();
-      // servo.load();
-      // servo.save();
-      // log.info("sweepDely {}", servo.sweepDelay);
-   
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
+    //kw: commeted out to improve code coverage reports :)
+//    try {
+//      Runtime.main(new String[] { "--interactive", "--id", "servo"});
+//      // LoggingFactory.init(Level.INFO);
+//      // Platform.setVirtual(true);
+//      // Runtime.start("python", "Python");
+//      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+//      webgui.autoStartBrowser(false);
+//      webgui.startService();
+//      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
+//      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+//      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+//      boolean done = true;
+//      if (done) {
+//        return;
+//      }
+//      mega.connect("/dev/ttyACM1");
+//      // mega.setBoardMega();
+//      log.info("servo pos {}", tilt.getCurrentInputPos());
+//      // double pos = 170;
+//      // servo03.setPosition(pos);
+//      tilt.setPin(3);
+//      double min = 3;
+//      double max = 170;
+//      double speed = 60; // degree/s
+//      mega.attach(tilt);
+//      // mega.attach(servo03,3);
+//      for (int i = 0; i < 100 ; ++i) {
+//        tilt.moveTo(20.0);
+//      }
+//      tilt.sweep(min, max, speed);
+//    } catch (Exception e) {
+//      log.error("main threw", e);
+//    }
   }
 
 }

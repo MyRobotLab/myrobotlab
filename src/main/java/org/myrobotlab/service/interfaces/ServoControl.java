@@ -60,11 +60,11 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void enable();
 
   /**
-   * getAutoDisable return value set by setAutoDisable
+   * isAutoDisable return value set by setAutoDisable
    * 
    * @return Boolean
    */
-  boolean getAutoDisable();
+  boolean isAutoDisable();
 
   /**
    * name of the current controllers - empty if not set
@@ -161,6 +161,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   double getTargetOutput();
 
+  /**
+   * This method returns the input target position of the servo.  This is the 
+   * input position that the servo was requested to move to.
+   * 
+   * @return
+   */
   double getTargetPos();
 
   /**
