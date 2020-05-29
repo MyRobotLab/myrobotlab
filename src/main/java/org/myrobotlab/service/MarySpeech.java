@@ -199,10 +199,10 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Emma", "female", "de", "bits1-hsmm");
     addVoice("Henry", "male", "en", "cmu-rms-hsmm");
     addVoice("Alim", "male", "tr", "dfki-ot-hsmm");
-    addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm");
+    //addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm"); this is useless because it is totally non understandable
     addVoice("Spike", "male", "en-GB", "dfki-spike-hsmm");
     addVoice("Sally", "female", "en-US", "cmu-slt-hsmm");
-    addVoice("Camille", "female", "fr", "enst-camille-hsmm");
+    //addVoice("Camille", "female", "fr", "enst-camille-hsmm"); this is useless because it is totally non understandable
     addVoice("Hans", "male", "de", "dfki-pavoque-neutral-hsmm");
     addVoice("Poppy", "female", "en-GB", "dfki-poppy-hsmm");
     addVoice("Mark", "male", "en-US", "cmu-bdl-hsmm");

@@ -270,7 +270,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   }
 
   public void addArtifact(String orgId, String classifierId) {
-    lastDependency.add(new ServiceArtifact(orgId, classifierId));
+    lastDependency.add(new ServiceArtifact(orgId, classifierId));  
   }
 
 }

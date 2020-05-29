@@ -15,8 +15,13 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.currentBotImage = null
 
+    $scope.aimlEditor = null
+
     $scope.tabs = {
-        "selected":1
+        "selected": 1
+    }
+    $scope.tabsRight = {
+        "selected": 1
     }
 
     // active tab index
@@ -24,8 +29,8 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.aimlFile = "<category>blah \n blah <category>"
     $scope.aimlFileData = {
-        "data":"HELLO THERE !!!"
-    } 
+        "data": "HELLO THERE !!!"
+    }
 
     $scope.lastResponse
 
@@ -92,6 +97,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         case 'onRequest':
             var textData = data
             $scope.chatLog.unshift({
+                type: 'User',
                 name: $scope.currentUserName,
                 text: $sce.trustAsHtml(textData)
             })
@@ -101,6 +107,7 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
         case 'onText':
             var textData = data
             $scope.chatLog.unshift({
+                type: 'Bot',
                 name: $scope.service.currentBotName,
                 text: $sce.trustAsHtml(textData)
             })
@@ -232,11 +239,24 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
 
     $scope.aceLoaded = function(_editor) {
         // _editor.setReadOnly(true);
+        $scope.aimlEditor = _editor
         console.log('aceLoaded')
     }
 
-    $scope.aceChanged = function(e) {//
+    $scope.aceChanged = function(e) {
+        //
         console.log('aceChanged')
+    }
+
+    $scope.getStatusLabel = function(level) {
+        if (level == 'error') {
+            return 'row label col-md-12 label-danger'
+        }
+        if (level == 'warn') {
+            return 'row label col-md-12 label-warning'
+        }
+
+        return 'row label col-md-12 label-info'
     }
 
     // subscribe to the response from programab.

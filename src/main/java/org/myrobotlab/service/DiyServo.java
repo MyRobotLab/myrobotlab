@@ -852,7 +852,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   @Override /* grog: TODO ? */
-  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
+  protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // TODO Auto-generated method stub
     return false;
   }
