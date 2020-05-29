@@ -82,24 +82,6 @@ public class CleverBot extends Service {
     return input;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(CleverBot.class);
-    meta.addDescription("chatbot service");
-    meta.addCategory("ai");
-    meta.addDependency("ca.pjer", "chatter-bot-api", "2.0.1");
-    meta.addDependency("com.squareup.okhttp3", "okhttp", "3.9.0");
-    meta.setCloudService(true);
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init();

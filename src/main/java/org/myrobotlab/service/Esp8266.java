@@ -31,25 +31,5 @@ public class Esp8266 extends Service {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Esp8266.class.getCanonicalName());
-    meta.addDescription("wifi Arduino");
-    meta.addCategory("microcontroller");
-
-    // put peer definitions in
-    meta.addPeer("serial", "Serial", "serial");
-    meta.addPeer("webgui", "WebGui", "webgui");
-
-    return meta;
-  }
 
 }

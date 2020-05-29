@@ -80,25 +80,6 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
 		addVoice(name, null, lang, null);
 	}
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return ServiceType - returns all the data
-	 * 
-	 */
-	static public ServiceType getMetaData() {
-
-		ServiceType meta = AbstractSpeechSynthesis.getMetaData(WebkitSpeechSynthesis.class.getCanonicalName());
-
-		meta.addDescription("Web speech api using Chrome or Firefox speech synthesis");
-		meta.setAvailable(true); // false if you do not want it viewable in a
-		// gui
-		// add dependency if necessary
-		meta.addCategory("speech", "sound");
-		return meta;
-	}
 
 	public boolean setVoice(String name) {
 		if (voices.containsKey(name)) {

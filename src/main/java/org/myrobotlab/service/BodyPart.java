@@ -208,16 +208,6 @@ public class BodyPart extends AbstractBodyPart implements IKJointAngleListener {
     }
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(BodyPart.class.getCanonicalName());
-    meta.addDescription("An easier way to control a body ...");
-    meta.addCategory("robot");
-    meta.setAvailable(true);
-    meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
-    return meta;
-  }
-
   // pasted from inmoov service, for compatibility
   @Override
   public void onJointAngles(Map<String, Double> angleMap) {

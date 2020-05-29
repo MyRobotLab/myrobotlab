@@ -1183,24 +1183,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
-    meta.addDescription("reads and writes data to a serial port");
-    meta.addCategory("sensors", "control");
-    meta.addDependency("org.scream3r", "jssc", "2.8.0-1");
-    meta.setLicenseGplV3(); // via jssc
-    return meta;
-  }
-
   public void connect() throws IOException {
     connect(lastPortName);
   }

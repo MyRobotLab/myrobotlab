@@ -74,22 +74,5 @@ public class Android extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Android.class.getCanonicalName());
-    meta.addDescription("re-publishes Android proximity and position information");
-    meta.addCategory("sensors");
-    meta.setLicenseApache();
-
-    return meta;
-  }
 
 }

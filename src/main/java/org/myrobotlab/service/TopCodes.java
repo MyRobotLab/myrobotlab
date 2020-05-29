@@ -89,21 +89,5 @@ public class TopCodes extends Service {
     return null;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(TopCodes.class.getCanonicalName());
-    meta.addDescription("Topcodes finds visual references and identifiers");
-    meta.addCategory("vision", "video", "sensors");
-    meta.addDependency("topcodes", "topcodes", "1.0.0");
-    return meta;
-  }
 
 }

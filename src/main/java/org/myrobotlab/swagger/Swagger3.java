@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
@@ -93,7 +94,7 @@ public class Swagger3 {
         // TODO - make examples and other info in MetaData !
         Method method = c.getMethod("getMetaData");
         ServiceType serviceType = (ServiceType) method.invoke(null); // Tags ?
-        // Examples ?
+// Examples ?
 
         // prefix ... ???
         String template = "/api/service/%s/%s";

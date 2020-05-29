@@ -207,29 +207,6 @@ public class VirtualDevice extends Service implements SerialDataListener {
     return ret;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(VirtualDevice.class.getCanonicalName());
-    meta.addDescription("a service which can create virtual serial ports and behaviors implemented in python for them");
-    meta.addCategory("testing");
-    // put peer definitions in
-    meta.addPeer("uart", "Serial", "uart");
-    meta.addPeer("logic", "Python", "logic to implement");
-
-    // this is used for testing, and does not need to be tested
-    meta.setAvailable(false);
-
-    return meta;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

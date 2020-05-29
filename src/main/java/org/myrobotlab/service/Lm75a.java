@@ -182,22 +182,6 @@ public class Lm75a extends Service implements I2CControl {
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Lm75a.class.getCanonicalName());
-    meta.addDescription("LM75A Digital temperature sensor");
-    meta.addCategory("shield", "sensors", "i2c");
-    meta.setSponsor("Mats");
-    return meta;
-  }
 
   /**
    * valid for a control or controller which can only have a single other

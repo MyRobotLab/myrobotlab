@@ -192,27 +192,6 @@ public class InMoov2Torso extends Service {
     moveTo(35.0, 45.0, 55.0);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoov2Torso.class.getCanonicalName());
-    meta.addDescription("InMoov Torso");
-    meta.addCategory("robot");
-
-    meta.addPeer("topStom", "Servo", "Top Stomach servo");
-    meta.addPeer("midStom", "Servo", "Mid Stomach servo");
-    meta.addPeer("lowStom", "Servo", "Low Stomach servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for torso");
-
-    return meta;
-  }
 
   @Deprecated /* use setSpeed */
   public void setVelocity(Double topStom, Double midStom, Double lowStom) {

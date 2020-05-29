@@ -452,30 +452,5 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     info("%s disconnected from %s", getName(), portName);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(EddieControlBoard.class.getCanonicalName());
-    meta.addDescription("microcontroller designed for robotics");
-    meta.addCategory("microcontroller");
-    // John Harland no longer uses this hardware
-    meta.setAvailable(false);
-
-    // put peer definitions in
-    meta.addPeer("serial", "Serial", "serial");
-    meta.addPeer("keyboard", "Keyboard", "serial");
-    meta.addPeer("webgui", "WebGui", "webgui");
-    //meta.addPeer("remote", "RemoteAdapter", "remote interface");
-    meta.addPeer("joystick", "Joystick", "joystick");
-
-    return meta;
-  }
 
 }

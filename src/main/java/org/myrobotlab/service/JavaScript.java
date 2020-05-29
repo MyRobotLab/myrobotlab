@@ -66,23 +66,6 @@ public class JavaScript extends Service {
     return engine.get(varName);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(JavaScript.class.getCanonicalName());
-    meta.addDescription("native jvm javascript engine, which allows execution of javascript through exec method");
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("programming");
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);

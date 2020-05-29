@@ -79,25 +79,6 @@ public class AzureTranslator extends Service implements TextListener, TextPublis
     toLanguage = to;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(AzureTranslator.class);
-    meta.addDescription("interface to Azure translation services");
-    meta.addCategory("translation", "cloud", "ai");
-    meta.addDependency("io.github.firemaples", "microsoft-translator-java-api", "0.8.3");
-    meta.setCloudService(true);
-    meta.setRequiresKeys(true);
-    return meta;
-  }
-
   @Override
   public String publishText(String text) {
     return text;

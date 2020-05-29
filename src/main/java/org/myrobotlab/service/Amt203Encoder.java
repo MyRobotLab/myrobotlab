@@ -1,11 +1,8 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.interfaces.EncoderController;
 
 /**
  * This is the service that will support the AMT-203 encoder from CUI. It is a
@@ -34,13 +31,6 @@ public class Amt203Encoder extends AbstractPinEncoder implements EncoderControl 
     super(n, id);
     // 12 bit encoder is 4096 steps of resolution
     resolution = 4096;
-  }
-  
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Amt203Encoder.class.getCanonicalName());
-    meta.addDescription("AMT203 Encoder - Absolute position encoder");
-    meta.addCategory("encoder", "sensors");
-    return meta;
   }
 
   public static void main(String[] args) throws Exception {

@@ -3,6 +3,7 @@ package org.myrobotlab.service.abstracts;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.myrobotlab.framework.Config;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -142,7 +143,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   /**
    * input mapper
    */
-  protected Mapper mapper = new MapperLinear(0, 180, 0, 180);
+  protected MapperLinear mapper = new MapperLinear(0, 180, 0, 180);
 
   /**
    * the 'pin' for this Servo - it is Integer because it can be in a state of
@@ -771,7 +772,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void setMapper(Mapper mapper) {
-    this.mapper = mapper;
+    this.mapper = (MapperLinear)mapper;
     broadcastState();
   }
 

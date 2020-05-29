@@ -241,24 +241,6 @@ public class OpenWeatherMap extends HttpClient {
     return localUnits;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(OpenWeatherMap.class.getCanonicalName());
-    meta.addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
-    meta.addCategory("weather");
-    meta.setCloudService(true);
-    meta.addDependency("org.json", "json", "20090211");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
-    return meta;
-  }
 
   public static void main(String[] args) {
     OpenWeatherMap owm = (OpenWeatherMap)Runtime.start("weather", "OpenWeatherMap");
