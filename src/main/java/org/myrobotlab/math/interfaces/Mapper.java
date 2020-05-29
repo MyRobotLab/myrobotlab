@@ -89,8 +89,8 @@ public interface Mapper {
    * set limits on output of the mapper
    * Deprecated, this method is ambiguous. explicitly call map(minX,maxX,minY,maxY) instead. 
    * 
-   * @param min (both input and output)
-   * @param max (both input and output)
+   * @param minXY (both input and output)
+   * @param maxXY (both input and output)
    */
   @Deprecated
   void setMinMax(double minXY, double maxXY);
