@@ -40,6 +40,8 @@
 <div class="col-md-12">
     <!-- TODO reduce this with show -->
     {{service.boardType}} {{connectedStatus}} {{versionStatus}} <br>
+    <span ng-show="boardInfo != null">version {{boardInfo.version}}</span>
+    <!-- span ng-show="boardInfo != null">boardTypeId {{boardInfo.boardTypeName}}</span -->
     <span ng-show="boardInfo != null">load {{boardInfo.microsPerLoop}}</span>
     <span ng-show="boardInfo != null">sram {{boardInfo.sram}} - {{boardInfo.activePins}} active pins {{boardInfo.deviceSummary.length}} devices</span>
     <span ng-show="boardInfo != null">ts {{boardInfo.receiveTs}}</span>

@@ -61,7 +61,6 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
-import org.bytedeco.javacv.ProjectorDevice;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
@@ -137,7 +136,7 @@ import static org.bytedeco.javacpp.opencv_videostab.*;
 public class OpenCV extends AbstractComputerVision {
 
   int vpId = 0;
-  
+
   transient CanvasFrame canvasFrame = null;
 
   class VideoProcessor implements Runnable {
@@ -146,8 +145,8 @@ public class OpenCV extends AbstractComputerVision {
     synchronized public void run() {
       try {
         log.info("run - capturing");
-        
-        capturing = true;        
+
+        capturing = true;
         getGrabber();
 
         lengthInFrames = grabber.getLengthInFrames();
@@ -265,9 +264,9 @@ public class OpenCV extends AbstractComputerVision {
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
-      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
-      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
+      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip", "FloodFill",
+      "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate", "LKOpticalTrack",
+      "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
       "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
 
   static final long serialVersionUID = 1L;
@@ -466,12 +465,15 @@ public class OpenCV extends AbstractComputerVision {
     // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     LoggingFactory.init("info");
 
+    Runtime runtime = Runtime.getInstance();
+    runtime.setLocale("fr");
     Runtime.start("gui", "SwingGui");
-    Runtime.start("python", "Python");
+    
+    // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
- //   WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
- //   webgui.autoStartBrowser(false);
- //   webgui.startService();
+    // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    // webgui.autoStartBrowser(false);
+    // webgui.startService();
 
     // cv.capture();
     // cv.setDisplay(true);
@@ -481,23 +483,18 @@ public class OpenCV extends AbstractComputerVision {
     // cv.setGrabberType("OpenCV");
 
     // cv.addFilter("LKOpticalTrack");
-//    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-    
-    
+    // cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+
     // yoloFilter.enable();
     // cv.addFilter(yoloFilter);
 
     /*
-    cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
-    
-    OpenCVFilter yoloFilter = cv.addFilter("yolo");
-    yoloFilter.enable();
-    yoloFilter.disable();
-    yoloFilter.enable();
-    yoloFilter.disable();
-    yoloFilter.enable();
-    */
-    
+     * cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+     * 
+     * OpenCVFilter yoloFilter = cv.addFilter("yolo"); yoloFilter.enable();
+     * yoloFilter.disable(); yoloFilter.enable(); yoloFilter.disable();
+     * yoloFilter.enable();
+     */
 
     // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
     // Matrix - Pill Scene Short.mp4");
@@ -990,12 +987,12 @@ public class OpenCV extends AbstractComputerVision {
     Map<String, List<Classification>> ret = new HashMap<>();
     String name = "yolo";
     try {
-      OpenCVFilterYolo fd = new OpenCVFilterYolo(name);      
+      OpenCVFilterYolo fd = new OpenCVFilterYolo(name);
       addFilter(fd);
       long startTs = System.currentTimeMillis();
       while (ret.keySet().size() == 0 && System.currentTimeMillis() - startTs < timeout) {
         ret.putAll(blockingClassification.poll(timeout, TimeUnit.MILLISECONDS));
-      }      
+      }
     } catch (InterruptedException e) {
     }
     removeFilter(name);
@@ -1014,14 +1011,14 @@ public class OpenCV extends AbstractComputerVision {
     return displayFilter;
   }
 
-  @Deprecated /*use getFaces*/
+  @Deprecated /* use getFaces */
   public OpenCVData getFaceDetect() {
     // willing to wait up to 5 seconds
     // but if we find a face before 5s we wont wait
     return getFaceDetect(5000);
   }
 
-  @Deprecated /*use getFaces*/
+  @Deprecated /* use getFaces */
   public OpenCVData getFaceDetect(int timeout) {
     OpenCVFilterFaceDetectDNN fd = new OpenCVFilterFaceDetectDNN("face");
     addFilter(fd);
@@ -1029,11 +1026,11 @@ public class OpenCV extends AbstractComputerVision {
     removeFilter(fd.name);
     return d;
   }
-  
+
   public List<Classification> getFaces() {
     return getFaces(5000); // FIXME - change to MAX_TIMOUT
   }
-  
+
   public List<Classification> getFaces(int timeout) {
     blockingClassification.clear();
     Map<String, List<Classification>> ret = new HashMap<>();
@@ -1049,7 +1046,7 @@ public class OpenCV extends AbstractComputerVision {
       }
     } catch (InterruptedException e) {
     }
-    removeFilter(name);   
+    removeFilter(name);
     return ret.get("face");
   }
 
@@ -1266,11 +1263,11 @@ public class OpenCV extends AbstractComputerVision {
     broadcastState(); // restarting/enabled filters ?? wth?
     return grabber;
   }
-  
+
   public void setWidth(int width) {
     this.width = width;
   }
-  
+
   public void setHeight(int height) {
     this.height = height;
   }
@@ -1464,21 +1461,21 @@ public class OpenCV extends AbstractComputerVision {
          */
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
-        
+
         if (display && !isHeadless()) {
           if (canvasFrame == null) {
             // FIXME - strange canvaFrame's fullscreen mode is not exposed :(
             // ProjectorDevice pd = new ProjectorDevice("display 2");
             // canvasFrame = pd.createCanvasFrame();
-            
-            canvasFrame = new CanvasFrame(displayFilter); 
+
+            canvasFrame = new CanvasFrame(displayFilter);
             canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            // canvasFrame.setAlwaysOnTop(true);            
+            // canvasFrame.setAlwaysOnTop(true);
             canvasFrame.setResizable(true);
             canvasFrame.pack();
           }
           canvasFrame.showImage(b);
-          
+
         } else if (!display && canvasFrame != null) {
           canvasFrame.dispose();
           canvasFrame = null;
@@ -1497,8 +1494,7 @@ public class OpenCV extends AbstractComputerVision {
 
     // future publishing (same as BoofCv !)
     invoke("publishCvData", data);
-    
- 
+
     // FIXME - TODO
     // data.prepareToSerialize();
     // invoke("publishVideoData", data);
@@ -2083,7 +2079,7 @@ public class OpenCV extends AbstractComputerVision {
       f.enable();
     broadcastState();
   }
-  
+
   public void setDisplay(boolean b) {
     display = b;
   }

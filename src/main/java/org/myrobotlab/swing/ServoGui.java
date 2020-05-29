@@ -244,7 +244,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
     JPanel blockingPanel = new JPanel();
     // blockingPanel.setBorder(BorderFactory.createTitledBorder("blocking"));
     blockingPanel.setBorder(blockingTitle);
-    ImageIcon icon = new ImageIcon(ImageIO.read(new File(Service.getResourceDir(Servo.class, "green.png"))));
+    // ImageIcon icon = new ImageIcon(ImageIO.read(new File(Service.getResourceDir(Servo.class, "green.png"))));
+    ImageIcon icon = Util.getImageIcon("green.png");
     JLabel isBlocking = new JLabel();
     isBlocking.setIcon(icon);
     blockingPanel.add(new JLabel("is blocking"));
