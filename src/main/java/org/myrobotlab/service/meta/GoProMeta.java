@@ -24,6 +24,7 @@ public class GoProMeta {
     // meta.addDependency("org.coolproject", "1.0.0");
     meta.addCategory("video");
     meta.addPeer("http", "HttpClient", "Http for GoPro control");
+    meta.addDescription("Go pro camera support");
     return meta;
   }
 

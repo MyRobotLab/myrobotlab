@@ -22,6 +22,7 @@ public class WiiDarMeta {
     Platform platform = Platform.getLocalInstance();
     // meta.addDependency("wiiuse.wiimote", "0.12b");
 
+    meta.addDescription("WiiDar.... who dar?  WiiDar!");
     meta.addDependency("wiiusej", "wiiusej", "wiiusej");
     meta.addCategory("sensors");
     // no longer have hardware for this ...
