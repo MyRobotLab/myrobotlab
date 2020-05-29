@@ -22,6 +22,7 @@ public class ChessGameMeta {
     Platform platform = Platform.getLocalInstance();
     meta.addCategory("game");
     meta.addDependency("ChessBoard", "ChessBoard", "1.0.0");
+    meta.addDescription("Would you like to play a game?");
     return meta;
   }
 }
