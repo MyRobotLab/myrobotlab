@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -17,7 +16,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
-import org.myrobotlab.image.Util;
+
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -26,6 +25,8 @@ public class ServiceInterfaceTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(ServiceInterfaceTest.class);
 
+  private boolean testWebPages = false;
+  
   // FIXME - add to report at end of "all" testing ...
   private boolean serviceHasWebPage(String service) {
     String url = "http://myrobotlab.org/service/" + service;
@@ -105,6 +106,9 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("_TemplateService");
     blacklist.add("Lloyd");
     blacklist.add("Solr");
+    // This one just takes so darn long.
+    blacklist.add("Deeplearning4j");
+    blacklist.add("OculusDiy");
     
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.start("python", "Python");
@@ -125,8 +129,8 @@ public class ServiceInterfaceTest extends AbstractTest {
       // test single service
       // serviceType = sd.getServiceType("org.myrobotlab.service.VirtualDevice");
       String service = serviceType.getSimpleName();
-      System.out.println("SYSTEM TESTING " + service);
-      System.out.flush();
+      // System.out.println("SYSTEM TESTING " + service);
+      // System.out.flush();
       if (blacklist.contains(service)/* || !serviceType.getSimpleName().equals("Emoji")*/) {
         log.info("White listed testing of service {}", service);
         continue;
@@ -139,12 +143,14 @@ public class ServiceInterfaceTest extends AbstractTest {
         servicesNotInServiceDataJson.add(service);
       } 
       
-      if (serviceHasWebPage(service)) {
-        log.info("Service {} has a web page..", service);
-        numServicePages++;
-      } else {
-        log.warn("Service {} does not have a web page..", service);
-        servicesWithoutWebPages.add(service);
+      if (testWebPages) {
+        if (serviceHasWebPage(service)) {
+          log.info("Service {} has a web page..", service);
+          numServicePages++;
+        } else {
+          log.warn("Service {} does not have a web page..", service);
+          servicesWithoutWebPages.add(service);
+        }
       }
 
       if (serviceInterfaceTest(service)) {

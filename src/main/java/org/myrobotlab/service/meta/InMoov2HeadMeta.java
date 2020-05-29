@@ -20,7 +20,7 @@ public class InMoov2HeadMeta {
 
     ServiceType meta = new ServiceType("org.myrobotlab.service.InMoov2Head");
     Platform platform = Platform.getLocalInstance();
-
+    meta.addDescription("The inmoov2 head");
     meta.addPeer("jaw", "Servo", "Jaw servo");
     meta.addPeer("eyeX", "Servo", "Eyes pan servo");
     meta.addPeer("eyeY", "Servo", "Eyes tilt servo");
@@ -31,7 +31,7 @@ public class InMoov2HeadMeta {
 
     meta.addPeer("eyelidLeft", "Servo", "eyelidLeft or both servo");
     meta.addPeer("eyelidRight", "Servo", "Eyelid right servo");
-
+    
     return meta;
   }
   

@@ -312,7 +312,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @param minXY
    *          minXY value
-   * @param maxY
+   * @param maxXY
    *          maxXY value
    * 
    */
