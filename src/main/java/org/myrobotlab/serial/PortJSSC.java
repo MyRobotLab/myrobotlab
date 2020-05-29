@@ -204,7 +204,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
             long delta = stats.ts - stats.lastTS;
             // avoid the divide by zero
             if (delta != 0) {
-              log.info("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, delta, 8 * stats.interval / delta);
+              log.debug("===stats - dequeued total {} - {} bytes in {} ms {} Kbps", stats.total, stats.interval, delta, 8 * stats.interval / delta);
             }
             // TODO: should we be calling this still?
             // publishQueueStats(stats);
