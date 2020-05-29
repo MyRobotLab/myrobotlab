@@ -169,17 +169,29 @@ public class ServoTest extends AbstractTest {
     Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
-
     servo01.setPosition(0.0);
+    servo01.setPin(7);
+    // use auto disable with a blocking move.
+    servo01.setAutoDisable(true);
     // 60 degrees per second.. move from 0 to 180 in 3 seconds
     servo01.setSpeed(60.0);
-    servo01.setPin(7);
     arduino01.attach(servo01);
-    
+    // Do I need to enable it?!
+    servo01.enable();
+
     long start = System.currentTimeMillis();
     servo01.moveToBlocking(180.0);
     long delta = System.currentTimeMillis() - start;
     assertTrue("Move to blocking should have taken more than 3 seconds.", delta > 3000);
+    // log.info("Move to blocking took {} milliseconds", delta);
+    assertTrue("Servo should be ebabled", servo01.isEnabled());
+    assertFalse("Servo should not be moving now.", servo01.isMoving());
+    // Now let's wait for the idle disable timer to kick off + 1000ms
+    // TODO: figure out why smaller values like 100ms cause this test to fail.
+    // there seems to be some lag
+    Thread.sleep(servo01.getIdleTimeout() + 1000);
+    assertFalse("Servo should be disabled.", servo01.isEnabled());
+    
   }
   
   @Test
