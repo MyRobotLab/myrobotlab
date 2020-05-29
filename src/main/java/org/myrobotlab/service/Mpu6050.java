@@ -4870,23 +4870,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
    * End of I2CDEV section.
    */
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Mpu6050.class.getCanonicalName());
-    meta.addDescription("General MPU-6050 acclerometer and gyro");
-    meta.addCategory("microcontroller", "sensors");
-    meta.setSponsor("Mats");
-    return meta;
-  }
-
   @Override
   public Orientation publishOrientation(Orientation data) {
     return data;

@@ -58,29 +58,6 @@ public class GoogleCloud extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(GoogleCloud.class.getCanonicalName());
-    meta.addDescription("google api client service");
-    meta.setAvailable(true);
-    // add dependency if necessary
-    // meta.addDependency("com.google.api-client", "google-api-client",
-    // "1.23.0");
-    meta.addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
-    meta.addCategory("cloud", "vision");
-    meta.setCloudService(true);
-    meta.setRequiresKeys(true);
-
-    return meta;
-  }
 
   /**
    * Detects entities,sentiment and syntax in a document using the Vision API.

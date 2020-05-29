@@ -59,6 +59,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.LangUtils;
@@ -345,11 +346,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // get the static keys
       // query on keys
       // if reservations exist then merge in data
-      Class<?> theClass = Class.forName(fullClassName);
-
-      // getPeers
-      Method method = theClass.getMethod("getMetaData");
-      ServiceType st = (ServiceType) method.invoke(null);
+      ServiceType st = ServiceData.getMetaData(fullClassName);
       Map<String, ServiceReservation> peers = st.getPeers();
 
       log.info("processing {}.getPeers({}) will process {} peers", serviceClass, myKey, peers.size());
@@ -1811,10 +1808,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String myKey = getName();
     log.info("releasePeers ({}, {})", myKey, serviceClass);
     try {
-      // TODO: what the heck does this thing do?
-      Class<?> theClass = Class.forName(serviceClass);
-      Method method = theClass.getMethod("getMetaData");
-      ServiceType serviceType = (ServiceType) method.invoke(null);
+      // get sub peers climbing tree
+      ServiceType serviceType = ServiceData.getMetaData(serviceClass);
       Map<String, ServiceReservation> peers = serviceType.getPeers();
       for (String s : peers.keySet()) {
         if (peerName == null) {
@@ -2213,9 +2208,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     log.info("starting peers");
     Map<String, ServiceReservation> peers = null;
 
-    try {
-      Method method = this.getClass().getMethod("getMetaData");
-      ServiceType st = (ServiceType) method.invoke(null);
+    try {      
+      ServiceType st = ServiceData.getMetaData(this.getClass().getCanonicalName());
       peers = st.getPeers();
     } catch (Exception e) {
     }
@@ -2504,28 +2498,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return the service type info
    */
   static public ServiceType getMetaData(String serviceClass) {
-    String serviceType;
-    if (!serviceClass.contains(".")) {
-      serviceType = String.format("org.myrobotlab.service.%s", serviceClass);
-    } else {
-      serviceType = serviceClass;
-    }
-
-    try {
-
-      Class<?> theClass = Class.forName(serviceType);
-
-      // execute static method to get meta data
-
-      Method method = theClass.getMethod("getMetaData");
-      ServiceType meta = (ServiceType) method.invoke(null);
-      return meta;
-
-    } catch (Exception e) {
-      // dont care
-    }
-
-    return null;
+    return ServiceData.getMetaData(serviceClass);
   }
 
   public String getDescription() {

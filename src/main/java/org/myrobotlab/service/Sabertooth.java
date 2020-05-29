@@ -228,23 +228,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     return false;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Sabertooth.class);
-    meta.addDescription("interface for the powerful Sabertooth motor controller");
-    meta.addCategory("motor", "control");
-    meta.addPeer("serial", "Serial", "Serial Port");
-
-    return meta;
-  }
 
   /**
    * Sabertooth is a serial device, so it has a PortConnector interface.

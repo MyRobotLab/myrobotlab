@@ -30,13 +30,5 @@ public class MotorPort extends AbstractMotor {
     return port;
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MotorPort.class.getCanonicalName());
-    meta.addDescription("supports port related motor controllers such as the Sabertooth and AdaFruitMotorShield");
-    meta.addCategory("motor");
-    meta.setAvailable(true);
-    return meta;
-  }
 
 }

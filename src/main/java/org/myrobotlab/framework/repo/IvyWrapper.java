@@ -94,7 +94,7 @@ public class IvyWrapper extends Repo implements Serializable {
 
   /**
    * <pre>
-   * generates all ivy related build files based on Service.getMetaData
+   * generates all ivy related build files based on their meta data
    * 
    * ivy.xml
    * ivysettings.xml 

@@ -232,25 +232,6 @@ public class Keyboard extends Service {
     return lastKeyPressed;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Keyboard.class.getCanonicalName());
-    meta.addDescription("keyboard interface");
-    meta.addCategory("control");
-
-    meta.addDependency("com.1stleg", "jnativehook", "2.0.3");
-
-    return meta;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

@@ -39,21 +39,5 @@ public class BeagleBoardBlack extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(BeagleBoardBlack.class.getCanonicalName());
-    meta.addDescription("service to access the beagle board black hardware");
-    meta.addCategory("microcontroller");
-    meta.setAvailable(false);
-    return meta;
-  }
 
 }

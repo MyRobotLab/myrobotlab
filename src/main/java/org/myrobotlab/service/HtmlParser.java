@@ -30,23 +30,5 @@ public class HtmlParser extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(HtmlParser.class.getCanonicalName());
-    meta.addDependency("org.jsoup", "jsoup", "1.8.3");
-    meta.addDescription("html parser");
-    meta.addCategory("document");
-    // Set to false since no JSoup service exists
-    meta.setAvailable(false);
-    return meta;
-  }
 
 }

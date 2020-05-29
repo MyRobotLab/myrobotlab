@@ -88,12 +88,6 @@ public class ServoMixer extends Service {
     this.posesDirectory = posesDirectory;
   }
   
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(ServoMixer.class.getCanonicalName());
-    meta.addDescription("ServoMixer - most just a swing gui that allows for simple movements of all servos in one gui panel.");
-    return meta;
-  }
-
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init("INFO");

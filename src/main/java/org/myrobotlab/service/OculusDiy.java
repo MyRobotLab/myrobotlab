@@ -171,23 +171,6 @@ public class OculusDiy extends Service implements OrientationListener {
     super.releaseService();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(OculusDiy.class);
-    meta.addDescription("Service to receive and compute data from a DIY Oculus");
-    meta.addCategory("video", "control", "sensors", "telerobotics");
-    meta.addPeer("arduino", "Arduino", "Arduino for DIYOculus and Myo");
-    meta.addPeer("mpu6050", "Mpu6050", "mpu6050");
-    return meta;
-  }
-
   @Override
   public Orientation onOrientation(Orientation orientation) {
     // int[] data = (int[])event.getData();

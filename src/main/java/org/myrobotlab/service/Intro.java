@@ -174,26 +174,7 @@ public class Intro extends Service {
     releasePeer("servo");
     isServoActivated = false;
   }
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Intro.class);
-    meta.addDescription("Introduction to MyRobotlab");
-    meta.setAvailable(true);
-    meta.addCategory("general");
-    // meta.addPeer("speech", "WebKitSpeechSynthesis", "speech");
-    // meta.addPeer("servo", "Servo", "servo");
-    // meta.addPeer("controller", "Arduino", "Arduino controller for this servo");
-    return meta;
-  }
 
   public static void main(String[] args) {
     try {

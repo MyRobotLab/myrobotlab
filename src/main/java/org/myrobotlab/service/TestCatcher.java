@@ -348,16 +348,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(TestCatcher.class.getCanonicalName());
-    meta.addDescription("This service is used to test messaging");
-    meta.setAvailable(false);
-    meta.addCategory("testing", "framework");
-
-    return meta;
-  }
-
   public String getPin(String label, String label2) {
     return null;
   }

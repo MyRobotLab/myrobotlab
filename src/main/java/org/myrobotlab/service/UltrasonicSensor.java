@@ -198,22 +198,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(UltrasonicSensor.class.getCanonicalName());
-    meta.addDescription("ranging sensor");
-    meta.addCategory("sensors");
-    meta.addPeer("controller", "Arduino", "default sensor controller will be an Arduino");
-    return meta;
-  }
 
   public int getPings() {
     return pings;

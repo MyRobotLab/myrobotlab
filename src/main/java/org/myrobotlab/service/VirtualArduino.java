@@ -187,14 +187,6 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     // TODO: after this is a good place to start the mrlCommIno runner.. isn't it?
   }
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(VirtualArduino.class);
-    meta.addDescription("virtual hardware of for the Arduino!");
-    meta.setAvailable(true);
-    meta.addPeer("uart", "Serial", "serial device for this Arduino");
-    meta.addCategory("simulator");
-    return meta;
-  }
 
   public String setBoard(String board) {
     // TODO: if the board type changes we need to reinit the pin map.

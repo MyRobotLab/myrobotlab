@@ -126,22 +126,6 @@ public class Arduino extends AbstractMicrocontroller
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   *
-   * @return ServiceType - returns all the data
-   *
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Arduino.class.getCanonicalName());
-    meta.addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");
-    meta.addCategory("microcontroller");
-    meta.addPeer("serial", "Serial", "serial device for this Arduino");
-    return meta;
-  }
 
   /**
    * path of the Arduino IDE must be set by user should not be static - since

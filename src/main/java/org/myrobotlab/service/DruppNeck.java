@@ -159,20 +159,6 @@ public class DruppNeck extends Service {
     this.downOffset = downOffset;
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(DruppNeck.class.getCanonicalName());
-    meta.addDescription("InMoov Drupp Neck Service");
-    meta.addCategory("robot");
-
-    meta.addPeer("up", "Servo", "Up servo");
-    meta.addPeer("middle", "Servo", "Middle servo");
-    meta.addPeer("down", "Servo", "Down servo");
-
-    meta.setAvailable(true);
-
-    return meta;
-  }
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init("INFO");

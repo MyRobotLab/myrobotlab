@@ -27,28 +27,6 @@ public class Chassis extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Chassis.class);
-    meta.addDescription("control platform");
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
-    meta.addPeer("left", "Motor", "left drive motor");
-    meta.addPeer("right", "Motor", "right drive motor");
-    meta.addPeer("joystick", "Joystick", "joystick control");
-    meta.addPeer("controller", "Sabertooth", "serial controller");
-    return meta;
-  }
-
   public static void main(String[] args) {
     try {
 

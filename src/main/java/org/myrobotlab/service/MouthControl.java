@@ -134,21 +134,6 @@ public class MouthControl extends Service {
     // }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MouthControl.class.getCanonicalName());
-    meta.addDescription("Mouth movements based on spoken text");
-    meta.addCategory("control");
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.DEBUG);

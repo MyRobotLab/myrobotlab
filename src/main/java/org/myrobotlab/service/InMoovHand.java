@@ -630,33 +630,6 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
     moveTo(150.0, 0.0, 0.0, 180.0, 180.0, 90.0);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoovHand.class.getCanonicalName());
-    meta.addDescription("an easier way to create gestures for InMoov");
-    meta.addCategory("robot");
-
-    meta.addPeer("thumb", "Servo", "Thumb servo");
-    meta.addPeer("index", "Servo", "Index servo");
-    meta.addPeer("majeure", "Servo", "Majeure servo");
-    meta.addPeer("ringFinger", "Servo", "RingFinger servo");
-    meta.addPeer("pinky", "Servo", "Pinky servo");
-    meta.addPeer("wrist", "Servo", "Wrist servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
-
-    return meta;
-  }
-
-  @Deprecated /* use set speed */
   public void setVelocity(Double thumb, Double index, Double majeure, Double ringFinger, Double pinky, Double wrist) {
     setSpeed(thumb, index, majeure, ringFinger, pinky, wrist);
   }

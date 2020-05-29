@@ -34,25 +34,6 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(SerialRelay.class.getCanonicalName());
-    meta.addDescription("Relaying Serial data to a different serial port on mega Arduino");
-    meta.setAvailable(false); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
-    return meta;
-  }
-
   public static void main(String[] args) {
     try {
 

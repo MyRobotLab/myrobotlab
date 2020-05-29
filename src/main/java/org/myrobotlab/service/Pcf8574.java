@@ -104,23 +104,6 @@ public class Pcf8574 extends Service implements I2CControl, PinArrayControl {
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Pcf8574.class.getCanonicalName());
-    meta.addDescription("Pcf8574 i2c 8 pin I/O extender");
-    meta.addCategory("shield", "sensors");
-    meta.setSponsor("Mats");
-    return meta;
-  }
-
   public transient I2CController controller;
 
   public String controllerName;

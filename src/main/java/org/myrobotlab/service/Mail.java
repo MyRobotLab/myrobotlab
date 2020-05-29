@@ -126,21 +126,5 @@ public class Mail extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Mail.class.getCanonicalName());
-    meta.addDescription("SMTP ssl/tls service used for sending things");
-    meta.addCategory("cloud");
-
-    return meta;
-  }
 
 }

@@ -456,21 +456,5 @@ success = true; // FIXME change object to send error tolerance - let the robot d
     // for the input point.
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InverseKinematics3D.class.getCanonicalName());
-    meta.addDescription("a 3D kinematics service supporting D-H parameters");
-    meta.addCategory("robot", "control");
-
-    return meta;
-  }
 
 }

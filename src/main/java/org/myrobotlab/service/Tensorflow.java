@@ -37,28 +37,6 @@ public class Tensorflow extends Service {
     super(name, id);
   }
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Tensorflow.class.getCanonicalName());
-    /**
-     * <pre>
-     * tensorflow not ready for primetime
-     */
-    meta.addDescription("Tensorflow machine learning library from Google");
-    meta.addCategory("ai");
-    // TODO: what happens when you try to install this on an ARM processor like
-    // RasPI or the Jetson TX2 ?
-    meta.addDependency("org.tensorflow", "tensorflow", "1.8.0");
-
-    // enable GPU support ?
-    boolean gpu = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
-    if (gpu) {
-      // Currently only supported on Linux. 64 bit.
-      meta.addDependency("org.tensorflow", "libtensorflow", "1.8.0");
-      meta.addDependency("org.tensorflow", "libtensorflow_jni_gpu", "1.8.0");
-    }
-    /* </pre> */
-    return meta;
-  }
 
   public static void main(String[] args) throws Exception {
     // Test code taken directly from the tensorflow webpage to verify that the

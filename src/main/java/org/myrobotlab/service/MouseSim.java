@@ -163,19 +163,4 @@ public class MouseSim extends Service {
     mousesim.wheel(10);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(MouseSim.class.getCanonicalName());
-    meta.addDescription("simulate mouse interactions");
-    meta.addCategory("control");
-    return meta;
-  }
-
 }

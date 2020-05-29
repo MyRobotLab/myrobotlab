@@ -129,27 +129,6 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
   }
   
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    // ServiceType meta = new ServiceType(VoiceRss.class.getCanonicalName());
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(VoiceRss.class.getCanonicalName());
-    meta.addDescription("VoiceRss speech synthesis service.");
-    meta.addCategory("speech");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "cloud");
-    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.setCloudService(true);
-    meta.addDependency("com.voicerss", "tts", "1.0");
-    return meta;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     // Runtime.start("gui", "SwingGui");
