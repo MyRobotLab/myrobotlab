@@ -23,6 +23,7 @@ public class WolframAlphaMeta {
     meta.addCategory("ai", "cloud");
     // TODO http should be removed as a dependency and added as a Peer
 
+    meta.addDescription("Run queries against wolfram alpha!");
     meta.addDependency("WolframAlpha", "WolframAlpha", "1.1");
 
     // FIXME - add Mrl Service HttpClient Peer - don't include dependency
