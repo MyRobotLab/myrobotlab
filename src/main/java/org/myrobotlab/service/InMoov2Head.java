@@ -67,8 +67,10 @@ public class InMoov2Head extends Service {
     eyeX.setPin(22);
     eyeY.setPin(24);
     jaw.setPin(26);
-    //FIXME rollNeck must be connected to right controller on pin 12 not on pin 30
-    rollNeck.setPin(30);
+    //FIXME rollNeck and eyelids must be connected to right controller
+    //rollNeck.setPin(12);
+    //eyelidLeft.setPin(22);
+    //eyelidRight.setPin(24);
 
     neck.map(20.0, 160.0, 20.0, 160.0);
     rollNeck.map(20.0, 160.0, 20.0, 160.0);

@@ -71,7 +71,7 @@ public class Servo extends AbstractServo implements ServoControl {
    * @param blocking
    * @param timeoutMs
    */
-  protected boolean processMove(double newPos, boolean blocking, Long timeoutMs) {
+  protected boolean processMove(Double newPos, boolean blocking, Long timeoutMs) {
     // FIXME - implement encoder blocking ...
     // FIXME - when and what should a servo publish and when ?
     // FIXME FIXME FIXME !!!! @*@*!!! - currentPos is the reported position of
@@ -80,6 +80,10 @@ public class Servo extends AbstractServo implements ServoControl {
     // this function
     // even with no hardware encoder a servo can have a TimeEncoder from which
     // position would be guessed - but
+    if (newPos == null) {
+      error("cannot move to null position - not moving");
+      return false;
+    }
     
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it

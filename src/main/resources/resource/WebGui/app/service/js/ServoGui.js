@@ -3,6 +3,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     var _self = this
     var msg = this.msg
 
+    // mode is either "status" or "control"
+    // in status mode we take updates by the servo and its events
+    // in control mode we take updates by the user
+    // $scope.mode = "status"; now statusControlMode
+
+    // useful for initialization of components
     var firstTime = true
 
     // init
@@ -62,11 +68,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    // mode is either "status" or "control"
-    // in status mode we take updates by the servo and its events
-    // in control mode we take updates by the user
-    // $scope.mode = "status"; now statusControlMode
-
     // TODO - should be able to build this based on
     // current selection of controller
     $scope.pinList = []
@@ -100,6 +101,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
@@ -118,6 +120,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
+            noSwitching: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
@@ -131,6 +135,34 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
+    $scope.inputFieldMin = function(){
+        if ($scope.lockInputOutput) {
+            $scope.outputSlider.minValue = $scope.inputSlider.minValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.inputFieldMax = function(){
+        if ($scope.lockInputOutput) {
+            $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.outputFieldMin = function(){
+        if ($scope.lockInputOutput) {
+            $scope.inputSlider.minValue = $scope.outputSlider.minValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.outputFieldMax = function(){
+        if ($scope.lockInputOutput) {
+            $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
+        }
+        msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
+    }
+    $scope.restField = function(){
+        msg.send('setRest', $scope.restSlider.value)
+    }
+
     $scope.outputSlider = {
         minValue: 0,
         maxValue: 180,
@@ -139,6 +171,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             ceil: 180,
             step: 1,
             showTicks: false,
+            hideLimitLabels: true,
+            noSwitching: true,
             onStart: function() {},
             /* - changing only on mouse up event - look in ServoGui.html - cannot do this !!! - sliding to the end an letting go doesnt do what you expect */
             onChange: function() {
@@ -152,7 +186,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.toggleLock = function(){
+    $scope.toggleLock = function() {
         $scope.lockInputOutput = !$scope.lockInputOutput
     }
 
@@ -198,6 +232,21 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
 
         $scope.pin = service.pin
+
+        $scope.pos.options.minLimit = service.mapper.minX
+        $scope.pos.options.maxLimit = service.mapper.maxX
+
+        $scope.restSlider.options.minLimit = service.mapper.minX
+        $scope.restSlider.options.maxLimit = service.mapper.maxX
+        if($scope.restSlider.value < $scope.inputSlider.minValue){
+            $scope.restSlider.value = $scope.inputSlider.minValue
+            msg.send('setRest', $scope.restSlider.value)
+        }
+        if($scope.restSlider.value > $scope.inputSlider.maxValue){
+            $scope.restSlider.value = $scope.inputSlider.maxValue
+            msg.send('setRest', $scope.restSlider.value)
+        }
+
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control

@@ -313,9 +313,21 @@
           <fileset>
             <directory>libraries</directory>
             <includes>
-              <include>repo.json</include>
+              <include>**</include>
             </includes>
             <followSymlinks>false</followSymlinks>
+          </fileset>
+          <fileset>
+            <directory>data</directory>
+            <includes>
+            <include>**</include>
+            </includes>
+          </fileset>
+          <fileset>
+            <directory>resource</directory>
+            <includes>
+            <include>**</include>
+            </includes>
           </fileset>
           <fileset>
             <directory>src/main/resources/resource/framework</directory>
@@ -327,7 +339,7 @@
                   </filesets>
                 </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
