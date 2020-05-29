@@ -429,7 +429,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Deprecated
   public boolean getAutoDisable() {
-    return autoDisable;
+    return isAutoDisable();
   }
   
   @Override
