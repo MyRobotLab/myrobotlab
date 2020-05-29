@@ -427,6 +427,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return autoDisable;
   }
 
+  @Deprecated
+  public boolean getAutoDisable() {
+    return autoDisable;
+  }
+  
   @Override
   public String getController() {
     return controller;
