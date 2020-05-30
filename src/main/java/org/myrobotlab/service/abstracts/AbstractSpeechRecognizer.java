@@ -501,6 +501,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     broadcastState();
   }
 
+  /* use startListening() */
+  @Deprecated
+  public void setAutoListen(Boolean value) {
+    if (value) 
+      startListening();
+    else 
+      stopListening();
+  }
   /**
    * for webkit - startRecognizer consists of setting a property and
    * broadcasting self to the webgui
