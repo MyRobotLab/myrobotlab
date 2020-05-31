@@ -544,7 +544,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void map(double minX, double maxX, double minY, double maxY) {
-    mapper = new MapperLinear(minX, maxX, minY, maxY);
+    MapperLinear newMapper = new MapperLinear(minX, maxX, minY, maxY);
+    if (mapper.isInverted()) {
+      newMapper.setInverted(true);
+    }
+    mapper = newMapper;
     broadcastState();
   }
 
