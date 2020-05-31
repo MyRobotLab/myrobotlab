@@ -402,6 +402,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void disable() {
+    stop();
     enabled = false;
     invoke("publishServoDisable", this);
     broadcastState();
