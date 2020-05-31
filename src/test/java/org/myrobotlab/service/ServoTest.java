@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
@@ -27,17 +28,29 @@ public class ServoTest extends AbstractTest {
 
   static final String port01 = "COM9";
   Integer pin = 5;
+  static Arduino arduino01 = null;
+  static Servo servo01 = null;
+  
+  // TODO - disconnected move tests
+  // TODO - can more than on servo be attached to the same controller and pin?
+  
+  @Before /* start initial state */
+  public void setUp() throws Exception {
+    servo01 = (Servo) Runtime.start("s1", "Servo");
+    arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);  
+    servo01.attach(arduino01, 8, 40.0);
+    servo01.rest();
+    servo01.enable();
+    servo01.map(0,180,0,180);
+    servo01.setRest(90.0);
+
+  }
+  
 
   @Test
   public void invertTest() throws Exception {
     // verify the outputs are inverted as expected.
-    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);  
-    servo01.attach(arduino01, 8, 40.0);
-    servo01.enable();
-    servo01.setRest(90.0);
-    servo01.rest();
     servo01.moveTo(30.0);
     assertEquals(30.0, servo01.getTargetOutput(), 0.001);
     servo01.setInverted(true);
@@ -50,10 +63,6 @@ public class ServoTest extends AbstractTest {
   
   @Test
   public void mapTest() throws Exception {
-    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);  
-    servo01.attach(arduino01, 8, 40.0);
     servo01.setInverted(true);
     servo01.map(10, 170, 20, 160);
     Mapper mapper = servo01.getMapper();
@@ -143,11 +152,6 @@ public class ServoTest extends AbstractTest {
   @Test
   public void testAutoDisable() throws Exception {
     // Start the test servo.
-    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);
-
-    servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
     servo01.setPosition(0.0);
