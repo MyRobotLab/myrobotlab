@@ -47,6 +47,25 @@ public class ServoTest extends AbstractTest {
     servo01.setInverted(false);
     assertEquals(20.0, servo01.getTargetOutput(), 0.001);
   }  
+  
+  @Test
+  public void mapTest() throws Exception {
+    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);  
+    servo01.attach(arduino01, 8, 40.0);
+    servo01.setInverted(true);
+    servo01.map(10, 170, 20, 160);
+    Mapper mapper = servo01.getMapper();
+    assertTrue(mapper.isInverted());
+    servo01.setInverted(false);
+    servo01.map(20, 160, 10, 170);
+    assertFalse(mapper.isInverted());
+    assertEquals(20.0, mapper.getMinX(), 0.001);
+    assertEquals(160.0, mapper.getMaxX(), 0.001);
+    assertEquals(10.0, mapper.getMinY(), 0.001);
+    assertEquals(170.0, mapper.getMaxY(), 0.001);
+  }
 
   @Test
   public void testServo() throws Exception {
