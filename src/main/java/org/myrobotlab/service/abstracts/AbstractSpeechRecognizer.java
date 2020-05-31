@@ -504,6 +504,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   /* use startListening() */
   @Deprecated
   public void setAutoListen(Boolean value) {
+    log.warn("Set Auto listen deprecated, use startListening() or stopListening() instead.");
     if (value) 
       startListening();
     else 
