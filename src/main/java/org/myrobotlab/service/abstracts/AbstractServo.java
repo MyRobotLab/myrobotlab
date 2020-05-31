@@ -602,14 +602,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
 //      invoke("publishServoEvent", ServoStatus.SERVO_STOPPED, currentInputPos);
       invoke("publishServoStopped", this);
-
-      // if currently configured to autoDisable - the timer starts now
-      if (autoDisable) {
-        // we cancel any pre-existing timer if it exists
-        purgeTask("idleDisable");
-        // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
-      }
       
     } else {
       isMoving = true;
@@ -703,6 +695,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public ServoControl publishServoStopped(ServoControl sc) {
+    // if currently configured to autoDisable - the timer starts now
+    if (autoDisable) {
+      // we cancel any pre-existing timer if it exists
+      log.warn("purging idleDisable");
+      purgeTask("idleDisable");
+      // and start our countdown
+      log.warn("addTaskOneShot idleDisable");
+      addTaskOneShot(idleTimeout, "idleDisable");
+    }
     return sc;
   }
 
@@ -737,11 +738,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   @Override
   public void setAutoDisable(Boolean autoDisable) {
     if (autoDisable) {
-      // schedule the disable
-      addTaskOneShot(idleTimeout, "idleDisable");
+      if (!isMoving) {
+        // not moving - safe & expected to put in a disable
+        log.warn("setAutoDisable - addTaskOneShot");
+        addTaskOneShot(idleTimeout, "idleDisable");
+      }
     } else {
+      log.warn("purgeTask - idleDisable");
       purgeTask("idleDisable");
-      idleDisabled = false;
     }
     boolean valueChanged = !this.autoDisable.equals(autoDisable);
     this.autoDisable = autoDisable;

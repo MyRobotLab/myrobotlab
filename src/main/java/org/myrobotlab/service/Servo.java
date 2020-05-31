@@ -25,10 +25,12 @@
 
 package org.myrobotlab.service;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.slf4j.Logger;
 
 /**
  * @author GroG
@@ -56,6 +58,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 public class Servo extends AbstractServo implements ServoControl {
 
   private static final long serialVersionUID = 1L;
+  
+  public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
   public Servo(String n, String id) {
     super(n, id);
@@ -94,10 +98,6 @@ public class Servo extends AbstractServo implements ServoControl {
     // we cancel any pre-existing timer if it exists
     purgeTask("idleDisable");
     // blocking move will be idleTime out enabled later.
-    if (autoDisable && !blocking) {
-      // and start our countdown
-      addTaskOneShot(idleTimeout, "idleDisable");
-    }
     
     if (!enabled) {
       log.info("cannot moveTo {} not enabled", getName());
