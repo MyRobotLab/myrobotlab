@@ -11,6 +11,5 @@ public interface ServoStatusPublisher {
    * @return
    */
   ServoEvent publishServoEvent(ServoStatus eventType, Double currentPosUs);
-
-  ServoControl publishServoStopped(ServoControl sc);
+  
 }
