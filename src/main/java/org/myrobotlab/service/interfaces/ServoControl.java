@@ -238,45 +238,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   Double moveToBlocking(Double pos, Long timeoutMs);
 
-  /**
-   * publishing servo's move
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishMoveTo(ServoControl sc);
-
-  /**
-   * 
-   * @param eventType
-   * @param currentPosUs
-   * @return
-   */
-  ServoEvent publishServoEvent(ServoStatus eventType, Double currentPosUs);
-
-  ServoControl publishServoSetSpeed(ServoControl sc);
-
-  ServoControl publishServoEnable(ServoControl sc);
-
-  ServoControl publishServoDisable(ServoControl sc);
-
-  /**
-   * control message publishing moveTo
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishServoMoveTo(ServoControl sc);
-
-  /**
-   * Publishing topic for a servo stop event - returns position
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishServoStop(ServoControl sc);
-
-  ServoControl publishServoStopped(ServoControl sc);
 
   /**
    * command to move to the rest position
