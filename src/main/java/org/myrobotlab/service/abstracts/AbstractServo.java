@@ -19,9 +19,11 @@ import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -51,7 +53,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 

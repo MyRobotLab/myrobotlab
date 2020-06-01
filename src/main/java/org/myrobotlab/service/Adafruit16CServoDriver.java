@@ -33,6 +33,7 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
 /**
@@ -44,7 +45,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController, ServoStatusPublisher {
 
   /**
    * SpeedControl, calculates the next position at regular intervals to make the
@@ -139,9 +140,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   }
 
-  public double publishServoEvent(ServoControl servo, Integer eventType, double currentOutput) {
+  public double publishServoEvent(ServoControl servo, Integer eventType, Double currentOutput) {
     // TODO Auto-generated method stub
-    servo.publishServoEvent(ServoStatus.SERVO_STARTED, currentOutput);
+    ((ServoStatusPublisher)servo).publishServoEvent(ServoStatus.SERVO_STARTED, currentOutput);
     return currentOutput;
   }
 
@@ -957,6 +958,18 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
     
+  }
+
+  @Override
+  public org.myrobotlab.service.interfaces.ServoEvent publishServoEvent(ServoStatus eventType, Double currentPosUs) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoStopped(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
