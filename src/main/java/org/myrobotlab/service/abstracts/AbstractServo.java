@@ -402,6 +402,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
 
   @Override
   public void disable() {
+    stop();
     enabled = false;
     invoke("publishServoDisable", this);
     broadcastState();
@@ -597,7 +598,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
       synchronized (this) {
         this.notifyAll();
       }
-      isMoving = false;
       
       invoke("publishJointAngle", new AngleData(getName(), data.angle));
 //      invoke("publishServoEvent", ServoStatus.SERVO_STOPPED, currentInputPos);
@@ -693,15 +693,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     return sc;
   }
 
-  @Override
+  @Override /* this is a status msg ! */
   public ServoControl publishServoStopped(ServoControl sc) {
+
+    // we've received a stop event from the TimeEncoder or real encoder
+    isMoving = false;
+    isSweeping = false;
+    
     // if currently configured to autoDisable - the timer starts now
     if (autoDisable) {
       // we cancel any pre-existing timer if it exists
-      log.warn("purging idleDisable");
       purgeTask("idleDisable");
       // and start our countdown
-      log.warn("addTaskOneShot idleDisable");
       addTaskOneShot(idleTimeout, "idleDisable");
     }
     return sc;
@@ -740,11 +743,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
-        log.warn("setAutoDisable - addTaskOneShot");
         addTaskOneShot(idleTimeout, "idleDisable");
       }
     } else {
-      log.warn("purgeTask - idleDisable");
       purgeTask("idleDisable");
     }
     boolean valueChanged = !this.autoDisable.equals(autoDisable);
@@ -862,9 +863,9 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
-    isSweeping = false;
-    // FIXME - figure out the appropriate thing to do for a TimeEncoder ????
+    // command to process - go to where you are
     processMove(getCurrentInputPos(), false, null);
+    // broadcast of a request to stop "publishServoStopped" is the broadcast of status
     invoke("publishServoStop", this);
     broadcastState();
   }
