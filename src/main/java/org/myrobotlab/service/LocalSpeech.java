@@ -12,6 +12,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
 import org.slf4j.Logger;
 
 /**
@@ -269,5 +270,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
      */
 
   }
+
 
 }

@@ -74,7 +74,7 @@ public class WorkETest extends AbstractTest {
 
     // attach with existing configuration
     // can be skipped if user wants to do all the attaching manually
-    worke.attach();
+    // worke.attach();
 
     // connect to "virtual" hardware
     worke.connect();

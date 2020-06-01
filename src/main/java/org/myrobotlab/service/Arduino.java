@@ -25,7 +25,6 @@ import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.i2c.I2CBus;
@@ -63,6 +62,7 @@ import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
@@ -1759,14 +1759,15 @@ public class Arduino extends AbstractMicrocontroller
     return serialData;
   }
 
-  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+  public ServoEvent publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
       ((ServoControl)getDevice(deviceId)).publishServoEvent(ServoStatus.values()[eventType], (double) currentPos);
-      log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
+      log.warn("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
+      return null;
     }
-    return currentPos;
+    return new ServoEvent();
   }
 
   // FIXME should be in Control interface - for callback

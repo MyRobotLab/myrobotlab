@@ -72,13 +72,6 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   public Voice getVoice();
 
   /**
-   * get voice effects on a remote server
-   * 
-   * @return list
-   */
-  // public List<String> getVoiceEffectFiles();
-
-  /**
    * start callback for speech synth. (Invoked when speaking starts)
    * 
    * @param utterance
@@ -114,16 +107,16 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    */
   public void setMute(boolean mute);
 
-  // FIXME - not needed in interface
-  // public String getLocalFileName(SpeechSynthesis provider, String toSpeak)
-  // throws UnsupportedEncodingException;
-
-  // FIXME addSpeechRecognizer
+  @Deprecated /* this should be type specific named - use attachSpeechRecognizer*/
   public void addEar(SpeechRecognizer ear);
 
   // FIXME - is this in the wrong place ??? - this seems like bot logic ...
   public void onRequestConfirmation(String text);
 
+  /**
+   * get a list of voices this speech synthesis supports
+   * @return
+   */
   public List<Voice> getVoices();
   
   /**
@@ -140,5 +133,30 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * @param ear
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
+  
+  /**
+   * event end-point for SpeechSynthesizerControl.publishSetVoice
+   * 
+   * @param name new name of voice
+   */
+  public void onSetVoice(String name);
+  
+  /**
+   * event end-point for SpeechSynthesizerControl.publishSetVolume
+   * @param volume - new volume
+   */
+  public void onSetVolume(Double volume);
+  
+  /**
+   * event end-point for SpeechSynthesizerControl.speak
+   * @param text
+   */
+  public void onSpeak(String text);
+  
+  /**
+   * Speech control controls volume, setting the voice, and of course "speak"
+   * @param control
+   */
+  public void attachSpeechControl(SpeechSynthesisControl control);
 
 }

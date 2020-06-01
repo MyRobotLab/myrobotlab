@@ -38,8 +38,6 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.joystick.Component;
 import org.myrobotlab.joystick.Controller;

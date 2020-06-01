@@ -135,6 +135,8 @@ public interface Attachable extends NameProvider {
 
   /**
    * @return the set of attached service names to this service
+   * FIXME - probably implemented wrong - this should be just notify entries with
+   * other service names !!
    */
   public Set<String> getAttached();
 
@@ -143,6 +145,7 @@ public interface Attachable extends NameProvider {
    *          - referenced service to test
    * @return true if service is already attached false otherwise
    */
+  @Deprecated /*with appropriate attach methods - this is not used */
   public boolean isAttached(Attachable instance);
 
   /**
@@ -152,8 +155,22 @@ public interface Attachable extends NameProvider {
    *          - name of service
    * @return True or False depending if service is attached
    */
+  @Deprecated /*with appropriate attach methods - this is not used */
   public boolean isAttached(String name);
 
   public boolean isLocal();
+  
+  /**
+   * returns true if interface is supported - TODO - make string version for remote & polyglot reasons
+   * @param class1
+   * @return
+   */
+   public boolean hasInterface(String interfaze);
 
+   public boolean hasInterface(Class<?> interfaze);
+
+   public boolean isType(Class<?> clazz);
+   
+   public boolean isType(String clazz);
+  
 }

@@ -70,6 +70,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -905,6 +906,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return resourceDir;
   } 
+  
+  /**
+   * non static get resource path return the path to a resource - since the root
+   * can change depending if in debug or runtime - it gets the appropriate root and
+   * adds the additionalPath..
+   * 
+   * @param additionalPath
+   * @return
+   */
+  public String getResourcePath(String additionalPath) {
+    return FileIO.gluePaths(getResourceDir(), additionalPath);
+  }
   
   /**
    * All resource access should be using this method.
@@ -2973,5 +2986,49 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getLocaleTag() {
     return locale.getTag();
   }
+
+  public boolean hasInterface(String interfaze) {
+    // probably a bad idea - but nice for lazy people
+    if (!interfaze.contains(".")) {
+      interfaze = String.format("org.myrobotlab.service.interfaces.%s", interfaze);
+    }
+    return interfaceSet.containsKey(interfaze);
+  }
+  
+  @Override
+  public boolean hasInterface(Class<?> interfaze) {    
+    return hasInterface(interfaze.getCanonicalName());
+  }
+  
+  public Set<String> getInterfaceNames() {
+    Set<String> fn = new TreeSet<>();    
+    Class<?>[] faces = getClass().getInterfaces();
+    for (Class<?> c : faces) {
+      fn.add(c.getCanonicalName());
+    }
+    return fn;
+  }
+
+  // a "helper" strongly typed Java function
+  @Override
+  public boolean isType(Class<?> clazz) {    
+    return isType(clazz.getCanonicalName());
+  }
+
+  /**
+   * This function does a type comparison of the service and a string
+   * passed in.  It's important that this does not use getClass() to resolve
+   * the type, instead to support polyglot proxies - it should be using a 
+   * string to compare types
+   */
+  @Override
+  public boolean isType(String clazz) {
+    // probably a bad idea - but nice for lazy people
+    if (!clazz.contains(".")) {
+      clazz = String.format("org.myrobotlab.service.%s", clazz);
+    }   
+    return serviceClass.equals(clazz);
+  }
+
   
 }

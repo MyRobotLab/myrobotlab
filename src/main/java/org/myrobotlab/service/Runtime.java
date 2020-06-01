@@ -72,6 +72,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
 import org.myrobotlab.string.StringUtil;
 import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
@@ -105,7 +106,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway, LocaleProvider {
+public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -1858,10 +1859,10 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
     public boolean spawnedFromAgent = false;
-
+/*
     @Option(names = { "--from-agent" }, description = "signals if the current process has been started by an Agent")
     public boolean fromAgent = false;
-
+*/
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
 
@@ -1960,6 +1961,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     synchronized (instanceLockObject) {
       if (runtime == null) {
+        // fist and only time....
         runtime = this;
         // if main(argv) args did not create options we must create
         // a new one with defaults
@@ -1967,10 +1969,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           options = new CmdOptions();
         }
 
-        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); // previously
-                                                                               // was
-                                                                               // not
-                                                                               // (IvyWrapper)
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
+        
+        boolean readyForPrimetime = false;
+        if (options.spawnedFromAgent && readyForPrimetime) {
+          
+          try {
+            log.info("attempting to connect to local agent");
+            runtime.connect();
+          } catch (IOException e) {
+            log.warn("could not connect to agent");
+          }
+        }
+        
         if (options == null) {
           options = new CmdOptions();
         }
@@ -3400,7 +3411,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // but just in case ...
       for (Object o : msg.data) {
         if (msg.method.equals("remoteRegister")) {
-          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).name, msg.name));
+          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).getName(), msg.name));
         } else {
           System.out.println(CodecUtils.toPrettyJson(o));
         }

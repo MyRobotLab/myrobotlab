@@ -133,4 +133,15 @@ public class I2CBus implements Attachable, I2CBusControl {
     return true;
   }
 
+  @Override
+  public boolean hasInterface(Class<?> class1) {
+    Class<?>[] faces = I2CBus.class.getInterfaces();
+    for (Class<?> c : faces) {
+      if (c.equals(class1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

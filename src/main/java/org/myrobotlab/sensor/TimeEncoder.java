@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
@@ -379,4 +380,14 @@ public class TimeEncoder implements Runnable, EncoderControl {
     positions.setPosition(name, estimatedPos);
   }
 
+  @Override
+  public boolean hasInterface(Class<?> class1) {
+    Class<?>[] faces = TimeEncoder.class.getInterfaces();
+    for (Class<?> c : faces) {
+      if (c.equals(class1)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

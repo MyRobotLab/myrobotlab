@@ -24,6 +24,7 @@ import org.myrobotlab.service.interfaces.AudioListener;
 import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
@@ -47,12 +48,25 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   protected Map<String, Locale> locales = new HashMap<>();
   
-
-  
   /**
    * mute or unmute service
    */
   boolean mute = false;
+  
+  /**
+   * replaces key with replacement 
+   */
+  public static class WordFilter implements Serializable {
+   
+    private static final long serialVersionUID = 1L;
+    String word;
+    String substitute;
+    
+    public WordFilter(String word, String substitute) {
+      this.word = word;
+      this.substitute = substitute;
+    }
+  }
 
   public static class Voice implements Serializable {
 
@@ -581,15 +595,20 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     return playList;
   }
 
+  @Deprecated /* use replaceWord */
+  public void addSubstitution(String key, String replace) {
+    substitutions.put(key.toLowerCase(), replace.toLowerCase());
+  }
+  
   /**
-   * substitutions for example : worke could get substituted to worky or work-ee
+   * replace word for example : worke could get substituted to worky or work-ee
    * or "something" that phonetically works for the current speech synthesis
    * service
    * 
    * @param key
    * @param replace
    */
-  public void addSubstitution(String key, String replace) {
+  public void replaceWord(String key, String replace) {
     substitutions.put(key.toLowerCase(), replace.toLowerCase());
   }
 
@@ -1035,6 +1054,30 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   
   public boolean isMute() {
     return mute;
+  }
+  
+  @Override
+  public void onSetVoice(String name) {
+    setVoice(name);
+  }
+
+
+  @Override
+  public void onSetVolume(Double volume) {
+    setVolume(volume);
+  }
+  
+  @Override
+  public void attachSpeechControl(SpeechSynthesisControl control) {
+    // TODO Auto-generated method stub
+    addListener(control.getName(), "publishSpeak");
+    addListener(control.getName(), "publishSetVolume");
+    addListener(control.getName(), "publishSetMute");
+    addListener(control.getName(), "publishReplaceWord");
+  }
+  
+  public void onSpeak(String text) {
+    speak(text);
   }
 
   static public ServiceType getMetaData(String serviceType) {

@@ -1,11 +1,10 @@
 package org.myrobotlab.framework;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Proxy;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
@@ -22,10 +21,10 @@ public class Registration {
   
   transient final static Logger log = LoggerFactory.getLogger(Registration.class);
  
-  public String id;
-  public String name;
-  public String typeKey;
-  public ServiceType type;
+  protected String id;
+  protected String name;
+  protected String typeKey;
+  protected ServiceType type;
   
   /**
    * current serialized state of the service - default encoding is json
@@ -46,7 +45,7 @@ public class Registration {
   }
   
   public Registration(ServiceInterface service) {
-    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.debug("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getType();
@@ -83,5 +82,10 @@ public class Registration {
 
   public String getFullName() {
     return String.format("%s@%s", name, id);
+  }
+
+  public boolean hasInterface(Class<?> interfaze) {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

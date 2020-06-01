@@ -9,6 +9,8 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 
 public interface ServiceInterface
     extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
@@ -65,7 +67,7 @@ public interface ServiceInterface
   public Outbox getOutbox();
 
   public String getSimpleName();
-
+  
   // important to maintain a method to return canonical type
   // important in the future when other services are expressed differently
   // e.g.(node js services)
@@ -137,5 +139,6 @@ public interface ServiceInterface
   public void loadLocalizations();
 
   public void setLocale(String code);
+
 
 }

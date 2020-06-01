@@ -88,8 +88,8 @@ public class Swagger3 {
         // BUILD IT !!!
         ///////////////////////////////////
         // get static class info
-        String name = nameAndType.name;
-        Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", nameAndType.typeKey));
+        String name = nameAndType.getName();
+        Class<?> c = Class.forName(String.format("org.myrobotlab.service.%s", nameAndType.getTypeKey()));
 
         // TODO - make examples and other info in MetaData !
         Method method = c.getMethod("getMetaData");
