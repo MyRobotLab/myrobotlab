@@ -863,8 +863,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Enc
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
-    // command to process - go to where you are
-    processMove(getCurrentInputPos(), false, null);
+    targetPos = getCurrentInputPos();
     // broadcast of a request to stop "publishServoStopped" is the broadcast of status
     invoke("publishServoStop", this);
     broadcastState();
