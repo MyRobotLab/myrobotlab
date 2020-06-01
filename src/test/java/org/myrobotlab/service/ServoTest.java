@@ -5,10 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
 
@@ -45,6 +44,39 @@ public class ServoTest extends AbstractTest {
     servo01.map(0,180,0,180);
     servo01.setRest(90.0);
 
+  }
+  
+  @Test
+  public void disabledMove() throws Exception {
+    // take off speed control
+    servo01.fullSpeed();    
+    servo01.moveTo(0.0);
+    Service.sleep(10);
+    
+    // begin long slow move
+    servo01.setSpeed(5.0);
+    servo01.moveTo(180.0);
+    assertTrue(servo01.isMoving());
+    
+    Service.sleep(100);
+    // after 1/10 of a second we should be moving
+    assertTrue(servo01.isMoving());
+    double pos = servo01.getCurrentInputPos();
+    
+    // disable move while it has not completed
+    servo01.disable();
+    Service.sleep(100);
+    assertTrue(!servo01.isMoving());
+    assertTrue(!servo01.isSweeping());
+    
+    // wait a little after disabling
+    Service.sleep(100);
+    double postDisablePos = servo01.getCurrentInputPos();
+    
+    // servo expected to have stopped and not continued after 
+    // a control disable() method was called
+    assertEquals(pos, postDisablePos, 0.03);
+    
   }
   
 
