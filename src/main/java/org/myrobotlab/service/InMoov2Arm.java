@@ -305,31 +305,49 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return true;
   }
 
-	public static boolean loadFile(String file) {
-		File f = new File(file);
-		Python p = (Python) Runtime.getService("python");
-		log.info("Loading  Python file {}", f.getAbsolutePath());
-		if (p == null) {
-			log.error("Python instance not found");
-			return false;
-		}
-		String script = null;
-		try {
-			script = FileIO.toString(f.getAbsolutePath());
-		} catch (IOException e) {
-			log.error("IO Error loading file : ", e);
-			return false;
-		}
-		// evaluate the scripts in a blocking way.
-		boolean result = p.exec(script, true);
-		if (!result) {
-			log.error("Error while loading file {}", f.getAbsolutePath());
-			return false;
-		} else {
-			log.debug("Successfully loaded {}", f.getAbsolutePath());
-		}
-		return true;
-	}  
+  /**
+   * execute a resource script
+   * @param someScriptName
+   */
+  public void execScript(String someScriptName) {
+    try {
+      Python p = (Python)Runtime.start("python", "Python");
+      String script = getResourceAsString(someScriptName);
+      p.exec(script, true);
+    } catch (Exception e) {
+      error("unable to execute script %s", someScriptName); 
+    }
+  }
+
+  /**
+   * This method will load a python file into the python interpreter.
+   */
+  @Deprecated /* use execScript - this doesn't handle resources correctly */
+  public static boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
+  }
 
   public void setAutoDisable(Boolean idleTimeoutMs) {
     bicep.setAutoDisable(idleTimeoutMs);
