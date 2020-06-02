@@ -9,5 +9,5 @@ public interface Invoker {
 
   public Object invoke(String method, Object... params);
 
-  public Object invokeOn(Object obj, String method, Object... params);
+  public Object invokeOn(boolean blockLocally, Object obj, String method, Object... params);
 }

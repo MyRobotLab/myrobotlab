@@ -135,12 +135,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
     // FIXME - implement direct callback or pub sub support ??
   }
 
-  public void broadcast(String msg) {
-    // TODO - possibly implement
-    // but we should use more xmpp definitions e.g. broadcast to room
-    // define a room etc...
-  }
-
   public void chatCreated(Chat chat, boolean locallyCreated) {
     // test if locallyCreated
     if (!locallyCreated) {

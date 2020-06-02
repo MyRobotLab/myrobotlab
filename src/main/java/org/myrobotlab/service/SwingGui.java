@@ -708,7 +708,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       
       for (int i = 0; i < sgs.size(); ++i) {
         ServiceGui sg = sgs.get(i);
-        invokeOn(sg, m.method, m.data);
+        invokeOn(false, sg, m.method, m.data);
       }
     }
 
