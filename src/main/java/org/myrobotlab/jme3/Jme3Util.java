@@ -54,7 +54,7 @@ public class Jme3Util {
   }
 
   public Object invoke(Jme3Msg msg) {
-    return jme.invokeOn(this, msg.method, msg.data);
+    return jme.invokeOn(false, this, msg.method, msg.data);
   }
 
   public void info(String format, Object... params) {

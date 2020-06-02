@@ -172,14 +172,11 @@ public class Servo extends AbstractServo implements ServoControl {
     // then this control needs to be able to broadcast "control" angles !!! -
     // and that
     // might be without a controller !
-    if (controller == null) {
+    if (controller == null) { // <-- NOT NEEDED :)
       log.info("controller is null");
       // FIXME - need to still go through the default 'move'
-    } else {
-      ServoController sc = (ServoController)Runtime.getService(controller);
-      if (sc != null) {
-        sc.onServoMoveTo(this);
-      }
+    } else { 
+      broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
     broadcastState();
