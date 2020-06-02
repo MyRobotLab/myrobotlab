@@ -141,7 +141,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected String id;
 
   /**
-   * simpleName used in serialization 
+   * simpleName used in serialization
    */
   protected String simpleName;
 
@@ -156,17 +156,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   transient protected Inbox inbox = null;
   transient protected Outbox outbox = null;
-  
+
   protected String serviceVersion = null;
-  
+
   /**
    * default en.properties - if there is one
    */
   protected Properties defaultLocalization = null;
 
-  
+
   /**
-   * map of keys to localizations - 
+   * map of keys to localizations -
    * <pre>
    *  Match Service with current Locale of the Runtime service
    *  Match Service with Default (English) Locale
@@ -176,8 +176,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * service specific - then runtime
    */
   protected transient Properties localization = null;
-  
-  
+
+
   /**
    * for promoting portability and good pathing
    */
@@ -839,9 +839,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
   }
-  
+
   // ============== resources begin ======================================
-  
+
   /**
    * Non-static getResourceDir() will return /resource/{ServiceType}
    * @return
@@ -849,7 +849,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getResourceDir() {
     return getResourceDir(getClass());
   }
-  
+
   /**
    * Static getResourceDir(Class clazz) will return the appropriate resource directory,
    * typically it will be /resource/{ServiceType} but depending if run in the presence of other
@@ -861,11 +861,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   static public String getResourceDir(Class<?> clazz) {
     return getResourceDir(clazz.getSimpleName(), null);
   }
-  
+
   static public String getResourceDir(Class<?> clazz, String additionalPath) {
     return getResourceDir(clazz.getSimpleName(), additionalPath);
   }
-  
+
   /**
    * getResourceDir gets the appropriate resource path for any resource supplied in additionalPath.
    * This is a private method, if you need a resource, use getResource or getResourceAsString
@@ -882,10 +882,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   static public String getResourceDir(String serviceType, String additionalPath) {
-    
+
     // setting resource directory
     String resourceDir = "resource" + fs + serviceType;
-    
+
     // overriden by src
     String override = "src" + fs + "main" + fs + "resources" + fs + "resource" + fs + serviceType;
     File test = new File(override);
@@ -900,13 +900,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       log.info("found override repo dir {}", override);
       resourceDir = override;
     }
-    
+
     if (additionalPath != null) {
       resourceDir = FileIO.gluePaths(resourceDir, additionalPath);
     }
     return resourceDir;
-  } 
-  
+  }
+
   /**
    * non static get resource path return the path to a resource - since the root
    * can change depending if in debug or runtime - it gets the appropriate root and
@@ -926,18 +926,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * and resolves the priority of setting this configuration
    * @return
    */
-  
+
   static public String getResourceRoot() {
     // setting resource root details
     String resourceRootDir = "resource";
     // allow default to be overriden by src if it exists
     File src = new File("src");
-    if (src.exists()) {        
+    if (src.exists()) {
       resourceRootDir = "src" + fs + "main" + fs + "resources" + fs + "resource";
-    }    
+    }
     return resourceRootDir;
   }
-  
+
   /**
    * list of resources for this service top level
    * @return
@@ -967,7 +967,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return content;
   }
-  
+
   public byte[] getResource(String resourceName) {
     return getResource(getClass(), resourceName);
   }
@@ -983,8 +983,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   static public byte[] getResource(Class<?> clazz, String resourceName) {
     return getResource(clazz.getSimpleName(), resourceName);
   }
-  
- 
+
+
   /**
    * Get a resource as a string.
    * This will follow the conventions of finding the appropriate resource dir
@@ -1018,7 +1018,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return null;
   }
-  
+
   /**
    * Constructor of service, reservedkey typically is a services name and inId
    * will be its process id
@@ -1035,12 +1035,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       id = inId;
       log.info("creating remote proxy service for id {}", id);
     }
-    
+
     serviceClass = this.getClass().getCanonicalName();
     simpleName = this.getClass().getSimpleName();
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
-            
+
     try {
       serviceType = getMetaData(this.getClass().getCanonicalName());
     } catch (Exception e) {
@@ -1067,7 +1067,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     // load appropriate localization properties based on current local language
     loadLocalizations();
-    
+
     // merge all our peer keys into the dna
     // so that reservations are set with actual names if
     // necessary
@@ -1084,16 +1084,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     this.inbox = new Inbox(getFullName());
     this.outbox = new Outbox(this);
-    
+
     File versionFile = new File(getResourceDir() + fs + "version.txt");
     if (versionFile.exists()) {
-    	try {
-    		String version = FileIO.toString(versionFile);
-	    	if (version != null) {
-	    		version = version.trim();
-	    		serviceVersion = version;
-	    	}
-    	} catch(Exception e) {/* don't care */}
+      try {
+        String version = FileIO.toString(versionFile);
+        if (version != null) {
+          version = version.trim();
+          serviceVersion = version;
+        }
+      } catch(Exception e) {/* don't care */}
     }
 
     // register this service if local - if we are a foreign service, we probably
@@ -1597,19 +1597,27 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return Runtime.getService(msg.getName()).invoke(msg);
     }
 
-    retobj = invokeOn(this, msg.method, msg.data);
+    retobj = invokeOn(false, this, msg.method, msg.data);
 
     return retobj;
   }
 
   @Override
   final public Object invoke(String method) {
-    return invokeOn(this, method, (Object[]) null);
+    return invokeOn(false, this, method, (Object[]) null);
   }
 
   @Override
   final public Object invoke(String method, Object... params) {
-    return invokeOn(this, method, params);
+    return invokeOn(false, this, method, params);
+  }
+  
+  final public Object broadcast(String method) {
+    return invokeOn(true, this, method, (Object[]) null);
+  }
+
+  final public Object broadcast(String method, Object... params) {
+    return invokeOn(true, this, method, params);
   }
 
   /**
@@ -1621,7 +1629,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   final public Object invokeOn(String serviceName, String methodName, Object... params) {
-    return invokeOn(Runtime.getService(serviceName), methodName, params);
+    return invokeOn(false, Runtime.getService(serviceName), methodName, params);
   }
 
   /**
@@ -1636,7 +1644,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return return object
    */
   @Override
-  final public Object invokeOn(Object obj, String methodName, Object... params) {
+  final public Object invokeOn(boolean blockLocally, Object obj, String methodName, Object... params) {
     Object retobj = null;
     try {
       MethodCache cache = MethodCache.getInstance();
@@ -1650,7 +1658,29 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return null; // should this be allowed to throw to a higher level ?
       }
       retobj = method.invoke(obj, params);
-      out(methodName, retobj);
+
+      if (blockLocally) {
+        ArrayList<MRLListener> subList = outbox.notifyList.get(methodName);
+        if (subList != null) {
+          for (MRLListener listener : subList) {
+            
+            Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
+            msg.sendingMethod = methodName;
+            
+            // correct? get local (default?) gateway
+            Runtime runtime = Runtime.getInstance();  
+            if (runtime.isLocal(msg)) {
+              ServiceInterface si = Runtime.getService(listener.callbackName);
+              Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
+              m.invoke(si, retobj);
+            } else {              
+              send(msg);
+            }
+          }
+        }
+      } else {
+        out(methodName, retobj);
+      }
     } catch (Exception e) {
       error("could not invoke %s.%s (%s) - check logs for details", getName(), methodName, params);
       log.error("could not invoke {}.{} ({})", getName(), methodName, params, e);
@@ -2053,16 +2083,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void sendToPeer(String peerName, String method) {
     send(String.format("%s.%s", name, peerName), method, (Object[]) null);
   }
-  
+
   public Object invokePeer(String peerName, String method) {
-    return invokeOn(getPeer(peerName), method, (Object[])null);
+    return invokeOn(false, getPeer(peerName), method, (Object[]) null);
   }
 
-
-  public Object invokePeer(String peerName, String method, Object...data) {
-    return invokeOn(getPeer(peerName), method, data);
+  public Object invokePeer(String peerName, String method, Object... data) {
+    return invokeOn(false, getPeer(peerName), method, data);
   }
-
 
   public void sendToPeer(String peerName, String method, Object... data) {
     send(String.format("%s.%s", name, peerName), method, data);
@@ -2221,7 +2249,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     log.info("starting peers");
     Map<String, ServiceReservation> peers = null;
 
-    try {      
+    try {
       ServiceType st = ServiceData.getMetaData(this.getClass().getCanonicalName());
       peers = st.getPeers();
     } catch (Exception e) {
@@ -2815,10 +2843,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public static byte[] getServiceIcon(String serviceType) {
     try {
-    // this is bad (making a string with resource root
-    // - but at least its only
-    String path = getResourceRoot() + fs + serviceType + ".png";
-    return Files.readAllBytes(Paths.get(path));
+      // this is bad (making a string with resource root
+      // - but at least its only
+      String path = getResourceRoot() + fs + serviceType + ".png";
+      return Files.readAllBytes(Paths.get(path));
     } catch(Exception e) {
       log.warn("getServiceIcon threw", e);
     }
@@ -2836,7 +2864,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String getServiceScript() {
     return getServiceScript(getClass());
   }
-  
+
   public String getResourceImage(String imageFile) {
     String path = FileIO.gluePaths(getResourceDir(), imageFile);
     return Util.getImageAsBase64(path);
@@ -2851,7 +2879,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public boolean isDev() {
-    // 2 folders to check 
+    // 2 folders to check
     // src/resource/{ServiceType} for services still bundled with myrobotlab.jar and
     // ../{ServiceType}/resource/{ServiceType} for services in their own repo
     File check = new File(FileIO.gluePaths("src/resource", simpleName));
@@ -2863,9 +2891,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return true;
     }
     return false;
-    
+
   }
-  
+
   /**
    * localize a key - details are
    * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
@@ -2876,7 +2904,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public String localize(String key) {
     return localize(key, (Object[])null);
   }
-  
+
   /**
    * String format template processing localization
    * 
@@ -2885,47 +2913,47 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public String localize(String key, Object ... args) {
-     if (key == null) {
-       log.error("localize(null) not allowed");
-       return null;
-     }     
-     key = key.toUpperCase();     
-     Object prop = localization.get(key);
-     
-     if (prop == null) {
-       prop = defaultLocalization.get(key);
-     }
-          
-     
-     if (prop == null) {
-       Runtime runtime = Runtime.getInstance();
-       // tried to resolve local to this service and failed
-       if (this != runtime) {
-         // if we are not runtime - we ask runtime
-         prop = runtime.localize(key, args);
-       } else if (this == runtime) {
-         // if we are runtime - we try default en
-         prop = runtime.localizeDefault(key);
-       }
-     }
-     if (prop == null) {
-       log.error("please help us get a good translation for {} in {}", key, Runtime.getInstance().getLocale().getTag());
-       return null;
-     }
-     if (args == null) {
-       return prop.toString();
-     } else {
-       return String.format(prop.toString(), args);
-     }
+    if (key == null) {
+      log.error("localize(null) not allowed");
+      return null;
+    }
+    key = key.toUpperCase();
+    Object prop = localization.get(key);
+
+    if (prop == null) {
+      prop = defaultLocalization.get(key);
+    }
+
+
+    if (prop == null) {
+      Runtime runtime = Runtime.getInstance();
+      // tried to resolve local to this service and failed
+      if (this != runtime) {
+        // if we are not runtime - we ask runtime
+        prop = runtime.localize(key, args);
+      } else if (this == runtime) {
+        // if we are runtime - we try default en
+        prop = runtime.localizeDefault(key);
+      }
+    }
+    if (prop == null) {
+      log.error("please help us get a good translation for {} in {}", key, Runtime.getInstance().getLocale().getTag());
+      return null;
+    }
+    if (args == null) {
+      return prop.toString();
+    } else {
+      return String.format(prop.toString(), args);
+    }
   }
-  
+
   public void loadLocalizations() {
-    
+
     if (defaultLocalization == null) {
       // default is always english :P
       defaultLocalization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/en.properties"));
     }
-    
+
     localization = Locale.loadLocalizations(FileIO.gluePaths(getResourceDir(), "localization/" + locale.getLanguage() + ".properties"));
   }
 
@@ -2940,7 +2968,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     loadLocalizations();
     broadcastState();
   }
-  
+
   /**
    * get country tag of current locale
    * @return

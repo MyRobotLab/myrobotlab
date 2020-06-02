@@ -63,6 +63,7 @@ import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
@@ -1761,8 +1762,8 @@ public class Arduino extends AbstractMicrocontroller
 
   public ServoEvent publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      ((ServoControl)getDevice(deviceId)).publishServoEvent(ServoStatus.values()[eventType], (double) currentPos);
-      log.warn("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
+      ((ServoStatusPublisher)getDevice(deviceId)).publishServoEvent(ServoStatus.values()[eventType], (double) currentPos);
+      log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
       return null;
