@@ -1650,23 +1650,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         ArrayList<MRLListener> subList = outbox.notifyList.get(methodName);
         if (subList != null) {
           for (MRLListener listener : subList) {
-            /* FIXME - need to figure out bad assumption ...
-            ServiceInterface sw = Runtime.getService(listener.callbackName);
-            if (sw == null) {
-              log.error("subscriber {} does not exist", listener.callbackName);
-              removeListener(listener.callbackName, listener.callbackName);
-              continue;
-            }*/
-              
-            if (Runtime.isLocal(listener.callbackName)) {
+            
+            Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
+            msg.sendingMethod = methodName;
+            
+            // correct? get local (default?) gateway
+            Runtime runtime = Runtime.getInstance();  
+            if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
               Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
               m.invoke(si, retobj);
-            } else {
-              Message m = Message.createMessage(listener.callbackName, null, listener.callbackMethod, retobj);
-              m.sender = this.getFullName();
-              m.sendingMethod = methodName;
-              send(m);
+            } else {              
+              send(msg);
             }
           }
         }

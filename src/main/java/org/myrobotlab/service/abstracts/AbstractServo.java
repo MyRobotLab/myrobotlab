@@ -593,8 +593,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // assuming this came from TimeEncoder - we re-calculate input and then
     // publish it
     data.value = currentInputPos;
-    // broadcast("publishEncoderData", data); 
-    invoke("publishEncoderData", data); 
+    broadcast("publishEncoderData", data); 
+    // invoke("publishEncoderData", data); 
     // log.error("bpublishEncoderData {}", data.value);
 
     boolean equal = Math.abs(targetPos - currentInputPos) < actualAngleDeltaError;
