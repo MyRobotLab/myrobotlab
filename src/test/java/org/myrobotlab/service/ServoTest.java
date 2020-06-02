@@ -37,7 +37,7 @@ public class ServoTest extends AbstractTest {
   @Before /* start initial state */
   public void setUp() throws Exception {
     
-    Platform.setVirtual(false);
+    Platform.setVirtual(true);
     
     servo01 = (Servo) Runtime.start("s1", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
