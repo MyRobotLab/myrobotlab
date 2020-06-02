@@ -181,6 +181,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * min sweep value
    */
   protected Double sweepMin = null;
+  
+  transient protected ServoController sc;
 
   /**
    * synchronized servos - when this one moves, it sends move commands to these
@@ -407,18 +409,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void disable() {
     stop();
     enabled = false;
-    invoke("publishServoDisable", this);
+    broadcast("publishServoDisable", this);
     broadcastState();
   }
 
   @Override
   public void enable() {
     enabled = true;
-    // invoke("publishServoEnable", this);
-    ServoController sc = (ServoController) Runtime.getService(controller);
-    if (sc != null) {
-      sc.onServoEnable(this);
-    }
+    broadcast("publishServoEnable", this);
     broadcastState();
   }
 
@@ -595,22 +593,21 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // assuming this came from TimeEncoder - we re-calculate input and then
     // publish it
     data.value = currentInputPos;
-    invoke("publishEncoderData", data);
+    broadcast("publishEncoderData", data); 
 
     boolean equal = Math.abs(targetPos - currentInputPos) < actualAngleDeltaError;
 
+    // FIXME - fix blocking - determine when publishJointAngle should be published
     if (equal) {
       synchronized (this) {
         this.notifyAll();
       }
 
-      invoke("publishJointAngle", new AngleData(getName(), data.angle));
-      // invoke("publishServoEvent", ServoStatus.SERVO_STOPPED,
+      broadcast("publishJointAngle", new AngleData(getName(), data.angle));
+      // broadcast("publishServoEvent", ServoStatus.SERVO_STOPPED,
       // currentInputPos);
 
-    } else {
-      isMoving = true;
-    }
+    } 
   }
 
   public void onRegistered(Registration s) {
@@ -639,7 +636,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     double posDegrees = microsecondsToDegree(currentPosUs);
     ServoEvent sd = new ServoEvent(status, getName(), posDegrees);
     lastActivityTimeTs = System.currentTimeMillis();
-    log.warn("publishServoEvent {} {}", status, currentPosUs);
+    log.warn("publishServoEvent - {} {}", status, currentPosUs);
     if (status == ServoStatus.SERVO_STOPPED) {
 
       // if currently configured to autoDisable - the timer starts now
@@ -847,7 +844,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     if (degreesPerSecond == null) {
       log.info("disabling speed control");
       speed = null;
-      invoke("publishServoSetSpeed", this);
+      broadcast("publishServoSetSpeed", this);
       broadcastState();
       return;
     }
@@ -859,7 +856,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // log.info("Trying to set speed to a value greater than max speed");
     // }
     speed = degreesPerSecond;
-    invoke("publishServoSetSpeed", this);
+    broadcast("publishServoSetSpeed", this);
     broadcastState();
   }
 
@@ -871,10 +868,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
-    targetPos = getCurrentInputPos();
-    // broadcast of a request to stop "publishServoStopped" is the broadcast of
-    // status
-    invoke("publishServoStop", this);
+    broadcast("publishServoStop", this);
     broadcastState();
   }
 
@@ -949,7 +943,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   public void writeMicroseconds(int uS) {
-    invoke("publishServoWriteMicroseconds", this, uS);
+    broadcast("publishServoWriteMicroseconds", this, uS);
   }
 
 }

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
@@ -25,8 +26,8 @@ import org.myrobotlab.test.AbstractTest;
  */
 public class ServoTest extends AbstractTest {
 
-  static final String port01 = "COM9";
-  Integer pin = 5;
+  static final String port01 = "/dev/ttyACM0";
+  Integer pin = 3;
   static Arduino arduino01 = null;
   static Servo servo01 = null;
   
@@ -35,42 +36,48 @@ public class ServoTest extends AbstractTest {
   
   @Before /* start initial state */
   public void setUp() throws Exception {
+    
+    Platform.setVirtual(false);
+    
     servo01 = (Servo) Runtime.start("s1", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);  
-    servo01.attach(arduino01, 8, 40.0);
+    servo01.setPin(3);
+    servo01.attach(arduino01, 3, 40.0);
     servo01.rest();
     servo01.enable();
     servo01.map(0,180,0,180);
     servo01.setRest(90.0);
-
   }
   
   @Test
   public void disabledMove() throws Exception {
     // take off speed control
+    log.error("HERE 0 ----------------");
     servo01.fullSpeed();    
     servo01.moveTo(0.0);
-    Service.sleep(10);
+    servo01.setInverted(false);
+    Service.sleep(1000);
+    log.error("HERE 1 ----------------");
     
     // begin long slow move
     servo01.setSpeed(5.0);
     servo01.moveTo(180.0);
+    Service.sleep(300);
     assertTrue(servo01.isMoving());
-    
-    Service.sleep(100);
+    log.error("HERE 2 ----------------");
     // after 1/10 of a second we should be moving
     assertTrue(servo01.isMoving());
     double pos = servo01.getCurrentInputPos();
     
     // disable move while it has not completed
     servo01.disable();
-    Service.sleep(100);
+    //Service.sleep(300);
     assertTrue(!servo01.isMoving());
     assertTrue(!servo01.isSweeping());
     
     // wait a little after disabling
-    Service.sleep(100);
+    // Service.sleep(100);
     double postDisablePos = servo01.getCurrentInputPos();
     
     // servo expected to have stopped and not continued after 
