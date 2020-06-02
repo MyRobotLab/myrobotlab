@@ -1637,6 +1637,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return null; // should this be allowed to throw to a higher level ?
       }
       retobj = method.invoke(obj, params);
+      
+      ArrayList<MRLListener> subList = outbox.notifyList.get(methodName);
+      for (MRLListener listener:subList) {
+        if (Runtime.isLocal(listener.callbackName)) {
+          ServiceInterface si = Runtime.getService(listener.callbackName);
+          Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
+          m.invoke(si, retobj);
+        }
+      }
+      
       out(methodName, retobj);
     } catch (Exception e) {
       error("could not invoke %s.%s (%s) - check logs for details", getName(), methodName, params);
