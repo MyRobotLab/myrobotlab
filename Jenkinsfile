@@ -23,6 +23,9 @@ node ('ubuntu') {  // use labels to direct build
    
    def mvnHome
    stage('preparation') { // for display purposes
+   	  // initial clean - remove afte successful build
+   	  cleanWs() 
+   
       // Get some code from a GitHub repository
       checkout scm
       // checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
@@ -103,5 +106,9 @@ node ('ubuntu') {  // use labels to direct build
 //										}"""
 //		server.upload(uploadSpec)
 
+	}
+	
+	stage('clean') {
+		cleanWs() 
 	}
 }
