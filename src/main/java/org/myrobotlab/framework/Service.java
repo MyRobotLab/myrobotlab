@@ -2900,6 +2900,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public String localize(String key, Object ... args) {
+    
+    log.error("{} current locale is {}", getName(), getLocale());
+    log.error("{} localization size {}", getName(), localization.size());
+    
     if (key == null) {
       log.error("localize(null) not allowed");
       return null;
