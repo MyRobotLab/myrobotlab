@@ -88,6 +88,10 @@ public class LocalizeTest extends AbstractTest {
     // test to see if runtime en is default when all else fails
     STARTINGLEFTONLY = i01.localize("RELEASESERVICE");
     assertEquals("releasing service", STARTINGLEFTONLY);
+    
+    // resetting
+    runtime.setLocale("en");
+    i01.setLocale("en");
 
   }
 
