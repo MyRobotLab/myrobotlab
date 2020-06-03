@@ -92,6 +92,8 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceTraining.class);
+  
+  boolean firstError = true;
 
   CvMemStorage storage = null;
   public CascadeClassifier cascade = null; // TODO - was static
@@ -657,7 +659,10 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
               DoublePointer confidence = new DoublePointer(1);
               OpenCVClassifier classifier = classifiers.get(facesSubclass);
               if (classifier.recognizer == null) {
-                log.warn("no recognizer");
+                if (firstError) {
+                  log.warn("no recognizer");
+                  firstError = false;
+                }
                 confidence.close();
                 label.close();
                 return image;
