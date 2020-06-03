@@ -22,6 +22,7 @@ public class LocalizeTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     runtime = Runtime.getInstance();
+    Runtime.install("InMoov2");
     i01 = (InMoov2)Runtime.start("i01", "InMoov2");
   }
 
