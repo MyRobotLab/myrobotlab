@@ -261,7 +261,7 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void testGetClassifications() {
     log.warn("=======OpenCVTest testGetClassifications=======");
-    
+    Runtime.setAllLocales("en");
     cv.reset();
     // cv.removeFilters();
     log.warn("=======OpenCVTest testGetClassifications - 1=======");
@@ -271,6 +271,7 @@ public class OpenCVTest extends AbstractTest {
     cv.addFilter("yolo");
     log.warn("=======OpenCVTest testGetClassifications - 3=======");
     // f.enable();
+    log.warn("=======OpenCVTest testGetClassifications - cv.getLocale {} =======", cv.getLocale());
     Map<String, List<Classification>> classifications = cv.getClassifications(MAX_TIMEOUT);
     log.warn("=======OpenCVTest testGetClassifications - 4 {} =======", classifications);
     assertNotNull(classifications);
