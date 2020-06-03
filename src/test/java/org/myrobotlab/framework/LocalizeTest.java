@@ -71,7 +71,10 @@ public class LocalizeTest extends AbstractTest {
     assertNull(BLAH);
     
     i01.setLocale("fr");
+    assertEquals("fr", i01.getLocale().getLanguage());
+    
     String STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
+
     assertEquals("arduino coté gauche uniquement sélectionné", STARTINGLEFTONLY);
     i01.setLocale("it");
     STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
