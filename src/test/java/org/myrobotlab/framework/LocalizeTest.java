@@ -92,7 +92,9 @@ public class LocalizeTest extends AbstractTest {
     // resetting
     runtime.setLocale("en");
     i01.setLocale("en");
-
+    
+    // lame sleep to avoid a race condition in InMoov2/Python console :P
+    Service.sleep(1000);
   }
 
 }
