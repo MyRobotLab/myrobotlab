@@ -28,6 +28,9 @@ public class LocalizeTest extends AbstractTest {
 
   @AfterClass
   public static void lastCleanup() {
+    // switch back to en
+    // i01 will switch "all" locales at once
+    Runtime.setAllLocales("en");
     Runtime.releaseService("i01");
   }
 
