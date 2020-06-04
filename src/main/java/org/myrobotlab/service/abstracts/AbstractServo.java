@@ -870,6 +870,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
+    isSweeping = false; 
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -911,7 +912,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     isSweeping = true;
     sweepingToMax = false;
     moveTo(sweepMin);
-    // broadcastState(); // grog: probably not necessary
+    broadcastState();
   }
 
   @Override

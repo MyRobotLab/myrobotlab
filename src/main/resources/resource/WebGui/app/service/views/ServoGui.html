@@ -56,11 +56,11 @@
                                     Sweep                                    
                                     
                                     <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
-                                    <toggle ng-model="toggleSweep" class="miniBTN" title="Servo will move from one position to the opposite" ng-change="service.isSweeping?msg.stop():msg.sweep()" on="" off="" size="btn-lg"/>
+                                    <toggle class="miniBTN" title="Servo will move from one position to the opposite" ng-model="sweep" ng-change="sweep?msg.sweep():msg.stop()" on="" off="" size="btn-lg"/>
                                 </td>
                                 <td colspan="2">
                                     Speed
-                                    <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
+                                    <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/> <button class="btn" ng-click="msg.stop()">stop<img src="../stop.png"/></button>
                                 </td>
                             </tr>
                             <tr class="valuesRow">
