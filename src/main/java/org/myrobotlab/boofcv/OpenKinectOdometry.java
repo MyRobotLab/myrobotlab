@@ -32,6 +32,8 @@ import org.ejml.equation.Equation;
 import org.ejml.equation.Sequence;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
@@ -41,7 +43,7 @@ import org.openkinect.freenect.FrameMode;
 import org.openkinect.freenect.Freenect;
 import org.openkinect.freenect.VideoFormat;
 import org.openkinect.freenect.VideoHandler;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.tracker.PointTrackerTwoPass;
@@ -92,6 +94,9 @@ import georegression.struct.se.Se3_F64;
  */
 public class OpenKinectOdometry {
 
+  static final Logger log = LoggerFactory.getLogger(OpenKinectOdometry.class);
+
+  
   private PointCloudViewer viewer;
   private PointCloudViewer viewerFixed;
 
@@ -192,7 +197,7 @@ public class OpenKinectOdometry {
           colors[i] = c;
         }
 
-        Log.info("Points size() 1 ", points.size(), "\n");
+        log.info("Points size() 1 ", points.size(), "\n");
         viewer.clearPoints();
         viewer.addCloud(points, colors);
 
@@ -235,7 +240,7 @@ public class OpenKinectOdometry {
     MediaManager media = DefaultMediaManager.INSTANCE;
     // String directory = UtilIO.pathExample("kinect/straight");
     String directory = Service.getResourceDir(BoofCv.class)+File.separator;
-    Log.info("Using directory ", directory);
+    log.info("Using directory ", directory);
 
     // load camera description and the video sequence
     VisualDepthParameters depthParam = CalibrationIO.load(media.openFile(directory + "visualdepth.yaml"));
@@ -332,7 +337,7 @@ public class OpenKinectOdometry {
     transMat.set(2, 3, 0.0);
     transMat.set(3, 3, 1.0);
 
-    Log.info("Points size() 2", points.size(), "\n");
+    log.info("Points size() 2", points.size(), "\n");
     for (int i = 0; i < points.size(); i++) {
       // Transform from cartesian to homogenous coordinates ( 4 dimensions )
       Point3D_F64 p = points.get(i);

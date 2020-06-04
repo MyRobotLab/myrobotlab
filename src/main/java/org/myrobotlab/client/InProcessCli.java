@@ -15,7 +15,6 @@ import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 /**
@@ -67,7 +66,7 @@ public class InProcessCli implements Runnable {
       myThread = new Thread(this, "client-stdin-worker");
       myThread.start();
     } else {
-      Log.info("stdin already running");
+      log.info("stdin already running");
     }
   }
 

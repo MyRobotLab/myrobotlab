@@ -13,7 +13,6 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.string.StringUtil;
-import org.python.jline.internal.Log;
 
 /**
  * <pre>
