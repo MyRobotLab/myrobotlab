@@ -29,7 +29,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -307,5 +306,5 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
-
+ 
 }

@@ -23,6 +23,7 @@ import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
@@ -53,7 +54,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher,  ServoStatusListener, EncoderPublisher, IKJointAnglePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -84,6 +85,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * and movements are possible
    */
   protected boolean enabled = false;
+  
+  /**
+   * Servo events of stopping and starting can come from a TimeEncoder or they
+   * can come from a controller.  These events describe the SERVO_STARTED and
+   * SERVO_STOPPED event
+   */
+  protected boolean proxyServoEvents = false;
 
   /**
    * The servos encoder - by "default" this will be a TimerEncoder - where a
@@ -948,5 +956,47 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void writeMicroseconds(int uS) {
     broadcast("publishServoWriteMicroseconds", this, uS);
   }
+
+  /**
+   * Proxied servo event "stopped" from either TimeEncoder
+   * or a Controller that supports it
+   */
+  @Override
+  public String publishServoStarted(String name) {   
+    log.warn("PROXY SERVO_STARTED - {}", name);
+    return name;
+  }
+
+  /**
+   * Proxied servo event "stopped" from either TimeEncoder
+   * or a Controller that supports it
+   */
+  @Override
+  public String publishServoStopped(String name) {
+    log.warn("PROXY SERVO_STOPPED - {}", name);
+    return name;
+  }
+  
+  /**
+   * Call-backs listening for servo events from either TimeEncoder
+   * or a Controller which supports them. Proxies them forward
+   * to its own publishing points
+   */
+  @Override
+  public void onServoStarted(String name) {
+    broadcast("publishServoStarted", name);
+  }
+
+  /**
+   * Call-backs listening for servo events from either TimeEncoder
+   * or a Controller which supports them. Proxies them forward
+   * to its own publishing points
+   */
+  @Override
+  public void onServoStopped(String name) {
+    broadcast("publishServoStopped", name);
+  }
+
+
 
 }
