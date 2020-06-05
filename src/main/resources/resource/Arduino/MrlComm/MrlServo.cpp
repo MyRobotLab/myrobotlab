@@ -36,14 +36,14 @@ bool MrlServo::attach(byte pin, int initPosUs, int initVelocity){
   // this is the velocity, however the servo will move to the initial position as fast as possible.
   velocity = initVelocity;
   this->pin = pin;
-  // attach the servo to the pin!
-  servo->attach(pin);
   return true;
 }
 
 // This method is equivalent to Arduino's Servo.attach(pin) - (no pos)
 void MrlServo::attachPin(int pin){
-  attach(pin, currentPosUs, velocity);
+  // attach the servo to the pin!
+  servo->attach(pin);
+
 }
 
 void MrlServo::detachPin(){
