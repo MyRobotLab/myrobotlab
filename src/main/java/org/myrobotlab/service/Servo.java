@@ -88,6 +88,14 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     
+    // This is to allow attaching disabled
+    // then delay enabling until the first moveTo command 
+    // is used
+    if (firstMove  && !enabled) {
+      enable();
+      firstMove = false;
+    }
+    
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();

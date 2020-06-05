@@ -444,9 +444,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (isConnected()) {
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName());
-      if (servo.isEnabled()) {
-        msg.servoAttachPin(dm.getId(), pin);
-      }
     }
     servo.attach(this);
   }
