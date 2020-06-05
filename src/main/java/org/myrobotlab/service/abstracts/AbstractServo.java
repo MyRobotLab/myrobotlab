@@ -415,6 +415,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     disable();
     send(sc, "detach", getName());
     sleep(500);
+    firstMove = true;
     broadcastState();
   }
 
