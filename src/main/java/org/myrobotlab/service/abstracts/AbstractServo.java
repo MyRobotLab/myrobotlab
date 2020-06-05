@@ -429,6 +429,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
+    
+    if (autoDisable) {
+      if (!isMoving) {
+        // not moving - safe & expected to put in a disable
+        purgeTask("idleDisable");
+        addTaskOneShot(idleTimeout, "idleDisable");
+      }
+    }
+    
     enabled = true;
     broadcast("publishServoEnable", this);
     broadcastState();
