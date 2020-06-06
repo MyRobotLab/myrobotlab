@@ -21,9 +21,6 @@ import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEvent;
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
-import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
@@ -54,7 +51,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher,  ServoStatusListener, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -847,7 +844,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
-    isSweeping = false; 
+    isSweeping = false;
+    moveTo(getCurrentInputPos());
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -977,26 +975,5 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     return name;
   }
   
-  /**
-   * Call-backs listening for servo events from either TimeEncoder
-   * or a Controller which supports them. Proxies them forward
-   * to its own publishing points
-   */
-  @Override
-  public void onServoStarted(String name) {
-    broadcast("publishServoStarted", name);
-  }
-
-  /**
-   * Call-backs listening for servo events from either TimeEncoder
-   * or a Controller which supports them. Proxies them forward
-   * to its own publishing points
-   */
-  @Override
-  public void onServoStopped(String name) {
-    broadcast("publishServoStopped", name);
-  }
-
-
 
 }
