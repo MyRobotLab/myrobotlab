@@ -1203,6 +1203,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro"});
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
 
+      Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
@@ -1210,14 +1211,16 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();
 
-      for (int i = 0; i < 1000; ++i) {
-        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
-      }
-
       boolean done = true;
       if (done) {
         return;
       }
+
+      
+      for (int i = 0; i < 1000; ++i) {
+        webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
+      }
+
       // Runtime.setLogLevel("ERROR");
       // Runtime.start("python", "Python");
       // Runtime.start("clock01", "Clock");
