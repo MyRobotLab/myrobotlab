@@ -90,13 +90,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   protected boolean enabled = false;
   
   /**
-   * Servo events of stopping and starting can come from a TimeEncoder or they
-   * can come from a controller.  These events describe the SERVO_STARTED and
-   * SERVO_STOPPED event
-   */
-  protected boolean proxyServoEvents = false;
-
-  /**
    * The servos encoder - by "default" this will be a TimerEncoder - where a
    * timer calculates the expected time the servo will make and complete
    * movements, and some configured division of time is configured to send
@@ -930,7 +923,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public String publishServoStarted(String name) {   
-    log.warn("PROXY SERVO_STARTED - {}", name);
+    log.info("TIME-ENCODER SERVO_STARTED - {}", name);
     isMoving = true;
     return name;
   }
@@ -941,7 +934,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   @Override
   public String publishServoStopped(String name) {
-    log.warn("PROXY SERVO_STOPPED - {}", name);
+    log.info("TIME-ENCODER SERVO_STOPPED - {}", name);
     // if currently configured to autoDisable - the timer starts now
     // if we are "stopping" going from moving to not moving
     if (autoDisable && isMoving) {

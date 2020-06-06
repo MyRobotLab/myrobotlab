@@ -1601,7 +1601,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
   
   /**
-   * "NEW !!!" - broadcast publishes messages synchronously without queuing !
+   * Broadcast publishes messages synchronously without queuing !
    * Messages will be processed on the same thread which calls broadcast. This
    * is unlike invoke, which will queue/buffer the message and wait for inbox
    * thread to pick it up.
@@ -1612,7 +1612,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * "NEW !!!" - broadcast publishes messages synchronously without queuing !
+   * Broadcast publishes messages synchronously without queuing !
    * Messages will be processed on the same thread which calls broadcast. This
    * is unlike invoke, which will queue/buffer the message and wait for inbox
    * thread to pick it up.
