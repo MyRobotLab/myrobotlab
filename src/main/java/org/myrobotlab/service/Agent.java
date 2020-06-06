@@ -1042,7 +1042,7 @@ public class Agent extends Service {
     }
     pd.jvm = jvmArgs.split(" ");
     
-    pd.options.fromAgent = true;
+    pd.options.spawnedFromAgent = true;
 
     // user override
     if (options.jvm != null) {
