@@ -56,6 +56,7 @@ import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -83,7 +84,7 @@ import org.slf4j.Logger;
  * messages.
  * 
  */
-public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker, QueueReporter {
+public abstract class Service implements Runnable, Serializable, ServiceInterface, Invoker, Broadcaster, QueueReporter {
 
   // FIXME upgrade to ScheduledExecutorService
   // http://howtodoinjava.com/2015/03/25/task-scheduling-with-executors-scheduledthreadpoolexecutor-example/
@@ -1599,10 +1600,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     return invokeOn(false, this, method, params);
   }
   
+  /**
+   * "NEW !!!" - broadcast publishes messages synchronously without queuing !
+   * Messages will be processed on the same thread which calls broadcast. This
+   * is unlike invoke, which will queue/buffer the message and wait for inbox
+   * thread to pick it up.
+   */
+  @Override
   final public Object broadcast(String method) {
     return invokeOn(true, this, method, (Object[]) null);
   }
 
+  /**
+   * "NEW !!!" - broadcast publishes messages synchronously without queuing !
+   * Messages will be processed on the same thread which calls broadcast. This
+   * is unlike invoke, which will queue/buffer the message and wait for inbox
+   * thread to pick it up.
+   */
+  @Override
   final public Object broadcast(String method, Object... params) {
     return invokeOn(true, this, method, params);
   }

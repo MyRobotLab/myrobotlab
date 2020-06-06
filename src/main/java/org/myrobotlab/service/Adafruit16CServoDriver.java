@@ -45,7 +45,7 @@ import org.slf4j.Logger;
  *         https://learn.adafruit.com/16-channel-pwm-servo-driver
  */
 @Ignore
-public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController {
+public class Adafruit16CServoDriver extends Service implements I2CControl, ServoController, MotorController, ServoStatusPublisher {
 
   /**
    * SpeedControl, calculates the next position at regular intervals to make the
@@ -74,7 +74,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
       log.info("Speed control started for {}", name);
       ServoEvent = servoMap.get(name);
       log.debug("Moving from {} to {} at {} degrees/second", ServoEvent.currentOutput, ServoEvent.targetOutput, ServoEvent.velocity);
-      publishServoEvent(ServoEvent.servo, 2, ServoEvent.currentOutput);
+      // publishServoEvent(ServoEvent.servo, 2, ServoEvent.currentOutput);
       try {
         lastExecution = System.currentTimeMillis();
         double _velocity;
@@ -141,8 +141,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   public double publishServoEvent(ServoControl servo, Integer eventType, Double currentOutput) {
-    // TODO Auto-generated method stub
-    ((ServoStatusPublisher)servo).publishServoEvent(ServoStatus.SERVO_STARTED, currentOutput);
+    if (eventType == 0) {
+      broadcast("publishServoStarted", getName());
+    } else if (eventType == 1) {
+      broadcast("publishServoStopped", getName());
+    }
     return currentOutput;
   }
 
@@ -958,6 +961,16 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
     
+  }
+
+  @Override
+  public String publishServoStarted(String name) {
+    return name;
+  }
+
+  @Override
+  public String publishServoStopped(String name) {
+    return name;
   }
 
 }

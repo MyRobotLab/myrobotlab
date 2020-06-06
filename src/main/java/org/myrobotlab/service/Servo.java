@@ -29,7 +29,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
@@ -87,6 +86,14 @@ public class Servo extends AbstractServo implements ServoControl {
     if (newPos == null) {
       error("cannot move to null position - not moving");
       return false;
+    }
+    
+    // This is to allow attaching disabled
+    // then delay enabling until the first moveTo command 
+    // is used
+    if (firstMove  && !enabled) {
+      enable();
+      firstMove = false;
     }
     
     if (idleDisabled && !enabled) {
@@ -307,5 +314,5 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
-
+ 
 }

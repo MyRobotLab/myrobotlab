@@ -23,6 +23,7 @@ import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
+import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 
@@ -53,7 +54,7 @@ import org.slf4j.Logger;
  *         vs status of angles
  *
  */
-public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher, EncoderPublisher, IKJointAnglePublisher {
+public abstract class AbstractServo extends Service implements ServoControl, ServoControlPublisher, ServoStatusPublisher,  ServoStatusListener, EncoderPublisher, IKJointAnglePublisher {
 
   public final static Logger log = LoggerFactory.getLogger(AbstractServo.class);
 
@@ -71,6 +72,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * this to Servo.java , DiyServo doesn't care about this detail.
    */
   protected String controller;
+  
+  /**
+   * This allows the servo to attach disabled, and only energize after
+   * the first moveTo command is processed
+   */
+  protected boolean firstMove = true;
 
   /**
    * the "current" OUTPUT position of the servo - this never gets updated from
@@ -84,6 +91,13 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * and movements are possible
    */
   protected boolean enabled = false;
+  
+  /**
+   * Servo events of stopping and starting can come from a TimeEncoder or they
+   * can come from a controller.  These events describe the SERVO_STARTED and
+   * SERVO_STOPPED event
+   */
+  protected boolean proxyServoEvents = false;
 
   /**
    * The servos encoder - by "default" this will be a TimerEncoder - where a
@@ -356,12 +370,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
     controller = sc;
-    enabled = true; // <-- how to deal with this ? "real" controllers usually
-                    // need an enable/energize command
-    // FIXME sc NEEDS TO BE FULL NAME !!!
+
+    // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
     // the servo control ackowledged this.
-    sendBlocking(sc, "attachServoControl", this);
+    sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
     // TOOD: we need to wait here for the servo controller to acknowledge that
     // it was attached.
 
@@ -402,6 +415,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     disable();
     send(sc, "detach", getName());
     sleep(500);
+    firstMove = true;
     broadcastState();
   }
 
@@ -415,6 +429,15 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
+    
+    if (autoDisable) {
+      if (!isMoving) {
+        // not moving - safe & expected to put in a disable
+        purgeTask("idleDisable");
+        addTaskOneShot(idleTimeout, "idleDisable");
+      }
+    }
+    
     enabled = true;
     broadcast("publishServoEnable", this);
     broadcastState();
@@ -632,52 +655,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   public ServoControl publishMoveTo(ServoControl sc) {
     return sc;
-  }
-
-  public ServoEvent publishServoEvent(ServoStatus status, Double currentPosUs) {
-    double posDegrees = microsecondsToDegree(currentPosUs);
-    ServoEvent sd = new ServoEvent(status, getName(), posDegrees);
-    lastActivityTimeTs = System.currentTimeMillis();
-    log.warn("publishServoEvent - {} {}", status, currentPosUs);
-    if (status == ServoStatus.SERVO_STOPPED) {
-
-      // if currently configured to autoDisable - the timer starts now
-      // if we are "stopping" going from moving to not moving
-      if (autoDisable && isMoving) {
-        // we cancel any pre-existing timer if it exists
-        purgeTask("idleDisable");
-        // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
-      }
-      
-      // we've received a stop event from the TimeEncoder or real encoder
-      isMoving = false;
-
-      if (isSweeping) {
-        double inputPos = mapper.calcInput(currentOutputPos);
-
-        // We got a stop event from the servo - which "should" be
-        // the end of a sweep. "Should" be.
-        // If our current position from the encoder says we
-        // are closer to one side vs the other .. we go to the
-        // opposite side.
-
-        double deltaMin = Math.abs(inputPos - sweepMin);
-        double deltaMax = Math.abs(inputPos - sweepMax);
-
-        if (deltaMin < deltaMax) {
-          send(getName(), "moveTo", sweepMax);
-        } else {
-          send(getName(), "moveTo", sweepMin);
-        }
-      }
-
-    } else if (status == ServoStatus.SERVO_STARTED) {
-      isMoving = true;
-    } else {
-      error("unhandled servo event status");
-    }
-    return sd;
   }
 
   /**
@@ -948,5 +925,78 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   public void writeMicroseconds(int uS) {
     broadcast("publishServoWriteMicroseconds", this, uS);
   }
+
+  /**
+   * Proxied servo event "stopped" from either TimeEncoder
+   * or a Controller that supports it
+   */
+  @Override
+  public String publishServoStarted(String name) {   
+    log.warn("PROXY SERVO_STARTED - {}", name);
+    isMoving = true;
+    return name;
+  }
+
+  /**
+   * Proxied servo event "stopped" from either TimeEncoder
+   * or a Controller that supports it
+   */
+  @Override
+  public String publishServoStopped(String name) {
+    log.warn("PROXY SERVO_STOPPED - {}", name);
+    // if currently configured to autoDisable - the timer starts now
+    // if we are "stopping" going from moving to not moving
+    if (autoDisable && isMoving) {
+      // we cancel any pre-existing timer if it exists
+      purgeTask("idleDisable");
+      // and start our countdown
+      addTaskOneShot(idleTimeout, "idleDisable");
+    }
+    
+    // we've received a stop event from the TimeEncoder or real encoder
+    isMoving = false;
+
+    if (isSweeping) {
+      double inputPos = mapper.calcInput(currentOutputPos);
+
+      // We got a stop event from the servo - which "should" be
+      // the end of a sweep. "Should" be.
+      // If our current position from the encoder says we
+      // are closer to one side vs the other .. we go to the
+      // opposite side.
+
+      double deltaMin = Math.abs(inputPos - sweepMin);
+      double deltaMax = Math.abs(inputPos - sweepMax);
+
+      if (deltaMin < deltaMax) {
+        send(getName(), "moveTo", sweepMax);
+      } else {
+        send(getName(), "moveTo", sweepMin);
+      }
+    }
+    return name;
+  }
+  
+  /**
+   * Call-backs listening for servo events from either TimeEncoder
+   * or a Controller which supports them. Proxies them forward
+   * to its own publishing points
+   */
+  @Override
+  public void onServoStarted(String name) {
+    broadcast("publishServoStarted", name);
+  }
+
+  /**
+   * Call-backs listening for servo events from either TimeEncoder
+   * or a Controller which supports them. Proxies them forward
+   * to its own publishing points
+   */
+  @Override
+  public void onServoStopped(String name) {
+    broadcast("publishServoStopped", name);
+  }
+
+
 
 }

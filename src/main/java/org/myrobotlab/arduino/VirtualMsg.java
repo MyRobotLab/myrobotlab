@@ -2,15 +2,17 @@ package org.myrobotlab.arduino;
 
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.logging.Level;
+
+import org.myrobotlab.arduino.virtual.MrlComm;
+import org.myrobotlab.string.StringUtil;
 
 /**
  * <pre>
@@ -43,10 +45,14 @@ import org.myrobotlab.logging.Level;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.VirtualArduino;
+
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -63,7 +69,7 @@ public class VirtualMsg {
   public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 65;
+  public static final int MRLCOMM_VERSION = 66;
   // send buffer
   private int sendBufferSize = 0;
   private int sendBuffer[] = new int[MAX_MSG_SIZE];
