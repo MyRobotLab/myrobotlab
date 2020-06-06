@@ -413,7 +413,7 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
       keyboard.attach(getName());
       python = (Python) Runtime.start("python", "Python");
       if (mouth == null) {
-        mouth = (SpeechSynthesis) Runtime.start("mouth", "NaturalReaderSpeech");
+        mouth = (SpeechSynthesis) Runtime.start("mouth", "WebkitSpeechSynthesis");
       }
     } catch (Exception e) {
       error(e);

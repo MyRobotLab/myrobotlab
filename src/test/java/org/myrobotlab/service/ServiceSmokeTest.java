@@ -64,6 +64,8 @@ public class ServiceSmokeTest extends AbstractTest {
     log.info("Press any key to continue");
     // System.in.read();
     for (String serviceType : serviceTypes) {
+      
+      // serviceType = "org.myrobotlab.service.Sabertooth";
 
       long start = System.currentTimeMillis();
 
@@ -71,7 +73,7 @@ public class ServiceSmokeTest extends AbstractTest {
         log.warn("Skipping known problematic service {}", serviceType);
         continue;
       }
-      log.warn("Testing service type {}", serviceType);
+      log.warn("Testing {}", serviceType);
       String serviceName = serviceType.toLowerCase();
       ServiceInterface s = Runtime.create(serviceName, serviceType);      
       if (s == null) {
