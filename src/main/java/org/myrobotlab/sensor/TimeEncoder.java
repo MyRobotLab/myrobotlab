@@ -272,7 +272,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
           positions.setPosition(name, estimatedPos);
           if (enableServoEvents && started) {
             // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
-            ((Broadcaster)servo).broadcast("onServoStarted", servo.getName());
+            ((Broadcaster)servo).broadcast("publishServoStarted", servo.getName());
             started = false;
           }
           servo.onEncoderData(d);// FIXME !! - broadcast this
@@ -285,7 +285,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
         servo.onEncoderData(d);
         if (enableServoEvents) {
           // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
-          ((Broadcaster)servo).broadcast("onServoStopped", servo.getName());
+          ((Broadcaster)servo).broadcast("publishServoStopped", servo.getName());
         }
         positions.setPosition(name, estimatedPos);
       }
