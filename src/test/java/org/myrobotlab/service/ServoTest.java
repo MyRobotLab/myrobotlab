@@ -50,8 +50,8 @@ public class ServoTest extends AbstractTest {
     servo01.setRest(90.0);
   }
   
-  @Ignore
   @Test
+  @Ignore
   public void disabledMove() throws Exception {
     // take off speed control
     log.error("HERE 0 ----------------");
@@ -172,6 +172,7 @@ public class ServoTest extends AbstractTest {
 
     //
     s.attach(arduino01, 10, 1.0);
+    s.enable();
     assertTrue(s.isEnabled());
     s.disable();
     assertFalse(s.isEnabled());
@@ -198,6 +199,7 @@ public class ServoTest extends AbstractTest {
     
     arduino01.attach(servo01);
     assertTrue("verifying servo is attached to the arduino.", servo01.isAttached("arduino01"));
+    servo01.moveTo(30.0);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     
     // Disable auto disable.. and move the servo.
