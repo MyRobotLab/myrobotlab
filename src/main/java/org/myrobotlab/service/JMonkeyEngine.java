@@ -2311,7 +2311,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
        * jme.rotateTo("i01.leftHand.index", 120);
        */
 
-      // Runtime.start("i01.mouth", "NaturalReaderSpeech");
       /*
        * InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
        * i01.startSimulator(); jme = i01.getSimulator();
