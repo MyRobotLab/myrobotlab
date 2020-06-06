@@ -167,10 +167,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     log.info("digitalWrite {} {}", pin, value);
     // msg.digitalWrite(pin, value);
     PinDefinition pinDef = pinIndex.get(pin);
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
     if (value == 0) {
-      pinDef.getGpioPin().low();
+      gpio.low();
     } else {
-      pinDef.getGpioPin().high();
+      gpio.high();
     }
     invoke("publishPinDefinition", pinDef);
   }
@@ -179,7 +180,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
   public void disablePin(int address) {
     PinDefinition pin = pinIndex.get(address);
     pin.setEnabled(false);
-    pin.getGpioPin().removeListener();
+    ((GpioPinDigitalMultipurpose) pin.getPinImpl()).removeListener();
     PinDefinition pinDef = pinIndex.get(address);
     invoke("publishPinDefinition", pinDef);
   }
@@ -191,10 +192,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
   @Override
   public void enablePin(int address, int rate) {
-    PinDefinition pin = pinIndex.get(address);
-    pin.getGpioPin().addListener(new GpioPinListener());
-    pin.setEnabled(true);
-    invoke("publishPinDefinition", pin); // broadcast pin change
+    PinDefinition pinDef = pinIndex.get(address);
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
+    gpio.addListener(new GpioPinListener());
+    pinDef.setEnabled(true);
+    invoke("publishPinDefinition", pinDef); // broadcast pin change
   }
 
   @Override
@@ -218,7 +220,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
     try {
       // if (SystemInfo.getBoardType() == SystemInfo.BoardType.RaspberryPi_3B) {
-      if (true) {
         for (int i = 0; i < 32; ++i) {
           PinDefinition pindef = new PinDefinition(getName(), i);
           String pinName = null;
@@ -241,9 +242,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
           pinMap.put(pinName, pindef);
           pinList.add(pindef);
         }
-      } else {
-        log.error("Unknown boardtype %{}", SystemInfo.getBoardType());
-      }
     } catch (Exception e) {
       log.error("getPinList threw", e);
     }
@@ -345,9 +343,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
     PinDefinition pinDef = pinIndex.get(pin);
     if (mode == INPUT) {
-      pinDef.setGpioPin(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_INPUT));
+      pinDef.setPinImpl(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_INPUT));
     } else {
-      pinDef.setGpioPin(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_OUTPUT));
+      pinDef.setPinImpl(gpio.provisionDigitalMultipurposePin(RaspiPin.getPinByAddress(pin), PinMode.DIGITAL_OUTPUT));
     }
     invoke("publishPinDefinition", pinDef);
   }
