@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
@@ -37,7 +37,7 @@ public class ServoTest extends AbstractTest {
   @Before /* start initial state */
   public void setUp() throws Exception {
     
-    // Platform.setVirtual(true);
+    Platform.setVirtual(false);
     
     servo01 = (Servo) Runtime.start("s1", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
@@ -51,7 +51,6 @@ public class ServoTest extends AbstractTest {
   }
   
   @Test
-  @Ignore
   public void disabledMove() throws Exception {
     // take off speed control
     log.error("HERE 0 ----------------");
@@ -73,7 +72,7 @@ public class ServoTest extends AbstractTest {
     
     // disable move while it has not completed
     servo01.disable();
-    //Service.sleep(300);
+    Service.sleep(300);
     assertTrue(!servo01.isMoving());
     assertTrue(!servo01.isSweeping());
     

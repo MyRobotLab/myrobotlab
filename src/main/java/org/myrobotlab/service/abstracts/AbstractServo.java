@@ -844,7 +844,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   // FIXME targetPos = pos, reportedSpeed, vs speed - set
   @Override
   public void stop() {
-    isSweeping = false; 
+    isSweeping = false;
+    moveTo(getCurrentInputPos());
     broadcast("publishServoStop", this);
     broadcastState();
   }
