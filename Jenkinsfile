@@ -23,6 +23,9 @@ node ('ubuntu') {  // use labels to direct build
    
    def mvnHome
    stage('preparation') { // for display purposes
+   	  // initial clean - remove afte successful build
+   	  // cleanWs() - unless bootstrap is needed - cleanWS should be done at the end of the build 
+   
       // Get some code from a GitHub repository
       checkout scm
       // checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
@@ -77,9 +80,11 @@ node ('ubuntu') {  // use labels to direct build
       junit '**/target/surefire-reports/TEST-*.xml'
    }
    stage('archive') {
-         archiveArtifacts 'target/*.jar'      
+         // archiveArtifacts 'target/myrobotlab.jar'
+         archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
    } 
    stage('jacoco') {
+        jacoco()
         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
         // jacoco(execPattern: '**/*.exec')
    } 
@@ -103,5 +108,9 @@ node ('ubuntu') {  // use labels to direct build
 //										}"""
 //		server.upload(uploadSpec)
 
+	}
+	
+	stage('clean') {
+		cleanWs() 
 	}
 }

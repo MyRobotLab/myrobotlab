@@ -64,15 +64,12 @@ import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-
-public class Arduino extends AbstractMicrocontroller
-    implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController, UltrasonicSensorController, PortConnector, RecordControl,
-    /* SerialRelayListener, */PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher {
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+    UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
 
@@ -127,7 +124,6 @@ public class Arduino extends AbstractMicrocontroller
 
   private static final long serialVersionUID = 1L;
 
-
   /**
    * path of the Arduino IDE must be set by user should not be static - since
    * gson will not serialize it, and it won't be 'saved()'
@@ -135,12 +131,6 @@ public class Arduino extends AbstractMicrocontroller
   public String arduinoPath;
 
   String aref;
-
-  @Deprecated /*
-               * should be just another attachable - this is a bad
-               * implementation
-               */
-  transient Map<Integer, Arduino> attachedController = new ConcurrentHashMap<Integer, Arduino>();
 
   /**
    * board info "from" MrlComm - which can be different from what the user say's
@@ -321,7 +311,7 @@ public class Arduino extends AbstractMicrocontroller
   synchronized private DeviceMapping attachDevice(Attachable device, Object[] attachConfig) {
     DeviceMapping map = new DeviceMapping(device, attachConfig);
     map.setId(nextDeviceId);
-    log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}",  device.getName(), device.getClass().getSimpleName(), map);
+    log.info("DEVICE LIST PUT ------ Name: {} Class: {} Map: {}", device.getName(), device.getClass().getSimpleName(), map);
     deviceList.put(device.getName(), map);
     deviceIndex.put(nextDeviceId, map);
     ++nextDeviceId;
@@ -338,7 +328,7 @@ public class Arduino extends AbstractMicrocontroller
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
-    // need to get a new device id!  wtf is this !
+    // need to get a new device id! wtf is this !
     // let's get the max current id
     // send data to micro-controller
 
@@ -356,7 +346,7 @@ public class Arduino extends AbstractMicrocontroller
       error("unknown encoder type {}", encoder.getClass().getName());
     }
     // attach the virtual representation of the device and get an id for it.
-    DeviceMapping m = attachDevice(encoder, new Object[] { address }); 
+    DeviceMapping m = attachDevice(encoder, new Object[] { address });
     // send the attach method with our device id.
     msg.encoderAttach(m.getId(), type, address);
 
@@ -443,7 +433,8 @@ public class Arduino extends AbstractMicrocontroller
     }
 
     int pin = getAddress(servo.getPin());
-    // targetOutput is never null and is the input requested angle in degrees for the servo.
+    // targetOutput is never null and is the input requested angle in degrees
+    // for the servo.
     // defaulting to the rest angle.
     double targetOutput = servo.getTargetOutput();
     double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
@@ -454,9 +445,6 @@ public class Arduino extends AbstractMicrocontroller
     if (isConnected()) {
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName());
-      if (servo.isEnabled()) {
-        msg.servoAttachPin(dm.getId(), pin);
-      }
     }
     servo.attach(this);
   }
@@ -466,7 +454,7 @@ public class Arduino extends AbstractMicrocontroller
    * @param dm
    */
   public void reattach(DeviceMapping dm) {
-    
+
     Attachable attachable = dm.getDevice();
     if (attachable instanceof Servo) {
       Servo servo = (Servo) attachable;
@@ -474,7 +462,7 @@ public class Arduino extends AbstractMicrocontroller
       double speed = (servo.getSpeed() == null) ? -1 : servo.getSpeed();
       int pin = getAddress(servo.getPin());
       log.info("================ re-attaching {} {} {} ================", servo.getName(), dm.getId(), pin);
-      msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName()); // 
+      msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName()); //
       if (servo.isEnabled()) {
         msg.servoAttachPin(dm.getId(), pin);
       }
@@ -502,9 +490,9 @@ public class Arduino extends AbstractMicrocontroller
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
     // test to see if we've been started. the serial might be null
-    
+
     try {
-      
+
       initSerial();
 
       if (isConnected() && port.equals(serial.getPortName())) {
@@ -575,7 +563,7 @@ public class Arduino extends AbstractMicrocontroller
       log.error("serial open threw", e);
       error(e.getMessage());
     }
-    
+
     broadcastState();
 
   }
@@ -592,7 +580,7 @@ public class Arduino extends AbstractMicrocontroller
     log.warn("================================ sync !!! ==============================");
     try {
       for (DeviceMapping device : deviceList.values()) {
-       reattach(device);
+        reattach(device);
       }
 
       List<PinDefinition> list = getPinList();
@@ -730,17 +718,8 @@ public class Arduino extends AbstractMicrocontroller
     // boardInfo is not valid after disconnect
     // because we might be connecting to a different Arduino
     // boardInfo.reset();
-    for (Arduino controller : attachedController.values()) {
-      controller.disconnect();
-    }
-    attachedController.clear();
-    if (controllerAttachAs != MRL_IO_NOT_DEFINED) {
-      controllerAttachAs = MRL_IO_NOT_DEFINED;
-      serial = (Serial) createPeer("serial");
-    } else {
-      if (serial != null) {
-        serial.disconnect();
-      }
+    if (serial != null) {
+      serial.disconnect();
     }
     broadcastState();
   }
@@ -1421,8 +1400,10 @@ public class Arduino extends AbstractMicrocontroller
 
   public synchronized void onBytes(byte[] bytes) {
     // log.info("On Bytes called in Arduino. {}", bytes);
-    // These bytes arrived from the serial port data, push them down into the msg parser.
-    // if a full message is detected, the publish(Function) method will be directly called on
+    // These bytes arrived from the serial port data, push them down into the
+    // msg parser.
+    // if a full message is detected, the publish(Function) method will be
+    // directly called on
     // this arduino instance.
     msg.onBytes(bytes);
   }
@@ -1482,7 +1463,7 @@ public class Arduino extends AbstractMicrocontroller
       log.error("openMrlComm threw", e);
     }
   }
-  
+
   public String getBase64ZippedMrlComm() {
     return Base64.getEncoder().encodeToString((getZippedMrlComm()));
   }
@@ -1564,14 +1545,16 @@ public class Arduino extends AbstractMicrocontroller
       broadcastState();
     }
 
-    // TODO: consider, can we really just re-sync when we see begin only.. ?  feels better/safer.
-//    if (boardInfo != null) {
-//      DeviceSummary[] ds = boardInfo.getDeviceSummary();
-//      if (deviceList.size() - 1 > ds.length) { /* -1 for self */
-//        log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}", deviceList, ds);
-//        invoke("sync");
-//      }
-//    }
+    // TODO: consider, can we really just re-sync when we see begin only.. ?
+    // feels better/safer.
+    // if (boardInfo != null) {
+    // DeviceSummary[] ds = boardInfo.getDeviceSummary();
+    // if (deviceList.size() - 1 > ds.length) { /* -1 for self */
+    // log.info("Invoking Sync DeviceList: {} and DeviceSummary: {}",
+    // deviceList, ds);
+    // invoke("sync");
+    // }
+    // }
 
     // we send here - because this is a "command" message, and we don't want the
     // possibility of
@@ -1621,7 +1604,7 @@ public class Arduino extends AbstractMicrocontroller
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
     // Also need to log this
-    
+
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
     Double angle = null;
@@ -1638,8 +1621,8 @@ public class Arduino extends AbstractMicrocontroller
     }
 
     EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
-//    log.info("Publish Encoder Data Raw {}", data);
-    
+    // log.info("Publish Encoder Data Raw {}", data);
+
     // TODO: all this code needs to move out of here!
     return data;
   }
@@ -1762,7 +1745,15 @@ public class Arduino extends AbstractMicrocontroller
 
   public ServoEvent publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
-      ((ServoStatusPublisher)getDevice(deviceId)).publishServoEvent(ServoStatus.values()[eventType], (double) currentPos);
+      if (eventType == 0) {
+        // ((ServoStatusPublisher) getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
+        broadcast("publishServoStarted", getDevice(deviceId).getName());
+      } else if (eventType == 1) {
+        // ((ServoStatusPublisher) getDevice(deviceId)).publishServoStopped(getDevice(deviceId).getName());
+        broadcast("publishServoStopped", getDevice(deviceId).getName());
+      } else {
+        log.error("unknown servo event type {}", eventType);
+      }
       log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
@@ -1889,7 +1880,6 @@ public class Arduino extends AbstractMicrocontroller
     }
     msg.servoSetVelocity(i, speed);
   }
-
 
   /**
    * On standard servos a parameter value of 1000 is fully counter-clockwise,
@@ -2213,14 +2203,15 @@ public class Arduino extends AbstractMicrocontroller
   }
 
   public void publishMrlCommBegin(Integer version) {
-    // If we were already connected up and clear to send.. this is a problem.. it means the board was reset on it.
+    // If we were already connected up and clear to send.. this is a problem..
+    // it means the board was reset on it.
     if (mrlCommBegin > 0) {
       error("arduino %s has reset - does it have a separate power supply?", getName());
       // At this point we need to reset!
       mrlCommBegin = 0;
     }
     ++mrlCommBegin;
-    // log.info("Skipping Sync!  TODO: uncomment me.");
+    // log.info("Skipping Sync! TODO: uncomment me.");
     // This needs to be non-blocking
     // If we have devices, we need to sync them.
     // The device list always has "Arduino" in it for some reason..
@@ -2242,39 +2233,35 @@ public class Arduino extends AbstractMicrocontroller
    */
   public static void main(String[] args) {
     try {
-      
-      // Platform.setVirtual(true);
-      
-      Runtime.main(new String[] { "--interactive", "--id", "id"});
 
-      
+      // Platform.setVirtual(true);
+
+      Runtime.main(new String[] { "--interactive", "--id", "id" });
+
       LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
-      
+
       /*
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.setPort(8887);
-      webgui.startService();
-      */
-      
-      
+       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+       * webgui.autoStartBrowser(false); webgui.setPort(8887);
+       * webgui.startService();
+       */
+
       // Runtime.start("gui", "SwingGui");
       Serial.listPorts();
 
       Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
-      
+
       hub.connect("/dev/ttyACM0");
 
       // hub.enableAck(false);
-      
+
       ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
       sc.setPin(3);
       hub.attach(sc);
       sc = (ServoControl) Runtime.start("s2", "Servo");
       sc.setPin(9);
       hub.attach(sc);
-      
 
       // hub.enableAck(true);
       /*
@@ -2284,8 +2271,6 @@ public class Arduino extends AbstractMicrocontroller
 
       log.info("here");
       // hub.connect("COM6"); // uno
-
-      
 
       // hub.startTcpServer();
 
@@ -2365,7 +2350,6 @@ public class Arduino extends AbstractMicrocontroller
 
       // remote.startListening();
 
-      
       // Runtime.start("webgui", "WebGui");
 
     } catch (Exception e) {
@@ -2380,7 +2364,17 @@ public class Arduino extends AbstractMicrocontroller
   public void onServoStop(ServoControl servo) {
     msg.servoStop(getDeviceId(servo));
   }
-  
-  
+
+  @Override
+  public String publishServoStarted(String name) {
+    log.debug("CONTROLLER SERVO_STARTED {}", name);
+    return name;
+  }
+
+  @Override
+  public String publishServoStopped(String name) {
+    log.debug("CONTROLLER SERVO_STOPPED {}", name);
+    return name;
+  }
 
 }

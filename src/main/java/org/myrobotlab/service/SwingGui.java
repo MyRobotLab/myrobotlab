@@ -166,10 +166,11 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    * used for "this" reference in anonymous swing utilities calls
    */
   transient SwingGui self;
-  transient private JMenu export;
-  transient private JMenu import_;
+  transient private JMenu exportMenu;
+  transient private JMenu importMenu;
   transient private JMenu refresh;
   private String guiId;
+  private boolean firstHeadlessError =  true;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -385,8 +386,9 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
-    if (Runtime.isHeadless()) {
+    if (Runtime.isHeadless() && firstHeadlessError ) {
       log.warn("{} SwingGui is in headless environment", getName());
+      firstHeadlessError = false;
       return;
     }
 
@@ -508,24 +510,24 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     menuBar.add(search);
     menuBar.add(Box.createHorizontalGlue());
 
-    export = new JMenu("export");
+    exportMenu = new JMenu("export");
     JMenuItem mi = new JMenuItem("export");
     mi.addActionListener(this);
-    export.add(mi);
+    exportMenu.add(mi);
     mi = new JMenuItem("export all");
     mi.addActionListener(this);
-    export.add(mi);
+    exportMenu.add(mi);
 
-    menuBar.add(export);
+    menuBar.add(exportMenu);
 
-    import_ = new JMenu("import");
+    importMenu = new JMenu("import");
     mi = new JMenuItem("import");
     mi.addActionListener(this);
-    import_.add(mi);
+    importMenu.add(mi);
     mi = new JMenuItem("import all");
     mi.addActionListener(this);
-    import_.add(mi);
-    menuBar.add(import_);
+    importMenu.add(mi);
+    menuBar.add(importMenu);
 
     refresh = new JMenu("refresh");
     mi = new JMenuItem("refresh");

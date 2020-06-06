@@ -225,16 +225,14 @@ public class AudioProcessor extends Thread {
         log.error("line is null !");
       }
     } catch (LineUnavailableException lineError) {
-      audioFile.warn("output audio line was not found - is audio enabled?");
+      audioFile.warn("LineUnavailableException - output audio line was not found - is audio enabled?");
+    } catch (IllegalArgumentException argError) {
+      audioFile.warn("IllegalArgumentException - output audio line was not found - is audio enabled?");      
     } catch (Exception e) {
       audioFile.error(e.getMessage());
       log.error(e.getMessage(), e);
       if (audioFile != null) {
-    	if (e instanceof LineUnavailableException) {
-    		audioFile.error("line is not available");
-    	} else {
     		audioFile.error("%s - %s", e.getMessage(), data.getFileName());
-    	}
       }
     } finally {
       if (din != null) {

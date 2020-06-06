@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
@@ -37,7 +37,7 @@ public class ServoTest extends AbstractTest {
   @Before /* start initial state */
   public void setUp() throws Exception {
     
-    // Platform.setVirtual(true);
+    // Platform.setVirtual(false); - force to make real servo
     
     servo01 = (Servo) Runtime.start("s1", "Servo");
     arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
@@ -50,7 +50,6 @@ public class ServoTest extends AbstractTest {
     servo01.setRest(90.0);
   }
   
-  @Ignore
   @Test
   public void disabledMove() throws Exception {
     // take off speed control
@@ -73,7 +72,7 @@ public class ServoTest extends AbstractTest {
     
     // disable move while it has not completed
     servo01.disable();
-    //Service.sleep(300);
+    Service.sleep(300);
     assertTrue(!servo01.isMoving());
     assertTrue(!servo01.isSweeping());
     
@@ -172,6 +171,7 @@ public class ServoTest extends AbstractTest {
 
     //
     s.attach(arduino01, 10, 1.0);
+    s.enable();
     assertTrue(s.isEnabled());
     s.disable();
     assertFalse(s.isEnabled());
@@ -198,6 +198,7 @@ public class ServoTest extends AbstractTest {
     
     arduino01.attach(servo01);
     assertTrue("verifying servo is attached to the arduino.", servo01.isAttached("arduino01"));
+    servo01.moveTo(30.0);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     
     // Disable auto disable.. and move the servo.
@@ -220,7 +221,7 @@ public class ServoTest extends AbstractTest {
     log.warn("thread list {}", getThreadNames());
     assertTrue("setting autoDisable true", servo01.isAutoDisable());
     servo01.moveTo(2.0);
-    sleep(servo01.getIdleTimeout()+500); // waiting for disable
+    sleep(servo01.getIdleTimeout()+1000); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
     
     assertEquals(2.0, servo01.getCurrentInputPos(), 0.0001);

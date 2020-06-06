@@ -538,6 +538,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           security = Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
 
+          if (options.spawnedFromAgent) {
+            try {
+              // runtime.connect(); FIXME !!! make it work !
+            } catch(Exception e) {
+              runtime.error(e);
+            }
+          }
+          
           // startHeartbeat();
 
           FileIO.extractResources();
@@ -1859,10 +1867,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
     public boolean spawnedFromAgent = false;
-/*
-    @Option(names = { "--from-agent" }, description = "signals if the current process has been started by an Agent")
-    public boolean fromAgent = false;
-*/
+
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
 

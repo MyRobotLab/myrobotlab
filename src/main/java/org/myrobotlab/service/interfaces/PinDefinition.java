@@ -46,7 +46,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
 
   Double value;
 
-  GpioPinDigitalMultipurpose gpioPin;
+  transient Object pinImpl;
 
   public PinDefinition(String serviceName, int address, String pin) {
     super(serviceName);
@@ -114,12 +114,12 @@ public class PinDefinition extends SensorDefinition implements Serializable {
     isPwm = b;
   }
 
-  public void setGpioPin(GpioPinDigitalMultipurpose b) {
-    gpioPin = b;
+  public void setPinImpl(Object b) {
+    pinImpl = b;
   }
 
-  public GpioPinDigitalMultipurpose getGpioPin() {
-    return gpioPin;
+  public Object getPinImpl() {
+    return pinImpl;
   }
 
   public String toString() {

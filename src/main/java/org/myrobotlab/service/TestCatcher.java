@@ -435,6 +435,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public Double catchBall(Double ball) {
     return ball;
   }
-
+  
+  public String onUptime(String str) {
+    return str;
+  }
 
 }
