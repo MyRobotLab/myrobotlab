@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.Broadcaster;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Servo;
@@ -98,7 +99,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
       // load previous positions
       String positionsDir = Service.getDataDir(Servo.class.getSimpleName());
       filename = positionsDir + File.separator + "positions.json";
-      
+
       if (positions == null) {
         Map<String, Double> savedPositions = null;
         try {
@@ -170,7 +171,13 @@ public class TimeEncoder implements Runnable, EncoderControl {
     }
   }
 
+  /**
+   * Static position saver for all servos which use a time encoder.
+   * the positions are read back in on starting the Servo
+   */
   Positions positions = null;
+
+  protected boolean enableServoEvents = true;
 
   public TimeEncoder(ServoControl servo) {
     this.servo = servo;
@@ -209,9 +216,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
     if (autoProcess) { // vs buffer ?
       processTrajectory(name);
     }
-    
-    long lengthOfMoveMs = ((endMoveTs - beginMoveTs) < 0 )?0:endMoveTs - beginMoveTs;
-    
+
+    long lengthOfMoveMs = ((endMoveTs - beginMoveTs) < 0) ? 0 : endMoveTs - beginMoveTs;
+
     return lengthOfMoveMs;
   }
 
@@ -242,6 +249,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
           continue;
         }
 
+        boolean started = true;
+        
         while (now < endMoveTs && isRunning) {
 
           now = System.currentTimeMillis();
@@ -256,11 +265,17 @@ public class TimeEncoder implements Runnable, EncoderControl {
           }
 
           // log.info(String.format("new pos %.2f", estimatedPos)); helpful to
-          // - Kwatters - SHOULD PROBABLY BE -> EncoderData(name, null, targetPos, estimatedPos) !!!
+          // - Kwatters - SHOULD PROBABLY BE -> EncoderData(name, null,
+          // targetPos, estimatedPos) !!!
           EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
 
           positions.setPosition(name, estimatedPos);
-          servo.onEncoderData(d);
+          if (enableServoEvents && started) {
+            // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
+            ((Broadcaster)servo).broadcast("onServoStarted", servo.getName());
+            started = false;
+          }
+          servo.onEncoderData(d);// FIXME !! - broadcast this
           Service.sleep(sampleIntervalMs);
         }
 
@@ -268,6 +283,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
         // log.info("finished moved");
         EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
         servo.onEncoderData(d);
+        if (enableServoEvents) {
+          // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
+          ((Broadcaster)servo).broadcast("onServoStopped", servo.getName());
+        }
         positions.setPosition(name, estimatedPos);
       }
     } catch (InterruptedException e) {

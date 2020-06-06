@@ -1,15 +1,19 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
-
 public interface ServoStatusPublisher {
-
+  
   /**
-   * 
-   * @param eventType
-   * @param currentPosUs
+   * Signals the servo has started a move 
+   * @param name
    * @return
    */
-  ServoEvent publishServoEvent(ServoStatus eventType, Double currentPosUs);
-  
+  public String publishServoStarted(String name);
+
+  /**
+   * Signals the servo has stopped a movement
+   * @param name
+   * @return
+   */
+  public String publishServoStopped(String name);  
+
 }
