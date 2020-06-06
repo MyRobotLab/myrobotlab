@@ -106,6 +106,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("_TemplateService");
     blacklist.add("Lloyd");
     blacklist.add("Solr");
+    blacklist.add("Agent");
     // This one just takes so darn long.
     blacklist.add("Deeplearning4j");
     blacklist.add("OculusDiy");
@@ -131,6 +132,12 @@ public class ServiceInterfaceTest extends AbstractTest {
       String service = serviceType.getSimpleName();
       // System.out.println("SYSTEM TESTING " + service);
       // System.out.flush();
+      if (service.equals("Agent")) {
+        log.info("here");
+      }
+
+      
+      
       if (blacklist.contains(service)/* || !serviceType.getSimpleName().equals("Emoji")*/) {
         log.info("White listed testing of service {}", service);
         continue;

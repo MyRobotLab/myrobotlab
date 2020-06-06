@@ -20,7 +20,8 @@ class Console:
     self.stderr = None
     
   def write(self,string):
-    myService.invoke("publishStdOut", string)
+    if myService is not None:
+        myService.invoke("publishStdOut", string)
     
   def attach(self):
     if (self.stdout == None):    

@@ -181,15 +181,16 @@ public class Intro extends Service {
 
       LoggingFactory.init(Level.INFO);
       
-      Runtime.main(new String[] { "--interactive", "--id", "admin", "-s", "intro", "Intro", "python", "Python" });
+      Runtime.main(new String[] { "--spawned-from-agent", "--id", "intro", "-s", "intro", "Intro"});
       
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      /*
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
-
+      */
 
     } catch (Exception e) {
       log.error("main threw", e);

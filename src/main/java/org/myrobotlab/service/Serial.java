@@ -1274,6 +1274,14 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     try {
 
       Platform.setVirtual(true);
+      
+      Serial s = (Serial)Runtime.start("s1", "Serial");
+      String vport1 = "vport1";
+      s.connect(vport1);
+      Serial uart = (Serial)Runtime.getService(vport1 + ".UART");
+      
+      Runtime.start("webgui", "WebGui");
+      
       Runtime.start("gui", "SwingGui");
       VirtualArduino hub = (VirtualArduino)Runtime.start("varduino", "VirtualArduino");
      //  Serial serial = (Serial) Runtime.start("serial", "Serial");
@@ -1308,10 +1316,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
       // EASY VIRTUAL SWITCH
 
-      // ---- Virtual Begin -----
-      VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-      virtual.createVirtualSerial(port);
-      Serial uart = virtual.getUart(port);
+      
       uart.setTimeout(300);
       // ---- Virtual End -----
 
