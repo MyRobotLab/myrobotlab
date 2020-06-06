@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.codec.serial.HexCodec;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.serial.Port;
@@ -35,8 +36,6 @@ public class SerialTest extends AbstractTest {
   static Serial serial = null;
   static Set<Thread> startThreads;
   static Serial uart = null;
-  static VirtualDevice virtualDevice = null;
-
   static String vport = "vport";
 
   public static Set<Thread> getDeadThreads() {
@@ -54,19 +53,17 @@ public class SerialTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     // LoggingFactory.init("WARN");
+    Platform.setVirtual(true);
 
     log.info("setUpBeforeClass");
 
     // Runtime.start("gui", "SwingGui");
     serial = (Serial) Runtime.start("serial", "Serial");
     catcher = (TestCatcher) Runtime.start("catcher", "TestCatcher");
-    virtualDevice = (VirtualDevice) Runtime.start("virtualDevice", "VirtualDevice");
-    virtualDevice.createVirtualSerial(vport);
-
-    uart = (Serial) virtualDevice.getUart(vport);
-    uart.setTimeout(300);
     Thread.sleep(100);
-    serial.open(vport);
+    serial.connect(vport);
+    uart = (Serial)Runtime.getService(vport + ".UART");
+    uart.setTimeout(300);
     Thread.sleep(300);
 
     startThreads = Runtime.getThreads();
