@@ -2365,13 +2365,13 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   @Override
   public String publishServoStarted(String name) {
-    log.warn("CONTROLLER SERVO_STARTED {}", name);
+    log.debug("CONTROLLER SERVO_STARTED {}", name);
     return name;
   }
 
   @Override
   public String publishServoStopped(String name) {
-    log.warn("CONTROLLER SERVO_STOPPED {}", name);
+    log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
   }
 
