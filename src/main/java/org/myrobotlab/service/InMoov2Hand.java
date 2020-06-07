@@ -553,7 +553,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
       log.debug("Successfully loaded {}", f.getAbsolutePath());
     }
     return true;
-  }  
+  }
 
   public void speakBlocking(String text) {
     if (speech != null) {
