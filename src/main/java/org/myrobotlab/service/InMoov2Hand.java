@@ -541,8 +541,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     }
   }
 
-  /**
-
   public void speakBlocking(String text) {
     if (speech != null) {
       speech.speak(text);
