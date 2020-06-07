@@ -555,12 +555,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return true;
   }
 
-  public void speakBlocking(String text) {
-    if (speech != null) {
-      speech.speak(text);
-    }
-  }
-
   public void setAutoDisable(Boolean param) {
     thumb.setAutoDisable(param);
     index.setAutoDisable(param);
