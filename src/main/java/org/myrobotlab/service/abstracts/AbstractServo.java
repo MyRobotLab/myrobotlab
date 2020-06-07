@@ -614,10 +614,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
     // FIXME - fix blocking - determine when publishJointAngle should be published
     if (equal) {
-      synchronized (this) {
-        this.notifyAll();
-      }
-
       broadcast("publishJointAngle", new AngleData(getName(), data.angle));
       // broadcast("publishServoEvent", ServoStatus.SERVO_STOPPED,
       // currentInputPos);
@@ -838,7 +834,16 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   public void stop() {
     isSweeping = false;
-    moveTo(getCurrentInputPos());
+    // moveTo(getCurrentInputPos());
+    targetPos = getCurrentInputPos();
+    
+    if (encoder != null && encoder instanceof TimeEncoder) {
+      TimeEncoder timeEncoder = (TimeEncoder) encoder;
+      // calculate trajectory calculates and processes this move
+      timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
+    }
+    
+    //purgeTask("idleDisable");    
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -942,6 +947,11 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       purgeTask("idleDisable");
       // and start our countdown
       addTaskOneShot(idleTimeout, "idleDisable");
+    }
+    
+    // notify all blocking moves - we have stopped
+    synchronized (this) {
+      this.notifyAll();
     }
     
     // we've received a stop event from the TimeEncoder or real encoder
