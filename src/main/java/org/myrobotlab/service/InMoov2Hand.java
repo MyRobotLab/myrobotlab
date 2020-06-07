@@ -527,6 +527,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     return true;
   }
   
+  @Deprecated
   public boolean loadFile(String file) {
     File f = new File(file);
     Python p = (Python) Runtime.getService("python");
