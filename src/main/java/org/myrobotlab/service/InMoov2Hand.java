@@ -526,20 +526,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     wrist.save();
     return true;
   }
-  
-  /**
-   * execute an Intro resource script
-   * @param introScriptName
-   */
-  public void execScript(String introScriptName) {
-    try {
-      Python p = (Python)Runtime.start("python", "Python");
-      String script = getResourceAsString(introScriptName);
-      p.exec(script, true);
-    } catch (Exception e) {
-      error("unable to execute script %s", introScriptName); 
-    }
-  }
 
   public void speakBlocking(String text) {
     if (speech != null) {
