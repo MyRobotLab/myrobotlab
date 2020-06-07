@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -73,7 +72,7 @@ public class WikiDataFetcher extends Service {
       log.info(getData("nothing to test", "P2048"));
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 

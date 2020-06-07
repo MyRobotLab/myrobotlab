@@ -132,6 +132,8 @@ public class ServiceInterfaceTest extends AbstractTest {
       String service = serviceType.getSimpleName();
       // System.out.println("SYSTEM TESTING " + service);
       // System.out.flush();
+      
+      // service = "org.myrobotlab.service.EddieControlBoard";
       if (service.equals("Agent")) {
         log.info("here");
       }
