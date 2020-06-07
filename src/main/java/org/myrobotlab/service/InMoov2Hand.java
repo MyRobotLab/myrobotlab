@@ -542,34 +542,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   }
 
   /**
-	 * This method will load a python file into the python interpreter.
-	 */
-  @Deprecated
-  public boolean loadFile(String file) {
-	File f = new File(file);
-	Python p = (Python) Runtime.getService("python");
-	log.info("Loading  Python file {}", f.getAbsolutePath());
-	if (p == null) {
-		log.error("Python instance not found");
-		return false;
-	}
-	String script = null;
-	try {
-		script = FileIO.toString(f.getAbsolutePath());
-	} catch (IOException e) {
-		log.error("IO Error loading file : ", e);
-		return false;
-	}
-	// evaluate the scripts in a blocking way.
-	boolean result = p.exec(script, true);
-	if (!result) {
-		log.error("Error while loading file {}", f.getAbsolutePath());
-		return false;
-	} else {
-		log.debug("Successfully loaded {}", f.getAbsolutePath());
-	}
-	return true;
-  }
 
   public void speakBlocking(String text) {
     if (speech != null) {
