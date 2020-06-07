@@ -1,7 +1,9 @@
 package org.myrobotlab.i2c;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -142,6 +144,28 @@ public class I2CBus implements Attachable, I2CBusControl {
       }
     }
     return false;
+  }
+
+  @Override
+  public boolean hasInterface(String inter) {
+    Class<?>[] interfaces = getClass().getInterfaces();
+    for (int i = 0; i < interfaces.length; ++i) {
+      Class<?> interfaze = interfaces[i];
+      if (inter.getClass().getCanonicalName().equals(inter)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isType(Class<?> clazz) {
+    return isType(clazz.getCanonicalName());
+  }
+
+  @Override
+  public boolean isType(String clazz) {
+    return getClass().getCanonicalName().equals(clazz);
   }
 
 }

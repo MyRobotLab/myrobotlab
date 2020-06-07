@@ -608,9 +608,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param key
    * @param replace
    */
-  public void replaceWord(String key, String replace) {
-    substitutions.put(key.toLowerCase(), replace.toLowerCase());
+  public void replaceWord(WordFilter filter) {
+    substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
   }
+  
 
   public Long publishGenerationTime(Long timeMs) {
     return timeMs;
@@ -1057,17 +1058,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
   
   @Override
-  public void onSetVoice(String name) {
-    setVoice(name);
-  }
-
-
-  @Override
-  public void onSetVolume(Double volume) {
-    setVolume(volume);
-  }
-  
-  @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub
     addListener(control.getName(), "publishSpeak");
@@ -1076,10 +1066,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishReplaceWord");
   }
   
-  public void onSpeak(String text) {
-    speak(text);
-  }
-
   static public ServiceType getMetaData(String serviceType) {
 
     ServiceType meta = new ServiceType(serviceType);

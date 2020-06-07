@@ -32,7 +32,7 @@ public class WorkEMeta {
 
     // vision - input
     // TODO - going to have several "spouts" - and bolts (storm analogy)
-    meta.addPeer("cv ", "OpenCV", "computer vision");// webcam spout
+    meta.addPeer("eye ", "OpenCV", "computer vision");// webcam spout
     // meta.addPeer("leftFoscam ", "OpenCV", "computer vision");// webcam spout
 
     // speech - output

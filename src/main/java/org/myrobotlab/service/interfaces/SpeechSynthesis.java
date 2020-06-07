@@ -5,6 +5,7 @@ import java.util.List;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -133,30 +134,16 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * @param ear
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
-  
-  /**
-   * event end-point for SpeechSynthesizerControl.publishSetVoice
-   * 
-   * @param name new name of voice
-   */
-  public void onSetVoice(String name);
-  
-  /**
-   * event end-point for SpeechSynthesizerControl.publishSetVolume
-   * @param volume - new volume
-   */
-  public void onSetVolume(Double volume);
-  
-  /**
-   * event end-point for SpeechSynthesizerControl.speak
-   * @param text
-   */
-  public void onSpeak(String text);
-  
+    
   /**
    * Speech control controls volume, setting the voice, and of course "speak"
    * @param control
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
 
+  /**
+   * replace one word with another - instead of "biscuit" say "cookie"
+   * @param filter
+   */
+  public void replaceWord(WordFilter filter);  
 }

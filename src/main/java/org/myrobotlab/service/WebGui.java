@@ -256,6 +256,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    */
   private boolean broadcastMode = true;
 
+  protected int maxMsgSize = 1048576;
+
   public WebGui(String n, String id) {
     super(n, id);
     // api = ApiFactory.getInstance(this);
@@ -486,12 +488,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
      * .initParam(ApplicationConfig.WEBSOCKET_BUFFER_SIZE,"1000000")
      */
 
-    configBuilder.maxWebSocketFrameAggregatorContentLength(1048576);
+    configBuilder.maxWebSocketFrameAggregatorContentLength(maxMsgSize);
     configBuilder.initParam("org.atmosphere.cpr.asyncSupport", "org.atmosphere.container.NettyCometSupport");
     configBuilder.initParam(ApplicationConfig.SCAN_CLASSPATH, "false");
     configBuilder.initParam(ApplicationConfig.PROPERTY_SESSION_SUPPORT, "true").port(port).host(address); // all
-    configBuilder.maxChunkContentLength(1048576);
-    configBuilder.maxWebSocketFrameSize(1048576);
+    configBuilder.maxChunkContentLength(maxMsgSize);
+    configBuilder.maxWebSocketFrameSize(maxMsgSize);
     // ips
 
     /*
@@ -1022,7 +1024,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void sendRemote(Message msg) {
     try {
       String json = CodecUtils.toJson(msg);
-      if (json.length() > 65536) {
+      if (json.length() > maxMsgSize) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
         /*
          * debugging large msgs try {

@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 import com.amazonaws.ClientConfiguration;

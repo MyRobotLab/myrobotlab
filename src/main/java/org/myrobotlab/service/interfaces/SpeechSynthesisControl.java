@@ -5,13 +5,13 @@ import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
 
 public interface SpeechSynthesisControl extends NameProvider {
 
-  public void speak(String text);
+  public String speak(String text);
 
-  public void setVoice(String name);
+  public String setVoice(String name);
   
-  public void setVolume(double volume);
+  public double setVolume(double volume);
   
-  public void setMute(boolean mute);
+  public boolean setMute(boolean mute);
   
   public void replaceWord(String word, String substitute);
   

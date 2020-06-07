@@ -1743,7 +1743,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     return serialData;
   }
 
-  public ServoEvent publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
+  public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
       if (eventType == 0) {
         // ((ServoStatusPublisher) getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
@@ -1757,9 +1757,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("publishServoEvent deviceId {} event {} currentPos {}", deviceId, eventType, currentPos);
     } else {
       error("no servo found at device id %d", deviceId);
-      return null;
     }
-    return new ServoEvent();
+    return currentPos;
   }
 
   // FIXME should be in Control interface - for callback

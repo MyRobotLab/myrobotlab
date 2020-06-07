@@ -1053,9 +1053,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       methodSet = getMessageSet();
     }
 
-    if (interfaceSet == null) {
-      interfaceSet = getInterfaceSet();
-    }
+    
+    interfaceSet = getInterfaceSet();
+    
 
     if (locale == null) {
       if (!Runtime.isRuntime(this)) {
@@ -1454,12 +1454,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public Map<String, String> getInterfaceSet() {
     Map<String, String> ret = new TreeMap<String, String>();
-    Class<?>[] interfaces = this.getClass().getInterfaces();
-    for (int i = 0; i < interfaces.length; ++i) {
-      Class<?> interfaze = interfaces[i];
-      // ya silly :P - but gson's default conversion of a HashSet is an
-      // array
-      ret.put(interfaze.getName(), interfaze.getName());
+    Class<?> c = getClass();
+    while (c != Object.class) {
+
+      Class<?>[] interfaces = c.getInterfaces();
+      for (int i = 0; i < interfaces.length; ++i) {
+        Class<?> interfaze = interfaces[i];
+        // ya silly :P - but gson's default conversion of a HashSet is an
+        // array
+        ret.put(interfaze.getName(), interfaze.getName());
+      }
+      c = c.getSuperclass();
     }
     return ret;
   }
