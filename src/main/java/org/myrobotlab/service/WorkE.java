@@ -63,7 +63,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    */
   // joystick to motor axis defaults
   String axisLeft = "y";
-
   String axisRight = "rz";
   protected String brain;
   private String brainPath = "../github";
@@ -71,19 +70,20 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   protected String ear;
   protected String eye;
   protected String joystick;
+
   String joystickControllerName = "Rumble";
 
   final List<Status> lastErrors = new ArrayList<Status>();
-
   Double maxX = 1.0;
   Double maxY = 20.0;
+
   // FIXME - get/use defaults from controller ????
   Double minX = -1.0;
-
   Double minY = -20.0;
-  protected String motorLeft;
 
+  protected String motorLeft;
   String motorPortLeft = "m2";
+
   String motorPortRight = "m1";
 
   protected String motorRight;
@@ -131,17 +131,13 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       }
     }
 
-    subscribe("runtime", "registered");
+    // subscribe("runtime", "created")
+    // to much type info - life-cycle happens before peers started
+    // subscribe("runtime", "registered"); 
+
+    subscribe("runtime", "started");
     subscribe("runtime", "released");
 
-  }
-
-  public void onRegistered(Registration registration) {
-    attach((Attachable) registration.service);
-  }
-
-  public void onReleased(String name) {
-    speak("released %s", name);
   }
 
   @Deprecated /* use attachTextListener */
@@ -160,74 +156,74 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   public void attach(Attachable service) {
 
     try {
-      
-    speak("discovered new service, %s", service.getName().replace(".", " "));
-    
-    // interface routing ... "better"
-    if (service.hasInterface(SpeechSynthesis.class)) {
-      attachSpeechSynthesis((SpeechSynthesis) service);
-    }
 
-    // abstract class routing .. meh not the best
-    if (service.hasInterface(MotorControl.class)) {
-      attachMotorControl((MotorControl) service);
-    }
+      speak("discovered new service, %s", service.getName().replace(".", " "));
 
-    // class routing - kind of lame
-    if (service.isType(Joystick.class)) {
-      attachJoystick((Joystick) service);
-    }
+      // interface routing ... "better"
+      if (service.hasInterface(SpeechSynthesis.class)) {
+        attachSpeechSynthesis((SpeechSynthesis) service);
+      }
 
-    // class routing - kind of lame
-    // lame to expose the type - lame to need to cast
-    if (service.isType(OpenCV.class)) {
-      attachOpenCV((OpenCV) service);
-    }
+      // abstract class routing .. meh not the best
+      if (service.hasInterface(MotorControl.class)) {
+        attachMotorControl((MotorControl) service);
+      }
 
-    // class name routing - pretty lame...
-    if (service.isType("ProgramAB")) {
-      // i named this attachBrain because - should probably have
-      // a chatbot, or brain, or "something" interface
-      attachBrain((ProgramAB) service);
-    }
+      // class routing - kind of lame
+      if (service.isType(Joystick.class)) {
+        attachJoystick((Joystick) service);
+      }
 
-    if (service.hasInterface(MotorController.class)) {
-      attachMotorController((MotorController) service);
-    }
+      // class routing - kind of lame
+      // lame to expose the type - lame to need to cast
+      if (service.isType(OpenCV.class)) {
+        attachOpenCV((OpenCV) service);
+      }
 
-    if (!hasErrors()) {
-      // speak("all systems are go..");
-      speak("%s is go", service.getName().replace(".", " "));
-      speak("work-ee is worky");
-    } else {
-      speak("not all systems are fully functional");
-      speak("would you like a list of things not working?");
-      // aiml Yes,Sure,Ok,Go For it,Fine || No, Nope, nuh uh, naw ?
+      // class name routing - pretty lame...
+      if (service.isType("ProgramAB")) {
+        // i named this attachBrain because - should probably have
+        // a chatbot, or brain, or "something" interface
+        attachBrain((ProgramAB) service);
+      }
 
-    }
+      if (service.hasInterface(MotorController.class)) {
+        attachMotorController((MotorController) service);
+      }
 
-    clearErrors();
+      if (!hasErrors()) {
+        // speak("all systems are go..");
+        speak("%s is go", service.getName().replace(".", " "));
+        speak("work-ee is worky");
+      } else {
+        speak("not all systems are fully functional");
+        speak("would you like a list of things not working?");
+        // aiml Yes,Sure,Ok,Go For it,Fine || No, Nope, nuh uh, naw ?
 
-    // speak("i am ready");
+      }
 
-    // cv.broadcastState();
+      clearErrors();
 
-    /*
-     * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState();
-     * controller.broadcastState(); motorLeft.broadcastState();
-     * motorRight.broadcastState();
-     */
-    // speakBlocking(false);
+      // speak("i am ready");
 
-    // FIXME - status
-    // camera state
-    // chassi state
-    // battery level
-    // charging state
+      // cv.broadcastState();
 
-    // state changes after attach
-    broadcastState();
-    } catch(Exception e) {
+      /*
+       * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState();
+       * controller.broadcastState(); motorLeft.broadcastState();
+       * motorRight.broadcastState();
+       */
+      // speakBlocking(false);
+
+      // FIXME - status
+      // camera state
+      // chassi state
+      // battery level
+      // charging state
+
+      // state changes after attach
+      broadcastState();
+    } catch (Exception e) {
       speak("error in attaching %s", service.getName());
     }
   }
@@ -263,11 +259,11 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     speak("attaching joystick to motors ..");
 
     /*
-    if (isVirtual()) {
-      speak("loading virtual joystick data");
-      send(joystick, "loadVirtualController", "src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json");
-    }
-    */
+     * if (isVirtual()) { speak("loading virtual joystick data"); send(joystick,
+     * "loadVirtualController",
+     * "src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json"
+     * ); }
+     */
 
     // fire and forget (vs proxying) msg to set the controller name
     send(joystick, "setController", joystickControllerName);
@@ -283,12 +279,12 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     if (isLeft) {
       speak("attaching left motor");
       motorLeft = service.getName();
-      addListener("publishLeftMotorMove", motorLeft, "move");
+      addListener("publishMotorLeftMove", motorLeft, "move");
       addListener("publishLeftMotorStop", motorLeft, "move");
     } else if (service.getName().toLowerCase().contains("right")) {
       speak("attaching right motor");
       motorRight = service.getName();
-      addListener("publishRightMotorMove", motorRight, "move");
+      addListener("publishMotorRightMove", motorRight, "move");
       addListener("publishRightMotorStop", motorRight, "move");
     } else {
       speak("I was told to attach motor named %s - but I don't know if its a left or right motor", service.getName());
@@ -375,12 +371,12 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     // our proxy methods - broadcast publications
     setVoice("Geraint");
     setVolume(0.75);
-    
+
     replaceWord("worke", "work-ee");
     replaceWord("worky", "work-ee");
     replaceWord("work-e", "work-ee");
     replaceWord("work e", "work-ee");
-    
+
     setMute(false);
 
     if (mouth != null) {
@@ -461,18 +457,26 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   }
 
-  public void move(double d) {
+  public void move(double pwr) {
     // TODO - mapping to get balanced ?
-    broadcast("publishLeftMotorMove", d);
-    broadcast("publishRightMotorMove", d);
+    broadcast("publishMotorLeftMove", pwr);
+    broadcast("publishMotorRightMove", pwr);
+  }
+
+  public void moveLeft(double pwr) {
+    broadcast("publishMotorLeftMove", pwr);
+  }
+
+  public void moveRight(double pwr) {
+    broadcast("publishMotorRightMove", pwr);
   }
 
   @Override
   public void onJoystickInput(JoystickData input) throws Exception {
     if (input.id.contentEquals(axisLeft)) {
-      send(motorLeft, "move", input.value);
+      moveLeft(input.value);
     } else if (input.id.contentEquals(axisRight)) {
-      send(motorRight, "move", input.value);
+      moveRight(input.value);
     } else {
       log.info("unused joystick data {}", input);
     }
@@ -480,6 +484,22 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   public void onOpenCVData(OpenCVData data) {
     log.info("onOpenCVData");
+  }
+  
+  public void onStarted(String name) {
+    try {
+    attach(name);
+    } catch(Exception e) {
+      log.error("onStarted threw", e);
+    }
+  }
+
+  public void onRegistered(Registration registration) {
+    attach((Attachable) registration.service);
+  }
+
+  public void onReleased(String name) {
+    speak("released %s", name);
   }
 
   @Override
@@ -498,25 +518,20 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   }
 
   /**
+   * left motor stop publishing point
+   */
+  public void publishLeftMotorStop() {
+  }
+
+  /**
    * left movement publishing point - this should probably go into a
    * ChassiControl interface
    * 
    * @param mc
    * @return
    */
-  public double publishLeftMotorMove(double pwr) {
+  public double publishMotorLeftMove(double pwr) {
     return pwr;
-  }
-
-  /**
-   * left motor stop publishing point
-   */
-  public void publishLeftMotorStop() {
-  }
-
-  @Override
-  public WordFilter publishReplaceWord(String word, String substitute) {
-    return new WordFilter(word, substitute);
   }
 
   /**
@@ -526,8 +541,13 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * @param mc
    * @return
    */
-  public double publishRightMotorMove(double pwr) {
+  public double publishMotorRightMove(double pwr) {
     return pwr;
+  }
+
+  @Override
+  public WordFilter publishReplaceWord(String word, String substitute) {
+    return new WordFilter(word, substitute);
   }
 
   /**
@@ -567,6 +587,16 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     if (mouth != null) {
       send(mouth, "replaceWord", word, substitute);
     }
+  }
+
+  public void rotateLeft(double d) {
+    broadcast("publishMotorLeftMove", d);
+    broadcast("publishMotorRightMove", -1 * d);
+  }
+
+  public void rotateRight(double d) {
+    broadcast("publishMotorLeftMove", -1 * d);
+    broadcast("publishMotorRightMove", d);
   }
 
   // FIXME - CheckResult pass / fail with Status detail
@@ -680,7 +710,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   @Override
   public String speak(String text) {
-    return speak(text, (Object[])null);
+    return speak(text, (Object[]) null);
   }
 
   public String speak(String inText, Object... args) {
@@ -704,16 +734,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     send(eye, "stopCapture");
   }
 
-  public void turnLeft(double d) {
-    broadcast("publishLeftMotorMove", d);
-    broadcast("publishRightMotorMove", -1 * d);
-  }
-
-  public void turnRight(double d) {
-    broadcast("publishLeftMotorMove", -1 * d);
-    broadcast("publishRightMotorMove", d);
-  }
-
   /**
    * replacing to work with WorkETest
    * 
@@ -735,10 +755,11 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       worke.startPeer("mouth");
       worke.startPeer("joystick");
       worke.startPeer("motorLeft");
-      /*
       worke.startPeer("motorRight");
-      worke.startPeer("controller");
-      */
+      
+      /*
+       * worke.startPeer("motorRight"); worke.startPeer("controller");
+       */
       // worke.startPeer("eye");
 
       // Polly polly = (Polly) Runtime.start("worke.mouth", "Polly");

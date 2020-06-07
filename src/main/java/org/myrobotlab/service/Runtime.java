@@ -443,6 +443,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         Runtime.getInstance().creationCount++;
         si.setOrder(Runtime.getInstance().creationCount);
       }
+
+      if (runtime != null) {
+        runtime.broadcast("created", name);
+      }
+      
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
@@ -3462,6 +3467,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (ServiceInterface si : getLocalServices().values()) {
         si.setLocale(code);
     }
+  }
+
+  @Override
+  public String created(String serviceName) {
+    return serviceName;
+  }
+
+  @Override
+  public String started(String serviceName) {
+    return serviceName;
   }
 
 }

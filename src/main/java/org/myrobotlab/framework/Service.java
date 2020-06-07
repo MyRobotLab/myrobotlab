@@ -2260,6 +2260,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       thisThread.start();
       isRunning = true;
+      Runtime runtime = Runtime.getInstance();
+      if (runtime != null) {
+        runtime.broadcast("started", name);
+      }
+      
     } else {
       log.debug("startService request: service {} is already running", name);
     }
