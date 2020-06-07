@@ -4,7 +4,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 /**
