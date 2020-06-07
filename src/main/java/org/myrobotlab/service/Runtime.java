@@ -1702,7 +1702,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // get api - decode msg - process it
       Map<String, Object> connection = getConnection(uuid);
       if (connection == null) {
-        error("no connection with uuid %s", uuid);
+        // error("no connection with uuid %s", uuid);
         return;
       }
 
@@ -3257,7 +3257,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
     if (conn == null) {
-      log.error("no connection for uuid {}", uuid);
+      // log.error("no connection for uuid {}", uuid);
       return null;
     }
 
