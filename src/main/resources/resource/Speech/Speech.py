@@ -16,6 +16,3 @@ mimicSpeech = Runtime.start("mimicSpeech", "MimicSpeech")
 polly = Runtime.start("polly", "Polly")
 voiceRss = Runtime.start("voiceRss", "VoiceRss")
 indianTts = Runtime.start("indianTts", "IndianTts")
-
-# beta :
-naturalReaderSpeech = Runtime.start("naturalReaderSpeech", "NaturalReaderSpeech")
