@@ -147,6 +147,14 @@ public class CodecUtils {
     os.flush();
     return byteStream.toByteArray();
   }
+  
+  static public final String shortName(String name) {
+    if (name.contains("@")) {
+      return name.substring(0,name.indexOf("@"));
+    } else {
+      return name;
+    }
+  }
 
   static public final String getCallbackTopicName(String topicMethod) {
     // replacements
