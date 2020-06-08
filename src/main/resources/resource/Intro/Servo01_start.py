@@ -18,11 +18,6 @@
 arduino = Runtime.start("arduino","Arduino")
 servo01 = Runtime.start("servo01","Servo")
 
-# we tell to the service what is going on
-# intro.isServoActivated = True ## FIXME this gives error readonly
-intro.isServoActivated()
-intro.broadcastState()
-
 # initialize arduino
 # linux or macos -> arduino.connect("/dev/ttyUSB0")
 # print("connecting arduino to serial port")
