@@ -111,7 +111,7 @@
 
     /* Handle */
     ::-webkit-scrollbar-thumb {
-      background: ##abb4c3; 
+      background: #abb4c3; 
     }
 
     /* Handle on hover */
@@ -175,13 +175,13 @@
         padding: 16px;
         width: 100%;
         /* Firefox */
-        height: -moz-calc(100vh - 156px);
+        height: -moz-calc(100vh - 65px);
         /* WebKit */
-        height: -webkit-calc(100vh - 156px);
+        height: -webkit-calc(100vh - 65px);
         /* Opera */
-        height: -o-calc(100vh - 156px);
+        height: -o-calc(100vh - 65px);
         /* Standard */
-        height: calc(100vh - 156px);
+        height: calc(100vh - 65px);
 
         z-index: 1;
         background-color: #FFFFFF;
@@ -190,26 +190,13 @@
         scrollbar-width: thin;
         overflow-x: hidden;
         overscroll-behavior: contain;
-
-    }
-    #bottomMessages{
-        transition: margin-left .5s;
-        width: calc(100vw - 260px);
-        height: 100px;
-        margin: 0px;
-        background-color: #cccccc;
-        overflow: scroll;
-        transition-timing-function: ease;
-        overflow-x: hidden;
-        overscroll-behavior: contain;
-    }
+    }   
 
     @media screen and (max-height: 450px) {
         .sidenav {
             padding-top: 15px;
         }
     }
-
 </style>
 <div class="container-fluid">
     <!-- 1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right -->
@@ -285,41 +272,53 @@
     </div>
     <!-- end main -->
     <div id="bottomMessages">
-        <ul id="notification-entries">
-            <li>
-                Notifications
-            </i>
+        <div id="handleCloseBottomMessages" onmouseenter="0closeBottomMessages()" onclick="closeBottomMessages()"><span class="glyphicon glyphicon-menu-down mr-4"></span> Hide</div>
+        <div id="handleOpenBottomMessages" onmouseenter="0openBottomMessages()" onclick="openBottomMessages()"><span class="glyphicon glyphicon-menu-up mr-4"></span> Show Notifications</div>
+        <div id="notificationContainer">
+            <ul id="notification-entries">
                 <li>
-
-                    <div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
-                        <span class="label label-danger">error</span>
-                        {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
-                                <span ng-hide="errorCount < 2" class="badge">{{errorCount}}</span>
-                        <button type="button" class="close" data-ng-click="errorStatus = null;errorCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="alert alert-warning alert-dismissable mb-0" ng-hide="warningStatus == null">
-                        <span class="label label-warning">warning</span>
-                        {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
-                                <span ng-hide="warningCount < 2" class="badge">{{warningCount}}</span>
-                        <button type="button" class="close" data-ng-click="warningStatus = null;warningCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null">
-                        <span class="label label-info">info</span>
-                        {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
-                                <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
-                        <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                    <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
                         </button>
                     </div>
 
+                    <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+                
+                    
+                <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
                 </li>
-            </ul>
-    </div>
 
+
+            </ul>
+        </div>
+    </div>
 
 </div>
 
@@ -374,6 +373,23 @@
         document.getElementById("main").style.width = "100%";
 
     }
+
+    function openBottomMessages() {
+        document.getElementById("handleCloseBottomMessages").style.display = "block";
+        document.getElementById("handleOpenBottomMessages").style.display = "none";
+        document.getElementById("notificationContainer").style.transform = "scaleY(1)";
+        document.getElementById("bottomMessages").style.height = "100px";
+        document.getElementById("main").style.height = "calc(100vh - 155px)";
+    }
+
+    function closeBottomMessages() {
+        document.getElementById("handleCloseBottomMessages").style.display = "none";
+        document.getElementById("handleOpenBottomMessages").style.display = "block";
+        document.getElementById("notificationContainer").style.transform = "scaleY(0)";
+        document.getElementById("bottomMessages").style.height = "1px";
+        document.getElementById("main").style.height = "calc(100vh - 65px)";
+    }
+
 </script>
 <!--
 <input type="text" ng-model="name" />
