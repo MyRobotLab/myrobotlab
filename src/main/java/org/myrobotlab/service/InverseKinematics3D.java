@@ -292,7 +292,7 @@ success = true; // FIXME change object to send error tolerance - let the robot d
 
     InverseKinematics3D inversekinematics = (InverseKinematics3D) Runtime.start("ik3d", "InverseKinematics3D");
     // InverseKinematics3D inversekinematics = new InverseKinematics3D("iksvc");
-    inversekinematics.setCurrentArm(arm, InMoovArm.getDHRobotArm("i01", "left"));
+    inversekinematics.setCurrentArm(arm, null /*InMoovArm.getDHRobotArm("i01", "left")*/);
     //
     // inversekinematics.getCurrentArm(arm).setIk3D(inversekinematics);
     // Create a new DH Arm.. simpler for initial testing.
@@ -326,8 +326,8 @@ success = true; // FIXME change object to send error tolerance - let the robot d
     boolean attached = true;
     if (attached) {
       // set up the left inmoov arm
-      InMoovArm leftArm = (InMoovArm) Runtime.start("leftArm", "InMoovArm");
-      leftArm.connect("COM21");
+      InMoov2Arm leftArm = (InMoov2Arm) Runtime.start("leftArm", "InMoov2Arm");
+      // leftArm.connect("COM21");
       // leftArm.omoplate.setMinMax(0, 180);
       // attach the publish joint angles to the on JointAngles for the inmoov
       // arm.

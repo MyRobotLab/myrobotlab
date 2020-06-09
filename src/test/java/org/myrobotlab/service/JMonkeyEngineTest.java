@@ -100,11 +100,11 @@ public class JMonkeyEngineTest extends AbstractTest {
      */
 
 
-    InMoov i01 = (InMoov) Runtime.create("i01", "InMoov");// has attach ...
+    InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");// has attach ...
                                                           // runtime does
                                                           // dynamic binding
                                                           // anyway...
-    InMoovHead head = i01.startHead("COM98");
+    InMoov2Head head = i01.startHead("COM98");
     Servo s = (Servo) Runtime.getService("i01.head.rothead");
     Servo jaw = (Servo) Runtime.getService("i01.head.jaw");
 

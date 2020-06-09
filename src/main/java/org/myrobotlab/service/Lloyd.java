@@ -469,8 +469,8 @@ public class Lloyd extends Service {
     rightIK = (InverseKinematics3D) Runtime.start("rightIK", "InverseKinematics3D");
 
     // TODO : proper IK models for left & right.
-    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm("i01", "left"));
-    rightIK.setCurrentArm(partName, InMoovArm.getDHRobotArm("i01", "left"));
+    leftIK.setCurrentArm(partName, null /*InMoovArm.getDHRobotArm("i01", "left")*/);
+    rightIK.setCurrentArm(partName, null /*InMoovArm.getDHRobotArm("i01", "left")*/);
 
     // specify the input scaling factors TODO: what should these be?
     // z axis is inverted!

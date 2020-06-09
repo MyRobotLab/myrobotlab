@@ -14,7 +14,7 @@ import marytts.util.math.MathUtils;
 @Ignore
 public class LloydIKTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(InMoovArm.class);
+  public final static Logger log = LoggerFactory.getLogger(LloydIKTest.class);
 
   private void printArmDetails(DHRobotArm arm) {
     int numLinks = arm.getNumLinks();
@@ -39,7 +39,7 @@ public class LloydIKTest extends AbstractTest {
     // and then compare a mock output from controller position / orientation to
     // how the arm reacts.
     InverseKinematics3D leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
-    leftIK.setCurrentArm(partName, InMoovArm.getDHRobotArm("i01", "left"));
+    leftIK.setCurrentArm(partName, null /*InMoovArm.getDHRobotArm("i01", "left")*/);
     leftIK.centerAllJoints(partName);
     Point position = leftIK.currentPosition(partName);
     log.info("Left IK center position is : {}", position);

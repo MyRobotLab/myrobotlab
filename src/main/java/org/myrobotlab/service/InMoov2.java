@@ -12,11 +12,9 @@ import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
-import org.myrobotlab.inmoov.Vision;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -249,9 +247,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   String speechService = "MarySpeech";
 
   transient InMoov2Torso torso;
-
-  @Deprecated
-  public Vision vision;
 
   // FIXME - remove all direct references
   // transient private HashMap<String, InMoov2Arm> arms = new HashMap<>();
@@ -2023,6 +2018,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (torso != null) {
       torso.waitTargetPos();
     }
+  }
+
+  // FIXME implement with broadcasts
+  public void setArmSpeed(String string, double rbicepspeed, double rrotatespeed, double rshoulderspeed, double romoplatespeed) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

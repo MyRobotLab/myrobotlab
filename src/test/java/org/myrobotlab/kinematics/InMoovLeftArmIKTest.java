@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.InMoovArm;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -23,7 +22,8 @@ public class InMoovLeftArmIKTest extends AbstractTest {
   public void testDHArm() {
 
     // LoggingFactory.init("INFO");
-    DHRobotArm arm = InMoovArm.getDHRobotArm("i01", "left");
+    // DHRobotArm arm = InMoov2Arm.getDHRobotArm("i01", "left");
+    DHRobotArm arm = null;
     // Point palm = arm.getPalmPosition();
     // log.info(palm);
     // well known configurations.

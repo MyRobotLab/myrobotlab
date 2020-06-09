@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.InMoov;
 import org.slf4j.Logger;
 
 public class TcpServer {
