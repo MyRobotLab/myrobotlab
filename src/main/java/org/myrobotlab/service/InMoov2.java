@@ -266,7 +266,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super(n, id);
 
     // by default all servos will auto-disable
-    // Servo.setAutoDisableDefault(true);
+    Servo.setAutoDisableDefault(true); //until peer servo services for InMoov2 have the auto disable behavior, we should keep this
 
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
     locale = Runtime.getInstance().getLocale();
@@ -1571,7 +1571,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
+    String assetPath = getResourceDir() + fs + InMoov2.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);

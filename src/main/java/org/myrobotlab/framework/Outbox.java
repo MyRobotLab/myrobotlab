@@ -291,4 +291,12 @@ public class Outbox implements Runnable, Serializable {
       log.error("outbox threw", e);
     }
   }
+  
+  /**
+   * remove ALL listeners/subscribers
+   */
+  public void reset() {
+    notifyList = new HashMap<String, ArrayList<MRLListener>>();
+  }
+  
 }
