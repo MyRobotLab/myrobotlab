@@ -1430,8 +1430,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public void onJointAngles(Map<String, Double> angleMap) {
     for (String name : angleMap.keySet()) {
       ServiceInterface si = Runtime.getService(name);
-      if (si instanceof Servo) {
-        ((Servo) si).moveTo(angleMap.get(name));
+      if (si instanceof ServoControl) {
+        ((ServoControl) si).moveTo(angleMap.get(name));
       }
     }
   }
