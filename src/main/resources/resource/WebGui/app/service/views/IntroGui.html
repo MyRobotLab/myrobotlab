@@ -133,7 +133,7 @@
             
                         
                         <!--toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isSimulatorActivated?msg.startSimulator():msg.stopSimulator()" width="80" height="30" on="virtual" off="real"/-->
-                        <toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isVirtual?msg.execScript('virtualServo01_stop.py'):msg.execScript('virtualServo01_start.py')" width="80" height="30" on="virtual" off="real"/>
+                        <toggle width="70" height="28" ng-model="props.simulatorIsActive" title="Virtual or Real Hardware" ng-change="!props.simulatorIsActive?msg.execScript('virtualServo01_stop.py'):msg.execScript('virtualServo01_start.py')" width="80" height="30" on="virtual" off="real"/>
                         <br/>
                         <div ng-show="!service.isVirtual">
                             <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/>

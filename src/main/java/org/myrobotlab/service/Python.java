@@ -629,7 +629,9 @@ public class Python extends Service {
   public void startService() {
     super.startService();
 
-    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.service import Python\n"
+    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" 
+        + "from org.myrobotlab.framework import Service\n"
+        + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("myService = Runtime.getService(\"%s\")\n", getName());
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);

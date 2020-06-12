@@ -124,9 +124,9 @@ public class Intro extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.INFO);
+      LoggingFactory.init(Level.WARN);
 
-      Runtime.main(new String[] { "--spawned-from-agent", "--id", "intro", "-s", "intro", "Intro" });
+      // Runtime.main(new String[] { "--spawned-from-agent", "--id", "intro", "-s", "intro", "Intro" });
 
       Runtime.start("intro", "Intro");
 
