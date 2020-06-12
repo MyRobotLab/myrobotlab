@@ -7,5 +7,8 @@
 # uncomment for virtual hardware
 # Platform.setVirtual(True)
 
-# release a virtualServo01
-Runtime.releaseService("virtualServo01")
+# make whole system 'real'
+Runtime.setAllVirtual(False)
+
+# release a simulator
+Runtime.releaseService("simulator")
