@@ -247,6 +247,11 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * @return ServiceType - returns all the data
    * 
    */
+  
+  public String testMultipleParamTypes(String a, Double b, Integer c) {
+    log.info("testMultipleParamTypes {} {} {}", a, b, c);
+    return a;
+  }
 
   public double testDouble(double d) {
     return d;
