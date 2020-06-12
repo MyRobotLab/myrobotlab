@@ -2587,13 +2587,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * detaches ALL other services from this service
+   * Detaches ALL listeners/subscribers from this service
+   * if services have special requirements, they can override this
    */
   public void detach() {
-    log.info("detach was called but I'm a NOOP in Service.java - probably not what you wanted - override me !");
-    // FIXME - attach should probably have a Service.java level of understanding
-    // where a Service understands
-    // that another service is attached
+    outbox.reset();
   }
 
   /**
@@ -2605,7 +2603,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public boolean isAttached(String serviceName) {
-    return isAttached(Runtime.getService(serviceName));
+    List<?> entries =  getNotifyList(serviceName);
+    if (entries == null || entries.size() == 0) {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -2662,7 +2664,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean isAttached(Attachable instance) {
-    return false;
+    return isAttached(instance.getName());
   }
 
   /**

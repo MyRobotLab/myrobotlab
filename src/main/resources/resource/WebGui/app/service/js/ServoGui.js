@@ -351,8 +351,12 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
         let pos = $scope.pos.value;
         // currently taken from the slider's value :P - not good if the slider's value is not good :(
+        if ($scope.speedSlider.value == 501){
+            msg.send('attach', controller, pin, pos)            
+        } else {
+            msg.send('attach', controller, pin, pos, $scope.speedSlider.value)
+        }
 
-        msg.send('attach', controller, pin, pos)
         // $scope.rest) <-- previously used rest which is (not good)
         // msg.attach($scope.controller, $scope.pin, 90)
     }

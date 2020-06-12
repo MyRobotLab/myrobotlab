@@ -87,6 +87,26 @@ public class MethodCacheTest extends AbstractTest {
     method = cache.getMethod(TestCatcher.class, "getPin", new Object[] { testArray });
     ret = method.invoke(tester, new Object[] { testArray });
     assertEquals(testArray, ret);
+    
+    // a null value in a mutli-type call 
+    Object[] jsonParams = new Object[] {"\"hello world\"", "null", "3" };
+    Object[] paramTypes = cache.getDecodedJsonParameters(TestCatcher.class, "testMultipleParamTypes", jsonParams);
+    assertTrue(paramTypes[0].getClass().equals(String.class));
+    assertTrue(paramTypes[1] == null);
+    assertTrue(paramTypes[2].getClass().equals(Integer.class));
+    
+    // method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"\"hello world\"", "null", "3" });
+    method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"\"hello world\"", "null", "3" });
+    ret = method.invoke(tester, new Object[] { "hello world", null, 3 });
+    assertEquals(ret, "hello world");
+    
+    /*
+    method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"hello world 2", 1.1, 3});
+    ret = method.invoke(tester, new Object[] { "hello world 2", null, 3 });
+    assertEquals(ret, "hello world 2");
+    */
+    
+    log.info("here");
 
   }
 

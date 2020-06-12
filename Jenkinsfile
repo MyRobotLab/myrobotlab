@@ -24,7 +24,7 @@ node ('ubuntu') {  // use labels to direct build
    def mvnHome
    stage('preparation') { // for display purposes
    	  // initial clean - remove afte successful build
-   	  cleanWs()// - unless bootstrap is needed - cleanWS should be done at the end of the build 
+      cleanWs() // - unless bootstrap is needed - cleanWS should be done at the end of the build 
    
       // Get some code from a GitHub repository
       checkout scm

@@ -1,22 +1,19 @@
 <!------------------------------INTRO-PAGE START-------------------------->
-
 <style>
-    #containerIntro{
-    width: 620px;
-    height: 588px;
-    /* border: 1px solid #000; */
-    position: relative;
-    background-image: url("../Intro/img/MRL_background.png");
-    z-index: 0;
-    float: none;
+    #containerIntro {
+        width: 620px;
+        height: 588px;
+        /* border: 1px solid #000; */
+        position: relative;
+        background-image: url("../Intro/img/MRL_background.png");
+        z-index: 0;
+        float: none;
     }
 
     #containerIntro-cell {
-    width: 620px;
+        width: 620px;
     }
-
 </style>
-
 <table border="1" class="table table-striped">
     <tr>
         <td colspan="2">&nbsp;{{onText}} 
@@ -27,275 +24,322 @@
         <td id="containerIntro-cell">
             <div id="containerIntro">
                 <!-- Right -->
-                
-    
-                <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')"><img src="../Intro/img/arduino.png"/>&nbsp;</a>
-    
-                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="msg.execScript('InMoov01_start.py');mrl.changeTab('i01')"><img src="../Intro/img/inmoov.png"/>&nbsp;</div>
-    
-                <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')"><img src="../Intro/img/serial.png"/>&nbsp;</div>
-    
-                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="setPanel('opencv')"><img src="../Intro/img/visionActive.png"/>&nbsp;</div>
-    
+                <a id="arduinoButton" class="IntroButtons preventIntroDragSelect" title="A tutorial of how to start with Arduino and MRLComm.ino" ng-click="setPanel('arduino')">
+                    <img src="../Intro/img/arduino.png"/>&nbsp;
+                </a>
+                <div id="inmoovButton" class="IntroButtons preventIntroDragSelect" title="Access and begin with InMoov" ng-click="msg.execScript('InMoov01_start.py');mrl.changeTab('i01')">
+                    <img src="../Intro/img/inmoov.png"/>&nbsp;
+                </div>
+                <div id="serialButton" class="IntroButtons preventIntroDragSelect" title="Setup your serial devices" ng-click="setPanel('serial')">
+                    <img src="../Intro/img/serial.png"/>&nbsp;
+                </div>
+                <div id="visionButton" class="IntroButtons preventIntroDragSelect" title="Vision with OpenCV and filters" ng-click="setPanel('opencv')">
+                    <img src="../Intro/img/visionActive.png"/>&nbsp;
+                </div>
                 <!-- Left -->
-    
-                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')"><img src="../Intro/img/servo.png"/>&nbsp;</div>
-    
-                <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')"><img src="../Intro/img/go.png"/>&nbsp;</div>
-    
-                <a id="introButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank"><img src="../Intro/img/intro.png"/>&nbsp;</a>
-    
-                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="setPanel('python')"><img src="../Intro/img/python.png"/>&nbsp;</div>
-    
+                <div id="servoButton" class="IntroButtons preventIntroDragSelect" title="A quick run test with your servo" ng-click="setPanel('servo')">
+                    <img src="../Intro/img/servo.png"/>&nbsp;
+                </div>
+                <div id="goButton" class="IntroButtons preventIntroDragSelect" title="Get started right away" ng-click="setPanel('runtime')">
+                    <img src="../Intro/img/go.png"/>&nbsp;
+                </div>
+                <a id="introButton" class="IntroButtons preventIntroDragSelect" title="A quick overview of MyRobotLab" href="http://myrobotlab.org/quick_start" target="_blank">
+                    <img src="../Intro/img/intro.png"/>&nbsp;
+                </a>
+                <div id="pythonButton" class="IntroButtons preventIntroDragSelect" title="Start coding with Python" ng-click="setPanel('python')">
+                    <img src="../Intro/img/python.png"/>&nbsp;
+                </div>
                 <div id="securityButton" class="securityButtons preventIntroDragSelect" ng-click="setPanel('security')">Security</div>
-    
                 <div id="homeButton" class="homeButtons preventIntroDragSelect" ng-click="setPanel('extension')">Home</div>
             </div>
         </td>
-    <td>
-    <!-- panels begin -->
-    <!------------------------ extension begin ------------------------------>
-    <table ng-show="showPanel('extension')" class="table table-striped">
-    <tr>
         <td>
-            <img src="../Intro/img/MRL_extension1.png"/>
-            <a id="logoButton" class="IntroButtons preventIntroDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank"><img src="../Intro/img/logo.png"/></a>
-         </td>
-    </tr>
-    </table>    
-    <!------------------------ extension end ------------------------------>
-    <!------------------------ arduino begin ------------------------------>
-    <table ng-show="showPanel('arduino')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../arduino.png"/>
-            <label>Arduino</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <p> MrlComm.ino is a catch all phrase for the Arduino sketch that runs as part of MyRobotLab.<br>  It is bundled with each build of myrobotlab.<br> You can locate the MrlComm.ino in <strong>resource/Arduino/MrlComm/MrlComm.ino</strong>.<br> Normally you would copy & paste the MRLComm.ino into the arduino IDE for upload to<br> the Arduino board.</p>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/-EQxjpsOJDg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </td>
-    </tr>
-    </table>    
-    <!------------------------ arduino end ------------------------------>
-    <!------------------------ serial begin ------------------------------>
-    <table ng-show="showPanel('serial')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../serial.png"/>
-            <label>Serial:</label>
-            <P>Serial service is a way to send and receive serial data into and out of MRL</P>
-            <a class="row col-md-3" href="http://myrobotlab.org/service/Serial" target="_blank">MORE INFO</a>
-            <a class="row col-md-4" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Serial.py" target="_blank">SEE PYTHON SCRIPT</a>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img width="600" src="http://myrobotlab.org/sites/default/files/users/user3images/Serial_1.png"/>
-        </td>
-    </tr>
-    </table>
-    <!------------------------ serial end ------------------------------>
-    <!------------------------ servo begin ------------------------------>
-    <table ng-show="showPanel('servo')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../Servo.png"/>
-            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>&nbsp;&nbsp;
-            <toggle width="70" height="28" ng-model="service.isServoActivated" title="To access settings, the servo must be activated" ng-change="!service.isServoActivated?msg.execScript('Servo01_stop.py'):msg.execScript('Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Tutorial next page</button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            The Servo service is used to control hobby servos through a Servo Controller.  This could be a Raspberry pi, micro-controller such as an Arduino, or other I2C servo controller.<br>
-            The Servo service allows control of position, speed, and limits of the servo actuator.
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Would you like to use real or virtual hardware ?
-            <!--toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isSimulatorActivated?msg.startSimulator():msg.stopSimulator()" width="80" height="30" on="virtual" off="real"/-->
-            <toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isVirtual?msg.execScript('virtualServo01_stop.py'):msg.execScript('virtualServo01_start.py')" width="80" height="30" on="virtual" off="real"/>
-            <br/>
-            <div ng-show="!service.isVirtual" >
-                <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/><br>
-                <br/>
-                A servo must be wired with its own power supply. <br>
-                Its not recommended to use the 5v power supply from the Arduino.<br>
-                You can do this with a 4 battery pack which will produce 6 volts for the servo.<br>
-                <br/>
-                For the controller to communicate with MyRobotLab, it is necessary to upload a script on the controller.<br>
-                <a class="row col-md-6" ng-click="setPanel('arduino')">You can follow the quick arduino tutorial</a>.
-            </div>
-            <div ng-show="service.isVirtual" >
-                <img src="../Intro/servoTutorial/arduino_servo_virtual.png" width="500"/><br>
-                JMonkey simulation service is used to do a 3d simulation of the servo using the same Servo service for control.
-                <!--div ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()"></div-->
-                <!--toggle width="125" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator ON" off="simulator OFF"></toggle-->
-            </div>
-        </td>
-    </tr>
-    </table>
-    <!------------------------ servo end ------------------------------>
-    <!------------------------ servo1 begin ------------------------------>
-    <table ng-show="showPanel('servo1')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../Servo.png"/>
-            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo')">Previous page</button>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo2')">Tutorial next page</button>
-        </td>
-    </tr>
-    <tr ng-show="!service.isVirtual">
-        <td>
-            <p>The Servo needs a controller in order to operate.<br> In this tutorial MRL has already setup a controller called arduino. Define your board type and choose the COM port according to your board. Open Windows device manager/port COM to know which COM port and rate to use.<br>For Linux and Mac arduino.connect("/dev/ttyUSB0").<br> Then press "Connect"</p>
-        </td>
-    </tr>
-    <tr ng-show="!service.isVirtual">
-        <td>
-            FIXME getPanel=noworky or refresh page
+            <!-- panels begin -->
+            <!------------------------ extension begin ------------------------------>
+            <table ng-show="showPanel('extension')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Intro/img/MRL_extension1.png"/>
+                        <a id="logoButton" class="IntroButtons preventIntroDragSelect" title="What is MyRobotLab" href="http://myrobotlab.org" target="_blank">
+                            <img src="../Intro/img/logo.png"/>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ extension end ------------------------------>
+            <!------------------------ arduino begin ------------------------------>
+            <table ng-show="showPanel('arduino')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../arduino.png"/>
+                        <label>Arduino</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <p>
+                            MrlComm.ino is a catch all phrase for the Arduino sketch that runs as part of MyRobotLab.<br>
+                            It is bundled with each build of myrobotlab.<br>
+                            You can locate the MrlComm.ino in <strong>resource/Arduino/MrlComm/MrlComm.ino</strong>
+                            .<br>
+                            Normally you would copy &paste the MRLComm.ino into the arduino IDE for upload to<br>the Arduino board.
+                        
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/-EQxjpsOJDg" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ arduino end ------------------------------>
+            <!------------------------ serial begin ------------------------------>
+            <table ng-show="showPanel('serial')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../serial.png"/>
+                        <label>Serial:</label>
+                        <P>Serial service is a way to send and receive serial data into and out of MRL</P>
+                        <a class="row col-md-3" href="http://myrobotlab.org/service/Serial" target="_blank">MORE INFO</a>
+                        <a class="row col-md-4" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Serial.py" target="_blank">SEE PYTHON SCRIPT</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img width="600" src="http://myrobotlab.org/sites/default/files/users/user3images/Serial_1.png"/>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ serial end ------------------------------>
+            <!------------------------ servo begin ------------------------------>
+            <table ng-show="showPanel('servo')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Servo.png"/>
+                        <label>Servo:</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img ng-src="{{(!props.servo01IsActive)?'../../red.png':'../../green.png'}}"/>
+                        &nbsp;&nbsp;<toggle width="70" height="28" ng-model="props.servo01IsActive" title="To access settings, the servo must be activated" ng-change="!props.servo01IsActive?msg.execScript('Servo01_stop.py'):msg.execScript('Servo01_start.py')" width="80" height="30" on="ON" off="OFF"/>
+                        &nbsp;&nbsp;<button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo1')">Tutorial next page</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        The Servo service is used to control hobby servos through a Servo Controller.  This could be a Raspberry pi, micro-controller such as an Arduino, or other I2C servo controller.<br>The Servo service allows control of position, speed, and limits of the servo actuator.
+        
+                    
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Would you like to use real or virtual hardware ?
+            
+                        
+                        <!--toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isSimulatorActivated?msg.startSimulator():msg.stopSimulator()" width="80" height="30" on="virtual" off="real"/-->
+                        <toggle width="70" height="28" ng-model="service.isVirtual" title="Virtual or Real Hardware" ng-change="!service.isVirtual?msg.execScript('virtualServo01_stop.py'):msg.execScript('virtualServo01_start.py')" width="80" height="30" on="virtual" off="real"/>
+                        <br/>
+                        <div ng-show="!service.isVirtual">
+                            <img src="../Intro/servoTutorial/arduino_servo.png" width="500"/>
+                            <br>
+                            <br/>
+                            A servo must be wired with its own power supply. <br>
+                            Its not recommended to use the 5v power supply from the Arduino.<br>
+                            You can do this with a 4 battery pack which will produce 6 volts for the servo.<br>
+                            <br/>
+                            For the controller to communicate with MyRobotLab, it is necessary to upload a script on the controller.<br>
+                            <a class="row col-md-6" ng-click="setPanel('arduino')">You can follow the quick arduino tutorial</a>
+                            .
+            
+                        
+                        </div>
+                        <div ng-show="service.isVirtual">
+                            <img src="../Intro/servoTutorial/arduino_servo_virtual.png" width="500"/>
+                            <br>JMonkey simulation service is used to do a 3d simulation of the servo using the same Servo service for control.
+                
+                            
+                            <!--div ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()"></div-->
+                            <!--toggle width="125" height="28" ng-model="service.isSimulatorActivated" ng-change="!service.isSimulatorActivated?msg.stopSimulator():msg.startSimulator()" on="simulator ON" off="simulator OFF"></toggle-->
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ servo end ------------------------------>
+            <!------------------------ servo1 begin ------------------------------>
+            <table ng-show="showPanel('servo1')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Servo.png"/>
+                        <label>Servo:</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img ng-src="{{(!props.servo01IsActive)?'../../red.png':'../../green.png'}}"/>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo')">Previous page</button>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo2')">Tutorial next page</button>
+                    </td>
+                </tr>
+                <tr ng-show="!service.isVirtual">
+                    <td>
+                        <p>
+                            The Servo needs a controller in order to operate.<br>
+                            In this tutorial MRL has already setup a controller called arduino. Define your board type and choose the COM port according to your board. Open Windows device manager/port COM to know which COM port and rate to use.<br>
+                            For Linux and Mac arduino.connect("/dev/ttyUSB0").<br>Then press "Connect"
+                        
+                        </p>
+                    </td>
+                </tr>
+                <tr ng-show="!service.isVirtual">
+                    <td>
+                        FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
-        </td>
-    </tr>
-    <!--- virtual section -------->
-    <tr ng-show="service.isVirtual">
-        <td>
-            <p>The Servo needs a virtual controller in order to operate.<br> In this tutorial MRL has already setup a controller called arduino.<br> Just click Start</p>
-        </td>
-    </tr>
-    <tr ng-show="service.isVirtual">
-        <td>
-            FIXME getPanel=noworky or refresh page
+                    </td>
+                </tr>
+                <!--- virtual section -------->
+                <tr ng-show="service.isVirtual">
+                    <td>
+                        <p>
+                            The Servo needs a virtual controller in order to operate.<br>
+                            In this tutorial MRL has already setup a controller called arduino.<br>Just click Start
+                        
+                        </p>
+                    </td>
+                </tr>
+                <tr ng-show="service.isVirtual">
+                    <td>
+                        FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
-        </td>
-    </tr>   
-    </table>
-    <!------------------------ servo1 end ------------------------------>
-    <!------------------------ servo2 begin ------------------------------>
-    <table ng-show="showPanel('servo2')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../Servo.png"/>
-            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo1')">Previous page</button>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Tutorial next page</button>
-        </td>
-    </tr>
-    <tr ng-show="!service.isVirtual">
-        <td>
-            <p>Now select the controller in the dropdown menu, by selecting it will get "attached".<br> Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.</p>
-        </td>
-    </tr>
-    <!--- virtual section -------->
-    <tr ng-show="service.isVirtual">
-        <td>
-            <p>Now select the varduino controller in the dropdown menu, by selecting it will get "attached".<br> Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.</p>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            FIXME getPanel=noworky or refresh page
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ servo1 end ------------------------------>
+            <!------------------------ servo2 begin ------------------------------>
+            <table ng-show="showPanel('servo2')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Servo.png"/>
+                        <label>Servo:</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img ng-src="{{(!props.servo01IsActive)?'../../red.png':'../../green.png'}}"/>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo1')">Previous page</button>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo3')">Tutorial next page</button>
+                    </td>
+                </tr>
+                <tr ng-show="!service.isVirtual">
+                    <td>
+                        <p>
+                            Now select the controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.
+                        
+                        </p>
+                    </td>
+                </tr>
+                <!--- virtual section -------->
+                <tr ng-show="service.isVirtual">
+                    <td>
+                        <p>
+                            Now select the varduino controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "disabled" and the servo should be controllable with the slider bar.
+                        
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
-        </td>
-    </tr> 
-    </table>
-    <!------------------------ servo2 end ------------------------------>
-    <!------------------------ servo3 begin ------------------------------>
-    <table ng-show="showPanel('servo3')" class="table table-striped">
-    <tr>
-        <td>
-            <img src="../Servo.png"/>
-            <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo2')">Previous page</button>
-            <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo4')">Tutorial next page</button>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <p>By selecting the advanced tab, you can set the limits of your servo.<br> There is two types of limits, the input and the output.<br>  The input limits are (TODO SHORT DEFINE), while the output limits are (TODO SHORT DEFINE)<br> 
-            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be set when initialized.</p>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            FIXME getPanel=noworky or refresh page
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ servo2 end ------------------------------>
+            <!------------------------ servo3 begin ------------------------------>
+            <table ng-show="showPanel('servo3')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Servo.png"/>
+                        <label>Servo:</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img ng-src="{{(!props.servo01IsActive)?'../../red.png':'../../green.png'}}"/>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo2')">Previous page</button>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo4')">Tutorial next page</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>
+                            By selecting the advanced tab, you can set the limits of your servo.<br>
+                            There is two types of limits, the input and the output.<br>
+                            The input limits are (TODO SHORT DEFINE), while the output limits are (TODO SHORT DEFINE)<br>
+                            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be set when initialized.
+                        
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        FIXME getPanel=noworky or refresh page
             <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
-        </td>
-    </tr>
-    </table>
-    <!------------------------ servo3 end ------------------------------>
-    <!------------------------ servo4 begin ------------------------------>
-    <table ng-show="showPanel('servo4')" class="table table-striped">
-        <tr>
-            <td>
-                <img src="../Servo.png"/>
-                <label>Servo:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-                <img ng-src="{{(!service.isServoActivated)?'../../red.png':'../../green.png'}}"/>
-                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo3')">Previous page</button>
-                <button class="btn btn-default" ng-show="service.isServoActivated" ng-click="setPanel('servo5')">Tutorial next page</button>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <p>These are the main functions a servo can do.</p>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <strong>servo.attach</strong>(controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
-    
-                <strong>servo.detach</strong>(controller): detach the servo from the microcontroller<br>
-    
-                <strong>servo.enable</strong>(): will turn the servo motor on<br>
-    
-                <strong>servo.disable</strong>(): will turn the servo motor off<br>
-    
-                <strong>servo.moveTo</strong>(pos): ask the servo to move to a position<br>
-    
-                <strong>servo.moveToBlocking</strong>(pos): ask the servo to move to a position and wait the position reached<br>
+                    </td>
+                </tr>
+            </table>
+            <!------------------------ servo3 end ------------------------------>
+            <!------------------------ servo4 begin ------------------------------>
+            <table ng-show="showPanel('servo4')" class="table table-striped">
+                <tr>
+                    <td>
+                        <img src="../Servo.png"/>
+                        <label>Servo:</label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<img ng-src="{{(!props.servo01IsActive)?'../../red.png':'../../green.png'}}"/>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo3')">Previous page</button>
+                        <button class="btn btn-default" ng-show="props.servo01IsActive" ng-click="setPanel('servo5')">Tutorial next page</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p>These are the main functions a servo can do.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>servo.attach</strong>
+                        (controller, pin, pos, velocity): Initial servo device attachement to the microcontroller<br>
+                        <strong>servo.detach</strong>
+                        (controller): detach the servo from the microcontroller<br>
+                        <strong>servo.enable</strong>
+                        (): will turn the servo motor on<br>
+                        <strong>servo.disable</strong>
+                        (): will turn the servo motor off<br>
+                        <strong>servo.moveTo</strong>
+                        (pos): ask the servo to move to a position<br>
+                        <strong>servo.moveToBlocking</strong>
+                        (pos): ask the servo to move to a position and wait the position reached<br>
+                        <strong>servo.sync</strong>
+                        (servo02): will sync servo02 with servo01, if you create a second servo<br>
+                        <strong>servo.map</strong>
+                        (inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
+                        <strong>servo.setInverted</strong>
+                        (true/false): Reverse the direction of rotation of the servo.
 
-                <strong>servo.sync</strong>(servo02): will sync servo02 with servo01, if you create a second servo<br>
-    
-                <strong>servo.map</strong>(inputMin, inputMax, outputMin, outputMax): default to (0,180, 0, 180). Allow to map a range to a valid output range that can be understand by the servo. The outputMin and outputMax must have value between 0 and 180.<br>
-    
-                <strong>servo.setInverted</strong>(true/false): Reverse the direction of rotation of the servo.</p>
-                <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>&nbsp;&nbsp;
-                <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">SEE PYTHON SCRIPT</a>
-            </td>
-        </tr>
-        </table>
-        <!------------------------ servo4 end ------------------------------>       
-    <!------------------------ introduction begin ------------------------------>
-    <table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
+</p><a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Servo">MORE INFO</a>
+&nbsp;&nbsp;<a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Servo.py">SEE PYTHON SCRIPT</a>
+</td></tr></table>
+<!------------------------ servo4 end ------------------------------>
+<!------------------------ introduction begin ------------------------------>
+<table ng-show="showPanel('introduction')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
             <img src="../myrobotlab.png"/>
-            <label>MyRobotLab:</label>&nbsp;&nbsp;&nbsp;&nbsp;
+            <label>MyRobotLab:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;
         </td>
-    </tr>    
+    </tr>
     <tr>
         <td>
-            <p> Maybe this can redirect to this link http://myrobotlab.org/quick_start</p>
+            <p>Maybe this can redirect to this link http://myrobotlab.org/quick_start</p>
             <a target="_self" href="http://myrobotlab.org/quick_start"></a>
         </td>
     </tr>
-    </table>
-    <!------------------------ introduction end ------------------------------>
-    <!------------------------ python begin ------------------------------>
-    <table ng-show="showPanel('python')" class="table table-striped">
+</table>
+<!------------------------ introduction end ------------------------------>
+<!------------------------ python begin ------------------------------>
+<table ng-show="showPanel('python')" class="table table-striped">
     <tr>
         <td>
-            <p>The Python Service allows development and execution of Python scripts which interact and control other Services.<br>  The GUI provides a rudementary IDE for this Service.  You can find a large number of scripts in the community library pyrobotlab</p>
-            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Python">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">SEE PYTHON SCRIPT</a>
+            <p>
+                The Python Service allows development and execution of Python scripts which interact and control other Services.<br>The GUI provides a rudementary IDE for this Service.  You can find a large number of scripts in the community library pyrobotlab
+            
+            </p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Python">MORE INFO</a>
+            &nbsp;&nbsp;<a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">SEE PYTHON SCRIPT</a>
             <iframe width="560" height="315" src="https://www.youtube.com/embed/_uQrJ0TkZlc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </td>
     </tr>
@@ -318,91 +362,103 @@
             <div class="tab-content" service-body panel="mrl.getPanel('python')"></div>
         </td>
     </tr>
-    </table>
-    <!------------------------ python end ------------------------------>
-    <!------------------------ security begin ------------------------------>
-    <table ng-show="showPanel('security')" class="inmoov-sub-panel table table-striped">
+</table>
+<!------------------------ python end ------------------------------>
+<!------------------------ security begin ------------------------------>
+<table ng-show="showPanel('security')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
             <img src="../Security.png"/>
-            <p>If you have something to hide this service is for you !<br>
-            Useful to store passwords or secrets keys ( like api keys ) inside an AES safe and expose some code lines.<br>
-            It is important to never expose API keys inside any script !</p>
+            <p>
+                If you have something to hide this service is for you !<br>
+                Useful to store passwords or secrets keys ( like api keys ) inside an AES safe and expose some code lines.<br>It is important to never expose API keys inside any script !
+            
+            </p>
             <a class="row col-md-1" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Security.py">SEE PYTHON SCRIPT</a>
         </td>
-    </tr>    
+    </tr>
     <tr>
         <td>
             <div class="tab-content" service-body panel="mrl.getPanel('security')"></div>
         </td>
     </tr>
-    </table>
-    <!------------------------ security end ------------------------------>
-    <!------------------------ runtime begin ------------------------------>
-    <table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
+</table>
+<!------------------------ security end ------------------------------>
+<!------------------------ runtime begin ------------------------------>
+<table ng-show="showPanel('runtime')" class="inmoov-sub-panel table table-striped">
     <tr>
         <td>
-            <img src="../runtime.png"/>&nbsp;&nbsp;
-            <p> The Runtime is the first Service to start when MyRobotLab begins.<br> Every running instance of MyRobotLab includes a single Runtime Service.<br> The Runtime is a singleton, which means there should be only one per running process of MyRobotLab.<br> Its responsibilities include the creation, removal, and merging of Services into the Service registry.<br>
-            The registry is critical for routing communication between Services.<br>
-            In addition to managing the endpoints of Service communication the Runtime can retrieve information<br> regarding details of the Java VM, operating system, and other details.</p>
-            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>&nbsp;&nbsp;
-            <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">SEE PYTHON SCRIPT</a>
+            <img src="../runtime.png"/>
+            &nbsp;&nbsp;
+            <p>
+                The Runtime is the first Service to start when MyRobotLab begins.<br>
+                Every running instance of MyRobotLab includes a single Runtime Service.<br>
+                The Runtime is a singleton, which means there should be only one per running process of MyRobotLab.<br>
+                Its responsibilities include the creation, removal, and merging of Services into the Service registry.<br>
+                The registry is critical for routing communication between Services.<br>
+                In addition to managing the endpoints of Service communication the Runtime can retrieve information<br>regarding details of the Java VM, operating system, and other details.
+            
+            </p>
+            <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/Runtime">MORE INFO</a>
+            &nbsp;&nbsp;<a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">SEE PYTHON SCRIPT</a>
         </td>
-    
         <td>
             <div class="tab-content" service-body panel="mrl.getPanel('runtime')"></div>
         </td>
     </tr>
-    </table>
-    <!------------------------ runtime end ------------------------------>
-    <!------------------------ opencv begin ------------------------------>
-    <table ng-show="showPanel('opencv')" class="table table-striped">
+</table>
+<!------------------------ runtime end ------------------------------>
+<!------------------------ opencv begin ------------------------------>
+<table ng-show="showPanel('opencv')" class="table table-striped">
     <tr>
         <td>
             <img src="../OpenCV.png"/>
-            <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.execScript('OpenCV01_stop.py'):msg.execScript('OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;
-            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv1')">Tutorial next page</button>
+            <label>OpenCV:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;<toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.execScript('OpenCV01_stop.py'):msg.execScript('OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>
+            &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv1')">Tutorial next page</button>
             <!--button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="mrl.changeTab('opencv')">Tutorial next page</button-->
         </td>
     </tr>
     <tr>
         <td>
-            <p>The OpenCV Service is a library of vision functions.<br>  
-            Some of the functions are:<br>
-            <br/>
-            -Face detection<br> 
-            -Fast Lucas Kanade optical tracking<br>
-            -Background forground separation<br>
-            -Motion detection<br>
-            -Color segmentation<br>
-            -Yolo object recognition<br>
-            -More...<br>
-            <br/>
-            Many of the functions in OpenCV are implemented as pipeline filters in MRL. <br> That is a filter can run, and the output of one can be connected to the input of another. <br> Not all filters are capable of "pipelining"<br>
-            <br/>
-            How to Add an OpenCV Filter:<br>
-            <br/>
-            Step 1 - select from the available filter list<br>
-            Step 2 - press the arrow button to add it into the left pipeline<br>
-            Step 3 - give it a unique name<br>
-            Step 4 - the filter is running in OpenCV</p>
+            <p>
+                The OpenCV Service is a library of vision functions.<br>
+                Some of the functions are:<br>
+                <br/>
+                -Face detection<br>
+                -Fast Lucas Kanade optical tracking<br>
+                -Background forground separation<br>
+                -Motion detection<br>
+                -Color segmentation<br>
+                -Yolo object recognition<br>
+                -More...<br>
+                <br/>
+                Many of the functions in OpenCV are implemented as pipeline filters in MRL. <br>
+                That is a filter can run, and the output of one can be connected to the input of another. <br>
+                Not all filters are capable of "pipelining"<br>
+                <br/>
+                How to Add an OpenCV Filter:<br>
+                <br/>
+                Step 1 - select from the available filter list<br>
+                Step 2 - press the arrow button to add it into the left pipeline<br>
+                Step 3 - give it a unique name<br>Step 4 - the filter is running in OpenCV
+            
+            </p>
             <br/>
             <a class="row col-md-3" target="_blank" href="http://myrobotlab.org/service/OpenCV">MORE INFO</a>
             <a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/OpenCV.py">SEE PYTHON SCRIPT</a>
         </td>
     </tr>
-    </table>
-    <!------------------------ opencv end ------------------------------>
-    <!------------------------ opencv1 begin ------------------------------>
-    <table ng-show="showPanel('opencv1')" class="table table-striped">
+</table>
+<!------------------------ opencv end ------------------------------>
+<!------------------------ opencv1 begin ------------------------------>
+<table ng-show="showPanel('opencv1')" class="table table-striped">
     <tr>
         <td>
             <img src="../OpenCV.png"/>
-            <label>OpenCV:</label>&nbsp;&nbsp;&nbsp;&nbsp;
-            <toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.execScript('OpenCV01_stop.py'):msg.execScript('OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>&nbsp;&nbsp;    
-            <button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv')">Previous page</button>
+            <label>OpenCV:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;<toggle width="70" height="28" ng-model="service.isOpenCVActivated" title="To access settings, OpenCV must be activated" ng-change="!service.isOpenCVActivated?msg.execScript('OpenCV01_stop.py'):msg.execScript('OpenCV01_start.py')" width="80" height="30" on="ON" off="OFF"/>
+            &nbsp;&nbsp;<button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv')">Previous page</button>
             <!--button class="btn btn-default" ng-show="service.isOpenCVActivated" ng-click="setPanel('opencv2')">Tutorial next page</button-->
         </td>
     </tr>
@@ -412,10 +468,8 @@
             <div class="tab-content" service-body panel="mrl.getPanel('opencv')"></div>
         </td>
     </tr>
-    </table>
-    <!------------------------ opencv1 end ------------------------------>     
-            <!-- panels end -->
-    </td></tr></table>
-    
-    <!------------------------------INTRO-PAGE END---------------------------->
-
+</table>
+<!------------------------ opencv1 end ------------------------------>
+<!-- panels end -->
+</td></tr></table>
+<!------------------------------INTRO-PAGE END---------------------------->
