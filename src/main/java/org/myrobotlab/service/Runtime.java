@@ -381,14 +381,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * subsequent services will be virtual
    */
   public boolean setVirtual(boolean b) {
+    setAllVirtual(b);
+    return b;
+  }
+
+  static public boolean setAllVirtual(boolean b) {
     Platform.setVirtual(true);
     for (ServiceInterface si : getServices()) {
       if (!si.isRuntime()) {
         si.setVirtual(b);
       }
     }
-    this.isVirtual = b;
-    broadcastState();
+    Runtime.getInstance().isVirtual = b;
+    Runtime.getInstance().broadcastState();
     return b;
   }
 

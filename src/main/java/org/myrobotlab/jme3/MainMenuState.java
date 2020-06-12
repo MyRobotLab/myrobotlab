@@ -226,10 +226,10 @@ public class MainMenuState extends BaseAppState {
       @Override
       public void execute(Button source) {
         if (grid.getText().equals("grid on")) {
-          jme.enableGrid(true);
+          jme.setFloorGrid(true);
           grid.setText("grid off");
         } else {
-          jme.enableGrid(false);
+          jme.setFloorGrid(false);
           grid.setText("grid on");
         }
       }
