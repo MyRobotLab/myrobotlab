@@ -70,7 +70,7 @@
                                             <span class="glyphicon glyphicon-stop"></span>
                                             Input   
                                         </div> 
-                                        <div class="restColor" ng-click="msg.rest()" title="Go to Rest">
+                                        <div class="restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
                                             <span class="glyphicon glyphicon-stop"></span>
                                             Rest
                                         </div> 
@@ -144,7 +144,10 @@
                                 </td>
                                 <td></td>
                                 <td class="bigLabel restColor">
-                                    <span ng-click="msg.rest()" title="Go to Rest">Rest</span></td>
+                                    <!--<span ng-click="msg.rest()" title="Go to Rest">Rest</span>-->
+                                    <span ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">Rest</span>
+                                    
+                                </td>
                                 <td>
                                     <!-- {{service.rest}} -->
                                     <input type="number" min="0" max="180" ng-change="restField()" ng-model="restSlider.value" class="limitNumbersFieldRest ng-valid ng-not-empty ng-dirty ng-valid-number ng-touched">
