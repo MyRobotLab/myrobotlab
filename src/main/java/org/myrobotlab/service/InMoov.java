@@ -2096,7 +2096,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     
     
     // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName() + fs + JMonkeyEngine.class.getSimpleName();
+    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -2255,6 +2255,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     jme.setMapper("i01.rightHand.thumb1", 0, 180, 30, 110);
     jme.setMapper("i01.rightHand.thumb2", 0, 180, -100, -150);
     jme.setMapper("i01.rightHand.thumb3", 0, 180, -100, -160);
+
+    // We set the correct location view
+    jme.cameraLookAt(getName() + ".torso.lowStom");
 
     // additional experimental mappings
     /*
