@@ -1,9 +1,12 @@
-angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('ServoMixerGuiCtrl')
+angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl', ['$scope', 'mrl', function($scope, mrl) {
+    console.info('ServoMixerGuiCtrl')
     var _self = this
     var msg = this.msg
+    $scope.selectedPose = ""
     $scope.servos = []
     $scope.sliders = []
+    $scope.poseFiles = []
+    $scope.loadedPose = null
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -14,30 +17,41 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         $scope.sliders[servo].tracking = !$scope.sliders[servo].tracking
     }
 
-    _self.onSliderChange = function(servoName){
-        if (!$scope.sliders[servoName].tracking){
+    _self.onSliderChange = function(servoName) {
+        if (!$scope.sliders[servoName].tracking) {
             msg.sendTo(servoName, 'moveTo', $scope.sliders[servoName].value)
         }
+    }
+
+    $scope.setSearchServo = function(text) {
+        $scope.searchServo.displayName = text
+    }
+
+    $scope.SearchServo = {// displayName: ""
     }
 
     this.updateState($scope.service)
 
     this.onMsg = function(inMsg) {
+        var data = inMsg.data[0];
         switch (inMsg.method) {
         case 'onState':
-            _self.updateState(inMsg.data[0])
+            _self.updateState(data)
             $scope.$apply()
             break
         case 'onServoEvent':
-            var data = inMsg.data[0];
             $scope.sliders[data.name].value = data.pos;
+            $scope.$apply()
+            break
+        case 'onPoseFiles':
+            $scope.poseFiles = data
             $scope.$apply()
             break
         case 'onListAllServos':
             // servos sliders are either in "tracking" or "control" state
             // "tracking" they are moving from callback position info published by servos
             // "control" they are sending control messages to the servos
-            $scope.servos = inMsg.data[0]
+            $scope.servos = data
             for (var servo of $scope.servos) {
                 // dynamically build sliders
                 $scope.sliders[servo.name] = {
@@ -73,7 +87,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
@@ -81,9 +95,11 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.savePose = function(pose) {
         msg.send('savePose', pose);
     }
-
+   
+    msg.subscribe('getPoseFiles')
     msg.subscribe('listAllServos')
     msg.send('listAllServos')
+    msg.send('getPoseFiles');
     msg.subscribe(this)
 }
 ])
