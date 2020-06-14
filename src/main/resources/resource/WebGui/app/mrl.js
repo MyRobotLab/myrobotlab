@@ -668,9 +668,22 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         //TODO: think of better way
         //-> not top priority, works quite well
         var updateSubscribtions = []
+
         _self.subscribeToUpdates = function(callback) {
             updateSubscribtions.push(callback)
         }
+
+        var panelReleasedSubscribers = []
+        var panelRegisteredSubscribers = []
+
+        _self.subscribeToRegistered = function(callback) {
+            panelRegisteredSubscribers.push(callback)
+        }
+
+        _self.subscribeToReleased = function(callback) {
+            panelReleasedSubscribers.push(callback)
+        }
+
 
         // lovely function - https://stackoverflow.com/questions/19098797/fastest-way-to-flatten-un-flatten-nested-json-objects
         _self.flatten = function(data) {
@@ -719,6 +732,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (index != -1) {
                 updateSubscribtions.splice(index, 1)
             }
+        }
+
+        var panelRegistered = function(panel) {
+            angular.forEach(panelRegisteredSubscribers, function(value, key) {
+                value(panel)
+            })
+        }
+
+        var panelReleased = function(panelName) {
+            angular.forEach(panelReleasedSubscribers, function(value, key) {
+                value(panelName)
+            })
         }
 
         var notifyAllOfUpdate = function() {
@@ -898,6 +923,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
                     newPanel.templatestatus = 'loaded'
+                    
+                    // broadcast - a new panel has been added
+                    panelRegistered(newPanel)
+
                     notifyAllOfUpdate()
                 }, function(response) {
                     addPanel(name).templatestatus = 'notfound'
@@ -921,6 +950,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //remove panels
             if (name in panels) {
                 delete panels[name]
+                delete msgInterfaces[name]
+                panelReleased(name)
             }
 
             //update !
@@ -1341,6 +1372,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             getDisplayImages: getDisplayImages,
             setDisplayCallback: setDisplayCallback,
             subscribeToUpdates: _self.subscribeToUpdates,
+            subscribeToRegistered: _self.subscribeToRegistered,
+            subscribeToReleased: _self.subscribeToReleased,
             getPanelList: _self.getPanelList,
             getPanel: _self.getPanel,
             sendTo: _self.sendTo,
