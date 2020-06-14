@@ -1,31 +1,17 @@
 <!-- file menu button bar begin -->
 <div class="row">
     <div class="form-inline col-md-6">
-        <!-- begin of dropdown -->
-        <div class="btn-group dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">new
-                </button>
-            <div class="dropdown-menu" role="menu" is-open="dropdownIsOpen">
-                <form ng-submit="dropdownIsOpen=false;msg.openScript(newName, '# new awesome robot script');newName='';">
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <input class="form-control btn-group" type="text" ng-model="newName" placeholder="file name"/>
-                            <button class="form-control btn btn-default btn-group" type="submit">add file </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- end of dropdown -->
+        <button ng-click="newFile = !newFile" class="btn btn-default">
+            <span class="glyphicon glyphicon-file">new
+        
+        </button>
         <div class="btn-group" uib-dropdown is-open="status.isopen">
-            <!--  input class="btn btn-default" type="button" value="new" ng-click="addScript()"/ -->
             <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
             <ul uib-dropdown-menu>
                 <li id="newService">
                     <form class="navbar-form">
                         <div class="input-group">
                             <div class="input-group-btn">
-                                <!-- input class="form-control" type="text" ng-model="example" placeholder="Service Type" uib-typeahead="service as service.name for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html" -->
                                 <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in getPossibleServices() | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html">
                                 <button class="btn btn-default" ng-click="msg.loadPyRobotLabServiceScript(newType.name.substring(23))">load</button>
                             </div>
@@ -34,15 +20,46 @@
                 </li>
             </ul>
         </div>
-        <button class="btn btn-default" ng-click="exec()"><span class="glyphicon glyphicon-play"></span>execute</button>
-        <button class="btn btn-default" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span>stop</button>
-        <button class="btn btn-default" ng-click="export()">export</button>
-		<button class="btn btn-default" ng-click="saveTextAsFile()">save</button> 
+        <button class="btn btn-default" ng-click="exec()">
+            <span class="glyphicon glyphicon-play"></span>
+            execute        
+        
+        
+        </button>
+        <button class="btn btn-default" ng-click="msg.stop()">
+            <span class="glyphicon glyphicon-stop"></span>
+            stop
+        
+        
+        </button>
+        <button class="btn btn-default" ng-click="loadFile=!loadFile">
+            <span class="glyphicon glyphicon-open-file"></span>
+            open
+        
+        </button>
+        <button class="btn btn-default" ng-click="export()">
+            <span class="glyphicon glyphicon-export">export
+        
+        </button>
+        <button class="btn btn-default" ng-click="saveTextAsFile()">
+            <span class="glyphicon glyphicon-save-file">save
+        
+        </button>
     </div>
 </div>
-
 <div class="row">
-    Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/>
+    <div ng-show="newFile">
+        <input class="form-control" type="text" placeholder="filename" width="50px" ng-model="newName" press-enter="newScript(newName)" autofocus/>
+    </div>
+</div>
+<div class="row">
+    <div ng-show="loadFile">
+        <input type="file" file-model="myFile"/>
+        <button ng-click="uploadFile()">upload me</button>
+    </div>
+</div>
+<div class="row">
+    <!-- Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/ -->
     <uib-tabset active="activeTabIndex">
         <uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" select="tabSelected(value)">
             <uib-tab-heading>
@@ -65,5 +82,5 @@
     </uib-tabset>
 </div>
 <div class="row">
-<pre>{{log}}</pre>
+    <pre>{{log}}</pre>
 </div>

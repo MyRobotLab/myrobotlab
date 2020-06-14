@@ -16,6 +16,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.lastStatus = null
     $scope.log = ''
 
+    // 2 dialogs 
+    $scope.loadFile = false
+    $scope.newFile = false
+
     this.updateState = function(service) {
         $scope.service = service
         $scope.scriptCount = 0
@@ -26,7 +30,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             }
             $scope.scriptCount++
         })
-
+        // this doesn't work - its the ace-ui callback that 
+        // changes the activeTabIndex
         $scope.activeTabIndex = $scope.scriptCount
     }
 
@@ -43,7 +48,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             _self.updateState(data)
             $scope.$apply()
             break
-        case 'onStdOut':            
+        case 'onStdOut':
             $scope.log = data + $scope.log
             $scope.$apply()
             break
@@ -55,6 +60,17 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             $log.error("ERROR - unhandled method " + msg.method)
             break
         }
+    }
+
+    $scope.newScript = function(filename, script) {
+        if (!script) {
+            script = '# new awesome robot script\n'
+        }
+        msg.send('openScript', filename, script)
+        $scope.newName = ''
+        // clear input text
+        $scope.newFile = false
+        // close dialog
     }
 
     // utility methods //
@@ -72,6 +88,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
         $log.info("ace loaded")
+        $scope.activeTabIndex = $scope.scriptCount
     }
 
     $scope.aceChanged = function(e) {
@@ -134,34 +151,48 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         downloadLink.click()
     }
 
-    $scope.item = "blah"
-
-    $scope.edit = function(item) {
-
-        var itemToEdit = item
-
-        $dialogs.dialog(angular.extend(dialogOptions, {
-            resolve: {
-                item: angular.copy(itemToEdit)
-            }
-        })).open().then(function(result) {
-            if (result) {
-                angular.copy(result, itemToEdit)
-            }
-            itemToEdit = undefined
-        })
-    }
-
     $scope.getPossibleServices = function(item) {
         return Object.values(mrl.getPossibleServices())
     }
 
-    $scope.export = function(){
+    $scope.export = function() {
         msg.send('exportAll')
+    }
+
+    $scope.uploadFile = function() {
+
+        var f = $scope.myFile;
+        var r = new FileReader();
+
+        r.onloadend = function(e) {
+            var data = e.target.result;
+            console.info('onloadend')
+            $scope.newScript(f.name, data)
+            $scope.loadFile = false
+            // close dialog
+        }
+
+        r.readAsBinaryString(f);
+        console.info('readAsBinaryString')
     }
 
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
 }
-])
+]).directive('fileModel', ['$parse', function($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+
+            element.bind('change', function() {
+                scope.$apply(function() {
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}
+]);

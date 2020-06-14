@@ -42,16 +42,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         var servicedata = mrl.getService(scope.panel.name);
                         newscope.servicedatajson = JSON.stringify(servicedata, null, 2);
                     }
-                    /* not needed -- finally found messageMap in msg._interface.temp.messageMap - why is newscope needed?
-                       this is difficult to follow, and the messageMap is buried - i'd refactor, but then i'll refactor to react
-                     */
-                     /*
-                    newscope.getMethods = function() {
-                        //get an updated / fresh servicedata & convert it to json
-                        var methods = mrl.getMethods(scope.panel.simpleName);
-                        newscope.methods = methods;
-                    }
-                    */
+
                     newscope.toggleVirtual = function(virtual) {
                         var service = mrl.getService(scope.panel.name);
                         //service.isVirtual = !service.isVirtual
