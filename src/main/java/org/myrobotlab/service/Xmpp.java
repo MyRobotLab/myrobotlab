@@ -90,27 +90,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   public final static Logger log = LoggerFactory.getLogger(Xmpp.class);
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Xmpp.class.getCanonicalName());
-    meta.addDescription("xmpp service to access the jabber network");
-    meta.addCategory("cloud","network");
-
-    meta.addDependency("org.igniterealtime.smack", "smack-java7", "4.1.6");
-    meta.addDependency("org.igniterealtime.smack", "smack-tcp", "4.1.6");
-    meta.addDependency("org.igniterealtime.smack", "smack-im", "4.1.6");
-    meta.addDependency("org.igniterealtime.smack", "smack-extensions", "4.1.6");
-
-    return meta;
-  }
-
   TreeMap<String, Contact> contacts = new TreeMap<String, Contact>();
   String username;
   String password;
@@ -154,12 +133,6 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
 
   public void addXmppMsgListener(Service service) {
     // FIXME - implement direct callback or pub sub support ??
-  }
-
-  public void broadcast(String msg) {
-    // TODO - possibly implement
-    // but we should use more xmpp definitions e.g. broadcast to room
-    // define a room etc...
   }
 
   public void chatCreated(Chat chat, boolean locallyCreated) {

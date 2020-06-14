@@ -16,8 +16,9 @@ import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
 /**
- * Indian TTS speech to text service based on http://indiantts.com This code is
- * basically all the same as NaturalReaderSpeech by Kwatters...
+ * Indian TTS speech to text service based on http://indiantts.com 
+ * This is a cloud service and depends on a subscription key to the
+ * cloud provider
  * 
  * http://indiantts.com/
  */
@@ -81,21 +82,6 @@ public class IndianTts extends AbstractSpeechSynthesis {
     }
 
     return audioData;
-  }
-
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(IndianTts.class.getCanonicalName());
-    meta.addDescription("Hindi text to speech support - requires keys");
-    meta.setCloudService(true);
-    meta.addCategory("speech","cloud");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "sound");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
-    
-    meta.setRequiresKeys(true);
-
-    return meta;
   }
 
   public void setKeys(String keyId, String keyIdSecret) {

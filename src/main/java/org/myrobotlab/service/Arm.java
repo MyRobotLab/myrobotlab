@@ -26,7 +26,6 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.slf4j.Logger;
@@ -70,24 +69,4 @@ public class Arm extends Service {
   public void startRobot() {
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Arm.class);
-    meta.addDescription("robot arm service");
-    meta.addCategory("robot");
-    meta.setLicenseApache();
-    meta.addTodo("add IK interfacing points");
-    // FIXME - add IK & DH Parameters
-    // not ready for primetime - nothing implemented
-    meta.setAvailable(false);
-    return meta;
-  }
 }

@@ -211,30 +211,6 @@ public class Test extends Service implements StatusListener {
 
   public final static Logger log = LoggerFactory.getLogger(Test.class);
 
-  //static final transient ServiceData serviceData = ServiceData.getLocalInstance();
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   *         FIXME - todo - make junit html report TODO - simple install start
-   *         release - check for rogue threads
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Test.class.getCanonicalName());
-    meta.addDescription("Testing service");
-    meta.addCategory("testing");
-    meta.addPeer("http", "HttpClient", "to interface with Service pages");
-    meta.setAvailable(false);
-
-    meta.addDependency("junit", "junit", "4.12");
-    // meta.addPeer("python", "Python", "python to excercise python scripts");
-    return meta;
-  }
 
   /**
    * pre-test

@@ -67,15 +67,6 @@ public class MotorDualPwm extends AbstractMotor {
     this.pwmFreq = pwmfreq;
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(MotorDualPwm.class.getCanonicalName());
-    meta.addDescription("Motor service which support 2 pwr pwm pins clockwise and counterclockwise");
-    meta.addCategory("motor");
-
-    return meta;
-  }
-
   public static void main(String[] args) throws InterruptedException {
 
     LoggingFactory.init(Level.INFO);

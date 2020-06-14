@@ -25,11 +25,11 @@
 
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
+import org.slf4j.Logger;
 
 /**
  * @author GroG
@@ -57,6 +57,8 @@ import org.myrobotlab.service.interfaces.ServoController;
 public class Servo extends AbstractServo implements ServoControl {
 
   private static final long serialVersionUID = 1L;
+  
+  public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
   public Servo(String n, String id) {
     super(n, id);
@@ -86,6 +88,14 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     
+    // This is to allow attaching disabled
+    // then delay enabling until the first moveTo command 
+    // is used
+    if (firstMove  && !enabled) {
+      enable();
+      firstMove = false;
+    }
+    
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
@@ -94,12 +104,7 @@ public class Servo extends AbstractServo implements ServoControl {
     // if currently configured to autoDisable - the timer starts now
     // we cancel any pre-existing timer if it exists
     purgeTask("idleDisable");
-    if (autoDisable) {
-      // and start our countdown
-      addTaskOneShot(idleTimeout, "idleDisable");
-    }
-
-    
+    // blocking move will be idleTime out enabled later.
     
     if (!enabled) {
       log.info("cannot moveTo {} not enabled", getName());
@@ -174,14 +179,11 @@ public class Servo extends AbstractServo implements ServoControl {
     // then this control needs to be able to broadcast "control" angles !!! -
     // and that
     // might be without a controller !
-    if (controller == null) {
+    if (controller == null) { // <-- NOT NEEDED :)
       log.info("controller is null");
       // FIXME - need to still go through the default 'move'
-    } else {
-      ServoController sc = (ServoController)Runtime.getService(controller);
-      if (sc != null) {
-        sc.onServoMoveTo(this);
-      }
+    } else { 
+      broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
     broadcastState();
@@ -190,6 +192,11 @@ public class Servo extends AbstractServo implements ServoControl {
       // to continue or timeout (if supplied) has been reached
       sleep(blockingTimeMs);
       isBlocking = false;
+      isMoving = false;
+      if (autoDisable) {
+        // and start our countdown
+        addTaskOneShot(idleTimeout, "idleDisable");
+      }
     }
     return true;
   }
@@ -199,60 +206,113 @@ public class Servo extends AbstractServo implements ServoControl {
     setAutoDisable(value);
   }
 
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Servo.class);
-    meta.addDescription("General hobby servo control with absolute positioning");
-    meta.addCategory("motor", "control", "servo");
-    meta.setAvailable(true);
-
-    return meta;
+  @Deprecated
+  public void setMaxVelocity(Double velocity) {
+    log.warn("SetMaxVelocity does nothing and is deprecated. please update your python scripts, and use fullSpeed() instead");
   }
   
   public static void main(String[] args) throws InterruptedException {
-    //kw: commeted out to improve code coverage reports :)
-//    try {
-//      Runtime.main(new String[] { "--interactive", "--id", "servo"});
-//      // LoggingFactory.init(Level.INFO);
-//      // Platform.setVirtual(true);
-//      // Runtime.start("python", "Python");
-//      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
-//      webgui.autoStartBrowser(false);
-//      webgui.startService();
-//      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
-//      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-//      // Servo pan = (Servo) Runtime.start("pan", "Servo");
-//      boolean done = true;
-//      if (done) {
-//        return;
-//      }
-//      mega.connect("/dev/ttyACM1");
-//      // mega.setBoardMega();
-//      log.info("servo pos {}", tilt.getCurrentInputPos());
-//      // double pos = 170;
-//      // servo03.setPosition(pos);
-//      tilt.setPin(3);
-//      double min = 3;
-//      double max = 170;
-//      double speed = 60; // degree/s
-//      mega.attach(tilt);
-//      // mega.attach(servo03,3);
-//      for (int i = 0; i < 100 ; ++i) {
-//        tilt.moveTo(20.0);
-//      }
-//      tilt.sweep(min, max, speed);
-//    } catch (Exception e) {
-//      log.error("main threw", e);
-//    }
-  }
+    try {
+      
+      // log.info("{}","blah$Blah".contains("$"));
 
+      Runtime.main(new String[] { "--interactive", "--id", "servo"});
+      // LoggingFactory.init(Level.INFO);
+      // Platform.setVirtual(true);
+      
+      // Runtime.start("python", "Python");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      
+      
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      mega.connect("/dev/ttyACM1");
+      // mega.setBoardMega();
+            
+      
+      log.info("servo pos {}", tilt.getCurrentInputPos());
+      
+      // double pos = 170;
+      // servo03.setPosition(pos);
+      tilt.setPin(3);
+      
+      double min = 3;
+      double max = 170;
+      double speed = 60; // degree/s
+      
+      mega.attach(tilt);
+      // mega.attach(servo03,3);
+      
+      for (int i = 0; i < 100 ; ++i) {
+        tilt.moveTo(20.0);
+      }
+      
+      tilt.sweep(min, max, speed);
+      
+      /*
+      Servo servo04 = (Servo) Runtime.start("servo04", "Servo");
+      Servo servo05 = (Servo) Runtime.start("servo05", "Servo");
+      Servo servo06 = (Servo) Runtime.start("servo06", "Servo");
+      Servo servo07 = (Servo) Runtime.start("servo07", "Servo");
+      Servo servo08 = (Servo) Runtime.start("servo08", "Servo");
+      Servo servo09 = (Servo) Runtime.start("servo09", "Servo");
+      Servo servo10 = (Servo) Runtime.start("servo10", "Servo");
+      Servo servo11 = (Servo) Runtime.start("servo11", "Servo");
+      Servo servo12 = (Servo) Runtime.start("servo12", "Servo");
+      */
+      // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
+
+     // servo03.attach(mega, 8, 38.0);
+      /*
+      servo04.attach(mega, 4, 38.0);
+      servo05.attach(mega, 5, 38.0);
+      servo06.attach(mega, 6, 38.0);
+      servo07.attach(mega, 7, 38.0);
+      servo08.attach(mega, 8, 38.0);
+      servo09.attach(mega, 9, 38.0);
+      servo10.attach(mega, 10, 38.0);
+      servo11.attach(mega, 11, 38.0);
+      servo12.attach(mega, 12, 38.0);
+      */
+      
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+      // servo03.attach((ServoEventListener)catcher);
+      
+      // servo.setPin(12);
+      
+      /*
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      servo.attach(mega, 7, 38.0);
+      */
+      
+      // servo.sweepDelay = 3;
+      // servo.save();
+      // servo.load();
+      // servo.save();
+      // log.info("sweepDely {}", servo.sweepDelay);
+   
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+  }
+ 
 }

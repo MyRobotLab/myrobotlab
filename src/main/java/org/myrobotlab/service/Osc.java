@@ -83,26 +83,6 @@ public class Osc extends Service implements OSCListener {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Osc.class.getCanonicalName());
-    meta.addDescription("Service for the Open Sound Control using the JavaOsc library");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    meta.setLink("http://www.illposed.com/software/javaosc.html");
-    // add dependency if necessary
-    meta.addDependency("com.illposed.osc", "javaosc-core", "0.4");
-    meta.addCategory("network", "music");
-    return meta;
-  }
-
   public void listen(Integer newPort) throws IOException {
     listen("/*", newPort);
   }

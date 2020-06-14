@@ -30,7 +30,6 @@ public class MrlServo extends Device implements VirtualServo {
   public int acceleration;
   public long moveStart;
   public boolean enabled = false;
-  
 
   public MrlServo(int deviceId, VirtualArduino virtual) {
     super(deviceId, Msg.DEVICE_TYPE_SERVO, virtual);
@@ -75,6 +74,7 @@ public class MrlServo extends Device implements VirtualServo {
     // to int
     if (isMoving) {
       if ((int) currentPosUs != targetPosUs) {
+        // msg->publishDebug("UPDATE");
         long deltaTime = millis() - lastUpdate;
         lastUpdate = millis();
         float _velocity = velocity;
@@ -86,6 +86,11 @@ public class MrlServo extends Device implements VirtualServo {
           }
         }
         if (targetPosUs > 500) {
+          // target position less than 500 is considered an angle!
+          // if the target position is greater than 500 we assume it's
+          // microseconds
+          // and as a result, our velicity needs to be mapped from degrees to
+          // microseconds.
           _velocity = map(_velocity, 0, 180, 544, 2400) - 544;
         }
         float step = _velocity * deltaTime;
@@ -93,10 +98,10 @@ public class MrlServo extends Device implements VirtualServo {
         if (isSweeping) {
           step = sweepStep;
         }
-        if (velocity < 0) { 
+        if (velocity < 0) {
           // when velocity < 0, it mean full speed ahead
           step = targetPosUs - (int) currentPosUs;
-        } 
+        }
         if (currentPosUs > targetPosUs) {
           // check the direction of the update moving forward or backwards
           step *= -1;
@@ -110,7 +115,9 @@ public class MrlServo extends Device implements VirtualServo {
         // There was a change in the currentPosition
         if (previousCurrentPosUs != (int) currentPosUs) {
           writeMicroseconds((int) currentPosUs);
-          publishServoEvent(SERVO_EVENT_STARTED);
+          // publishServoEvent(SERVO_EVENT_STARTED);
+          // if we're not sweeping and we reached the target position., then we
+          // are stopped here.
           if (!isSweeping && ((int) currentPosUs == targetPosUs)) {
             publishServoEvent(SERVO_EVENT_STOPPED);
             isMoving = false;
@@ -135,11 +142,12 @@ public class MrlServo extends Device implements VirtualServo {
     }
   }
 
-  public void moveToMicroseconds(int posUs) {   
+  public void moveToMicroseconds(int posUs) {
     targetPosUs = posUs;
     isMoving = true;
     lastUpdate = millis();
     moveStart = lastUpdate;
+    publishServoEvent(SERVO_EVENT_STARTED);
   }
 
   void startSweep(int minUs, int maxUs, int step) {
@@ -149,11 +157,19 @@ public class MrlServo extends Device implements VirtualServo {
     targetPosUs = maxUs;
     isMoving = true;
     isSweeping = true;
+    publishServoEvent(SERVO_EVENT_STARTED);
+  }
+
+  void stop() {
+    isMoving = false;
+    isSweeping = false;
+    publishServoEvent(SERVO_EVENT_STOPPED);
   }
 
   void stopSweep() {
     isMoving = false;
     isSweeping = false;
+    publishServoEvent(SERVO_EVENT_STOPPED);
   }
 
   void setVelocity(int velocity) {

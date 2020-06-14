@@ -116,7 +116,6 @@ public class MethodCache {
       if (instance == null) {
         instance = new MethodCache();
         instance.excludeMethods.add("main");
-        // instance.excludeMethods.add("getMetaData"); // why ?
       }
     }
     return instance;
@@ -165,11 +164,11 @@ public class MethodCache {
     for (Method m : methods) {
       // log.debug("processing {}", m.getName());
 
-      // extremely useful for debugging cache      
-      // if (m.getName().equals("processResults") && m.getParameterTypes().length == 1) {
-      //   log.info("here");
+      // extremely useful for debugging cache
+      // if (m.getName().equals("processResults") &&
+      // m.getParameterTypes().length == 1) {
+      // log.info("here");
       // }
-      
 
       String key = getMethodKey(object, m);
       String ordinalKey = getMethodOrdinalKey(object, m);
@@ -183,39 +182,20 @@ public class MethodCache {
       // if (excludeMethods.contains(m.getName())) {
       // continue;
       // }
-        
 
       // search for interfaces in parameters - if there are any the method is
       // not applicable for remote invoking !
 
       MethodEntry me = new MethodEntry(m);
       mi.methodsIndex.put(key, me);
-      
+
       addMethodEntry(mi.methodOrdinalIndex, ordinalKey, me);
 
-     // if (!hasInterfaceInParamList) { <- required in-process regular interface
-      /*
-        if (!mi.methodOrdinalIndex.containsKey(ordinalKey)) {
-          List<MethodEntry> mel = new ArrayList<>();
-          mel.add(me);
-          mi.methodOrdinalIndex.put(ordinalKey, mel);
-        } else {
-          List<MethodEntry> mel = mi.methodOrdinalIndex.get(ordinalKey);
-          mel.add(me);
-          // FIXME - output more info on collisions
-          // log.warn("{} method ordinal parameters collision ", ordinalKey);
-        }
-        */
-    //  }
 
-      // FIXME - excluding from declared / declaring might be nice for small swagger interface
-    //   if (!excludeFromDeclared.contains(m.getDeclaringClass()) && !excludeMethods.contains(m.getName())) {
 
-        if (!hasInterfaceInParamList) {
-          addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
-          // mi.remoteMethods.put(key, me);
-        }
-   //    }
+      if (!hasInterfaceInParamList) {
+        addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
+      }
       log.debug("processed {}", me);
     }
 
@@ -280,7 +260,11 @@ public class MethodCache {
   public Method getMethod(Class<?> object, String methodName, Class<?>... paramTypes) throws ClassNotFoundException {
     String[] paramTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
-      paramTypeNames[i] = paramTypes[i].getTypeName();
+      if (paramTypes[i] == null) {
+        paramTypeNames[i] = null;
+      } else {
+        paramTypeNames[i] = paramTypes[i].getTypeName();
+      }
     }
     return getMethod(object.getTypeName(), methodName, paramTypeNames);
   }
@@ -307,7 +291,11 @@ public class MethodCache {
     if (params != null) {
       paramTypes = new Class<?>[params.length];
       for (int i = 0; i < params.length; ++i) {
-        paramTypes[i] = params[i].getClass();
+        if (params[i] == null) {
+          paramTypes[i] = null;
+        } else {
+          paramTypes[i] = params[i].getClass();
+        }
       }
     } else {
       paramTypes = new Class<?>[0];
@@ -400,7 +388,6 @@ public class MethodCache {
     return mi.methodsIndex.get(key).method;
   }
 
-  
   public Map<String, Map<String, MethodEntry>> getRemoteMethods() {
     Map<String, Map<String, MethodEntry>> ret = new TreeMap<>();
     for (String name : objectCache.keySet()) {
@@ -418,7 +405,6 @@ public class MethodCache {
     }
     return null;
   }
-  
 
   final public Object invokeOn(Object obj, String methodName, Object... params)
       throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
@@ -509,7 +495,7 @@ public class MethodCache {
     }
     return methodIndex.methodOrdinalIndex.get(ordinalKey);
   }
-  
+
   public List<MethodEntry> getRemoteOrdinalMethods(Class<?> object, String methodName, int parameterSize) {
     if (object == null) {
       log.error("getRemoteOrdinalMethods object is null");
@@ -530,12 +516,13 @@ public class MethodCache {
     if (encodedParams == null) {
       encodedParams = new Object[0];
     }
-    
+
     if (clazz == null) {
       log.error("cannot query method cache for null class");
     }
     // get templates
-    // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName, encodedParams.length);
+    // List<MethodEntry> possible = getOrdinalMethods(clazz, methodName,
+    // encodedParams.length);
     List<MethodEntry> possible = getRemoteOrdinalMethods(clazz, methodName, encodedParams.length);
     if (possible == null) {
       log.error("getOrdinalMethods -> {}.{} with ordinal {} does not exist", clazz.getSimpleName(), methodName, encodedParams.length);
@@ -560,7 +547,7 @@ public class MethodCache {
         // successfully decoded params
         return params;
       } catch (Exception e) {
-        
+
         log.info("getDecodedParameters threw clazz {} method {} params {} ", clazz, methodName, encodedParams.length, e.getMessage());
       }
     }

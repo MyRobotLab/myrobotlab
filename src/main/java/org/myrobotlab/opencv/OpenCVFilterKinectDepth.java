@@ -57,6 +57,8 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   double maxY = 1.0;
   double minX = 0;
   double minY = 0.0;
+  
+  boolean firstError = true;
 
   /**
    * list of samplepoint to return depth
@@ -104,8 +106,9 @@ public class OpenCVFilterKinectDepth extends OpenCVFilter {
   @Override
   public IplImage process(IplImage depth) throws InterruptedException {
 
-    if (depth.depth() != 16 && depth.nChannels() != 1) {
+    if (firstError && depth.depth() != 16 && depth.nChannels() != 1) {
       log.error("not valid kinect depth image expecting 1 channel 16 depth got {} channel {} depth", depth.depth(), depth.nChannels());
+      firstError = false;
       return depth;
     }
 

@@ -28,22 +28,6 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(FiniteStateMachine.class);
-    meta.addDescription("general service which can create and maintaine multiple finite state machines");
-    // meta.addDependency("orgId", "artifactId", "2.4.0");
-    meta.addCategory("general", "ai");
-    return meta;
-  }
 
   ArrayList<String> currentStates;
   Set<State> finalStates;

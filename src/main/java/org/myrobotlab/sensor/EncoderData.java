@@ -27,7 +27,7 @@ public class EncoderData {
    * raw value of the encoder - this is the tick from the encoder can be
    * whatever the encoder supports - required value
    */
-  public double value = 0.0;
+  public double value;
   
   /**
    * time data was generated

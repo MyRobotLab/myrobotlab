@@ -18,25 +18,6 @@ public class Blocks extends Service {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Blocks.class.getCanonicalName());
-    meta.addDescription("basic block programming interface");
-    meta.setAvailable(false);
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("programming");
-    return meta;
-  }
-
   public static void main(String[] args) {
     try {
 

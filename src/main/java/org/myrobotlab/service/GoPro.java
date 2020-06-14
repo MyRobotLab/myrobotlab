@@ -70,24 +70,6 @@ public class GoPro extends Service {
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(GoPro.class.getCanonicalName());
-    meta.addDescription("controls a GoPro camera over wifi");
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("video");
-    meta.addPeer("http", "HttpClient", "Http for GoPro control");
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);

@@ -381,14 +381,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * subsequent services will be virtual
    */
   public boolean setVirtual(boolean b) {
+    setAllVirtual(b);
+    return b;
+  }
+
+  static public boolean setAllVirtual(boolean b) {
     Platform.setVirtual(true);
     for (ServiceInterface si : getServices()) {
       if (!si.isRuntime()) {
         si.setVirtual(b);
       }
     }
-    this.isVirtual = b;
-    broadcastState();
+    Runtime.getInstance().isVirtual = b;
+    Runtime.getInstance().broadcastState();
     return b;
   }
 
@@ -537,6 +542,14 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           security = Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
 
+          if (options.spawnedFromAgent) {
+            try {
+              // runtime.connect(); FIXME !!! make it work !
+            } catch(Exception e) {
+              runtime.error(e);
+            }
+          }
+          
           // startHeartbeat();
 
           FileIO.extractResources();
@@ -1693,7 +1706,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // get api - decode msg - process it
       Map<String, Object> connection = getConnection(uuid);
       if (connection == null) {
-        error("no connection with uuid %s", uuid);
+        // error("no connection with uuid %s", uuid);
         return;
       }
 
@@ -1858,9 +1871,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
     public boolean spawnedFromAgent = false;
-
-    @Option(names = { "--from-agent" }, description = "signals if the current process has been started by an Agent")
-    public boolean fromAgent = false;
 
     @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
     public boolean help = false;
@@ -2675,45 +2685,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return platform;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   *
-   * @return ServiceType - returns all the data
-   *
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Runtime.class.getCanonicalName());
-    meta.addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
-    meta.addCategory("framework");
-
-    meta.includeServiceInOneJar(true);
-    // apache 2.0 license
-    meta.addDependency("com.google.code.gson", "gson", "2.8.5");
-    // apache 2.0 license
-    meta.addDependency("org.apache.ivy", "ivy", "2.4.0-5");
-    // apache 2.0 license
-    meta.addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
-    // apache 2.0 license
-    meta.addDependency("org.atmosphere", "wasync", "2.1.5");
-    // apache 2.0 license
-    meta.addDependency("info.picocli", "picocli", "4.0.0-beta-2");
-
-    // EDL (new-style BSD) licensed
-    meta.addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
-
-    // all your logging needs
-    meta.addDependency("org.slf4j", "slf4j-api", "1.7.21");
-    meta.addDependency("ch.qos.logback", "logback-classic", "1.0.13");
-
-    // meta.addDependency("org.apache.maven", "maven-embedder", "3.1.1");
-    // meta.addDependency("ch.qos.logback", "logback-classic", "1.2.3");
-
-    return meta;
-  }
-
   public ServiceData getServiceData() {
     return serviceData;
   }
@@ -3280,7 +3251,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     // get a connection from the route
     Map<String, Object> conn = getConnection(uuid);
     if (conn == null) {
-      log.error("no connection for uuid {}", uuid);
+      // log.error("no connection for uuid {}", uuid);
       return null;
     }
 

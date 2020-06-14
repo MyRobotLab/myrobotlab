@@ -205,13 +205,6 @@ public class Hd44780 extends Service {
     super.stopService();
   }
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Hd44780.class.getCanonicalName());
-    meta.addDescription("I2C LCD Display driver");
-    meta.addCategory("i2c", "display");
-    return meta;
-  }
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     Platform.setVirtual(true);

@@ -5,9 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
+import org.junit.Before;
 import org.junit.Test;
+import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.test.AbstractTest;
 
@@ -25,19 +26,70 @@ import org.myrobotlab.test.AbstractTest;
  */
 public class ServoTest extends AbstractTest {
 
-  static final String port01 = "COM9";
-  Integer pin = 5;
+  static final String port01 = "/dev/ttyACM0";
+  Integer pin = 3;
+  static Arduino arduino01 = null;
+  static Servo servo01 = null;
+  
+  // TODO - disconnected move tests
+  // TODO - can more than on servo be attached to the same controller and pin?
+  
+  @Before /* start initial state */
+  public void setUp() throws Exception {
+    
+    // Platform.setVirtual(false); - force to make real servo
+    
+    servo01 = (Servo) Runtime.start("s1", "Servo");
+    arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);  
+    servo01.setPin(3);
+    servo01.attach(arduino01, 3, 40.0);
+    servo01.rest();
+    servo01.enable();
+    servo01.map(0,180,0,180);
+    servo01.setRest(90.0);
+  }
+  
+  @Test
+  public void disabledMove() throws Exception {
+    // take off speed control
+    log.error("HERE 0 ----------------");
+    servo01.fullSpeed();    
+    servo01.moveTo(0.0);
+    servo01.setInverted(false);
+    Service.sleep(1000);
+    log.error("HERE 1 ----------------");
+    
+    // begin long slow move
+    servo01.setSpeed(5.0);
+    servo01.moveTo(180.0);
+    Service.sleep(300);
+    assertTrue(servo01.isMoving());
+    log.error("HERE 2 ----------------");
+    // after 1/10 of a second we should be moving
+    assertTrue(servo01.isMoving());
+    double pos = servo01.getCurrentInputPos();
+    
+    // disable move while it has not completed
+    servo01.disable();
+    Service.sleep(300);
+    assertTrue(!servo01.isMoving());
+    assertTrue(!servo01.isSweeping());
+    
+    // wait a little after disabling
+    // Service.sleep(100);
+    double postDisablePos = servo01.getCurrentInputPos();
+    
+    // servo expected to have stopped and not continued after 
+    // a control disable() method was called
+    assertEquals(pos, postDisablePos, 0.03);
+    
+  }
+  
 
   @Test
   public void invertTest() throws Exception {
     // verify the outputs are inverted as expected.
-    Servo servo01 = (Servo) Runtime.start("s1", "Servo");
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);  
-    servo01.attach(arduino01, 8, 40.0);
-    servo01.enable();
-    servo01.setRest(90.0);
-    servo01.rest();
     servo01.moveTo(30.0);
     assertEquals(30.0, servo01.getTargetOutput(), 0.001);
     servo01.setInverted(true);
@@ -47,6 +99,21 @@ public class ServoTest extends AbstractTest {
     servo01.setInverted(false);
     assertEquals(20.0, servo01.getTargetOutput(), 0.001);
   }  
+  
+  @Test
+  public void mapTest() throws Exception {
+    servo01.setInverted(true);
+    servo01.map(10, 170, 20, 160);
+    Mapper mapper = servo01.getMapper();
+    assertTrue(mapper.isInverted());
+    servo01.setInverted(false);
+    servo01.map(20, 160, 10, 170);
+    assertFalse(mapper.isInverted());
+    assertEquals(20.0, mapper.getMinX(), 0.001);
+    assertEquals(160.0, mapper.getMaxX(), 0.001);
+    assertEquals(10.0, mapper.getMinY(), 0.001);
+    assertEquals(170.0, mapper.getMaxY(), 0.001);
+  }
 
   @Test
   public void testServo() throws Exception {
@@ -104,6 +171,7 @@ public class ServoTest extends AbstractTest {
 
     //
     s.attach(arduino01, 10, 1.0);
+    s.enable();
     assertTrue(s.isEnabled());
     s.disable();
     assertFalse(s.isEnabled());
@@ -124,17 +192,13 @@ public class ServoTest extends AbstractTest {
   @Test
   public void testAutoDisable() throws Exception {
     // Start the test servo.
-    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
-    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
-    arduino01.connect(port01);
-
-    servo01 = (Servo) Runtime.start("servo01", "Servo");
     servo01.detach();
     servo01.setPin(pin);
     servo01.setPosition(0.0);
     
     arduino01.attach(servo01);
     assertTrue("verifying servo is attached to the arduino.", servo01.isAttached("arduino01"));
+    servo01.moveTo(30.0);
     assertTrue("verifying servo should be enabled", servo01.isEnabled());
     
     // Disable auto disable.. and move the servo.
@@ -157,7 +221,7 @@ public class ServoTest extends AbstractTest {
     log.warn("thread list {}", getThreadNames());
     assertTrue("setting autoDisable true", servo01.isAutoDisable());
     servo01.moveTo(2.0);
-    sleep(servo01.getIdleTimeout()+500); // waiting for disable
+    sleep(servo01.getIdleTimeout()+1000); // waiting for disable
     assertFalse("servo should have been disabled", servo01.isEnabled());
     
     assertEquals(2.0, servo01.getCurrentInputPos(), 0.0001);
@@ -169,17 +233,29 @@ public class ServoTest extends AbstractTest {
     Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
     Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
     arduino01.connect(port01);
-
     servo01.setPosition(0.0);
+    servo01.setPin(7);
+    // use auto disable with a blocking move.
+    servo01.setAutoDisable(true);
     // 60 degrees per second.. move from 0 to 180 in 3 seconds
     servo01.setSpeed(60.0);
-    servo01.setPin(7);
     arduino01.attach(servo01);
-    
+    // Do I need to enable it?!
+    servo01.enable();
+
     long start = System.currentTimeMillis();
     servo01.moveToBlocking(180.0);
     long delta = System.currentTimeMillis() - start;
     assertTrue("Move to blocking should have taken more than 3 seconds.", delta > 3000);
+    // log.info("Move to blocking took {} milliseconds", delta);
+    assertTrue("Servo should be ebabled", servo01.isEnabled());
+    assertFalse("Servo should not be moving now.", servo01.isMoving());
+    // Now let's wait for the idle disable timer to kick off + 1000ms
+    // TODO: figure out why smaller values like 100ms cause this test to fail.
+    // there seems to be some lag
+    Thread.sleep(servo01.getIdleTimeout() + 1000);
+    assertFalse("Servo should be disabled.", servo01.isEnabled());
+    
   }
   
   @Test

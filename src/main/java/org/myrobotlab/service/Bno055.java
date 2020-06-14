@@ -435,22 +435,7 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     broadcastState();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(Bno055.class);
-    meta.addDescription("General BNO055 acclerometer and gyro");
-    meta.addCategory("microcontroller", "sensors");
-    meta.setSponsor("calamity");
-    return meta;
-  }
 
   public boolean begin() {
     return begin(OperationMode.NDOF);

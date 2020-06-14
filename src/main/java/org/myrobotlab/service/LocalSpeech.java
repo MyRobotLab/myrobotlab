@@ -61,16 +61,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     super(n, id);
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData(LocalSpeech.class.getCanonicalName());
-    meta.addCategory("speech", "sound");
-    meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
-    meta.setAvailable(true);
-    meta.addCategory("speech");
-    meta.addDependency("com.microsoft", "tts", "1.1", "zip");
-    return meta;
-  }
 
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {

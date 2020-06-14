@@ -281,7 +281,7 @@ public class Outbox implements Runnable, Serializable {
         // get gateway
         Gateway gateway = (Gateway) Runtime.getInstance().getGatway(msg.getId());
         if (gateway == null) {
-          log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
+          // log.error("gateway not found for msg.id {} {}", msg.getId(), msg);
           return;
         }
         gateway.sendRemote(msg);
@@ -291,4 +291,12 @@ public class Outbox implements Runnable, Serializable {
       log.error("outbox threw", e);
     }
   }
+  
+  /**
+   * remove ALL listeners/subscribers
+   */
+  public void reset() {
+    notifyList = new HashMap<String, ArrayList<MRLListener>>();
+  }
+  
 }

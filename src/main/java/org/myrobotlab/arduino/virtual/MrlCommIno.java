@@ -82,7 +82,6 @@ public class MrlCommIno {
    * STANDARD ARDUINO LOOP BEGIN This method will be called over and over again
    * by the arduino, it is the main loop any arduino sketch runs
    * 
-   * @throws Exception
    *           - error if processing of a command blows up for some reason.
    */
   public void loop() {

@@ -1,14 +1,18 @@
 package org.myrobotlab.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -62,31 +66,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   private int sensorPin;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoov2Hand.class.getCanonicalName());
-    meta.addDescription("an easier way to create gestures for InMoov");
-    meta.addCategory("robot");
-
-    meta.addPeer("thumb", "Servo", "Thumb servo");
-    meta.addPeer("index", "Servo", "Index servo");
-    meta.addPeer("majeure", "Servo", "Majeure servo");
-    meta.addPeer("ringFinger", "Servo", "RingFinger servo");
-    meta.addPeer("pinky", "Servo", "Pinky servo");
-    meta.addPeer("wrist", "Servo", "Wrist servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this hand");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
-
-    return meta;
-  }
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -546,6 +525,33 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     ringFinger.save();
     pinky.save();
     wrist.save();
+    return true;
+  }
+  
+  @Deprecated
+  public boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
     return true;
   }
 

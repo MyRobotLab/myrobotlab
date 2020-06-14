@@ -91,22 +91,5 @@ public class JFugue extends Service {
      */
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(JFugue.class.getCanonicalName());
-    meta.addDescription("service wrapping Jfugue, used for music and sound generation");
-    meta.addCategory("sound","music");
-    // org="jfugue" name="jfugue" rev="5.0.7
-    meta.addDependency("jfugue", "jfugue", "5.0.7");
-    return meta;
-  }
 
 }

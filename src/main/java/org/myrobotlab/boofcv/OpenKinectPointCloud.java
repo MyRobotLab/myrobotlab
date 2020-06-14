@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.ddogleg.struct.FastQueue;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Context;
 import org.openkinect.freenect.DepthFormat;
@@ -36,7 +36,7 @@ import org.openkinect.freenect.FrameMode;
 import org.openkinect.freenect.Freenect;
 import org.openkinect.freenect.VideoFormat;
 import org.openkinect.freenect.VideoHandler;
-import org.python.jline.internal.Log;
+import org.slf4j.Logger;
 
 import com.sun.jna.NativeLibrary;
 
@@ -66,6 +66,8 @@ public class OpenKinectPointCloud {
     // location of your shared library!
     NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
   }
+  
+  static final Logger log = LoggerFactory.getLogger(OpenKinectPointCloud.class);
 
   private PointCloudViewer viewer;
 
@@ -145,7 +147,7 @@ public class OpenKinectPointCloud {
 
         viewer.clearPoints();
         if (colors.length != points.size()) {
-          Log.info("WTF", colors.length, points.size(), cloud.size);
+          log.info("WTF", colors.length, points.size(), cloud.size);
         }
         viewer.addCloud(points, colors);
 

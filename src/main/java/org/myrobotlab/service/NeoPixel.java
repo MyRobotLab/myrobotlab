@@ -275,22 +275,6 @@ public class NeoPixel extends Service implements NeoPixelControl {
     broadcastState();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(NeoPixel.class.getCanonicalName());
-    meta.addDescription("Control a Neopixel hardware");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    meta.addCategory("control", "display");
-    return meta;
-  }
 
   public void attach(String controllerName, int pin, int numPixel) throws Exception {
     attach((NeoPixelController) Runtime.getService(controllerName), pin, numPixel);

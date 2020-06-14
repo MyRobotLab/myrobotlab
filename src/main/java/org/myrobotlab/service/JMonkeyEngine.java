@@ -25,7 +25,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
@@ -36,6 +35,7 @@ import org.myrobotlab.jme3.Jme3App;
 import org.myrobotlab.jme3.Jme3Msg;
 import org.myrobotlab.jme3.Jme3Util;
 import org.myrobotlab.jme3.MainMenuState;
+import org.myrobotlab.jme3.PhysicsTestHelper;
 import org.myrobotlab.jme3.Search;
 import org.myrobotlab.jme3.UserData;
 import org.myrobotlab.logging.LoggerFactory;
@@ -44,11 +44,12 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
@@ -57,6 +58,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.asset.plugins.FileLocator;
+import com.jme3.bullet.BulletAppState;
 // import com.jme3.bullet.animation.DynamicAnimControl;
 import com.jme3.collision.CollisionResults;
 import com.jme3.export.binary.BinaryExporter;
@@ -113,61 +115,17 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ServoController, ActionListener, Simulator, IKJointAngleListener {
+public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener {
+
+  final static String CAMERA = "camera";
 
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
 
+  final static String ROOT = "root";
+
   private static final long serialVersionUID = 1L;
 
-  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
-
-  @Deprecated /* came from jme3ServoController... */
-  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(JMonkeyEngine.class);
-    meta.addDescription("is a 3d game engine, used for simulators");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // TODO: extract version numbers like this into a constant/enum
-    String jmeVersion = "3.2.2-stable";
-    meta.addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
-    // meta.addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
-    meta.addDependency("com.simsilica", "lemur", "1.11.0");
-    meta.addDependency("com.simsilica", "lemur-proto", "1.10.0");
-
-    meta.addDependency("org.jmonkeyengine", "jme3-bullet", jmeVersion);
-    meta.addDependency("org.jmonkeyengine", "jme3-bullet-native", jmeVersion);
-
-    // meta.addDependency("jme3utilities", "Minie", "0.6.2");
-
-    // "new" physics - ik forward kinematics ...
-
-    // not really supposed to use blender models - export to j3o
-    meta.addDependency("org.jmonkeyengine", "jme3-blender", jmeVersion);
-
-    // jbullet ==> org="net.sf.sociaal" name="jME3-jbullet" rev="3.0.0.20130526"
-
-    // audio dependencies
-    meta.addDependency("de.jarnbjo", "j-ogg-all", "1.0.0");
-
-    meta.addCategory("simulator");
-    return meta;
-  }
-
   boolean altLeftPressed = false;
-
-  double defaultServoSpeed = 60;
 
   transient AnalogListener analog = null;
 
@@ -179,19 +137,17 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   boolean autoAttach = true;
 
-  final static String CAMERA = "camera";
-
-  final static String ROOT = "root";
-
   transient Node camera = new Node(CAMERA);
 
   transient Camera cameraSettings;
 
   transient CameraNode camNode;
-  
+
   boolean ctrlLeftPressed = false;
-  
+
   String defaultAppType = "Jme3App";
+
+  double defaultServoSpeed = 500;
 
   long deltaMs;
 
@@ -202,16 +158,27 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   String fontColor = "#66ff66"; // green
 
   int fontSize = 14;
+
   boolean fullscreen = false;
 
+  private String guiId;
+
   transient Node guiNode;
+
   transient Map<String, HudText> guiText = new TreeMap<>();
 
   int height = 768;
+
+  List<Jme3Msg> history = new ArrayList<Jme3Msg>();
+
   transient AtomicInteger id = new AtomicInteger();
+
   transient InputManager inputManager;
+
   transient Interpolator interpolator;
+
   protected Queue<Jme3Msg> jme3MsgQueue = new ConcurrentLinkedQueue<Jme3Msg>();
+
   final public String KEY_SEPERATOR = "/";
 
   transient DisplayMode lastDisplayMode = null;
@@ -224,9 +191,11 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   boolean mouseRightPressed = false;
 
+  Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
+
   final Map<String, String> nameMappings = new TreeMap<String, String>();
 
-  transient Map<String, Spatial> nodesx = new TreeMap<String, Spatial>();
+  transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
   FloatBuffer pointCloudBuffer = null;
@@ -237,11 +206,16 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   transient Node rootNode;
 
+  boolean saveHistory = false;
+
   transient Spatial selectedForMovement = null;
 
   transient Spatial selectedForView = null;
 
   int selectIndex = 0;
+
+  @Deprecated /* came from jme3ServoController... */
+  Map<String, ServoControl> servos = new TreeMap<String, ServoControl>();
 
   transient AppSettings settings;
 
@@ -259,11 +233,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   int width = 1024;
 
-  private String guiId;
-
-  List<Jme3Msg> history = new ArrayList<Jme3Msg>();
-  boolean saveHistory = false;
-
   public JMonkeyEngine(String n, String id) {
     super(n, id);
     File d = new File(modelsDir);
@@ -275,7 +244,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     guiId = "jme-" + getName() + "-" + getId();
 
     // setup the virtual reflection
-    // this will "connect" to our mrl instance 
+    // this will "connect" to our mrl instance
     // and part of the connection is the mrl instance
     // sending a series of registrations ... including self
     // still a race condition ?
@@ -293,12 +262,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       } catch (Exception e) {
         error(e);
       }
-
     }
-  }
-
-  public void addNode(String name) {
-    addMsg("addNode", name);
   }
 
   public void addBox(String boxName) {
@@ -399,6 +363,10 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     jme3MsgQueue.add(new Jme3Msg(method, params));
   }
 
+  public void addNode(String name) {
+    addMsg("addNode", name);
+  }
+
   public void attach(Attachable service) throws Exception {
     attach(service, (String[]) null);
   }
@@ -407,8 +375,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     attach(service.getName(), nodeNames);
   }
 
-  Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
-
+  // Routing Attach - should be based on string type info and name (ie a
+  // Registration)
   public void attach(String name, String... nodeNames) throws Exception {
 
     ServiceInterface service = Runtime.getService(name);
@@ -432,11 +400,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     }
 
     if (service.getType().equals("org.myrobotlab.service.Servo")) {
-      // what to do here - there are several options 
-      ServoControl sc = (ServoControl)Runtime.getService(name);
-      // TODO: KW removed maxSpeed here.. plumb the rest of that through the interface and remove this null
-      // potentially this shouldn't be the max speed, but the current speed to attach.
-      sc.attachServoController(getName(), null, null, null);
+      // non-batched - "instantaneous" move data subscription
+      subscribe(service.getName(), "publishEncoderData", getName(), "onEncoderData");
     }
 
     // backward attach ?
@@ -564,6 +529,19 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
   public void clone(String name, String newName) {
 
+  }
+
+  @Override
+  public void connect(String uri) throws Exception {
+    // easy single client support
+    Map<String, Object> attributes = new HashMap<>();
+    attributes.put("gateway", getName());
+    attributes.put("c-type", getSimpleName());
+    attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
+    String uuid = java.util.UUID.randomUUID().toString();
+    attributes.put("uuid", uuid);
+    Runtime.getInstance().addConnection(uuid, attributes);
+    Runtime.updateRoute(guiId, uuid);
   }
 
   public Geometry createBoundingBox(Spatial spatial, String color) {
@@ -759,21 +737,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     }
   }
 
-  // FYI - not done with the JME thread ..
-  // TODO - addGrid called from enableFloorGrid
-  public void enableGrid(boolean b) {
-    Spatial s = find("floor-grid");
-    if (s == null) {
-      addGrid("floor-grid");
-      s = get("floor-grid");
-    }
-    if (b) {
-      s.setCullHint(CullHint.Never);
-    } else {
-      s.setCullHint(CullHint.Always);
-    }
-  }
-
   public Spatial find(String name) {
     return find(name, null);
   }
@@ -870,7 +833,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
 
     float result = rawAngle;
     if (data.mapper != null) {
-      result = Double.valueOf(data.mapper.calcInput((double)rawAngle)).floatValue();
+      result = Double.valueOf(data.mapper.calcInput((double) rawAngle)).floatValue();
     }
     return result;
   }
@@ -891,12 +854,30 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     return geoBbName;
   }
 
+  @Override
+  public List<String> getClientIds() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Map<String, Map<String, Object>> getClients() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   public String getCoorAxesName(Spatial spatial) {
     if (spatial.getName().startsWith("_")) {
       return null;
     }
     String geoBbName = String.format("_axis-%s-%s", getType(spatial), spatial.getName());
     return geoBbName;
+  }
+
+  @Override
+  public Message getDefaultMsg(String connId) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   private String getExt(String name) {
@@ -937,6 +918,14 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       p = p.getParent();
     }
     return sb.toString();
+  }
+
+  public Node getMenuNode() {
+    return guiNode;
+  }
+
+  public Map<String, String[]> getMultiMapped() {
+    return multiMapped;
   }
 
   private String getNameNoExt(String name) {
@@ -1067,7 +1056,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   }
 
   public void hide(String name) {
-    setVisible(name, true);
+    setVisible(name, false);
   }
 
   public void initPointCloud(PointCloud pc) {
@@ -1110,6 +1099,11 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     rootNode.attachChild(geo);
   }
 
+  @Override
+  public boolean isLocal(Message msg) {
+    return false;
+  }
+
   // FIXME - more parameters - location & rotation (new function "move")
   // FIXME - scale should not be in this - scale as one of 3 methods rotate !!!!
   // translate
@@ -1117,7 +1111,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   // TODO - removeNode
   public void load(String inFileName) {
     log.info("load({})", inFileName);
-    // UserData o = null;
+
     try {
 
       if (inFileName == null) {
@@ -1160,21 +1154,21 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
         for (Jme3Msg msg : msgs) {
           jme3MsgQueue.add(msg);
         }
-
-        // now for the json meta data ....
-        /*
-         * String json = FileIO.toString(inFileName); Map<String, Object> list =
-         * CodecUtils.fromJson(json, nodes.getClass()); for (String name :
-         * list.keySet()) { String nodePart = CodecUtils.toJson(list.get(name));
-         * UserData node = CodecUtils.fromJson(nodePart, UserData.class); //
-         * get/create transient parts //
-         * node.setService(Runtime.getService(name)); // node.setJme(this); //
-         * putN // nodes.put(node.getName(), node); }
-         */
       }
-
     } catch (Exception e) {
       error(e);
+    }
+  }
+
+  /**
+   * load a known file type
+   * 
+   * @param inFileName
+   */
+  public void loadFile(String inFileName) {
+    File file = getFile(inFileName);
+    if (!file.exists()) {
+      error("%s does not exist", inFileName);
     }
   }
 
@@ -1432,6 +1426,16 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     // FIXME - do something interesting ... :)
   }
 
+  @Override
+  public void onJointAngles(Map<String, Double> angleMap) {
+    for (String name : angleMap.keySet()) {
+      ServiceInterface si = Runtime.getService(name);
+      if (si instanceof ServoControl) {
+        ((ServoControl) si).moveTo(angleMap.get(name));
+      }
+    }
+  }
+
   public void onPointCloud(PointCloud pc) {
 
     if (pc == null) {
@@ -1613,27 +1617,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   }
 
   /**
-   * rotate on the "default" axis to a location without using speed
-   * 
-   * @param name
-   * @param degrees
-   */
-  public void rotateTo(String name, double degrees) {
-    addMsg("rotateTo", name, null, degrees);
-  }
-
-  /**
-   * rotate on the "default" axis using speed
-   * 
-   * @param name
-   * @param degrees
-   * @param speed
-   */
-  public void rotateTo(String name, double degrees, double speed) {
-    interpolator.addAnimation("rotateTo", name, null, degrees, speed);
-  }
-
-  /**
    * instant rotation on an particular axis
    * 
    * @param name
@@ -1655,6 +1638,27 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     interpolator.addAnimation("rotateTo", name, axis, degrees, speed);
   }
 
+  /**
+   * rotate on the "default" axis to a location without using speed
+   * 
+   * @param name
+   * @param degrees
+   */
+  public void rotateTo(String name, double degrees) {
+    addMsg("rotateTo", name, null, degrees);
+  }
+
+  /**
+   * rotate on the "default" axis using speed
+   * 
+   * @param name
+   * @param degrees
+   * @param speed
+   */
+  public void rotateTo(String name, double degrees, double speed) {
+    interpolator.addAnimation("rotateTo", name, null, degrees, speed);
+  }
+
   // this just saves keys !!!
   public void saveKeys(Spatial toSave) {
     try {
@@ -1671,6 +1675,13 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     } catch (Exception e) {
       error(e);
     }
+  }
+
+  public void saveMsgs() throws IOException {
+    List<Jme3Msg> temp = history;
+    history = new ArrayList<Jme3Msg>();
+    String data = CodecUtils.toJson(temp);
+    FileIO.toFile(String.format("jme3-msg-history-%d.json", System.currentTimeMillis()), data);
   }
 
   public boolean saveNodes() {
@@ -1758,12 +1769,41 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     return search.getResults();
   }
 
+  @Override
+  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void sendRemote(Message msg) throws Exception {
+    // TODO Auto-generated method stub
+
+  }
+
+  public void setDefaultServoSpeed(Double speed) {
+    defaultServoSpeed = speed;
+  }
+
   public void setDisplayFps(boolean b) {
     app.setDisplayFps(b);
   }
 
   public void setDisplayStatView(boolean b) {
     app.setDisplayStatView(b);
+  }
+
+  public void setFloorGrid(boolean b) {
+    Spatial s = find("floor-grid");
+    if (s == null) {
+      addGrid("floor-grid");
+      s = get("floor-grid");
+    }
+    if (b) {
+      show("floor-grid");
+    } else {
+      hide("floor-grid");
+    }
   }
 
   public void setFontColor(String color) {
@@ -1782,6 +1822,10 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     }
     node.mapper = new MapperLinear(minx, maxx, miny, maxy);
     return node.mapper;
+  }
+
+  public void setRotation(String name, double xRot, double yRot, double zRot) {
+    addMsg("setRotation", name, xRot, yRot, zRot);
   }
 
   public void setRotation(String name, String rotation) {
@@ -1831,6 +1875,14 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     setSelected(s);
   }
 
+  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
+    addMsg("setTransform", name, x, y, z, xRot, yRot, zRot);
+  }
+
+  public void setTranslation(String name, double x, double y, double z) {
+    addMsg("setTranslation", name, x, y, z);
+  }
+
   public void setVisible(boolean b) {
     if (selectedForView != null) {
       if (b) {
@@ -1841,9 +1893,9 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     }
   }
 
-  public void setVisible(String name, boolean b) {
+  public void setVisible(String name, boolean visible) {
     Spatial s = get(name);
-    if (b) {
+    if (visible) {
       s.setCullHint(CullHint.Never);
     } else {
       s.setCullHint(CullHint.Always);
@@ -1851,36 +1903,36 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
   }
 
   public void show(String name) {
-    setVisible(name, false);
+    setVisible(name, true);
   }
+
+  public void showMenu(boolean b) {
+    // TODO - implement !!!
+  }
+
+  BulletAppState bulletAppState;
+
+  private boolean usePhysics;
 
   public void simpleInitApp() {
 
     stateManager = app.getStateManager();
-    // GuiGlobals.initialize(app);
-    // Load the 'glass' style
-    // BaseStyles.loadGlassStyle();
-    // Set 'glass' as the default style when not specified
-    // GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
+
+    if (usePhysics) {
+      bulletAppState = new BulletAppState();
+      stateManager.attach(bulletAppState);
+    }
 
     setDisplayFps(false);
 
     setDisplayStatView(false);
 
-    // guiNode = app.getGuiNode();
-
-    // wtf - assetManager == null - another race condition ?!?!?
-    // after start - these are initialized as "default"
     assetManager = app.getAssetManager();
-    inputManager = app.getInputManager();
-    // stateManager.attach(state);
 
-    // app = jme.getApp();
+    inputManager = app.getInputManager();
+
     guiNode = app.getGuiNode();
-    // String x = guiNode.getName();
-    // guiNode.setName("menu");
-    // Initialize the globals access so that the default
-    // components can find what they need.
+
     GuiGlobals.initialize(app);
     // Load the 'glass' style
     BaseStyles.loadGlassStyle();
@@ -1941,9 +1993,10 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLocator(assetsDir, FileLocator.class);
     assetManager.registerLocator(getResourceDir(), FileLocator.class);
+    assetManager.registerLocator(getResourceDir() + "/Interface/Logo", FileLocator.class); // /Interface/Logo/Monkey.jpg
 
     // FIXME - should be moved under ./data/JMonkeyEngine/
-    //assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
+    // assetManager.registerLocator("InMoov/jm3/assets", FileLocator.class);
     assetManager.registerLocator(getDataDir(), FileLocator.class);
     assetManager.registerLoader(BlenderLoader.class, "blend");
 
@@ -2044,15 +2097,15 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     menu = app.getMainMenu();// new MainMenuState(this);
     // menu.loadGui();
 
-    // load models in the default directory
-    loadModels();
-  }
+    if (usePhysics) {
+      bulletAppState.setDebugEnabled(false);
+      PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
+      PhysicsTestHelper.createBallShooter(app, rootNode, bulletAppState.getPhysicsSpace());
+    }
 
-  public void saveMsgs() throws IOException {
-    List<Jme3Msg> temp = history;
-    history = new ArrayList<Jme3Msg>();
-    String data = CodecUtils.toJson(temp);
-    FileIO.toFile(String.format("jme3-msg-history-%d.json", System.currentTimeMillis()), data);
+    // load models in the default directory
+    // loadModels();
+
   }
 
   public void simpleUpdate(float tpf) {
@@ -2145,7 +2198,7 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
         moveTo(CAMERA, 0, 3, 6);
         cameraLookAtRoot();
         rotateOnAxis(CAMERA, "x", -20);
-        enableGrid(true);
+        setFloorGrid(true);
 
       } catch (Exception e) {
         log.warn("future threw", e);
@@ -2226,32 +2279,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     // save it out
   }
 
-  public void setTransform(String name, double x, double y, double z, double xRot, double yRot, double zRot) {
-    addMsg("setTransform", name, x, y, z, xRot, yRot, zRot);
-  }
-
-  public void setTranslation(String name, double x, double y, double z) {
-    addMsg("setTranslation", name, x, y, z);
-  }
-
-  public void setRotation(String name, double xRot, double yRot, double zRot) {
-    addMsg("setRotation", name, xRot, yRot, zRot);
-  }
-
-  public Map<String, String[]> getMultiMapped() {
-    return multiMapped;
-  }
-
-  @Override
-  public void onJointAngles(Map<String, Double> angleMap) {
-    for (String name : angleMap.keySet()) {
-      ServiceInterface si = Runtime.getService(name);
-      if (si instanceof Servo) {
-        ((Servo) si).moveTo(angleMap.get(name));
-      }
-    }
-  }
-
   public static void main(String[] args) {
     try {
 
@@ -2261,31 +2288,29 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       // reservedRotations from different controllers
       // FIXME - make "load" work ..
 
-      LoggingFactory.init("info");
+      LoggingFactory.init("WARN");
 
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--interactive", "--id", "admin" });
-      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("i01.jme", "JMonkeyEngine");
-      
+      JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
+
       jme.addBox("box", 1.0, 1.0, 1.0, "fc8803", true);
       jme.getNode(CAMERA).move(3, 1, 4);
       jme.cameraLookAt("box");
-      jme.rotateOnAxis("camera", "y", 220.0, 1);
+      jme.setFloorGrid(true);
+      // jme.rotateOnAxis("camera", "y", 220.0, 1);
       Node m = jme.getNode("Gui Node");
       // jme.getNode("Gui Node").move(1,1,1);
       jme.getMenuNode().move(1.0f, 3.0f, 2.0f);
 
-      
-      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
       boolean done = true;
       if (done) {
         return;
       }
-
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.setPort(8887);
-      webgui.autoStartBrowser(false);
-      webgui.startService();
 
       // Runtime.start("gui", "SwingGui");
 
@@ -2293,9 +2318,8 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       // left.connect("COM4");
 
       Runtime.start("i01.head.jaw", "Servo");
-            
-      jme.setRotation("i01.head.jaw", "x");
 
+      jme.setRotation("i01.head.jaw", "x");
 
       for (int i = 0; i < 100; ++i) {
         jme.rotateOnAxis("i01.head.jaw", "x", 100);
@@ -2352,7 +2376,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
        * jme.rotateTo("i01.leftHand.index", 120);
        */
 
-      // Runtime.start("i01.mouth", "NaturalReaderSpeech");
       /*
        * InMoov i01 = (InMoov) Runtime.start("i01", "InMoov");
        * i01.startSimulator(); jme = i01.getSimulator();
@@ -2393,87 +2416,41 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
       log.error("main threw", e);
     }
   }
-  
-  public Node getMenuNode() {
-    return guiNode;
-  }
-  
-  public void showMenu(boolean b) {
-    // TODO - implement !!!
-  }
 
-  @Override
-  public void connect(String uri) throws Exception {
-    // easy single client support
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("gateway", getName());
-    attributes.put("c-type", getSimpleName());
-    attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
-    String uuid = java.util.UUID.randomUUID().toString();
-    attributes.put("uuid", uuid);
-    Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.updateRoute(guiId, uuid);
-  }
-
-  @Override
-  public List<String> getClientIds() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Map<String, Map<String, Object>> getClients() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void sendRemote(Message msg) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean isLocal(Message msg) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public Message getDefaultMsg(String connId) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  public void setDefaultServoSpeed(Double speed) {
-    defaultServoSpeed = speed;
-  }
-  /*
-   * THERE IS ALSO THE OPTION TO LISTEN TO WHATEVER ENCODER THE SERVO HAS
-   * 
-   * @Override public void onEncoderData(EncoderData data) { String name =
-   * data.source;
-   * 
-   * String axis = rotationMap.get(name);
-   * 
-   * String[] multi = multiMapped.get(name); if (multi != null) { for (String
-   * nodeName : multi) { jme.rotateOnAxis(nodeName, axis, data.value, velocity);
-   * } } else { jme.rotateOnAxis(name, axis, servo.getPos(), velocity); }
-   * 
-   * }
+  /**
+   * "Near" instantaneous movement - this would be pulsed many times by an
+   * actual encoder - represeting its position "right now" vs something else
+   * sending a "batch" of changes based on a target position and speed
    */
+  @Override
+  public void onEncoderData(EncoderData data) {
+    String name = data.source;
+
+    String[] multi = multiMapped.get(name);
+    if (multi != null) {
+      for (String nodeName : multi) {
+        // wrong - uses interpolator - which does encoding/animation
+        // rotateOnAxis(nodeName, null, data.angle/*, velocity - No speed
+        // supplied*/);
+        // util.rotateTo(nodeName, null, data.angle);
+        addMsg("rotateTo", nodeName, null, data.angle);
+      }
+    } else {
+      // wrong - uses interpolator - which does encoding/animation
+      // rotateOnAxis(name, null, data.angle/*, velocity - No speed supplied*/);
+      // util.rotateTo(name, null, data.angle);
+      addMsg("rotateTo", name, null, data.angle);
+    }
+  }
 
   /**
    * parameter is not an interface to allow it to be remotely invoked with the
    * MethodCache
+   * 
+   * FIXME REMOVE !!!
+   * 
+   * @param servo
    */
-  @Override
   public void onServoMoveTo(ServoControl servo) {
     String name = servo.getName();
     /*
@@ -2496,48 +2473,6 @@ public class JMonkeyEngine extends Service implements Gateway, ServoController, 
     } else {
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
-  }
-
-  @Override
-  public void attach(ServoControl servo, int pinOrAddress) throws Exception {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onServoStop(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onServoSetSpeed(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onServoEnable(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void onServoDisable(ServoControl servo) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
-  public void attachServoControl(ServoControl sc) {
-    // TODO Auto-generated method stub
-    
   }
 
 }

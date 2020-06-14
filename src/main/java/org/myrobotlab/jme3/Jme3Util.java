@@ -1,8 +1,11 @@
 package org.myrobotlab.jme3;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
+import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
@@ -31,6 +34,8 @@ public class Jme3Util {
 
   public Jme3Util(JMonkeyEngine jme) {
     this.jme = jme;
+    MethodCache cache = MethodCache.getInstance();
+    cache.cacheMethodEntries(this.getClass());
   }
 
   static public ColorRGBA toColor(String userColor) {
@@ -53,8 +58,10 @@ public class Jme3Util {
     return ColorRGBA.Green;
   }
 
-  public Object invoke(Jme3Msg msg) {
-    return jme.invokeOn(this, msg.method, msg.data);
+  public Object invoke(Jme3Msg msg) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    MethodCache cache = MethodCache.getInstance();
+    Method method = cache.getMethod(this.getClass(), msg.method, msg.data);
+    return method.invoke(this, msg.data);// jme.invokeOn(false, this, msg.method, msg.data);
   }
 
   public void info(String format, Object... params) {

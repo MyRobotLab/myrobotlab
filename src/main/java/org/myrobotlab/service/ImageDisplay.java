@@ -151,22 +151,6 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
    }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(ImageDisplay.class.getCanonicalName());
-    meta.addDescription("Service to Display Images");
-    meta.addCategory("display");
-
-    return meta;
-  }
 
   // Returns the Height-factor of the DisplayResolution.
   public static int getResolutionOfH() {

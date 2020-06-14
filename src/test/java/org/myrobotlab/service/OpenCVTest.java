@@ -3,11 +3,9 @@ package org.myrobotlab.service;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,9 +14,6 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.opencv.OpenCVData;
-import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.test.AbstractTest;
 import org.myrobotlab.test.ChaosMonkey;
 import org.slf4j.Logger;
@@ -266,16 +261,22 @@ public class OpenCVTest extends AbstractTest {
   @Test
   public final void testGetClassifications() {
     log.warn("=======OpenCVTest testGetClassifications=======");
-    
+    Runtime.setAllLocales("en");
     cv.reset();
     // cv.removeFilters();
-    
+    log.warn("=======OpenCVTest testGetClassifications - 1=======");
     cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
     // OpenCVFilter f = 
+    log.warn("=======OpenCVTest testGetClassifications - 2=======");
     cv.addFilter("yolo");
+    log.warn("=======OpenCVTest testGetClassifications - 3=======");
     // f.enable();
+    log.warn("=======OpenCVTest testGetClassifications - cv.getLocale {} =======", cv.getLocale());
     Map<String, List<Classification>> classifications = cv.getClassifications(MAX_TIMEOUT);
+    log.warn("=======OpenCVTest testGetClassifications - 4 {} =======", classifications);
     assertNotNull(classifications);
+    log.warn("=======OpenCVTest testGetClassifications - 5 =======");
     assertTrue(classifications.containsKey("person"));
+    log.warn("=======OpenCVTest testGetClassifications - 6 =======");
   }
 }

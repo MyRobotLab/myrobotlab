@@ -22,11 +22,15 @@ public class LocalizeTest extends AbstractTest {
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
     runtime = Runtime.getInstance();
+    Runtime.install("InMoov2");
     i01 = (InMoov2)Runtime.start("i01", "InMoov2");
   }
 
   @AfterClass
   public static void lastCleanup() {
+    // switch back to en
+    // i01 will switch "all" locales at once
+    Runtime.setAllLocales("en");
     Runtime.releaseService("i01");
   }
 
@@ -70,7 +74,10 @@ public class LocalizeTest extends AbstractTest {
     assertNull(BLAH);
     
     i01.setLocale("fr");
+    assertEquals("fr", i01.getLocale().getLanguage());
+    
     String STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
+
     assertEquals("arduino coté gauche uniquement sélectionné", STARTINGLEFTONLY);
     i01.setLocale("it");
     STARTINGLEFTONLY = i01.localize("STARTINGLEFTONLY");
@@ -81,7 +88,13 @@ public class LocalizeTest extends AbstractTest {
     // test to see if runtime en is default when all else fails
     STARTINGLEFTONLY = i01.localize("RELEASESERVICE");
     assertEquals("releasing service", STARTINGLEFTONLY);
-
+    
+    // resetting
+    runtime.setLocale("en");
+    i01.setLocale("en");
+    
+    // lame sleep to avoid a race condition in InMoov2/Python console :P
+    Service.sleep(1000);
   }
 
 }

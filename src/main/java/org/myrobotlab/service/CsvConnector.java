@@ -221,21 +221,5 @@ public class CsvConnector extends AbstractConnector {
     this.idColumn = idColumn;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(CsvConnector.class.getCanonicalName());
-    meta.addDescription("This service crawls a csv file and publishes each row as a document");
-    meta.addCategory("ingest");
-    meta.addDependency("net.sf.opencsv", "opencsv", "2.3");
-    return meta;
-  }
 
 }

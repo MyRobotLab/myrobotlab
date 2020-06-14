@@ -298,20 +298,5 @@ public class AudioCapture extends Service {
     broadcastState();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(AudioCapture.class.getCanonicalName());
-    meta.addDescription("captures and stores audio from microphone");
-    meta.addCategory("sound");
-    return meta;
-  }
 
 }

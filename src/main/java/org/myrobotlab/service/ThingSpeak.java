@@ -140,20 +140,4 @@ public class ThingSpeak extends Service {
     return update(new Object[] { data });
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(ThingSpeak.class.getCanonicalName());
-    meta.addDescription("Service which can relay data to a ThingSpeak account");
-    meta.addCategory("monitor","cloud");
-    return meta;
-  }
-
 }

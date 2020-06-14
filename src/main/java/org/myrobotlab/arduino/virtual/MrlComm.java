@@ -500,7 +500,7 @@ public class MrlComm implements SerialDataListener {
   }
 
   public Object invoke(String method, Object... params) {
-    return virtual.invokeOn(this, method, params);
+    return virtual.invokeOn(false, this, method, params);
   }
 
   public long micros() {

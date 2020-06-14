@@ -58,28 +58,6 @@ public class IBus extends Service implements SerialDataListener {
     serial.attach(serial);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(IBus.class);
-    meta.addDescription("IBus serial protocol");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-
-    // TEMPORARY CORE DEPENDENCIES !!! (for uber-jar)
-    // meta.addDependency("orgId", "artifactId", "2.4.0");
-
-    meta.setAvailable(false);
-    meta.addCategory("general");
-    return meta;
-  }
 
   static long millis() {
     return System.currentTimeMillis();

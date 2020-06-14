@@ -1183,24 +1183,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Serial.class.getCanonicalName());
-    meta.addDescription("reads and writes data to a serial port");
-    meta.addCategory("sensors", "control");
-    meta.addDependency("org.scream3r", "jssc", "2.8.0-1");
-    meta.setLicenseGplV3(); // via jssc
-    return meta;
-  }
-
   public void connect() throws IOException {
     connect(lastPortName);
   }
@@ -1292,6 +1274,14 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     try {
 
       Platform.setVirtual(true);
+      
+      Serial s = (Serial)Runtime.start("s1", "Serial");
+      String vport1 = "vport1";
+      s.connect(vport1);
+      Serial uart = (Serial)Runtime.getService(vport1 + ".UART");
+      
+      Runtime.start("webgui", "WebGui");
+      
       Runtime.start("gui", "SwingGui");
       VirtualArduino hub = (VirtualArduino)Runtime.start("varduino", "VirtualArduino");
      //  Serial serial = (Serial) Runtime.start("serial", "Serial");
@@ -1326,10 +1316,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
       // EASY VIRTUAL SWITCH
 
-      // ---- Virtual Begin -----
-      VirtualDevice virtual = (VirtualDevice) Runtime.start("virtual", "VirtualDevice");
-      virtual.createVirtualSerial(port);
-      Serial uart = virtual.getUart(port);
+      
       uart.setTimeout(300);
       // ---- Virtual End -----
 

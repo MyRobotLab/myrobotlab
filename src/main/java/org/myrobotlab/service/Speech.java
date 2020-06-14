@@ -18,28 +18,6 @@ public class Speech extends Service {
     super(n, id);
   }
 
-  /**
-   * TODO - default mrl Speech service .. can proxy other Speech services like
-   * Amazon, Azure, Google via cloud default to MarySpeech because it's open
-   * source
-   * 
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Speech.class.getCanonicalName());
-    meta.addDescription("used as a general template");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    // meta.addDependency("org.coolproject", "1.0.0");
-    meta.addCategory("general");
-    return meta;
-  }
 
   public static void main(String[] args) {
     try {

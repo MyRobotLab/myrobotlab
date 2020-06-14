@@ -439,24 +439,6 @@ public class ImapEmailConnector extends AbstractConnector {
     this.docIdPrefix = docIdPrefix;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(ImapEmailConnector.class.getCanonicalName());
-    meta.addDescription("This connector will connect to an IMAP based email server and crawl the emails");
-    meta.addCategory("monitor", "cloud", "network");
-    meta.addDependency("javax.mail", "mail", "1.4.7");
-    meta.setCloudService(true);
-
-    return meta;
-  }
 
   public static void main(String[] args) throws Exception {
     ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");

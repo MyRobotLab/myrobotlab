@@ -29,21 +29,6 @@ public class Webcam extends Service implements WebcamListener {
     super(n, id);
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-    // setAutoOpenMode(true);
-    ServiceType meta = new ServiceType(Webcam.class);
-    meta.addDescription("used as a general webcam");
-    meta.addCategory("video");
-    return meta;
-  }
 
   public void start() {
     start(null);

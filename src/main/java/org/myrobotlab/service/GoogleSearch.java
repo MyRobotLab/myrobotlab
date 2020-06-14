@@ -90,22 +90,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     excludeTextFilter.clear();
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
 
-    ServiceType meta = new ServiceType(GoogleSearch.class);
-    meta.addDescription("used as a general google search");
-    meta.addDependency("org.jsoup", "jsoup", "1.8.3");
-    meta.addCategory("search");
-    return meta;
-  }
 
   @Override
   public SearchResults search(String searchText) throws IOException {

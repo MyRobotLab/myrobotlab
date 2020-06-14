@@ -600,33 +600,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     this.commitOnFlush = commitOnFlush;
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */ 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Solr.class.getCanonicalName());
-    meta.addDescription("Solr Service - Open source search engine");
-    meta.addCategory("search");
-    String solrVersion = "8.4.1";
-    meta.addDependency("org.apache.solr", "solr-core", solrVersion);
-    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-    meta.addDependency("org.apache.solr", "solr-test-framework", solrVersion);
-    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-    meta.addDependency("org.apache.solr", "solr-solrj", solrVersion);
-    meta.addDependency("commons-io", "commons-io", "2.5");
-    // TODO: update this with the latest schema!
-    // meta.addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
-    // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)
-    meta.exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
-    // Dependencies issue
-    meta.setAvailable(true);
-    return meta;
-  }
 
   // Attach Pattern stuff!
   public void attach(OpenCV opencv) {

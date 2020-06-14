@@ -223,27 +223,6 @@ public class Rekognition extends Service {
 
   }
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Rekognition.class);
-    meta.addDescription("Amazon visual recognition cloud service");
-    meta.setAvailable(true); // false if you do not want it viewable in a gui
-    // add dependency if necessary
-    meta.addDependency("com.amazonaws", "aws-java-sdk-rekognition", "1.11.263");
-    meta.setCloudService(true);
-    meta.setRequiresKeys(true);
-    meta.addCategory("vision","cloud");
-    return meta;
-  }
-
   public static void main(String[] args) throws Exception {
 
     Rekognition recog = (Rekognition) Runtime.start("recog", "Rekognition");

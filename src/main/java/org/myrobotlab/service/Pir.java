@@ -19,24 +19,6 @@ public class Pir extends Service implements PinListener {
 
   private static final long serialVersionUID = 1L;
 
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Pir.class.getCanonicalName());
-    meta.addDescription("PIR - Passive Infrared Sensor");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    meta.addCategory("sensors");
-    return meta;
-  }
-
   public static void main(String[] args) {
     try {
 

@@ -16,6 +16,9 @@
     # javadoc check
     mvn -q javadoc:javadoc -o
     
+    # specific test
+    mvn test -Dtest=OpenCVTest#testGetClassifications    
+    
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
   
@@ -1084,7 +1087,7 @@
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
-    <version>2.9.10.3</version>
+    <version>2.9.10.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1423,7 +1426,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.9.9 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.10.3 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.9.10.4 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.9.9 skipping -->
 <!-- WikiDataFetcher end -->
 
@@ -1532,7 +1535,7 @@
           </executions>
         </plugin>
   
-      <plugin>
+      <!-- removed because now we generate serviceData.json during runtime plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.6.0</version>
@@ -1549,11 +1552,10 @@
           <mainClass>org.myrobotlab.framework.repo.ServiceData</mainClass>
           <classpathScope>test</classpathScope>
           <arguments>
-            <!-- TODO: fix this with the proper location -->
                   <argument>target/classes/resource/framework</argument>
                 </arguments>
         </configuration>
-      </plugin>
+      </plugin -->
     
       <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1749,7 +1751,7 @@
                   </filesets>
                 </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

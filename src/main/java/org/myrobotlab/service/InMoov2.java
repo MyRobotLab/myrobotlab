@@ -37,79 +37,20 @@ import org.slf4j.Logger;
 
 public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
 
-  public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
+	public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
-  public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
+	public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-  // FIXME - why
-  @Deprecated
-  static boolean RobotCanMoveRandom = true;
-  private static final long serialVersionUID = 1L;
+	// FIXME - why
+	@Deprecated
+	static boolean RobotCanMoveRandom = true;
+	private static final long serialVersionUID = 1L;
+	
+	public Arduino neopixelArduino = null;
 
-  public Arduino neopixelArduino = null;
+	static String speechRecognizer = "WebkitSpeechRecognition";
 
-  static String speechRecognizer = "WebkitSpeechRecognition";
-
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(InMoov2.class);
-    meta.addDescription("InMoov2 Service");
-    meta.addCategory("robot");
-
-    meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
-    meta.addPeer("opencv", "OpenCV", "opencv");
-    meta.addPeer("servomixer", "ServoMixer", "for making gestures");
-    meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
-    meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
-    meta.addPeer("pir", "Pir", "infrared sensor");
-
-    // the four legacy controllers .. :(
-    meta.addPeer("left", "Arduino", "legacy controller");
-    meta.addPeer("right", "Arduino", "legacy controller");
-    meta.addPeer("controller3", "Arduino", "legacy controller");
-    meta.addPeer("controller4", "Arduino", "legacy controller");
-
-    meta.addPeer("htmlFilter", "HtmlFilter", "filter speaking html");
-
-    meta.addPeer("chatBot", "ProgramAB", "chatBot");
-    meta.addPeer("simulator", "JMonkeyEngine", "simulator");
-
-    meta.addPeer("head", "InMoov2Head", "head");
-    meta.addPeer("torso", "InMoov2Torso", "torso");
-    // meta.addPeer("eyelids", "InMoovEyelids", "eyelids");
-    meta.addPeer("leftArm", "InMoov2Arm", "left arm");
-    meta.addPeer("leftHand", "InMoov2Hand", "left hand");
-    meta.addPeer("rightArm", "InMoov2Arm", "right arm");
-    meta.addPeer("rightHand", "InMoov2Hand", "right hand");
-    meta.addPeer("mouthControl", "MouthControl", "MouthControl");
-    // meta.addPeer("imageDisplay", "ImageDisplay", "image display service");
-    meta.addPeer("mouth", "MarySpeech", "InMoov speech service");
-    meta.addPeer("ear", speechRecognizer, "InMoov webkit speech recognition service");
-
-    meta.addPeer("headTracking", "Tracking", "Head tracking system");
-
-    meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    // meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head
-    // Arduino"); NO !!!!
-    meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
-    meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
-
-    // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
-
-    // latest - not ready until repo is ready
-    meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
-
-    return meta;
-  }
+ 
   
   /**
    * execute a resource script
@@ -125,35 +66,35 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
   }
 
-  /**
-   * This method will load a python file into the python interpreter.
-   */
+	/**
+	 * This method will load a python file into the python interpreter.
+	 */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
-  public static boolean loadFile(String file) {
-    File f = new File(file);
-    Python p = (Python) Runtime.getService("python");
-    log.info("Loading  Python file {}", f.getAbsolutePath());
-    if (p == null) {
-      log.error("Python instance not found");
-      return false;
-    }
-    String script = null;
-    try {
-      script = FileIO.toString(f.getAbsolutePath());
-    } catch (IOException e) {
-      log.error("IO Error loading file : ", e);
-      return false;
-    }
-    // evaluate the scripts in a blocking way.
-    boolean result = p.exec(script, true);
-    if (!result) {
-      log.error("Error while loading file {}", f.getAbsolutePath());
-      return false;
-    } else {
-      log.debug("Successfully loaded {}", f.getAbsolutePath());
-    }
-    return true;
-  }
+	public static boolean loadFile(String file) {
+		File f = new File(file);
+		Python p = (Python) Runtime.getService("python");
+		log.info("Loading  Python file {}", f.getAbsolutePath());
+		if (p == null) {
+			log.error("Python instance not found");
+			return false;
+		}
+		String script = null;
+		try {
+			script = FileIO.toString(f.getAbsolutePath());
+		} catch (IOException e) {
+			log.error("IO Error loading file : ", e);
+			return false;
+		}
+		// evaluate the scripts in a blocking way.
+		boolean result = p.exec(script, true);
+		if (!result) {
+			log.error("Error while loading file {}", f.getAbsolutePath());
+			return false;
+		} else {
+			log.debug("Successfully loaded {}", f.getAbsolutePath());
+		}
+		return true;
+	}
 
   public static void main(String[] args) {
     try {
@@ -201,7 +142,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   Set<String> configs = null;
 
   String currentConfigurationName = "default";
-
   transient SpeechRecognizer ear;
 
   transient OpenCV opencv;
@@ -326,7 +266,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super(n, id);
 
     // by default all servos will auto-disable
-    // Servo.setAutoDisableDefault(true);
+    //Servo.setAutoDisableDefault(true); //until peer servo services for InMoov2 have the auto disable behavior, we should keep this
 
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
     locale = Runtime.getInstance().getLocale();
@@ -1631,7 +1571,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
+    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);

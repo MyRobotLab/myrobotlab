@@ -25,7 +25,7 @@ public class VirtualArduinoTest extends AbstractServiceTest implements MrlCommPu
 
   @Override
   public Service createService() {
-    Runtime.setLogLevel("info");
+    // Runtime.setLogLevel("info");
     VirtualArduino service = (VirtualArduino)Runtime.start("virtualArduino", "VirtualArduino");
     return service;
   }

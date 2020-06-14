@@ -24,15 +24,6 @@ public class Relay extends Service {
     super(n, id);
   }
 
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = new ServiceType(Relay.class.getCanonicalName());
-    meta.addDescription("Relay used by an arduino");
-    meta.setAvailable(true);
-    meta.addCategory("home automation");
-    return meta;
-  }
-
   public void on() {
     if (arduino.isConnected() && pin != null && onValue != null) {
       arduino.pinMode(pin, Arduino.OUTPUT);

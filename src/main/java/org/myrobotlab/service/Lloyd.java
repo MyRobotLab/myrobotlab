@@ -619,14 +619,6 @@ public class Lloyd extends Service {
     }
   }
 
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(Lloyd.class.getCanonicalName());
-    meta.addDescription("Lloyd an evolved InMoov.");
-    meta.addCategory("robot");
-    // TODO: add pears
-    return meta;
-  }
-
   public static void main(String[] args) throws SolrServerException, IOException {
     //
     LoggingFactory.init("INFO");

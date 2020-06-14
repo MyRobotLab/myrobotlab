@@ -265,11 +265,12 @@
         </div>
         <div class="col-md-12">
             <div class="tab-content">
-                <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
+                <div ng-show="view_tab == panel.name" ng-repeat="panel in panels"  service-body panel="panel"></div>
             </div>
         </div>
 
     </div>
+<!-- Removing begin.... -->
     <!-- end main -->
     <div id="bottomMessages">
         <div id="handleCloseBottomMessages" onmouseenter="closeBottomMessages()" onclick="closeBottomMessages()"><span class="glyphicon glyphicon-menu-down mr-4"></span> Hide</div>
@@ -319,10 +320,8 @@ NameError: name 'isTheSunShiny' is not defined
             </ul>
         </div>
     </div>
-
+<!-- TO REMOVE END -->
 </div>
-
-
 
 <script>
     
