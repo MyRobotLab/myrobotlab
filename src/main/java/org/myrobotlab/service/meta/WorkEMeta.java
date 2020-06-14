@@ -27,6 +27,7 @@ public class WorkEMeta {
     meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
+    meta.addPeer("simulator", "JMonkeyEngine", "simulator");
 
     meta.addPeer("webgui", "WebGui", "web interface");
 

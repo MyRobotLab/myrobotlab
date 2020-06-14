@@ -521,7 +521,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * left motor stop publishing point
    */
   public void publishLeftMotorStop() {
-  }
+    log.info("publish left -> stop");
+    }
 
   /**
    * left movement publishing point - this should probably go into a
@@ -531,6 +532,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * @return
    */
   public double publishMotorLeftMove(double pwr) {
+    log.info("publish left -> {}", pwr);
     return pwr;
   }
 
@@ -542,6 +544,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * @return
    */
   public double publishMotorRightMove(double pwr) {
+    log.info("publish right -> {}", pwr);
     return pwr;
   }
 
@@ -554,6 +557,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * right motor stop publishing point
    */
   public void publishRightMotorStop() {
+    log.info("publish left -> stop");
   }
 
   @Override
@@ -756,6 +760,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       worke.startPeer("joystick");
       worke.startPeer("motorLeft");
       worke.startPeer("motorRight");
+      worke.startPeer("controller");
       
       /*
        * worke.startPeer("motorRight"); worke.startPeer("controller");
