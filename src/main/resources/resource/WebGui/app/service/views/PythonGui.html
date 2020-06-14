@@ -1,7 +1,7 @@
 <!-- file menu button bar begin -->
 <div class="row">
     <div class="form-inline col-md-6">
-        <button ng-click="newFile = !newFile" class="btn btn-default">new</button>
+        <button ng-click="newFile = !newFile" class="btn btn-default"><span class="glyphicon glyphicon-file">new</button>
         <div class="btn-group" uib-dropdown is-open="status.isopen">
             <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
             <ul uib-dropdown-menu>
@@ -25,8 +25,9 @@
             <span class="glyphicon glyphicon-stop"></span>
             stop
         </button>
-        <button class="btn btn-default" ng-click="export()">export</button>
-        <button class="btn btn-default" ng-click="saveTextAsFile()">save</button>
+        <button class="btn btn-default" ng-click="loadFile=!loadFile"><span class="glyphicon glyphicon-open-file"></span>open</button>
+        <button class="btn btn-default" ng-click="export()"><span class="glyphicon glyphicon-export">export</button>
+        <button class="btn btn-default" ng-click="saveTextAsFile()"><span class="glyphicon glyphicon-save-file">save</button>
     </div>
 </div>
 <div class="row">
@@ -34,8 +35,18 @@
         <input class="form-control" type="text" placeholder="filename" width="50px" ng-model="newName" press-enter="newScript(newName)" autofocus/>
     </div>
 </div>
+
 <div class="row">
-    Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/>
+    <div ng-show="loadFile">
+
+<input type="file" id="file" name="file"/>
+<button class="btn btn-default" ng-click="load()">Load</button>
+    </div>
+</div>
+
+
+<div class="row">
+    <!-- Active index: {{ activeTabIndex  }}  script count: {{scriptCount}} <br/ -->
     <uib-tabset active="activeTabIndex">
         <uib-tab ng-repeat="(key, value) in scripts" index="$index + 1" select="tabSelected(value)">
             <uib-tab-heading>
@@ -60,5 +71,3 @@
 <div class="row">
     <pre>{{log}}</pre>
 </div>
-<input type="file" id="file" name="file"/>
-<button class="btn btn-default" ng-click="load()">Load</button>

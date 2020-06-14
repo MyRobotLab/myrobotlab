@@ -16,6 +16,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.lastStatus = null
     $scope.log = ''
 
+    // 2 dialogs 
+    $scope.loadFile = false
     $scope.newFile = false
 
     this.updateState = function(service) {
@@ -160,7 +162,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             var data = e.target.result;
             console.info('onloadend')
             $scope.newScript(f.name, data)
-            //send your binary data via $http or $resource or do anything else with it
+            $scope.loadFile = false // close dialog
         }
 
         r.readAsBinaryString(f);
