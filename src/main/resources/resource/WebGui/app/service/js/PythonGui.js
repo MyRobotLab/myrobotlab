@@ -16,6 +16,8 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     $scope.lastStatus = null
     $scope.log = ''
 
+    $scope.newFile = false
+
     this.updateState = function(service) {
         $scope.service = service
         $scope.scriptCount = 0
@@ -27,7 +29,10 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             $scope.scriptCount++
         })
 
+        console.info('activeTabIndex', $scope.activeTabIndex)
         $scope.activeTabIndex = $scope.scriptCount
+        console.info('activeTabIndex', $scope.activeTabIndex)
+
     }
 
     this.onMsg = function(msg) {
@@ -43,7 +48,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             _self.updateState(data)
             $scope.$apply()
             break
-        case 'onStdOut':            
+        case 'onStdOut':
             $scope.log = data + $scope.log
             $scope.$apply()
             break
@@ -55,6 +60,17 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             $log.error("ERROR - unhandled method " + msg.method)
             break
         }
+    }
+
+    $scope.newScript = function(filename, script) {
+        if (!script) {
+            script = '# new awesome robot script\n'
+        }
+        msg.send('openScript', filename, script)
+        $scope.newName = ''
+        // clear input text
+        $scope.newFile = false
+        // close dialog
     }
 
     // utility methods //
@@ -72,6 +88,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     //----- ace editors related callbacks begin -----//
     $scope.aceLoaded = function(e) {
         $log.info("ace loaded")
+        $scope.activeTabIndex = $scope.scriptCount
     }
 
     $scope.aceChanged = function(e) {
@@ -134,29 +151,28 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         downloadLink.click()
     }
 
-    $scope.item = "blah"
+    // WORKY !!
+    $scope.load = function() {
+        let f = document.getElementById('file').files[0]
+        let r = new FileReader();
 
-    $scope.edit = function(item) {
+        r.onloadend = function(e) {
+            var data = e.target.result;
+            console.info('onloadend')
+            $scope.newScript(f.name, data)
+            //send your binary data via $http or $resource or do anything else with it
+        }
 
-        var itemToEdit = item
+        r.readAsBinaryString(f);
+        console.info('readAsBinaryString')
 
-        $dialogs.dialog(angular.extend(dialogOptions, {
-            resolve: {
-                item: angular.copy(itemToEdit)
-            }
-        })).open().then(function(result) {
-            if (result) {
-                angular.copy(result, itemToEdit)
-            }
-            itemToEdit = undefined
-        })
     }
 
     $scope.getPossibleServices = function(item) {
         return Object.values(mrl.getPossibleServices())
     }
 
-    $scope.export = function(){
+    $scope.export = function() {
         msg.send('exportAll')
     }
 
