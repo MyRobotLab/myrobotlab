@@ -437,12 +437,10 @@ padding: 2px;
 .custom-slider.rzslider .rz-bar {/* background: #ffc6aa; */height: 5px;}
 .custom-slider2.rzslider .rz-bar {background: #e0e0e0;height: 18px;}
 
-.custom-slider.rzslider .rz-selection {
-background: #9dd2ff;
-}
+.custom-slider.rzslider .rz-selection {background: #9dd2ff;}
 
-.custom-slider.rzslider .rz-pointer {/* width: 1px; */height: 25px;top: 14px;
-/* to remove the default positioning */bottom: 0px;background-color: #999;/* border-top-left-radius: 3px; *//* border-top-right-radius: 3px; */}
+.custom-slider.rzslider .rz-pointer {/* width: 1px; *//* height: 25px; *//* top: 14px; */
+/* to remove the default positioning *//* bottom: 0px; */background-color: #999;border-top-left-radius: 3px;border-top-right-radius: 3px;}
 
 .lastColumn{
 right: 8px!important;
@@ -481,6 +479,7 @@ outline: none!important;
   border-left: 10px solid transparent;
   border-bottom: 10px solid transparent;
 }
+
 .rzPos .custom-slider2.rzslider .rz-pointer {
   top: -10px;
   cursor: grabbing;
@@ -576,6 +575,7 @@ outline: none!important;
 
 
 .rzInput .custom-slider2.rzslider .rz-selection {background: #edf6e9;height: 34px;top: -13px;}
+
 .lockInputOutputButton{
   position: relative;
   top: -180px;
@@ -621,52 +621,8 @@ cursor: col-resize;
   border-radius: 2px;
 }
 
-.custom-slider.rzslider .rz-bubble:nth-child(5) {
-  /* bottom: -12px; */
-  padding: 3px 9px;
-  color: #55637d;
-  cursor: none;
-  top: -19px;
-  z-index: 8;
-  border-color: #ededed;
-  background-color: #FFFFFF;
-  border-width: 1px;
-  border-style: solid;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
 
-.custom-slider.rzslider .rz-bubble:nth-child(6) {
-  bottom: 6px;
-  padding: 3px 6px;
-  color: #55637d;
-  cursor: none;
-  z-index: 8;
-  margin-left: 10px;
-  border-color: #ededed;
-  background-color: #FFFFFF;
-  border-width: 1px;
-  text-indent: 24px;
-  border-style: solid;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
 
-.custom-slider.rzslider .rz-bubble:nth-child(n+7) {
-  bottom: 22px;
-  pointer-events: none;
-  padding: 3px 9px;
-  color: #55637d;
-  margin-left: 0px;
-  cursor: pointer;
-  z-index: 8;
-  border-color: #ededed;
-  background-color: #FFFFFF;
-  border-width: 1px;
-  border-style: solid;
-}
 
 .custom-slider2.rzslider .rz-bubble:nth-child(5) {
   bottom: -22px;
@@ -708,23 +664,7 @@ display: block;
 display: none!important;
 }
 
-.custom-slider.rzslider .rz-bubble {
-bottom: 14px;
-}
 
-.custom-slider.rzslider .rz-limit {
-font-weight: bold;
-color: #999;
-}
-
-.custom-slider.rzslider .rz-tick {
-width: 1px;
-height: 10px;
-margin-left: 4px;
-border-radius: 0;
-background: #ffe4d1;
-top: -1px;
-}
 
 .custom-slider.rzslider .rz-tick.rz-selected {
 background: #999;
@@ -833,6 +773,325 @@ background: #999;
 background: #cecece;
 height: 4px;
 }
+
+.rzMixer{
+  width: 100%;
+  margin-top: 0px;
+  padding-top: 50px;
+  /* background-color: aqua; */
+  display: block;
+}
+.MixerTop{
+  position: relative;
+  border-bottom-color: #337ab7;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  /* min-height: 150px; */
+}
+.poseList{
+  width: 358px;
+}
+.rzMixer .sliderMixer{
+  width: 375px;
+  float: left;
+  padding-right: 6px;
+  margin-right: 40px;
+  /* background-color: antiquewhite; */
+  padding-bottom: 20px;
+  padding-top: 10px;
+  border-bottom: 1px solid #ececec;
+}
+
+[class*="head"]::before :last-child {
+  content: "Head";
+  color: #000000;
+  background-color: #FF0000;
+  font-weight: bold;
+}
+
+[class*="head.eye"] {
+  color: #0000FF;
+  font-weight: bold;
+}
+.restMixer{
+  position: relative;
+  width: 1px;
+  height: 18px;
+  bottom: -59px;
+  z-index: 90;
+  background-color: #e48b53;
+}
+.rzMixer .restColor{
+  /* width: 64px; */
+  float: left;
+  /* background-color: blue; */
+  text-align: center;
+  /* margin-right: 5px; */
+  line-height: 24px;
+}
+.MixerRow{
+    width: 360px;
+    /* background-color: aqua; */
+    white-space: nowrap;
+    justify-content: space-between;
+}
+
+.MixerServoSpeed{
+  position: relative;
+  float: right;
+  /* width: 280px; */
+  /* background-color: #55ec42; */
+}
+.MixerServoSpeed input{
+  width: 40px;
+  height: 24px !important;
+  padding: 3px;
+  text-align: right;
+}
+
+.rzMixer .btn-default {
+    height: 24px;
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    padding: 3px;
+    padding-left: 6px;
+    padding-right: 6px;
+    vertical-align: middle;
+    line-height: 12px;
+    margin-bottom: 4px;
+}
+
+.directoryName{
+  height: 24px !important;
+  margin-right: 0px;
+  margin-left: 8px;
+  margin-bottom: 4px;
+  padding: 3px;
+  text-align: left;
+  vertical-align: middle;
+  margin-left: 8px;
+  width: 223px !important;
+}
+.loadPose{
+  position: relative;
+  top: 8px;
+  left: 5px;
+  float: left;
+  margin-bottom: 0px;
+  padding-left: 0px;
+}
+.savePose{
+  /* position: relative; */
+  width: 310px;
+  /* float: left; */
+  /* top: 10px; */
+  /* left: 0px; */
+  margin-left: 0px;
+  padding-left: 0px;
+}
+
+@media (max-width: 1343px){
+  .loadPose{
+    width: 380px;
+    top: 0px;
+    left: -19px;
+  }
+  .savePose{
+    position: relative;
+    width: 357px;
+    height: 24px;
+    float: left;
+    top: 10px;
+    /* bottom: -3px !important; */
+    vertical-align: bottom;
+    margin-left: 0px;
+    padding-left: 0px;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+  }
+  .rzMixer{
+    padding-top: 20px;
+  }
+}
+@media (max-width: 858px){
+  .loadPose{
+    width: 380px;
+    top: 5px;
+    left: 2px;
+  }
+  .savePose{
+    position: relative;
+    width: 357px;
+    height: 24px;
+    float: left;
+    top: 10px;
+    /* bottom: -3px !important; */
+    vertical-align: bottom;
+    margin-left: 0px;
+    padding-left: 0px;
+    margin-bottom: 30px;
+    padding-bottom: 0px;
+  }
+  .rzMixer{
+    padding-top: 20px;
+  }
+}
+
+@media (min-width: 1450px){
+  .loadPose{
+    position: relative;
+    width: 270px;
+    /* float: left; */
+    top: 58px;
+    left: -20px;
+    margin-bottom: 0px;
+    padding-left: 0px;
+  }
+  .savePose{
+    position: relative;
+    width: 310px;
+    float: left;
+    top: 38px;
+    /* left: 20px; */
+    margin-left: 0px;
+    padding-left: 0px;
+  }
+}
+
+.servoFilter{
+  margin-left: 0px;
+  margin-bottom: 30px;
+  width: 270px;
+  display: flex;
+  line-height: 28px;
+}
+.servoFilter input{
+  margin-left: 8px;
+  margin-right: 6px;
+  height: 24px !important;
+}
+
+.MixerTop .row{
+  margin-left: 0px;
+  margin-right: 0px;
+}
+.MixerDirectory{
+  width: 380px;
+  margin-right: 0px;
+  float: left;
+}
+
+
+.poseName{
+  width: 270px !important;
+  height: 24px !important;
+  vertical-align: middle;
+  float: left;
+}
+.MixerServoName{
+  color: #888888;
+  font-weight: bold;
+  font-size: medium;
+  width: 210px;
+  float: left;
+  margin-right: 0px;
+  overflow: hidden;
+  /* background-color: #dbd7fa; */
+}
+.MixerServo{
+  width: 300px;
+}
+
+.rzMixer .custom-slider.rzslider .rz-pointer:before {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 10px;
+  /* width: 1px; */
+  z-index: 99;
+  height: 0;
+  border-right: 10px solid transparent;
+  border-left: 10px solid transparent;
+  border-top: 10px solid #000;
+}
+.rzMixer .custom-slider.rzslider .rz-pointer {
+  width: 1px;
+  background-color: transparent;
+  top: -10px;
+  cursor: grabbing;
+  z-index: 100;
+}
+.rzMixer .custom-slider.rzslider .rz-bar {
+  background: #e5e5e5;
+  height: 18px;
+}
+
+.rzMixer .custom-slider.rzslider .rz-pointer:focus {
+  outline: none!important;
+}
+.rzMixer .custom-slider2.rzslider .rz-bar.rz-selection {
+  background: #edf6e9;
+  height: 34px;
+  top: -33px;
+}
+.rzMixer .custom-slider.rzslider .rz-bubble:nth-child(5) {
+  bottom: -15px;
+  padding: 0px 3px;
+  color: #ccc;
+  cursor: default;
+  line-height: 18px;
+  margin-left: -27px;
+  font-size: medium;
+  font-weight: normal;
+  z-index: 80;
+  text-indent: 9px;
+  background-color: transparent;
+  visibility: visible!important;
+}
+.rzMixer .custom-slider.rzslider .rz-bubble:nth-child(6) {
+  bottom: -15px;
+  padding: 0px 0px;
+  color: #ccc;
+  font-weight: normal;
+  z-index: 80;
+  line-height: 18px;
+  cursor: default;
+  font-size: medium;
+  /* text-indent: 18px; */
+  left: 20px;
+  margin-left: 39px;
+  visibility: visible!important;
+  background-color: transparent;
+}
+
+.rzMixer .custom-slider.rzslider .rz-bubble {
+  bottom: -6px;
+}
+
+.rzMixer .custom-slider .rz-bubble:nth-child(7) {
+  position: absolute;
+  /* background-color:#ffffff;*/
+  height: 30px;
+  text-align: center;
+  font-weight: bold;
+  top: -22px;
+  font-size: 18px!important;
+  font-family: Arial, Helvetica, sans-serif!important;
+  border: 0px;
+  z-index: 120;
+  color: #6f6f6f;
+  line-height: 25px;
+  pointer-events: none;
+  text-indent: 6px;
+}
+
+.rzMixer .custom-slider .rz-bubble:nth-child(7)::after {
+  content: "º";
+}
+
 .rzPos .custom-slider.rzslider .rz-pointer:before {content: "";position: absolute;right: -10px;top: -6px;/* width: 1px; */z-index: 99;height: 0;border-right: 10px solid transparent;border-left: 10px solid transparent;border-bottom: 10px solid #2a611e;}
 .rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 56px;top: -17px;}
 .rzOutput .custom-slider.rzslider .rz-selection {background: #e4f3f3;height: 59px;top: -19px;}
@@ -1934,11 +2193,7 @@ margin-top: 0px;
 margin-bottom: 0px;
 text-transform: capitalize;
 }
-.tableProgramABtop .btn, input{
-padding: 2px 4px;
-height: 28px !important;
-/* margin-right: 13px; */
-}
+.tableProgramABtop .btn, input{padding: 2px 4px;height: 28px !important;/* margin-right: 13px; */}
 .tableProgramABtop tr:nth-child(3) {
 height: 39px;
 }
@@ -2317,3 +2572,4 @@ height: calc(100vh - 453px);
   background: #56aaff;
   box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.2);
 }
+

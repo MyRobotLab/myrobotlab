@@ -19,7 +19,15 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             msg.sendTo(servoName, 'moveTo', $scope.sliders[servoName].value)
         }
     }
-
+    
+    $scope.setSearchServo = function(text) {
+        $scope.searchServo.displayName = text
+    }
+    
+    $scope.SearchServo = {
+        // displayName: ""
+    }
+    
     this.updateState($scope.service)
 
     this.onMsg = function(inMsg) {
