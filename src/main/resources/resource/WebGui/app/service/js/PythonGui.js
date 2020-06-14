@@ -30,11 +30,9 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
             }
             $scope.scriptCount++
         })
-
-        console.info('activeTabIndex', $scope.activeTabIndex)
+        // this doesn't work - its the ace-ui callback that 
+        // changes the activeTabIndex
         $scope.activeTabIndex = $scope.scriptCount
-        console.info('activeTabIndex', $scope.activeTabIndex)
-
     }
 
     this.onMsg = function(msg) {
@@ -153,23 +151,6 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         downloadLink.click()
     }
 
-    // WORKY !!
-    $scope.load = function() {
-        let f = document.getElementById('file').files[0]
-        let r = new FileReader();
-
-        r.onloadend = function(e) {
-            var data = e.target.result;
-            console.info('onloadend')
-            $scope.newScript(f.name, data)
-            $scope.loadFile = false // close dialog
-        }
-
-        r.readAsBinaryString(f);
-        console.info('readAsBinaryString')
-
-    }
-
     $scope.getPossibleServices = function(item) {
         return Object.values(mrl.getPossibleServices())
     }
@@ -178,8 +159,40 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
         msg.send('exportAll')
     }
 
+    $scope.uploadFile = function() {
+
+        var f = $scope.myFile;
+        var r = new FileReader();
+
+        r.onloadend = function(e) {
+            var data = e.target.result;
+            console.info('onloadend')
+            $scope.newScript(f.name, data)
+            $scope.loadFile = false
+            // close dialog
+        }
+
+        r.readAsBinaryString(f);
+        console.info('readAsBinaryString')
+    }
+
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
 }
-])
+]).directive('fileModel', ['$parse', function($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+
+            element.bind('change', function() {
+                scope.$apply(function() {
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
+}
+]);
