@@ -184,8 +184,7 @@
                 </tr>
                 <tr ng-show="!service.isVirtual">
                     <td>
-                        FIXME getPanel=noworky or refresh page
-            <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
+                        <div ng-if="subPanels.arduino"> <div service-body panel="subPanels.arduino" /> </div>
                     </td>
                 </tr>
                 <!--- virtual section -------->
@@ -200,8 +199,7 @@
                 </tr>
                 <tr ng-show="service.isVirtual">
                     <td>
-                        FIXME getPanel=noworky or refresh page
-            <div class="tab-content" service-body panel="mrl.getPanel('arduino')"></div>
+                        <div ng-if="subPanels.arduino"> <div service-body panel="subPanels.arduino" /> </div>
                     </td>
                 </tr>
             </table>
@@ -236,8 +234,7 @@
                 </tr>
                 <tr>
                     <td>
-                        FIXME getPanel=noworky or refresh page
-            <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
+                        <div ng-if="subPanels.servo01"> <div service-body panel="subPanels.servo01" /> </div>
                     </td>
                 </tr>
             </table>
@@ -266,8 +263,7 @@
                 </tr>
                 <tr>
                     <td>
-                        FIXME getPanel=noworky or refresh page
-            <div class="tab-content" service-body panel="mrl.getPanel('servo01')"></div>
+                        <div ng-if="subPanels.servo01"> <div service-body panel="subPanels.servo01" /> </div>
                     </td>
                 </tr>
             </table>
@@ -342,24 +338,10 @@
             &nbsp;&nbsp;<a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/InMoov2/master/resource/InMoov2/InMoovFingerStarter.py">SEE PYTHON SCRIPT</a>
             <iframe width="560" height="315" src="https://www.youtube.com/embed/_uQrJ0TkZlc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </td>
-    </tr>
-    <!--FOR PYTHON DISPLAY-->
-    <!--tr>
-        <td>
-        <div ng-model="code" style="height: 500px;width: 50%;" id="$index" ui-ace="{
-		                                       useWrapMode : false,
-		                                       showGutter: true,		                                       
-                                               theme:'chrome',
-		                                       mode: 'python',
-		                                       firstLineNumber: 1,
-		                                       onLoad: aceLoaded,		                                       
-		                                       onChange: aceChanged}"></div>
-        </td>
-    </tr-->
-    <!--FOR PYTHON DISPLAY-->
+    </tr>    
     <tr>
         <td>
-            <div class="tab-content" service-body panel="mrl.getPanel('python')"></div>
+            <div ng-if="subPanels.python"> <div service-body panel="subPanels.python" /> </div>
         </td>
     </tr>
 </table>
@@ -379,7 +361,7 @@
     </tr>
     <tr>
         <td>
-            <div class="tab-content" service-body panel="mrl.getPanel('security')"></div>
+            <div ng-if="subPanels.security"> <div service-body panel="subPanels.security" /> </div>
         </td>
     </tr>
 </table>
@@ -403,7 +385,7 @@
             &nbsp;&nbsp;<a class="row col-md-3" target="_blank" href="https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/master/service/Runtime.py">SEE PYTHON SCRIPT</a>
         </td>
         <td>
-            <div class="tab-content" service-body panel="mrl.getPanel('runtime')"></div>
+            <div ng-if="subPanels.runtime"> <div service-body panel="subPanels.runtime" /> </div>
         </td>
     </tr>
 </table>
@@ -463,9 +445,8 @@
         </td>
     </tr>
     <tr>
-        <td>
-            FIXME getPanel=noworky or refresh page
-            <div class="tab-content" service-body panel="mrl.getPanel('opencv')"></div>
+        <td>          
+            <div ng-if="subPanels.opencv"> <div service-body panel="subPanels.opencv" /> </div>
         </td>
     </tr>
 </table>
@@ -473,3 +454,5 @@
 <!-- panels end -->
 </td></tr></table>
 <!------------------------------INTRO-PAGE END---------------------------->
+
+
