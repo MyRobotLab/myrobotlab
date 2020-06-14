@@ -62,6 +62,7 @@ public class ServoMixer extends Service {
     String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
     log.info("Loading Pose name {}", filename);
     currentPose = Pose.loadPose(filename);
+    broadcastState();
     return currentPose;
 
   }
