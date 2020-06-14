@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -99,10 +101,14 @@ public class ServoMixer extends Service {
       return files;
     }
     File[] all = dir.listFiles();
+    Set<String> sorted = new TreeSet<>();
     for (File f : all) {
       if (f.getName().toLowerCase().endsWith(".pose")) {
-        files.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
+        sorted.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
       }
+    }
+    for(String s: sorted) {
+      files.add(s);
     }
     return files;
   }
