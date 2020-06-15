@@ -1346,14 +1346,20 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     String fullkey = Peers.getPeerKey(getName(), reservedKey);
 
     ServiceReservation sr = dnaPool.get(fullkey);
+    
+    // TODO - replace above with this
+    ServiceReservation sr2 = serviceType.getPeer(reservedKey);
+    
     if (sr == null) {
       error("can not create peer from reservedkey %s - no type definition !", fullkey);
       return null;
     }
-
-    // WOW THIS WAS A NASTY BUG !!!
-    // return Runtime.create(fullkey, sr.fullTypeName);
-    return Runtime.create(sr.actualName, sr.fullTypeName);
+    
+    ServiceInterface si = Runtime.create(sr.actualName, sr.fullTypeName);
+    if (sr2 != null) {
+      sr2.state = "created";
+    }
+    return si;
   }
 
   public synchronized ServiceInterface createPeer(String reservedKey, String defaultType) {
@@ -1888,6 +1894,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public void releasePeer(String peerName) {
     releasePeers(peerName);
+    ServiceReservation sr2 = serviceType.getPeer(peerName);      
+    sr2.state = "inactive";
+    broadcastState();
   }
 
   /**
@@ -2214,12 +2223,19 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         error("could not create service from key %s", reservedKey);
         return null;
       }
-
+      
+      ServiceReservation sr2 = serviceType.getPeer(reservedKey);      
       si.startService();
+      
+      if (sr2 != null) {
+        sr2.state = "started";
+      }
+      
     } catch (Exception e) {
       error(e.getMessage());
       log.error("startPeer threw", e);
     }
+    broadcastState();
     return si;
   }
 

@@ -22,6 +22,12 @@ public class ServiceReservation implements Serializable {
 
   public Boolean isRoot = false;
   public Boolean autoStart;
+  /**
+   * service life-cycle state 
+   * inactive | created | registered | running | stopped | released
+   * a challenge will be keeping it sync'd with actual service state :P
+   */
+  public String state = "inactive";
 
   public ServiceReservation(String key, String typeName, String comment) {
     this(key, key, typeName, comment, null, null);    
