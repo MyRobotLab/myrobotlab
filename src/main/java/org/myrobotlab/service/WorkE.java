@@ -431,8 +431,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     if (isVirtual()) {
       send(eye, "setGrabberType", "ByteArray");
       send(eye, "setInputSource", "file");
-      // FIXME -
-      send(eye, "setInputFileName", "C:\\mrl.ssh\\frames");
+      // FIXME - find valid test files
+      send(eye, "setInputFileName", Service.getResourceDir("OpenCV", "frames"));
     } else {
       send(eye, "setGrabberType", "OpenKinect");
     }
