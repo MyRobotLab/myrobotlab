@@ -494,7 +494,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void motorMove(MotorControl mc) {
+  public void onMotorMove(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 
@@ -542,7 +542,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void motorMoveTo(MotorControl mc) {
+  public void onMotorMoveTo(MotorControl mc) {
     // speed parameter?
     // modulo - if < 1
     // speed = 1 else
@@ -577,7 +577,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void motorStop(MotorControl mc) {
+  public void onMotorStop(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 
@@ -597,7 +597,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   @Override
-  public void motorReset(MotorControl motor) {
+  public void onMotorReset(MotorControl motor) {
     // perhaps this should be in the motor control
     // motor.reset();
     // opportunity to reset variables on the controller

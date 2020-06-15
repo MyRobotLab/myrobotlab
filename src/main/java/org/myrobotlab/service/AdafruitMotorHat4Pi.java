@@ -262,7 +262,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   @Override
-  public void motorMove(MotorControl mc) {
+  public void onMotorMove(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 
@@ -330,14 +330,14 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   @Override
-  public void motorMoveTo(MotorControl mc) {
+  public void onMotorMoveTo(MotorControl mc) {
     /*
      * TODO Implement MotorMove for the Stepper motor(s)
      */
   }
 
   @Override
-  public void motorStop(MotorControl mc) {
+  public void onMotorStop(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 
@@ -357,7 +357,7 @@ public class AdafruitMotorHat4Pi extends AbstractMotorController implements I2CC
   }
 
   @Override
-  public void motorReset(MotorControl motor) {
+  public void onMotorReset(MotorControl motor) {
     // perhaps this should be in the motor control
     // motor.reset();
     // opportunity to reset variables on the controller

@@ -45,6 +45,16 @@ angular.module('mrlapp.service.WorkEGui', []).controller('WorkEGuiCtrl', ['$scop
         }
     }
 
+    $scope.getPeerState = function(key){
+        let cls = ['btn']
+        if ($scope.service.serviceType.peers[key].state == 'started'){
+            cls.push('primary')
+        } else {
+            cls.push('default')
+        }
+        return 
+    }
+
     // $scope.panel = mrl.getPanel($scope.service.name)
 	$scope.panel = mrl.getPanel('runtime')
 

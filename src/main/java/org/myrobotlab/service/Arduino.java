@@ -1268,7 +1268,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public void motorMove(MotorControl mc) {
+  public void onMotorMove(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 
@@ -1302,7 +1302,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   // FIXME - MasterBlaster had a pulse motor which could support MoveTo
   // We need a Motor + encoder (analog or digital) DiyServo does this...
   @Override
-  public void motorMoveTo(MotorControl mc) {
+  public void onMotorMoveTo(MotorControl mc) {
     // speed parameter?
     // modulo - if < 1
     // speed = 1 else
@@ -1336,7 +1336,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public void motorReset(MotorControl motor) {
+  public void onMotorReset(MotorControl motor) {
     // perhaps this should be in the motor control
     // motor.reset();
     // opportunity to reset variables on the controller
@@ -1344,7 +1344,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public void motorStop(MotorControl mc) {
+  public void onMotorStop(MotorControl mc) {
 
     Class<?> type = mc.getClass();
 

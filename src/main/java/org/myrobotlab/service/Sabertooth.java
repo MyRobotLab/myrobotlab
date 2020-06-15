@@ -186,7 +186,7 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
   // --- MotorController interface end ----
 
   @Override
-  public void motorMove(MotorControl mc) {
+  public void onMotorMove(MotorControl mc) {
 
     if (!motors.containsKey(mc.getName())) {
       error("%s not attached to %s", mc.getName(), getName());

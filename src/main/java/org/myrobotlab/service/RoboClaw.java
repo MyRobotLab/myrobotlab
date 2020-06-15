@@ -128,7 +128,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   public void motorMove(String name) {
-    motorMove((MotorControl) Runtime.getService(name));
+    onMotorMove((MotorControl) Runtime.getService(name));
   }
 
   public void motorMoveTo(String name, Integer position) {
@@ -245,7 +245,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   // --- MotorController interface end ----
 
   @Override
-  public void motorMove(MotorControl mc) {
+  public void onMotorMove(MotorControl mc) {
 
     if (!motors.containsKey(mc.getName())) {
       error("%s not attached to %s", mc.getName(), getName());
@@ -278,13 +278,13 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   @Override
-  public void motorMoveTo(MotorControl motor) {
+  public void onMotorMoveTo(MotorControl motor) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void motorStop(MotorControl motor) {
+  public void onMotorStop(MotorControl motor) {
     motor.move(0);
   }
 
@@ -295,7 +295,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   }
 
   @Override
-  public void motorReset(MotorControl motor) {
+  public void onMotorReset(MotorControl motor) {
     // TODO Auto-generated method stub
 
   }

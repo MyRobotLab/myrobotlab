@@ -45,7 +45,7 @@ public interface MotorController extends Attachable {
    * @param motor
    *          the motor that will be moved
    */
-  public void motorMove(MotorControl motor);
+  public void onMotorMove(MotorControl motor);
 
   /**
    * moveTo - move the MotorControl a relative amount the amount can be negative
@@ -57,7 +57,7 @@ public interface MotorController extends Attachable {
    * @param motor
    *          the motor that will be moved
    */
-  public void motorMoveTo(MotorControl motor);
+  public void onMotorMoveTo(MotorControl motor);
 
   /**
    * stops the motor
@@ -66,7 +66,7 @@ public interface MotorController extends Attachable {
    *          the motor that will be stopped
    * 
    */
-  public void motorStop(MotorControl motor);
+  public void onMotorStop(MotorControl motor);
 
   /**
    * method for resetting all the variables of a motor this will reset counters
@@ -77,7 +77,7 @@ public interface MotorController extends Attachable {
    *          the motor that will be reset
    * 
    */
-  public void motorReset(MotorControl motor);
+  public void onMotorReset(MotorControl motor);
 
   /**
    * if the motor controller uses ports - this method will return a list of

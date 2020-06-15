@@ -3,14 +3,30 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     var _self = this
     var msg = this.msg
     $scope.selectedPose = ""
+    $scope.currentPose = {}
     $scope.servos = []
     $scope.sliders = []
     $scope.poseFiles = []
     $scope.loadedPose = null
+    $scope.subPanels = {}
+
+
+    let panelNames = new Set()
+    panelNames.add('servo1')
+    panelNames.add('servo2')
+    panelNames.add('servo3')
+
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
+        if (!service.currentPose) {
+            // user has no definition
+            service.currentPose = {}
+        } else {
+            // replace with service definition
+            $scope.currentPose = service.currentPose    
+        }
     }
 
     $scope.toggle = function(servo) {
@@ -95,11 +111,37 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.savePose = function(pose) {
         msg.send('savePose', pose);
     }
+
+
+    // this method initializes subPanels when a new service becomes available
+    this.onRegistered = function(panel) {
+        if (panelNames.has(panel.displayName)) {
+            $scope.subPanels[panel.displayName] = panel
+        }
+    }
+
+    // this method removes subPanels references from released service
+    this.onReleased = function(panelName) {
+        if (panelNames.has(panelName)) {
+            $scope.subPanels[panelName]           
+        }
+        console.info('here')
+    }
+
+    // initialize all services which have panel references in Intro
+    let servicePanelList = mrl.getPanelList()
+    for (let index = 0; index < servicePanelList.length; ++index){
+        this.onRegistered(servicePanelList[index])
+    }    
    
     msg.subscribe('getPoseFiles')
     msg.subscribe('listAllServos')
     msg.send('listAllServos')
     msg.send('getPoseFiles');
+
+    mrl.subscribeToRegistered(this.onRegistered)
+    mrl.subscribeToReleased(this.onReleased)
+
     msg.subscribe(this)
 }
 ])

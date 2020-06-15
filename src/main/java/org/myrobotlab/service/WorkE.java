@@ -193,8 +193,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
       if (!hasErrors()) {
         // speak("all systems are go..");
-        speak("%s is go", service.getName().replace(".", " "));
-        speak("work-ee is worky");
+        // speak("%s is go", service.getName().replace(".", " "));
+        // speak("work-ee is worky");
       } else {
         speak("not all systems are fully functional");
         speak("would you like a list of things not working?");
@@ -298,7 +298,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
         send(motorLeft, "setPort", motorPortLeft);
         speak("to %s", motorPortLeft);
         speak("setting left motor inverted");
-        speak("setting %s inverted", motorLeft);
         send(motorLeft, "setInverted", true);
       } else {
         send(motorRight, "setPort", motorPortRight);
@@ -307,7 +306,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     }
 
     if (controller != null) {
-      speak("attaching %s to motor controller %s", name, controller);
+      speak("attaching %s to motor controller", name);
       send(controller, "attach", name);
     }
 
@@ -318,15 +317,26 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   // if throws - how is it reported ?
   public void attachMotorController(MotorController service) throws Exception {
-
-    if (isVirtual()) {
-      // nothing needed ?
-    } else {
+      speak("attaching motor controller");
+      
+      controller = service.getName();
+    
       if (service.isType(Sabertooth.class)) {
-        speak("found a sabertooth motor controller");
-        speak("connecting serial port");
+        speak("found a sabertooth");
+        speak("connecting to serial port %s", serialPort);
         ((Sabertooth) service).connect(serialPort);
       }
+      
+      if (motorRight != null) {
+        speak("attaching right motor to controller");
+        send(motorRight, "attach", controller);
+      }
+
+      if (motorLeft != null) {
+        speak("attaching left motor to controller");
+        send(motorLeft, "attach", controller);
+      }
+
       /**
        * <pre>
         *  Find new serial port possibilities
@@ -350,9 +360,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
        */
       speak("could not find valid serial port for sabertooth");
     }
-  }
+  
 
   public void attachOpenCV(OpenCV service) {
+    speak("attaching eye");
     eye = service.getName();
     subscribeTo(service.getName(), "publishOpenCVData");
     // addListener(topicMethod, callbackName, callbackMethod);
@@ -378,11 +389,25 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     replaceWord("work e", "work-ee");
 
     setMute(false);
+    
+    speak("attaching mouth");
 
+    if (Platform.isVirtual()) {
+      speak("starting in virtual mode");
+    } else {
+      speak("starting in real mode");
+    }
+    
     if (mouth != null) {
       speak("attaching mouth to brain");
       send(brain, "attach", mouth);
     }
+    
+    if (ear != null) {
+      speak("attaching mouth to ear");
+      send(ear, "attach", mouth);
+    }
+
   }
 
   @Override
@@ -464,10 +489,12 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   }
 
   public void moveLeft(double pwr) {
+    // speak("moving left at %d percent", (int)(pwr * 100));
     broadcast("publishMotorLeftMove", pwr);
   }
 
   public void moveRight(double pwr) {
+    // speak("moving right at %d percent", (int)(pwr * 100));
     broadcast("publishMotorRightMove", pwr);
   }
 

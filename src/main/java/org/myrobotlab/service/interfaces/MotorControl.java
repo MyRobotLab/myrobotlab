@@ -31,9 +31,11 @@ import org.myrobotlab.sensor.EncoderPublisher;
 
 public interface MotorControl extends NameProvider, RelativePositionControl, Attachable {
 
+  // FIXME - change to attachMotorController(String controller)
   void attachMotorController(MotorController controller) throws Exception;
 
-  void detachMotorController(MotorController controller);
+  // FIXME - change to detachMotorController(String controller)
+  // void detachMotorController(MotorController controller); use detach(String)
 
   /**
    * the raw non-computed input range is -1.0 &lt;---&gt; 1.0
@@ -62,7 +64,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
    * 
    * @return true/false
    */
-  boolean isAttached();
+  // boolean isAttached();  grog, use isAttached(String) !!!
 
   /**
    * testing if a 'specific' motor controller is attached
@@ -71,7 +73,7 @@ public interface MotorControl extends NameProvider, RelativePositionControl, Att
    *          c
    * @return true if the contorller is attached to this control.
    */
-  boolean isAttached(MotorController controller);
+  // boolean isAttached(MotorController controller); - grog, use isAttached(String) !!!
 
   /**
    * @return query the motor as to its inverted status

@@ -55,7 +55,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
 
   // FIXME - if kept they should be put in interface
   public void motorMove(String name) {
-    motorMove((MotorControl) Runtime.getService(name));
+    onMotorMove((MotorControl) Runtime.getService(name));
   }
 
   // FIXME - if kept they should be put in interface
@@ -64,19 +64,19 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
 
   @Override
-  public void motorReset(MotorControl motor) {
+  public void onMotorReset(MotorControl motor) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void motorMoveTo(MotorControl motor) {
+  public void onMotorMoveTo(MotorControl motor) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void motorStop(MotorControl motor) {
+  public void onMotorStop(MotorControl motor) {
     motor.move(0);
   }
 
