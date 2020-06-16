@@ -369,7 +369,6 @@ NameError: name 'isTheSunShiny' is not defined
     // first time
     onStartOpenNav();
     function onStartOpenNav(){
-        //document.getElementById("handleOpen").style.visibility = "hidden";
         document.getElementById("handleClose").style.visibility = "hidden";
         setTimeout(function () {
             openNav();
@@ -392,8 +391,6 @@ NameError: name 'isTheSunShiny' is not defined
         document.getElementById("main").style.marginLeft = "250px";
         document.getElementById("bottomMessages").style.marginLeft = "250px";
         document.getElementById("bottomMessages").style.width = "calc(100vw - 260px)";
-        
-        /*document.getElementById("main").style.width = "calc(100% - 250px)";*/
     }
 
     function closeNav() {
@@ -411,10 +408,9 @@ NameError: name 'isTheSunShiny' is not defined
         document.getElementById("bottomMessages").style.marginLeft = "0px";
         document.getElementById("bottomMessages").style.width = "calc(100vw - 10px)";
         document.getElementById("main").style.width = "100%";
-
     }
  
-    // Drag Bottom Messages container
+    // Drag Bottom Messages container -------------------------------------
     // initial height value;
     var BottomMessagesHeight = 100;
     var BottomMessagesTop = 100;
@@ -440,7 +436,6 @@ NameError: name 'isTheSunShiny' is not defined
           ghostbar.css("top",e.pageY);
        });
         //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
-        //$("span").text("BottomMessagesHeight: " + BottomMessagesHeight + ", BottomMessagesTop: " + BottomMessagesTop); 
     });
     
     $(document).mouseup(function(e){
@@ -460,7 +455,7 @@ NameError: name 'isTheSunShiny' is not defined
     });
 
 
-    // drag for Touch devices 
+    // drag functions for Touch devices 
     document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
     function dragTouchBottomMessagesStart(event){
         //document.getElementById("ghostbarTouchHandler").style.visibility = "visible";
@@ -478,18 +473,12 @@ NameError: name 'isTheSunShiny' is not defined
         //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
     }
 
-    function dragTouchBottomMessagesEnd(event){
-        
-        //document.getElementById("debugDrag").innerHTML = "xxx";
-        
+    function dragTouchBottomMessagesEnd(event){        
+    
         document.getElementById("main").style.height = "calc(100vh - (52px + " + BottomMessagesHeight + "px))";
         document.getElementById("bottomMessages").style.top = BottomMessagesTop +"px";
         document.getElementById("bottomMessages").style.height = BottomMessagesHeight +"px";
-        /*
-        document.getElementById("ghostbarTouchHandler").style.visibility = "hidden";
-        document.getElementById("ghostbarTouchHandler").style.top = BottomMessagesTop;
-        */
-        document.getElementById("ghostbarTouchHandler").style.zIndex = "30";
+          document.getElementById("ghostbarTouchHandler").style.zIndex = "30";
         document.getElementById("ghostbarTouchHandler").style.opacity = "0";
         //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
     }
@@ -497,6 +486,8 @@ NameError: name 'isTheSunShiny' is not defined
         document.getElementById("ghostbarTouchHandler").style.zIndex = "30";
         document.getElementById("ghostbarTouchHandler").style.opacity = "0";
     }
+    //-- End drag functions -----------------------
+
 
     function openBottomMessages() {
         document.getElementById("handleCloseBottomMessages").style.display = "block";

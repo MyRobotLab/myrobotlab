@@ -2604,14 +2604,14 @@ height: calc(100vh - 453px);
     width: 100%;
     height: 19px;
     background-color: transparent;
-    opacity: 1;
+    opacity: 0;
     margin-top: -14px;
     left: 0px;
     position:absolute;
     cursor: row-resize;
     visibility: visible;
     z-index:30;
-    border-bottom-color: #FF0000;
+    border-bottom-color: #337ab7;
     border-bottom-style: dashed;
     border-bottom-width: 4px;
     /* pointer-events: none; */
