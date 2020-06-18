@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.logging.LoggingFactory;
@@ -14,11 +16,50 @@ import org.myrobotlab.service.interfaces.ServoControl;
 
 public class ServoMixer extends Service {
 
-  public String posesDirectory = getDataInstanceDir() + fs + "poses";
   private static final long serialVersionUID = 1L;
+
+  protected String posesDirectory = getDataDir() + fs + "poses";
+
+  protected Pose currentPose = null;
+
+  /**
+   * Set of name kept in sync with current registry
+   */
+  protected TreeSet<String> allServos = new TreeSet<>();
 
   public ServoMixer(String n, String id) {
     super(n, id);
+
+    // FIXME - make this part of framework !!!!
+    //subscribe("runtime", "started");
+    subscribe("runtime", "registered");
+    subscribe("runtime", "released");
+
+    // FIXME - incorporate into framework
+    // FIXME - this "should" be calling onStarted :(
+    List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
+    for (String sc : all) {
+      allServos.add(Runtime.getFullName(sc));
+    }
+
+  }
+
+  // FIXME - these should be Abstract Service methods
+  // which can get meta information regarding inteface
+  public void onRegistered(Registration registration) {
+    // FIXME - wait until ServiceInterface implements hasInterface(String) !
+    // then FIX
+    List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
+    for (String sc : all) {
+      allServos.add(Runtime.getFullName(sc));
+    }
+    broadcastState();
+  }
+
+  // FIXME - part of the service life-cycle framework - this method should be in
+  // Abstract Service
+  public void onReleased(String name) {
+    allServos.remove(name);
   }
 
   public List<ServoControl> listAllServos() {
@@ -36,8 +77,9 @@ public class ServoMixer extends Service {
     // This assumes all servos will be used for the pose.
     List<ServoControl> servos = listAllServos();
     savePose(name, servos);
+    broadcast("getPoseFiles");
   }
-  
+
   public void savePose(String name, List<ServoControl> servos) throws IOException {
     // TODO: save this pose somewhere!
     // we should make a directory
@@ -56,9 +98,9 @@ public class ServoMixer extends Service {
   public Pose loadPose(String name) throws IOException {
     String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
     log.info("Loading Pose name {}", filename);
-    Pose p = Pose.loadPose(filename);
-    return p;
-
+    currentPose = Pose.loadPose(filename);
+    broadcastState();
+    return currentPose;
   }
 
   public void moveToPose(Pose p) throws IOException {
@@ -87,11 +129,34 @@ public class ServoMixer extends Service {
   public void setPosesDirectory(String posesDirectory) {
     this.posesDirectory = posesDirectory;
   }
-  
+
+  public List<String> getPoseFiles() {
+    File dir = new File(posesDirectory);
+    List<String> files = new ArrayList<>();
+    if (!dir.exists() || !dir.isDirectory()) {
+      error("%s not a valid directory", posesDirectory);
+      return files;
+    }
+    File[] all = dir.listFiles();
+    Set<String> sorted = new TreeSet<>();
+    for (File f : all) {
+      if (f.getName().toLowerCase().endsWith(".pose")) {
+        sorted.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
+      }
+    }
+    for (String s : sorted) {
+      files.add(s);
+    }
+    return files;
+  }
+
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init("INFO");
-    Runtime.start("gui", "SwingGui");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    Runtime.start("python", "Python");
+    webgui.startService();
     Servo servo1 = (Servo) Runtime.start("servo1", "Servo");
     servo1.setPin(1);
     Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
@@ -107,7 +172,7 @@ public class ServoMixer extends Service {
     ard.attach(servo2);
     ard.attach(servo3);
 
-    ServoMixer mixer = (ServoMixer) Runtime.start("servomixer", "ServoMixer");
+    ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
 
   }
 

@@ -900,7 +900,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    * 
    * @param interfaze
    * @return
-   */
+   */ // FIXME !!! NOT RETURNING FULL NAMES !!!
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {
     List<String> ret = new ArrayList<String>();
     List<ServiceInterface> services = getServicesFromInterface(interfaze);
