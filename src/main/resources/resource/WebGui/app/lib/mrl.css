@@ -85,7 +85,7 @@ table, th, td {
 
 .restLabel{
   position: absolute;
-  color: #e48b53;
+  color: #e48b53;  
   height: 8px;
   font-size: small;
   top: -50px;
@@ -94,7 +94,20 @@ table, th, td {
   margin-left: -20px;
 }
 
-.restCursor{position: absolute;background-color: #e48b53;margin-left: 20px;width: 1px;z-index: 1;}
+.servoBasicContainer .restCursor:before{
+  content: "Rest";
+  margin-top: 0px;
+  position: absolute;
+  left: -16px;
+  top: -17px;
+}
+.restCursor{
+  position: absolute;
+  background-color: #e48b53;
+  margin-left: 20px;
+  width: 1px;
+  z-index: 1;
+}
 
 .energizedZone{position: absolute;z-index: 52;top: 0px;left: 0px;width: 100%;height: 18px;pointer-events: none;}
 
@@ -673,7 +686,7 @@ background: #999;
 /* custom slider end */
 
 .servoReferences{
-  font-size: 12px;
+  font-size: medium;
   text-align: left;
   white-space: nowrap;
   display: flex;
@@ -973,7 +986,9 @@ height: 4px;
   float: left;
 }
 
-
+.rzMixer .dropdown-toggle{
+  display: none;
+}
 .poseName{
   width: 270px !important;
   height: 24px !important;
@@ -984,22 +999,22 @@ height: 4px;
   color: #888888;
   font-weight: bold;
   font-size: medium;
-  width: 210px;
+  width: 100%;
+  height: 20px;
   float: left;
   margin-right: 0px;
   overflow: hidden;
-  /* background-color: #dbd7fa; */
+  background-color: transparent;
 }
 .MixerServo{
   width: 300px;
 }
-
+/*
 .rzMixer .custom-slider.rzslider .rz-pointer:before {
   content: "";
   position: absolute;
   right: -10px;
   top: 10px;
-  /* width: 1px; */
   z-index: 99;
   height: 0;
   border-right: 10px solid transparent;
@@ -1049,7 +1064,6 @@ height: 4px;
   line-height: 18px;
   cursor: default;
   font-size: medium;
-  /* text-indent: 18px; */
   left: 20px;
   margin-left: 39px;
   visibility: visible!important;
@@ -1062,7 +1076,6 @@ height: 4px;
 
 .rzMixer .custom-slider .rz-bubble:nth-child(7) {
   position: absolute;
-  /* background-color:#ffffff;*/
   height: 30px;
   text-align: center;
   font-weight: bold;
@@ -1080,6 +1093,7 @@ height: 4px;
 .rzMixer .custom-slider .rz-bubble:nth-child(7)::after {
   content: "º";
 }
+*/
 
 .rzPos .custom-slider.rzslider .rz-pointer:before {content: "";position: absolute;right: -10px;top: -6px;/* width: 1px; */z-index: 99;height: 0;border-right: 10px solid transparent;border-left: 10px solid transparent;border-bottom: 10px solid #2a611e;}
 .rzInput .custom-slider.rzslider .rz-selection {background: #edf6e9;height: 56px;top: -17px;}
@@ -1283,7 +1297,7 @@ border-right-color: #f4f4f4;
   background-color: #337ab7!important;
 }
 
-.verticalSpacerBasic{height: 0px;position: inherit;vertical-align: middle;width: 100%;}
+.verticalSpacerBasic{height: 3px;position: inherit;vertical-align: middle;width: 100%;display: flex;/* background: #207aca; */}
 .verticalSpacerLimits{height: 34px;position: inherit;vertical-align: middle;width: 100%;}
 .verticalSpacerAdvanced{height: 16px;position: inherit;vertical-align: middle;width: 100%;}
 
@@ -1610,12 +1624,8 @@ pointer-events: none;
 }
 
 #notification-entries {
-  /* display: block; */
-  /* position: absolute; */
   width: 1030px;
-  /* height: 400px; */
   max-width: 80vh;
-  max-height: 50vh;
   overflow-x: hidden;
   overflow-y: scroll;
   padding: 6px;
@@ -2535,6 +2545,24 @@ height: calc(100vh - 453px);
   display: block;
   cursor: pointer;
 }
+@media (min-width: 700px){
+  #handleOpenBottomMessages{
+    position: relative;
+    width: 176px;
+    height: 20px;
+    right: 0px;
+    margin-right: 0px;
+    float: right;
+    top: -8px;
+    text-align: right;
+    padding-right: 6px;
+    padding-left: 6px;
+    background-color: #f5f5f5;
+    display: block;
+    z-index: 40;
+    cursor: pointer;
+  }
+}
 
 #notificationContainer{
   transform-origin: bottom left;
@@ -2587,18 +2615,17 @@ height: calc(100vh - 453px);
     margin-top: -2px;
     position:absolute;
     cursor: row-resize;
-    z-index:999
+    z-index:999;
 }
 #ghostbarTouch{
     width:100%px;
     background-color:#F00;
     opacity:1;
-
     margin-top: -2px;
     position:absolute;
     cursor: row-resize;
     visibility: visible;
-    z-index:999
+    z-index:999;
 }
 #ghostbarTouchHandler{
     width: 100%;
@@ -2614,5 +2641,196 @@ height: calc(100vh - 453px);
     border-bottom-color: #337ab7;
     border-bottom-style: dashed;
     border-bottom-width: 4px;
-    /* pointer-events: none; */
+    display: none;
+}
+
+
+.rzMixer .servoContent{
+  width: 100% !important;
+  /* max-width: 300px; */
+  overflow: hidden;
+  display: table;
+}
+
+.rzMixer .servoController{
+  display: none !important;
+}
+.rzMixer .servoLimits{
+  display: none;
+}
+.rzMixer .verticalSpacerBasic{
+  display: none;
+}
+.rzMixer .servoBasic{
+  display: block;
+}
+.rzMixer .servoAdvanced{
+  display: none;
+}
+.rzMixer .tableBasic{
+  display: none;
+}
+
+
+.rzMixer .nav-tabs{
+  display: none;
+}
+.sweep{
+  float: left;
+  margin-top: 8px;
+}
+.rzMixer .sweep{
+  display: none;
+}
+.servoReferences{
+  /* clear: both; */
+  width: 541px;
+  float: left;
+  margin-top: 6px;
+}
+.rzMixer .servoReferences{
+  display: none; 
+}
+.basicStopButton{
+  float: left;
+  width: 26px;
+  height: 26px;
+  color: #FF0000;
+  padding: 2px !important;
+  padding-left: 0px !important;
+  font-size: 12px !important;
+  /* box-sizing: border-box; */
+  vertical-align: middle;
+  margin-left: 8px;
+  margin-top: 8px;
+}
+.rzMixer .basicStopButton{
+  display: none; 
+}
+.servoLineDivider{
+  height: 1px;
+  width: 100%;
+  background-color: #cccccc;
+  position: relative;
+  top: 44px;
+}
+
+.restCursorPoint{
+  display: none;
+}
+.rzMixer .restCursorPoint{
+  display: block;
+  width: 5px;
+  height: 5px;
+  position: relative;
+  left: -2px;
+  top: -2px;
+  border-style: solid;
+  border-width: 1px;
+  background-color: #e48b53;
+}
+.rzMixer .speedLabelSlider{
+  position: relative;
+  top: -13px;
+  margin-left: 6px;
+  margin-bottom: 6px;
+  float: left;
+  width: 10%;
+}
+.rzMixer .speedLabelSlider:after{
+  content: ":";
+}
+.rzMixer .basicSpeedValue{
+  width: 90%;
+  top: -18px;
+  left: 80px;
+  position: absolute;
+}
+
+.rzMixer .servoLineDivider{
+  display: none;
+}
+/*
+.rzMixer .restLabel{
+  content: " ";
+  color: transparent;
+  border-color: #FF0000;
+  border-style: solid;
+  border-width: 1px;
+  width: 4px;
+  height: 4px;
+  margin-left: 0px;
+}
+*/
+
+.speedLabelSlider{
+  float: left;
+  margin-top: 10px;
+  margin-left: 14px;
+}
+.speedSlider{
+  width: 501px !important;
+  float: left;
+  margin-top: 10px;
+  margin-left: 6px;
+}
+
+.basicSpeedLabel{
+  margin-right: 4px;
+  margin-top: 15px;
+  float: left;
+  font-size: medium;
+  font-weight: bold;
+}
+.basicSpeedValue{
+  float: left;
+  margin-top: 15px;
+  font-size: medium;
+  font-weight: bold;
+}
+.rzMixer .basicSpeedLabel{
+  display: none; 
+}
+.rzRest .rzslider .rz-bubble{
+  display: none;
+}
+
+.rzMixer .nav-tabs {
+  display: none;
+}
+
+.rzMixer .tab-content>.tab-pane:nth-child(1) {
+    display: none !important;
+}
+.rzMixer .tab-content>.tab-pane:nth-child(2) {
+    display: block !important;
+}
+.rzMixer .tab-content>.tab-pane:nth-child(3) {
+    display: none !important;
+}
+.rzMixer .tab-content>.tab-pane:nth-child(4) {
+    display: none !important;
+}
+.rzMixer .sliderContainer {
+  width: 100%;
+  /* margin-left: -37px; */
+  padding-left: 10px;
+  padding-right: 28px;
+  top: -55px;
+  left: -8px;
+  position: relative;
+  height: 84px;
+}
+.rzMixer .speedSlider {
+  padding-right: 6px;
+  position: relative;
+  top: -23px;
+  left: 0px;
+  width: 98% !important;
+}
+.rzMixer .servoBasicContainer {
+  position: relative;
+  width: 100%;
+  top: 34px;
+  left: 20px;
 }

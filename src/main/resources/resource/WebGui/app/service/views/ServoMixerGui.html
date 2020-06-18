@@ -28,8 +28,7 @@
                 </button>
             </div>
             <div class="savePose">
-                New Pose
-                
+                New Pose                
                 <div class="input-group">
                     <input class="form-control ng-pristine ng-untouched ng-valid ng-empty poseName" type="text" ng-model="poseName" name="poseName" id="poseName" ng-init="" placeholder="Type pose name" style="">
                     <span class="input-group-btn">
@@ -42,33 +41,12 @@
     <div class="row servoFilter">
         Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
         <button class="btn btn-default" ng-click="searchServo.displayName=''">Show All</button>
-    </div>
-    <div ng-repeat="servo in servos | filter:searchServo.displayName">
+    </div>     
+    <div ng-repeat="servo in service.allServos | filter:searchServo.displayName">
         <div class="sliderMixer">
-            <div class="MixerRow">
-                <div class="MixerServoName {{servo.name}}">{{servo.name}}
-                </div>
-                <div class="restColor" ng-click="sliders[servo.name].value=service.rest; msg.rest()" title="Go to Rest">
-                    <span class="glyphicon glyphicon-stop"></span>
-                    Rest
-                
-                </div>
-                <div class="MixerServoSpeed">
-                    <input type="text" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="speed" title="Define a speed for this servo pose">
-                    <a href="#" title="Set at Max speed">
-                        <span class="glyphicon glyphicon-fast-forward"></span>
-                        MAX
-                    </a>
-                </div>
-            </div>
-            <div class="MixerServo">
-                <div class="restMixer" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%)));"></div>
-                <rzslider class="custom-slider" rz-slider-model="sliders[servo.name].value" rz-slider-options="sliders[servo.name].options"/>
-            </div>
+            <div class="MixerServoName">{{servo}}</div>
+            <div service-body panel="subPanels[servo]" /></div>
         </div>
     </div>
-</div>
 
-<div ng-repeat="servo in service.allServos | filter:searchServo.displayName">
-     <div service-body panel="subPanels[servo]" /></div><br/>
-</div>    
+</div>

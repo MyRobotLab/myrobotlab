@@ -501,6 +501,7 @@ NameError: name 'isTheSunShiny' is not defined
         document.getElementById("ghostbarTouchHandler").style.visibility = "visible";
         document.getElementById("ghostbarTouchHandler").style.opacity = "1";
         document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
+        document.getElementById("ghostbarTouchHandler").style.display = "block";
     }
 
     function closeBottomMessages() {
@@ -512,7 +513,8 @@ NameError: name 'isTheSunShiny' is not defined
         document.getElementById("dragbar").style.visibility = "hidden";
         document.getElementById("main").style.height = "calc(100vh - 65px)";
         document.getElementById("ghostbarTouchHandler").style.opacity = "0";
-        document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;        
+        document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
+        document.getElementById("ghostbarTouchHandler").style.display = "none";        
     }
 
 </script>
