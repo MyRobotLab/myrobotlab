@@ -2834,3 +2834,6 @@ height: calc(100vh - 453px);
   top: 34px;
   left: 20px;
 }
+.currentPose{
+  color: #337ab7;
+}
