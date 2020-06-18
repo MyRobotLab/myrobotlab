@@ -60,6 +60,10 @@
                     </div>
                     <button class="btn basicStopButton" title="Stop" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span></button>
                     <div class="servoLineDivider"></div>
+                    <div class="restColor gotoRestButton" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
+                        <span class="glyphicon glyphicon-stop"></span>
+                            Rest
+                    </div>
                     <div class="servoReferences">
                         <div class="inputColor">
                             <span class="glyphicon glyphicon-stop"></span>
@@ -75,43 +79,7 @@
                         </div> 
                     </div>
                     <div class="dataColor basicSpeedLabel">Speed = </div><div class="dataColor basicSpeedValue">{{speedDisplay}} °/s</div>
-<!--
-                    <table class="table tableBasic preventDragSelect" style="margin-bottom: 0px!important;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    Sweep                                    
-                                    <toggle class="miniBTN" title="Servo will move from one position to the opposite" ng-model="service.isSweeping" ng-change="service.isSweeping?msg.sweep():msg.stop()" on="" off="" size="btn-lg"/>
-                                </td>
-                                <td colspan="2">
-                                    Speed
-                                    <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/> <button class="btn" ng-click="msg.stop()">stop<img src="../stop.png"/></button>
-                                </td>
-                            </tr>
-                            <tr class="valuesRow">
-                                <td colspan="2">
-                                    <div class="servoReferences">
-                                        <div class="inputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Input   
-                                        </div> 
-                                        <div class="restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Rest
-                                        </div> 
-                                        <div class="outputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Output
-                                        </div> 
-                                    </div>
-                                </td>
-                                <td>
-                                     <div class="dataColor">Speed = {{speedDisplay}} °/s</div> 
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                -->
+
                     <div class="row servoBasicContainer">
                         <div class="col-md-12">
                             <div class="verticalSpacerBasic">

@@ -94,13 +94,21 @@ table, th, td {
   margin-left: -20px;
 }
 
-.servoBasicContainer .restCursor:before{
+ .servoBasicContainer .restCursor:before{
   content: "Rest";
   margin-top: 0px;
   position: absolute;
   left: -16px;
   top: -17px;
 }
+.rzMixer .restCursor:before{
+  content: " ";
+  margin-top: 0px;
+  position: absolute;
+  left: -16px;
+  top: -17px;
+}
+
 .restCursor{
   position: absolute;
   background-color: #e48b53;
@@ -2816,10 +2824,10 @@ height: calc(100vh - 453px);
   /* margin-left: -37px; */
   padding-left: 10px;
   padding-right: 28px;
-  top: -55px;
+  top: -69px;
   left: -8px;
   position: relative;
-  height: 84px;
+  height: 65px;
 }
 .rzMixer .speedSlider {
   padding-right: 6px;
@@ -2836,4 +2844,14 @@ height: calc(100vh - 453px);
 }
 .currentPose{
   color: #337ab7;
+}
+.gotoRestButton{
+  display: none;
+}
+.rzMixer .gotoRestButton{
+  display: block;
+  position: absolute;
+  right: 25px;
+  top: -6px;
+  z-index: 50;
 }
