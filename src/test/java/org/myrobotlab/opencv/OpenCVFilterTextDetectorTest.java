@@ -1,0 +1,37 @@
+package org.myrobotlab.opencv;
+
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
+
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.nd4j.linalg.io.Assert;
+
+@Ignore
+public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
+
+  @Before
+  public void setup() {
+    debug = true;
+  }
+
+  @Override
+  public OpenCVFilter createFilter() {
+    return new OpenCVFilterTextDetector("td");
+  }
+
+  @Override
+  public IplImage createTestImage() {
+    String filename = "US Treasury/1.png";
+    return cvLoadImage(filename);
+  }
+
+  @Override
+  public void verify(OpenCVFilter filter, IplImage input, IplImage output) {
+    // Make sure we found 5 faces.
+    log.info("CVData: {}", filter.data);
+    Assert.notNull(output);
+    waitOnAnyKey();
+  }
+
+}
