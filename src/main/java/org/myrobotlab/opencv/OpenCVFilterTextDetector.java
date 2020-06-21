@@ -7,6 +7,8 @@ import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNet;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
+import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
+import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -18,6 +20,7 @@ import java.util.TreeMap;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -40,7 +43,7 @@ import org.opencv.imgproc.Imgproc;
 public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
-  
+
   public OpenCVFilterTextDetector() {
     super();
     // TODO Auto-generated constructor stub
@@ -73,6 +76,9 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   private IplImage detectText(IplImage image) {
     // 
+
+    Mat originalImageMat = OpenCV.toMat(image);
+
     int newWidth = 640;
     int newHeight = 640;
     IplImage ret = IplImage.create(newWidth, newHeight, image.depth(), image.nChannels());
@@ -98,9 +104,9 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     ArrayList<RotatedRect> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
     // here we can/should draw the results on the image i guess?
     // TODO: map these rects back to the orginal image coordinates!
-    
-    
-    
+
+
+
     Point2f ratio = new Point2f((float)frame.cols() / inpWidth, (float)frame.rows() / inpHeight);
     for (RotatedRect box : results) {
       Point2f vertices = new Point2f(4);
@@ -112,10 +118,16 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
         vertices.y( vertices.y() * ratio.y());
         log.info("Scaled: {} {} {} {}", vertices.x(), vertices.y());
       }
+      vertices.position(0);
       // In theory we have an array with the 4 scaled points representing the text area
-      
-      
-      
+
+      Mat cropped = new Mat();
+      // This should be the orig image...  not the frame.
+      fourPointsTransform(originalImageMat, vertices, cropped);
+      //fourPointsTransform(frame, vertices, cropped);
+
+
+
       // TODO: use the scaled up vertices for the box instead.
       drawRect(frame,box);
     }
@@ -126,6 +138,42 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   }
 
+  private void fourPointsTransform(Mat frame, Point2f vertices, Mat result) {
+    // TODO Auto-generated method stub
+    
+    // TODO: it'd be nice to actually size this according to the original size of the rotated rect
+    // not grok'in whats 100x32 for?
+    
+    Size outputSize = new Size(100, 32);
+    Point2f targetVertices = new Point2f(4);
+
+    targetVertices.position(0);
+    targetVertices.put(new Point2f(0, outputSize.height() - 1));
+    targetVertices.position(1);
+    targetVertices.put(new Point2f(0, 0));
+    targetVertices.position(2);
+    targetVertices.put(new Point2f(outputSize.width() - 1, 0));
+    targetVertices.position(3);
+    targetVertices.put(new Point2f(outputSize.width() - 1, outputSize.height() - 1));
+    targetVertices.position(0);
+    
+    Mat rotationMatrix = getPerspectiveTransform(vertices, targetVertices);
+    warpPerspective(frame, result, rotationMatrix, outputSize);
+    // Ok.. now the result should have the cropped image?
+    
+   //  show(OpenCV.toImage(result), "four points...");
+
+  }
+
+
+  public CanvasFrame show(final IplImage image, final String title) {
+    CanvasFrame canvas = new CanvasFrame(title);
+    // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    canvas.showImage(toFrame(image));
+    return canvas;
+  }
+
+  
   private ArrayList<RotatedRect> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
 
     ArrayList<Classification> results = new ArrayList<Classification>();
@@ -260,12 +308,12 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     //
     // TODO: fill in the stuffs.
-//    for (RotatedRect rr : classifications) {
-//      // Render the rect on the image..
-//      Rect bR = rr.boundingRect();
-//      graphics.drawRect((int) bR.x(), (int) bR.y(), (int) bR.width(), (int) bR.height());
-//    }
-    
+    //    for (RotatedRect rr : classifications) {
+    //      // Render the rect on the image..
+    //      Rect bR = rr.boundingRect();
+    //      graphics.drawRect((int) bR.x(), (int) bR.y(), (int) bR.width(), (int) bR.height());
+    //    }
+
     return image;
   }
 
