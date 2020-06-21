@@ -11,6 +11,9 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -29,11 +32,14 @@ import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.myrobotlab.document.Classification;
+import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;
 import org.opencv.imgproc.Imgproc;
 
 public class OpenCVFilterTextDetector extends OpenCVFilter {
 
+  ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
+  
   public OpenCVFilterTextDetector() {
     super();
     // TODO Auto-generated constructor stub
@@ -56,7 +62,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   // first we need our EAST detection model. 
-  String modelFile = "models/frozen_east_text_detection.pb";
+  String modelFile = "resource/OpenCV/east_text_detector/frozen_east_text_detection.pb";
   float confThreshold = 0.5f;
   Net detector = null;
 
@@ -88,22 +94,19 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // Decode predicted bounding boxes.
     // std::vector<RotatedRect> boxes;
     // std::vector<float> confidences;
-
     ArrayList<RotatedRect> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
-
     // here we can/should draw the results on the image i guess?
     // TODO: map these rects back to the orginal image coordinates!
     for (RotatedRect rr : results) {
       drawRect(frame, rr);
     }
-    
     IplImage newImg = OpenCV.toImage(frame);
-    show(newImg, "Regions");
+    // show(newImg, "Regions");
     return newImg;
 
   }
 
-  private static ArrayList<RotatedRect> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
+  private ArrayList<RotatedRect> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
 
     ArrayList<Classification> results = new ArrayList<Classification>();
     int height = scores.size(2);
@@ -167,10 +170,8 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // Apply non-maximum suppression procedure.
     // std::vector<int> indices;
     ArrayList<RotatedRect> maxRects = applyNMSBoxes(threshold, boxes, confidences);
-    for (RotatedRect r : maxRects) {
-      drawRect(frame, r);
-    }
     // System.out.println("Here we are.. what's in our indicesIp?!?");
+    classifications = maxRects;
     return maxRects;
   }
 
@@ -185,7 +186,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // IntPointer indicesIp = new IntPointer(confidences.size());
     IntPointer indicesIp = new IntPointer();
     NMSBoxes(boxesRV, confidencesFV, (float)threshold, nmsThreshold, indicesIp);
-    System.out.println("NMS BOXES!!!!");
+    // System.out.println("NMS BOXES!!!!");
     // Ok.. so.. now what do we do with these ?!  persumably, the boxes for specific indicesIp values are good?
     ArrayList<RotatedRect> goodOnes = new ArrayList<RotatedRect>();
     for (int m=0;m<indicesIp.limit();m++) {
@@ -216,8 +217,8 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   private static void drawRect(Mat frame, RotatedRect rec) {
     IplImage image = OpenCV.toImage(frame);
     drawRect(image, rec.boundingRect(), CvScalar.YELLOW);
-    //show(image, "Our image..");
-    System.out.println("Here...");
+    // show(image, "Our image..");
+    // System.out.println("Here...");
   }
 
 
@@ -237,7 +238,14 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    // 
+    //
+    // TODO: fill in the stuffs.
+//    for (RotatedRect rr : classifications) {
+//      // Render the rect on the image..
+//      Rect bR = rr.boundingRect();
+//      graphics.drawRect((int) bR.x(), (int) bR.y(), (int) bR.width(), (int) bR.height());
+//    }
+    
     return image;
   }
 
