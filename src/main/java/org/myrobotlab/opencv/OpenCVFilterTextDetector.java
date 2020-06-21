@@ -23,6 +23,7 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.Point2fVector;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.RotatedRect;
@@ -97,9 +98,28 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     ArrayList<RotatedRect> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
     // here we can/should draw the results on the image i guess?
     // TODO: map these rects back to the orginal image coordinates!
-    for (RotatedRect rr : results) {
-      drawRect(frame, rr);
+    
+    
+    
+    Point2f ratio = new Point2f((float)frame.cols() / inpWidth, (float)frame.rows() / inpHeight);
+    for (RotatedRect box : results) {
+      Point2f vertices = new Point2f(4);
+      box.points(vertices);
+      for (int j = 0; j < 4; ++j) {
+        // walk the array?
+        vertices.position(j);
+        vertices.x( vertices.x() * ratio.x());
+        vertices.y( vertices.y() * ratio.y());
+        log.info("Scaled: {} {} {} {}", vertices.x(), vertices.y());
+      }
+      // In theory we have an array with the 4 scaled points representing the text area
+      
+      
+      
+      // TODO: use the scaled up vertices for the box instead.
+      drawRect(frame,box);
     }
+    ratio.close();
     IplImage newImg = OpenCV.toImage(frame);
     // show(newImg, "Regions");
     return newImg;
