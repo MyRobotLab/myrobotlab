@@ -10,6 +10,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
 import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ import org.opencv.imgproc.Imgproc;
 public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
+
+  int newWidth = 320;
+  int newHeight = 320;
 
   public OpenCVFilterTextDetector() {
     super();
@@ -79,8 +83,6 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
     Mat originalImageMat = OpenCV.toMat(image);
 
-    int newWidth = 640;
-    int newHeight = 640;
     IplImage ret = IplImage.create(newWidth, newHeight, image.depth(), image.nChannels());
     cvResize(image, ret, Imgproc.INTER_AREA);
     Mat frame = OpenCV.toMat(ret);
@@ -306,14 +308,28 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    //
+//    //
+//    int width = image.getWidth();
+//    int height = image.getHeight();
+//    
+    // we need to scale the boxes 
+    Point2f ratio = new Point2f( (float)image.getWidth() / newWidth ,  (float)image.getHeight() / newHeight );
+    log.error("Image Size {} {} ", image.getWidth(), image.getHeight());
     // TODO: fill in the stuffs.
-    //    for (RotatedRect rr : classifications) {
-    //      // Render the rect on the image..
-    //      Rect bR = rr.boundingRect();
-    //      graphics.drawRect((int) bR.x(), (int) bR.y(), (int) bR.width(), (int) bR.height());
-    //    }
+    for (RotatedRect rr : classifications) {
+      // Render the rect on the image..
+      Rect bR = rr.boundingRect();
+      // scaled back down.
+      int x = (int) (bR.x()*ratio.x());
+      int y = (int) (bR.y()*ratio.y());
+      int w = (int) (bR.width()*ratio.x());
+      int h = (int) (bR.height()*ratio.y());
+      log.error("Draw Rect : {} {} {} {}", x,y,w,h);
+      graphics.setColor(Color.BLACK);
 
+      graphics.drawRect(x,y,w,h);
+    }
+    ratio.close();
     return image;
   }
 
