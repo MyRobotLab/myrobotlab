@@ -47,7 +47,8 @@ public class TesseractOcr extends Service {
       TesseractOcr tesseract = (TesseractOcr) Runtime.start("tesseract", "TesseractOcr");
       // String found = tesseract.ocr("phototest.jpg");
       // String found = tesseract.ocr("30.speed.JPG");
-      String found = tesseract.ocr("traffic.sign.jpg");
+      //String found = tesseract.ocr("traffic.sign.jpg");
+      String found = tesseract.ocr("src/test/resources/OpenCV/i_am_a_droid.jpg");
 
       // String found = tesseract.ocr("test.jpg");
       // String found = tesseract.ocr("test.tif");
@@ -80,6 +81,14 @@ public class TesseractOcr extends Service {
     BytePointer outText;
     if (api == null) {
       api = new TessBaseAPI();
+      String tessData = "C:/dev/workspace.mrl2/myrobotlab/resource/TesseractOcr";
+      // load the models
+      
+      if (api.Init(tessData, "eng") != 0) {
+        System.err.println("Could not initialize tesseract.");
+        System.exit(1);
+      }
+      
     }
     // Initialize tesseract-ocr with English, without specifying tessdata path
     // FIXME - maybe don't just dump in the root - perhaps subdirectory - and

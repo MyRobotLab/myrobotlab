@@ -17,7 +17,8 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Override
   public OpenCVFilter createFilter() {
-    return new OpenCVFilterTextDetector("td");
+    OpenCVFilterTextDetector filter = new OpenCVFilterTextDetector("td");
+    return filter;
   }
 
   @Override

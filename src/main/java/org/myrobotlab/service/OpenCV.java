@@ -410,7 +410,7 @@ public class OpenCV extends AbstractComputerVision {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
     cv.addFilter(td);
-//    cv.capture();
+    cv.capture();
     
     // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     // webgui.autoStartBrowser(false);
