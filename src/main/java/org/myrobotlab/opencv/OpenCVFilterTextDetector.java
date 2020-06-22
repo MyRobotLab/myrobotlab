@@ -5,7 +5,10 @@ import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_dnn.NMSBoxes;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNet;
+import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
 import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
@@ -33,6 +36,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
+import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
@@ -43,6 +47,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
   public TesseractOcr tesseract = null;
+  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   int newWidth = 320;
   int newHeight = 320;
   // first we need our EAST detection model. 
@@ -145,8 +150,8 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       if (tesseract == null) {
         tesseract = (TesseractOcr)Runtime.start("tesseract", "TesseractOcr");
       }
-      result = tesseract.ocr(candidate);
-      System.err.println("Result from OCR WAS : " + result);
+      result = tesseract.ocr(candidate).trim();
+      //System.err.println("Result from OCR WAS : " + result);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -405,6 +410,13 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       graphics.drawRect(x,y,w,h);
     }
     ratio.close();
+    
+    // 
+    if (detectedText != null && detectedText.length() > 0) {
+      graphics.setColor(Color.CYAN);
+      graphics.drawString(detectedText, 20, 40);
+    }
+    
     return image;
   }
 
