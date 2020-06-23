@@ -128,15 +128,22 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       Mat cropped = cropAndRotate(originalImageMat, rr, rect, ratio);
       // can I just ocr that cropped mat now?
       String croppedResult = ocrMat(cropped);
-      // System.err.println("CROPPED RESULT: "  +croppedResult);
-      // String result = ocrRegion(originalImageMat, rect);
-      detectedText.append(croppedResult);
-      detectedText.append(" ");
+      if (croppedResult != null) {
+        croppedResult = croppedResult.trim();
+        if (croppedResult.length() > 0) {
+          detectedText.append(croppedResult);
+          detectedText.append(" ");
+        }
+      }
+      
     }
     String trimmed = detectedText.toString().trim();
     if (trimmed.length() > 0) {
       System.err.println("Detected Text : " + detectedText.toString());
+      // stuff this in the opencvdata.
+      data.setDetectedText(trimmed);
     }
+    
     return trimmed;
   }
 
