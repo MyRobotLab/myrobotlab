@@ -5,10 +5,7 @@ import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_dnn.NMSBoxes;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNet;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
 import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
@@ -18,7 +15,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
@@ -36,7 +32,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
-import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
@@ -47,9 +42,12 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
   public TesseractOcr tesseract = null;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
   int newWidth = 320;
   int newHeight = 320;
+  // a little extra padding on the x axis
+  int xPadding = 20;
+  // some on the y axis.
+  int yPadding = 10;
   // first we need our EAST detection model. 
   String modelFile = "resource/OpenCV/east_text_detector/frozen_east_text_detection.pb";
   float confThreshold = 0.5f;
@@ -115,9 +113,6 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     Point2f ratio = new Point2f( (float)image.width() / newWidth ,  (float)image.height() / newHeight );
     // log.error("Image Size {} {} ", image.width(), image.height());
     // TODO: fill in the stuffs.
-    // add a 5 pixel border to our detected rect.
-    int xPadding = 5;
-    int yPadding = 5;
     
     for (RotatedRect rr : classifications) {
       // Render the rect on the image..
@@ -166,6 +161,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   }
 
   private String ocrMat(Mat input) {
+    // log.error("INPUT MAT SIZE FOR OCR: {} x {}", input.cols(), input.rows());
     String result = null;
     BufferedImage candidate = OpenCV.toBufferedImage(OpenCV.toFrame(input));
     try {
