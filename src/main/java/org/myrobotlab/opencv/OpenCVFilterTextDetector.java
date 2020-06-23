@@ -130,6 +130,13 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       log.error("Draw Rect : {} {} {} {}", x,y,w,h);
       // This should be correct
       Rect rect = new Rect(x,y,w,h);
+      
+      Mat cropped = cropAndRotate(originalImageMat, rr, rect, ratio);
+      // can I just ocr that cropped mat now?
+      
+      String croppedResult = ocrMat(cropped);
+      System.err.println("CROPPED RESULT: "  +croppedResult);
+      
       String result = ocrRegion(originalImageMat, rect);
       detectedText.append(result);
       detectedText.append(" ");
@@ -141,6 +148,43 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     return trimmed;
   }
 
+  private Mat cropAndRotate(Mat frame, RotatedRect box, Rect rect, Point2f ratio) {
+    // TODO Auto-generated method stub
+    Point2f vertices = new Point2f(4);
+    box.points(vertices);
+    for (int i = 0 ; i < 4; i++) {
+      vertices.position(i);
+      vertices.x( vertices.x() * ratio.x() );
+      vertices.y( vertices.y() * ratio.y() );
+    }
+    vertices.position(0);
+    // In theory we have an array with the 4 scaled points representing the text area
+    // TODO: better target size?
+    Size outputSize = new Size(rect.width(),rect.height());
+    System.out.println("Output Size : " + outputSize);
+    Mat cropped = new Mat();
+    fourPointsTransform(frame, vertices, cropped, outputSize);
+    show(cropped, " cropped?");
+    return cropped;
+  }
+
+  private String ocrMat(Mat input) {
+    String result = null;
+    BufferedImage candidate = OpenCV.toBufferedImage(OpenCV.toFrame(input));
+    try {
+      if (tesseract == null) {
+        tesseract = (TesseractOcr)Runtime.start("tesseract", "TesseractOcr");
+      }
+      result = tesseract.ocr(candidate).trim();
+      //System.err.println("Result from OCR WAS : " + result);
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return result;
+    
+  }
+  
   private String ocrRegion(Mat originalImageMat, Rect box) {
     String result = null;
     IplImage subImage = extractSubImage(originalImageMat, box);

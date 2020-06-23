@@ -81,7 +81,7 @@ public class TesseractOcr extends Service {
     BytePointer outText;
     if (api == null) {
       api = new TessBaseAPI();
-      String tessData = "C:/dev/workspace.mrl2/myrobotlab/resource/TesseractOcr";
+      String tessData = "C:/dev/workspace/myrobotlab/resource/TesseractOcr";
       // load the models
       
       if (api.Init(tessData, "eng") != 0) {

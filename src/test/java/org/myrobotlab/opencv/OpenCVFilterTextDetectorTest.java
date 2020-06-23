@@ -23,7 +23,8 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Override
   public IplImage createTestImage() {
-    String filename = "src/test/resources/OpenCV/i_am_a_droid.jpg";
+    // String filename = "src/test/resources/OpenCV/i_am_a_droid.jpg";
+    String filename = "src/test/resources/OpenCV/hiring_humans.jpg";
     return cvLoadImage(filename);
   }
 
