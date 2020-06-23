@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
@@ -35,8 +36,10 @@ import org.slf4j.Logger;
 public class TesseractOcr extends Service {
 
   private static final long serialVersionUID = 1L;
-  transient private TessBaseAPI api;
+  transient private TessBaseAPI api = null;
 
+  // define which language model to load
+  String lang = "eng";
   public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class);
 
   public static void main(String[] args) {
@@ -64,6 +67,18 @@ public class TesseractOcr extends Service {
     super(n, id);
   }
 
+  private void initModel(String lang) {
+    api = new TessBaseAPI();
+    // 
+    String tessData = "resource/TesseractOcr";
+    log.info("Tess Data being loaded from {}", tessData);
+    // load the models
+    if (api.Init(tessData, lang) != 0) {
+      System.err.println("Could not initialize tesseract.");
+      System.exit(1);
+    }
+  }
+
   public String ocr(BufferedImage image) throws IOException {
     // A class called PIXConversions will convert directly
     // but I'm afraid to import the library in that it might clash with the
@@ -79,25 +94,9 @@ public class TesseractOcr extends Service {
   public String ocr(String filename) throws IOException {
 
     BytePointer outText;
-    if (api == null) {
-      api = new TessBaseAPI();
-      String tessData = "C:/dev/workspace/myrobotlab/resource/TesseractOcr";
-      // load the models
-      
-      if (api.Init(tessData, "eng") != 0) {
-        System.err.println("Could not initialize tesseract.");
-        System.exit(1);
-      }
-      
-    }
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    // FIXME - maybe don't just dump in the root - perhaps subdirectory - and
-    // what
-    // about integrating with other /resources ?
-    if (api.Init(System.getProperty("user.dir"), "eng") != 0) {
-      log.error("Could not initialize tesseract.");
-    }
-
+    // TODO: i don't think we want ot call this each time.
+    initModel("eng");
+  
     // Open input image with leptonica library
     PIX image = pixRead(filename);
     api.SetImage(image);
