@@ -127,18 +127,15 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       int y = (int) Math.max(0, bR.y()*ratio.y()-yPadding/2);
       int w = (int) Math.max(0, bR.width()*ratio.x()+xPadding);
       int h = (int) Math.max(0, bR.height()*ratio.y()+yPadding);
-      log.error("Draw Rect : {} {} {} {}", x,y,w,h);
+      //log.error("Draw Rect : {} {} {} {}", x,y,w,h);
       // This should be correct
       Rect rect = new Rect(x,y,w,h);
-      
       Mat cropped = cropAndRotate(originalImageMat, rr, rect, ratio);
       // can I just ocr that cropped mat now?
-      
       String croppedResult = ocrMat(cropped);
-      System.err.println("CROPPED RESULT: "  +croppedResult);
-      
-      String result = ocrRegion(originalImageMat, rect);
-      detectedText.append(result);
+      // System.err.println("CROPPED RESULT: "  +croppedResult);
+      // String result = ocrRegion(originalImageMat, rect);
+      detectedText.append(croppedResult);
       detectedText.append(" ");
     }
     String trimmed = detectedText.toString().trim();
@@ -161,10 +158,10 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // In theory we have an array with the 4 scaled points representing the text area
     // TODO: better target size?
     Size outputSize = new Size(rect.width(),rect.height());
-    System.out.println("Output Size : " + outputSize);
+    // System.out.println("Output Size : " + outputSize);
     Mat cropped = new Mat();
     fourPointsTransform(frame, vertices, cropped, outputSize);
-    show(cropped, " cropped?");
+    // show(cropped, " cropped?");
     return cropped;
   }
 
@@ -388,8 +385,10 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       @Override         
       public int compare(RotatedRect rect1, RotatedRect rect2) {
         // left to right.. top to bottom. 
-        int index1 = rect1.boundingRect().x() + rect1.boundingRect().y()*width; 
-        int index2 = rect2.boundingRect().x() + rect2.boundingRect().y()*width;;
+        // TODO: this 100 is a vertical sort of resolution ... it should be more dynamic
+        // and it should probably be configured somehow..
+        int index1 = rect1.boundingRect().x() + (rect1.boundingRect().y()*width/100); 
+        int index2 = rect2.boundingRect().x() + (rect2.boundingRect().y()*width/100);
         return (index2 > index1 ? -1 : (index2 == index1 ? 0 : 1));           
       }     
     };  
@@ -448,7 +447,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       int y = (int) (bR.y()*ratio.y());
       int w = (int) (bR.width()*ratio.x());
       int h = (int) (bR.height()*ratio.y());
-      log.error("Draw Rect : {} {} {} {}", x,y,w,h);
+      // log.error("Draw Rect : {} {} {} {}", x,y,w,h);
       graphics.setColor(Color.BLACK);
 
       graphics.drawRect(x,y,w,h);

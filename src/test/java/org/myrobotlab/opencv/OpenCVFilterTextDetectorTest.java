@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.nd4j.linalg.io.Assert;
 
-@Ignore
+// @Ignore
 public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Before
@@ -23,8 +23,8 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Override
   public IplImage createTestImage() {
-    // String filename = "src/test/resources/OpenCV/i_am_a_droid.jpg";
-    String filename = "src/test/resources/OpenCV/hiring_humans.jpg";
+    String filename = "src/test/resources/OpenCV/i_am_a_droid.jpg";
+   // String filename = "src/test/resources/OpenCV/hiring_humans.jpg";
     return cvLoadImage(filename);
   }
 

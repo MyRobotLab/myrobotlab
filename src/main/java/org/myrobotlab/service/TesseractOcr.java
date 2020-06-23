@@ -104,7 +104,7 @@ public class TesseractOcr extends Service {
     // Get OCR result
     outText = api.GetUTF8Text();
     String ret = outText.getString();
-    log.info("OCR output:\n" + ret);
+    //log.info("OCR output:\n" + ret);
 
     // Destroy used object and release memory
     api.End();
