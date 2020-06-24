@@ -3,17 +3,17 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-// @Ignore
+/**
+ * Test a sample image through text detection and ocr
+ */
 public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
-    debug = true;
+    debug = false;
   }
 
   @Override
@@ -24,13 +24,7 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Override
   public IplImage createTestImage() {
-    // String filename = "src/test/resources/OpenCV/i_am_a_droid.jpg";
     String filename = "src/test/resources/OpenCV/hiring_humans.jpg";
-    //String filename = "US Treasury/1.png";
-    //String filename = "US Treasury/1a.png";
-    // String filename = "US Treasury/1b.png";
-    // String filename = "US Treasury/2.png";
-    // String filename = "US Treasury/3.png";
     return cvLoadImage(filename);
   }
 
@@ -43,7 +37,7 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
     System.out.println("TEXT: " + fullString);
     //assertTrue(filter.data.getDetectedText().get(0).text.contains(" HIRING "));
     assertEquals("WERE STILL. HIRING UMANS Carneqie ) Robotics, (2l", fullString);
-    waitOnAnyKey();
+    // waitOnAnyKey();
   }
 
   private String stitchText(OpenCVFilter filter) {
