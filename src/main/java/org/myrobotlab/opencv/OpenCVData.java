@@ -153,7 +153,7 @@ public class OpenCVData extends CvData {
   private long timestamp;
 
   // for use with text detection / ocr filters.
-  private String detectedText;
+  private ArrayList<DetectedText> detectedText;
   
   public OpenCVData() {
   }
@@ -552,11 +552,11 @@ public class OpenCVData extends CvData {
     sources.put(CvData.POINT_CLOUDS, pcs);
   }
 
-  public String getDetectedText() {
+  public ArrayList<DetectedText> getDetectedText() {
     return detectedText;
   }
 
-  public void setDetectedText(String detectedText) {
+  public void setDetectedText(ArrayList<DetectedText> detectedText) {
     this.detectedText = detectedText;
   }
 

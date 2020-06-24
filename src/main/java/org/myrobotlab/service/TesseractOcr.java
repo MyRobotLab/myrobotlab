@@ -59,7 +59,6 @@ public class TesseractOcr extends Service {
   @Override
   synchronized public void startService() {
     super.startService();
-    System.err.println("Start Service called? ");
     initModel(lang);
   }
 
