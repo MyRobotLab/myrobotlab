@@ -19,6 +19,7 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
   @Override
   public OpenCVFilter createFilter() {
     OpenCVFilterTextDetector filter = new OpenCVFilterTextDetector("td");
+    // filter.xPadding = 0;
     return filter;
   }
 
@@ -34,10 +35,9 @@ public class OpenCVFilterTextDetectorTest  extends AbstractOpenCVFilterTest {
     assertNotNull(output);
     // assert that we got something semi readable
     String fullString = stitchText(filter);
-    System.out.println("TEXT: " + fullString);
-    //assertTrue(filter.data.getDetectedText().get(0).text.contains(" HIRING "));
-    assertEquals("WERE STILL. HIRING UMANS Carneqie ) Robotics, (2l", fullString);
+    // System.out.println("TEXT: " + fullString);
     // waitOnAnyKey();
+    assertEquals("WERE -STILL . HIRING IUMANS Carnegie o Robotics. (zr.t1 ", fullString);
   }
 
   private String stitchText(OpenCVFilter filter) {

@@ -58,17 +58,20 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   ArrayList<DetectedText> classifications = new ArrayList<DetectedText>();
   private transient TesseractOcr tesseract = null;
   int fontSize = 40;
+  // these need to be a multiple of 32.  They determine the input size to the model.
   int newWidth = 320;
   int newHeight = 320;
-  // a little extra padding on the x axis
-  int xPadding = 10;
+  // a little extra padding on the x axis for our detected boxes
+  int xPadding = 2;
   // some on the y axis.
-  int yPadding = 10;
+  int yPadding = 0;
   // first we need our EAST detection model. 
   String modelFile = "resource/OpenCV/east_text_detector/frozen_east_text_detection.pb";
+  // text region detection threshold
   float confThreshold = 0.5f;
-  // non-maximum suppression threshold
+  // non-maximum suppression threshold for de-dup of overlapping results.
   float nmsThreshold = (float) 0.3;
+  // the actual east text classification network 
   Net detector = null;
   
   public OpenCVFilterTextDetector() {
@@ -127,20 +130,19 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     ArrayList<DetectedText> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
     for (DetectedText dt : results) {
       // Render the rect on the image..
-      Rect bR = dt.box.boundingRect();
-      // scaled back down.
-      int x = (int) Math.max(0, bR.x()*ratio.x()-xPadding/2);
-      int y = (int) Math.max(0, bR.y()*ratio.y()-yPadding/2);
-      int w = (int) Math.max(0, bR.width()*ratio.x()+xPadding);
-      int h = (int) Math.max(0, bR.height()*ratio.y()+yPadding);
-      // this rect should have a border around it.
-      // TODO: this represents the target size.  This should probably not include the padding.
-      // Crop the image and rotate it to the same size as rect ?  pass in the ratio here.
-      // TODO: this is probably the wrong size.. 
-      Size outputSize = new Size(w,h);
-      Mat cropped = cropAndRotate(originalImageMat, dt.box, outputSize, ratio);
+      // the target height and width rect after we warp with the padding on the original image
+      int w = (int) ((dt.box.size().width()+xPadding)*ratio.x());
+      int h = (int) ((dt.box.size().height()+yPadding)*ratio.y());
+      Size outputSizeInt = new Size(w,h);
+      // the target output size for a rotated rect slighty larger than the original.. in the scaled image.
+      Size2f origPaddedSize = new Size2f(dt.box.size().width()+xPadding, dt.box.size().height()+yPadding);
+      RotatedRect largerBox = new RotatedRect(dt.box.center(), origPaddedSize , dt.box.angle());
+      // crop and rotate based on the updated padded box.
+      Mat cropped = cropAndRotate(originalImageMat, largerBox, outputSizeInt, ratio);
       // can I just ocr that cropped mat now?
       String croppedResult = ocrMat(cropped);
+      // If debugging.. it's useful to see this section ..
+      // show(cropped, croppedResult);
       if (croppedResult != null) {
         croppedResult = croppedResult.trim();
         // update the text on the detected text object.
@@ -159,9 +161,19 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     return results;
   }
 
-  private Mat cropAndRotate(Mat frame, RotatedRect box, Size outputSize, Point2f ratio) {
+  private Mat cropAndRotate(Mat frame, RotatedRect largerBox, Size outputSize, Point2f ratio) {
     // Input rotatedRect is on the neural network scaled image
     // this needs to be scaled up to the original resolution by the ratio.
+    Point2f vertices = scaleVertices(largerBox, ratio);
+    // a target for the cropped image
+    Mat cropped = new Mat();
+    // do the cropping of the original image, scaled vertices and a target output size
+    fourPointsTransform(frame, vertices, cropped, outputSize);
+    // return the cropped mat that is populated with the cropped image from the original input image.
+    return cropped;
+  }
+
+  private Point2f scaleVertices(RotatedRect box, Point2f ratio) {
     Point2f vertices = new Point2f(4);
     box.points(vertices);
     for (int i = 0 ; i < 4; i++) {
@@ -170,10 +182,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       vertices.y( vertices.y() * ratio.y() );
     }
     vertices.position(0);
-    Mat cropped = new Mat();
-    fourPointsTransform(frame, vertices, cropped, outputSize);
-    // show(cropped, " cropped?");
-    return cropped;
+    return vertices;
   }
 
   private String ocrMat(Mat input) {
@@ -191,9 +200,6 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   }
 
   private void fourPointsTransform(Mat frame, Point2f vertices, Mat result, Size outputSize) {
-    // TODO: it'd be nice to actually size this according to the original size of the rotated rect
-    // not grok'in whats 100x32 for?
-    // TODO: a better resoulution is desired.
     Point2f targetVertices = new Point2f(4);
     // write the data into the array
     targetVertices.position(0);
@@ -212,13 +218,6 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // show(OpenCV.toImage(result), "four points...");
   }
 
-  public CanvasFrame show(final IplImage image, final String title) {
-    CanvasFrame canvas = new CanvasFrame(title);
-    // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    canvas.showImage(toFrame(image));
-    return canvas;
-  }
-
   private ArrayList<DetectedText> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
     int height = scores.size(2);
     int width = scores.size(3);
@@ -234,7 +233,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
         if (score < threshold) {
           continue;
         }
-        // two points and an angle to determin the rotated rect i guess.
+        // two points and an angle to determine the rotated rect i guess.
         float x0_data = geometryIndexer.get(0,0,y,x);
         float x1_data = geometryIndexer.get(0,1,y,x);
         float x2_data = geometryIndexer.get(0,2,y,x);
@@ -350,11 +349,12 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       graphics.drawRect(x,y,w,h);
       graphics.setColor(Color.BLUE);
       // we should center the text in the middle of the box.
-      int yText = y + h/2;
+      int yText = y + h/2 + fontSize/2;
       graphics.drawString(rr.text, x, yText);
       fullText.append(rr.text).append(" ");
     }
-    graphics.drawString(fullText.toString().trim(), 20, 80);
+    graphics.setColor(Color.YELLOW);
+    graphics.drawString(fullText.toString().trim(), 20, 60);
     ratio.close();
     //restore the font .. just in case?
     graphics.setFont(previousFont);
