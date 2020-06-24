@@ -5,8 +5,21 @@ import static org.bytedeco.leptonica.global.lept.pixRead;
 import static org.bytedeco.leptonica.global.lept.pixReadMem;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
+
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOInvalidTreeException;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.metadata.IIOMetadataNode;
+import javax.imageio.stream.ImageOutputStream;
+
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.leptonica.PIX;
 import org.bytedeco.tesseract.TessBaseAPI;
@@ -37,6 +50,7 @@ public class TesseractOcr extends Service {
   // define which language model to load
   String lang = "eng";
   public final static Logger log = LoggerFactory.getLogger(TesseractOcr.class);
+  private static final double INCH_2_CM = 2.54;
 
   public TesseractOcr(String n, String id) {
     super(n, id);
@@ -68,26 +82,37 @@ public class TesseractOcr extends Service {
   }
 
   public String ocr(BufferedImage image) throws IOException {
+    // The tesseract api has some issues reading the image directly as a byte array.
+    // so for now... until that changes, we'll write a temp file to be ocr'd and 
+    // TODO: where is this.. and i think we need to randomize the name  of it
+    // or synchronize this method.
+    File temp = File.createTempFile("tesseract", ".png");
+    // This method. in theory sets the DPI on the saved file to avoid tesseract warnings.
+    // saveGridImage(image, temp);
+    FileOutputStream fos = new FileOutputStream(temp);
+    ImageIO.write(image, "png", fos);
+    temp.deleteOnExit();
+    return ocr(temp.getAbsolutePath());
     // A class called PIXConversions will convert directly
     // but I'm afraid to import the library in that it might clash with the
     // version javacv is expecting.. so we are going to do it the "file" way :P
     // TODO: is there a better way to convert the buffered image to a byte array?
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    // TODO: what format makes sense? perhaps something lossless?
-    // TODO: try png , tif, bmp.. etc.
-    ImageIO.write( image, "jpg", baos );
-    baos.flush();
-    byte[] bytes = baos.toByteArray();
-    baos.close();
-    PIX pixImage = pixReadMem(bytes, bytes.length);
-    api.SetImage(pixImage);
-    // Get OCR result
-    BytePointer outText = api.GetUTF8Text();
-    String ret = outText.getString();
-    // Destroy used object and release memory
-    outText.deallocate();
-    pixDestroy(pixImage);
-    return ret;
+    //    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    //    // TODO: what format makes sense? perhaps something lossless?
+    //    // TODO: try png , tif, bmp.. etc.
+    //    ImageIO.write( image, "jpg", baos );
+    //    baos.flush();
+    //    byte[] bytes = baos.toByteArray();
+    //    baos.close();
+    //    PIX pixImage = pixReadMem(bytes, bytes.length);
+    //    api.SetImage(pixImage);
+    //    // Get OCR result
+    //    BytePointer outText = api.GetUTF8Text();
+    //    String ret = outText.getString();
+    //    // Destroy used object and release memory
+    //    outText.deallocate();
+    //    pixDestroy(pixImage);
+    //    return ret;
   }
 
   public String ocr(String filename) throws IOException {
@@ -127,5 +152,45 @@ public class TesseractOcr extends Service {
       Logging.logError(e);
     }
   }
-  
+
+  // taken from https://stackoverflow.com/questions/321736/how-to-set-dpi-information-in-an-image
+  private void saveGridImage(BufferedImage gridImage, File output) throws IOException {
+    output.delete();
+    final String formatName = "png";
+    for (Iterator<ImageWriter> iw = ImageIO.getImageWritersByFormatName(formatName); iw.hasNext();) {
+      ImageWriter writer = iw.next();
+      ImageWriteParam writeParam = writer.getDefaultWriteParam();
+      ImageTypeSpecifier typeSpecifier = ImageTypeSpecifier.createFromBufferedImageType(BufferedImage.TYPE_INT_RGB);
+      IIOMetadata metadata = writer.getDefaultImageMetadata(typeSpecifier, writeParam);
+      if (metadata.isReadOnly() || !metadata.isStandardMetadataFormatSupported()) {
+        continue;
+      }
+      setDPI(metadata);
+      final ImageOutputStream stream = ImageIO.createImageOutputStream(output);
+      try {
+        writer.setOutput(stream);
+        writer.write(metadata, new IIOImage(gridImage, null, metadata), writeParam);
+      } finally {
+        stream.close();
+      }
+      break;
+    }
+  }
+
+  private void setDPI(IIOMetadata metadata) throws IIOInvalidTreeException {
+    // for PMG, it's dots per millimeter
+    double DPI = 70;
+    double dotsPerMilli = 1.0 * DPI / 10 / INCH_2_CM;
+    IIOMetadataNode horiz = new IIOMetadataNode("HorizontalPixelSize");
+    horiz.setAttribute("value", Double.toString(dotsPerMilli));
+    IIOMetadataNode vert = new IIOMetadataNode("VerticalPixelSize");
+    vert.setAttribute("value", Double.toString(dotsPerMilli));
+    IIOMetadataNode dim = new IIOMetadataNode("Dimension");
+    dim.appendChild(horiz);
+    dim.appendChild(vert);
+    IIOMetadataNode root = new IIOMetadataNode("javax_imageio_1.0");
+    root.appendChild(dim);
+    metadata.mergeTree("javax_imageio_1.0", root);
+  }
+
 }

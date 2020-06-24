@@ -40,12 +40,12 @@ import org.opencv.imgproc.Imgproc;
 public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  ArrayList<RotatedRect> classifications = new ArrayList<RotatedRect>();
+  ArrayList<DetectedText> classifications = new ArrayList<DetectedText>();
   public TesseractOcr tesseract = null;
   int newWidth = 320;
   int newHeight = 320;
   // a little extra padding on the x axis
-  int xPadding = 20;
+  int xPadding = 10;
   // some on the y axis.
   int yPadding = 10;
   // first we need our EAST detection model. 
@@ -83,7 +83,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     detectedText = detectText(image);
     // return the original image un-altered.
     return image;
-  }
+  } 
 
 
   private String detectText(IplImage image) {
@@ -108,15 +108,15 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     // The second layer is the actual geometry of the region found.
     Mat geometry = outs.get(1);
     // Decode predicted bounding boxes.
-    ArrayList<RotatedRect> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
+    ArrayList<DetectedText> results = decodeBoundingBoxes(frame, scores, geometry, confThreshold);
     // here we can/should draw the results on the image i guess?
     Point2f ratio = new Point2f( (float)image.width() / newWidth ,  (float)image.height() / newHeight );
     // log.error("Image Size {} {} ", image.width(), image.height());
     // TODO: fill in the stuffs.
     
-    for (RotatedRect rr : classifications) {
+    for (DetectedText rr : results) {
       // Render the rect on the image..
-      Rect bR = rr.boundingRect();
+      Rect bR = rr.box.boundingRect();
       // scaled back down.
       int x = (int) Math.max(0, bR.x()*ratio.x()-xPadding/2);
       int y = (int) Math.max(0, bR.y()*ratio.y()-yPadding/2);
@@ -125,9 +125,10 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       //log.error("Draw Rect : {} {} {} {}", x,y,w,h);
       // This should be correct
       Rect rect = new Rect(x,y,w,h);
-      Mat cropped = cropAndRotate(originalImageMat, rr, rect, ratio);
+      Mat cropped = cropAndRotate(originalImageMat, rr.box, rect, ratio);
       // can I just ocr that cropped mat now?
       String croppedResult = ocrMat(cropped);
+      rr.text = croppedResult;
       if (croppedResult != null) {
         croppedResult = croppedResult.trim();
         if (croppedResult.length() > 0) {
@@ -325,7 +326,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   }
 
   // TODO: return a different type, to include the confidence
-  private ArrayList<RotatedRect> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
+  private ArrayList<DetectedText> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
     int height = scores.size(2);
     int width = scores.size(3);
     // For fast lookup into the Mats
@@ -373,25 +374,25 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
         confidences.add(score);
       }
     }
-    ArrayList<RotatedRect> maxRects = applyNMSBoxes(threshold, boxes, confidences);
+    ArrayList<DetectedText> maxRects = applyNMSBoxes(threshold, boxes, confidences);
     // This is the filtered list of rects that matched our threshold.
     classifications = orderRects(maxRects, frame.cols());
     return maxRects;
   }
 
-  private ArrayList<RotatedRect> orderRects(ArrayList<RotatedRect> maxRects, int width) {
+  private ArrayList<DetectedText> orderRects(ArrayList<DetectedText> maxRects, int width) {
     // TODO Auto-generated method stub
     // we want to scan the rects top to bottom.. left to right.
     // TODO: we need to know the original image width
     
-    Comparator<RotatedRect> rectComparator = new Comparator<RotatedRect>() {         
+    Comparator<DetectedText> rectComparator = new Comparator<DetectedText>() {         
       @Override         
-      public int compare(RotatedRect rect1, RotatedRect rect2) {
+      public int compare(DetectedText rect1, DetectedText rect2) {
         // left to right.. top to bottom. 
         // TODO: this 100 is a vertical sort of resolution ... it should be more dynamic
         // and it should probably be configured somehow..
-        int index1 = rect1.boundingRect().x() + (rect1.boundingRect().y()*width/100); 
-        int index2 = rect2.boundingRect().x() + (rect2.boundingRect().y()*width/100);
+        int index1 = rect1.box.boundingRect().x() + (rect1.box.boundingRect().y()*width/100); 
+        int index2 = rect2.box.boundingRect().x() + (rect2.box.boundingRect().y()*width/100);
         return (index2 > index1 ? -1 : (index2 == index1 ? 0 : 1));           
       }     
     };  
@@ -400,7 +401,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     return maxRects;
   }
 
-  private static ArrayList<RotatedRect> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences) {
+  private static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences) {
     float nmsThreshold = (float) 0.3;
     RectVector boxesRV = new RectVector();
     for (RotatedRect rr : boxes) {
@@ -411,11 +412,14 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     IntPointer indicesIp = new IntPointer();
     NMSBoxes(boxesRV, confidencesFV, (float)threshold, nmsThreshold, indicesIp);
     // Ok.. so.. now what do we do with these ?!  persumably, the boxes for specific indicesIp values are good?
-    ArrayList<RotatedRect> goodOnes = new ArrayList<RotatedRect>();
+    ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
     for (int m=0;m<indicesIp.limit();m++) {
       int i = indicesIp.get(m);
-      RotatedRect box = boxes.get(i);    
-      goodOnes.add(box);
+      RotatedRect box = boxes.get(i); 
+      confidencesFV.position(i);
+      // we don't have text yet
+      DetectedText dt = new DetectedText(box, confidencesFV.get(), null);
+      goodOnes.add(dt);
     }
     return goodOnes;
   }
@@ -442,18 +446,20 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     Point2f ratio = new Point2f( (float)image.getWidth() / newWidth ,  (float)image.getHeight() / newHeight );
     // log.error("Image Size {} {} ", image.getWidth(), image.getHeight());
     // TODO: fill in the stuffs.
-    for (RotatedRect rr : classifications) {
+    for (DetectedText rr : classifications) {
       // Render the rect on the image..
-      Rect bR = rr.boundingRect();
+      Rect bR = rr.box.boundingRect();
       // scaled back down.
       int x = (int) (bR.x()*ratio.x());
       int y = (int) (bR.y()*ratio.y());
       int w = (int) (bR.width()*ratio.x());
       int h = (int) (bR.height()*ratio.y());
       // log.error("Draw Rect : {} {} {} {}", x,y,w,h);
-      graphics.setColor(Color.BLACK);
-
+      graphics.setColor(Color.GREEN);
       graphics.drawRect(x,y,w,h);
+      
+      graphics.setColor(Color.BLUE);
+      graphics.drawString(rr.text, x, y+10);
     }
     ratio.close();
     
