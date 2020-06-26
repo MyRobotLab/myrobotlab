@@ -2,6 +2,9 @@ package org.myrobotlab.framework;
 
 import java.io.Serializable;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * ServiceRegistration is a data object containing information regarding a
  * "peer" service within a "composite" service. The Composite service utilizes
@@ -14,81 +17,69 @@ import java.io.Serializable;
  */
 public class ServiceReservation implements Serializable {
   private static final long serialVersionUID = 1L;
-  // FIXME MAKE KEY FINAL !
-  public final String key; // FIXME - remove completely - exists only in Index
+  
+  transient public final static Logger log = LoggerFactory.getLogger(ServiceReservation.class);
+  
+  public String key;
   public String actualName;
-  public String fullTypeName;
+  public String type;
   public String comment;
-
-  public Boolean isRoot = false;
   public Boolean autoStart;
   /**
-   * service life-cycle state 
-   * inactive | created | registered | running | stopped | released
-   * a challenge will be keeping it sync'd with actual service state :P
+   * service life-cycle state inactive | created | registered | running |
+   * stopped | released a challenge will be keeping it sync'd with actual
+   * service state :P
    */
   public String state = "inactive";
 
+  /**
+   * key type and comment are all that is needed to define a peer
+   * @param key
+   * @param typeName
+   * @param comment
+   */
   public ServiceReservation(String key, String typeName, String comment) {
-    this(key, key, typeName, comment, null, null);    
-  }
-  
-  public ServiceReservation(String key, String typeName, String comment, boolean autoStart) {
-    this(key, key, typeName, comment, null, autoStart);   
+    this(key, null, typeName, comment, null);
   }
 
+  /**
+   * when actual name is specified whatever key is then mapped to the actual name
+   * @param key
+   * @param actualName
+   * @param typeName
+   * @param comment
+   */
   public ServiceReservation(String key, String actualName, String typeName, String comment) {
-    this(key, actualName, typeName, comment, null, null);
+    this(key, actualName, typeName, comment, null);
   }
 
-  public ServiceReservation(String key, String actualName, String typeName, String comment, Boolean isRoot, Boolean autoStart) {
+  public ServiceReservation(String key, String actualName, String typeName, String comment, Boolean autoStart) {
+    if (key == null) {
+      log.error("key cannot be null");
+    }
+        
+    if (typeName == null) {
+      log.error("typeName cannot be null");
+    }
+    
     this.key = key;
     this.actualName = actualName;
-    if (!typeName.contains(".")) {
-      this.fullTypeName = String.format("org.myrobotlab.service.%s", typeName);
-    } else {
-      this.fullTypeName = typeName;
-    }
+    this.type = typeName;
     this.comment = comment;
-    this.isRoot = (isRoot == null)?false:isRoot;
-    this.autoStart = (autoStart == null)?true:autoStart;
-  }
-
-  // FIXME - clean up data entry - so this doesnt need the logic !!
-  public String getSimpleName() {
-    if (fullTypeName != null && fullTypeName.contains(".")) {
-      return fullTypeName.substring(fullTypeName.lastIndexOf(".") + 1);
-    } else {
-      return fullTypeName;
-    }
-
+    this.autoStart = (autoStart == null) ? true : autoStart;
   }
 
   @Override
   public String toString() {
-    // return gson.toJson(this);
+
     StringBuffer sb = new StringBuffer();
-
-    /*
-     * if (!key.equals(actualName)){ sb.append("("); sb.append(key);
-     * sb.append(")"); }
-     */
-
-    /*
-     * if (!key.equals(actualName)) { sb.append("["); sb.append(actualName);
-     * sb.append("] "); }
-     */
-    sb.append("[");
-    sb.append(actualName);
-    sb.append("] ");
-
-    if (isRoot) {
-      sb.append("isRoot");
+    sb.append(key).append("=");
+    if (actualName != null) {
+      sb.append("[");
+      sb.append(actualName);
+      sb.append("] ");
     }
-
-    sb.append(getSimpleName());
-    sb.append(" - ");
-    sb.append(comment);
+    sb.append(type);
 
     return sb.toString();
   }
