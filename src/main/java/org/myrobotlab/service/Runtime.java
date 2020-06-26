@@ -51,10 +51,10 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.MessageListener;
@@ -73,8 +73,8 @@ import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
-import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
@@ -281,21 +281,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public synchronized ServiceInterface create(String name, String type) {
-    String fullTypeName;
-    if (name.contains("/")) {
-      throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
-    }
-
-    if (name.contains("@")) {
-      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
-    }
-
-    if (type.indexOf(".") == -1) {
-      fullTypeName = String.format("org.myrobotlab.service.%s", type);
-    } else {
-      fullTypeName = type;
-    }
-    return createService(name, fullTypeName, null);
+    return createService(name, type, null);
   }
 
   /**
@@ -398,8 +384,28 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return b;
   }
 
-  static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {
+  static public synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
+    
+    if (name == null) {
+      log.error("service name cannot be null");
+    }
+    
+    String fullTypeName;
+    if (name.contains("/")) {
+      throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
+    }
+
+    if (name.contains("@")) {
+      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
+    }
+
+    if (type.indexOf(".") == -1) {
+      fullTypeName = String.format("org.myrobotlab.service.%s", type);
+    } else {
+      fullTypeName = type;
+    }
+    
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
@@ -450,7 +456,28 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (runtime != null) {
+        
         runtime.broadcast("created", name);
+        
+        // add all the service life cycle subscriptions 
+        runtime.addListener("registered", name);
+        runtime.addListener("created", name);
+        runtime.addListener("started", name);        
+        runtime.addListener("stopped", name);        
+        runtime.addListener("released", name);        
+      }
+      
+      // initialization of the new service - it gets local registery events
+      // for pre-existing registered? created/started
+      List<ServiceInterface> services = getServices();// getLocalServices();
+      for (ServiceInterface s: services) {
+        if (runtime != null && runtime.serviceData != null) {
+          si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+        }
+        si.onCreated(s.getName());
+        if (si.isRunning()) {
+          si.onStarted(s.getName());
+        }
       }
       
       return (Service) newService;
@@ -822,14 +849,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
-  // FIXME - max complexity method
-  public Map<String, Object> getSwagger(String id, String name, String type) {
-    Swagger3 swagger = new Swagger3();
-    List<Registration> nameAndTypes = new ArrayList<>();
-    nameAndTypes.add(new Registration(id, name, type, serviceData.getServiceType(type)));
-    return swagger.getSwagger(nameAndTypes);
-  }
-
   // FIXME - scary function - returns private data
   public static Map<String, ServiceInterface> getRegistry() {
     return registry;// FIXME should return copy
@@ -952,9 +971,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       ServiceData sd = ServiceData.getLocalInstance();
 
-      List<ServiceType> sts = sd.getServiceTypes();
+      List<MetaData> sts = sd.getServiceTypes();
 
-      for (ServiceType st : sts) {
+      for (MetaData st : sts) {
         if (st.getSimpleName().equals("Polly")) {
           log.info("here");
         }
@@ -1372,7 +1391,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       if (runtime != null) {
         // TODO - determine rules on re-broadcasting based on configuration
-        runtime.invoke("registered", registration);
+        runtime.broadcast("registered", registration);
       }
 
       // TODO - remove ? already get state from registration
@@ -1401,10 +1420,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     String name = getFullName(inName);
 
     log.info("releasing service {}", name);
-    Runtime rt = getInstance();
 
     if (!registry.containsKey(name)) {
-      rt.info("%s already released", name);
+      log.info("{} not registered", name);
       return false;
     }
 
@@ -1421,7 +1439,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (sw.isLocal()) {
       sw.releaseService();
     } else {
-      rt.send(name, "releaseService");
+      if (runtime != null) {
+        runtime.send(name, "releaseService");
+      }
     }
 
     unregister(name);
@@ -1432,7 +1452,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   synchronized public static void unregister(String inName) {
     String name = getFullName(inName);
     log.info("unregister {}", name);
-    Runtime rt = getInstance();
 
     // get reference from registry
     ServiceInterface sw = registry.get(name);
@@ -1442,7 +1461,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
 
     // you have to send released before removing from registry
-    rt.invoke("released", name);
+    if (runtime != null) {
+      runtime.broadcast("released", name);
+    }
 
     // last step - remove from registry
     registry.remove(name);
@@ -2973,7 +2994,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return routeTable;
   }
 
-  public List<ServiceType> getServiceTypes() {
+  public List<MetaData> getServiceTypes() {
     return serviceData.getServiceTypes();
   }
 
@@ -3484,4 +3505,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return serviceName;
   }
 
+  @Override
+  public String stopped(String serviceName) {
+    return serviceName;
+  }
+
+  public static void setPeer(String fullKey, String actualName, String serviceType) {
+    ServiceData.setPeer(fullKey, actualName, serviceType);
+  }
+
+  public static Plan getPlan(String serviceName, String serviceType) {    
+    return ServiceData.getPlan(serviceName, serviceType);
+  }
+
+  public static void clearPlan() {
+    ServiceData.clearOverrides();
+  }
+
+  public static MetaData getMetaData(String serviceName, String serviceType) {
+    return ServiceData.getMetaData(serviceName, serviceType);
+  }
+
+  public static MetaData getMetaData(String serviceType) {
+    return ServiceData.getMetaData(serviceType);
+  }
+  
 }
