@@ -26,9 +26,9 @@ public class PollyMeta {
     // add dependency if necessary
     meta.addCategory("speech", "sound");
 
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.9.9");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.9.10.4");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.9.9");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.1");
+    meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
     meta.addDependency("com.amazonaws", "aws-java-sdk-polly", "1.11.512");
     meta.addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // force using httpClient service httpcomponents version
