@@ -2,7 +2,7 @@ package org.myrobotlab.framework.interfaces;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Inbox;
@@ -51,9 +51,9 @@ public interface ServiceInterface
 
   public Method[] getMethods();
 
-  public ArrayList<MRLListener> getNotifyList(String key);
+  public List<MRLListener> getNotifyList(String key);
 
-  public ArrayList<String> getNotifyListKeySet();
+  public List<String> getNotifyListKeySet();
 
   public Inbox getInbox();
 

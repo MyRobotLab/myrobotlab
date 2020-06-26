@@ -266,7 +266,10 @@ public class ServiceData implements Serializable {
               sr.comment = override.comment;
             }
           } else {
-            sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
+            // if actual name wasn't set in the getMetaData - assign it as {parentName}.{peerKey}
+            if (sr.actualName == null) {
+              sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
+            }
           }
         }
       }
