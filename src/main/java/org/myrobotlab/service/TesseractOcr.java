@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.UUID;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -39,7 +40,25 @@ import org.slf4j.Logger;
  * TesseractOCR - This service will use the open source project tesseract.
  * Tesseract will take an Image and extract any recognizable text from that
  * image as a string.
- *
+ * 
+ * ara - arabic
+ * chi_sim - simplified chinese
+ * deu - german
+ * eng - english
+ * fra - french
+ * grc - greek
+ * heb - hebrew
+ * hin - hindi
+ * isl - icelandic
+ * ita - italian
+ * jpn - japanese
+ * kor - korean
+ * por - portugues
+ * rus - russian
+ * spa - spanish
+ * tha - thai
+ * vie - vietnamese
+ *     
  */
 public class TesseractOcr extends Service {
 
@@ -67,26 +86,30 @@ public class TesseractOcr extends Service {
     api.End();
   }
 
-  private void initModel(String lang) {
+  /**
+   * Load the language specific model as the current language model.
+   * 
+   * @param lang - the 3 leter code
+   */
+  public void initModel(String lang) {
     api = new TessBaseAPI();
     String tessData = "resource/TesseractOcr";
     // load the models
     if (api.Init(tessData, lang) != 0) {
-      log.warn("Unable to load tesseract model in {} with language {}", tessData, lang);
-      // TODO: what's the lifecycle if a service fails to start?  maybe we should throw?
+      warn("Unable to load tesseract model in %s with language %s", tessData, lang);
     }
   }
 
   public String ocr(BufferedImage image) throws IOException {
     // The tesseract api has some issues reading the image directly as a byte array.
     // so for now... until that changes, we'll write a temp file to be ocr'd and 
-    // TODO: where is this.. and i think we need to randomize the name  of it
-    // or synchronize this method.
-    File temp = File.createTempFile("tesseract", ".png");
-    FileOutputStream fos = new FileOutputStream(temp);
+    String tempFilename = "tesseract." + UUID.randomUUID().toString() + ".png";
+    File tempFile = new File(getDataDir(), tempFilename);  
+    FileOutputStream fos = new FileOutputStream(tempFile);
     ImageIO.write(image, "png", fos);
-    temp.deleteOnExit();
-    return ocr(temp.getAbsolutePath());
+    String result = ocr(tempFile.getAbsolutePath());
+    tempFile.delete();
+    return result;
   }
 
   public String ocr(String filename) throws IOException {

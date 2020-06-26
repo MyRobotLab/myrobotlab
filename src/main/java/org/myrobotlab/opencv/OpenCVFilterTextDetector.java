@@ -1,14 +1,17 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import static org.bytedeco.opencv.global.opencv_core.cvPoint;
+import static org.bytedeco.opencv.global.opencv_imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
+import static org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGB2GRAY;
 import static org.bytedeco.opencv.global.opencv_dnn.NMSBoxes;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNet;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
+import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
 import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
+import static org.bytedeco.opencv.global.opencv_imgproc.adaptiveThreshold;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -19,8 +22,6 @@ import java.util.Comparator;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
@@ -33,6 +34,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Size2f;
 import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
+import org.myrobotlab.image.Util;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TesseractOcr;
@@ -57,14 +59,14 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   ArrayList<DetectedText> classifications = new ArrayList<DetectedText>();
   private transient TesseractOcr tesseract = null;
-  int fontSize = 40;
+  int fontSize = 16;
   // these need to be a multiple of 32.  They determine the input size to the model.
   int newWidth = 320;
   int newHeight = 320;
   // a little extra padding on the x axis for our detected boxes
   int xPadding = 2;
   // some on the y axis.
-  int yPadding = 0;
+  int yPadding = 2;
   // first we need our EAST detection model. 
   String modelFile = "resource/OpenCV/east_text_detector/frozen_east_text_detection.pb";
   // text region detection threshold
@@ -73,7 +75,9 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   float nmsThreshold = (float) 0.3;
   // the actual east text classification network 
   Net detector = null;
-  
+  // 
+  boolean thresholdEnabled = false;
+
   public OpenCVFilterTextDetector() {
     super();
     initModel();
@@ -138,9 +142,13 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       Size2f origPaddedSize = new Size2f(dt.box.size().width()+xPadding, dt.box.size().height()+yPadding);
       RotatedRect largerBox = new RotatedRect(dt.box.center(), origPaddedSize , dt.box.angle());
       // crop and rotate based on the updated padded box.
-      Mat cropped = cropAndRotate(originalImageMat, largerBox, outputSizeInt, ratio);
-      // can I just ocr that cropped mat now?
-      String croppedResult = ocrMat(cropped);
+      Mat cropped = Util.cropAndRotate(originalImageMat, largerBox, outputSizeInt, ratio);
+      // Some thresholding on the cropped image.
+      Mat ocrInputMat = cropped;
+      if (thresholdEnabled) {
+        ocrInputMat = applyAdaptiveThreshold(cropped);
+      } 
+      String croppedResult = ocrMat(ocrInputMat);
       // If debugging.. it's useful to see this section ..
       // show(cropped, croppedResult);
       if (croppedResult != null) {
@@ -161,29 +169,21 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     return results;
   }
 
-  private Mat cropAndRotate(Mat frame, RotatedRect largerBox, Size outputSize, Point2f ratio) {
-    // Input rotatedRect is on the neural network scaled image
-    // this needs to be scaled up to the original resolution by the ratio.
-    Point2f vertices = scaleVertices(largerBox, ratio);
-    // a target for the cropped image
-    Mat cropped = new Mat();
-    // do the cropping of the original image, scaled vertices and a target output size
-    fourPointsTransform(frame, vertices, cropped, outputSize);
-    // return the cropped mat that is populated with the cropped image from the original input image.
-    return cropped;
+  private static Mat applyAdaptiveThreshold(Mat cropped) {
+    //int thresh = 127;
+    //int maxval = 255; 
+    Mat dest = new Mat();
+    // threshold(cropped, dest, thresh, maxval, type);
+    // need to cut the mat down to grayscale for this i guess?
+    cvtColor(cropped, dest, COLOR_RGB2GRAY);
+    // Mat, Mat, double, int, int, int, double
+    // TODO: what does changing these values do?
+    adaptiveThreshold(dest,dest, 255.0, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 5, 2.0);
+    // show(cropped, "input");
+    // show(dest, "output");
+    return dest;
   }
 
-  private Point2f scaleVertices(RotatedRect box, Point2f ratio) {
-    Point2f vertices = new Point2f(4);
-    box.points(vertices);
-    for (int i = 0 ; i < 4; i++) {
-      vertices.position(i);
-      vertices.x( vertices.x() * ratio.x() );
-      vertices.y( vertices.y() * ratio.y() );
-    }
-    vertices.position(0);
-    return vertices;
-  }
 
   private String ocrMat(Mat input) {
     String result = null;
@@ -196,27 +196,10 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     } catch (IOException e) {
       log.warn("Tesseract failure.", e);
     }
+    // show(input, result);
     return result;
   }
 
-  private void fourPointsTransform(Mat frame, Point2f vertices, Mat result, Size outputSize) {
-    Point2f targetVertices = new Point2f(4);
-    // write the data into the array
-    targetVertices.position(0);
-    targetVertices.put(new Point2f(0, outputSize.height() - 1));
-    targetVertices.position(1);
-    targetVertices.put(new Point2f(0, 0));
-    targetVertices.position(2);
-    targetVertices.put(new Point2f(outputSize.width() - 1, 0));
-    targetVertices.position(3);
-    targetVertices.put(new Point2f(outputSize.width() - 1, outputSize.height() - 1));
-    // reset the pointer to the beginning of the array.
-    targetVertices.position(0);
-    Mat rotationMatrix = getPerspectiveTransform(vertices, targetVertices);
-    warpPerspective(frame, result, rotationMatrix, outputSize);
-    // Ok.. now the result should have the cropped image?
-    // show(OpenCV.toImage(result), "four points...");
-  }
 
   private ArrayList<DetectedText> decodeBoundingBoxes(Mat frame, Mat scores, Mat geometry, float threshold) {
     int height = scores.size(2);
@@ -272,7 +255,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       }
     }
     // Apply non-maximum suppression to filter down boxes that mostly overlap
-    ArrayList<DetectedText> maxRects = applyNMSBoxes(threshold, boxes, confidences, nmsThreshold);
+    ArrayList<DetectedText> maxRects = Util.applyNMSBoxes(threshold, boxes, confidences, nmsThreshold);
     // This is the filtered list of rects that matched our threshold.
     classifications = orderRects(maxRects, frame.cols());
     return maxRects;
@@ -294,40 +277,6 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
     return maxRects;
   }
 
-  private static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {    
-    RectVector boxesRV = new RectVector();
-    for (RotatedRect rr : boxes) {
-      boxesRV.push_back(rr.boundingRect());
-    }
-    FloatPointer confidencesFV = arrayListToFloatPointer(confidences);
-    IntPointer indicesIp = new IntPointer();
-    NMSBoxes(boxesRV, confidencesFV, (float)threshold, nmsThreshold, indicesIp);
-    ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
-    for (int m=0;m<indicesIp.limit();m++) {
-      int i = indicesIp.get(m);
-      RotatedRect box = boxes.get(i); 
-      confidencesFV.position(i);
-      // we don't have text yet, that will be filled in later by the ocr step.
-      DetectedText dt = new DetectedText(box, confidencesFV.get(), null);
-      goodOnes.add(dt);
-    }
-    return goodOnes;
-  }
-
-  // utilty helper function to put an array of floats into a javacpp float pointer
-  private static FloatPointer arrayListToFloatPointer(ArrayList<Float> confidences) {
-    // create a float pointer of the correct size
-    FloatPointer confidencesFV = new FloatPointer(confidences.size());
-    for (int i = 0; i < confidences.size(); i++) {
-      // update the pointer and put the float in 
-      confidencesFV.position(i);
-      confidencesFV.put(confidences.get(i));
-    }
-    // reset the pointer position back to the head.
-    confidencesFV.position(0);
-    return confidencesFV;
-  }
-
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     StringBuilder fullText = new StringBuilder();
@@ -347,7 +296,7 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
       int h = (int) (bR.height()*ratio.y());
       graphics.setColor(Color.GREEN);
       graphics.drawRect(x,y,w,h);
-      graphics.setColor(Color.BLUE);
+      graphics.setColor(Color.RED);
       // we should center the text in the middle of the box.
       int yText = y + h/2 + fontSize/2;
       graphics.drawString(rr.text, x, yText);
