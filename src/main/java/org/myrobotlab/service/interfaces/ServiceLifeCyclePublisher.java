@@ -10,6 +10,8 @@ public interface ServiceLifeCyclePublisher {
 
   public String started(String serviceName);
 
+  public String stopped(String serviceName);
+
   public String released(String serviceName);
 
 }
