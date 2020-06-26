@@ -17,7 +17,7 @@
                 </select>
                 <div class="buttonsRow">
                     <div>
-                        <button class="btn btn-default" ng-click="msg.moveToPose(poseName)">
+                        <button class="btn btn-default" ng-click="msg.moveToPose(currentPose.name)">
                             <span class="glyphicon glyphicon-play"></span> Move
                         </button>
                     </div>
@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div class="buttonsRow">
-                    <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(currentPose.name)"><span class="glyphicon glyphicon-plus"></span>{{currentPose.name}}</button>                
+                    <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(currentPose.name)"><span class="glyphicon glyphicon-plus"></span>{{currentPose.name}}</button>               
                     <div class="input-group">
                         <span class="input-group-btn">
                             <button class="btn btn-default" ng-click="msg.addSequenceDelay(sequenceDelay)" title="Add Delay in seconds to sequence"><span class="glyphicon glyphicon-plus"></span> Delay</button>
@@ -114,7 +114,6 @@
 
         </div>
     </div>
-
 
     <div class="row servoFilter">
         Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
