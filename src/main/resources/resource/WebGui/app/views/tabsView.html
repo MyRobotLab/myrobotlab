@@ -377,7 +377,7 @@ NameError: name 'isTheSunShiny' is not defined
 
     function openNav() {
         // prevent bouncing        
-        document.getElementById("handleOpen").style.visibility = "hidden";
+        //document.getElementById("handleOpen").style.visibility = "hidden";
         document.getElementById("handleClose").style.visibility = "hidden";
         setTimeout(function () {
             document.getElementById("handleClose").style.visibility = "visible";
@@ -395,7 +395,7 @@ NameError: name 'isTheSunShiny' is not defined
 
     function closeNav() {
         // prevent bouncing
-        document.getElementById("handleOpen").style.visibility = "hidden";
+        //document.getElementById("handleOpen").style.visibility = "hidden";
         setTimeout(function () {
             document.getElementById("handleOpen").style.visibility = "visible";
         }, 600);
@@ -443,7 +443,8 @@ NameError: name 'isTheSunShiny' is not defined
        {
             BottomMessagesTop = e.pageY-2;
             BottomMessagesHeight = document.body.clientHeight-e.pageY;
-            $('#main').css("height",BottomMessagesTop);
+            document.getElementById("main").style.height = "calc(100vh - (52px + " + BottomMessagesHeight + "px))";
+            //$('#main').css("height",BottomMessagesTop);
             $('#bottomMessages').css("top",BottomMessagesTop);
             $('#bottomMessages').css("height",BottomMessagesHeight);
             //$('#notificationContainer').css("height",BottomMessagesHeight);

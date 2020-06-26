@@ -10,7 +10,6 @@
                                 <span>
                                     <h6>
                                         You need to attach a controller to a servo.<br/>For example real and virtual controller.
-                                    
                                     </h6>
                                 </span>
                             </nav>
@@ -18,13 +17,13 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <table class="table">
+                            <table class="tableController">
                                 <tr>
                                     <td>
-                                        <select ng-disabled="service.controller" class="form-control" ng-model="selectedController">
+                                        <select ng-disabled="service.controller" class="form-control selectController" ng-model="selectedController">
                                             <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
-                                    <td>
+                                    </td>
                                     <td>
                                         <!-- TODO - send pos ! ??? -->
                                         <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>

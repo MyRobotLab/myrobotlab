@@ -39,19 +39,31 @@ body {
 
 @media only screen and (max-width: 768px) {
 /* For mobile phones: */
-[class*="col-"] {
-  width: 100%;
+  [class*="col-"] {
+    width: 100%;
+  }
+  #notification-entries {width: 80vmax;}
+  /* mobile view */
+  .container-fluid {
+    display: flex;
+  }
+  #handleOpen{
+    top: 68px !important;
+  }
 }
-#notification-entries {width: 80vmax;}
-/* mobile view */
-.container-fluid {
-  display: flex;
-}
+
+.servoContent .btn{
+  height: 26px !important;
+  line-height: 15px;
 }
 
 .switchesButtons{
 padding-right: 14px;
 }
+
+
+.tableController .form-control[disabled]{border-color: #1ca942;background-color: #abf2c9;font-weight: bold;color: #3d9a03;}  
+
 
 .dropdownLabel{
 padding-right: 6px;
@@ -99,7 +111,9 @@ table, th, td {
   margin-top: 0px;
   position: absolute;
   left: -16px;
-  top: -17px;
+  top: -37px;
+  display: flex;
+  margin-top: 20px;
 }
 .rzMixer .restCursor:before{
   content: " ";
@@ -166,7 +180,8 @@ position: relative;
 top: 7px;
 width: 700px;
 position: relative;
-display: inline-table;
+/*display: inline-table;*/
+display: flex;
 }
 
 .servoContent input.form-control{
@@ -189,10 +204,36 @@ color: #337ab7!important;
 }
 
 .servoContent select{
-height: 26px;
-line-heigt: 10px;
-font-size: smaller;
-padding: 2px;
+  height: 26px;
+  line-height: 10px;
+  font-size: smaller;
+  padding: 2px;
+  /* width: 120px; */
+}
+
+.tableController {
+  /* width: 6; */
+  margin-top: 20px;
+  width: 648px;
+}
+
+.tableController td:nth-child(1) {
+  width: 120px;
+}
+.tableController td:nth-child(2) {
+  width: 120px;
+  padding-left: 6px;
+}
+.tableController td:nth-child(3) {
+  width: 30px;
+}
+.tableController td:nth-child(4) {
+  width: 48px;
+}
+.tableController td:nth-child(5) {
+  width: 80px;
+  padding-left: 40px;
+  padding-right: 6px;
 }
 
 .gray1{
@@ -211,11 +252,7 @@ top: -2px!important;
 /* right: 0px; */
 font-size: smaller;
 }
-.miniBTN .toggle *{
-width: 220%;
-font-size: smaller;
-color: #337ab7!important;
-}
+.miniBTN .toggle *{width: 220%;font-size: smaller;color: #337ab7!important;}
 .miniBTN .toggle-off-pad{
 color: transparent !important;
 padding-left: 28px !important;
@@ -228,12 +265,7 @@ padding-right: 30px;
   left: -155%;
   width: 100px;
 }
-.miniBTN .btn {
-/* padding: 10px !important; */
-height: 26px !important;
-width: 35px !important;
-line-height: 26px;
-}
+.miniBTN .btn {/* padding: 10px !important; */height: 24px !important;width: 35px !important;/* line-height: 18px; */}
 .miniBTN {
 
 /* line-height: 33px; */
@@ -812,17 +844,17 @@ height: 4px;
   /* min-height: 150px; */
 }
 .poseList{
-  width: 358px;
+  /* width: 358px; */
 }
 .rzMixer .sliderMixer{
-  width: 375px;
+  width: 365px;
   float: left;
   padding-right: 6px;
   margin-right: 40px;
   /* background-color: antiquewhite; */
   padding-bottom: 20px;
   padding-top: 10px;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid #afe1ec;
 }
 
 .restMixer{
@@ -864,26 +896,27 @@ height: 4px;
 .rzMixer .btn-default {
     height: 24px;
     color: #333;
-    background-color: #fff;
+    background-color: #ebf5ff;
     border-color: #ccc;
     padding: 3px;
     padding-left: 6px;
     padding-right: 6px;
     vertical-align: middle;
-    line-height: 12px;
+    line-height: 18px;
     margin-bottom: 4px;
+    /* margin-top: 4px; */
 }
 
 .directoryName{
   height: 24px !important;
   margin-right: 0px;
   margin-left: 8px;
-  margin-bottom: 4px;
+  /* margin-bottom: 4px; */
   padding: 3px;
   text-align: left;
   vertical-align: middle;
   margin-left: 8px;
-  width: 223px !important;
+  width: 217px !important;
 }
 .loadPose{
   position: relative;
@@ -895,6 +928,7 @@ height: 4px;
 }
 .savePose{
   /* position: relative; */
+  /* width: 310px; */
   width: 310px;
   /* float: left; */
   /* top: 10px; */
@@ -903,25 +937,62 @@ height: 4px;
   padding-left: 0px;
 }
 
+.buttonsRow{
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+}
+.red {
+  color: #d80606;
+}
+.addPoseButton{
+  overflow: hidden;
+  max-width: 218px;
+  width: 218px;
+  text-align: left;
+}
+
+.poseList{
+  height: 115px !important;
+}
+
+.sequenceContentList{
+  height: 83px !important;
+}
+.addPoseButton:empty::after {content: "Select Pose first";display: block;color: #f50303;}
+
+.labelRow{
+  width: 100%;
+  font-weight: bold;
+  font-size: medium;
+  margin-top: 14px;
+  margin-bottom: 0px;
+  height: 28px;
+  display: flex;
+}
+
+.fieldSave{
+   height: 24px !important;
+   width: 130px !important;
+}
+.fieldDelay{
+  height: 24px !important;
+  width: 60px !important;
+}
+.btnServomixer{
+  height: 24px !important;
+  width: 60px !important; 
+}
+
 @media (max-width: 1343px){
   .loadPose{
     width: 380px;
     top: 0px;
     left: -19px;
   }
-  .savePose{
-    position: relative;
-    width: 357px;
-    height: 24px;
-    float: left;
-    top: 10px;
-    /* bottom: -3px !important; */
-    vertical-align: bottom;
-    margin-left: 0px;
-    padding-left: 0px;
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-  }
+  
   .rzMixer{
     padding-top: 20px;
   }
@@ -949,6 +1020,10 @@ height: 4px;
     padding-top: 20px;
   }
 }
+.updownButton{
+  width: 100px;
+  height: 24px;
+}
 
 @media (min-width: 1450px){
   .loadPose{
@@ -961,12 +1036,12 @@ height: 4px;
     padding-left: 0px;
   }
   .savePose{
-    position: relative;
-    width: 310px;
-    float: left;
+    /* position: relative; */
+    width: 177px;
     top: 38px;
     /* left: 20px; */
-    margin-left: 0px;
+    display: flex;
+    margin-left: 10px;
     padding-left: 0px;
   }
 }
@@ -976,7 +1051,7 @@ height: 4px;
   margin-bottom: 30px;
   width: 270px;
   display: flex;
-  line-height: 28px;
+  line-height: 24px;
 }
 .servoFilter input{
   margin-left: 8px;
@@ -989,19 +1064,19 @@ height: 4px;
   margin-right: 0px;
 }
 .MixerDirectory{
-  width: 380px;
-  margin-right: 0px;
+  width: 365px;
+  margin-right: 40px;
+  padding-right: 6px;
   float: left;
+  align-content: space-between;
 }
 
 .rzMixer .dropdown-toggle{
   display: none;
 }
 .poseName{
-  width: 270px !important;
+  width: 168px !important;
   height: 24px !important;
-  vertical-align: middle;
-  float: left;
 }
 .MixerServoName{
   color: #888888;
@@ -2077,10 +2152,8 @@ width: 70px;
   font-family: Arial, Helvetica, sans-serif!important;
 }
 
-.speedSlider{
-width: 501px !important;
-vertical-align: middle !important;
-}
+.speedSlider{width: 501px !important;vertical-align: middle !important;}
+
 .autoDisableSlider{
 width: 70px !important;
 vertical-align: middle !important;
@@ -2834,16 +2907,28 @@ height: calc(100vh - 453px);
   position: relative;
   top: -23px;
   left: 0px;
+  margin-top: 8px !important;
+  margin-bottom: 16px !important;
+  padding-bottom: 10px;
   width: 98% !important;
+  display: contents;
 }
+.rzMixer .custom-slider3.rzslider {
+  margin-top: 8px !important;
+  margin-bottom: 6px !important;
+}
+
 .rzMixer .servoBasicContainer {
   position: relative;
   width: 100%;
   top: 34px;
   left: 20px;
+  /* display: flex; */
+  margin-top: 28px;
 }
 .currentPose{
   color: #337ab7;
+  margin-left: 6px;
 }
 .gotoRestButton{
   display: none;
