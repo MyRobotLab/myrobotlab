@@ -73,7 +73,7 @@ public class ServiceReservation implements Serializable {
   public String toString() {
 
     StringBuffer sb = new StringBuffer();
-    sb.append(key).append("=");
+    //sb.append(key).append("=");
     if (actualName != null) {
       sb.append("[");
       sb.append(actualName);

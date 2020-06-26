@@ -472,7 +472,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       List<ServiceInterface> services = getServices();// getLocalServices();
       for (ServiceInterface s: services) {
         if (runtime != null && runtime.serviceData != null) {
-          si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          // for typeless registration - try the following ? without a service reference ??
+          // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          si.onRegistered(new Registration(s));
         }
         si.onCreated(s.getName());
         if (si.isRunning()) {
@@ -492,7 +494,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     Map<String, ServiceInterface> sorted = getLocalServices();
     for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet()) {
       log.info(entry.getKey() + "/" + entry.getValue());
-      ArrayList<String> flks = entry.getValue().getNotifyListKeySet();
+      List<String> flks = entry.getValue().getNotifyListKeySet();
       Map<String, List<MRLListener>> subret = new TreeMap<String, List<MRLListener>>();
       for (String sn : flks) {
         List<MRLListener> mrllistners = entry.getValue().getNotifyList(sn);
@@ -1462,7 +1464,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // you have to send released before removing from registry
     if (runtime != null) {
-      runtime.broadcast("released", name);
+      runtime.broadcast("released", inName);
     }
 
     // last step - remove from registry
@@ -2532,7 +2534,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void removeAllSubscriptions() {
     for (ServiceInterface si : getLocalServices().values()) {
-      ArrayList<String> nlks = si.getNotifyListKeySet();
+      List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
         si.getOutbox().notifyList.clear();
       }

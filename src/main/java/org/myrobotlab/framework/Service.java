@@ -52,6 +52,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -716,7 +717,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     if (outbox.notifyList.containsKey(listener.topicMethod)) {
       // iterate through all looking for duplicate
       boolean found = false;
-      ArrayList<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
+      List<MRLListener> nes = outbox.notifyList.get(listener.topicMethod);
       for (int i = 0; i < nes.size(); ++i) {
         MRLListener entry = nes.get(i);
         if (entry.equals(listener)) {
@@ -730,7 +731,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         nes.add(listener);
       }
     } else {
-      ArrayList<MRLListener> notifyList = new ArrayList<MRLListener>();
+      List<MRLListener> notifyList = new CopyOnWriteArrayList<MRLListener>();
       notifyList.add(listener);
       log.debug("adding addListener from {}.{} to {}.{}", this.getName(), listener.topicMethod, listener.callbackName, listener.callbackMethod);
       outbox.notifyList.put(listener.topicMethod, notifyList);
@@ -738,7 +739,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public boolean hasSubscribed(String listener, String topicMethod) {
-    ArrayList<MRLListener> nes = outbox.notifyList.get(topicMethod);
+    List<MRLListener> nes = outbox.notifyList.get(topicMethod);
     for (MRLListener ne : nes) {
       if (ne.callbackName.contentEquals(listener)) {
         return true;
@@ -1025,7 +1026,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   @Override
-  public ArrayList<MRLListener> getNotifyList(String key) {
+  public List<MRLListener> getNotifyList(String key) {
     if (getOutbox() == null) {
       // this is remote system - it has a null outbox, because its
       // been serialized with a transient outbox
@@ -1224,7 +1225,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       retobj = method.invoke(obj, params);
 
       if (blockLocally) {
-        ArrayList<MRLListener> subList = outbox.notifyList.get(methodName);
+        List<MRLListener> subList = outbox.notifyList.get(methodName);
         if (subList != null) {
           for (MRLListener listener : subList) {
             
@@ -1488,7 +1489,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void removeListener(String outMethod, String serviceName, String inMethod) {
     if (outbox.notifyList.containsKey(outMethod)) {
-      ArrayList<MRLListener> nel = outbox.notifyList.get(outMethod);
+      List<MRLListener> nel = outbox.notifyList.get(outMethod);
       for (int i = 0; i < nel.size(); ++i) {
         MRLListener target = nel.get(i);
         if (target.callbackName.compareTo(serviceName) == 0) {
@@ -2601,6 +2602,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void onReleased(String serviceName) {
     // service life-cycle callback - override if interested in these events    
+  }
+
+  public boolean isStarted(String peerKey) {
+    ServiceInterface si = getPeer(peerKey);
+    if (si == null || !si.isRunning()) {
+      return false;
+    }
+    return true;
   }
 
   
