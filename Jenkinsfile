@@ -81,7 +81,7 @@ node ('ubuntu') {  // use labels to direct build
    }
    stage('archive') {
          // archiveArtifacts 'target/myrobotlab.jar'
-         archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
+         archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
    } 
    stage('jacoco') {
         jacoco()
