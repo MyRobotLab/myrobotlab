@@ -6,11 +6,12 @@ import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.google.gson.internal.LinkedTreeMap;
@@ -53,7 +54,7 @@ public class Proxy extends Service {
     cache.cacheMethodEntries(this.getClass());
 
     try {
-      serviceType = getMetaData(type);
+      serviceType = ServiceData.getMetaData(name, type);
     } catch (Exception e) {
       log.error("could not extract meta data for {}", type);
     }

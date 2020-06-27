@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Ads1115Meta {
+public class Ads1115Meta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(Ads1115Meta.class);
   
   /**
@@ -16,9 +17,9 @@ public class Ads1115Meta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Ads1115");
+    MetaData meta = new MetaData("org.myrobotlab.service.Ads1115");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("a higher-precision analog to digital converter 16-bit");
     meta.setLicenseApache();

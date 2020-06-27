@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class XMLConnectorMeta {
+public class XMLConnectorMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(XMLConnectorMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class XMLConnectorMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.XMLConnector");
+    MetaData meta = new MetaData("org.myrobotlab.service.XMLConnector");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
     meta.addCategory("filter");

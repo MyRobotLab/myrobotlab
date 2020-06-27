@@ -27,8 +27,9 @@ package org.myrobotlab.service;
 
 import java.util.ArrayList;
 
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -67,6 +68,12 @@ public class TestThrower extends Service {
         Service.sleep(throwInterval);
       }
 
+    }
+  }
+  
+  public void attach(Attachable attachable) {
+    if (attachable.isType("TestCatcher")) {
+      addListener("publishInteger", attachable.getName());
     }
   }
 

@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class CsvConnectorMeta {
+public class CsvConnectorMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(CsvConnectorMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class CsvConnectorMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.CsvConnector");
+    MetaData meta = new MetaData("org.myrobotlab.service.CsvConnector");
     Platform platform = Platform.getLocalInstance();
     
     meta.addDescription("This service crawls a csv file and publishes each row as a document");

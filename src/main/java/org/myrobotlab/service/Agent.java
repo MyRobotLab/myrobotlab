@@ -44,13 +44,13 @@ import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.service.Runtime.CmdOptions;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;

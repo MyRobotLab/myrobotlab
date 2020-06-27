@@ -16,7 +16,6 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
@@ -26,6 +25,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
 import org.python.core.PyException;
 import org.python.core.PyObject;
@@ -243,7 +243,7 @@ public class Python extends Service {
   public Python(String n, String id) {
     super(n, id);
 
-    subscribe(Runtime.getInstance().getName(), "registered");
+    // subscribe(Runtime.getInstance().getName(), "registered");
     log.info("created python {}", getName());
 
     log.info("creating module directory pythonModules");
@@ -251,11 +251,9 @@ public class Python extends Service {
 
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
-    // I love Platform !
-    Platform p = Platform.getLocalInstance();
-    List<ServiceType> sdt = sd.getAvailableServiceTypes();
+    List<MetaData> sdt = sd.getAvailableServiceTypes();
     for (int i = 0; i < sdt.size(); ++i) {
-      ServiceType st = sdt.get(i);
+      MetaData st = sdt.get(i);
       // FIXME - cache in "data" dir Or perhaps it should be pulled into
       // resource directory during build time and packaged with jar
       String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
@@ -562,18 +560,19 @@ public class Python extends Service {
   }
 
   public void onRegistered(Registration r) {
-    ServiceInterface s = r.service;
+    // ServiceInterface s = r.service;
 
-    String registerScript = "";
+    String registerScript = "from org.myrobotlab.service import Runtime\n";
 
     // load the import
     // RIXME - RuntimeGlobals & static values for unknown
-    if (!"unknown".equals(s.getSimpleName())) {
-      registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
+    if (!"unknown".equals(r.getTypeKey())) {
+      registerScript += String.format("from org.myrobotlab.service import %s\n", CodecUtils.getSimpleName(r.getTypeKey()));
     }
 
-    registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
-    exec(registerScript, false);
+    registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(r.getName()), r.getName());
+    // exec(registerScript, false);
+    exec(registerScript, true);
   }
 
   /**

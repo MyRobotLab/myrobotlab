@@ -11,7 +11,7 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class DatabaseConnector extends AbstractConnector {
 

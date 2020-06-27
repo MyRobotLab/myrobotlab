@@ -2,11 +2,11 @@ package org.myrobotlab.service;
 
 import java.util.Map;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * 

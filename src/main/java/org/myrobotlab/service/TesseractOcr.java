@@ -14,12 +14,12 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.leptonica.PIX;
 import org.bytedeco.tesseract.TessBaseAPI;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

@@ -145,5 +145,11 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * replace one word with another - instead of "biscuit" say "cookie"
    * @param filter
    */
+  public void replaceWord(String key, String replacement);
+  
+  /**
+   * replace one word with another - instead of "biscuit" say "cookie"
+   * @param filter
+   */
   public void replaceWord(WordFilter filter);  
 }

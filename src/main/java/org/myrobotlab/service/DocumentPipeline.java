@@ -10,9 +10,9 @@ import org.myrobotlab.document.transformer.WorkflowConfiguration;
 import org.myrobotlab.document.workflow.WorkflowMessage;
 import org.myrobotlab.document.workflow.WorkflowServer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.interfaces.DocumentListener;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class DocumentPipeline extends Service implements DocumentListener, DocumentPublisher {
 

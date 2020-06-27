@@ -17,13 +17,13 @@ import org.apache.ivy.util.Message;
 import org.apache.ivy.util.filter.Filter;
 import org.apache.ivy.util.filter.NoFilter;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.StatusLevel;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 // FIXME - 2 layer abstraction - because to generate build files and 
 // other critical methods - they do not require actual "ivy" components
@@ -193,7 +193,7 @@ public class IvyWrapper extends Repo implements Serializable {
     ret.append("  <dependencies>\n\n");
 
     for (String serviceType : serviceTypes) {
-      ServiceType service = sd.getServiceType(serviceType);
+      MetaData service = sd.getServiceType(serviceType);
       Set<ServiceDependency> dependencies = getUnfulfilledDependencies(serviceType);
 
       if (dependencies.size() == 0) {

@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.myrobotlab.service.abstracts.AbstractBodyPart;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * Body spare parts for universal ServoControl gestures Inspired by

@@ -11,8 +11,8 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
 import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.slf4j.Logger;
 
 import com.amazonaws.ClientConfiguration;
@@ -339,5 +339,5 @@ public class Polly extends AbstractSpeechSynthesis {
     setReady(polly != null ? true : false);
     return ready;
   }
-
+  
 }

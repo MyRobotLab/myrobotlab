@@ -72,7 +72,6 @@ import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
@@ -92,6 +91,7 @@ import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;

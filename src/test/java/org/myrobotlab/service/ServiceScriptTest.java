@@ -14,9 +14,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 @Ignore
 public class ServiceScriptTest extends AbstractTest {
@@ -49,10 +49,10 @@ public class ServiceScriptTest extends AbstractTest {
       HashSet<String> serviceTypes = new HashSet<String>();
 
       pythonScripts = new TreeMap<String, String>();
-      List<ServiceType> sts = ServiceData.getLocalInstance().getServiceTypes();
+      List<MetaData> sts = ServiceData.getLocalInstance().getServiceTypes();
       log.info("found {} services", sts.size());
       for (int i = 0; i < sts.size(); ++i) {
-        ServiceType st = sts.get(i);
+        MetaData st = sts.get(i);
         serviceTypes.add(st.getSimpleName());
         System.out.println(System.getProperty("user.dir") + "/src/main/resources/resource/" + st.getSimpleName() + "/" + st.getSimpleName() + ".py");
         String script = FileIO.toSafeString("src/main/resources/resource/" + st.getSimpleName() + "/" + st.getSimpleName() + ".py"); // GitHub.getPyRobotLabScript(branch,

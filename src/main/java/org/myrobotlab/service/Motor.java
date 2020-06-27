@@ -1,10 +1,10 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * A general motor implementation with a "simple H-bridge" where one control

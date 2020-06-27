@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class Lidar extends Service implements SerialDataListener {
@@ -86,7 +86,6 @@ public class Lidar extends Service implements SerialDataListener {
 
   public Lidar(String n, String id) {
     super(n, id);
-    reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar");
   }
 
   @Override
@@ -316,7 +315,7 @@ public class Lidar extends Service implements SerialDataListener {
     super.startService();
 
     try {
-      serial = (Serial) startPeer("serial", "Serial");
+      serial = (Serial) startPeer("serial");
       serial.addByteListener(this);
       // setting callback / message route
       serial.addListener("publishByte", getName(), "byteReceived");

@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class MotorHat4Pi extends AbstractMotor {
   private static final long serialVersionUID = 1L;

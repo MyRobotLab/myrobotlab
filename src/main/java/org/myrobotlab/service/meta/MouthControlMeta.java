@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class MouthControlMeta {
+public class MouthControlMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(MouthControlMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class MouthControlMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.MouthControl");
+    MetaData meta = new MetaData("org.myrobotlab.service.MouthControl");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("Mouth movements based on spoken text");
     meta.addCategory("control");

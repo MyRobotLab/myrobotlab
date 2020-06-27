@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class MotorDualPwm extends AbstractMotor {
   private static final long serialVersionUID = 1L;

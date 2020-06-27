@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class TwitterMeta {
+public class TwitterMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(TwitterMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class TwitterMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Twitter");
+    MetaData meta = new MetaData("org.myrobotlab.service.Twitter");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("Service which can relay tweets");
     meta.addCategory("cloud");

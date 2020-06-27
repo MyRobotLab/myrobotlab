@@ -18,7 +18,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -47,6 +46,7 @@ import org.myrobotlab.service.interfaces.ServoController;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

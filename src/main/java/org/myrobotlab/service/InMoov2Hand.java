@@ -10,7 +10,6 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -23,6 +22,7 @@ import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

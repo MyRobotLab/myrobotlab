@@ -24,6 +24,9 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         FIXME controlled clear units (degrees cm per s vs ms .. etc)
+ *         
+ *         FIXME - THIS SHOULD BE A SERVICE - similar to PID where it can manage 
+ *         multiple calculations/trajectories/encoding for many other services
  *
  */
 public class TimeEncoder implements Runnable, EncoderControl {
@@ -425,5 +428,29 @@ public class TimeEncoder implements Runnable, EncoderControl {
   public boolean isType(String clazz) {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
   }
 }

@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class PingdarMeta {
+public class PingdarMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(PingdarMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class PingdarMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Pingdar");
+    MetaData meta = new MetaData("org.myrobotlab.service.Pingdar");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("used as a ultra sonic radar");
     meta.addCategory("sensors", "display");
@@ -27,7 +28,6 @@ public class PingdarMeta {
     meta.addPeer("sensors", "UltrasonicSensor", "sensors");
     meta.addPeer("servo", "Servo", "servo");
 
-    meta.sharePeer("sensor.controller", "controller", "Arduino", "shared arduino");
     // theoretically - Servo should follow the same share config
     // meta.sharePeer("servo.controller", "controller", "Arduino", "shared
     // arduino");

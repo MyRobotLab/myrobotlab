@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoov2Meta {
+public class InMoov2Meta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(InMoov2Meta.class);
   
   /**
@@ -16,17 +17,17 @@ public class InMoov2Meta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoov2");
+    MetaData meta = new MetaData("org.myrobotlab.service.InMoov2");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("InMoov2 Service");
     meta.addCategory("robot");
 
-    meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
+    meta.addPeer("mouthControl", "mouth", "MarySpeech", "shared Speech");
 
-        meta.addPeer("opencv", "OpenCV", "opencv");
-        meta.addPeer("servomixer", "ServoMixer", "for making gestures");
+    meta.addPeer("opencv", "OpenCV", "opencv");
+    meta.addPeer("servomixer", "ServoMixer", "for making gestures");
     meta.addPeer("ultraSonicRight", "UltrasonicSensor", "measure distance");
     meta.addPeer("ultraSonicLeft", "UltrasonicSensor", "measure distance");
     meta.addPeer("pir", "Pir", "infrared sensor");
@@ -56,14 +57,14 @@ public class InMoov2Meta {
 
     meta.addPeer("headTracking", "Tracking", "Head tracking system");
 
-    meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
+    meta.addPeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
     // meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head
     // Arduino"); NO !!!!
-    meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
-    meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
+    meta.addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
+    meta.addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
+    // meta.addRootPeer("python", "Python", "shared Python service");
 
     // latest - not ready until repo is ready
     meta.addDependency("fr.inmoov", "inmoov2", null, "zip");

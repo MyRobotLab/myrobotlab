@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
@@ -27,6 +27,7 @@ import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public abstract class AbstractSpeechSynthesis extends Service implements SpeechSynthesis, TextListener, KeyConsumer, AudioListener {
@@ -41,27 +42,27 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * substitutions are phonetic substitutions for a specific instance of speech
    * synthesis service
    */
-  Map<String, String> substitutions = new HashMap<String, String>();
-  
+  transient protected Map<String, String> substitutions = new ConcurrentHashMap<String, String>();
+
   /**
    * generalized list of languages and their codes - if useful
    */
   protected Map<String, Locale> locales = new HashMap<>();
-  
+
   /**
    * mute or unmute service
    */
   boolean mute = false;
-  
+
   /**
-   * replaces key with replacement 
+   * replaces key with replacement
    */
   public static class WordFilter implements Serializable {
-   
+
     private static final long serialVersionUID = 1L;
     String word;
     String substitute;
-    
+
     public WordFilter(String word, String substitute) {
       this.word = word;
       this.substitute = substitute;
@@ -111,7 +112,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
           log.warn("only know about male or female - but will set gender to {} because we don't want to discriminate", g);
         }
         this.gender = g;
-      }     
+      }
       if (lang != null) {
         String[] l = lang.split("-");
         if (l.length > 1) {
@@ -245,9 +246,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   private Map<String, Voice> voiceProviderIndex = new TreeMap<>();
 
   private List<Voice> voiceList = new ArrayList<>();
-  
+
   boolean blocking = false;
-  
+
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
   // implementing service
@@ -259,10 +260,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * be pessimistic - MarySpeech is "always" ready :)
    */
 
-   public AbstractSpeechSynthesis(String n, String id) {
+  public AbstractSpeechSynthesis(String n, String id) {
     super(n, id);
-    setReady(false);   
-    
+    setReady(false);
+
     locale = Runtime.getInstance().getLocale();
 
     if (langIndex == null) {
@@ -277,11 +278,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       genderIndex = new HashMap<String, List<Voice>>();
     }
     audioFile = (AudioFile) createPeer("audioFile");
-    
+
     getVoices();
-    
+
   }
-  
+
   @Override
   public Map<String, Locale> getLocales() {
     return locales;
@@ -436,6 +437,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   @Override
   public void setVolume(double volume) {
+    if (audioFile == null) {
+      return;
+    }
     audioFile.setVolume((float) volume);
     info("Set volume to " + volume);
     broadcastState();
@@ -494,7 +498,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
-    
+
     if (voices.size() > 0) {
       setReady(true);
     }
@@ -513,6 +517,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   AudioData play(AudioData data, boolean block) {
     if (block) {
       data.mode = AudioData.MODE_BLOCKING;
+    }
+    if (audioFile == null) {
+      log.warn("{} audioFile is null", getName());
+      return data;
     }
     return audioFile.play(data);
   }
@@ -534,7 +542,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * sound files, SSML, TarsosDsp would all be prepared here before the audio
    * data is generated
    *
-   * @param toSpeak - phrase to speak
+   * @param toSpeak
+   *          - phrase to speak
    * @return - list of audio data
    */
   public List<AudioData> parse(String toSpeak) {
@@ -543,7 +552,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     // but at the moment it seems useful
     // splitting on sound effects ...
     // TODO - use SSML speech synthesis markup language
-    
+
     log.info("{} processing {}", getName(), toSpeak);
 
     // broadcast the original text to be processed/parsed
@@ -553,8 +562,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     toSpeak = toSpeak.toLowerCase();
 
     // process substitutions
-    for (String substitute : substitutions.keySet()) {
-      toSpeak = toSpeak.replace(substitute, substitutions.get(substitute));
+    if (substitutions != null) {
+      for (String substitute : substitutions.keySet()) {
+        toSpeak = toSpeak.replace(substitute, substitutions.get(substitute));
+      }
     }
 
     List<String> spokenParts = parseEffects(toSpeak);
@@ -582,7 +593,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
       if (!mute) {
         process(audioData, speak, blocking);
       } else {
-    	log.info("not producing audio for {} - currently we are mute", speak);
+        log.info("not producing audio for {} - currently we are mute", speak);
       }
 
       // effect files are handled differently from generated audio
@@ -596,10 +607,14 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   @Deprecated /* use replaceWord */
-  public void addSubstitution(String key, String replace) {
-    substitutions.put(key.toLowerCase(), replace.toLowerCase());
+  public void addSubstitution(String key, String replacement) {
+    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
   }
-  
+
+  public void replaceWord(String key, String replacement) {
+    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
+  }
+
   /**
    * replace word for example : worke could get substituted to worky or work-ee
    * or "something" that phonetically works for the current speech synthesis
@@ -611,7 +626,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public void replaceWord(WordFilter filter) {
     substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
   }
-  
 
   public Long publishGenerationTime(Long timeMs) {
     return timeMs;
@@ -907,6 +921,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   public boolean setVoice(String name) {
+    if (voices == null) {
+      return false;
+    }
     if (voices.containsKey(name)) {
       voice = voices.get(name);
       broadcastState();
@@ -1001,11 +1018,11 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     String lang = null;
     if (code.contains("-")) {
       lang = code.split("-")[0];
-    }else if (code.contains("_")) {
+    } else if (code.contains("_")) {
       lang = code.split("_")[0];
     } else {
       lang = code;
-    }    
+    }
     return lang.trim().toLowerCase();
   }
 
@@ -1043,20 +1060,20 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public void unmute() {
     this.mute = false;
   }
-  
+
   public void setMute(boolean b) {
     this.mute = b;
   }
-  
+
   public Boolean setBlocking(Boolean b) {
     blocking = b;
     return b;
   }
-  
+
   public boolean isMute() {
     return mute;
   }
-  
+
   @Override
   public void attachSpeechControl(SpeechSynthesisControl control) {
     // TODO Auto-generated method stub
@@ -1065,10 +1082,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishSetMute");
     addListener(control.getName(), "publishReplaceWord");
   }
-  
-  static public ServiceType getMetaData(String serviceType) {
 
-    ServiceType meta = new ServiceType(serviceType);
+  static public MetaData getMetaData(String serviceType) {
+
+    MetaData meta = new MetaData(serviceType);
     meta.addPeer("audioFile", "AudioFile", "audioFile");
     meta.addCategory("speech");
 

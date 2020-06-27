@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoovMeta {
+public class InMoovMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(InMoovMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class InMoovMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoov");
+    MetaData meta = new MetaData("org.myrobotlab.service.InMoov");
     Platform platform = Platform.getLocalInstance();
     
     meta.addDescription("The InMoov service");
@@ -29,30 +30,30 @@ public class InMoovMeta {
     meta.addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
-    meta.sharePeer("head.arduino", "left", "Arduino", "shared left arduino");
-    meta.sharePeer("torso.arduino", "left", "Arduino", "shared left arduino");
+    meta.addPeer("head.arduino", "left", "Arduino", "shared left arduino");
+    meta.addPeer("torso.arduino", "left", "Arduino", "shared left arduino");
 
-    meta.sharePeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
-    meta.sharePeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
+    meta.addPeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
+    meta.addPeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
     // eyelidsArduino peer for backward compatibility
-    meta.sharePeer("eyelidsArduino", "right", "Arduino", "shared right arduino");
-    meta.sharePeer("rightArm.arduino", "right", "Arduino", "shared right arduino");
-    meta.sharePeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
+    meta.addPeer("eyelidsArduino", "right", "Arduino", "shared right arduino");
+    meta.addPeer("rightArm.arduino", "right", "Arduino", "shared right arduino");
+    meta.addPeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
 
-    meta.sharePeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
-    meta.sharePeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
-    meta.sharePeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
-    meta.sharePeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
-    meta.sharePeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    meta.sharePeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
-    meta.sharePeer("headTracking.x", "head.rothead", "Servo", "shared servo");
-    meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
+    meta.addPeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
+    meta.addPeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
+    meta.addPeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
+    meta.addPeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
+    meta.addPeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
+    meta.addPeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
+    meta.addPeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
+    meta.addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
+    meta.addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
+    meta.addPeer("python", "python", "Python", "shared Python service");
 
     // put peer definitions in
     meta.addPeer("torso", "InMoovTorso", "torso");

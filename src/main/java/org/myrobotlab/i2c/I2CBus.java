@@ -1,18 +1,20 @@
 package org.myrobotlab.i2c;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
-import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.slf4j.Logger;
-
+/**
+ * 
+ * FIXME - this probably should be its own service - one that manages writing into and reading out of
+ * a I2C bus
+ *
+ */
 public class I2CBus implements Attachable, I2CBusControl {
 
   transient public final static Logger log = LoggerFactory.getLogger(I2CBus.class);
@@ -166,6 +168,30 @@ public class I2CBus implements Attachable, I2CBusControl {
   @Override
   public boolean isType(String clazz) {
     return getClass().getCanonicalName().equals(clazz);
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

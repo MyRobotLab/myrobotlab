@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class TrackingMeta {
+public class TrackingMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(TrackingMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class TrackingMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Tracking");
+    MetaData meta = new MetaData("org.myrobotlab.service.Tracking");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("uses a video input and vision library to visually track objects");
     meta.addCategory("vision", "video", "sensors", "control");

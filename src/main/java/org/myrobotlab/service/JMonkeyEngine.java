@@ -1468,14 +1468,18 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   // auto Register
-  public void onRegistered(Registration registration) throws Exception {
-    // new service - see if we can virtualize it
-    log.info("{}.onRegistered({})", getName(), registration);
-    if (registration.getName().contentEquals("i01.head.jaw")) {
-      log.info("here");
-    }
-    if (autoAttach) {
-      attach(registration.getFullName());
+  public void onRegistered(Registration registration) {
+    try {
+      // new service - see if we can virtualize it
+      log.info("{}.onRegistered({})", getName(), registration);
+      if (registration.getName().contentEquals("i01.head.jaw")) {
+        log.info("here");
+      }
+      if (autoAttach) {
+        attach(registration.getFullName());
+      }
+    } catch (Exception e) {
+      error(e);
     }
   }
 

@@ -49,7 +49,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -58,6 +57,7 @@ import org.myrobotlab.net.InstallCert;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.HttpResponseListener;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -13,6 +12,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.MjpegServer;
 import org.myrobotlab.service.abstracts.AbstractVideoSink;
 import org.myrobotlab.service.interfaces.VideoSource;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

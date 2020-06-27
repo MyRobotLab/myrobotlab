@@ -204,11 +204,6 @@ public abstract class ServiceGui implements WindowListener {
     swingGui.unsubscribe(boundServiceName, inMethod, swingGui.getName(), outMethod);
   }
 
-  public void sendPeer(String peerKey, String method, Object... params) {
-    String fullKey = String.format("%s.%s", boundServiceName, peerKey);
-    swingGui.sendPeer(fullKey, method, params);
-  }
-
   public void addTopGroup(String title, Object... components) {
     addTopLine(createFlowPanel(title, components));
   }

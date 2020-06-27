@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.fsm.api.Event;
 import org.myrobotlab.fsm.api.EventHandler;
@@ -20,6 +19,7 @@ import org.myrobotlab.fsm.core.SimpleTransition;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class FiniteStateMachine extends Service implements EventHandler, StateHandler, org.myrobotlab.fsm.api.FiniteStateMachine {

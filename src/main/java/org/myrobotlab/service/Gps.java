@@ -9,13 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -839,7 +839,7 @@ public class Gps extends Service implements SerialDataListener {
   public void startService() {
     super.startService();
     try {
-      serial = (Serial) startPeer("serial", "Serial");
+      serial = (Serial) startPeer("serial");
       // serial.attach(getName());
       serial.addByteListener(this);
 

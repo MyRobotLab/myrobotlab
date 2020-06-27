@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Deeplearning4jMeta {
+public class Deeplearning4jMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(Deeplearning4jMeta.class);
   
   /**
@@ -16,14 +17,14 @@ public class Deeplearning4jMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
     String dl4jVersion = "1.0.0-beta6";
 
     boolean cudaEnabled = Boolean.valueOf(System.getProperty("gpu.enabled", "false"));
     boolean supportRasPi = false;
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Deeplearning4j");
+    MetaData meta = new MetaData("org.myrobotlab.service.Deeplearning4j");
     meta.addDescription("A wrapper service for the Deeplearning4j framework.");
     meta.addCategory("ai");
     

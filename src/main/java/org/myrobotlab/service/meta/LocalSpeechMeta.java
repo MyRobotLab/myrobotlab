@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class LocalSpeechMeta {
+public class LocalSpeechMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(LocalSpeechMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class LocalSpeechMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.LocalSpeech");
+    MetaData meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.LocalSpeech");
     meta.addCategory("speech", "sound");
     meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     meta.setAvailable(true);

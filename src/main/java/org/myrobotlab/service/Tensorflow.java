@@ -16,7 +16,7 @@ limitations under the License.
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;

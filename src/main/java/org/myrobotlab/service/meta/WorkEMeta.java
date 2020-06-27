@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class WorkEMeta {
+public class WorkEMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(WorkEMeta.class);
   
   /**
@@ -16,28 +17,34 @@ public class WorkEMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.WorkE");
+    MetaData meta = new MetaData("org.myrobotlab.service.WorkE");
     Platform platform = Platform.getLocalInstance();
     meta.addPeer("git", "Git", "synching repos");
 
     // motor control - output
-    meta.addPeer("joystick ", "Joystick", "joystick control");
+    meta.addPeer("joystick", "Joystick", "joystick control");
     meta.addPeer("controller", "Sabertooth", "motor controller");
     meta.addPeer("motorLeft", "MotorPort", "left motor");
     meta.addPeer("motorRight", "MotorPort", "right motor");
-    meta.addPeer("simulator", "JMonkeyEngine", "simulator");
+    
+    // global simulator
+    meta.addPeer("simulator", "simulator", "JMonkeyEngine", "the simulator");
 
-    meta.addPeer("webgui", "WebGui", "web interface");
+    // global python
+    meta.addPeer("python", "python", "Python", "the python interface");
+    
+    // global webgui
+    meta.addPeer("webgui", "webgui", "WebGui", "web interface");
 
     // vision - input
     // TODO - going to have several "spouts" - and bolts (storm analogy)
-    meta.addPeer("eye ", "OpenCV", "computer vision");// webcam spout
+    meta.addPeer("eye", "OpenCV", "computer vision");// webcam spout
     // meta.addPeer("leftFoscam ", "OpenCV", "computer vision");// webcam spout
 
     // speech - output
-    meta.addPeer("mouth ", "Polly", "mouth");
+    meta.addPeer("mouth", "Polly", "mouth");
 
     // ear - input
     meta.addPeer("ear", "WebkitSpeechRecognition", "ear");

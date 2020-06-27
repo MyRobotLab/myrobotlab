@@ -280,6 +280,12 @@ public class MetaData implements Serializable {
   }
 
   public ServiceReservation getPeer(String peerKey) {
+    if (peers.get(peerKey) == null) {
+      log.warn("{} not found in peer keys - possible keys follow:", peerKey);
+      for (String key : peers.keySet()) {
+        log.warn(key);
+      }
+    }
     return peers.get(peerKey);
   }
   

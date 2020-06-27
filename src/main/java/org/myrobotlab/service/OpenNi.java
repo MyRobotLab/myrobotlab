@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -21,6 +20,7 @@ import org.myrobotlab.openni.PImage;
 import org.myrobotlab.openni.PVector;
 import org.myrobotlab.openni.Skeleton;
 import org.myrobotlab.service.interfaces.VideoSink;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import SimpleOpenNI.ContextWrapper;

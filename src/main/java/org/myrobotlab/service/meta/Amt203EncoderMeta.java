@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Amt203EncoderMeta {
+public class Amt203EncoderMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(Amt203EncoderMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class Amt203EncoderMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Amt203Encoder");
+    MetaData meta = new MetaData("org.myrobotlab.service.Amt203Encoder");
     Platform platform = Platform.getLocalInstance();
     
     meta.addDescription("AMT203 Encoder - Absolute position encoder");

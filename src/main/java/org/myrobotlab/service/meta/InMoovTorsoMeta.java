@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoovTorsoMeta {
+public class InMoovTorsoMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(InMoovTorsoMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class InMoovTorsoMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoovTorso");
+    MetaData meta = new MetaData("org.myrobotlab.service.InMoovTorso");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("InMoov Torso");
     meta.addCategory("robot");

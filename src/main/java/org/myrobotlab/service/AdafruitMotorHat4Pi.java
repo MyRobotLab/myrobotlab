@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -23,6 +22,7 @@ import org.myrobotlab.service.abstracts.AbstractMotorController;
 import org.myrobotlab.service.interfaces.I2CControl;
 import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

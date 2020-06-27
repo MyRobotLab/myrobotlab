@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.IOException;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
@@ -12,6 +11,7 @@ import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.OrientationListener;
 import org.myrobotlab.service.interfaces.PinArrayControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

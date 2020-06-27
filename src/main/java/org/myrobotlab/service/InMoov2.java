@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -33,6 +32,7 @@ import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
@@ -1068,8 +1068,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public String setSpeechType(String speechType) {
-    speechService = speechType;
-    setPeer("mouth", speechType);
+    speechService = speechType;    
     return speechType;
   }
 
@@ -1255,7 +1254,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // expandable detail in appropriate places
   public OpenCV startOpenCV() throws Exception {
     speakBlocking(get("STARTINGOPENCV"));
-    opencv = (OpenCV) startPeer("opencv", "OpenCV");
+    opencv = (OpenCV) startPeer("opencv");
     subscribeTo(opencv.getName(), "publishOpenCVData");
     isOpenCvActivated = true;
     return opencv;
@@ -1306,7 +1305,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(get(port));
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(head.neck);
@@ -1379,7 +1378,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(leftArm.bicep);
@@ -1406,7 +1405,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(leftHand.thumb);
@@ -1473,7 +1472,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right");
         arduino.connect(port);
 
         arduino.attach(rightArm.bicep);
@@ -1501,7 +1500,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right");
         arduino.connect(port);
 
         arduino.attach(rightHand.thumb);

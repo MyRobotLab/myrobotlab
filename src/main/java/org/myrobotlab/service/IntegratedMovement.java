@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionDectection;
@@ -33,6 +32,7 @@ import org.myrobotlab.service.data.AngleData;
 import org.myrobotlab.service.interfaces.IKJointAnglePublisher;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.jme3.math.Vector3f;

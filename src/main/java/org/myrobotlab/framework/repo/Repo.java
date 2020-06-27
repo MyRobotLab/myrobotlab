@@ -16,12 +16,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public abstract class Repo {
@@ -288,8 +289,9 @@ public abstract class Repo {
         log.error("{} not found", type);
         return ret;
       }
+     
 
-      ServiceType st = sd.getServiceType(type);
+      MetaData st = sd.getServiceType(type);
 
       // look through our repo and resolve
       // if we dont have it - we need it
@@ -309,7 +311,7 @@ public abstract class Repo {
       if (peers != null) {
         for (String key : peers.keySet()) {
           ServiceReservation sr = peers.get(key);
-          ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
+          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(sr.type)));
         }
       }
     }

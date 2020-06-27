@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.headtracking.OculusTracking;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.kinematics.Point;
@@ -16,6 +15,7 @@ import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;

@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Esp8266_01Meta {
+public class Esp8266_01Meta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(Esp8266_01Meta.class);
   
   /**
@@ -16,9 +17,9 @@ public class Esp8266_01Meta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Esp8266_01");
+    MetaData meta = new MetaData("org.myrobotlab.service.Esp8266_01");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     meta.addCategory("i2c", "control");

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;
@@ -15,6 +14,7 @@ import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;

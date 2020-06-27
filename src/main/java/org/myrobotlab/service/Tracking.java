@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
@@ -50,6 +49,7 @@ import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilterDetector;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 // TODO - attach() ???  Static name peer key list ???

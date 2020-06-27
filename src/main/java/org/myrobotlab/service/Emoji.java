@@ -14,7 +14,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.fsm.api.Event;
 import org.myrobotlab.fsm.api.EventHandler;
 import org.myrobotlab.fsm.api.SimpleEvent;
@@ -27,6 +26,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.StateListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 // emotionListener

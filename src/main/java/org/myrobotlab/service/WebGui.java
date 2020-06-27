@@ -45,7 +45,6 @@ import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
@@ -54,6 +53,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -917,20 +917,18 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public void onRegistered(Registration r) {
-    ServiceInterface si = r.service;
     // new service
     // subscribe to the status events
     // FIXED !!! - these subscribes are no longer needed because
     // the angular app currently subscribes to them
     // subscribe(si.getName(), "publishStatus");
     // subscribe(si.getName(), "publishState");
-
     // for distributed Runtimes
-    if (si.isRuntime()) {
-      subscribe(si.getName(), "registered");
+    if (r.getName().equals("runtime")) {
+      subscribe("runtime", "registered");
     }
 
-    invoke("publishPanel", si.getName());
+    invoke("publishPanel", r.getName());
   }
 
   public String publishHide(String name) {

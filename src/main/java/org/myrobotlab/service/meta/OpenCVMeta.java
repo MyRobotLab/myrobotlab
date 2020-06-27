@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class OpenCVMeta {
+public class OpenCVMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(OpenCVMeta.class);
   
   /**
@@ -16,14 +17,14 @@ public class OpenCVMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.OpenCV");
+    MetaData meta = new MetaData("org.myrobotlab.service.OpenCV");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     meta.addCategory("video", "vision", "sensors");
     // meta.addPeer("streamer", "VideoStreamer", "video streaming service
-    meta.sharePeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
+    meta.addPeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
     String javaCvVersion = "1.5.3";
     meta.addDependency("org.bytedeco", "javacv", javaCvVersion);
     meta.addDependency("org.bytedeco", "javacv-platform", javaCvVersion);

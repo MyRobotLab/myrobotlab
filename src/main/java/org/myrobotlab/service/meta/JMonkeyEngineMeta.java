@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class JMonkeyEngineMeta {
+public class JMonkeyEngineMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(JMonkeyEngineMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class JMonkeyEngineMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.JMonkeyEngine");
+    MetaData meta = new MetaData("org.myrobotlab.service.JMonkeyEngine");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("is a 3d game engine, used for simulators");
     meta.setAvailable(true); // false if you do not want it viewable in a gui

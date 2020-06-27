@@ -6,12 +6,12 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 // FIXME - checkingForUpdates needs to process ? versus display current
@@ -41,8 +41,8 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
     }
 
     // select by class being published by JTable on how to display
-    if (value.getClass().equals(ServiceType.class)) {
-      ServiceType entry = (ServiceType) table.getValueAt(row, 0);
+    if (value.getClass().equals(MetaData.class)) {
+      MetaData entry = (MetaData) table.getValueAt(row, 0);
       setHorizontalAlignment(SwingConstants.LEFT);
       setIcon(Util.getScaledIcon(Util.getImage((entry.getSimpleName() + ".png"), "unknown.png"), 0.30));
       setText(entry.getSimpleName());
@@ -57,7 +57,7 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
       setText(entry.getSimpleName());
 
     } else if (value.getClass().equals(String.class)) {
-      ServiceType entry = (ServiceType) table.getValueAt(row, 0);
+      MetaData entry = (MetaData) table.getValueAt(row, 0);
       availableToInstall = repo.isServiceTypeInstalled(entry.getName());
 
       setIcon(null);
@@ -82,7 +82,7 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
       setForeground(Style.listForeground);
     } else {
 
-      ServiceType entry = (ServiceType) table.getValueAt(row, 0);
+      MetaData entry = (MetaData) table.getValueAt(row, 0);
       availableToInstall = repo.isServiceTypeInstalled(entry.getName());
 
       if (!availableToInstall) {

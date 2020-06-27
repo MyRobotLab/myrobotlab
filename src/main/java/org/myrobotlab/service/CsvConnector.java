@@ -9,7 +9,7 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 
 import au.com.bytecode.opencsv.CSVReader;

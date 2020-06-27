@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class OculusRiftMeta {
+public class OculusRiftMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(OculusRiftMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class OculusRiftMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.OculusRift");
+    MetaData meta = new MetaData("org.myrobotlab.service.OculusRift");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("The Oculus Rift Head Tracking Service");
     meta.addCategory("video", "control", "sensors", "telerobotics");

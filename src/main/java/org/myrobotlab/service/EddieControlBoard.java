@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -16,6 +15,7 @@ import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

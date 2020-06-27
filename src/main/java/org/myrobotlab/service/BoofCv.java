@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -9,6 +8,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.service.interfaces.Point2DfListener;
 import org.myrobotlab.service.interfaces.Point2DfPublisher;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class BoofCv extends Service implements Point2DfPublisher, Point2DfListener {

@@ -1,11 +1,11 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.DruppIKSolver;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * 

@@ -14,15 +14,5 @@ public interface SpeechSynthesisControl extends NameProvider {
   public boolean setMute(boolean mute);
   
   public void replaceWord(String word, String substitute);
-  
-  public String publishSpeak(String text);
-  
-  public String publishSetVoice(String name);
-
-  public Double publishSetVolume(Double volume);
-  
-  public Boolean publishSetMute(Boolean mute);
-
-  public WordFilter publishReplaceWord(String word, String substitute);
-  
+    
 }

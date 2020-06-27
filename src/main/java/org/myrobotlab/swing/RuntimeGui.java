@@ -70,7 +70,6 @@ import javax.swing.table.TableColumnModel;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
@@ -84,6 +83,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.swing.widget.ImageNameRenderer;
 import org.myrobotlab.swing.widget.PossibleServicesRenderer;
 import org.myrobotlab.swing.widget.ProgressDialog;
@@ -220,7 +220,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     cm.getColumn(1).setMaxWidth(60);
 
     possibleServices.setDefaultRenderer(ImageIcon.class, cellRenderer);
-    possibleServices.setDefaultRenderer(ServiceType.class, cellRenderer);
+    possibleServices.setDefaultRenderer(MetaData.class, cellRenderer);
     possibleServices.setDefaultRenderer(String.class, cellRenderer);
 
     possibleServices.addMouseListener(new MouseAdapter() {
@@ -239,7 +239,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         log.info("******************popUpTrigger*********************");
         JTable source = (JTable) e.getSource();
         popupRow = source.rowAtPoint(e.getPoint());
-        ServiceType c = (ServiceType) possibleServicesModel.getValueAt(popupRow, 0);
+        MetaData c = (MetaData) possibleServicesModel.getValueAt(popupRow, 0);
         releaseMenuItem.setVisible(false);
         infoMenuItem.setVisible(true);
         if (!myRepo.isServiceTypeInstalled(c.getName())) {
@@ -416,7 +416,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   // zod
   @Override
   public void actionPerformed(ActionEvent event) {
-    ServiceType c = (ServiceType) possibleServicesModel.getValueAt(popupRow, 0);
+    MetaData c = (MetaData) possibleServicesModel.getValueAt(popupRow, 0);
     String cmd = event.getActionCommand();
     Object o = event.getSource();
 
@@ -430,7 +430,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     } else if ("install".equals(cmd)) {
       int selectedRow = possibleServices.getSelectedRow();
 
-      ServiceType entry = ((ServiceType) possibleServices.getValueAt(selectedRow, 0));
+      MetaData entry = ((MetaData) possibleServices.getValueAt(selectedRow, 0));
       String n = entry.getName();
       Repo repo = myRuntime.getRepo();
 
@@ -451,7 +451,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
 
     } else if ("start".equals(cmd)) {
       int selectedRow = possibleServices.getSelectedRow();
-      ServiceType entry = ((ServiceType) possibleServices.getValueAt(selectedRow, 0));
+      MetaData entry = ((MetaData) possibleServices.getValueAt(selectedRow, 0));
       addNewService(entry.getName());
 
     } else if ("install all".equals(cmd)) {
@@ -618,9 +618,9 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
           possibleServicesModel.removeRow(i - 1);
         }
         // populate with serviceData
-        List<ServiceType> possibleService = serviceData.getServiceTypes();
+        List<MetaData> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
-          ServiceType serviceType = possibleService.get(i);
+          MetaData serviceType = possibleService.get(i);
           if (filtered == "" || serviceType.getSimpleName().toLowerCase().indexOf(filtered.toLowerCase()) != -1) {
             if (serviceType.isAvailable()) {
               possibleServicesModel.addRow(new Object[] { serviceType, "" });
@@ -657,9 +657,9 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         }
 
         // populate with serviceData
-        List<ServiceType> possibleService = serviceData.getServiceTypes();
+        List<MetaData> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
-          ServiceType serviceType = possibleService.get(i);
+          MetaData serviceType = possibleService.get(i);
           if (filtered == null || filtered.contains(serviceType.getName())) {
             if (serviceType.isAvailable()) {
               possibleServicesModel.addRow(new Object[] { serviceType, "" });

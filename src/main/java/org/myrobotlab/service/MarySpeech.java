@@ -11,7 +11,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -19,6 +18,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 

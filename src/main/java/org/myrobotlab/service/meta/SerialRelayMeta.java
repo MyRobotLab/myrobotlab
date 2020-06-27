@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class SerialRelayMeta {
+public class SerialRelayMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(SerialRelayMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class SerialRelayMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.SerialRelay");
+    MetaData meta = new MetaData("org.myrobotlab.service.SerialRelay");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("Relaying Serial data to a different serial port on mega Arduino");
     meta.setAvailable(false); // false if you do not want it viewable in a gui

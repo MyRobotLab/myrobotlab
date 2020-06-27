@@ -20,7 +20,6 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 // import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
 import org.myrobotlab.logging.Level;
@@ -29,6 +28,7 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.service.Xmpp.XmppMsg;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 // FIXME - use Peers !

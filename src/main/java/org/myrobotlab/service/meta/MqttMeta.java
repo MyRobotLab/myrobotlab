@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class MqttMeta {
+public class MqttMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(MqttMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class MqttMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Mqtt");
+    MetaData meta = new MetaData("org.myrobotlab.service.Mqtt");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");

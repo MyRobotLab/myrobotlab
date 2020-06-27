@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -48,6 +47,7 @@ import org.myrobotlab.service.interfaces.PinListener;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoEvent;
 import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -301,7 +301,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public DiyServo(String n, String id) {
     super(n, id);
     refreshPinArrayControls();
-    motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
+    motorControl = (MotorControl) createPeer("motor");
     initPid();
     subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();

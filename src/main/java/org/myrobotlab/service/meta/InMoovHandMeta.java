@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoovHandMeta {
+public class InMoovHandMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(InMoovHandMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class InMoovHandMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoovHand");
+    MetaData meta = new MetaData("org.myrobotlab.service.InMoovHand");
     Platform platform = Platform.getLocalInstance();
     
     meta.addDescription("an easier way to create gestures for InMoov");
@@ -31,7 +32,7 @@ public class InMoovHandMeta {
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
+    meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
 
     return meta;
   }

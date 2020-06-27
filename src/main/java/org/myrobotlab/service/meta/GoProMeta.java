@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class GoProMeta {
+public class GoProMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(GoProMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class GoProMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.GoPro");
+    MetaData meta = new MetaData("org.myrobotlab.service.GoPro");
     Platform platform = Platform.getLocalInstance();
     // add dependency if necessary
     // meta.addDependency("org.coolproject", "1.0.0");

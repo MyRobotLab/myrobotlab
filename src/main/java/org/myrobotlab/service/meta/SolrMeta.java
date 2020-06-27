@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class SolrMeta {
+public class SolrMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(SolrMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class SolrMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Solr");
+    MetaData meta = new MetaData("org.myrobotlab.service.Solr");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("Solr Service - Open source search engine");
     meta.addCategory("search");

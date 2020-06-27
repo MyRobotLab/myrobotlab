@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
@@ -20,12 +19,13 @@ import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
 import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
+import org.myrobotlab.service.interfaces.SpeechSynthesisControlPublisher;
 import org.myrobotlab.service.interfaces.StatusListener;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class WorkE extends Service implements StatusListener, TextPublisher, SpeechSynthesisControl, JoystickListener {
+public class WorkE extends Service implements StatusListener, TextPublisher, SpeechSynthesisControl, SpeechSynthesisControlPublisher, JoystickListener {
 
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
 
@@ -135,8 +135,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     // to much type info - life-cycle happens before peers started
     // subscribe("runtime", "registered"); 
 
-    subscribe("runtime", "started");
-    subscribe("runtime", "released");
+    // subscribe("runtime", "started");
+    // subscribe("runtime", "released");
 
   }
 
@@ -153,42 +153,42 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * @throws Exception
    */
   @Override
-  public void attach(Attachable service) {
+  public void attach(Attachable attachable) {
 
     try {
 
-      speak("discovered new service, %s", service.getName().replace(".", " "));
+      speak("discovered new service, %s", attachable.getName().replace(".", " "));
 
       // interface routing ... "better"
-      if (service.hasInterface(SpeechSynthesis.class)) {
-        attachSpeechSynthesis((SpeechSynthesis) service);
+      if (attachable.hasInterface(SpeechSynthesis.class)) {
+        attachSpeechSynthesis((SpeechSynthesis) attachable);
       }
 
       // abstract class routing .. meh not the best
-      if (service.hasInterface(MotorControl.class)) {
-        attachMotorControl((MotorControl) service);
+      if (attachable.hasInterface(MotorControl.class)) {
+        attachMotorControl((MotorControl) attachable);
       }
 
       // class routing - kind of lame
-      if (service.isType(Joystick.class)) {
-        attachJoystick((Joystick) service);
+      if (attachable.isType(Joystick.class)) {
+        attachJoystick((Joystick) attachable);
       }
 
       // class routing - kind of lame
       // lame to expose the type - lame to need to cast
-      if (service.isType(OpenCV.class)) {
-        attachOpenCV((OpenCV) service);
+      if (attachable.isType(OpenCV.class)) {
+        attachOpenCV((OpenCV) attachable);
       }
 
       // class name routing - pretty lame...
-      if (service.isType("ProgramAB")) {
+      if (attachable.isType("ProgramAB")) {
         // i named this attachBrain because - should probably have
         // a chatbot, or brain, or "something" interface
-        attachBrain((ProgramAB) service);
+        attachBrain((ProgramAB) attachable);
       }
 
-      if (service.hasInterface(MotorController.class)) {
-        attachMotorController((MotorController) service);
+      if (attachable.hasInterface(MotorController.class)) {
+        attachMotorController((MotorController) attachable);
       }
 
       if (!hasErrors()) {
@@ -224,7 +224,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // state changes after attach
       broadcastState();
     } catch (Exception e) {
-      speak("error in attaching %s", service.getName());
+      speak("error in attaching %s", attachable.getName());
     }
   }
 
@@ -297,8 +297,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       if (isLeft) {
         send(motorLeft, "setPort", motorPortLeft);
         speak("to %s", motorPortLeft);
-        speak("setting left motor inverted");
-        send(motorLeft, "setInverted", true);
+        // speak("setting left motor inverted");
+        // send(motorLeft, "setInverted", true);
       } else {
         send(motorRight, "setPort", motorPortRight);
         speak("to %s", motorPortRight);
@@ -513,6 +513,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     log.info("onOpenCVData");
   }
   
+  // PREFERRED !!!
   public void onStarted(String name) {
     try {
     attach(name);
@@ -521,9 +522,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     }
   }
 
+  /** TOO SOON !!!! 
   public void onRegistered(Registration registration) {
     attach((Attachable) registration.service);
-  }
+  }*/
 
   public void onReleased(String name) {
     speak("released %s", name);
@@ -745,12 +747,20 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   }
 
   public String speak(String inText, Object... args) {
+    
     String text = null;
     if (args != null) {
       text = String.format(inText, args);
     } else {
       text = inText;
     }
+    
+    // if mouth has not started
+    // no point in speaking
+    if (!isStarted("mouth")) {
+      return text;
+    }
+    
     broadcast("publishText", text);
     broadcast("publishSpeak", text);
     return text;
@@ -772,7 +782,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    */
   public static void main(String[] args) {
     try {
-
+      
       LoggingFactory.init(Level.WARN);
       Platform.setVirtual(true);
 

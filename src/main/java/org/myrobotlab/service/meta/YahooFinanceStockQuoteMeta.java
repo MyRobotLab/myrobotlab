@@ -1,11 +1,12 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class YahooFinanceStockQuoteMeta {
+public class YahooFinanceStockQuoteMeta  extends Meta {
   public final static Logger log = LoggerFactory.getLogger(YahooFinanceStockQuoteMeta.class);
   
   /**
@@ -16,9 +17,9 @@ public class YahooFinanceStockQuoteMeta {
    * @return ServiceType - returns all the data
    * 
    */
-  static public ServiceType getMetaData() {
+  public MetaData getMetaData() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.YahooFinanceStockQuote");
+    MetaData meta = new MetaData("org.myrobotlab.service.YahooFinanceStockQuote");
     Platform platform = Platform.getLocalInstance();
     meta.addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
     meta.addCategory("filter", "finance");
