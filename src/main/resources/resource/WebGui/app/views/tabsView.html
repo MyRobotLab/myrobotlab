@@ -111,7 +111,7 @@
 
     /* Handle */
     ::-webkit-scrollbar-thumb {
-      background: ##abb4c3; 
+      background: #abb4c3; 
     }
 
     /* Handle on hover */
@@ -175,13 +175,13 @@
         padding: 16px;
         width: 100%;
         /* Firefox */
-        height: -moz-calc(100vh - 156px);
+        height: -moz-calc(100vh - 65px);
         /* WebKit */
-        height: -webkit-calc(100vh - 156px);
+        height: -webkit-calc(100vh - 65px);
         /* Opera */
-        height: -o-calc(100vh - 156px);
+        height: -o-calc(100vh - 65px);
         /* Standard */
-        height: calc(100vh - 156px);
+        height: calc(100vh - 65px);
 
         z-index: 1;
         background-color: #FFFFFF;
@@ -190,26 +190,13 @@
         scrollbar-width: thin;
         overflow-x: hidden;
         overscroll-behavior: contain;
-
-    }
-    #bottomMessages{
-        transition: margin-left .5s;
-        width: calc(100vw - 260px);
-        height: 100px;
-        margin: 0px;
-        background-color: #cccccc;
-        overflow: scroll;
-        transition-timing-function: ease;
-        overflow-x: hidden;
-        overscroll-behavior: contain;
-    }
+    }   
 
     @media screen and (max-height: 450px) {
         .sidenav {
             padding-top: 15px;
         }
     }
-
 </style>
 <div class="container-fluid">
     <!-- 1/2 manual tab implementation because Angular UI Bootstrap doesn't include a option for content right -->
@@ -274,63 +261,114 @@
                 -->
         <div ng-repeat="panel in panels" service-ctrl-directive panel="panel">
             <!-- maybe move this to somewhere general? -->
-            <!-- Astro: I don't know what is this. I need some "graphic Map" with names of elements with examples -->
         </div>
         <div class="col-md-12">
             <div class="tab-content">
-                <div ng-repeat="panel in panels" ng-show="view_tab == panel.name" service-body panel="panel"></div>
+                <div ng-show="view_tab == panel.name" ng-repeat="panel in panels"  service-body panel="panel"></div>
             </div>
         </div>
 
     </div>
+<!-- Removing begin.... -->
     <!-- end main -->
+    <div id="ghostbarTouchHandler"></div>
+
+    <div id="handleOpenBottomMessages" onmouseenter="openBottomMessages()" onclick="openBottomMessages()"><span class="glyphicon glyphicon-menu-up mr-4 preventDragSelect"></span> Show Notifications</div>
     <div id="bottomMessages">
-        <ul id="notification-entries">
-            <li>
-                Notifications
-            </i>
+       <!-- Debug :<div id="debugDrag"></div> -->
+        <div id="dragbar" ontouchstart="dragTouchBottomMessagesStart(event)" ontouchmove="dragTouchBottomMessagesMove(event)" ontouchend="dragTouchBottomMessagesEnd(event)" ontouchcancel="dragCancel(event)"></div>      
+        <!-- <div id="ghostbarTouchZone"></div> -->
+        <div id="handleCloseBottomMessages" onmouseenter="closeBottomMessages()" onclick="closeBottomMessages()"><span class="glyphicon glyphicon-menu-down mr-4 preventDragSelect"></span> Hide</div>
+        
+        
+        <div id="notificationContainer">
+            <ul id="notification-entries">
+
+
+                <!-- -------------- ERRORS -------------------- -->
                 <li>
-
-                    <div class="alert alert-danger alert-dismissable mb-0" ng-hide="errorStatus == null">
-                        <span class="label label-danger">error</span>
-                        {{errorStatus.name}} : {{errorStatus.key}} : {{errorStatus.detail}}  
-                                <span ng-hide="errorCount < 2" class="badge">{{errorCount}}</span>
-                        <button type="button" class="close" data-ng-click="errorStatus = null;errorCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="alert alert-warning alert-dismissable mb-0" ng-hide="warningStatus == null">
-                        <span class="label label-warning">warning</span>
-                        {{warningStatus.name}} : {{warningStatus.key}} : {{warningStatus.detail}}  
-                                <span ng-hide="warningCount < 2" class="badge">{{warningCount}}</span>
-                        <button type="button" class="close" data-ng-click="warningStatus = null;warningCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="alert alert-info alert-dismissable mb-0" ng-hide="infoStatus == null">
-                        <span class="label label-info">info</span>
-                        {{infoStatus.name}} : {{infoStatus.key}} : {{infoStatus.detail}}  
-                                <span ng-hide="infoCount < 2" class="badge">{{infoCount}}</span>
-                        <button type="button" class="close" data-ng-click="infoStatus = null;infoCount = 0" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                    <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
                         </button>
                     </div>
 
+                    <div class="alert alert-warning alert-dismissable">
+                        <span class="label label-warning">error test</span>
+                        SIMULATED ERROR python :  : Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info alert-dismissable">
+                        <span class="label label-info">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+
+                    <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+
+                    <div class="alert alert-danger alert-dismissable">
+                        <span class="label label-danger">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+                
+                    
+                    <div class="alert alert-info alert-dismissable">
+                        <span class="label label-info">error test</span>
+                        SIMULATED ERROR python :  : Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+NameError: name 'isTheSunShiny' is not defined
+  
+                        <span ng-hide="errorCount < 2" class="badge" style="">2</span>
+                        <button type="button" class="close" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
                 </li>
+                <!-- /-------------- ERRORS -------------------- -->
+
+
             </ul>
+        </div>
     </div>
-
-
+<!-- TO REMOVE END -->
 </div>
 
-
-
 <script>
-    
     // first time
     onStartOpenNav();
     function onStartOpenNav(){
-        //document.getElementById("handleOpen").style.visibility = "hidden";
         document.getElementById("handleClose").style.visibility = "hidden";
         setTimeout(function () {
             openNav();
@@ -353,8 +391,6 @@
         document.getElementById("main").style.marginLeft = "250px";
         document.getElementById("bottomMessages").style.marginLeft = "250px";
         document.getElementById("bottomMessages").style.width = "calc(100vw - 260px)";
-        
-        /*document.getElementById("main").style.width = "calc(100% - 250px)";*/
     }
 
     function closeNav() {
@@ -372,8 +408,113 @@
         document.getElementById("bottomMessages").style.marginLeft = "0px";
         document.getElementById("bottomMessages").style.width = "calc(100vw - 10px)";
         document.getElementById("main").style.width = "100%";
-
     }
+ 
+    // Drag Bottom Messages container -------------------------------------
+    // initial height value;
+    var BottomMessagesHeight = 100;
+    var BottomMessagesTop = 100;
+    var i = 0;
+    var dragging = false;
+    $('#dragbar').mousedown(function(e){
+       e.preventDefault();
+       
+       dragging = true;
+       var main = $('#main');
+       var dragbar = $("#dragbar");
+       var ghostbar = $('<div>',
+                        {id:'ghostbar',
+                         css: {
+                                height: 4,
+                                width: dragbar.outerWidth()-10,
+                                top: main.offset().top,
+                                bottom: main.offset().bottom,
+                                right: 20
+                               }
+                        }).appendTo('body');
+        $(document).mousemove(function(e){
+          ghostbar.css("top",e.pageY);
+       });
+        //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
+    });
+    
+    $(document).mouseup(function(e){
+       if (dragging) 
+       {
+            BottomMessagesTop = e.pageY-2;
+            BottomMessagesHeight = document.body.clientHeight-e.pageY;
+            $('#main').css("height",BottomMessagesTop);
+            $('#bottomMessages').css("top",BottomMessagesTop);
+            $('#bottomMessages').css("height",BottomMessagesHeight);
+            //$('#notificationContainer').css("height",BottomMessagesHeight);
+            $('#ghostbar').remove();
+            $(document).unbind('mousemove');
+            document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
+            dragging = false;            
+       }
+    });
+
+
+    // drag functions for Touch devices 
+    document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
+    function dragTouchBottomMessagesStart(event){
+        //document.getElementById("ghostbarTouchHandler").style.visibility = "visible";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "1";
+        //document.getElementById("debugDrag").innerHTML = parseInt(event.touches[0].clientY);
+    }   
+    function dragTouchBottomMessagesMove(event){
+        event.preventDefault();
+        document.getElementById("ghostbarTouchHandler").style.top = parseInt(event.touches[0].clientY)+10+"px";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "1";
+        document.getElementById("ghostbarTouchHandler").style.zIndex = "2000";
+        BottomMessagesTop=parseInt(event.touches[0].clientY);
+        BottomMessagesHeight = parseInt(document.body.clientHeight - event.touches[0].clientY);
+        //document.getElementById("debugDrag").innerHTML = parseInt(event.touches[0].clientY);
+        //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
+    }
+
+    function dragTouchBottomMessagesEnd(event){        
+    
+        document.getElementById("main").style.height = "calc(100vh - (52px + " + BottomMessagesHeight + "px))";
+        document.getElementById("bottomMessages").style.top = BottomMessagesTop +"px";
+        document.getElementById("bottomMessages").style.height = BottomMessagesHeight +"px";
+          document.getElementById("ghostbarTouchHandler").style.zIndex = "30";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "0";
+        //document.getElementById("debugDrag").innerHTML = BottomMessagesHeight;
+    }
+    function dragCancel(event){
+        document.getElementById("ghostbarTouchHandler").style.zIndex = "30";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "0";
+    }
+    //-- End drag functions -----------------------
+
+
+    function openBottomMessages() {
+        document.getElementById("handleCloseBottomMessages").style.display = "block";
+        document.getElementById("handleOpenBottomMessages").style.display = "none";
+        document.getElementById("bottomMessages").style.visibility = "visible";
+        document.getElementById("notificationContainer").style.transform = "scaleY(1)";
+        document.getElementById("bottomMessages").style.top = document.body.clientHeight - BottomMessagesHeight +"px";
+        document.getElementById("bottomMessages").style.height = BottomMessagesHeight + "px";
+        document.getElementById("dragbar").style.visibility = "visible";
+        document.getElementById("main").style.height = "calc(100vh - (52px + " + BottomMessagesHeight + "px))";
+        document.getElementById("ghostbarTouchHandler").style.visibility = "visible";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "1";
+        document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;
+    }
+
+    function closeBottomMessages() {
+        document.getElementById("handleCloseBottomMessages").style.display = "none";
+        document.getElementById("handleOpenBottomMessages").style.display = "block";
+        document.getElementById("notificationContainer").style.transform = "scaleY(0)";
+        document.getElementById("bottomMessages").style.visibility = "hidden";
+        document.getElementById("bottomMessages").style.height = "0px";
+        document.getElementById("dragbar").style.visibility = "hidden";
+        document.getElementById("main").style.height = "calc(100vh - 65px)";
+        document.getElementById("ghostbarTouchHandler").style.opacity = "0";
+        document.getElementById("ghostbarTouchHandler").style.top = document.getElementById("bottomMessages").style.top;        
+    }
+
 </script>
 <!--
 <input type="text" ng-model="name" />

@@ -66,6 +66,8 @@ public class OpenCVMeta {
     meta.addDependency("opencv", "opencv_classifiers", "0.0.2", "zip");
     // the DNN Face Detection module
     meta.addDependency("opencv", "opencv_facedetectdnn", "1.0.1", "zip");
+    // text detection using EAST classifier
+    meta.addDependency("opencv", "opencv_east_text_detection", "0.0.1", "zip");
     // youtube downloader
     meta.addDependency("com.github.axet", "vget", "1.1.34");
     // yolo models

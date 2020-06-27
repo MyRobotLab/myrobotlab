@@ -26,7 +26,7 @@ angular.module('mrlapp.service.JMonkeyEngineGui', []).controller('JMonkeyEngineG
         }
     }
 
-    msg.subscribe('pulse')
+    // msg.subscribe('pulse')
     msg.subscribe(this)
 
 }

@@ -3,18 +3,28 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
     var _self = this
     var msg = this.msg
     $scope.mrl = mrl
-    $scope.panel = mrl.getPanel('runtime')
-
+    // $scope.panel = mrl.getPanel('runtime')
+    // although this should be a set or dictionary - angular does not handle key changes
+    // correctly on modifications - instead the only handle array[] changes :(
+    $scope.panels = []
     $scope.props = {}
 
-    $scope.activePanel = 'settings'
+    $scope.subPanels = {}
 
-    // GOOD Intro TO FOLLOW
+    // possible panels of interest
+    let panelNames = new Set()
+    panelNames.add('arduino')
+    panelNames.add('servo01')
+    panelNames.add('servo02')
+    panelNames.add('python')
+    panelNames.add('security')
+    panelNames.add('runtime')
+
+    // GOOD pattern to follow - updateState called form onMsg
     this.updateState = function(service) {
         $scope.service = service
         $scope.props = service.props
         console.info($scope.props.servo01IsActive)
-        console.info('here')
     }
 
     this.onMsg = function(inMsg) {
@@ -52,10 +62,32 @@ angular.module('mrlapp.service.IntroGui', []).controller('IntroGuiCtrl', ['$scop
     $scope.get = function(key) {
         let ret = $scope.service.props[key]
         return ret
-    }    
+    }
+
+    // this method initializes subPanels when a new service becomes available
+    this.onRegistered = function(panel) {
+        if (panelNames.has(panel.displayName)) {
+            $scope.subPanels[panel.displayName] = panel
+        }
+    }
+
+    // this method removes subPanels references from released service
+    this.onReleased = function(panelName) {
+        if (panelNames.has(panelName)) {
+            $scope.subPanels[panelName]           
+        }
+        console.info('here')
+    }
+
+    // initialize all services which have panel references in Intro
+    let servicePanelList = mrl.getPanelList()
+    for (let index = 0; index < servicePanelList.length; ++index){
+        this.onRegistered(servicePanelList[index])
+    }
 
     msg.subscribe(this)
-    msg.subscribe("registered")
-
+    // runtime registration of new services
+    mrl.subscribeToRegistered(this.onRegistered)
+    mrl.subscribeToReleased(this.onReleased)
 }
 ])
