@@ -80,8 +80,8 @@ node ('ubuntu') {  // use labels to direct build
       junit '**/target/surefire-reports/TEST-*.xml'
    }
    stage('archive') {
-         // archiveArtifacts 'target/myrobotlab.jar'
-         archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+         //  site/*
+         archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
    } 
    stage('jacoco') {
         jacoco()
