@@ -86,6 +86,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterTextDetector;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -267,7 +268,7 @@ public class OpenCV extends AbstractComputerVision {
       "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip", "FloodFill",
       "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate", "LKOpticalTrack",
       "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
-      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo", };
+      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -407,6 +408,10 @@ public class OpenCV extends AbstractComputerVision {
     
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
+    cv.addFilter(td);
+    cv.capture();
+    
     // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     // webgui.autoStartBrowser(false);
     // webgui.startService();

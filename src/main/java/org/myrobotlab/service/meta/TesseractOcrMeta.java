@@ -25,9 +25,9 @@ public class TesseractOcrMeta  extends Meta {
     meta.addCategory("ai","vision");
     meta.addDependency("org.bytedeco", "tesseract", "4.1.1-1.5.3");
     meta.addDependency("org.bytedeco", "tesseract-platform", "4.1.1-1.5.3");
+    meta.addDependency("tesseract", "tessdata", "0.0.2", "zip");
     return meta;
   }
-
   
 }
 
