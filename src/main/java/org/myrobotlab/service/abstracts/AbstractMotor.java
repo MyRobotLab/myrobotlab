@@ -70,27 +70,29 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
    */
   public List<String> controllers;
 
+  // FIXME - use a timer encoder !
   transient MotorEncoder encoder = null;
 
   // FIXME - implements an Encoder interface
   // get a named instance - stopping and tarting should not be creating &
   // destroying
   transient Object lock = new Object();
-  boolean locked = false;
+  
+  protected boolean locked = false;
 
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
-  transient Mapper mapper = new MapperLinear();
+  protected MapperLinear mapper = new MapperLinear();
 
-  Double max = null;
+  protected Double max = null;
 
-  Double min = null;
+  protected Double min = null;
 
   // feedback
-  Double positionCurrent; // aka currentPos
+  protected Double positionCurrent; // aka currentPos
 
-  Double positionInput; // aka targetPos
+  protected Double positionInput; // aka targetPos
 
   /**
    * the power level requested - varies between -1.0 &lt;--&gt; 1.0
@@ -100,7 +102,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   // PARTS ARE NOW PART OF CONTROLLER
 
   // inputs
-  Double powerInput = 0.0;
+  protected Double powerInput = 0.0;
 
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -273,7 +275,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   // FIXME promote to interface
-  public void setMapper(Mapper mapper) {
+  public void setMapper(MapperLinear mapper) {
     this.mapper = mapper;
   }
 

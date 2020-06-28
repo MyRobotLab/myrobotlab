@@ -940,7 +940,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   // currently not a "real" motor control - it has to wait for merging of Servo
   // & Motor
   @Override
-  public Mapper getDefaultMapper() {
+  public MapperLinear getDefaultMapper() {
     // best guess :P
     MapperLinear mapper = new MapperLinear();
     mapper.map(-1.0, 1.0, 0.0, 255.0);

@@ -2,7 +2,7 @@ package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.Registration;
 
-public interface ServiceLifeCyclePublisher {
+public interface ServiceLifeCycle {
   
   public Registration registered(Registration registration);
 

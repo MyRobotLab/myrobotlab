@@ -157,7 +157,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
   }
 
   @Override
-  public Mapper getDefaultMapper() {
+  public MapperLinear getDefaultMapper() {
     return defaultMapper;
   }
 

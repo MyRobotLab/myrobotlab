@@ -297,8 +297,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       if (isLeft) {
         send(motorLeft, "setPort", motorPortLeft);
         speak("to %s", motorPortLeft);
-        // speak("setting left motor inverted");
-        // send(motorLeft, "setInverted", true);
+        speak("setting left motor inverted");
+        send(motorLeft, "setInverted", true);
       } else {
         send(motorRight, "setPort", motorPortRight);
         speak("to %s", motorPortRight);
@@ -793,7 +793,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // FIXME - setters & getters for peers
 
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      worke.startPeer("mouth");
+      // worke.startPeer("mouth");
       worke.startPeer("joystick");
       worke.startPeer("motorLeft");
       worke.startPeer("motorRight");

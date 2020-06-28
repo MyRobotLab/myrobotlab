@@ -334,6 +334,8 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
         if (event.text != null && event.text.toLowerCase().contains(wakeWord.toLowerCase())) {
           info("wake word match on %s in %s, idle timer starts to sleep in {} seconds", wakeWord, event.text, wakeWordIdleTimeoutSeconds);
           String originalText = event.text;
+          // if WakeWord is "robot" and you say "robot" got wash dishes - this
+          // will remove the "robot" from the published text
           if (removeWakeWord) {
             event.text = event.text.replace(wakeWord.toLowerCase(), "");
           }
@@ -473,13 +475,14 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   public void setWakeWord(String word) {
     if (word == null || word.trim().length() == 0) {
       word = null;
+      wakeWord = null;
       log.info("unsetting wake word");
       purgeTask("wakeWordIdleTimeoutSeconds");
       setAwake(true);
     } else {
       setAwake(false);
-    }
-    this.wakeWord = word.trim();
+      this.wakeWord = word.trim();
+    }    
     broadcastState();
   }
 

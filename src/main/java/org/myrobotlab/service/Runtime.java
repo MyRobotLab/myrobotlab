@@ -72,7 +72,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
-import org.myrobotlab.service.interfaces.ServiceLifeCyclePublisher;
+import org.myrobotlab.service.interfaces.ServiceLifeCycle;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, ServiceLifeCyclePublisher, RemoteMessageHandler, Gateway, LocaleProvider {
+public class Runtime extends Service implements MessageListener, ServiceLifeCycle, RemoteMessageHandler, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton

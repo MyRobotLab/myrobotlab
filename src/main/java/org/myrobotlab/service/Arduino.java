@@ -898,7 +898,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  public org.myrobotlab.math.interfaces.Mapper getDefaultMapper() {
+  public MapperLinear getDefaultMapper() {
     // best guess :P
     MapperLinear mapper = new MapperLinear();
     mapper.map(-1.0, 1.0, 0.0, 255.0);
