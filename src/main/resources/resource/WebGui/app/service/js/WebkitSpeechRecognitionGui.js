@@ -191,13 +191,15 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
             $scope.setState('start')
         }
 
+        /*
         Object.keys(service.locales).forEach(function(key) {
            if (service.locales[key].language == service.locale.language){
                $scope.selectedLanguage = service.locales[key].tag;     
             }
         })
+        */
 
-        // $scope.selectedLanguage = service.locale.tag
+        $scope.selectedLanguage = service.locale.tag
 
         // update en-mass
         $scope.service = service

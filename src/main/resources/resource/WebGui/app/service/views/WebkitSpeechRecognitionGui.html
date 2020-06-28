@@ -55,7 +55,8 @@ security exceptions to get mic working - https://medium.com/@Carmichaelize/enabl
               <input type="text" class="form-control" style="width: 80%" placeholder="Hey Robot" ng-model="service.wakeWord"/>
             </td>
             <td>
-              <button class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">Set</button>
+              <button ng-show="!service.wakeWord" class="btn btn-default" ng-click="msg.setWakeWord(service.wakeWord)">Set</button>
+              <button ng-show="service.wakeWord" class="btn btn-default" ng-click="msg.unsetWakeWord()">UnSet</button>
             </td>
           </tr>
           <tr>
