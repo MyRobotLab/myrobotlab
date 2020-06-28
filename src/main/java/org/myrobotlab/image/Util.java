@@ -25,6 +25,10 @@
 
 package org.myrobotlab.image;
 
+import static org.bytedeco.opencv.global.opencv_dnn.NMSBoxes;
+import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
+import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -45,13 +49,22 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.RotatedRect;
+import org.bytedeco.opencv.opencv_core.Size;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.opencv.DetectedText;
 import org.slf4j.Logger;
 
 /**
@@ -508,4 +521,82 @@ public class Util {
     return icon;
   }
 
+  // 
+  public static void fourPointsTransform(Mat frame, Point2f vertices, Mat result, Size outputSize) {
+    Point2f targetVertices = new Point2f(4);
+    // write the data into the array
+    targetVertices.position(0);
+    targetVertices.put(new Point2f(0, outputSize.height() - 1));
+    targetVertices.position(1);
+    targetVertices.put(new Point2f(0, 0));
+    targetVertices.position(2);
+    targetVertices.put(new Point2f(outputSize.width() - 1, 0));
+    targetVertices.position(3);
+    targetVertices.put(new Point2f(outputSize.width() - 1, outputSize.height() - 1));
+    // reset the pointer to the beginning of the array.
+    targetVertices.position(0);
+    Mat rotationMatrix = getPerspectiveTransform(vertices, targetVertices);
+    warpPerspective(frame, result, rotationMatrix, outputSize);
+    // Ok.. now the result should have the cropped image?
+    // show(OpenCV.toImage(result), "four points...");
+  }
+
+  public static Point2f scaleVertices(RotatedRect box, Point2f ratio) {
+    Point2f vertices = new Point2f(4);
+    box.points(vertices);
+    for (int i = 0 ; i < 4; i++) {
+      vertices.position(i);
+      vertices.x( vertices.x() * ratio.x() );
+      vertices.y( vertices.y() * ratio.y() );
+    }
+    vertices.position(0);
+    return vertices;
+  }
+
+  public static Mat cropAndRotate(Mat frame, RotatedRect largerBox, Size outputSize, Point2f ratio) {
+    // Input rotatedRect is on the neural network scaled image
+    // this needs to be scaled up to the original resolution by the ratio.
+    Point2f vertices = Util.scaleVertices(largerBox, ratio);
+    // a target for the cropped image
+    Mat cropped = new Mat();
+    // do the cropping of the original image, scaled vertices and a target output size
+    Util.fourPointsTransform(frame, vertices, cropped, outputSize);
+    // return the cropped mat that is populated with the cropped image from the original input image.
+    return cropped;
+  }
+
+  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {    
+    RectVector boxesRV = new RectVector();
+    for (RotatedRect rr : boxes) {
+      boxesRV.push_back(rr.boundingRect());
+    }
+    FloatPointer confidencesFV = arrayListToFloatPointer(confidences);
+    IntPointer indicesIp = new IntPointer();
+    NMSBoxes(boxesRV, confidencesFV, (float)threshold, nmsThreshold, indicesIp);
+    ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
+    for (int m=0;m<indicesIp.limit();m++) {
+      int i = indicesIp.get(m);
+      RotatedRect box = boxes.get(i); 
+      confidencesFV.position(i);
+      // we don't have text yet, that will be filled in later by the ocr step.
+      DetectedText dt = new DetectedText(box, confidencesFV.get(), null);
+      goodOnes.add(dt);
+    }
+    return goodOnes;
+  }
+
+  // utilty helper function to put an array of floats into a javacpp float pointer
+  public static FloatPointer arrayListToFloatPointer(ArrayList<Float> confidences) {
+    // create a float pointer of the correct size
+    FloatPointer confidencesFV = new FloatPointer(confidences.size());
+    for (int i = 0; i < confidences.size(); i++) {
+      // update the pointer and put the float in 
+      confidencesFV.position(i);
+      confidencesFV.put(confidences.get(i));
+    }
+    // reset the pointer position back to the head.
+    confidencesFV.position(0);
+    return confidencesFV;
+  }
+  
 }
