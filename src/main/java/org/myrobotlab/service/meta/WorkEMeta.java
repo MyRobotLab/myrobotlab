@@ -55,6 +55,8 @@ public class WorkEMeta  extends Meta {
     // emoji - output
     meta.addPeer("emoji", "Emoji", "emotional state machine");
 
+    meta.addDependency("org.myrobotlab", "worke", null, "zip");
+    
     meta.addDescription("the worke bot !");
     meta.addCategory("robot");
     return meta;
