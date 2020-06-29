@@ -110,7 +110,7 @@ public abstract class AbstractMotorController extends Service implements MotorCo
    * Routing Attach - routes ServiceInterface.attach(service) to appropriate
    * methods for this class
    */
-  @Override
+  @Override // FIXME - just use subscriptions !!!!
   public void attach(Attachable service) throws Exception {
 
     // check if service already attached

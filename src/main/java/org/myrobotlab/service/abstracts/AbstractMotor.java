@@ -147,12 +147,14 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // subscribe(pindef.getName(), "publishPin", getName(), "move");
   }
 
-  @Override
+  @Override // FIXME - just create listeners by a "name" !!!
   public void attachMotorController(MotorController controller) throws Exception {
     if (controller == null) {
       error("motor.attach(controller) - controller cannot be null");
       return;
     }
+    
+    // FIXME - remove this !!!
     if (isAttached(controller)) {
       log.info("motor {} already attached to motor controller {}", getName(), controller.getName());
       return;
@@ -164,7 +166,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
     // 0 to 255 ? not sure.
-    this.mapper = controller.getDefaultMapper();
+    // this.mapper = controller.getDefaultMapper();
 
     broadcastState();
     controller.attach(this);
