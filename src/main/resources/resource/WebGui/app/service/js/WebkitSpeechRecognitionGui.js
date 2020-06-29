@@ -8,6 +8,7 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
     $scope.restartCnt = 0
     $scope.interimTranscript = ''
     $scope.publishedText = ''
+    $scope.wakeWord = null
 
     // corresponds to internal RecognizedResult class
     // in AbstractSpeechREcognizer
@@ -187,20 +188,25 @@ angular.module('mrlapp.service.WebkitSpeechRecognitionGui', []).controller('Webk
         if ($scope.isRecording && !service.isRecording) {
             $scope.setState('stop')
         }
-        if (!$scope.isRecording && service.isRecording) {
+            if (!$scope.isRecording && service.isRecording) {
             $scope.setState('start')
         }
 
+        /*
         Object.keys(service.locales).forEach(function(key) {
            if (service.locales[key].language == service.locale.language){
                $scope.selectedLanguage = service.locales[key].tag;     
             }
         })
+        */
 
-        // $scope.selectedLanguage = service.locale.tag
+        $scope.selectedLanguage = service.locale.tag
 
         // update en-mass
         $scope.service = service
+        if (service.wakeWord != null && $scope.wakeWord == null){
+            $scope.wakeWord = service.wakeWord
+        }
 
     }
 
