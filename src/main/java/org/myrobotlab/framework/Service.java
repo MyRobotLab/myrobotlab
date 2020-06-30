@@ -71,7 +71,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -96,7 +96,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * data for an instance
    * 
    */
-  protected MetaData serviceType;
+  protected AbstractMetaData serviceType;
   
 
   private static final long serialVersionUID = 1L;

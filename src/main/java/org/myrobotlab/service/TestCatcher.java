@@ -45,7 +45,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -252,7 +252,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   }
 
-  static public MetaData meta = null;
+  static public AbstractMetaData meta = null;
 
   /*
    * This static method returns all the details of the class without it having

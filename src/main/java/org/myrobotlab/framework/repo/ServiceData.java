@@ -21,7 +21,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.meta.abstracts.Meta;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -99,7 +99,7 @@ public class ServiceData implements Serializable {
       log.debug("querying {}", fullClassName);
       try {
 
-        MetaData serviceType = (MetaData) getMetaData(fullClassName);
+        AbstractMetaData serviceType = (AbstractMetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getName())) {
           log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
@@ -209,7 +209,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  static public MetaData getMetaData(String type) {
+  static public AbstractMetaData getMetaData(String type) {
     return getMetaData(null, type);
   }
 
@@ -227,7 +227,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  public static MetaData getMetaData(String serviceName, String type) {
+  public static AbstractMetaData getMetaData(String serviceName, String type) {
     try {
 
       // test for overrides from name - name can override type
@@ -453,7 +453,7 @@ public class ServiceData implements Serializable {
     Plan root = new Plan();
     
     // get the root meta data
-    MetaData temp = getMetaData(serviceName, serviceType);
+    AbstractMetaData temp = getMetaData(serviceName, serviceType);
     if (temp != null) {
       root.put(serviceName, serviceType);
     }
@@ -479,7 +479,7 @@ public class ServiceData implements Serializable {
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
     // FIXME figure out if overrides can happen here !?!?!?
   
-    MetaData branch = getMetaData(sr.actualName, sr.type);
+    AbstractMetaData branch = getMetaData(sr.actualName, sr.type);
     //root.getPeers().putAll(branch.getPeers());
     root.put(sr.actualName, sr.type);
     for (ServiceReservation peer : branch.getPeers().values()) {      

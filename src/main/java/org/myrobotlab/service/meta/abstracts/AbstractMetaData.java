@@ -28,9 +28,9 @@ import org.slf4j.Logger;
  * to override actual name and type information.
  * 
  */
-public class MetaData implements Serializable {
+public class AbstractMetaData implements Serializable {
 
-  transient public final static Logger log = LoggerFactory.getLogger(MetaData.class);
+  transient public final static Logger log = LoggerFactory.getLogger(AbstractMetaData.class);
 
   private static final long serialVersionUID = 1L;
 
@@ -190,15 +190,15 @@ public class MetaData implements Serializable {
     this.todo = todo;
   }
 
-  public MetaData() {
+  public AbstractMetaData() {
   }
 
-  public MetaData(Class<?> clazz) {
+  public AbstractMetaData(Class<?> clazz) {
     this.name = clazz.getCanonicalName();
     this.simpleName = clazz.getSimpleName();
   }
 
-  public MetaData(String name) {
+  public AbstractMetaData(String name) {
     this.name = CodecUtils.makeFullTypeName(name);
     this.simpleName = name.substring(name.lastIndexOf(".") + 1);
   }

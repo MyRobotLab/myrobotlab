@@ -13,7 +13,7 @@ import org.myrobotlab.framework.repo.ServiceArtifact;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -33,7 +33,7 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
 
   private static final long serialVersionUID = 1L;
 
-  public static ServiceType fromMetaData(MetaData meta) {
+  public static ServiceType fromMetaData(AbstractMetaData meta) {
     ServiceType st = new ServiceType();
     st.peers = meta.peers;
     st.available = meta.isAvailable();
@@ -320,8 +320,8 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
   }
 
   // GAH ! - more convertions for smaller pr :(
-  public static MetaData toMetaData(ServiceType type) {
-    MetaData meta = new MetaData();
+  public static AbstractMetaData toMetaData(ServiceType type) {
+    AbstractMetaData meta = new AbstractMetaData();
     meta.peers = type.peers;
     meta.setAvailable(type.isAvailable());
     meta.categories = type.categories;

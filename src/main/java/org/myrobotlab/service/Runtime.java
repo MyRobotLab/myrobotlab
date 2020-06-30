@@ -74,7 +74,7 @@ import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServiceLifeCycle;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -3525,11 +3525,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.clearOverrides();
   }
 
-  public static MetaData getMetaData(String serviceName, String serviceType) {
+  public static AbstractMetaData getMetaData(String serviceName, String serviceType) {
     return ServiceData.getMetaData(serviceName, serviceType);
   }
 
-  public static MetaData getMetaData(String serviceType) {
+  public static AbstractMetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
   
