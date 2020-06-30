@@ -31,7 +31,9 @@ public class InMoovHandMeta {
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
+    // Currently if the LeapMotion service is loaded and the jni is not there - the whole jvm crashes :(
+    // this should use pub sub and be less destructive !
+    // meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
 
     return meta;
   }
