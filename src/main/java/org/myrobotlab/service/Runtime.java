@@ -2010,8 +2010,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
         
-        boolean readyForPrimetime = false;
-        if (options.spawnedFromAgent && readyForPrimetime) {
+        if (options.spawnedFromAgent) {
           
           try {
             log.info("attempting to connect to local agent");
