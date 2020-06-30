@@ -34,7 +34,7 @@ public interface Attachable extends NameProvider {
   
   /**
    * Preferred add listener, a callback will be created.
-   * from CodecUtils.getCallbackTopicName pub/get{Method} -> on{Method}
+   * from CodecUtils.getCallbackTopicName pub/get{Method} called on on{Method}
    * @param localTopic
    * @param otherService
    */
@@ -115,7 +115,7 @@ public interface Attachable extends NameProvider {
 
   /**
    * safe method to query interface without having to invoke class 
-   * @param interfaze
+   * @param clazz
    * @return
    */
   public boolean isType(String clazz);

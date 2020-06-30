@@ -227,24 +227,6 @@ public class ServiceType implements Serializable, Comparator<ServiceType> {
     return requiresKeys;
   }
 
-  /**
-   * checks if already exists - if it does - merges only unset values into peers
-   * 
-   * @param sr
-   *          the service reservation
-   */
-  /*
-  public void mergePeer(ServiceReservation sr) {
-    if (peers.containsKey(sr.key)) {
-      ServiceReservation existing = peers.get(sr.key);
-      existing.actualName = (existing.actualName != null) ? existing.actualName : sr.actualName;
-      existing.fullTypeName = (existing.fullTypeName != null) ? existing.fullTypeName : sr.fullTypeName;
-      existing.comment = (existing.comment != null) ? existing.comment : sr.comment;
-    } else {
-      peers.put(sr.key, sr);
-    }
-  }
-  */
 
   public void setAvailable(boolean b) {
     this.available = b;

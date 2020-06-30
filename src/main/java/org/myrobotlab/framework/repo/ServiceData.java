@@ -219,7 +219,7 @@ public class ServiceData implements Serializable {
    * instance's meta data, which can contain overrides.
    * 
    * This allows the user an opportunity to change the creation details (actual
-   * names & types) of peer services before all the peers are created
+   * names and types) of peer services before all the peers are created
    * 
    * If a name/instance is not supplied the default meta data is supplied
    * 
@@ -472,9 +472,9 @@ public class ServiceData implements Serializable {
    * Recursively build the peers until the tree is complete.
    * Useful to get a full plan regarding some complex description
    * 
-   * @param string
-   * @param string2
-   * @return
+   * @param root
+   * @param parentName
+   * @param sr
    */
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
     // FIXME figure out if overrides can happen here !?!?!?

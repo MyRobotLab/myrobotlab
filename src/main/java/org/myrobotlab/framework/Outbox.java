@@ -70,7 +70,7 @@ public class Outbox implements Runnable, Serializable {
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
   /**
-   * pub/sub listeners - HashMap< {topic}, List {listeners} > 
+   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt; 
    */
   public HashMap<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
