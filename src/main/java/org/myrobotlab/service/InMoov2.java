@@ -1069,7 +1069,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public String setSpeechType(String speechType) {
     speechService = speechType;
-    setPeer("mouth", speechType);
+    // setPeer("mouth", speechType); needs to be done a better way
     return speechType;
   }
 
@@ -1255,7 +1255,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   // expandable detail in appropriate places
   public OpenCV startOpenCV() throws Exception {
     speakBlocking(get("STARTINGOPENCV"));
-    opencv = (OpenCV) startPeer("opencv", "OpenCV");
+    opencv = (OpenCV) startPeer("opencv");
     subscribeTo(opencv.getName(), "publishOpenCVData");
     isOpenCvActivated = true;
     return opencv;
@@ -1306,7 +1306,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(get(port));
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(head.neck);
@@ -1379,7 +1379,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(leftArm.bicep);
@@ -1406,7 +1406,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("left", "Arduino");
+        Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
         arduino.attach(leftHand.thumb);
@@ -1473,7 +1473,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right");
         arduino.connect(port);
 
         arduino.attach(rightArm.bicep);
@@ -1501,7 +1501,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (port != null) {
       try {
         speakBlocking(port);
-        Arduino arduino = (Arduino) startPeer("right", "Arduino");
+        Arduino arduino = (Arduino) startPeer("right");
         arduino.connect(port);
 
         arduino.attach(rightHand.thumb);

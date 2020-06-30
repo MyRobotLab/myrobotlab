@@ -288,6 +288,7 @@ public abstract class Repo {
         log.error("{} not found", type);
         return ret;
       }
+     
 
       ServiceType st = sd.getServiceType(type);
 
@@ -309,7 +310,7 @@ public abstract class Repo {
       if (peers != null) {
         for (String key : peers.keySet()) {
           ServiceReservation sr = peers.get(key);
-          ret.addAll(getUnfulfilledDependencies(sr.fullTypeName));
+          ret.addAll(getUnfulfilledDependencies(CodecUtils.makeFullTypeName(sr.type)));
         }
       }
     }

@@ -52,7 +52,7 @@ public class InMoovMeta {
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
+    meta.addPeer("python", "python", "Python", "shared Python service");
 
     // put peer definitions in
     meta.addPeer("torso", "InMoovTorso", "torso");

@@ -33,9 +33,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -381,7 +381,7 @@ public class SwingGuiGui extends ServiceGui implements ActionListener {
       if (s != null) {
         Iterator<String> ri = s.getNotifyListKeySet().iterator();
         while (ri.hasNext()) {
-          ArrayList<MRLListener> nl = s.getNotifyList(ri.next());
+          List<MRLListener> nl = s.getNotifyList(ri.next());
           for (int i = 0; i < nl.size(); ++i) {
             MRLListener listener = nl.get(i);
 

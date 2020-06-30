@@ -86,7 +86,7 @@ public class Lidar extends Service implements SerialDataListener {
 
   public Lidar(String n, String id) {
     super(n, id);
-    reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar");
+    // reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar"); describe it in meta data
   }
 
   @Override
@@ -316,7 +316,7 @@ public class Lidar extends Service implements SerialDataListener {
     super.startService();
 
     try {
-      serial = (Serial) startPeer("serial", "Serial");
+      serial = (Serial) startPeer("serial");
       serial.addByteListener(this);
       // setting callback / message route
       serial.addListener("publishByte", getName(), "byteReceived");

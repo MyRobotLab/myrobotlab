@@ -28,19 +28,24 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.HttpData;
 import org.myrobotlab.service.interfaces.HttpDataListener;
 import org.myrobotlab.service.interfaces.SerialDataListener;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -71,6 +76,16 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   }
 
   boolean isLocal = true;
+
+  public Set<String> onCreated = new HashSet<>();
+
+  public Map<String,Registration> onRegistered = new HashMap<String,Registration>();
+
+  public Set<String> onStarted  = new HashSet<>();
+
+  public Set<String> onReleased = new HashSet<>();
+
+  public Set<String> onStopped = new HashSet<>();
 
   /**
    * awesome override to simulate remote services - e.g. in
@@ -237,7 +252,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   }
 
-  static public ServiceType meta = null;
+  static public MetaData meta = null;
 
   /*
    * This static method returns all the details of the class without it having
@@ -445,4 +460,28 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     return str;
   }
 
+
+  public void onCreated(String serviceName) {
+    onCreated.add(serviceName);
+  }
+  
+  public void onRegistered(Registration registration) {
+    if (onRegistered != null) {
+      onRegistered.put(registration.getName(), registration);
+    }
+  }
+
+  public void onStarted(String serviceName) {
+    onStarted.add(serviceName);    
+  }
+
+  public void onStopped(String serviceName) {
+    onStopped.add(serviceName);    
+  }
+
+  public void onReleased(String serviceName) {
+    onReleased.add(serviceName);
+  }
+
+  
 }

@@ -1,11 +1,10 @@
 package org.myrobotlab.framework;
 
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Proxy;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -22,10 +21,9 @@ public class Registration {
   
   transient final static Logger log = LoggerFactory.getLogger(Registration.class);
  
-  public String id;
-  public String name;
-  public String typeKey;
-  public ServiceType type;
+  protected String id;
+  protected String name;
+  protected String typeKey;
   
   /**
    * current serialized state of the service - default encoding is json
@@ -38,19 +36,17 @@ public class Registration {
    */
   transient public ServiceInterface service = null;
   
-  public Registration(String id, String name, String typeKey, ServiceType type) {
+  public Registration(String id, String name, String typeKey) {
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
-    this.type = type;
   }
   
   public Registration(ServiceInterface service) {
-    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.debug("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getType();
-    this.type = ServiceData.getLocalInstance().getServiceType(this.typeKey);
     // when this registration is re-broadcasted to remotes it will use this serialization to init state
     this.state = CodecUtils.toJson(service);
     // if this is a local registration - need reference to service
@@ -83,5 +79,10 @@ public class Registration {
 
   public String getFullName() {
     return String.format("%s@%s", name, id);
+  }
+
+  public boolean hasInterface(Class<?> interfaze) {
+    // TODO Auto-generated method stub
+    return false;
   }
 }

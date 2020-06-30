@@ -30,7 +30,7 @@ public class InMoov2HandMeta {
     meta.addPeer("pinky", "Servo", "Pinky servo");
     meta.addPeer("wrist", "Servo", "Wrist servo");
     meta.addPeer("arduino", "Arduino", "Arduino controller for this hand");
-    meta.addPeer("leap", "LeapMotion", "Leap Motion Service", false);
+    meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
 
     return meta;
   }

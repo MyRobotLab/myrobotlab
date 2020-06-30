@@ -839,7 +839,7 @@ public class Gps extends Service implements SerialDataListener {
   public void startService() {
     super.startService();
     try {
-      serial = (Serial) startPeer("serial", "Serial");
+      serial = (Serial) startPeer("serial");
       // serial.attach(getName());
       serial.addByteListener(this);
 

@@ -51,6 +51,7 @@ import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.MethodEntry;
+import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
@@ -72,8 +73,9 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
+import org.myrobotlab.service.interfaces.ServiceLifeCycle;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
-import org.myrobotlab.swagger.Swagger3;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
@@ -105,7 +107,7 @@ import picocli.CommandLine.Option;
  * check for 64 bit OS and 32 bit JVM is is64bit()
  *
  */
-public class Runtime extends Service implements MessageListener, RemoteMessageHandler, Gateway, LocaleProvider {
+public class Runtime extends Service implements MessageListener, ServiceLifeCycle, RemoteMessageHandler, Gateway, LocaleProvider {
   final static private long serialVersionUID = 1L;
 
   // FIXME - AVOID STATIC FIELDS !!! use .getInstance() to get the singleton
@@ -280,21 +282,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   }
 
   static public synchronized ServiceInterface create(String name, String type) {
-    String fullTypeName;
-    if (name.contains("/")) {
-      throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
-    }
-
-    if (name.contains("@")) {
-      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
-    }
-
-    if (type.indexOf(".") == -1) {
-      fullTypeName = String.format("org.myrobotlab.service.%s", type);
-    } else {
-      fullTypeName = type;
-    }
-    return createService(name, fullTypeName, null);
+    return createService(name, type, null);
   }
 
   /**
@@ -397,8 +385,28 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     return b;
   }
 
-  static public synchronized ServiceInterface createService(String name, String fullTypeName, String inId) {
+  static public synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
+    
+    if (name == null) {
+      log.error("service name cannot be null");
+    }
+    
+    String fullTypeName;
+    if (name.contains("/")) {
+      throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
+    }
+
+    if (name.contains("@")) {
+      throw new IllegalArgumentException(String.format("can not have @ in name %s", name));
+    }
+
+    if (type.indexOf(".") == -1) {
+      fullTypeName = String.format("org.myrobotlab.service.%s", type);
+    } else {
+      fullTypeName = type;
+    }
+    
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
@@ -447,6 +455,34 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
         Runtime.getInstance().creationCount++;
         si.setOrder(Runtime.getInstance().creationCount);
       }
+
+      if (runtime != null) {
+        
+        runtime.broadcast("created", name);
+        
+        // add all the service life cycle subscriptions 
+        runtime.addListener("registered", name);
+        runtime.addListener("created", name);
+        runtime.addListener("started", name);        
+        runtime.addListener("stopped", name);        
+        runtime.addListener("released", name);        
+      }
+      
+      // initialization of the new service - it gets local registery events
+      // for pre-existing registered? created/started
+      List<ServiceInterface> services = getServices();// getLocalServices();
+      for (ServiceInterface s: services) {
+        if (runtime != null && runtime.serviceData != null) {
+          // for typeless registration - try the following ? without a service reference ??
+          // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          si.onRegistered(new Registration(s));
+        }
+        si.onCreated(s.getName());
+        if (si.isRunning()) {
+          si.onStarted(s.getName());
+        }
+      }
+      
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
@@ -459,7 +495,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     Map<String, ServiceInterface> sorted = getLocalServices();
     for (Map.Entry<String, ServiceInterface> entry : sorted.entrySet()) {
       log.info(entry.getKey() + "/" + entry.getValue());
-      ArrayList<String> flks = entry.getValue().getNotifyListKeySet();
+      List<String> flks = entry.getValue().getNotifyListKeySet();
       Map<String, List<MRLListener>> subret = new TreeMap<String, List<MRLListener>>();
       for (String sn : flks) {
         List<MRLListener> mrllistners = entry.getValue().getNotifyList(sn);
@@ -811,17 +847,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // problem with
       // ret.add(new NameAndType(si.getId(), si.getName(), si.getType(),
       // CodecUtils.toJson(si)));
-      ret.add(new Registration(si.getId(), si.getName(), si.getType(), serviceData.getServiceType(si.getType())));
+      ret.add(new Registration(si.getId(), si.getName(), si.getType()));
     }
     return ret;
-  }
-
-  // FIXME - max complexity method
-  public Map<String, Object> getSwagger(String id, String name, String type) {
-    Swagger3 swagger = new Swagger3();
-    List<Registration> nameAndTypes = new ArrayList<>();
-    nameAndTypes.add(new Registration(id, name, type, serviceData.getServiceType(type)));
-    return swagger.getSwagger(nameAndTypes);
   }
 
   // FIXME - scary function - returns private data
@@ -1366,7 +1394,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
       if (runtime != null) {
         // TODO - determine rules on re-broadcasting based on configuration
-        runtime.invoke("registered", registration);
+        runtime.broadcast("registered", registration);
       }
 
       // TODO - remove ? already get state from registration
@@ -1395,10 +1423,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     String name = getFullName(inName);
 
     log.info("releasing service {}", name);
-    Runtime rt = getInstance();
 
     if (!registry.containsKey(name)) {
-      rt.info("%s already released", name);
+      log.info("{} not registered", name);
       return false;
     }
 
@@ -1415,7 +1442,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     if (sw.isLocal()) {
       sw.releaseService();
     } else {
-      rt.send(name, "releaseService");
+      if (runtime != null) {
+        runtime.send(name, "releaseService");
+      }
     }
 
     unregister(name);
@@ -1426,7 +1455,6 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
   synchronized public static void unregister(String inName) {
     String name = getFullName(inName);
     log.info("unregister {}", name);
-    Runtime rt = getInstance();
 
     // get reference from registry
     ServiceInterface sw = registry.get(name);
@@ -1436,7 +1464,9 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
 
     // you have to send released before removing from registry
-    rt.invoke("released", name);
+    if (runtime != null) {
+      runtime.broadcast("released", inName);
+    }
 
     // last step - remove from registry
     registry.remove(name);
@@ -1970,6 +2000,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
 
     synchronized (instanceLockObject) {
       if (runtime == null) {
+        // fist and only time....
         runtime = this;
         // if main(argv) args did not create options we must create
         // a new one with defaults
@@ -1977,10 +2008,19 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
           options = new CmdOptions();
         }
 
-        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); // previously
-                                                                               // was
-                                                                               // not
-                                                                               // (IvyWrapper)
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
+        
+        boolean readyForPrimetime = false;
+        if (options.spawnedFromAgent && readyForPrimetime) {
+          
+          try {
+            log.info("attempting to connect to local agent");
+            runtime.connect();
+          } catch (IOException e) {
+            log.warn("could not connect to agent");
+          }
+        }
+        
         if (options == null) {
           options = new CmdOptions();
         }
@@ -2495,7 +2535,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
    */
   static public void removeAllSubscriptions() {
     for (ServiceInterface si : getLocalServices().values()) {
-      ArrayList<String> nlks = si.getNotifyListKeySet();
+      List<String> nlks = si.getNotifyListKeySet();
       for (int i = 0; i < nlks.size(); ++i) {
         si.getOutbox().notifyList.clear();
       }
@@ -3410,7 +3450,7 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
       // but just in case ...
       for (Object o : msg.data) {
         if (msg.method.equals("remoteRegister")) {
-          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).name, msg.name));
+          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).getName(), msg.name));
         } else {
           System.out.println(CodecUtils.toPrettyJson(o));
         }
@@ -3458,4 +3498,39 @@ public class Runtime extends Service implements MessageListener, RemoteMessageHa
     }
   }
 
+  @Override
+  public String created(String serviceName) {
+    return serviceName;
+  }
+
+  @Override
+  public String started(String serviceName) {
+    return serviceName;
+  }
+
+  @Override
+  public String stopped(String serviceName) {
+    return serviceName;
+  }
+
+  public static void setPeer(String fullKey, String actualName, String serviceType) {
+    ServiceData.setPeer(fullKey, actualName, serviceType);
+  }
+
+  public static Plan getPlan(String serviceName, String serviceType) {    
+    return ServiceData.getPlan(serviceName, serviceType);
+  }
+
+  public static void clearPlan() {
+    ServiceData.clearOverrides();
+  }
+
+  public static MetaData getMetaData(String serviceName, String serviceType) {
+    return ServiceData.getMetaData(serviceName, serviceType);
+  }
+
+  public static MetaData getMetaData(String serviceType) {
+    return ServiceData.getMetaData(serviceType);
+  }
+  
 }
