@@ -103,6 +103,10 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
     // FIXME - NO DIRECT REFERENCES ALL PUB SUB
 
+  }
+  
+  public void startService() {
+    super.startService();
     // FIXME - creatPeers()
     startPeers();
     // createPeers()
@@ -135,7 +139,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     wrist.setPosition(90.0);
 
     setSpeed(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
-
   }
 
   public void bird() {
@@ -179,12 +182,12 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   @Override
   public void broadcastState() {
-    thumb.broadcastState();
-    index.broadcastState();
-    majeure.broadcastState();
-    ringFinger.broadcastState();
-    pinky.broadcastState();
-    wrist.broadcastState();
+    if (thumb != null) thumb.broadcastState();
+    if (index != null) index.broadcastState();
+    if (majeure != null) majeure.broadcastState();
+    if (ringFinger != null) ringFinger.broadcastState();
+    if (pinky != null) pinky.broadcastState();
+    if (wrist != null) wrist.broadcastState();
   }
 
   public void close() {
