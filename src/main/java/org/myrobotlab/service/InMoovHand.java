@@ -140,12 +140,12 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
 
   @Override
   public void broadcastState() {
-    thumb.broadcastState();
-    index.broadcastState();
-    majeure.broadcastState();
-    ringFinger.broadcastState();
-    pinky.broadcastState();
-    wrist.broadcastState();
+    if (thumb != null)thumb.broadcastState();
+    if (index != null)index.broadcastState();
+    if (majeure != null)majeure.broadcastState();
+    if (ringFinger != null)ringFinger.broadcastState();
+    if (pinky != null)pinky.broadcastState();
+    if (wrist != null)wrist.broadcastState();
   }
 
   public void close() {

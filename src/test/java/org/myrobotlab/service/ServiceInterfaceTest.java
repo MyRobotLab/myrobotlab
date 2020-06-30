@@ -107,6 +107,8 @@ public class ServiceInterfaceTest extends AbstractTest {
     blacklist.add("Lloyd");
     blacklist.add("Solr");
     blacklist.add("Agent");
+    blacklist.add("Sphinx");
+    blacklist.add("SwingGui");
     // This one just takes so darn long.
     blacklist.add("Deeplearning4j");
     blacklist.add("OculusDiy");
@@ -125,6 +127,9 @@ public class ServiceInterfaceTest extends AbstractTest {
     // FIXME - subscribe to all errors of all new services !!! - a prefix script !
     // FIXME - must have different thread (prefix script) which runs a timer - 
     // script REQUIRED to complete in 4 minutes ... or BOOM it fails
+    
+    // sts.clear();
+    // sts.add(sd.getServiceType("org.myrobotlab.service.InMoov"));
     
     for (ServiceType serviceType : sts) {
       // test single service

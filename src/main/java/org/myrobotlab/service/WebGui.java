@@ -216,7 +216,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   // add client session
   // TODO - probably should have getters - to publish - currently
   // just marking as transient to remove some of the data load 10240 max frame
-  transient Map<String, Panel> panels;
+  transient Map<String, Panel> panels = new HashMap<String, Panel>();
 
   public Integer port;
 
