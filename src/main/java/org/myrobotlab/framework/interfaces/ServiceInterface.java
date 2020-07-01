@@ -2,16 +2,17 @@ package org.myrobotlab.framework.interfaces;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
 public interface ServiceInterface
-    extends ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
+    extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
 
   /**
    * this is a local method which adds a request from some foreign service with
@@ -39,12 +40,6 @@ public interface ServiceInterface
    * @return
    */
   public boolean isVirtual();
-  
-  // FIXME - remove callback
-  public void addListener(String localTopic, String otherService, String callback);
-
-  // FIXME - remove callback
-  public void removeListener(String localTopic, String otherService, String callback);
 
   public String[] getDeclaredMethodNames();
 
@@ -56,16 +51,16 @@ public interface ServiceInterface
 
   public Method[] getMethods();
 
-  public ArrayList<MRLListener> getNotifyList(String key);
+  public List<MRLListener> getNotifyList(String key);
 
-  public ArrayList<String> getNotifyListKeySet();
+  public List<String> getNotifyListKeySet();
 
   public Inbox getInbox();
 
   public Outbox getOutbox();
 
   public String getSimpleName();
-
+  
   // important to maintain a method to return canonical type
   // important in the future when other services are expressed differently
   // e.g.(node js services)
@@ -137,5 +132,6 @@ public interface ServiceInterface
   public void loadLocalizations();
 
   public void setLocale(String code);
+
 
 }

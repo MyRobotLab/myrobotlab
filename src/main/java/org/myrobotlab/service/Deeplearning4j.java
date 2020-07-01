@@ -123,7 +123,7 @@ public class Deeplearning4j extends Service {
   // TODO: what does this actually control?!
   protected static int batchSize = 20;
   protected static long seed = 42;
-  protected static Random rng = new Random(seed);
+  transient protected static Random rng = new Random(seed);
   protected static int listenerFreq = 1;
   protected static int iterations = 1;
   // protected static int epochs = 50;
@@ -134,7 +134,7 @@ public class Deeplearning4j extends Service {
   public String modelDir = "models";
   public String modelFilename = "model.bin";
   // This is the "model" to be trained and used
-  private MultiLayerNetwork network;
+  transient private MultiLayerNetwork network;
   // these are the labels that relate to the output of the model.
   private List<String> networkLabels;
 
@@ -142,16 +142,16 @@ public class Deeplearning4j extends Service {
   // we're just going to hack in the deeplearning4j zoo , in particular vgg16
   // model
   // pretrained from imagenet.
-  private ImageNetLabels imageNetLabels = null;
-  private ComputationGraph vgg16 = null;
+  transient private ImageNetLabels imageNetLabels = null;
+  transient private ComputationGraph vgg16 = null;
 
-  private ComputationGraph darknet = null;
-  private ComputationGraph tinyyolo = null;
-  private TinyYOLO tinyYOLOModel = null;
+  transient private ComputationGraph darknet = null;
+  transient private ComputationGraph tinyyolo = null;
+  transient private TinyYOLO tinyYOLOModel = null;
 
-  private ComputationGraph miniXCEPTION = null;
+  transient private ComputationGraph miniXCEPTION = null;
   
-  private TextGenerationLSTM textGenLSTM = null;
+  transient private TextGenerationLSTM textGenLSTM = null;
   
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
   

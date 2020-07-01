@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,10 +14,14 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Plan;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
+import org.myrobotlab.service.meta.abstracts.Meta;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -28,8 +33,6 @@ import org.slf4j.Logger;
  * specific. ServiceData has to be created during "build" time since most of the
  * services contain dependencies which might not be fulfilled during runtime.
  * 
- * ServiceData.generate() creates serviceData.json which is packaged by the
- * build in : /resource/framework/serviceData.json
  * 
  * When MyRobotLab runs for the first time, it will extract this file into the
  * .myrobotlab directory.
@@ -39,23 +42,116 @@ import org.slf4j.Logger;
  */
 public class ServiceData implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  static private ServiceData localInstance = null;
 
   transient public final static Logger log = LoggerFactory.getLogger(ServiceData.class);
 
   /**
-   * all services meta data is contained here
+   * A plan of what services and peers to create. If not defined, the default
+   * will be used as its defined in the {ServiceType}Meta data class. The
+   * default build plan can be modified. This static object will be empty unless
+   * there are overrides that modify default meta data.
+   * 
+   * All entries in planOverrides are all absolute key paths !
    */
-  TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
+  transient static public final Map<String, ServiceReservation> overrides = new TreeMap<>();
 
-  /**
-   * the set of all categories
-   */
-  TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
-
-  static private ServiceData localInstance = null;
+  private static final long serialVersionUID = 1L;
 
   static private String serviceDataCacheFileName = FileIO.getCfgDir() + File.separator + "serviceData.json";
+
+  /**
+   * clears all overrides. All services shall be using the standard hard co
+   */
+  public static void clearOverrides() {
+    overrides.clear();
+  }
+
+  /**
+   * This method has to check the environment first in order to tell if its
+   * Develop-Time or Run-Time because the method of generating a service list is
+   * different depending on current environment
+   * 
+   * Develop-Time can simply filter and process the files on the file system
+   * given by the code source location
+   * 
+   * Run-Time must extract itself and scan/filter zip entries which is
+   * potentially a lengthy process, and should only have to be done once for the
+   * lifetime of the version or mrl
+   * 
+   * @return the service data description
+   * @throws IOException
+   *           e
+   */
+  static public synchronized ServiceData generate() throws IOException {
+    log.info("================ generating serviceData.json begin ================");
+    ServiceData sd = new ServiceData();
+
+    // get services - all this could be done during Runtime
+    // although running through zip entries would be a bit of a pain
+    // Especially if you have to spin through 50 megs of data
+    List<String> services = FileIO.getServiceList();
+
+    log.info("found {} services", services.size());
+    for (int i = 0; i < services.size(); ++i) {
+
+      String fullClassName = services.get(i);
+      log.debug("querying {}", fullClassName);
+      try {
+
+        AbstractMetaData serviceType = (AbstractMetaData) getMetaData(fullClassName);
+
+        if (!fullClassName.equals(serviceType.getName())) {
+          log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
+        }
+
+        sd.add(ServiceType.fromMetaData(serviceType));
+
+        for (String cat : serviceType.categories) {
+          Category category = null;
+          if (serviceType.isAvailable()) {
+            if (sd.categoryTypes.containsKey(cat)) {
+              category = sd.categoryTypes.get(cat);
+            } else {
+              category = new Category();
+              category.name = cat;
+            }
+            category.serviceTypes.add(serviceType.getName());
+            sd.categoryTypes.put(cat, category);
+          }
+        }
+
+      } catch (Exception e) {
+        log.error("{} does not have a static getMetaData method", fullClassName);
+      }
+    }
+    log.info("================ generating serviceData.json end ================");
+
+    return sd;
+  }
+
+  static public List<ServiceDependency> getDependencyKeys(String fullTypeName) {
+    List<ServiceDependency> keys = new ArrayList<ServiceDependency>();
+    ServiceData sd = getLocalInstance();
+    if (!sd.serviceTypes.containsKey(fullTypeName)) {
+      log.error("{} not defined in service types");
+      return keys;
+    }
+
+    ServiceType st = localInstance.serviceTypes.get(fullTypeName);
+    return st.getDependencies();
+  }
+
+  static public String getFullMetaTypeName(String type) {
+    if (!type.contains(".") && !type.endsWith("Meta")) {
+      type = String.format("org.myrobotlab.service.meta.%sMeta", type);
+    } else {
+      int pos = type.lastIndexOf(".");
+      String serviceTypeName = type.substring(pos + 1);
+      type = type.substring(0, pos) + ".meta." + serviceTypeName + "Meta";
+    }
+    return type;
+  }
 
   static public ServiceData getLocalInstance() {
     if (localInstance != null) {
@@ -108,67 +204,111 @@ public class ServiceData implements Serializable {
   }
 
   /**
-   * This method has to check the environment first in order to tell if its
-   * Develop-Time or Run-Time because the method of generating a service list is
-   * different depending on current environment
+   * This method returns the default meta data of a class.
    * 
-   * Develop-Time can simply filter and process the files on the file system
-   * given by the code source location
-   * 
-   * Run-Time must extract itself and scan/filter zip entries which is
-   * potentially a lengthy process, and should only have to be done once for the
-   * lifetime of the version or mrl
-   * 
-   * @return the service data description
-   * @throws IOException
-   *           e
+   * @param type
+   * @return
    */
-  static public synchronized ServiceData generate() throws IOException {
-    log.info("================ generating serviceData.json begin ================");
-    ServiceData sd = new ServiceData();
+  static public AbstractMetaData getMetaData(String type) {
+    return getMetaData(null, type);
+  }
 
-    // get services - all this could be done during Runtime
-    // although running through zip entries would be a bit of a pain
-    // Especially if you have to spin through 50 megs of data
-    List<String> services = FileIO.getServiceList();
+  /**
+   * This method gets the meta data of a service class. If the service is
+   * instance specific (ie if the service has a name) it will return that
+   * instance's meta data, which can contain overrides.
+   * 
+   * This allows the user an opportunity to change the creation details (actual
+   * names and types) of peer services before all the peers are created
+   * 
+   * If a name/instance is not supplied the default meta data is supplied
+   * 
+   * @param serviceName
+   * @param type
+   * @return
+   */
+  public static AbstractMetaData getMetaData(String serviceName, String type) {
+    try {
 
-    log.info("found {} services", services.size());
-    for (int i = 0; i < services.size(); ++i) {
-
-      String fullClassName = services.get(i);
-      log.debug("querying {}", fullClassName);
-      try {
-
-        ServiceType serviceType = (ServiceType) getMetaData(fullClassName);
-
-        if (!fullClassName.equals(serviceType.getName())) {
-          log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
+      // test for overrides from name - name can override type
+      if (serviceName != null && ServiceData.overrides.get(serviceName) != null) {
+        ServiceReservation sr = ServiceData.overrides.get(serviceName);
+        if (sr != null && sr.type != null) {
+          type = sr.type;
         }
+      }
 
-        sd.add(serviceType);
+      type = getFullMetaTypeName(type);
 
-        for (String cat : serviceType.categories) {
-          Category category = null;
-          if (serviceType.isAvailable()) {
-            if (sd.categoryTypes.containsKey(cat)) {
-              category = sd.categoryTypes.get(cat);
-            } else {
-              category = new Category();
-              category.name = cat;
+      // RETRO-GRADED for "nice" sized pr :(
+      Class<?> c = Class.forName(type);
+      // Constructor<?> mc = c.getConstructor();
+      Method method = c.getMethod("getMetaData");
+      ServiceType metaData = (ServiceType) method.invoke(null); // mc.newInstance((Object[]) null);
+      // MetaData metaData = meta.getMetaData();
+      
+
+      // if this is an instance description of the meta data
+      // there is the possibility of overrides
+      if (serviceName != null) {
+        metaData.setServiceName(serviceName);
+
+        Map<String, ServiceReservation> peers = metaData.getPeers();
+        for (ServiceReservation sr : peers.values()) {
+
+          // handle overrides !
+          String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
+          // return override if exists
+          ServiceReservation override = ServiceData.overrides.get(fullkey);
+          if (override != null) {
+            if (override.actualName != null) {
+              sr.actualName = override.actualName;
             }
-            category.serviceTypes.add(serviceType.getName());
-            sd.categoryTypes.put(cat, category);
+            if (override.type != null) {
+              sr.type = override.type;
+            }
+            if (override.comment != null) {
+              sr.comment = override.comment;
+            }
+          } else {
+            // if actual name wasn't set in the getMetaData - assign it as {parentName}.{peerKey}
+            if (sr.actualName == null) {
+              sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
+            }
           }
         }
-
-      } catch (Exception e) {
-        log.error("{} does not have a static getMetaData method", fullClassName);
       }
-    }
-    log.info("================ generating serviceData.json end ================");
 
-    return sd;
+      return ServiceType.toMetaData(metaData);
+
+    } catch (Exception e) {
+      log.error("getMetaData threw {}.getMetaData() does not exist", type, e);
+    }
+    return null;
   }
+
+  static public Map<String, ServiceReservation> getOverrides() {
+    return overrides;
+  }
+
+  public static String getPeerKey(String name, String key) {
+    return String.format("%s.%s", name, key);
+  }
+
+  
+  public static void setPeer(String key, String actualName, String serviceType) {
+    overrides.put(key, new ServiceReservation(key, actualName, serviceType, serviceType));
+  }
+
+  /**
+   * the set of all categories
+   */
+  TreeMap<String, Category> categoryTypes = new TreeMap<String, Category>();
+
+  /**
+   * all services meta data is contained here
+   */
+  TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
 
   public ServiceData() {
   }
@@ -182,13 +322,21 @@ public class ServiceData implements Serializable {
   }
 
   public List<ServiceType> getAvailableServiceTypes() {
-    ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+    List<ServiceType> ret = new ArrayList<ServiceType>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       if (o.getValue().isAvailable()) {
         ret.add(o.getValue());
       }
     }
     return ret;
+  }
+
+  public List<Category> getCategories() {
+    ArrayList<Category> categories = new ArrayList<Category>();
+    for (Category category : categoryTypes.values()) {
+      categories.add(category);
+    }
+    return categories;
   }
 
   public Category getCategory(String filter) {
@@ -210,6 +358,14 @@ public class ServiceData implements Serializable {
       ++i;
     }
     return cat;
+  }
+
+  
+  public ServiceType getServiceType(String fullTypeName) {
+    if (!fullTypeName.contains(".")) {
+      fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
+    }
+    return serviceTypes.get(fullTypeName);
   }
 
   public HashSet<ServiceDependency> getServiceTypeDependencyKeys() {
@@ -247,19 +403,12 @@ public class ServiceData implements Serializable {
 
   }
 
-  public ServiceType getServiceType(String fullTypeName) {
-    if (!fullTypeName.contains(".")) {
-      fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
-    }
-    return serviceTypes.get(fullTypeName);
-  }
-
   public List<ServiceType> getServiceTypes() {
     return getServiceTypes(true);
   }
 
   public List<ServiceType> getServiceTypes(boolean showUnavailable) {
-    ArrayList<ServiceType> ret = new ArrayList<ServiceType>();
+    List<ServiceType> ret = new ArrayList<ServiceType>();
     for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       if (!o.getValue().isAvailable() && !showUnavailable) {
         log.info("getServiceTypes ignore : " + o.getValue().getSimpleName());
@@ -286,62 +435,59 @@ public class ServiceData implements Serializable {
 
       return true;
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("service data saving threw for {}", filename, e);
     }
 
     return false;
   }
 
-  // TWO LEVELS !!! 1. Run-time checking & Build-time checking
-  // Built-time checking
-  // build time has access to the repo - can cross check dependencies to make
-  // sure they are in the library
-  //
-  // Runtime checking
-  // for all Peers - do ALL THERE TYPES CURRENTLY EXIST ???
-  // FIXME - TODO - FIND
-
-  public List<Category> getCategories() {
-    ArrayList<Category> categories = new ArrayList<Category>();
-    for (Category category : categoryTypes.values()) {
-      categories.add(category);
+  /**
+   * Start at root and build all the meta data - add 
+   * 
+   * @param serviceName
+   * @param serviceType
+   * @return
+   */
+  public static Plan getPlan(String serviceName, String serviceType) {
+    
+    Plan root = new Plan();
+    
+    // get the root meta data
+    AbstractMetaData temp = getMetaData(serviceName, serviceType);
+    if (temp != null) {
+      root.put(serviceName, serviceType);
     }
-    return categories;
+    
+    // recursively process all the children and add them to peers
+    Map<String, ServiceReservation> peers = temp.getPeers();
+    for (ServiceReservation peer : peers.values()) {      
+      // just get overrides :P
+      getPlan(root, serviceName,  peer);
+    }
+    
+    return root;
   }
 
-  static public List<ServiceDependency> getDependencyKeys(String fullTypeName) {
-    List<ServiceDependency> keys = new ArrayList<ServiceDependency>();
-    ServiceData sd = getLocalInstance();
-    if (!sd.serviceTypes.containsKey(fullTypeName)) {
-      log.error("{} not defined in service types");
-      return keys;
+  /** 
+   * Recursively build the peers until the tree is complete.
+   * Useful to get a full plan regarding some complex description
+   * 
+   * @param root
+   * @param parentName
+   * @param sr
+   */
+  public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
+    // FIXME figure out if overrides can happen here !?!?!?
+  
+    AbstractMetaData branch = getMetaData(sr.actualName, sr.type);
+    //root.getPeers().putAll(branch.getPeers());
+    root.put(sr.actualName, sr.type);
+    for (ServiceReservation peer : branch.getPeers().values()) {      
+      // just get overrides :PT
+      root.put(sr.actualName, sr.type);
+      getPlan(root, getPeerKey(parentName, sr.actualName), peer);
     }
-
-    ServiceType st = localInstance.serviceTypes.get(fullTypeName);
-    return st.getDependencies();
-  }
-
-  public static ServiceType getMetaData(String serviceTypeName) {
-    try {
-
-      if (!serviceTypeName.contains(".")) {
-        serviceTypeName = String.format("org.myrobotlab.service.meta.%sMeta", serviceTypeName);
-      } else {
-        int pos = serviceTypeName.lastIndexOf(".");
-        String serviceName = serviceTypeName.substring(pos + 1);
-        serviceTypeName = serviceTypeName.substring(0, pos) + ".meta." + serviceName + "Meta";
-      }
-
-      Class<?> theClass = Class.forName(serviceTypeName);
-      Method method = theClass.getMethod("getMetaData");
-      ServiceType serviceType = (ServiceType) method.invoke(null);
-      return serviceType;
-      
-    } catch (Exception e) {
-      log.error("getMetaData threw {}.getMetaData() does not exist", serviceTypeName, e);
-    }
-
-    return null;
+   
   }
 
   public static void main(String[] args) {
@@ -384,5 +530,4 @@ public class ServiceData implements Serializable {
     // System.exit(0);
 
   }
-
 }

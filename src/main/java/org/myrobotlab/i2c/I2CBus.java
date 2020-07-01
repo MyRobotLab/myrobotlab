@@ -3,14 +3,18 @@ package org.myrobotlab.i2c;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.myrobotlab.boofcv.ExampleVisualOdometryDepth;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.slf4j.Logger;
-
+/**
+ * 
+ * FIXME - this probably should be its own service - one that manages writing into and reading out of
+ * a I2C bus
+ *
+ */
 public class I2CBus implements Attachable, I2CBusControl {
 
   transient public final static Logger log = LoggerFactory.getLogger(I2CBus.class);
@@ -131,6 +135,63 @@ public class I2CBus implements Attachable, I2CBusControl {
     // assuming a bus to connect is always
     // "in" process and not remote ?
     return true;
+  }
+
+  @Override
+  public boolean hasInterface(Class<?> class1) {
+    Class<?>[] faces = I2CBus.class.getInterfaces();
+    for (Class<?> c : faces) {
+      if (c.equals(class1)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean hasInterface(String inter) {
+    Class<?>[] interfaces = getClass().getInterfaces();
+    for (int i = 0; i < interfaces.length; ++i) {
+      Class<?> interfaze = interfaces[i];
+      if (inter.getClass().getCanonicalName().equals(inter)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public boolean isType(Class<?> clazz) {
+    return isType(clazz.getCanonicalName());
+  }
+
+  @Override
+  public boolean isType(String clazz) {
+    return getClass().getCanonicalName().equals(clazz);
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService, String callback) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void removeListener(String localTopic, String otherService) {
+    // TODO Auto-generated method stub
+    
   }
 
 }

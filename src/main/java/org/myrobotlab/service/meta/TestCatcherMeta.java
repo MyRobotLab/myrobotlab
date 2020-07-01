@@ -24,10 +24,13 @@ public class TestCatcherMeta {
     meta.addDescription("This service is used to test messaging");
     meta.setAvailable(false);
     meta.addCategory("testing", "framework");
+    
+    // meta.addPeer("subpeer", "TestCatcher", "comment"); Don't do recursive infinite loop
+    meta.addPeer("subpeer", "TestThrower", "comment"); // Don't do recursive infinite loop
+    meta.addPeer("globalPeer", "thrower01", "TestThrower", "comment"); // Don't do recursive infinite loop
 
     return meta;
   }
-
-  
+    
 }
 

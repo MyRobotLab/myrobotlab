@@ -110,6 +110,11 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     // and there will be no need this service.
     // Config will be managed by LangUtils
 
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
     startPeers();
 
     bicep.setPin(8);
@@ -132,16 +137,16 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     rotate.setPosition(90.0);
     omoplate.setPosition(10.0);
 
-    setSpeed(20.0, 20.0, 20.0, 20.0);
+    setSpeed(20.0, 20.0, 20.0, 20.0);    
   }
 
   @Override
   public void broadcastState() {
     super.broadcastState();
-    bicep.broadcastState();
-    rotate.broadcastState();
-    shoulder.broadcastState();
-    omoplate.broadcastState();
+    if (bicep != null)bicep.broadcastState();
+    if (rotate != null)rotate.broadcastState();
+    if (shoulder != null)shoulder.broadcastState();
+    if (omoplate != null)omoplate.broadcastState();
   }
 
   public void disable() {

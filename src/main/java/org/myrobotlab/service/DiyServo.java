@@ -301,7 +301,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public DiyServo(String n, String id) {
     super(n, id);
     refreshPinArrayControls();
-    motorControl = (MotorControl) createPeer("motor", "MotorDualPwm");
+    motorControl = (MotorControl) createPeer("motor");
     initPid();
     subscribeToRuntime("registered");
     lastActivityTimeTs = System.currentTimeMillis();

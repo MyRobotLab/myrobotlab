@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.MessageListener;
@@ -67,12 +69,25 @@ public class Outbox implements Runnable, Serializable {
   int initialThreadCount = 1;
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
-  public HashMap<String, ArrayList<MRLListener>> notifyList = new HashMap<String, ArrayList<MRLListener>>();
-  // CommunicationInterface comm = null;
+  /**
+   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt; 
+   */
+  public HashMap<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
+
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
   public Outbox(NameProvider myService) {
     this.myService = myService;
+  }
+  
+  public Set<String> getAttached(){    
+    Set<String> unique = new TreeSet<>();
+    for (List<MRLListener> subcribers : notifyList.values()) {
+      for (MRLListener listener: subcribers) {
+        unique.add(listener.callbackName);
+      }
+    }
+    return unique;
   }
 
   // TODO - config to put message in block mode - with no buffer overrun
@@ -114,12 +129,7 @@ public class Outbox implements Runnable, Serializable {
     for (MessageListener ml : listeners) {
       ml.onMessage(msg);
     }
-
   }
-
-  /*
-   * public CommunicationInterface getCommunicationManager() { return comm; }
-   */
 
   // FIXME - consider using a blocking queue now that we are using Java 5.0
   @Override
@@ -166,7 +176,7 @@ public class Outbox implements Runnable, Serializable {
       // BROADCASTS name=="" WILL DROP DOWN and be processed here
       if (notifyList.size() != 0) {
         // get the value for the source method
-        ArrayList<MRLListener> subList = notifyList.get(msg.sendingMethod);
+        List<MRLListener> subList = notifyList.get(msg.sendingMethod);
         if (subList == null) {
           log.debug("no additional routes for {}.{} ", msg.sender, msg.sendingMethod);
           // This will cause issues in broadcasts
@@ -193,11 +203,6 @@ public class Outbox implements Runnable, Serializable {
 
     } // while (isRunning)
   }
-
-  /*
-   * public void setCommunicationManager(CommunicationInterface c) { this.comm =
-   * c; }
-   */
 
   public int size() {
     return msgBox.size();
@@ -296,7 +301,24 @@ public class Outbox implements Runnable, Serializable {
    * remove ALL listeners/subscribers
    */
   public void reset() {
-    notifyList = new HashMap<String, ArrayList<MRLListener>>();
+    notifyList = new HashMap<String, List<MRLListener>>();
+  }
+
+  /**
+   * Safe detach for single subscriber
+   * @param name
+   */
+  synchronized public void detach(String name) {
+    for (String topic : notifyList.keySet()) {
+      List<MRLListener> subscribers = notifyList.get(topic);
+      ArrayList<MRLListener> smallerList = new ArrayList<>();
+      for (MRLListener listener: subscribers) {
+        if (!listener.callbackName.equals(name)) {
+          smallerList.add(listener);
+        }        
+      }
+      notifyList.put(topic, smallerList);
+    }
   }
   
 }

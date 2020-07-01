@@ -63,7 +63,7 @@ public class InMoov2Meta {
     meta.sharePeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
     // Global - undecorated by self name
-    meta.addRootPeer("python", "Python", "shared Python service");
+    meta.addPeer("python", "python", "Python", "shared Python service");
 
     // latest - not ready until repo is ready
     meta.addDependency("fr.inmoov", "inmoov2", null, "zip");
