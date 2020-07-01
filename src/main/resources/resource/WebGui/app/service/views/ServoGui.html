@@ -3,14 +3,13 @@
     <div class="row">
         <div class="col-md-12">
             <uib-tabset active="activeTabIndex">
-                <uib-tab heading="Controller" index="0">
+                <uib-tab heading="Controller" index="0" class="servoController">
                     <div class="row">
                         <div class="col-md-12">
                             <nav class="settingsbar preventDragSelect">
                                 <span>
                                     <h6>
                                         You need to attach a controller to a servo.<br/>For example real and virtual controller.
-                                    
                                     </h6>
                                 </span>
                             </nav>
@@ -18,13 +17,13 @@
                     </div>
                     <div class="row">
                         <div class="col-md-12">
-                            <table class="table">
+                            <table class="tableController">
                                 <tr>
                                     <td>
-                                        <select ng-disabled="service.controller" class="form-control" ng-model="selectedController">
+                                        <select ng-disabled="service.controller" class="form-control selectController" ng-model="selectedController">
                                             <option ng-repeat="controller in possibleControllers" value="{{controller}}">{{controller}} </option>
                                         </select>
-                                    <td>
+                                    </td>
                                     <td>
                                         <!-- TODO - send pos ! ??? -->
                                         <button ng-show="!service.controller" class="btn btn-default" ng-click="attachController(selectedController, service.pin)">attach</button>
@@ -47,46 +46,40 @@
                     </div>
                     <!-- /.row -->
                 </uib-tab>
-                <uib-tab select="refreshSlider()" heading="Basic" index="1">
+                <uib-tab select="refreshSlider()" heading="Basic" index="1"  class="servoBasic">
                     <!-- ------------------ Basic ------------------ -->
-                    <table class="table tableBasic preventDragSelect" style="margin-bottom: 0px!important;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    Sweep                                    
-                                    
-                                    <!-- ---- FIXME ---- WHEN SWEEPING IT SHOULD NOT AUTODISABLE-->
-                                    <toggle class="miniBTN" title="Servo will move from one position to the opposite" ng-model="service.isSweeping" ng-change="service.isSweeping?msg.sweep():msg.stop()" on="" off="" size="btn-lg"/>
-                                </td>
-                                <td colspan="2">
-                                    Speed
-                                    <rzslider class="custom-slider3 speedSlider" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/> <button class="btn" ng-click="msg.stop()">stop<img src="../stop.png"/></button>
-                                </td>
-                            </tr>
-                            <tr class="valuesRow">
-                                <td colspan="2">
-                                    <div class="servoReferences">
-                                        <div class="inputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Input   
-                                        </div> 
-                                        <div class="restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Rest
-                                        </div> 
-                                        <div class="outputColor">
-                                            <span class="glyphicon glyphicon-stop"></span>
-                                            Output
-                                        </div> 
-                                    </div>
-                                </td>
-                                <td>
-                                     <div class="dataColor">Speed = {{speedDisplay}} °/s</div> 
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="row">
+                    <div class="sweep">
+                        Sweep
+                        <toggle class="miniBTN" title="Servo will move from one position to the opposite" ng-model="service.isSweeping" ng-change="service.isSweeping?msg.sweep():msg.stop()" on="" off="" size="btn-lg"/>
+                    </div>
+                    <div class="speedLabelSlider">
+                        Speed</div>
+                    <div class="speedSlider">
+                        <rzslider class="custom-slider3" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/>
+                    </div>
+                    <button class="btn basicStopButton" title="Stop" ng-click="msg.stop()"><span class="glyphicon glyphicon-stop"></span></button>
+                    <div class="servoLineDivider"></div>
+                    <div class="restColor gotoRestButton" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
+                        <span class="glyphicon glyphicon-stop"></span>
+                            Rest
+                    </div>
+                    <div class="servoReferences">
+                        <div class="inputColor">
+                            <span class="glyphicon glyphicon-stop"></span>
+                            Input   
+                        </div> 
+                        <div class="restColor" ng-click="pos.value=restSlider.value; msg.rest()" title="Go to Rest">
+                            <span class="glyphicon glyphicon-stop"></span>
+                            Rest
+                        </div> 
+                        <div class="outputColor">
+                            <span class="glyphicon glyphicon-stop"></span>
+                            Output
+                        </div> 
+                    </div>
+                    <div class="dataColor basicSpeedLabel">Speed = </div><div class="dataColor basicSpeedValue">{{speedDisplay}} °/s</div>
+
+                    <div class="row servoBasicContainer">
                         <div class="col-md-12">
                             <div class="verticalSpacerBasic">
                             <!-- spacer to get the same vertical position of slider in Advacend Tab -->
@@ -101,8 +94,7 @@
                                         <div class="servoCursor"></div>
                                     </div>
                                     <div class="restLabel" style="left: calc(100% - (({{100 -(service.rest*100/180)}}%) + 1px));">
-                                        Rest
-                                    <div class="restCursor"></div>
+                                        <div class="restCursor"><div class="restCursorPoint"></div></div>
                                     </div>
                                     <div ng-show="service.enabled" class="preventDragSelect">
                                         <div class="energizedZone">
@@ -125,7 +117,7 @@
                     <!-- /.row -->
                     <!-- <div class="verticalSpacer"></div> -->
                 </uib-tab>
-                <uib-tab select="refreshSlider()" heading="Limits" index="2">
+                <uib-tab select="refreshSlider()" heading="Limits" index="2" class="servoLimits">
                     <!-- ------------------ Limits ------------------ -->
                     <table class="table tableLimits preventDragSelect" style="margin-bottom: 0px!important;">
                         <tbody>
@@ -232,7 +224,7 @@
                     </div>
                     <!-- /.row -->
                 </uib-tab>
-                <uib-tab select="refreshSlider()" heading="Advanced" index="3">
+                <uib-tab select="refreshSlider()" heading="Advanced" index="3" class="servoAdvanced">
                     <!-- ------------------ Advanced ------------------ -->
                     <table class="table tableAdvanced preventDragSelect">
                         <tbody>
@@ -311,16 +303,5 @@
     </div>
     <!-- /.row -->
 </div>
-<script>
-    function speedSlider(servo, value) {
-        if (value == 501) {
-            value = "<b>Max Speed</b>";
-        } else {
-            value = 'Speed = ' + value + 'º per second';
-        }
-        document.getElementById("speedValue" + servo).textContent = value;
-        // And set de value in angular
-    }
-</script>
 <!-- /#servoContent -->
 <!-- /ServoGui.html -->

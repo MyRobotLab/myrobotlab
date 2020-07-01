@@ -146,7 +146,10 @@ public class Locale {
     Map<String, Locale> locales = new TreeMap<>();
     java.util.Locale[] ls = java.util.Locale.getAvailableLocales();
     for (java.util.Locale l : ls) {
-      locales.put(l.toString(), new Locale(l.toString()));
+      Locale newLocale = new Locale(l.toString());
+      if (l.toString() != null && l.toString().length() != 0) {
+        locales.put(newLocale.tag, newLocale);
+      }
     }
     return locales;
   }

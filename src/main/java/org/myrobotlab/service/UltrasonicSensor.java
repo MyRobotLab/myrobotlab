@@ -55,7 +55,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   String controllerName;
 
-  double multiplier = 1;
+  // 1/57 http://myrobotlab.org/content/ultrasonicsensor
+  double multiplier = 0.01754385964; // 1/57 default cm
 
   double offset = 0;
 
@@ -168,11 +169,19 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     controller.ultrasonicSensorStopRanging(this);
   }
 
+  /**
+   * The Arduino sketch currently uses NewPing for its non-blocking sampling
+   * characteristics. That sketch currently returns cm of distance, while previously
+   * the MrlUltrasonicSensor.cpp return micro-seconds.
+   * @return
+   */
   synchronized public Double range() {
     Double rawMs = ping();
     if (rawMs == null) {
       return null;
     }
+    // multiplier is 1 offset is 0 cm is returned directly from Arduino
+    // 1/57 http://myrobotlab.org/content/ultrasonicsensor
     return rawMs * multiplier + offset;
   }
 
@@ -193,12 +202,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return null;
   }
 
-  // probably should do this in a util class
-  public static int byteArrayToInt(int[] b) {
-    return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
-  }
-
-
   public int getPings() {
     return pings;
   }
@@ -218,8 +221,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   }
 
   @Override
-  public Double onUltrasonicSensorData(Double rawMs) {
-    // data comes in 'raw' and leaves as Range
+  public Double onUltrasonicSensorData(Double echoTimeRawUs) {
+    // data comes back in micro seconds complete echoTime
     // TODO implement changes based on type of sensor SRF04 vs SRF05
     // TODO implement units preferred
     // direct callback vs pub/sub (this needs to be handled by the
@@ -229,8 +232,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     // inches/meters/other kubits?
 
     ++pings;
-    lastRaw = rawMs;
-    Double range = (rawMs * multiplier + offset);
+    lastRaw = echoTimeRawUs;
+    Double range = (echoTimeRawUs * multiplier + offset);
     if (isBlocking) {
       try {
         data.put(lastRaw);
@@ -245,12 +248,12 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   @Override
   public void setUnitCm() {
-    multiplier = 1;
+    multiplier = 0.01754385964; // echoTime/57 default cm
   }
 
   @Override
   public void setUnitInches() {
-    multiplier = 0.393701;
+    multiplier = 0.393701 * 0.01754385964;
   }
 
   @Override

@@ -793,7 +793,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // FIXME - setters & getters for peers
 
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      // worke.startPeer("mouth");
+      worke.startPeer("eye");
+      /*
       worke.startPeer("joystick");
       worke.startPeer("motorLeft");
       worke.startPeer("motorRight");

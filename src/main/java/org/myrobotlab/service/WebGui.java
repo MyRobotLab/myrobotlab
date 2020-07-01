@@ -64,11 +64,6 @@ import org.slf4j.Logger;
  */
 public class WebGui extends Service implements AuthorizationProvider, Gateway, Handler {
 
-  /**
-   * Static list of third party dependencies for this service. The list will be
-   * consumed by Ivy to download and manage the appropriate resources
-   */
-
   public static class LiveVideoStreamHandler implements Handler {
 
     @Override

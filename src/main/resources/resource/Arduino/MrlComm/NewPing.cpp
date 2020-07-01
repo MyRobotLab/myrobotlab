@@ -345,11 +345,15 @@ ISR(TIMER2_COMPA_vect) {
 // ---------------------------------------------------------------------------
 
 unsigned int NewPing::convert_cm(unsigned int echoTime) {
+	// FIXED return raw time - http://myrobotlab.org/content/ultrasonicsensor
+	return echoTime;
+/*
 #if ROUNDING_ENABLED == false
 	return (echoTime / US_ROUNDTRIP_CM);              // Convert uS to centimeters (no rounding).
 #else
 	return NewPingConvert(echoTime, US_ROUNDTRIP_CM); // Convert uS to centimeters.
 #endif
+*/
 }
 
 

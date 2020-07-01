@@ -52,6 +52,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import javax.swing.JFrame;
 
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
@@ -380,7 +382,6 @@ public class OpenCV extends AbstractComputerVision {
     return grabberTypes;
   }
 
-
   /**
    * get the current list of possible filter types
    * 
@@ -403,192 +404,86 @@ public class OpenCV extends AbstractComputerVision {
     LoggingFactory.init("info");
 
     Runtime runtime = Runtime.getInstance();
-    runtime.setLocale("fr");
-    Runtime.start("gui", "SwingGui");
-    
+
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
     cv.addFilter(td);
     cv.capture();
-    
-    // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    // webgui.autoStartBrowser(false);
-    // webgui.startService();
 
-    // cv.capture();
-    // cv.setDisplay(true);
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    for (int i = 0; i < 1000; ++i) {
+      cv.startStreamer();
+      Service.sleep(1000);
+      cv.stopStreamer();
+      Service.sleep(1000);
+    }
 
-    // cv.setGrabberType("OpenKinect");
-    // cv.setStreamerEnabled(true);
-    // cv.setGrabberType("OpenCV");
+    log.info("made it !");
+    // FFmpegFrameRecorder test = new
 
-    // cv.addFilter("LKOpticalTrack");
-    // cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    // FFmpegFrameRecorder recorder = new
+    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
+    // recorder.setFormat("webm");
+    // recorder.start();
 
-    // yoloFilter.enable();
-    // cv.addFilter(yoloFilter);
-
-    /*
-     * cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    /**
+     * <pre>
      * 
-     * OpenCVFilter yoloFilter = cv.addFilter("yolo"); yoloFilter.enable();
-     * yoloFilter.disable(); yoloFilter.enable(); yoloFilter.disable();
-     * yoloFilter.enable();
+     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
+     *
+     * private void initLiveStream() throws FrameRecorder.Exception {
+     * 
+     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
+     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
+     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+     * frameRecorder.setAudioCodec(0);
+     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
+     * frameRecorder.setFrameRate(frameRate);
+     * frameRecorder.setVideoBitrate(5000);
+     * frameRecorder.setOption("content_type","video/webm");
+     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
+     *
+     *
+     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
+     * grabber.getImageWidth(), grabber.getImageHeight());
+     * recorder.setFormat(grabber.getFormat());
+     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
+     * recorder.setFrameRate(grabber.getFrameRate());
+     * recorder.setVideoBitrate(grabber.getVideoBitrate());
+     * recorder.setVideoCodec(grabber.getVideoCodec());
+     * recorder.setVideoOption("preset", "ultrafast");
+     * recorder.setVideoCodecName("libx264");
+     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
+     * 
      */
-
-    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
-    // Matrix - Pill Scene Short.mp4");
-    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\1559052474050");
 
     boolean done = true;
     if (done) {
       return;
     }
 
-    // TODO - chaos monkey yolo
-    // for (int i = 0 ; i < 10; i++) {
-    // yoloFilter.enable();
-    // yoloFilter.disable();
-    // }
-    // Thread.sleep(2000);
-    // yoloFilter.enable();
-    // cv.capture();
-    // yoloFilter.disable();
-    // yoloFilter.enable();
-
-    // cv.load();
-
-    // single kinect image file
-    // cv.reset();
-
-    // must do this for 1 chn 16 bit
-    // cv.setGrabberType("ImageFile");
-    // cv.capture("kinect-data");
-    // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
-
-    // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
-
-    // FIXME - make this work :P
-    // http://192.168.0.37/videostream.cgi
-    cv.reset();
-    cv.capture("OpenCV\\1543189994036");
-
-    // set recording of frames both avi and single frames
-    cv.recordFrames();
-
-    // record a set of files
-    cv.capture();
-    cv.record();
-
-    cv.sleep(10000);
-
-    cv.stopRecording();
-
-    // directory full of kinect files
-    cv.setGrabberType("ImageFile");
-    cv.capture("src/test/resources/OpenCV/kinect");
-
-    // directory test
-    cv.capture("src/test/resources/OpenCV");
-
-    // single file test
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-
-    // mp4 test
-    cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
-
     OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
     cv.addFilter(depth);
     cv.capture();
-
-    OpenCVFilterYolo yolo = (OpenCVFilterYolo) cv.addFilter("yolo");
-
-    // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
-    // FIXME - decompose into modular filters
-    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");//
-    // matrix-restaurant
-    // cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30
-    // min movie
-
-    // OpenCVFilterFaceTraining filter = new
-    // OpenCVFilterFaceTraining("training");
-    // filter.mode = Mode.TRAIN;
-    // cv.addFilter(filter);
-
     cv.addFilter("Yolo");
 
-    // filter.load("C:\\mrl\\myrobotlab.opencv-fixes\\myrobotlab\\BoundingBoxToFile\\neo");
-    // filter.mode = Mode.TRAIN;
+  }
 
-    boolean leave = true;
-    if (leave) {
-      return;
-    }
-
-    for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      if (fn.startsWith("DL4J")) {
-        continue;
+  public void stopStreamer() {
+    try {
+      if (webm == null) {
+        log.warn("webm already stopped");
+        return;
       }
-      log.info("trying {}", fn);
-      cv.addFilter(fn);
-      sleep(100);
-      cv.removeFilters();
+      webm.close();
+      webm = null;
+    } catch (Exception e) {
+      log.error("stopStreamer threw", e);
     }
-
-    for (int i = 0; i < 1000; ++i) {
-
-      Map<String, List<Classification>> classifications = cv.getClassifications();
-
-      StringBuilder sb = new StringBuilder("I found ");
-      if (classifications != null && classifications.keySet().size() > 0) {
-
-        for (String c : classifications.keySet()) {
-          List<Classification> types = classifications.get(c);
-          sb.append(types.size());
-          sb.append(" ");
-          sb.append(c);
-          if (types.size() > 1) {
-            sb.append("s");
-          }
-          sb.append(" ");
-        }
-        sb.append(".");
-      } else {
-        sb.append("nothing.");
-      }
-
-      log.info(sb.toString());
-    }
-
-    cv.addFilter("yolo");
-    cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin street
-
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-
-    cv.capture(0);
-    // cv.capture("C:\\mrl\\myrobotlab.opencv-fixes\\d.mp4"); dunno why
-    // ffmpeg noWorky
-
-    // check with
-    // &timestart=
-    cv.setColor("black");
-    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    // cv.capture("testAvi/rassegna2.avi");
-    // cv.addFilter("GoodFeaturesToTrack");
-    // cv.addFilter("Canny");
-    // cv.addFilter("yolo");
-    // cv.capture("googleimagesdownload/downloads/cats");
-    // cv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
-    OpenCVFilterYolo yolo1 = new OpenCVFilterYolo("yolo");
-    cv.addFilter(yolo1);
-    log.info("here");
-
-    // cv.capture();
-
   }
 
   /**
@@ -760,6 +655,11 @@ public class OpenCV extends AbstractComputerVision {
   private PointCloud lastPointCloud;
 
   boolean display = true;
+
+  /**
+   * for native canvas frame view of output
+   */
+  public boolean nativeView = false;
 
   static String DATA_DIR;
 
@@ -1403,7 +1303,7 @@ public class OpenCV extends AbstractComputerVision {
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
 
-        if (display && !isHeadless()) {
+        if (display && !isHeadless() && nativeView) {
           if (canvasFrame == null) {
             // FIXME - strange canvaFrame's fullscreen mode is not exposed :(
             // ProjectorDevice pd = new ProjectorDevice("display 2");
@@ -1449,6 +1349,14 @@ public class OpenCV extends AbstractComputerVision {
 
     if (recording || recordingFrames) {
       record(data);
+    }
+
+    if (webm != null) {
+      try {
+        webm.record(data.getInputFrame());
+      } catch (Exception e) {
+        log.error("webm threw", e);
+      }
     }
 
     frameEndTs = System.currentTimeMillis();
@@ -1626,6 +1534,44 @@ public class OpenCV extends AbstractComputerVision {
 
   public void record() {
     recording = true;
+  }
+
+  transient FFmpegFrameRecorder webm = null;
+
+  public void startStreamer() {
+    try {
+      if (webm != null) {
+        log.warn("webm already initialized");
+        return;
+      }
+      
+      int imageWidth = (width == null) ? 640 : width;
+      int imageHeight = (height == null) ? 480 : height;
+
+      webm = new FFmpegFrameRecorder("tcp://localhost:9090?listen", imageWidth, imageHeight);
+      webm.setFormat("webm");
+      webm.start();
+
+      // ~~~ https://github.com/bytedeco/javacv/issues/598 ~~~
+
+      /*
+      webm = new FFmpegFrameRecorder("http://localhost:9090", webWidth, webHeight, 0);
+      webm.setVideoOption("preset", "ultrafast");
+      webm.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+      webm.setAudioCodec(0);
+      webm.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+      webm.setFormat("webm");
+      webm.setGopSize(10);
+      webm.setFrameRate(32);
+      webm.setVideoBitrate(5000);
+      webm.setOption("content_type", "video/webm");
+      webm.setOption("listen", "1");
+      webm.start();
+      */
+      log.info("started webm");
+    } catch (Exception e) {
+      log.error("startStreamer threw", e);
+    }
   }
 
   /**
