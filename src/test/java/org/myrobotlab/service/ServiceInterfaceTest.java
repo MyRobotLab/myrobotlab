@@ -131,7 +131,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     // sts.clear();
     // sts.add(sd.getServiceType("org.myrobotlab.service.InMoov"));
     
-    for (ServiceType serviceType : sts) {
+    for (MetaData serviceType : sts) {
       // test single service
       // serviceType = sd.getServiceType("org.myrobotlab.service.VirtualDevice");
       String service = serviceType.getSimpleName();

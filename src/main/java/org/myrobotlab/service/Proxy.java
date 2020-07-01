@@ -6,7 +6,7 @@ import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
+import org.myrobotlab.framework.MetaData;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

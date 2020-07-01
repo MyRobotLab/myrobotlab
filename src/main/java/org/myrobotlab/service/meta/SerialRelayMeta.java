@@ -14,7 +14,7 @@ public class SerialRelayMeta  extends Meta {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @return ServiceType - returns all the data
+   * @return MetaData - returns all the data
    * 
    */
   public MetaData getMetaData() {

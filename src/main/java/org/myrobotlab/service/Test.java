@@ -1030,7 +1030,7 @@ public class Test extends Service implements StatusListener {
       if (script == null) {
         test.status = Status.error("script not found");
         /*
-         * ServiceData sd = ServiceData.getLocalInstance(); ServiceType st =
+         * ServiceData sd = ServiceData.getLocalInstance(); MetaData st =
          * sd.getServiceType(test.fullTypeName); StringBuffer t = new
          * StringBuffer();
          * t.append("#########################################\n");

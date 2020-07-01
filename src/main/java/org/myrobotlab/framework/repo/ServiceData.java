@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,12 +15,11 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -48,7 +46,7 @@ public class ServiceData implements Serializable {
 
   /**
    * A plan of what services and peers to create. If not defined, the default
-   * will be used as its defined in the {ServiceType}Meta data class. The
+   * will be used as its defined in the {MetaData}Meta data class. The
    * default build plan can be modified. This static object will be empty unless
    * there are overrides that modify default meta data.
    * 
@@ -102,10 +100,10 @@ public class ServiceData implements Serializable {
         AbstractMetaData serviceType = (AbstractMetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getName())) {
-          log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
+          log.error("Class name {} not equal to the MetaData's name {}", fullClassName, serviceType.getName());
         }
 
-        sd.add(ServiceType.fromMetaData(serviceType));
+        sd.add(serviceType);
 
         for (String cat : serviceType.categories) {
           Category category = null;
@@ -138,7 +136,7 @@ public class ServiceData implements Serializable {
       return keys;
     }
 
-    ServiceType st = localInstance.serviceTypes.get(fullTypeName);
+    MetaData st = localInstance.serviceTypes.get(fullTypeName);
     return st.getDependencies();
   }
 
@@ -244,7 +242,7 @@ public class ServiceData implements Serializable {
       Class<?> c = Class.forName(type);
       // Constructor<?> mc = c.getConstructor();
       Method method = c.getMethod("getMetaData");
-      ServiceType metaData = (ServiceType) method.invoke(null); // mc.newInstance((Object[]) null);
+      MetaData metaData = (MetaData) method.invoke(null); // mc.newInstance((Object[]) null);
       // MetaData metaData = meta.getMetaData();
       
 
@@ -279,7 +277,7 @@ public class ServiceData implements Serializable {
         }
       }
 
-      return ServiceType.toMetaData(metaData);
+      return MetaData.toMetaData(metaData);
 
     } catch (Exception e) {
       log.error("getMetaData threw {}.getMetaData() does not exist", type, e);
@@ -308,7 +306,7 @@ public class ServiceData implements Serializable {
   /**
    * all services meta data is contained here
    */
-  TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
+  TreeMap<String, MetaData> serviceTypes = new TreeMap<String, MetaData>();
 
   public ServiceData() {
   }
@@ -321,9 +319,9 @@ public class ServiceData implements Serializable {
     return serviceTypes.containsKey(fullServiceName);
   }
 
-  public List<ServiceType> getAvailableServiceTypes() {
-    List<ServiceType> ret = new ArrayList<ServiceType>();
-    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+  public List<MetaData> getAvailableServiceTypes() {
+    List<MetaData> ret = new ArrayList<MetaData>();
+    for (Map.Entry<String, MetaData> o : serviceTypes.entrySet()) {
       if (o.getValue().isAvailable()) {
         ret.add(o.getValue());
       }
@@ -361,7 +359,7 @@ public class ServiceData implements Serializable {
   }
 
   
-  public ServiceType getServiceType(String fullTypeName) {
+  public MetaData getServiceType(String fullTypeName) {
     if (!fullTypeName.contains(".")) {
       fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
     }
@@ -403,13 +401,13 @@ public class ServiceData implements Serializable {
 
   }
 
-  public List<ServiceType> getServiceTypes() {
+  public List<MetaData> getServiceTypes() {
     return getServiceTypes(true);
   }
 
-  public List<ServiceType> getServiceTypes(boolean showUnavailable) {
-    List<ServiceType> ret = new ArrayList<ServiceType>();
-    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
+  public List<MetaData> getServiceTypes(boolean showUnavailable) {
+    List<MetaData> ret = new ArrayList<MetaData>();
+    for (Map.Entry<String, MetaData> o : serviceTypes.entrySet()) {
       if (!o.getValue().isAvailable() && !showUnavailable) {
         log.info("getServiceTypes ignore : " + o.getValue().getSimpleName());
       } else {

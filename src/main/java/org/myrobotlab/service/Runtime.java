@@ -1943,7 +1943,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     public String logLevel = "info";
 
     @Option(names = { "-i",
-        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
+        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {MetaData} installs dependencies for a specific service")
     public String install[];
     
     @Option(names = { "-d",

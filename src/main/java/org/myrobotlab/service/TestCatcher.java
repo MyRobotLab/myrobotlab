@@ -259,7 +259,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @return ServiceType - returns all the data
+   * @return MetaData - returns all the data
    * 
    */
   
