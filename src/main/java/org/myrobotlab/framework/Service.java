@@ -71,7 +71,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -96,7 +96,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * data for an instance
    * 
    */
-  protected MetaData serviceType;
+  protected AbstractMetaData serviceType;
   
 
   private static final long serialVersionUID = 1L;
@@ -1237,7 +1237,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
               if (si == null) {
-                log.warn("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
+                log.info("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
                 m.invoke(si, retobj);

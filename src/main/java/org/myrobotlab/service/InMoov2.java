@@ -1068,7 +1068,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public String setSpeechType(String speechType) {
-    speechService = speechType;    
+    speechService = speechType;
+    // setPeer("mouth", speechType); needs to be done a better way
     return speechType;
   }
 

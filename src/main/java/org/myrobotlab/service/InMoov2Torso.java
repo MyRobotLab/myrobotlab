@@ -41,7 +41,11 @@ public class InMoov2Torso extends Service {
     // lowStom = (ServoControl) createPeer("lowStom");
     // // controller = (ServoController) createPeer("arduino");
 
-    // FIXME - createPeers ?
+    // FIXME - createPeers ?    
+  }
+  
+  public void startService() {
+    super.startService();
     startPeers();
     topStom.setPin(27);
     midStom.setPin(28);
@@ -86,9 +90,9 @@ public class InMoov2Torso extends Service {
 
   @Override
   public void broadcastState() {
-    topStom.broadcastState();
-    midStom.broadcastState();
-    lowStom.broadcastState();
+    if (topStom != null)topStom.broadcastState();
+    if (midStom != null)midStom.broadcastState();
+    if (lowStom != null)lowStom.broadcastState();
   }
 
   public void disable() {

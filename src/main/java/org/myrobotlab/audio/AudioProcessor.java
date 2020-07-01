@@ -56,7 +56,7 @@ public class AudioProcessor extends Thread {
   AudioData currentAudioData = null;
 
   private int repeatCount;
-  
+
   public AudioProcessor(AudioFile audioFile, String track) {
     super(String.format("%s:track", track));
     this.audioFile = audioFile;
@@ -224,15 +224,16 @@ public class AudioProcessor extends Thread {
       } else {
         log.error("line is null !");
       }
-    } catch (LineUnavailableException lineError) {
-      audioFile.warn("LineUnavailableException - output audio line was not found - is audio enabled?");
-    } catch (IllegalArgumentException argError) {
-      audioFile.warn("IllegalArgumentException - output audio line was not found - is audio enabled?");      
     } catch (Exception e) {
-      audioFile.error(e.getMessage());
-      log.error(e.getMessage(), e);
+      audioFile.warn("%s - %s output audio line was not found - is audio enabled?", e.getClass().getSimpleName(), e.getMessage());
+      if (data != null) {
+        synchronized (data) {
+          log.debug("notifying others");
+          data.notifyAll();
+        }
+      }
       if (audioFile != null) {
-    		audioFile.error("%s - %s", e.getMessage(), data.getFileName());
+        audioFile.error("%s - %s", e.getMessage(), data.getFileName());
       }
     } finally {
       if (din != null) {
@@ -301,20 +302,6 @@ public class AudioProcessor extends Thread {
   public void setVolume(double volume) {
     this.volume = volume;
   }
-
-  /*
-   * <pre> public static void main(String[] args) {
-   * 
-   * AudioPlayer player = new AudioPlayer();
-   * 
-   * // jlp.play("NeroSoundTrax_test1_PCM_Stereo_CBR_16SS_6000Hz.wav");
-   * AudioData data = new AudioData("aaa.mp3"); // data.volume = 120.0f;
-   * data.balance = -1;
-   * 
-   * player.play(data);
-   * 
-   * } </pre>
-   */
 
   public double getVolume() {
     return volume;

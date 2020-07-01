@@ -73,7 +73,7 @@ import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServiceLifeCycle;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -846,7 +846,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // problem with
       // ret.add(new NameAndType(si.getId(), si.getName(), si.getType(),
       // CodecUtils.toJson(si)));
-      ret.add(new Registration(si.getId(), si.getName(), si.getType(), serviceData.getServiceType(si.getType())));
+      ret.add(new Registration(si.getId(), si.getName(), si.getType()));
     }
     return ret;
   }
@@ -2009,8 +2009,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
         
-        boolean readyForPrimetime = false;
-        if (options.spawnedFromAgent && readyForPrimetime) {
+        if (options.spawnedFromAgent) {
           
           try {
             log.info("attempting to connect to local agent");
@@ -3524,11 +3523,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.clearOverrides();
   }
 
-  public static MetaData getMetaData(String serviceName, String serviceType) {
+  public static AbstractMetaData getMetaData(String serviceName, String serviceType) {
     return ServiceData.getMetaData(serviceName, serviceType);
   }
 
-  public static MetaData getMetaData(String serviceType) {
+  public static AbstractMetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
   

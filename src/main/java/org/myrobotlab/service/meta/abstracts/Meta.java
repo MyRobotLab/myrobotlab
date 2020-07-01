@@ -13,8 +13,8 @@ abstract public class Meta {
    */
   static protected Map<String, ServiceReservation> overrides = new TreeMap<>();
 
-  protected MetaData metaData = null;
+  protected AbstractMetaData metaData = null;
 
-  abstract public MetaData getMetaData();
+  abstract public AbstractMetaData getMetaData();
 
 }

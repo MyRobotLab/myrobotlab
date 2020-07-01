@@ -86,6 +86,7 @@ public class Lidar extends Service implements SerialDataListener {
 
   public Lidar(String n, String id) {
     super(n, id);
+    // reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar"); describe it in meta data
   }
 
   @Override

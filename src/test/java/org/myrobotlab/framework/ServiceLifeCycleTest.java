@@ -16,7 +16,7 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
 import org.myrobotlab.service.WorkE;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -49,7 +49,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     ServiceInterface si = null;
     
     // static template info
-    MetaData metaData = ServiceData.getMetaData("TestCatcher");
+    AbstractMetaData metaData = ServiceData.getMetaData("TestCatcher");
     log.info("static meta data {}", metaData);
     
     // instance info
@@ -114,7 +114,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     Runtime.setPeer("catcher01.subpeer", "rootTracking", "Tracking");
     // show modified plan
     masterPlan = Runtime.getPlan("catcher01","TestCatcher");
-    log.info("current plan {}", masterPlan);
+    log.warn("current plan {}", masterPlan);
         
     metaData = ServiceData.getMetaData("catcher01","TestCatcher"); 
     
@@ -132,7 +132,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     Runtime.release("catcher01");
     
     // verify a plan exists with a subpeer    
-    MetaData i01MetaData = Runtime.getMetaData("i01","InMoov2");    
+    AbstractMetaData i01MetaData = Runtime.getMetaData("i01","InMoov2");    
     log.info("i01 meta data {}", i01MetaData);   
         
     // release

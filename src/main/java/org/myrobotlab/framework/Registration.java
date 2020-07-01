@@ -4,7 +4,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -24,8 +24,6 @@ public class Registration {
   protected String id;
   protected String name;
   protected String typeKey;
-  @Deprecated /* I don't believe this is used */
-  protected MetaData type;
   
   /**
    * current serialized state of the service - default encoding is json
@@ -38,11 +36,10 @@ public class Registration {
    */
   transient public ServiceInterface service = null;
   
-  public Registration(String id, String name, String typeKey, MetaData type) {
+  public Registration(String id, String name, String typeKey) {
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
-    this.type = type;
   }
   
   public Registration(ServiceInterface service) {
@@ -50,7 +47,6 @@ public class Registration {
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getType();
-    this.type = ServiceData.getLocalInstance().getServiceType(this.typeKey);
     // when this registration is re-broadcasted to remotes it will use this serialization to init state
     this.state = CodecUtils.toJson(service);
     // if this is a local registration - need reference to service

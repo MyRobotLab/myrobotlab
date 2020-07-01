@@ -15,7 +15,6 @@ import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -29,70 +28,43 @@ import org.slf4j.Logger;
  * to override actual name and type information.
  * 
  */
-public class MetaData implements Serializable {
+public class AbstractMetaData implements Serializable {
 
-  transient public final static Logger log = LoggerFactory.getLogger(MetaData.class);
+  transient public final static Logger log = LoggerFactory.getLogger(AbstractMetaData.class);
 
   private static final long serialVersionUID = 1L;
 
-  public static ServiceType fromMetaData(AbstractMetaData meta) {
-    ServiceType st = new ServiceType();
-    st.peers = meta.peers;
-    st.available = meta.isAvailable();
-    st.categories = meta.categories;
-    st.dependencies = meta.dependencies;
-    st.description = meta.getDescription();
-    st.includeServiceInOneJar = meta.includeServiceInOneJar();
-    st.isCloudService = meta.isCloudService();
-    st.lastDependency = meta.getLastDependency();
-    st.license = meta.getLicense();
-    st.link = meta.getLink();
-    st.name = meta.getName();
-    st.peers = meta.getPeers();
-    st.requiresKeys = meta.requiresKeys();
-    st.simpleName = meta.getSimpleName();
-    st.sponsor = meta.getSponsor();
-    st.state = meta.getState();
-    st.todo = meta.getTodo();
-    return st;
-  }
-  
   /**
    * available in the UI(s)
    */
-  Boolean available = true;
+  protected Boolean available = true; // why not ? :P
   
+  /**
+   * Set of categories this service belongs to
+   */
   transient public Set<String> categories = new HashSet<String>();
+  
   /**
    * dependency keys of with key structure {org}-{version}
    */
   public List<ServiceDependency> dependencies = new ArrayList<ServiceDependency>();
+  
   /**
    * description of what the service does
    */
-  String description = null;
-  Boolean includeServiceInOneJar = false;
-  transient private ServiceDependency lastDependency;
-
-  String license;// = "Apache";
-
-  String link;
-  String name;
-  public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
-  Boolean requiresKeys = false;
-
-  String simpleName;
-
+  protected String description = null;
+  
   /**
    * if true the dependency of this service are packaged in the build
    * of myrobotlab.jar
-  Boolean includeServiceInOneJar = false;
+   */
+  protected Boolean includeServiceInOneJar = false;
   
   /**
    * service requires an internet connection because some or all of its
    * functionality 
    */
-  Boolean isCloudService = false;
+  protected Boolean isCloudService = false;
   
   /**
    * used for appending ServiceExcludes to the ServiceDependencies
@@ -102,17 +74,17 @@ public class MetaData implements Serializable {
   /**
    * license of the service
    */
-  String license;// = "Apache";
+  protected String license;// = "Apache";
   
   /**
    * relevant site to the Service
    */
-  String link;
+  protected String link;
   
   /**
    * full type name of the service
    */
-  String name;
+  protected String name;
   
   /**
    * key'd structure of other services that are necessary for the correct function of this service
@@ -120,36 +92,119 @@ public class MetaData implements Serializable {
    */
   public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
-  String state = null;
+  /**
+   * true if the service requires a key e.g. Polly
+   */
+  protected Boolean requiresKeys = false;
+  
+  /**
+   * instance name of service this MetaData belongs to
+   * e.g. "i01"
+   */
+  protected String serviceName;
+
   /**
    * simple class name of this service
    */
-  String todo;
-  Integer workingLevel = null;
+  protected String simpleName;
 
-  protected String serviceName;
+  /**
+   * the single sponsor of this service
+   */
+  protected String sponsor;
+
+  /**
+   * service life-cycle state 
+   * inactive | created | registered | running | stopped | released
+   */
+  protected String state = null;
 
   /**
    * what is left TODO on this service for it to be ready for release
    */
-  String todo;
+  protected String todo;
   
-  Integer workingLevel = null;
-  public MetaData() {
+  protected Integer workingLevel = null;
+  
+  public Boolean getAvailable() {
+    return available;
   }
 
-  public MetaData(Class<?> clazz) {
+  public void setAvailable(Boolean available) {
+    this.available = available;
+  }
+
+  public Boolean getIncludeServiceInOneJar() {
+    return includeServiceInOneJar;
+  }
+
+  public void setIncludeServiceInOneJar(Boolean includeServiceInOneJar) {
+    this.includeServiceInOneJar = includeServiceInOneJar;
+  }
+
+  public Boolean getIsCloudService() {
+    return isCloudService;
+  }
+
+  public void setIsCloudService(Boolean isCloudService) {
+    this.isCloudService = isCloudService;
+  }
+
+  public Boolean getRequiresKeys() {
+    return requiresKeys;
+  }
+
+  public void setRequiresKeys(Boolean requiresKeys) {
+    this.requiresKeys = requiresKeys;
+  }
+
+  public Integer getWorkingLevel() {
+    return workingLevel;
+  }
+
+  public void setWorkingLevel(Integer workingLevel) {
+    this.workingLevel = workingLevel;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setLicense(String license) {
+    this.license = license;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setSimpleName(String simpleName) {
+    this.simpleName = simpleName;
+  }
+
+  public void setState(String state) {
+    this.state = state;
+  }
+
+  public void setTodo(String todo) {
+    this.todo = todo;
+  }
+
+  public AbstractMetaData() {
+  }
+
+  public AbstractMetaData(Class<?> clazz) {
     this.name = clazz.getCanonicalName();
     this.simpleName = clazz.getSimpleName();
   }
 
-  public MetaData(String name) {
+  public AbstractMetaData(String name) {
     this.name = CodecUtils.makeFullTypeName(name);
     this.simpleName = name.substring(name.lastIndexOf(".") + 1);
   }
 
   public void addArtifact(String orgId, String classifierId) {
-    lastDependency.add(new ServiceArtifact(orgId, classifierId));  
+    lastDependency.add(new ServiceArtifact(orgId, classifierId));
   }
 
   public void addCategory(String... categories) {
@@ -180,23 +235,9 @@ public class MetaData implements Serializable {
     this.license = license;
   }
 
-  public void addPeer(String key, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, null, peerType, comment));
-  }
-
-  public void addPeer(String key, String actualName, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
-
   public void addTodo(String todo) {
     this.todo = todo;
   }
-
-  @Override
-  public int compare(ServiceType o1, ServiceType o2) {
-    return o1.name.compareTo(o2.name);
-  }
-
 
   public void exclude(String groupId, String artifactId) {
     // get last dependency
@@ -207,13 +248,8 @@ public class MetaData implements Serializable {
     lastDependency.add(new ServiceExclude(groupId, artifactId));
   }
 
-  /*
-  public void addRootPeer(String actualName, String peerType, String comment) {
-    peers.put(actualName, new ServiceReservation(actualName, actualName, peerType, comment, true, true));
-  }*/
-
-  public String getName() {
-    return name;
+  public List<ServiceDependency> getDependencies() {
+    return dependencies;
   }
 
   public String getDescription() {
@@ -226,10 +262,6 @@ public class MetaData implements Serializable {
 
   public String getLink() {
     return link;
-  }
-
-  public boolean includeServiceInOneJar() {
-    return includeServiceInOneJar;
   }
 
   public String getName() {
@@ -260,13 +292,12 @@ public class MetaData implements Serializable {
     return requiresKeys;
   }
 
-
   public void setAvailable(boolean b) {
     this.available = b;
   }
 
-  public void setLicenseProprietary() {
-    addLicense("proprietary");
+  public void setCloudService(boolean b) {
+    isCloudService = b;
   }
 
   public void setLicenseApache() {
@@ -293,33 +324,10 @@ public class MetaData implements Serializable {
     this.sponsor = sponsor;
   }
 
-  /**
-   * sharing means sharePeer is forced - while addPeer will check before adding
-   * 
-   * @param key
-   *          k
-   * @param actualName
-   *          n
-   * @param peerType
-   *          n
-   * @param comment
-   *          comment
-   */
-  public void sharePeer(String key, String actualName, String peerType, String comment) {
-    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
-  }
-
   public int size() {
     return dependencies.size();
   }
-  
-  public String getPeerActualName(String peerKey) {
 
- 
-  public void setServiceName(String serviceName) {
-    this.serviceName = serviceName;
-  }
-  
   @Override
   public String toString() {
     StringBuffer sb = new StringBuffer();
@@ -336,28 +344,75 @@ public class MetaData implements Serializable {
     return sb.toString();
   }
 
-  // GAH ! - more convertions for smaller pr :(
-  public static AbstractMetaData toMetaData(ServiceType type) {
-    AbstractMetaData meta = new AbstractMetaData();
-    meta.peers = type.peers;
-    meta.setAvailable(type.isAvailable());
-    meta.categories = type.categories;
-    meta.dependencies = type.dependencies;
-    meta.setDescription(type.getDescription());
-    meta.setIncludeServiceInOneJar(type.includeServiceInOneJar());
-    meta.setIsCloudService(type.isCloudService);
-    meta.setLastDependency(type.lastDependency);
-    meta.setLicense(type.getLicense());
-    meta.setLink(type.getLink());
-    meta.setName(type.getName());
-    meta.peers = type.getPeers();
-    meta.setRequiresKeys(type.requiresKeys());
-    meta.setSimpleName(type.getSimpleName());
-    meta.setSponsor(type.sponsor);
-    meta.setState(type.state);
-    meta.setTodo(type.todo);
-    return meta;
+  public ServiceReservation getPeer(String peerKey) {
+    if (peers.get(peerKey) == null) {
+      log.warn("{} not found in peer keys - possible keys follow:", peerKey);
+      for (String key : peers.keySet()) {
+        log.warn(key);
+      }
+    }
+    return peers.get(peerKey);
+  }
+  
+  public void setServiceName(String serviceName) {
+    this.serviceName = serviceName;
+  }
+  
+  public String getServiceName() {
+    return serviceName;
   }
 
+  /**
+   * typical adding of a service reservation ..
+   * the actual name is left null, so that this template
+   * will dynamically generate peer names depending on the parents name
+   * 
+   * @param key
+   * @param peerType
+   * @param comment
+   */
+  public void addPeer(String key, String peerType, String comment) {
+    peers.put(key, new ServiceReservation(key, null, peerType, comment));
+  }
+
+  public void addPeer(String key, String actualName, String peerType, String comment) {
+    peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
+  }
+  
+  public String getPeerActualName(String peerKey) {
+
+    // return local defined name
+    ServiceReservation peer = peers.get(peerKey);
+    if (peer != null) {
+      if (peer.actualName != null) {
+        return peer.actualName;
+      }
+    }
+    return null;
+  }
+
+  public Boolean isCloudService() {
+    return isCloudService;
+  }
+
+  public String getSponsor() {
+    return sponsor;
+  }
+
+  public ServiceDependency getLastDependency() {
+    return lastDependency;
+  }
+
+  public String getState() {
+    return state;
+  }
+
+  public String getTodo() {    
+    return todo;
+  }
+
+  public void setLastDependency(ServiceDependency lastDependency) {
+    this.lastDependency = lastDependency;
+  }
 
 }

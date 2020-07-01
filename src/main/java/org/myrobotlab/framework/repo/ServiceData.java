@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,11 +16,12 @@ import java.util.TreeMap;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
+import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.meta.abstracts.Meta;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.slf4j.Logger;
 
 /**
@@ -97,13 +99,13 @@ public class ServiceData implements Serializable {
       log.debug("querying {}", fullClassName);
       try {
 
-        MetaData serviceType = (MetaData) getMetaData(fullClassName);
+        AbstractMetaData serviceType = (AbstractMetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getName())) {
           log.error("Class name {} not equal to the ServiceType's name {}", fullClassName, serviceType.getName());
         }
 
-        sd.add(serviceType);
+        sd.add(ServiceType.fromMetaData(serviceType));
 
         for (String cat : serviceType.categories) {
           Category category = null;
@@ -136,7 +138,7 @@ public class ServiceData implements Serializable {
       return keys;
     }
 
-    MetaData st = localInstance.serviceTypes.get(fullTypeName);
+    ServiceType st = localInstance.serviceTypes.get(fullTypeName);
     return st.getDependencies();
   }
 
@@ -207,7 +209,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  static public MetaData getMetaData(String type) {
+  static public AbstractMetaData getMetaData(String type) {
     return getMetaData(null, type);
   }
 
@@ -217,7 +219,7 @@ public class ServiceData implements Serializable {
    * instance's meta data, which can contain overrides.
    * 
    * This allows the user an opportunity to change the creation details (actual
-   * names & types) of peer services before all the peers are created
+   * names and types) of peer services before all the peers are created
    * 
    * If a name/instance is not supplied the default meta data is supplied
    * 
@@ -225,7 +227,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  public static MetaData getMetaData(String serviceName, String type) {
+  public static AbstractMetaData getMetaData(String serviceName, String type) {
     try {
 
       // test for overrides from name - name can override type
@@ -238,10 +240,13 @@ public class ServiceData implements Serializable {
 
       type = getFullMetaTypeName(type);
 
+      // RETRO-GRADED for "nice" sized pr :(
       Class<?> c = Class.forName(type);
-      Constructor<?> mc = c.getConstructor();
-      Meta meta = (Meta) mc.newInstance((Object[]) null);
-      MetaData metaData = meta.getMetaData();
+      // Constructor<?> mc = c.getConstructor();
+      Method method = c.getMethod("getMetaData");
+      ServiceType metaData = (ServiceType) method.invoke(null); // mc.newInstance((Object[]) null);
+      // MetaData metaData = meta.getMetaData();
+      
 
       // if this is an instance description of the meta data
       // there is the possibility of overrides
@@ -274,7 +279,7 @@ public class ServiceData implements Serializable {
         }
       }
 
-      return metaData;
+      return ServiceType.toMetaData(metaData);
 
     } catch (Exception e) {
       log.error("getMetaData threw {}.getMetaData() does not exist", type, e);
@@ -303,7 +308,7 @@ public class ServiceData implements Serializable {
   /**
    * all services meta data is contained here
    */
-  TreeMap<String, MetaData> serviceTypes = new TreeMap<String, MetaData>();
+  TreeMap<String, ServiceType> serviceTypes = new TreeMap<String, ServiceType>();
 
   public ServiceData() {
   }
@@ -316,9 +321,9 @@ public class ServiceData implements Serializable {
     return serviceTypes.containsKey(fullServiceName);
   }
 
-  public List<MetaData> getAvailableServiceTypes() {
-    ArrayList<MetaData> ret = new ArrayList<MetaData>();
-    for (Map.Entry<String, MetaData> o : serviceTypes.entrySet()) {
+  public List<ServiceType> getAvailableServiceTypes() {
+    List<ServiceType> ret = new ArrayList<ServiceType>();
+    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       if (o.getValue().isAvailable()) {
         ret.add(o.getValue());
       }
@@ -356,7 +361,7 @@ public class ServiceData implements Serializable {
   }
 
   
-  public MetaData getServiceType(String fullTypeName) {
+  public ServiceType getServiceType(String fullTypeName) {
     if (!fullTypeName.contains(".")) {
       fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
     }
@@ -398,13 +403,13 @@ public class ServiceData implements Serializable {
 
   }
 
-  public List<MetaData> getServiceTypes() {
+  public List<ServiceType> getServiceTypes() {
     return getServiceTypes(true);
   }
 
-  public List<MetaData> getServiceTypes(boolean showUnavailable) {
-    ArrayList<MetaData> ret = new ArrayList<MetaData>();
-    for (Map.Entry<String, MetaData> o : serviceTypes.entrySet()) {
+  public List<ServiceType> getServiceTypes(boolean showUnavailable) {
+    List<ServiceType> ret = new ArrayList<ServiceType>();
+    for (Map.Entry<String, ServiceType> o : serviceTypes.entrySet()) {
       if (!o.getValue().isAvailable() && !showUnavailable) {
         log.info("getServiceTypes ignore : " + o.getValue().getSimpleName());
       } else {
@@ -448,7 +453,7 @@ public class ServiceData implements Serializable {
     Plan root = new Plan();
     
     // get the root meta data
-    MetaData temp = getMetaData(serviceName, serviceType);
+    AbstractMetaData temp = getMetaData(serviceName, serviceType);
     if (temp != null) {
       root.put(serviceName, serviceType);
     }
@@ -467,14 +472,14 @@ public class ServiceData implements Serializable {
    * Recursively build the peers until the tree is complete.
    * Useful to get a full plan regarding some complex description
    * 
-   * @param string
-   * @param string2
-   * @return
+   * @param root
+   * @param parentName
+   * @param sr
    */
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
     // FIXME figure out if overrides can happen here !?!?!?
   
-    MetaData branch = getMetaData(sr.actualName, sr.type);
+    AbstractMetaData branch = getMetaData(sr.actualName, sr.type);
     //root.getPeers().putAll(branch.getPeers());
     root.put(sr.actualName, sr.type);
     for (ServiceReservation peer : branch.getPeers().values()) {      

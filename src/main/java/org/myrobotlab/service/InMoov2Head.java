@@ -42,7 +42,22 @@ public class InMoov2Head extends Service {
 
   public InMoov2Head(String n, String id) {
     super(n, id);
+  }
 
+  public void blink() {
+
+    // TODO: clean stop autoblink if tracking ...
+    double tmpVelo = ThreadLocalRandom.current().nextInt(40, 150 + 1);
+    eyelidLeft.setSpeed(tmpVelo);
+    eyelidRight.setSpeed(tmpVelo);
+    moveToBlocking(180, 180);
+    moveToBlocking(0, 0);
+
+  }
+  
+  @Override
+  public void startService() {
+    super.startService();
     // FIXME - future will just be pub/sub attach/detach subscriptions
     // and there will be no need this service.
     // Config will be managed by LangUtils
@@ -103,17 +118,6 @@ public class InMoov2Head extends Service {
     setSpeed(45.0, 45.0, null, null, null, 45.0);
   }
 
-  public void blink() {
-
-    // TODO: clean stop autoblink if tracking ...
-    double tmpVelo = ThreadLocalRandom.current().nextInt(40, 150 + 1);
-    eyelidLeft.setSpeed(tmpVelo);
-    eyelidRight.setSpeed(tmpVelo);
-    moveToBlocking(180, 180);
-    moveToBlocking(0, 0);
-
-  }
-
   class blinkEyesTimertask extends TimerTask {
     @Override
     public void run() {
@@ -143,14 +147,14 @@ public class InMoov2Head extends Service {
 
   @Override
   public void broadcastState() {
-    rothead.broadcastState();
-    rollNeck.broadcastState();
-    neck.broadcastState();
-    eyeX.broadcastState();
-    eyeY.broadcastState();
-    jaw.broadcastState();
-    eyelidLeft.broadcastState();
-    eyelidRight.broadcastState();
+    if (rothead != null)rothead.broadcastState();
+    if (rollNeck != null)rollNeck.broadcastState();
+    if (neck != null)neck.broadcastState();
+    if (eyeX != null)eyeX.broadcastState();
+    if (eyeY != null)eyeY.broadcastState();
+    if (jaw != null)jaw.broadcastState();
+    if (eyelidLeft != null)eyelidLeft.broadcastState();
+    if (eyelidRight != null)eyelidRight.broadcastState();
   }
 
   public void stop() {
