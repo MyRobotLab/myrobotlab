@@ -1083,17 +1083,4 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     addListener(control.getName(), "publishReplaceWord");
   }
 
-  static public MetaData getMetaData(String serviceType) {
-
-    MetaData meta = new MetaData(serviceType);
-    meta.addPeer("audioFile", "AudioFile", "audioFile");
-    meta.addCategory("speech");
-
-    meta.addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
-    meta.addDependency("javazoom", "jlayer", "1.0.1");
-    meta.addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
-
-    return meta;
-  }
-
 }

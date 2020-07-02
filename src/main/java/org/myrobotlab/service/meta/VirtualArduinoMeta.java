@@ -2,31 +2,28 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class VirtualArduinoMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(VirtualArduinoMeta.class);
+public class VirtualArduinoMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(VirtualArduinoMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  public MetaData getMetaData() {
+  public VirtualArduinoMeta() {
 
-    MetaData meta = new MetaData("org.myrobotlab.service.VirtualArduino");
+    
     Platform platform = Platform.getLocalInstance();
     
-    meta.addDescription("virtual hardware of for the Arduino!");
-    meta.setAvailable(true);
-    meta.addPeer("uart", "Serial", "serial device for this Arduino");
-    meta.addCategory("simulator");
-    return meta;
+   addDescription("virtual hardware of for the Arduino!");
+   setAvailable(true);
+   addPeer("uart", "Serial", "serial device for this Arduino");
+   addCategory("simulator");
+    
   }
   
 }

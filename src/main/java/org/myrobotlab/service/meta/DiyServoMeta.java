@@ -2,33 +2,26 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class DiyServoMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(DiyServoMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class DiyServoMeta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(DiyServoMeta.class);
 
-    MetaData meta = new MetaData("org.myrobotlab.service.DiyServo");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("Controls a motor so that it can be used as a Servo");
-    meta.addCategory("control", "servo");
-    meta.addPeer("motor", "MotorDualPwm", "MotorControl service");
-    meta.addPeer("pid", "Pid", "PID service");
-    return meta;
-  }
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public DiyServoMeta() {
 
-  
-  
+		Platform platform = Platform.getLocalInstance();
+		addDescription("Controls a motor so that it can be used as a Servo");
+		addCategory("control", "servo");
+		addPeer("motor", "MotorDualPwm", "MotorControl service");
+		addPeer("pid", "Pid", "PID service");
+
+	}
+
 }
-

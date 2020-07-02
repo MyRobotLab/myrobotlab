@@ -2,32 +2,29 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class KeyboardMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(KeyboardMeta.class);
+public class KeyboardMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(KeyboardMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  public MetaData getMetaData() {
+  public KeyboardMeta() {
 
-    MetaData meta = new MetaData("org.myrobotlab.service.Keyboard");
+    
     Platform platform = Platform.getLocalInstance();
     
-    meta.addDescription("keyboard interface");
-    meta.addCategory("control");
+   addDescription("keyboard interface");
+   addCategory("control");
 
-    meta.addDependency("com.1stleg", "jnativehook", "2.0.3");
+   addDependency("com.1stleg", "jnativehook", "2.0.3");
 
-    return meta;
+    
   }
 
   

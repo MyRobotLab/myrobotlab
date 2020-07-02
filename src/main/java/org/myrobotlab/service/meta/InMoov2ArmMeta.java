@@ -2,37 +2,30 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoov2ArmMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(InMoov2ArmMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class InMoov2ArmMeta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(InMoov2ArmMeta.class);
 
-    MetaData meta = new MetaData("org.myrobotlab.service.InMoov2Arm");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("the InMoov Arm Service");
-    meta.addCategory("robot");
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public InMoov2ArmMeta() {
 
-    meta.addPeer("bicep", "Servo", "Bicep servo");
-    meta.addPeer("rotate", "Servo", "Rotate servo");
-    meta.addPeer("shoulder", "Servo", "Shoulder servo");
-    meta.addPeer("omoplate", "Servo", "Omoplate servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+		Platform platform = Platform.getLocalInstance();
+		addDescription("the InMoov Arm Service");
+		addCategory("robot");
 
-    return meta;
-  }
+		addPeer("bicep", "Servo", "Bicep servo");
+		addPeer("rotate", "Servo", "Rotate servo");
+		addPeer("shoulder", "Servo", "Shoulder servo");
+		addPeer("omoplate", "Servo", "Omoplate servo");
+		addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
-  
+	}
+
 }
-

@@ -2,31 +2,28 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class WiiMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(WiiMeta.class);
+public class WiiMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(WiiMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  public MetaData getMetaData() {
+  public WiiMeta() {
 
-    MetaData meta = new MetaData("org.myrobotlab.service.Wii");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("Wii mote control and sensor info");
-    meta.addCategory("control", "sensors");
+   addDescription("Wii mote control and sensor info");
+   addCategory("control", "sensors");
 
-    meta.addDependency("wiiusej", "wiiusej", "wiiusej");
+   addDependency("wiiusej", "wiiusej", "wiiusej");
     //
-    return meta;
+    
   }
   
   

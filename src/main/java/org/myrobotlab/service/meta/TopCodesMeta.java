@@ -2,29 +2,26 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class TopCodesMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(TopCodesMeta.class);
+public class TopCodesMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(TopCodesMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  public MetaData getMetaData() {
+  public TopCodesMeta() {
 
-    MetaData meta = new MetaData("org.myrobotlab.service.TopCodes");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("Topcodes finds visual references and identifiers");
-    meta.addCategory("vision", "video", "sensors");
-    meta.addDependency("topcodes", "topcodes", "1.0.0");
-    return meta;
+   addDescription("Topcodes finds visual references and identifiers");
+   addCategory("vision", "video", "sensors");
+   addDependency("topcodes", "topcodes", "1.0.0");
+    
   }
   
 }

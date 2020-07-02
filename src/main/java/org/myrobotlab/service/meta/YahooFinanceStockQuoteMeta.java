@@ -2,29 +2,26 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class YahooFinanceStockQuoteMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(YahooFinanceStockQuoteMeta.class);
+public class YahooFinanceStockQuoteMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(YahooFinanceStockQuoteMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  public MetaData getMetaData() {
+  public YahooFinanceStockQuoteMeta() {
 
-    MetaData meta = new MetaData("org.myrobotlab.service.YahooFinanceStockQuote");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
-    meta.addCategory("filter", "finance");
-    meta.setAvailable(false);
-    return meta;
+   addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
+   addCategory("filter", "finance");
+   setAvailable(false);
+    
   }
 
   

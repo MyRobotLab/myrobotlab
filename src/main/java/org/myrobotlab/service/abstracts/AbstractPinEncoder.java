@@ -33,13 +33,6 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     lastUpdate = System.currentTimeMillis();
   }
 
-  static public MetaData getMetaData() {
-    MetaData meta = new MetaData(AbstractPinEncoder.class);
-    meta.addDescription("encoder which operates with a single pin");
-    meta.addCategory("encoder", "sensors");
-    return meta;
-  }
-
   public String getPin() {
     return pin;
   }

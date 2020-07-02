@@ -30,9 +30,9 @@ import org.slf4j.Logger;
  */
 public class MetaData implements Serializable {
 
-  transient public final static Logger log = LoggerFactory.getLogger(MetaData.class);
+  transient private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(MetaData.class);
 
-  private static final long serialVersionUID = 1L;
 
   /**
    * available in the UI(s)
@@ -126,8 +126,13 @@ public class MetaData implements Serializable {
   
   Integer workingLevel = null;
   public MetaData() {
+	  // name is the name this meta class respresents
+	  // in the case of ArduinoMeta - it represents the org.myrobotlab.service.Arduino
+	  simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
+	  name = "org.myrobotlab.service." + simpleName;
   }
 
+  /*
   public MetaData(Class<?> clazz) {
     this.name = clazz.getCanonicalName();
     this.simpleName = clazz.getSimpleName();
@@ -137,6 +142,7 @@ public class MetaData implements Serializable {
     this.name = CodecUtils.makeFullTypeName(name);
     this.simpleName = name.substring(name.lastIndexOf(".") + 1);
   }
+  */
 
   public void addArtifact(String orgId, String classifierId) {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));

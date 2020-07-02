@@ -2,38 +2,31 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class GoogleCloudMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(GoogleCloudMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class GoogleCloudMeta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(GoogleCloudMeta.class);
 
-    MetaData meta = new MetaData("org.myrobotlab.service.GoogleCloud");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("google api client service");
-    meta.setAvailable(true);
-    // add dependency if necessary
-    // meta.addDependency("com.google.api-client", "google-api-client",
-    // "1.23.0");
-    meta.addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
-    meta.addCategory("cloud", "vision");
-    meta.setCloudService(true);
-    meta.setRequiresKeys(true);
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public GoogleCloudMeta() {
 
-    return meta;
-  }
+		Platform platform = Platform.getLocalInstance();
+		addDescription("google api client service");
+		setAvailable(true);
+		// add dependency if necessary
+		// addDependency("com.google.api-client", "google-api-client",
+		// "1.23.0");
+		addDependency("com.google.cloud", "google-cloud-vision", "1.14.0");
+		addCategory("cloud", "vision");
+		setCloudService(true);
+		setRequiresKeys(true);
 
-  
+	}
+
 }
-

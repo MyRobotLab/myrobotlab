@@ -2,30 +2,25 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class DatabaseConnectorMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(DatabaseConnectorMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class DatabaseConnectorMeta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(DatabaseConnectorMeta.class);
 
-    MetaData meta = new MetaData("org.myrobotlab.service.DatabaseConnector");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("This service will run a select statement against a database and return the rows as documents to be published");
-    meta.addCategory("ingest");
-    return meta;
-  }
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public DatabaseConnectorMeta() {
 
-  
+		Platform platform = Platform.getLocalInstance();
+		addDescription(
+				"This service will run a select statement against a database and return the rows as documents to be published");
+		addCategory("ingest");
+
+	}
+
 }
-

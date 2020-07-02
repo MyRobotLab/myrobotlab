@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
@@ -97,7 +97,7 @@ public class ServiceData implements Serializable {
       log.debug("querying {}", fullClassName);
       try {
 
-        AbstractMetaData serviceType = (AbstractMetaData) getMetaData(fullClassName);
+        MetaData serviceType = (MetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getName())) {
           log.error("Class name {} not equal to the MetaData's name {}", fullClassName, serviceType.getName());
@@ -207,7 +207,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  static public AbstractMetaData getMetaData(String type) {
+  static public MetaData getMetaData(String type) {
     return getMetaData(null, type);
   }
 
@@ -225,7 +225,7 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  public static AbstractMetaData getMetaData(String serviceName, String type) {
+  public static MetaData getMetaData(String serviceName, String type) {
     try {
 
       // test for overrides from name - name can override type
@@ -240,11 +240,8 @@ public class ServiceData implements Serializable {
 
       // RETRO-GRADED for "nice" sized pr :(
       Class<?> c = Class.forName(type);
-      // Constructor<?> mc = c.getConstructor();
-      Method method = c.getMethod("getMetaData");
-      MetaData metaData = (MetaData) method.invoke(null); // mc.newInstance((Object[]) null);
-      // MetaData metaData = meta.getMetaData();
-      
+      Constructor<?> mc = c.getConstructor();
+      MetaData metaData = (MetaData)mc.newInstance();
 
       // if this is an instance description of the meta data
       // there is the possibility of overrides
@@ -277,7 +274,7 @@ public class ServiceData implements Serializable {
         }
       }
 
-      return MetaData.toMetaData(metaData);
+      return metaData;
 
     } catch (Exception e) {
       log.error("getMetaData threw {}.getMetaData() does not exist", type, e);
@@ -451,7 +448,7 @@ public class ServiceData implements Serializable {
     Plan root = new Plan();
     
     // get the root meta data
-    AbstractMetaData temp = getMetaData(serviceName, serviceType);
+    MetaData temp = getMetaData(serviceName, serviceType);
     if (temp != null) {
       root.put(serviceName, serviceType);
     }
@@ -477,7 +474,7 @@ public class ServiceData implements Serializable {
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
     // FIXME figure out if overrides can happen here !?!?!?
   
-    AbstractMetaData branch = getMetaData(sr.actualName, sr.type);
+    MetaData branch = getMetaData(sr.actualName, sr.type);
     //root.getPeers().putAll(branch.getPeers());
     root.put(sr.actualName, sr.type);
     for (ServiceReservation peer : branch.getPeers().values()) {      

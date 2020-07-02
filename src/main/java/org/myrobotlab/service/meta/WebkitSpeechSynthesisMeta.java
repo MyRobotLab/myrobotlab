@@ -1,35 +1,26 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
-import org.myrobotlab.service.meta.abstracts.Meta;
-import org.myrobotlab.service.meta.abstracts.MetaData;
+import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
-public class WebkitSpeechSynthesisMeta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(WebkitSpeechSynthesisMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(WebkitSpeechSynthesisMeta.class);
 
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public WebkitSpeechSynthesisMeta() {
 
-    MetaData meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.WebkitSpeechSynthesis");
+		addDescription("Web speech api using Chrome or Firefox speech synthesis");
+		setAvailable(true); // false if you do not want it viewable in a
+		// gui
+		// add dependency if necessary
+		addCategory("speech", "sound");
 
-    meta.addDescription("Web speech api using Chrome or Firefox speech synthesis");
-    meta.setAvailable(true); // false if you do not want it viewable in a
-    // gui
-    // add dependency if necessary
-    meta.addCategory("speech", "sound");
-    return meta;
-  }
-  
-  
+	}
+
 }
-

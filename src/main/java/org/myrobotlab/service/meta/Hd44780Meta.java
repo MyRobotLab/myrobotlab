@@ -2,31 +2,24 @@ package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.meta.abstracts.Meta;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Hd44780Meta  extends Meta {
-  public final static Logger log = LoggerFactory.getLogger(Hd44780Meta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
-  public MetaData getMetaData() {
+public class Hd44780Meta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Hd44780Meta.class);
 
-    MetaData meta = new MetaData("org.myrobotlab.service.Hd44780");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("I2C LCD Display driver");
-    meta.addCategory("i2c", "display");
-    return meta;
-  }
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public Hd44780Meta() {
 
-  
-  
+		Platform platform = Platform.getLocalInstance();
+		addDescription("I2C LCD Display driver");
+		addCategory("i2c", "display");
+
+	}
+
 }
-
