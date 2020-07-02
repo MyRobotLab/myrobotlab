@@ -1,51 +1,49 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class WikiDataFetcherMeta {
-  public final static Logger log = LoggerFactory.getLogger(WikiDataFetcherMeta.class);
+public class WikiDataFetcherMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(WikiDataFetcherMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public WikiDataFetcherMeta() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.WikiDataFetcher");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("This service grab data from wikidata website");
-    meta.addCategory("ai");
-    meta.setSponsor("beetlejuice");
-    meta.addDependency("org.wikidata.wdtk", "wdtk-client", "0.8.0");
-    meta.exclude("org.slf4j", "slf4j-log4j12");
+   addDescription("This service grab data from wikidata website");
+   addCategory("ai");
+   setSponsor("beetlejuice");
+   addDependency("org.wikidata.wdtk", "wdtk-client", "0.8.0");
+   exclude("org.slf4j", "slf4j-log4j12");
     // force using httpClient service httpcomponents version
-    meta.exclude("org.apache.httpcomponents", "httpcore");
-    meta.exclude("org.apache.httpcomponents", "httpclient");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
+   exclude("org.apache.httpcomponents", "httpcore");
+   exclude("org.apache.httpcomponents", "httpclient");
+   addPeer("httpClient", "HttpClient", "httpClient");
     // force using same jackson version as polly
     /*
-    meta.exclude("com.fasterxml.jackson.core", "jackson-core");
-    meta.exclude("com.fasterxml.jackson.core", "jackson-databind");
-    meta.exclude("com.fasterxml.jackson.core", "jackson-annotations");
+   exclude("com.fasterxml.jackson.core", "jackson-core");
+   exclude("com.fasterxml.jackson.core", "jackson-databind");
+   exclude("com.fasterxml.jackson.core", "jackson-annotations");
     */
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.1");
-    meta.addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
+   addDependency("com.fasterxml.jackson.core", "jackson-core", "2.10.1");
+   addDependency("com.fasterxml.jackson.core", "jackson-databind", "2.10.1");
+   addDependency("com.fasterxml.jackson.core", "jackson-annotations", "2.10.1");
     /*
-     * meta.addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
-     * meta.addDependency("org.apache.commons.httpclient", "4.5.2");
-     * meta.addDependency("org.apache.commons.commons-lang3", "3.3.2");
-     * meta.addDependency("com.fasterxml.jackson.core", "2.5.0");
+     *addDependency("org.wikidata.wdtk", "0.8.0-SNAPSHOT");
+     *addDependency("org.apache.commons.httpclient", "4.5.2");
+     *addDependency("org.apache.commons.commons-lang3", "3.3.2");
+     *addDependency("com.fasterxml.jackson.core", "2.5.0");
      */
-    meta.setCloudService(true);
-    return meta;
+   setCloudService(true);
+    
   }
   
   

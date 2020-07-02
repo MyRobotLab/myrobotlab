@@ -14,7 +14,6 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -26,7 +25,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;

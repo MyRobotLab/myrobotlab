@@ -1,17 +1,15 @@
 package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import static org.bytedeco.opencv.global.opencv_imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
-import static org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY;
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGB2GRAY;
-import static org.bytedeco.opencv.global.opencv_dnn.NMSBoxes;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNet;
+import static org.bytedeco.opencv.global.opencv_imgproc.ADAPTIVE_THRESH_GAUSSIAN_C;
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_RGB2GRAY;
+import static org.bytedeco.opencv.global.opencv_imgproc.THRESH_BINARY;
+import static org.bytedeco.opencv.global.opencv_imgproc.adaptiveThreshold;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvtColor;
-import static org.bytedeco.opencv.global.opencv_imgproc.getPerspectiveTransform;
-import static org.bytedeco.opencv.global.opencv_imgproc.warpPerspective;
-import static org.bytedeco.opencv.global.opencv_imgproc.adaptiveThreshold;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -19,15 +17,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
+
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Point2f;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.RotatedRect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;

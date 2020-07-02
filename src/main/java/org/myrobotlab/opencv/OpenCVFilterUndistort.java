@@ -1,22 +1,15 @@
 package org.myrobotlab.opencv;
 
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.bytedeco.javacpp.indexer.Indexer;
 import static org.bytedeco.opencv.global.opencv_calib3d.undistort;
+import static org.bytedeco.opencv.global.opencv_core.CV_32FC1;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import javax.swing.WindowConstants;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_32FC1;
-import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
+import org.bytedeco.javacpp.indexer.Indexer;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 
 public class OpenCVFilterUndistort extends OpenCVFilter {
 

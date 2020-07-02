@@ -1,31 +1,25 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class Esp8266Meta {
-  public final static Logger log = LoggerFactory.getLogger(Esp8266Meta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+public class Esp8266Meta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(Esp8266Meta.class);
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Esp8266");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("This connector will scan all the files in a directory and production documents");
-    meta.addCategory("ingest");
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public Esp8266Meta() {
 
-    return meta;
-  }
+		Platform platform = Platform.getLocalInstance();
+		addDescription("This connector will scan all the files in a directory and production documents");
+		addCategory("ingest");
 
-  
+	}
+
 }
-

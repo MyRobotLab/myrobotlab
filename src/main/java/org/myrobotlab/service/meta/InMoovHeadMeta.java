@@ -1,37 +1,35 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoovHeadMeta {
-  public final static Logger log = LoggerFactory.getLogger(InMoovHeadMeta.class);
+public class InMoovHeadMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(InMoovHeadMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public InMoovHeadMeta() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoovHead");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("InMoov Head Service");
-    meta.addCategory("robot");
+   addDescription("InMoov Head Service");
+   addCategory("robot");
 
-    meta.addPeer("jaw", "Servo", "Jaw servo");
-    meta.addPeer("eyeX", "Servo", "Eyes pan servo");
-    meta.addPeer("eyeY", "Servo", "Eyes tilt servo");
-    meta.addPeer("rothead", "Servo", "Head pan servo");
-    meta.addPeer("neck", "Servo", "Head tilt servo");
-    meta.addPeer("rollNeck", "Servo", "rollNeck Mod servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+   addPeer("jaw", "Servo", "Jaw servo");
+   addPeer("eyeX", "Servo", "Eyes pan servo");
+   addPeer("eyeY", "Servo", "Eyes tilt servo");
+   addPeer("rothead", "Servo", "Head pan servo");
+   addPeer("neck", "Servo", "Head tilt servo");
+   addPeer("rollNeck", "Servo", "rollNeck Mod servo");
+   addPeer("arduino", "Arduino", "Arduino controller for this arm");
 
-    return meta;
+    
   }
   
 }

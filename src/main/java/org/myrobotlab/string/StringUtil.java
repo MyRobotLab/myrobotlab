@@ -95,7 +95,7 @@ public class StringUtil {
         continue;
       }
       String serviceType = f.getName().substring(0, f.getName().length() - 5);
-      String out = template.replace("{ServiceType}", serviceType);
+      String out = template.replace("{MetaData}", serviceType);
       FileOutputStream fos = new FileOutputStream("src/main/java/org/myrobotlab/service/meta/" + serviceType + "Meta.java");
       fos.write(out.getBytes());
       fos.close();

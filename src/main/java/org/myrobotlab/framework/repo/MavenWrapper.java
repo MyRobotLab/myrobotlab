@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 // FIXME - 2 layer abstraction - because to generate build files and 
 // other critical methods - they do not require actual "ivy" components
@@ -133,7 +133,7 @@ public class MavenWrapper extends Repo implements Serializable {
 
     Set<String> listedDeps = new HashSet<String>();
     for (String serviceType : serviceTypes) {
-      ServiceType service = sd.getServiceType(serviceType);
+      MetaData service = sd.getServiceType(serviceType);
 
       // FIXME - getUnFufilledDependencies ???
       List<ServiceDependency> dependencies = service.getDependencies();

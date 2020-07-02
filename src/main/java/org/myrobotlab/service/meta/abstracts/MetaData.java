@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.repo.ServiceArtifact;
-import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;
@@ -28,16 +26,16 @@ import org.slf4j.Logger;
  * to override actual name and type information.
  * 
  */
-public class AbstractMetaData implements Serializable {
+public class MetaData implements Serializable {
 
-  transient public final static Logger log = LoggerFactory.getLogger(AbstractMetaData.class);
+  transient private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(MetaData.class);
 
-  private static final long serialVersionUID = 1L;
 
   /**
    * available in the UI(s)
    */
-  protected Boolean available = true; // why not ? :P
+  Boolean available = true; // why not ? :P
   
   /**
    * Set of categories this service belongs to
@@ -52,19 +50,19 @@ public class AbstractMetaData implements Serializable {
   /**
    * description of what the service does
    */
-  protected String description = null;
+  String description = null;
   
   /**
    * if true the dependency of this service are packaged in the build
    * of myrobotlab.jar
    */
-  protected Boolean includeServiceInOneJar = false;
+  Boolean includeServiceInOneJar = false;
   
   /**
    * service requires an internet connection because some or all of its
    * functionality 
    */
-  protected Boolean isCloudService = false;
+  Boolean isCloudService = false;
   
   /**
    * used for appending ServiceExcludes to the ServiceDependencies
@@ -74,17 +72,17 @@ public class AbstractMetaData implements Serializable {
   /**
    * license of the service
    */
-  protected String license;// = "Apache";
+  String license;// = "Apache";
   
   /**
    * relevant site to the Service
    */
-  protected String link;
+  String link;
   
   /**
    * full type name of the service
    */
-  protected String name;
+  String name;
   
   /**
    * key'd structure of other services that are necessary for the correct function of this service
@@ -95,113 +93,54 @@ public class AbstractMetaData implements Serializable {
   /**
    * true if the service requires a key e.g. Polly
    */
-  protected Boolean requiresKeys = false;
+  Boolean requiresKeys = false;
   
   /**
    * instance name of service this MetaData belongs to
    * e.g. "i01"
    */
-  protected String serviceName;
+  String serviceName;
 
   /**
    * simple class name of this service
    */
-  protected String simpleName;
+  String simpleName;
 
   /**
    * the single sponsor of this service
    */
-  protected String sponsor;
+  String sponsor;
 
   /**
    * service life-cycle state 
    * inactive | created | registered | running | stopped | released
    */
-  protected String state = null;
+  String state = null;
 
   /**
    * what is left TODO on this service for it to be ready for release
    */
-  protected String todo;
+  String todo;
   
-  protected Integer workingLevel = null;
-  
-  public Boolean getAvailable() {
-    return available;
+  Integer workingLevel = null;
+  public MetaData() {
+	  // name is the name this meta class respresents
+	  // in the case of ArduinoMeta - it represents the org.myrobotlab.service.Arduino
+	  simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
+	  name = "org.myrobotlab.service." + simpleName;
   }
 
-  public void setAvailable(Boolean available) {
-    this.available = available;
-  }
-
-  public Boolean getIncludeServiceInOneJar() {
-    return includeServiceInOneJar;
-  }
-
-  public void setIncludeServiceInOneJar(Boolean includeServiceInOneJar) {
-    this.includeServiceInOneJar = includeServiceInOneJar;
-  }
-
-  public Boolean getIsCloudService() {
-    return isCloudService;
-  }
-
-  public void setIsCloudService(Boolean isCloudService) {
-    this.isCloudService = isCloudService;
-  }
-
-  public Boolean getRequiresKeys() {
-    return requiresKeys;
-  }
-
-  public void setRequiresKeys(Boolean requiresKeys) {
-    this.requiresKeys = requiresKeys;
-  }
-
-  public Integer getWorkingLevel() {
-    return workingLevel;
-  }
-
-  public void setWorkingLevel(Integer workingLevel) {
-    this.workingLevel = workingLevel;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public void setLicense(String license) {
-    this.license = license;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setSimpleName(String simpleName) {
-    this.simpleName = simpleName;
-  }
-
-  public void setState(String state) {
-    this.state = state;
-  }
-
-  public void setTodo(String todo) {
-    this.todo = todo;
-  }
-
-  public AbstractMetaData() {
-  }
-
-  public AbstractMetaData(Class<?> clazz) {
+  /*
+  public MetaData(Class<?> clazz) {
     this.name = clazz.getCanonicalName();
     this.simpleName = clazz.getSimpleName();
   }
 
-  public AbstractMetaData(String name) {
+  public MetaData(String name) {
     this.name = CodecUtils.makeFullTypeName(name);
     this.simpleName = name.substring(name.lastIndexOf(".") + 1);
   }
+  */
 
   public void addArtifact(String orgId, String classifierId) {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
@@ -389,30 +328,6 @@ public class AbstractMetaData implements Serializable {
       }
     }
     return null;
-  }
-
-  public Boolean isCloudService() {
-    return isCloudService;
-  }
-
-  public String getSponsor() {
-    return sponsor;
-  }
-
-  public ServiceDependency getLastDependency() {
-    return lastDependency;
-  }
-
-  public String getState() {
-    return state;
-  }
-
-  public String getTodo() {    
-    return todo;
-  }
-
-  public void setLastDependency(ServiceDependency lastDependency) {
-    this.lastDependency = lastDependency;
   }
 
 }

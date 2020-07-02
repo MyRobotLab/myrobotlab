@@ -1,8 +1,9 @@
 package org.myrobotlab.service;
 
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2RGB;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,7 +79,6 @@ import org.myrobotlab.deeplearning4j.SolrImageRecordReader;
 import org.myrobotlab.deeplearning4j.SolrInputSplit;
 import org.myrobotlab.deeplearning4j.SolrLabelGenerator;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

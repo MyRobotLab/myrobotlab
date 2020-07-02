@@ -15,7 +15,6 @@ import org.alicebot.ab.Bot;
 import org.alicebot.ab.Category;
 import org.alicebot.ab.MagicBooleans;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;

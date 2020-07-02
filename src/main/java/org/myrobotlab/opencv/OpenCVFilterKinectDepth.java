@@ -34,10 +34,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
 import org.bytedeco.javacv.Parallel;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point;
 import org.slf4j.Logger;

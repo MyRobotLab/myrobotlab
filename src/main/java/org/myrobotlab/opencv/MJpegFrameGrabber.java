@@ -6,11 +6,13 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
+
 import net.sf.jipcam.axis.MjpegFrame;
 import net.sf.jipcam.axis.MjpegInputStream;
 

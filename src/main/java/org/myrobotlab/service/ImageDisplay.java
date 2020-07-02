@@ -38,7 +38,6 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 // import org.myrobotlab.image.DisplayedImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

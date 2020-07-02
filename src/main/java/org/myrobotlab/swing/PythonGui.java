@@ -53,7 +53,6 @@ import javax.swing.text.DefaultCaret;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.rsyntaxtextarea.TextEditorPane;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.net.BareBonesBrowserLaunch;

@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.data.JoystickData;
 import org.myrobotlab.service.interfaces.JoystickListener;
 import org.myrobotlab.service.interfaces.KeyListener;

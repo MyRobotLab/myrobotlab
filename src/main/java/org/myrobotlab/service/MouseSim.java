@@ -1,12 +1,10 @@
 package org.myrobotlab.service;
 
-import java.awt.AWTException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;

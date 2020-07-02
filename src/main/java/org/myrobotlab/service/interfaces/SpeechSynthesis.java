@@ -5,6 +5,7 @@ import java.util.List;
 import org.myrobotlab.framework.interfaces.NameProvider;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.Voice;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
 import org.myrobotlab.service.data.AudioData;
 import org.slf4j.Logger;
 
@@ -72,13 +73,6 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
   public Voice getVoice();
 
   /**
-   * get voice effects on a remote server
-   * 
-   * @return list
-   */
-  // public List<String> getVoiceEffectFiles();
-
-  /**
    * start callback for speech synth. (Invoked when speaking starts)
    * 
    * @param utterance
@@ -114,16 +108,16 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    */
   public void setMute(boolean mute);
 
-  // FIXME - not needed in interface
-  // public String getLocalFileName(SpeechSynthesis provider, String toSpeak)
-  // throws UnsupportedEncodingException;
-
-  // FIXME addSpeechRecognizer
+  @Deprecated /* this should be type specific named - use attachSpeechRecognizer*/
   public void addEar(SpeechRecognizer ear);
 
   // FIXME - is this in the wrong place ??? - this seems like bot logic ...
   public void onRequestConfirmation(String text);
 
+  /**
+   * get a list of voices this speech synthesis supports
+   * @return
+   */
   public List<Voice> getVoices();
   
   /**
@@ -140,5 +134,22 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * @param ear
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
+    
+  /**
+   * Speech control controls volume, setting the voice, and of course "speak"
+   * @param control
+   */
+  public void attachSpeechControl(SpeechSynthesisControl control);
 
+  /**
+   * replace one word with another - instead of "biscuit" say "cookie"
+   * @param filter
+   */
+  public void replaceWord(String key, String replacement);
+  
+  /**
+   * replace one word with another - instead of "biscuit" say "cookie"
+   * @param filter
+   */
+  public void replaceWord(WordFilter filter);  
 }

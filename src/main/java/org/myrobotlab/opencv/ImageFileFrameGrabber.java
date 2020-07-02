@@ -4,12 +4,11 @@ import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

@@ -1,7 +1,6 @@
 package org.myrobotlab.service.data;
 
 import java.util.Set;
-
 import java.util.TreeSet;
 
 /**

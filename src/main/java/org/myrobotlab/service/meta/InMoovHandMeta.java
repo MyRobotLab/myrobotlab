@@ -1,41 +1,39 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class InMoovHandMeta {
-  public final static Logger log = LoggerFactory.getLogger(InMoovHandMeta.class);
+public class InMoovHandMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(InMoovHandMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public InMoovHandMeta() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.InMoovHand");
+    
     Platform platform = Platform.getLocalInstance();
     
-    meta.addDescription("an easier way to create gestures for InMoov");
-    meta.addCategory("robot");
+   addDescription("an easier way to create gestures for InMoov");
+   addCategory("robot");
 
-    meta.addPeer("thumb", "Servo", "Thumb servo");
-    meta.addPeer("index", "Servo", "Index servo");
-    meta.addPeer("majeure", "Servo", "Majeure servo");
-    meta.addPeer("ringFinger", "Servo", "RingFinger servo");
-    meta.addPeer("pinky", "Servo", "Pinky servo");
-    meta.addPeer("wrist", "Servo", "Wrist servo");
-    meta.addPeer("arduino", "Arduino", "Arduino controller for this arm");
+   addPeer("thumb", "Servo", "Thumb servo");
+   addPeer("index", "Servo", "Index servo");
+   addPeer("majeure", "Servo", "Majeure servo");
+   addPeer("ringFinger", "Servo", "RingFinger servo");
+   addPeer("pinky", "Servo", "Pinky servo");
+   addPeer("wrist", "Servo", "Wrist servo");
+   addPeer("arduino", "Arduino", "Arduino controller for this arm");
     // Currently if the LeapMotion service is loaded and the jni is not there - the whole jvm crashes :(
     // this should use pub sub and be less destructive !
-    // meta.addPeer("leap", "LeapMotion", "Leap Motion Service");
+    //addPeer("leap", "LeapMotion", "Leap Motion Service");
 
-    return meta;
+    
   }
   
 }

@@ -1,36 +1,31 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class EmojiMeta {
-  public final static Logger log = LoggerFactory.getLogger(EmojiMeta.class);
-  
-  /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
-   * 
-   */
-  static public ServiceType getMetaData() {
+public class EmojiMeta extends MetaData {
+	private static final long serialVersionUID = 1L;
+	public final static Logger log = LoggerFactory.getLogger(EmojiMeta.class);
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.Emoji");
-    Platform platform = Platform.getLocalInstance();
-    meta.addDescription("used as a general template");
+	/**
+	 * This class is contains all the meta data details of a service. It's peers,
+	 * dependencies, and all other meta data related to the service.
+	 * 
+	 */
+	public EmojiMeta() {
 
-    meta.addPeer("display", "ImageDisplay", "image display");
-    meta.addPeer("http", "HttpClient", "downloader");
-    meta.addPeer("fsm", "FiniteStateMachine", "emotional state machine");
+		Platform platform = Platform.getLocalInstance();
+		addDescription("used as a general template");
 
-    // meta.setAvailable(false);
-    meta.addCategory("general");
-    return meta;
-  }
+		addPeer("display", "ImageDisplay", "image display");
+		addPeer("http", "HttpClient", "downloader");
+		addPeer("fsm", "FiniteStateMachine", "emotional state machine");
 
-  
+		// setAvailable(false);
+		addCategory("general");
+
+	}
+
 }
-

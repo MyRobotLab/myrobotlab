@@ -1,31 +1,29 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class OpenWeatherMapMeta {
-  public final static Logger log = LoggerFactory.getLogger(OpenWeatherMapMeta.class);
+public class OpenWeatherMapMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(OpenWeatherMapMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public OpenWeatherMapMeta() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.OpenWeatherMap");
+    
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
-    meta.addCategory("weather");
-    meta.setCloudService(true);
-    meta.addDependency("org.json", "json", "20090211");
-    meta.addPeer("httpClient", "HttpClient", "httpClient");
-    return meta;
+   addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
+   addCategory("weather");
+   setCloudService(true);
+   addDependency("org.json", "json", "20090211");
+   addPeer("httpClient", "HttpClient", "httpClient");
+    
   }
   
   

@@ -29,9 +29,9 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.global.opencv_core.cvMixChannels;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvInitFont;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

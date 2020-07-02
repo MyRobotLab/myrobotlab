@@ -18,6 +18,23 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import org.ddogleg.struct.GrowQueue_I8;
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.Resolution;
+
+import com.sun.jna.NativeLibrary;
+
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
@@ -28,19 +45,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import com.sun.jna.NativeLibrary;
-import org.ddogleg.struct.GrowQueue_I8;
-import org.openkinect.freenect.Context;
-import org.openkinect.freenect.Device;
-import org.openkinect.freenect.Freenect;
-import org.openkinect.freenect.Resolution;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Displays RGB image from the kinect and then pauses after a set period of

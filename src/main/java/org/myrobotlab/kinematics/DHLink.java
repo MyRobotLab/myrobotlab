@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MathUtils;
-import org.myrobotlab.service.Servo;
 import org.slf4j.Logger;
 
 //import marytts.util.math.MathUtils;

@@ -26,51 +26,15 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_imgproc.cvFindContours;
-import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
-import static org.bytedeco.opencv.global.opencv_core.cvInRangeS;
-import static org.bytedeco.opencv.global.opencv_core.cvPoint;
-import static org.bytedeco.opencv.global.opencv_core.cvRect;
-import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
-import static org.bytedeco.opencv.global.opencv_core.cvScalar;
-import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
 import static org.bytedeco.opencv.global.opencv_core.cvSize;
-import static org.bytedeco.opencv.global.opencv_core.cvZero;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_POLY_APPROX_DP;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvApproxPoly;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvBoundingRect;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvCheckContourConvexity;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvContourPerimeter;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvPyrDown;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_core.CvContour;
-import org.bytedeco.opencv.opencv_core.CvMemStorage;
-import org.bytedeco.opencv.opencv_core.CvPoint;
-import org.bytedeco.opencv.opencv_core.CvRect;
-import org.bytedeco.opencv.opencv_core.CvScalar;
-import org.bytedeco.opencv.opencv_core.CvSeq;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_imgproc.CvFont;
-import org.myrobotlab.image.KinectImageNode;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterKinectDepthMask extends OpenCVFilter {

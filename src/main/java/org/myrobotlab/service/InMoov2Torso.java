@@ -4,16 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
-import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**

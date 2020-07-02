@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;

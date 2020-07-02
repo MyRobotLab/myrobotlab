@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.connector.ConnectorState;
-import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 import org.xml.sax.Attributes;

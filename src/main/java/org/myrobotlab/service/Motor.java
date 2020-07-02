@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;

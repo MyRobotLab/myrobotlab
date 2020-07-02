@@ -1,10 +1,10 @@
 package org.myrobotlab.service.abstracts;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class AbstractPinEncoder extends Service implements EncoderControl {
 
@@ -31,13 +31,6 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     this.controller = controller;
     controller.attach(this);
     lastUpdate = System.currentTimeMillis();
-  }
-
-  static public ServiceType getMetaData() {
-    ServiceType meta = new ServiceType(AbstractPinEncoder.class);
-    meta.addDescription("encoder which operates with a single pin");
-    meta.addCategory("encoder", "sensors");
-    return meta;
   }
 
   public String getPin() {

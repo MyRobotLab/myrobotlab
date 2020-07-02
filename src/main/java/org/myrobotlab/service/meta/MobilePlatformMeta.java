@@ -1,32 +1,30 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class MobilePlatformMeta {
-  public final static Logger log = LoggerFactory.getLogger(MobilePlatformMeta.class);
+public class MobilePlatformMeta  extends MetaData {
+  private static final long serialVersionUID = 1L;
+public final static Logger log = LoggerFactory.getLogger(MobilePlatformMeta.class);
   
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service.
+   * It's peers, dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public MobilePlatformMeta() {
 
-    ServiceType meta = new ServiceType("org.myrobotlab.service.MobilePlatform");
+    
     Platform platform = Platform.getLocalInstance();
     
-    meta.addDescription(
+   addDescription(
         "used to encapsulate many of the functions and formulas regarding 2 motor platforms encoders and other feedback mechanisms can be added to provide heading, location and other information");
-    meta.addCategory("robot", "control");
-    meta.setAvailable(false);
+   addCategory("robot", "control");
+   setAvailable(false);
 
-    return meta;
+    
   }
   
   

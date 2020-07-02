@@ -19,7 +19,6 @@ import java.util.TreeMap;
 import org.junit.Ignore;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -32,7 +31,6 @@ import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.PinDefinition;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
 import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 import org.slf4j.Logger;
 

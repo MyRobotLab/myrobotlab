@@ -25,7 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
@@ -36,6 +35,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvCanny;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawLine;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvHoughLines2;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

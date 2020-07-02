@@ -40,7 +40,6 @@ import java.util.HashMap;
 
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
-import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;

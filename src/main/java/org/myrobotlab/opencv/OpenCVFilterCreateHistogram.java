@@ -25,13 +25,13 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_imgproc.cvCalcHist;
-import static org.bytedeco.opencv.helper.opencv_imgproc.cvCreateHist;
 import static org.bytedeco.opencv.global.opencv_core.CV_HIST_ARRAY;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvSplit;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2HSV;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
+import static org.bytedeco.opencv.helper.opencv_imgproc.cvCalcHist;
+import static org.bytedeco.opencv.helper.opencv_imgproc.cvCreateHist;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
