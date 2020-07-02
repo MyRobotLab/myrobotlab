@@ -151,7 +151,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
       log.info("Testing Service: {}", service);
 
-      MetaData st = sd.getServiceType("org.myrobotlab.service." + service);
+      MetaData st = ServiceData.getMetaData("org.myrobotlab.service." + service);
       if (st == null) {
         System.out.println("NO SERVICE TYPE FOUND!"); // perhaps this should throw
         servicesNotInServiceDataJson.add(service);

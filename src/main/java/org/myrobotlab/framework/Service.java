@@ -414,7 +414,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   // ============== resources begin ======================================
 
   /**
-   * Non-static getResourceDir() will return /resource/{MetaData}
+   * Non-static getResourceDir() will return /resource/{service type name} 
+   * e.g. /resource/Arduino
    * @return
    */
   public String getResourceDir() {

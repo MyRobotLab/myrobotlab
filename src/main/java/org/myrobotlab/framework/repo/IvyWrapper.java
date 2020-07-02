@@ -193,7 +193,7 @@ public class IvyWrapper extends Repo implements Serializable {
     ret.append("  <dependencies>\n\n");
 
     for (String serviceType : serviceTypes) {
-      MetaData service = sd.getServiceType(serviceType);
+      MetaData service = ServiceData.getMetaData(serviceType);
       Set<ServiceDependency> dependencies = getUnfulfilledDependencies(serviceType);
 
       if (dependencies.size() == 0) {

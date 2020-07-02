@@ -291,7 +291,7 @@ public abstract class Repo {
       }
      
 
-      MetaData st = sd.getServiceType(type);
+      MetaData st = ServiceData.getMetaData(type);
 
       // look through our repo and resolve
       // if we dont have it - we need it
