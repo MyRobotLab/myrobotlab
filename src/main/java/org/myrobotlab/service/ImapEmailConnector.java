@@ -26,7 +26,6 @@ import javax.mail.internet.MimeMultipart;
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.connector.AbstractConnector;
 import org.myrobotlab.document.transformer.ConnectorConfig;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 import com.sun.mail.imap.IMAPFolder;
 

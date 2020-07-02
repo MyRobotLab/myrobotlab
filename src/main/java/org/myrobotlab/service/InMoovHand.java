@@ -1,8 +1,5 @@
 package org.myrobotlab.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 import org.myrobotlab.framework.Service;
@@ -14,7 +11,6 @@ import org.myrobotlab.service.data.LeapHand;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.PinArrayListener;
-import org.myrobotlab.service.interfaces.PinArrayPublisher;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.myrobotlab.service.interfaces.ServoController;

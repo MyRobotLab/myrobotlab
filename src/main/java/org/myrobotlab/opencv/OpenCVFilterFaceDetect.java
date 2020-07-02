@@ -44,13 +44,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.io.FileIO;
 // import org.bytedeco.opencv.opencv_objdetect;
 // import org.bytedeco.opencv.opencv_objdetect.CvHaarClassifierCascade;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterFaceDetect extends OpenCVFilter {

@@ -18,13 +18,13 @@ import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glCullFace;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glScissor;
 import static org.lwjgl.opengl.GL11.glViewport;
-import static org.lwjgl.opengl.GL11.glDeleteTextures;
 import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
@@ -35,7 +35,9 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
+
 import java.io.File;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -62,6 +64,7 @@ import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
 import org.saintandreas.resources.Resource;
 import org.slf4j.Logger;
+
 import com.oculusvr.capi.EyeRenderDesc;
 import com.oculusvr.capi.FovPort;
 import com.oculusvr.capi.Hmd;

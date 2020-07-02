@@ -18,17 +18,22 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import org.ddogleg.struct.FastQueue;
+import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.BoofCv;
+
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.misc.ImageStatistics;
-import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
+import boofcv.io.calibration.CalibrationIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
-import boofcv.misc.BoofMiscOps;
-import boofcv.openkinect.StreamOpenKinectRgbDepth;
-import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.FastQueueArray_I32;
 import boofcv.struct.calib.VisualDepthParameters;
 import boofcv.struct.image.GrayU16;
@@ -37,28 +42,6 @@ import boofcv.struct.image.Planar;
 import boofcv.visualize.PointCloudViewer;
 import boofcv.visualize.VisualizeData;
 import georegression.struct.point.Point3D_F64;
-
-import com.sun.jna.NativeLibrary;
-
-import org.ddogleg.struct.FastQueue;
-import org.ddogleg.struct.GrowQueue_I8;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
-import org.myrobotlab.service.BoofCv;
-import org.openkinect.freenect.Context;
-import org.openkinect.freenect.Device;
-import org.openkinect.freenect.Freenect;
-import org.openkinect.freenect.Resolution;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import boofcv.io.UtilIO;
-import boofcv.io.calibration.CalibrationIO;
 
 /**
  * Displays RGB image from the kinect and then pauses after a set period of time.  At which point the user can press

@@ -1,8 +1,6 @@
 package org.myrobotlab.service;
 
 import org.jnativehook.GlobalScreen;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;

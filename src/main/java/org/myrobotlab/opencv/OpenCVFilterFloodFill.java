@@ -25,10 +25,10 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_core.cvScalar;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFloodFill;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

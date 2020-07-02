@@ -3,7 +3,6 @@ package org.myrobotlab.service.meta;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {

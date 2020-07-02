@@ -32,7 +32,6 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.system.SystemInfo;
 import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
 

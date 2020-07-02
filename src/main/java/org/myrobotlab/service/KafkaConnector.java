@@ -7,7 +7,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * A kafka connector that can subscribe to a string/string kafka stopic and

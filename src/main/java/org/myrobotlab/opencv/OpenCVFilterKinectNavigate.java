@@ -25,24 +25,7 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_features2d.*;
-import static org.bytedeco.opencv.global.opencv_flann.*;
-import static org.bytedeco.opencv.global.opencv_highgui.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
-import static org.bytedeco.opencv.global.opencv_ml.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
-import static org.bytedeco.opencv.global.opencv_photo.*;
-import static org.bytedeco.opencv.global.opencv_shape.*;
-import static org.bytedeco.opencv.global.opencv_stitching.*;
-import static org.bytedeco.opencv.global.opencv_video.*;
-import static org.bytedeco.opencv.global.opencv_videostab.*;
 import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
-import static org.bytedeco.opencv.global.opencv_core.cvSize;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvPyrDown;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -51,7 +34,6 @@ import java.nio.ByteBuffer;
 
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterKinectNavigate extends OpenCVFilter {

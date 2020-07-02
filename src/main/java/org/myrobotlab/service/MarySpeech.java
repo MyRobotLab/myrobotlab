@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Map;
 import java.util.Set;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -17,8 +16,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
-import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 

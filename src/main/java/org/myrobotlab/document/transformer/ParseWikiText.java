@@ -6,17 +6,12 @@ import org.myrobotlab.document.Document;
 import org.myrobotlab.document.transformer.wiki.TextConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
-import org.sweble.wikitext.engine.EngineException;
 import org.sweble.wikitext.engine.PageId;
 import org.sweble.wikitext.engine.PageTitle;
 import org.sweble.wikitext.engine.WtEngineImpl;
 import org.sweble.wikitext.engine.config.WikiConfig;
 import org.sweble.wikitext.engine.nodes.EngProcessedPage;
 import org.sweble.wikitext.engine.utils.DefaultConfigEnWp;
-import org.sweble.wikitext.parser.parser.LinkTargetException;
-import org.sweble.wikitext.parser.parser.RatsWikitextParser;
-
-import de.fau.cs.osr.ptk.common.Warning;
 
 public class ParseWikiText extends AbstractStage {
 

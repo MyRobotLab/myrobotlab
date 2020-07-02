@@ -25,8 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
-import static org.bytedeco.opencv.helper.opencv_imgproc.cvFindContours;
 import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
@@ -44,6 +42,8 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvContourPerimeter;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFloodFill;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
+import static org.bytedeco.opencv.helper.opencv_imgproc.cvFindContours;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

@@ -60,7 +60,6 @@ import java.util.zip.ZipException;
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

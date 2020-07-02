@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Arduino;

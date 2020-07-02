@@ -25,15 +25,12 @@
 
 package org.myrobotlab.swing;
 
-import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.MarySpeech;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.swing.abstracts.AbstractSpeechSynthesisGui;
 import org.slf4j.Logger;

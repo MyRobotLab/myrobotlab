@@ -29,16 +29,16 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
 import static org.bytedeco.opencv.global.opencv_imgproc.resize;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
-
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 
 
 public class OpenCVFilterResize extends OpenCVFilter {

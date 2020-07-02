@@ -1,7 +1,5 @@
 package org.myrobotlab.service.interfaces;
 
-import org.myrobotlab.service.interfaces.ServoEvent.ServoStatus;
-
 public interface ServoControlPublisher {
   /**
    * publishing servo's move

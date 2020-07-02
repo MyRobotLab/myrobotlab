@@ -1,7 +1,6 @@
 package org.myrobotlab.logging;
 
 import org.myrobotlab.framework.Instantiator;
-import org.slf4j.Logger;
 
 public class LoggingFactory {
   

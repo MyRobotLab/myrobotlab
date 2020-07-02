@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.arduino.virtual.MrlCommIno;

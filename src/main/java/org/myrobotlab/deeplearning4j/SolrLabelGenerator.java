@@ -1,6 +1,7 @@
 package org.myrobotlab.deeplearning4j;
 
 import java.net.URI;
+
 import org.datavec.api.io.labels.ParentPathLabelGenerator;
 import org.datavec.api.writable.Text;
 import org.datavec.api.writable.Writable;

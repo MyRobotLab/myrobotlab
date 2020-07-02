@@ -251,6 +251,8 @@ public class Python extends Service {
 
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
+    // I love Platform !
+    Platform p = Platform.getLocalInstance();
     List<MetaData> sdt = sd.getAvailableServiceTypes();
     for (int i = 0; i < sdt.size(); ++i) {
       MetaData st = sdt.get(i);

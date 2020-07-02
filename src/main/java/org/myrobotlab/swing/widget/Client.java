@@ -37,9 +37,9 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
-import org.myrobotlab.service.Runtime;
 public class Client extends JApplet {
 
   public final static Logger log = LoggerFactory.getLogger(Client.class);

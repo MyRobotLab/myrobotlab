@@ -18,6 +18,11 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import org.ddogleg.struct.GrowQueue_I8;
+
 import boofcv.gui.image.ImageGridPanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
@@ -28,10 +33,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import org.ddogleg.struct.GrowQueue_I8;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 /**
  * @author Peter Abeles

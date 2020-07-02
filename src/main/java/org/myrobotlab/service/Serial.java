@@ -38,8 +38,6 @@ import org.myrobotlab.service.interfaces.QueueSource;
 import org.myrobotlab.service.interfaces.RecordControl;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
-import org.myrobotlab.service.meta.abstracts.MetaData;
-import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**

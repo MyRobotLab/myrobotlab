@@ -2,24 +2,14 @@ package org.myrobotlab.service;
 
 import static org.bytedeco.leptonica.global.lept.pixDestroy;
 import static org.bytedeco.leptonica.global.lept.pixRead;
-import static org.bytedeco.leptonica.global.lept.pixReadMem;
+
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.UUID;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.metadata.IIOInvalidTreeException;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.metadata.IIOMetadataNode;
-import javax.imageio.stream.ImageOutputStream;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.leptonica.PIX;

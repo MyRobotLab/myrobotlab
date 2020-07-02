@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.repo.ServiceArtifact;
-import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.framework.repo.ServiceDependency;
 import org.myrobotlab.framework.repo.ServiceExclude;
 import org.myrobotlab.logging.LoggerFactory;

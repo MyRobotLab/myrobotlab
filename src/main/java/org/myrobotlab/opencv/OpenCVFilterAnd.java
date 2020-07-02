@@ -30,7 +30,7 @@ import static org.bytedeco.opencv.global.opencv_core.cvRect;
 import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -38,7 +38,6 @@ import java.awt.image.BufferedImage;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 public class OpenCVFilterAnd extends OpenCVFilter {

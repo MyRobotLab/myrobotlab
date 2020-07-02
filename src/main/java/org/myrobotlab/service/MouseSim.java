@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import java.awt.AWTException;
 import java.awt.GraphicsEnvironment;
 import java.awt.Robot;
 import java.awt.event.InputEvent;

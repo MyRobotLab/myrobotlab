@@ -1,7 +1,6 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import org.myrobotlab.framework.interfaces.Invoker;
 import org.myrobotlab.io.StreamGobbler;

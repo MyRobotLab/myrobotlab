@@ -18,6 +18,20 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.image.BufferedImage;
+import java.nio.ByteBuffer;
+
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.DepthFormat;
+import org.openkinect.freenect.DepthHandler;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.FrameMode;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.VideoFormat;
+import org.openkinect.freenect.VideoHandler;
+
+import com.sun.jna.NativeLibrary;
+
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.gui.image.VisualizeImageData;
@@ -26,11 +40,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import com.sun.jna.NativeLibrary;
-import org.openkinect.freenect.*;
-
-import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
 
 /**
  * Example demonstrating how to process and display data from the Kinect.

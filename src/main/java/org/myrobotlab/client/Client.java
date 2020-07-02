@@ -18,7 +18,6 @@ import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.Socket;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.Clock;
 import org.slf4j.Logger;
 
 import com.ning.http.client.AsyncHttpClient;

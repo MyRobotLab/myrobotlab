@@ -13,7 +13,6 @@ import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.document.xml.MRLChunkingXMLHandler;
 import org.myrobotlab.document.xml.RecordingInputStream;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;

@@ -1,8 +1,9 @@
 package org.myrobotlab.service;
 
+import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2RGB;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvResize;
-import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
