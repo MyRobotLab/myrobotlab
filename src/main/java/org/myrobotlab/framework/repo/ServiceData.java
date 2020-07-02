@@ -354,14 +354,6 @@ public class ServiceData implements Serializable {
     return cat;
   }
 
-  
-  public MetaData getServiceType(String fullTypeName) {
-    if (!fullTypeName.contains(".")) {
-      fullTypeName = String.format("org.myrobotlab.service.%s", fullTypeName);
-    }
-    return serviceTypes.get(fullTypeName);
-  }
-
   public HashSet<ServiceDependency> getServiceTypeDependencyKeys() {
     HashSet<ServiceDependency> uniqueKeys = new HashSet<ServiceDependency>();
     for (Map.Entry<String, MetaData> o : serviceTypes.entrySet()) {

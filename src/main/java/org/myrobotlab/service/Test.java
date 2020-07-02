@@ -351,7 +351,7 @@ public class Test extends Service implements StatusListener {
          * t.append("\n"); t.append("# start the service\n");
          */
 
-        MetaData st = ServiceData.getLocalInstance().getServiceType(String.format("org.myrobotlab.service.%s", service));
+        MetaData st = ServiceData.getMetaData(String.format("org.myrobotlab.service.%s", service));
 
         t.append("#########################################\n");
         t.append(String.format("# %s.py\n", service));

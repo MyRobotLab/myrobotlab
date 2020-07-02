@@ -133,7 +133,7 @@ public class MavenWrapper extends Repo implements Serializable {
 
     Set<String> listedDeps = new HashSet<String>();
     for (String serviceType : serviceTypes) {
-      MetaData service = sd.getServiceType(serviceType);
+      MetaData service = ServiceData.getMetaData(serviceType);
 
       // FIXME - getUnFufilledDependencies ???
       List<ServiceDependency> dependencies = service.getDependencies();
