@@ -6,26 +6,26 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class AdafruitIna219Meta extends MetaData {
-	private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(AdafruitIna219Meta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(AdafruitIna219Meta.class);
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return MetaData - returns all the data
-	 * 
-	 */
-	public AdafruitIna219Meta() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return MetaData - returns all the data
+   * 
+   */
+  public AdafruitIna219Meta() {
 
-		Platform platform = Platform.getLocalInstance();
+    Platform platform = Platform.getLocalInstance();
 
-		addDescription("measures voltage and current of a circuit");
-		setLicenseApache();
-		addCategory("shield", "sensors", "i2c");
-		setSponsor("Mats");
+    addDescription("measures voltage and current of a circuit");
+    setLicenseApache();
+    addCategory("shield", "sensors", "i2c");
+    setSponsor("Mats");
 
-	}
+  }
 
 }

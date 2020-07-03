@@ -6,21 +6,21 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class GoogleSearchMeta extends MetaData {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(GoogleSearchMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(GoogleSearchMeta.class);
 
-	/**
-	 * This class is contains all the meta data details of a service. It's peers,
-	 * dependencies, and all other meta data related to the service.
-	 * 
-	 */
-	public GoogleSearchMeta() {
+  /**
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
+   * 
+   */
+  public GoogleSearchMeta() {
 
-		Platform platform = Platform.getLocalInstance();
-		addDescription("used as a general google search");
-		addDependency("org.jsoup", "jsoup", "1.8.3");
-		addCategory("search");
+    Platform platform = Platform.getLocalInstance();
+    addDescription("used as a general google search");
+    addDependency("org.jsoup", "jsoup", "1.8.3");
+    addCategory("search");
 
-	}
+  }
 
 }

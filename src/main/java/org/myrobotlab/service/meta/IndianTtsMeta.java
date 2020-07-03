@@ -6,27 +6,27 @@ import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
 public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(IndianTtsMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(IndianTtsMeta.class);
 
-	/**
-	 * This class is contains all the meta data details of a service. It's peers,
-	 * dependencies, and all other meta data related to the service.
-	 * 
-	 */
-	public IndianTtsMeta() {
+  /**
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
+   * 
+   */
+  public IndianTtsMeta() {
 
-		Platform platform = Platform.getLocalInstance();
+    Platform platform = Platform.getLocalInstance();
 
-		addDescription("Hindi text to speech support - requires keys");
-		setCloudService(true);
-		addCategory("speech", "cloud");
-		setSponsor("moz4r");
-		addCategory("speech", "sound");
-		addPeer("httpClient", "HttpClient", "httpClient");
+    addDescription("Hindi text to speech support - requires keys");
+    setCloudService(true);
+    addCategory("speech", "cloud");
+    setSponsor("moz4r");
+    addCategory("speech", "sound");
+    addPeer("httpClient", "HttpClient", "httpClient");
 
-		setRequiresKeys(true);
+    setRequiresKeys(true);
 
-	}
+  }
 
 }

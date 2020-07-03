@@ -6,24 +6,24 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class AudioCaptureMeta extends MetaData {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(AudioCaptureMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(AudioCaptureMeta.class);
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return MetaData - returns all the data
-	 * 
-	 */
-	public AudioCaptureMeta() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return MetaData - returns all the data
+   * 
+   */
+  public AudioCaptureMeta() {
 
-		Platform platform = Platform.getLocalInstance();
+    Platform platform = Platform.getLocalInstance();
 
-		addDescription("captures and stores audio from microphone");
-		addCategory("sound");
+    addDescription("captures and stores audio from microphone");
+    addCategory("sound");
 
-	}
+  }
 
 }

@@ -6,23 +6,23 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class ClockMeta extends MetaData {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(ClockMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(ClockMeta.class);
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return MetaData - returns all the data
-	 * 
-	 */
-	public ClockMeta() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return MetaData - returns all the data
+   * 
+   */
+  public ClockMeta() {
 
-		Platform platform = Platform.getLocalInstance();
-		addDescription("used to generate pulses and recurring messages");
-		addCategory("scheduling");
+    Platform platform = Platform.getLocalInstance();
+    addDescription("used to generate pulses and recurring messages");
+    addCategory("scheduling");
 
-	}
+  }
 
 }

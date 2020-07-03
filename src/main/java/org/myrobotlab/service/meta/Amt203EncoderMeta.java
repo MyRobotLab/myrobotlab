@@ -6,24 +6,24 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class Amt203EncoderMeta extends MetaData {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(Amt203EncoderMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(Amt203EncoderMeta.class);
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return MetaData - returns all the data
-	 * 
-	 */
-	public Amt203EncoderMeta() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return MetaData - returns all the data
+   * 
+   */
+  public Amt203EncoderMeta() {
 
-		Platform platform = Platform.getLocalInstance();
+    Platform platform = Platform.getLocalInstance();
 
-		addDescription("AMT203 Encoder - Absolute position encoder");
-		addCategory("encoder", "sensors");
+    addDescription("AMT203 Encoder - Absolute position encoder");
+    addCategory("encoder", "sensors");
 
-	}
+  }
 
 }

@@ -5,25 +5,21 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class ShoutboxMeta  extends MetaData {
+public class ShoutboxMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(ShoutboxMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(ShoutboxMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public ShoutboxMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-   addDescription("shoutbox server");
-   addCategory("cloud");
+    addDescription("shoutbox server");
+    addCategory("cloud");
 
-    
   }
-  
-  
-}
 
+}
