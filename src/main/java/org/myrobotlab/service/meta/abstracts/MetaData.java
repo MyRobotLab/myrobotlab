@@ -16,77 +16,77 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * MetaData describes most of the data about a service that is static.
- * It's dependencies, categories and other meta information.
+ * MetaData describes most of the data about a service that is static. It's
+ * dependencies, categories and other meta information.
  * 
- * It also describes its list of peers. They define a list of group this 
- * service expects to interact with.  When a service is started it gets
- * a copy of MetaData based on its instance name. When a new instance is
- * created a list of ServiceData.overrides are consulted, to allow the user
- * to override actual name and type information.
+ * It also describes its list of peers. They define a list of group this service
+ * expects to interact with. When a service is started it gets a copy of
+ * MetaData based on its instance name. When a new instance is created a list of
+ * ServiceData.overrides are consulted, to allow the user to override actual
+ * name and type information.
  * 
  */
 public class MetaData implements Serializable {
 
   transient private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(MetaData.class);
-
+  public final static Logger log = LoggerFactory.getLogger(MetaData.class);
 
   /**
    * available in the UI(s)
    */
   Boolean available = true; // why not ? :P
-  
+
   /**
    * Set of categories this service belongs to
    */
   transient public Set<String> categories = new HashSet<String>();
-  
+
   /**
    * dependency keys of with key structure {org}-{version}
    */
   public List<ServiceDependency> dependencies = new ArrayList<ServiceDependency>();
-  
+
   /**
    * description of what the service does
    */
   String description = null;
-  
+
   /**
-   * if true the dependency of this service are packaged in the build
-   * of myrobotlab.jar
+   * if true the dependency of this service are packaged in the build of
+   * myrobotlab.jar
    */
   Boolean includeServiceInOneJar = false;
-  
+
   /**
    * service requires an internet connection because some or all of its
-   * functionality 
+   * functionality
    */
   Boolean isCloudService = false;
-  
+
   /**
    * used for appending ServiceExcludes to the ServiceDependencies
    */
   transient private ServiceDependency lastDependency;
-  
+
   /**
    * license of the service
    */
   String license;// = "Apache";
-  
+
   /**
    * relevant site to the Service
    */
   String link;
-  
+
   /**
    * full type name of the service
    */
   String name;
-  
+
   /**
-   * key'd structure of other services that are necessary for the correct function of this service
-   * can be modified with overrides before starting named instance of this service
+   * key'd structure of other services that are necessary for the correct
+   * function of this service can be modified with overrides before starting
+   * named instance of this service
    */
   public Map<String, ServiceReservation> peers = new TreeMap<String, ServiceReservation>();
 
@@ -94,10 +94,9 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
    * true if the service requires a key e.g. Polly
    */
   Boolean requiresKeys = false;
-  
+
   /**
-   * instance name of service this MetaData belongs to
-   * e.g. "i01"
+   * instance name of service this MetaData belongs to e.g. "i01"
    */
   String serviceName;
 
@@ -112,8 +111,8 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
   String sponsor;
 
   /**
-   * service life-cycle state 
-   * inactive | created | registered | running | stopped | released
+   * service life-cycle state inactive | created | registered | running |
+   * stopped | released
    */
   String state = null;
 
@@ -121,26 +120,25 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
    * what is left TODO on this service for it to be ready for release
    */
   String todo;
-  
+
   Integer workingLevel = null;
+
   public MetaData() {
-	  // name is the name this meta class respresents
-	  // in the case of ArduinoMeta - it represents the org.myrobotlab.service.Arduino
-	  simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
-	  name = "org.myrobotlab.service." + simpleName;
+    // name is the name this meta class respresents
+    // in the case of ArduinoMeta - it represents the
+    // org.myrobotlab.service.Arduino
+    simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
+    name = "org.myrobotlab.service." + simpleName;
   }
 
   /*
-  public MetaData(Class<?> clazz) {
-    this.name = clazz.getCanonicalName();
-    this.simpleName = clazz.getSimpleName();
-  }
-
-  public MetaData(String name) {
-    this.name = CodecUtils.makeFullTypeName(name);
-    this.simpleName = name.substring(name.lastIndexOf(".") + 1);
-  }
-  */
+   * public MetaData(Class<?> clazz) { this.name = clazz.getCanonicalName();
+   * this.simpleName = clazz.getSimpleName(); }
+   * 
+   * public MetaData(String name) { this.name =
+   * CodecUtils.makeFullTypeName(name); this.simpleName =
+   * name.substring(name.lastIndexOf(".") + 1); }
+   */
 
   public void addArtifact(String orgId, String classifierId) {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
@@ -275,11 +273,11 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
     } else {
       sb.append(String.format("\n%s\n", simpleName));
     }
-    
+
     for (ServiceReservation sr : peers.values()) {
       sb.append(sr).append("\n");
     }
-    
+
     return sb.toString();
   }
 
@@ -292,19 +290,19 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
     }
     return peers.get(peerKey);
   }
-  
+
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
   }
-  
+
   public String getServiceName() {
     return serviceName;
   }
 
   /**
-   * typical adding of a service reservation ..
-   * the actual name is left null, so that this template
-   * will dynamically generate peer names depending on the parents name
+   * typical adding of a service reservation .. the actual name is left null, so
+   * that this template will dynamically generate peer names depending on the
+   * parents name
    * 
    * @param key
    * @param peerType
@@ -317,7 +315,7 @@ public final static Logger log = LoggerFactory.getLogger(MetaData.class);
   public void addPeer(String key, String actualName, String peerType, String comment) {
     peers.put(key, new ServiceReservation(key, actualName, peerType, comment));
   }
-  
+
   public String getPeerActualName(String peerKey) {
 
     // return local defined name
