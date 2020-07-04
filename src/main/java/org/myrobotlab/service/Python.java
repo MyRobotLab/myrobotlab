@@ -562,7 +562,7 @@ public class Python extends Service {
   }
 
   public void onRegistered(Registration r) {
-    ServiceInterface s = r.service;
+    ServiceInterface s = Runtime.getService(r.getName());
 
     String registerScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.framework import Service\n";
 
