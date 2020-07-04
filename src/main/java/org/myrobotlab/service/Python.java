@@ -569,7 +569,9 @@ public class Python extends Service {
     // load the import
     // RIXME - RuntimeGlobals & static values for unknown
     if (!"unknown".equals(s.getSimpleName())) {
-      registerScript = String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
+      registerScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" 
+          + "from org.myrobotlab.framework import Service\n" + 
+          String.format("from org.myrobotlab.service import %s\n", s.getSimpleName());
     }
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
