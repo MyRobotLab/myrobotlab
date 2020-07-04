@@ -18,8 +18,6 @@ public class AbstractSpeechSynthesisMeta extends MetaData {
     addCategory("speech");
 
     addDependency("org.myrobotlab.audio", "voice-effects", "1.0", "zip");
-    addDependency("javazoom", "jlayer", "1.0.1");
-    addDependency("com.googlecode.soundlibs", "mp3spi", "1.9.5.4");
 
   }
 
