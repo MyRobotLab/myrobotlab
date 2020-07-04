@@ -1,7 +1,6 @@
 package org.myrobotlab.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,7 +20,6 @@ import javax.swing.event.ChangeListener;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
-
 import org.myrobotlab.service.ServoMixer;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.ServoControl;

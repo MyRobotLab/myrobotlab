@@ -35,28 +35,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 
+import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvSize;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.javacv.Java2DFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
-
-import static org.bytedeco.opencv.global.opencv_imgproc.*;
-import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_features2d.*;
-import static org.bytedeco.opencv.global.opencv_flann.*;
-import static org.bytedeco.opencv.global.opencv_highgui.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
-import static org.bytedeco.opencv.global.opencv_ml.*;
-import static org.bytedeco.opencv.global.opencv_objdetect.*;
-import static org.bytedeco.opencv.global.opencv_photo.*;
-import static org.bytedeco.opencv.global.opencv_shape.*;
-import static org.bytedeco.opencv.global.opencv_stitching.*;
-import static org.bytedeco.opencv.global.opencv_video.*;
-import static org.bytedeco.opencv.global.opencv_videostab.*;
 
 public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
 

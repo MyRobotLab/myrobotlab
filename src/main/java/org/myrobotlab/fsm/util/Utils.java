@@ -23,9 +23,9 @@
  */
 package org.myrobotlab.fsm.util;
 
-import org.myrobotlab.fsm.api.State;
-
 import java.util.Set;
+
+import org.myrobotlab.fsm.api.State;
 
 /**
  * Constants and utilities class.

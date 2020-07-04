@@ -72,7 +72,6 @@ import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;

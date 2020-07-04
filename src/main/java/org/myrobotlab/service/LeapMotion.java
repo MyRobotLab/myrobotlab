@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.leap.LeapMotionListener;
 import org.myrobotlab.logging.Level;

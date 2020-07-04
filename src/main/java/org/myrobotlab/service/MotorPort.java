@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 
 /**

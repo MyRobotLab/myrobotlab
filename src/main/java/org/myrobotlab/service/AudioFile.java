@@ -33,8 +33,6 @@ import java.util.Map;
 
 import org.myrobotlab.audio.AudioProcessor;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

@@ -32,19 +32,19 @@ import static org.bytedeco.opencv.global.opencv_core.cvRect;
 import static org.bytedeco.opencv.global.opencv_core.cvResetImageROI;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_GRAY2BGR;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvLine;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.opencv.opencv_core.CvScalar;
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacv.ObjectFinder;
 import org.bytedeco.javacv.ObjectFinder.Settings;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 

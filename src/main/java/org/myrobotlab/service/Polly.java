@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.kinematics.DHLink;
 import org.myrobotlab.kinematics.DHRobotArm;

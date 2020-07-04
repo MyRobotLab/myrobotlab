@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.myrobotlab.framework.Registration;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractMotor;
 import org.myrobotlab.service.interfaces.MotorController;

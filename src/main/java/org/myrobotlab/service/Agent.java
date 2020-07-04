@@ -44,7 +44,6 @@ import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.ProcessData;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;

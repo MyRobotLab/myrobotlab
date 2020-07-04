@@ -24,7 +24,6 @@ import org.junit.runner.Result;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.GitHub;
@@ -35,6 +34,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.StatusListener;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -304,7 +304,7 @@ public class Test extends Service implements StatusListener {
   // FIXME - all tests must start with test .. so testSerialization
   ArrayList<String> serializationTestFailures = new ArrayList<String>();
 
-  List<ServiceType> services = null;
+  List<MetaData> services = null;
 
   String pythonServiceScriptDir;
 
@@ -351,7 +351,7 @@ public class Test extends Service implements StatusListener {
          * t.append("\n"); t.append("# start the service\n");
          */
 
-        ServiceType st = ServiceData.getLocalInstance().getServiceType(String.format("org.myrobotlab.service.%s", service));
+        MetaData st = ServiceData.getMetaData(String.format("org.myrobotlab.service.%s", service));
 
         t.append("#########################################\n");
         t.append(String.format("# %s.py\n", service));
@@ -390,9 +390,9 @@ public class Test extends Service implements StatusListener {
       HashSet<String> serviceTypes = new HashSet<String>();
 
       pythonScripts = new TreeMap<String, String>();
-      List<ServiceType> sts = ServiceData.getLocalInstance().getServiceTypes();
+      List<MetaData> sts = ServiceData.getLocalInstance().getServiceTypes();
       for (int i = 0; i < sts.size(); ++i) {
-        ServiceType st = sts.get(i);
+        MetaData st = sts.get(i);
         serviceTypes.add(st.getSimpleName());
         String script = GitHub.getPyRobotLabScript(branch, st.getSimpleName());
         if (script != null) {
@@ -416,7 +416,7 @@ public class Test extends Service implements StatusListener {
     return pythonScripts;
   }
 
-  public List<ServiceType> getServices() {
+  public List<MetaData> getServices() {
     return ServiceData.getLocalInstance().getServiceTypes(showUnavailableServices);
   }
 
@@ -433,10 +433,10 @@ public class Test extends Service implements StatusListener {
 
   public List<String> getServicesWithOutServicePages() throws ClientProtocolException, IOException {
     ArrayList<String> ret = new ArrayList<String>();
-    List<ServiceType> serviceTypes = ServiceData.getLocalInstance().getServiceTypes();
+    List<MetaData> serviceTypes = ServiceData.getLocalInstance().getServiceTypes();
     HttpClient http = (HttpClient) startPeer("http");
     for (int i = 0; i < serviceTypes.size(); ++i) {
-      ServiceType serviceType = serviceTypes.get(i);
+      MetaData serviceType = serviceTypes.get(i);
 
       // Status retStatus =
       // verifyServicePageScript(serviceType.getName());
@@ -489,9 +489,9 @@ public class Test extends Service implements StatusListener {
    */
   public void loadDefaultTests() {
 
-    List<ServiceType> types = ServiceData.getLocalInstance().getServiceTypes();
+    List<MetaData> types = ServiceData.getLocalInstance().getServiceTypes();
     for (int i = 0; i < types.size(); ++i) {
-      ServiceType type = types.get(i);
+      MetaData type = types.get(i);
       log.info("adding {}", type.getSimpleName());
       matrix.servicesToTest.add(type.getSimpleName());
     }
@@ -1030,7 +1030,7 @@ public class Test extends Service implements StatusListener {
       if (script == null) {
         test.status = Status.error("script not found");
         /*
-         * ServiceData sd = ServiceData.getLocalInstance(); ServiceType st =
+         * ServiceData sd = ServiceData.getLocalInstance(); MetaData st =
          * sd.getServiceType(test.fullTypeName); StringBuffer t = new
          * StringBuffer();
          * t.append("#########################################\n");

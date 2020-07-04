@@ -55,7 +55,6 @@ import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.MessageListener;
@@ -74,7 +73,7 @@ import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.ServiceLifeCycle;
-import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -974,9 +973,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       ServiceData sd = ServiceData.getLocalInstance();
 
-      List<ServiceType> sts = sd.getServiceTypes();
+      List<MetaData> sts = sd.getServiceTypes();
 
-      for (ServiceType st : sts) {
+      for (MetaData st : sts) {
         if (st.getSimpleName().equals("Polly")) {
           log.info("here");
         }
@@ -1944,7 +1943,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     public String logLevel = "info";
 
     @Option(names = { "-i",
-        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {ServiceType} installs dependencies for a specific service")
+        "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {MetaData} installs dependencies for a specific service")
     public String install[];
     
     @Option(names = { "-d",
@@ -2996,7 +2995,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return routeTable;
   }
 
-  public List<ServiceType> getServiceTypes() {
+  public List<MetaData> getServiceTypes() {
     return serviceData.getServiceTypes();
   }
 
@@ -3524,11 +3523,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.clearOverrides();
   }
 
-  public static AbstractMetaData getMetaData(String serviceName, String serviceType) {
+  public static MetaData getMetaData(String serviceName, String serviceType) {
     return ServiceData.getMetaData(serviceName, serviceType);
   }
 
-  public static AbstractMetaData getMetaData(String serviceType) {
+  public static MetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
   

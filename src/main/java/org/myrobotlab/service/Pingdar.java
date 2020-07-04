@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -9,7 +8,6 @@ import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangingControl;
-import org.myrobotlab.service.interfaces.ServoEvent;
 import org.slf4j.Logger;
 
 /**

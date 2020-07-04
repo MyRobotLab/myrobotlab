@@ -18,7 +18,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;

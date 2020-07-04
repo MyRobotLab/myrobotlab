@@ -13,11 +13,11 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -116,7 +116,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.start("python", "Python");
     ServiceData sd = ServiceData.getLocalInstance();
-    List<ServiceType> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
+    List<MetaData> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
     
     int numServices = sts.size();
     int numServicePages = 0;
@@ -131,7 +131,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     // sts.clear();
     // sts.add(sd.getServiceType("org.myrobotlab.service.InMoov"));
     
-    for (ServiceType serviceType : sts) {
+    for (MetaData serviceType : sts) {
       // test single service
       // serviceType = sd.getServiceType("org.myrobotlab.service.VirtualDevice");
       String service = serviceType.getSimpleName();
@@ -151,7 +151,7 @@ public class ServiceInterfaceTest extends AbstractTest {
       }
       log.info("Testing Service: {}", service);
 
-      ServiceType st = sd.getServiceType("org.myrobotlab.service." + service);
+      MetaData st = ServiceData.getMetaData("org.myrobotlab.service." + service);
       if (st == null) {
         System.out.println("NO SERVICE TYPE FOUND!"); // perhaps this should throw
         servicesNotInServiceDataJson.add(service);
@@ -240,7 +240,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     ServiceData sd = ServiceData.getLocalInstance();// CodecUtils.fromJson(FileUtils.readFileToString(new
                                                     // File("../repo/serviceData.json")),
                                                     // ServiceData.class);
-    for (ServiceType st : sd.getServiceTypes()) {
+    for (MetaData st : sd.getServiceTypes()) {
       if (!st.isAvailable()) {
         log.info("Installing Service:" + st.getName());
         Runtime.install(st.getName());

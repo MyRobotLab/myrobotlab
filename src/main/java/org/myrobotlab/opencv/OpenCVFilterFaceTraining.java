@@ -26,9 +26,6 @@
 package org.myrobotlab.opencv;
 
 
-import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
-
-import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 // import static org.bytedeco.opencv.opencv_objdetect.cvHaarDetectObjects;
 // import org.bytedeco.opencv.opencv_objdetect.CvHaarClassifierCascade;
 import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
@@ -36,7 +33,6 @@ import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
-import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
 //import static org.bytedeco.opencv.opencv_core.cvLoad;
 //import static org.bytedeco.opencv.helper.opencv_core.cvLoad;
 import static org.bytedeco.opencv.global.opencv_core.cvSetImageROI;
@@ -44,13 +40,13 @@ import static org.bytedeco.opencv.global.opencv_core.cvSetZero;
 // import static org.bytedeco.opencv.global.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_GRAYSCALE;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
-import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_DO_ROUGH_SEARCH;
-import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_FIND_BIGGEST_OBJECT;
-import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 //import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_FEATURE_MAX;
 //import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_MAGIC_VAL;
 //import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_STAGE_MAX;
 import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_DO_CANNY_PRUNING;
+import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_DO_ROUGH_SEARCH;
+import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_FIND_BIGGEST_OBJECT;
+import static org.bytedeco.opencv.global.opencv_objdetect.CASCADE_SCALE_IMAGE;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -70,6 +66,7 @@ import java.util.TreeSet;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.CvSize;
@@ -79,10 +76,7 @@ import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_face.EigenFaceRecognizer;
 import org.bytedeco.opencv.opencv_face.FaceRecognizer;
-import org.bytedeco.opencv.global.opencv_objdetect;
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.service.OpenCV;
-import org.myrobotlab.io.FileIO;
+import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;

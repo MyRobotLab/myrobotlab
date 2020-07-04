@@ -3,7 +3,6 @@ package org.myrobotlab.arduino.virtual;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.VirtualArduino;
-import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.virtual.VirtualMotor;
 import org.slf4j.Logger;
 

@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
@@ -26,7 +26,7 @@ public class ServiceDataTest extends AbstractTest {
     if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     ServiceData sd = ServiceData.getLocalInstance();
     // TODO: add a valid assert for this test.
-    List<ServiceType> types = sd.getAvailableServiceTypes();
+    List<MetaData> types = sd.getAvailableServiceTypes();
     assertTrue(types.size() > 0);
   }
 

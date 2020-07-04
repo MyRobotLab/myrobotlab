@@ -25,7 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_32F;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
@@ -41,6 +40,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvMatchTemplate;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvRectangle;
+import static org.bytedeco.opencv.helper.opencv_core.CV_RGB;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -51,7 +51,6 @@ import org.bytedeco.opencv.opencv_core.CvRect;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
 
 // TODO - http://opencv.willowgarage.com/wiki/FastMatchTemplate

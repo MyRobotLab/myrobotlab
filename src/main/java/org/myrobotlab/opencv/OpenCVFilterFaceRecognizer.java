@@ -47,7 +47,6 @@ import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;

@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.myrobotlab.service.Runtime;
 
 import org.myrobotlab.framework.QueueStats;
+import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 

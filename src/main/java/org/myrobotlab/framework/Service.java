@@ -71,7 +71,7 @@ import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
-import org.myrobotlab.service.meta.abstracts.AbstractMetaData;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -96,7 +96,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * data for an instance
    * 
    */
-  protected AbstractMetaData serviceType;
+  protected MetaData serviceType;
   
 
   private static final long serialVersionUID = 1L;
@@ -414,7 +414,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   // ============== resources begin ======================================
 
   /**
-   * Non-static getResourceDir() will return /resource/{ServiceType}
+   * Non-static getResourceDir() will return /resource/{service type name} 
+   * e.g. /resource/Arduino
    * @return
    */
   public String getResourceDir() {
@@ -423,7 +424,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * Static getResourceDir(Class clazz) will return the appropriate resource directory,
-   * typically it will be /resource/{ServiceType} but depending if run in the presence of other
+   * typically it will be /resource/{MetaData} but depending if run in the presence of other
    * developing directories.
    * 
    * @param clazz
@@ -444,8 +445,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * <pre>
    * Order of increasing precedence is:
    *     1. resource
-   *     2. src/resource/{ServiceType} or
-   *     3. ../{ServiceType}/resource/{ServiceType}
+   *     2. src/resource/{MetaData} or
+   *     3. ../{MetaData}/resource/{MetaData}
    * </pre>
    * 
    * @param serviceType
@@ -2227,8 +2228,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * a convenience method for a Service which always attempts to find a file
    * with the same ordered precedence
    * 
-   * 1. check data/{ServiceType} first (users data directory) 2. check
-   * resource/{ServiceType} (mrl's static resource directory) 3. check absolute
+   * 1. check data/{MetaData} first (users data directory) 2. check
+   * resource/{MetaData} (mrl's static resource directory) 3. check absolute
    * path
    * 
    * @param filename
@@ -2397,8 +2398,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   public boolean isDev() {
     // 2 folders to check
-    // src/resource/{ServiceType} for services still bundled with myrobotlab.jar and
-    // ../{ServiceType}/resource/{ServiceType} for services in their own repo
+    // src/resource/{MetaData} for services still bundled with myrobotlab.jar and
+    // ../{MetaData}/resource/{MetaData} for services in their own repo
     File check = new File(FileIO.gluePaths("src/resource", simpleName));
     if (check.exists()) {
       return true;

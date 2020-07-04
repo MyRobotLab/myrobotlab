@@ -1,5 +1,6 @@
 package org.myrobotlab.opencv;
 
+import static org.bytedeco.opencv.global.opencv_core.CV_32F;
 import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_dnn.blobFromImage;
 import static org.bytedeco.opencv.global.opencv_dnn.readNetFromDarknet;
@@ -7,10 +8,6 @@ import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
-import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import static org.bytedeco.opencv.global.opencv_core.IPL_DEPTH_8U;
-import static org.bytedeco.opencv.global.opencv_core.cvCopy;
-import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -28,10 +25,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.swing.WindowConstants;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -40,8 +36,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
-import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.deeplearning4j.CustomModel;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Deeplearning4j;

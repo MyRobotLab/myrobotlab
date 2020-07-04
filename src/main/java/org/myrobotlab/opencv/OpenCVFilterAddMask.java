@@ -32,10 +32,10 @@ import static org.bytedeco.opencv.global.opencv_imgproc.cvRectangle;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacpp.indexer.UByteIndexer;
 import org.bytedeco.javacv.Parallel;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;

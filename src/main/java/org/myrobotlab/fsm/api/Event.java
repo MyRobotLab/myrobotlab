@@ -23,9 +23,9 @@
  */
 package org.myrobotlab.fsm.api;
 
-import org.myrobotlab.fsm.util.Utils;
-
 import java.util.Date;
+
+import org.myrobotlab.fsm.util.Utils;
 
 /**
  * Abstract class for events to which a FSM should react and make transitions.

@@ -25,24 +25,18 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.global.opencv_imgproc.cvFindContours;
 import static org.bytedeco.opencv.global.opencv_core.cvClearMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateMemStorage;
 import static org.bytedeco.opencv.global.opencv_core.cvGetSeqElem;
-
-import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
-import static org.bytedeco.opencv.global.opencv_imgproc.CV_FONT_HERSHEY_PLAIN;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_POLY_APPROX_DP;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvApproxPoly;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvBoundingRect;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvContourPerimeter;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvFont;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvPutText;
+import static org.bytedeco.opencv.helper.opencv_imgproc.cvFindContours;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -55,12 +49,9 @@ import org.bytedeco.opencv.opencv_core.CvContour;
 import org.bytedeco.opencv.opencv_core.CvMemStorage;
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvRect;
-import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.CvSeq;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.math.geometry.Point2df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.slf4j.Logger;
 //import static org.bytedeco.javacpp.opencv_core.cvFont;

@@ -9,7 +9,6 @@ import java.util.Set;
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -32,7 +31,6 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.system.SystemInfo;
 import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
 

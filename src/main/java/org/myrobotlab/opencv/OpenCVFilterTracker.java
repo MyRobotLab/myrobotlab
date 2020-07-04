@@ -32,28 +32,28 @@ import static org.bytedeco.opencv.global.opencv_core.cvPoint;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvDrawRect;
-import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.CvScalar;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect2d;
+import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
 import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
 import org.bytedeco.opencv.opencv_tracking.TrackerGOTURN;
 import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
 import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
 import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
+import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
 import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
-
-import org.bytedeco.opencv.opencv_core.CvScalar;
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Rect2d;
-import org.bytedeco.opencv.opencv_tracking.Tracker;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
-
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import org.slf4j.Logger;
 
 /**

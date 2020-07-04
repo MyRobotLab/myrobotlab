@@ -3,6 +3,7 @@ package org.myrobotlab.document.connector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.myrobotlab.document.Document;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.framework.Service;

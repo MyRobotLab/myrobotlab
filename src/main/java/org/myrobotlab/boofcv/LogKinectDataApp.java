@@ -18,6 +18,19 @@
 
 package org.myrobotlab.boofcv;
 
+import java.awt.image.BufferedImage;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.ddogleg.struct.GrowQueue_I8;
+import org.openkinect.freenect.Context;
+import org.openkinect.freenect.Device;
+import org.openkinect.freenect.Freenect;
+import org.openkinect.freenect.Resolution;
+
+import com.sun.jna.NativeLibrary;
+
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
@@ -28,17 +41,6 @@ import boofcv.openkinect.UtilOpenKinect;
 import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
-import com.sun.jna.NativeLibrary;
-import org.ddogleg.struct.GrowQueue_I8;
-import org.openkinect.freenect.Context;
-import org.openkinect.freenect.Device;
-import org.openkinect.freenect.Freenect;
-import org.openkinect.freenect.Resolution;
-
-import java.awt.image.BufferedImage;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * @author Peter Abeles

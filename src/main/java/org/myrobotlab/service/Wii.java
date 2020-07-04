@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;

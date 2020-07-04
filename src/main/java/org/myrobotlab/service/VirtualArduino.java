@@ -7,12 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.arduino.VirtualMsg;
 import org.myrobotlab.arduino.virtual.Device;
 import org.myrobotlab.arduino.virtual.MrlComm;
 import org.myrobotlab.arduino.virtual.MrlCommIno;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.PinDefinition;

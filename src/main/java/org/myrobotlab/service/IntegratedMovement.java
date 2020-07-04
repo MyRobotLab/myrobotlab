@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.genetic.GeneticParameters;
 import org.myrobotlab.jme3.IntegratedMovementInterface;
 import org.myrobotlab.kinematics.CollisionDectection;

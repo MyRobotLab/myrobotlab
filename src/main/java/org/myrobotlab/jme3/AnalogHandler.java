@@ -1,6 +1,7 @@
 package org.myrobotlab.jme3;
 
 import org.myrobotlab.service.JMonkeyEngine;
+
 import com.jme3.input.controls.AnalogListener;
 
 /**

@@ -25,13 +25,11 @@
 package org.myrobotlab.boofcv;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.ejml.data.DMatrixRMaj;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.BoofCv;
 import org.openkinect.freenect.Resolution;

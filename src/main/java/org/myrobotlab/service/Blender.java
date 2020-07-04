@@ -8,7 +8,6 @@ import java.net.Socket;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;

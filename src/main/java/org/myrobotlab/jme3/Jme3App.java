@@ -11,7 +11,6 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.font.BitmapFont;
-import com.jme3.system.AppSettings;
 
 /**
  * This is a base abstract class to implement common data structures and methods

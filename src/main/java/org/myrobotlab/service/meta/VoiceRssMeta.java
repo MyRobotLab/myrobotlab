@@ -1,37 +1,30 @@
 package org.myrobotlab.service.meta;
 
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
-public class VoiceRssMeta {
+public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
+  private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(VoiceRssMeta.class);
-  
+
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
-
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.VoiceRss");
+  public VoiceRssMeta() {
 
     Platform platform = Platform.getLocalInstance();
-    meta.addDescription("VoiceRss speech synthesis service.");
-    meta.addCategory("speech");
-    meta.setSponsor("moz4r");
-    meta.addCategory("speech", "cloud");
-    meta.addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
-    meta.setCloudService(true);
-    meta.addDependency("com.voicerss", "tts", "1.0");
-    return meta;
+    addDescription("VoiceRss speech synthesis service.");
+    addCategory("speech");
+    setSponsor("moz4r");
+    addCategory("speech", "cloud");
+    addTodo("test speak blocking - also what is the return type and AudioFile audio track id ?");
+    setCloudService(true);
+    addDependency("com.voicerss", "tts", "1.0");
+
   }
 
-  
 }
-

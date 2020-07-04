@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.JFrame;
-
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.opencv.OpenCVFilter;

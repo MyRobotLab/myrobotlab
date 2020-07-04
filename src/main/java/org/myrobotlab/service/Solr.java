@@ -41,7 +41,6 @@ import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.framework.interfaces.MessageListener;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;

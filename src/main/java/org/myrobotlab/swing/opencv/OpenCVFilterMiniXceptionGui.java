@@ -28,12 +28,14 @@ package org.myrobotlab.swing.opencv;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.myrobotlab.opencv.FilterWrapper;
 import org.myrobotlab.opencv.OpenCVFilterMiniXception;
 import org.myrobotlab.service.SwingGui;

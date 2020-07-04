@@ -1,31 +1,26 @@
 package org.myrobotlab.service.meta;
 
-import org.myrobotlab.framework.ServiceType;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
-public class LocalSpeechMeta {
+public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
+  private static final long serialVersionUID = 1L;
   public final static Logger log = LoggerFactory.getLogger(LocalSpeechMeta.class);
-  
+
   /**
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return ServiceType - returns all the data
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
-  static public ServiceType getMetaData() {
+  public LocalSpeechMeta() {
 
-    ServiceType meta = AbstractSpeechSynthesis.getMetaData("org.myrobotlab.service.LocalSpeech");
-    meta.addCategory("speech", "sound");
-    meta.addDescription("Local OS text to speech ( tts.exe / say etc ... )");
-    meta.setAvailable(true);
-    meta.addCategory("speech");
-    meta.addDependency("com.microsoft", "tts", "1.1", "zip");
-    return meta;
+    addCategory("speech", "sound");
+    addDescription("Local OS text to speech ( tts.exe / say etc ... )");
+    setAvailable(true);
+    addCategory("speech");
+    addDependency("com.microsoft", "tts", "1.1", "zip");
+
   }
-  
-}
 
+}

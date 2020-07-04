@@ -28,8 +28,8 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.global.opencv_core.cvCopy;
 import static org.bytedeco.opencv.global.opencv_core.cvCreateImage;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -42,15 +42,14 @@ import java.util.Map;
 
 import javax.swing.ImageIcon;
 
-import org.bytedeco.opencv.opencv_core.IplImage;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.opencv_core.IplImage;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.service.OpenCV;

@@ -34,11 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.SphericalCoordinates;
-import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.javacpp.indexer.UShortRawIndexer;
+import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.math.geometry.Point;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.Rectangle;
 import org.myrobotlab.service.OpenCV;

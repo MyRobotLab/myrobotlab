@@ -18,6 +18,12 @@
 
 package org.myrobotlab.boofcv;
 
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import org.ddogleg.struct.FastQueue;
+
 import boofcv.alg.depth.VisualDepthOps;
 import boofcv.io.calibration.CalibrationIO;
 import boofcv.io.image.UtilImageIO;
@@ -28,11 +34,6 @@ import boofcv.struct.image.GrayU16;
 import boofcv.struct.image.GrayU8;
 import boofcv.struct.image.Planar;
 import georegression.struct.point.Point3D_F64;
-import org.ddogleg.struct.FastQueue;
-
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Loads kinect observations and saves a point cloud with rgb information to a
