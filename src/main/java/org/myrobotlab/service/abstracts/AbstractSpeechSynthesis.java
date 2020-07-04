@@ -614,9 +614,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * replace word for example : worke could get substituted to worky or work-ee
    * or "something" that phonetically works for the current speech synthesis
    * service
-   * 
-   * @param key
-   * @param replace
    */
   public void replaceWord(String key, String replacement) {
     substitutions.put(key.toLowerCase(), replacement.toLowerCase());

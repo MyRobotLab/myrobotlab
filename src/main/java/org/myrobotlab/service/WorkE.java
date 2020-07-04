@@ -149,8 +149,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * overriden Service.attach - becomes the "router" based on type info. It is
    * important not to expose the incoming attachable actual type - this will be
    * helpful in interfacing polyglot and remote scenarios
-   * 
-   * @throws Exception
    */
   @Override
   public void attach(Attachable attachable) {
@@ -557,7 +555,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * left movement publishing point - this should probably go into a
    * ChassiControl interface
    * 
-   * @param mc
+   * @param pwr
    * @return
    */
   public double publishMotorLeftMove(double pwr) {
@@ -569,7 +567,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * right movement publishing point - this should probably go into a
    * ChassiControl interface
    * 
-   * @param mc
+   * @param pwr
    * @return
    */
   public double publishMotorRightMove(double pwr) {
@@ -577,6 +575,9 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     return pwr;
   }
 
+  /**
+   * publishing method call instead of using direct reference
+   */
   @Override
   public WordFilter publishReplaceWord(String word, String substitute) {
     return new WordFilter(word, substitute);
@@ -775,11 +776,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     send(eye, "stopCapture");
   }
 
-  /**
-   * replacing to work with WorkETest
-   * 
-   * <pre>
-   */
   public static void main(String[] args) {
     try {
       
