@@ -49,7 +49,11 @@ public class InMoovMeta extends MetaData {
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
-    addPeer("python", "python", "Python", "shared Python service");
+    // currently InMoov manually calls releasePeers - when it does
+    // the interpreter is in a process of shutdown while all inmoov peer services have not
+    // run their initialization scripts - npe and other errors can happen when creating and
+    // releasing all peers in quick succession
+    // addPeer("python", "python", "Python", "shared Python service"); 
 
     // put peer definitions in
     addPeer("torso", "InMoovTorso", "torso");

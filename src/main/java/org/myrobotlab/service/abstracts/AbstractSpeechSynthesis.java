@@ -610,10 +610,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     substitutions.put(key.toLowerCase(), replacement.toLowerCase());
   }
 
-  public void replaceWord(String key, String replacement) {
-    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
-  }
-
   /**
    * replace word for example : worke could get substituted to worky or work-ee
    * or "something" that phonetically works for the current speech synthesis
@@ -622,6 +618,10 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param key
    * @param replace
    */
+  public void replaceWord(String key, String replacement) {
+    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
+  }
+
   public void replaceWord(WordFilter filter) {
     substitutions.put(filter.word.toLowerCase(), filter.substitute.toLowerCase());
   }
