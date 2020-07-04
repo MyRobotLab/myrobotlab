@@ -476,6 +476,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
           si.onRegistered(new Registration(s));
         }
+        // don't register or create or start event self
+        if (s.getName().equals(si.getName())) {
+          continue;
+        }        
         si.onCreated(s.getName());
         if (si.isRunning()) {
           si.onStarted(s.getName());
