@@ -14,7 +14,7 @@ public class Amt203EncoderMeta extends MetaData {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @return MetaData - returns all the data
+   * 
    * 
    */
   public Amt203EncoderMeta() {
