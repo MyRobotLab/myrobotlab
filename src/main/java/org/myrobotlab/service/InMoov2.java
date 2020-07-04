@@ -270,7 +270,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
     locale = Runtime.getInstance().getLocale();
 
-    python = (Python) startPeer("python");
+    // REALLY NEEDS TO BE CLEANED UP - no direct references
+    // "publish" scripts which should be executed :(
+    // python = (Python) startPeer("python");
+    python = (Python)Runtime.start("python", "Python"); // this crud should stop
     load(locale.getTag());
 
     // get events of new services and shutdown
