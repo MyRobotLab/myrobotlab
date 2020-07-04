@@ -6,25 +6,25 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class BeagleBoardBlackMeta extends MetaData {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(BeagleBoardBlackMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(BeagleBoardBlackMeta.class);
 
-	/**
-	 * This static method returns all the details of the class without it having to
-	 * be constructed. It has description, categories, dependencies, and peer
-	 * definitions.
-	 * 
-	 * @return MetaData - returns all the data
-	 * 
-	 */
-	public BeagleBoardBlackMeta() {
+  /**
+   * This static method returns all the details of the class without it having
+   * to be constructed. It has description, categories, dependencies, and peer
+   * definitions.
+   * 
+   * @return MetaData - returns all the data
+   * 
+   */
+  public BeagleBoardBlackMeta() {
 
-		Platform platform = Platform.getLocalInstance();
+    Platform platform = Platform.getLocalInstance();
 
-		addDescription("service to access the beagle board black hardware");
-		addCategory("microcontroller");
-		setAvailable(false);
+    addDescription("service to access the beagle board black hardware");
+    addCategory("microcontroller");
+    setAvailable(false);
 
-	}
+  }
 
 }

@@ -5,26 +5,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class KeyboardSimMeta  extends MetaData {
+public class KeyboardSimMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(KeyboardSimMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(KeyboardSimMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public KeyboardSimMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-    
-   addDescription("simulate keyboard interactions");
-   addCategory("control");
-    
+
+    addDescription("simulate keyboard interactions");
+    addCategory("control");
+
   }
 
-  
-  
 }
-

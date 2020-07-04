@@ -5,28 +5,26 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class WiiDarMeta  extends MetaData {
+public class WiiDarMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(WiiDarMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(WiiDarMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public WiiDarMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-    //addDependency("wiiuse.wiimote", "0.12b");
+    // addDependency("wiiuse.wiimote", "0.12b");
 
-   addDescription("WiiDar.... who dar?  WiiDar!");
-   addDependency("wiiusej", "wiiusej", "wiiusej");
-   addCategory("sensors");
+    addDescription("WiiDar.... who dar?  WiiDar!");
+    addDependency("wiiusej", "wiiusej", "wiiusej");
+    addCategory("sensors");
     // no longer have hardware for this ...
-   setAvailable(false);
-    
-  }
-  
-}
+    setAvailable(false);
 
+  }
+
+}

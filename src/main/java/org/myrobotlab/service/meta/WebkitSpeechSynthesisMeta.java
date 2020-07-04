@@ -5,22 +5,22 @@ import org.myrobotlab.service.meta.abstracts.AbstractSpeechSynthesisMeta;
 import org.slf4j.Logger;
 
 public class WebkitSpeechSynthesisMeta extends AbstractSpeechSynthesisMeta {
-	private static final long serialVersionUID = 1L;
-	public final static Logger log = LoggerFactory.getLogger(WebkitSpeechSynthesisMeta.class);
+  private static final long serialVersionUID = 1L;
+  public final static Logger log = LoggerFactory.getLogger(WebkitSpeechSynthesisMeta.class);
 
-	/**
-	 * This class is contains all the meta data details of a service. It's peers,
-	 * dependencies, and all other meta data related to the service.
-	 * 
-	 */
-	public WebkitSpeechSynthesisMeta() {
+  /**
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
+   * 
+   */
+  public WebkitSpeechSynthesisMeta() {
 
-		addDescription("Web speech api using Chrome or Firefox speech synthesis");
-		setAvailable(true); // false if you do not want it viewable in a
-		// gui
-		// add dependency if necessary
-		addCategory("speech", "sound");
+    addDescription("Web speech api using Chrome or Firefox speech synthesis");
+    setAvailable(true); // false if you do not want it viewable in a
+    // gui
+    // add dependency if necessary
+    addCategory("speech", "sound");
 
-	}
+  }
 
 }

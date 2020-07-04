@@ -5,24 +5,22 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class MultiWiiMeta  extends MetaData {
+public class MultiWiiMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(MultiWiiMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(MultiWiiMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public MultiWiiMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-    
-   addDescription("MultiWii interface");
-   addCategory("control");
-    
-  }
-  
-}
 
+    addDescription("MultiWii interface");
+    addCategory("control");
+
+  }
+
+}

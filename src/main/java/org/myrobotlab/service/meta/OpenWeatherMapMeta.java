@@ -5,27 +5,24 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class OpenWeatherMapMeta  extends MetaData {
+public class OpenWeatherMapMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(OpenWeatherMapMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(OpenWeatherMapMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public OpenWeatherMapMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-   addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
-   addCategory("weather");
-   setCloudService(true);
-   addDependency("org.json", "json", "20090211");
-   addPeer("httpClient", "HttpClient", "httpClient");
-    
-  }
-  
-  
-}
+    addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
+    addCategory("weather");
+    setCloudService(true);
+    addDependency("org.json", "json", "20090211");
+    addPeer("httpClient", "HttpClient", "httpClient");
 
+  }
+
+}

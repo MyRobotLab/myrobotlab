@@ -5,26 +5,23 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class SerialMeta  extends MetaData {
+public class SerialMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-public final static Logger log = LoggerFactory.getLogger(SerialMeta.class);
-  
+  public final static Logger log = LoggerFactory.getLogger(SerialMeta.class);
+
   /**
-   * This class is contains all the meta data details of a service.
-   * It's peers, dependencies, and all other meta data related to the service.
+   * This class is contains all the meta data details of a service. It's peers,
+   * dependencies, and all other meta data related to the service.
    * 
    */
   public SerialMeta() {
 
-    
     Platform platform = Platform.getLocalInstance();
-   addDescription("reads and writes data to a serial port");
-   addCategory("sensors", "control");
-   addDependency("org.scream3r", "jssc", "2.8.0-1");
-   setLicenseGplV3(); // via jssc
-    
+    addDescription("reads and writes data to a serial port");
+    addCategory("sensors", "control");
+    addDependency("org.scream3r", "jssc", "2.8.0-1");
+    setLicenseGplV3(); // via jssc
+
   }
 
-  
 }
-
