@@ -156,7 +156,7 @@ public class Python extends Service {
           if (interp != null) {
             interp.exec(String.format("print '%s'", filtered));
           }
-          log.error("following script errored {}", code);
+          log.error("following script errored \n{}", code);
           log.error("interp.exec threw", e);
           if (filtered.length() > 40) {
             filtered = filtered.substring(0, 40);
@@ -243,7 +243,6 @@ public class Python extends Service {
   public Python(String n, String id) {
     super(n, id);
 
-    subscribe(Runtime.getInstance().getName(), "registered");
     log.info("created python {}", getName());
 
     log.info("creating module directory pythonModules");
@@ -266,6 +265,46 @@ public class Python extends Service {
 
     createPythonInterpreter();
     attachPythonConsole();
+    
+    
+    //////// was in startService
+    
+
+    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
+        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
+        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+        + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
+    interp.exec(compiled);
+
+    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
+    StringBuffer initScript = new StringBuffer();
+    initScript.append("from time import sleep\n");
+    initScript.append("from org.myrobotlab.service import Runtime\n");
+    /* NOT NECESSARY ON CONSTRUCTION - handled on event onStarted
+    Iterator<String> it = svcs.keySet().iterator();
+    while (it.hasNext()) {
+      String fullname = it.next();
+      ServiceInterface sw = svcs.get(fullname);
+
+      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
+
+      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
+
+      // get a handle on running service
+      initScript.append(serviceScript);
+    }
+
+    exec(initScript.toString(), false);
+    */
+    log.info("starting python {}", getName());
+    if (inputQueueThread == null) {
+      inputQueueThread = new InputQueueThread(this);
+      inputQueueThread.start();
+    }
+    log.info("started python {}", getName());
+    
+    
   }
 
   public void openScript(String scriptName, String code) {
@@ -561,8 +600,12 @@ public class Python extends Service {
     openScript(filename, data);
   }
 
-  public void onRegistered(Registration r) {
-    ServiceInterface s = Runtime.getService(r.getName());
+  public void onStarted(String serviceName) {
+    ServiceInterface s = Runtime.getService(serviceName);
+    if (s == null) {
+      error("%s got started event from {} yet does not exist in registry", getName(), serviceName);
+      return;
+    }
 
     String registerScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n" + "from org.myrobotlab.framework import Service\n";
 
@@ -575,6 +618,7 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
+    log.info("here");
   }
 
   /**
@@ -626,42 +670,12 @@ public class Python extends Service {
     broadcastState();
   }
 
+  /* no longer needed
   @Override
   public void startService() {
     super.startService();
-
-    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
-        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
-        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-        + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
-    interp.exec(compiled);
-
-    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
-    StringBuffer initScript = new StringBuffer();
-    initScript.append("from time import sleep\n");
-    initScript.append("from org.myrobotlab.service import Runtime\n");
-    Iterator<String> it = svcs.keySet().iterator();
-    while (it.hasNext()) {
-      String fullname = it.next();
-      ServiceInterface sw = svcs.get(fullname);
-
-      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
-
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
-
-      // get a handle on running service
-      initScript.append(serviceScript);
-    }
-
-    exec(initScript.toString(), false);
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
   }
+  */
 
   @Override
   public void releaseService() {
