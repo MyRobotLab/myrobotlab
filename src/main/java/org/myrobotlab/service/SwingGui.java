@@ -400,6 +400,11 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
+        
+        if (isHeadless()) {
+          log.info("headless - no swing gui");
+          return;
+        }
 
     	// FIXME - this will be an issue of name collision in distributed mrl !!!
         String name = sw.getFullName();// sw.getName();
