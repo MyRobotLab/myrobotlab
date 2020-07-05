@@ -603,7 +603,7 @@ public class Python extends Service {
   public void onStarted(String serviceName) {
     ServiceInterface s = Runtime.getService(serviceName);
     if (s == null) {
-      error("%s got started event from {} yet does not exist in registry", getName(), serviceName);
+      error("%s got started event from %s yet does not exist in registry", getName(), serviceName);
       return;
     }
 

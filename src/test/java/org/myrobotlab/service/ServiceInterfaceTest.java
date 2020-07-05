@@ -74,12 +74,13 @@ public class ServiceInterfaceTest extends AbstractTest {
     // TODO: add a bunch more tests here!
     foo.startService();
     foo.stopService();
-    foo.releaseService();
 
     foo.startService();
     foo.save();
     foo.load();
     foo.stopService();
+
+    foo.releaseService();
 
     return true;
   }
@@ -115,6 +116,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     
     // start up python so we have it available to do some testing with.
     Python python = (Python) Runtime.start("python", "Python");
+    Service.sleep(1000);
     ServiceData sd = ServiceData.getLocalInstance();
     List<MetaData> sts = sd.getServiceTypes(); // there is also sd.getAvailableServiceTypes();
     
