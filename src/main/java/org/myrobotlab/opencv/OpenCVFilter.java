@@ -57,7 +57,10 @@ import org.slf4j.Logger;
 
 public abstract class OpenCVFilter implements Serializable {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
+  
   private static final long serialVersionUID = 1L;
+  
+  protected String type = null;
 
   static public String getCacheFile(String url) {
     return OpenCV.getCacheFile(url);
@@ -177,48 +180,46 @@ public abstract class OpenCVFilter implements Serializable {
   /**
    * number of channels of incoming image
    */
-  int channels;
+  protected int channels;
 
   /**
    * converters for the filter
    */
-  transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
+  transient protected OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
 
   /**
    * converter for the filter
    */
-  transient OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+  transient protected OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
 
   /**
    * reference to the last OpenCVData processed and the one this filter will
    * modify
    */
-  OpenCVData data;
+  protected OpenCVData data;
 
   /**
    * color of display if any overlay
    */
-  transient Color displayColor;
+  transient protected Color displayColor;
 
   /**
    * This allows the display method to be processed in the filter typically its
    * a conversion from opencv-jni-land to java-land and associated processing
    * for human consumption
    */
-  boolean displayEnabled = false;
+  protected boolean displayEnabled = false;
 
-  boolean displayExport = false;
+  protected boolean displayExport = false;
 
   /**
    * This will enable/disable the filter in the pipeline
    */
-  boolean enabled = true;
+  protected boolean enabled = true;
 
-  int height;
+  protected int height;
 
-  // transient CvSize imageSize;
-
-  transient Java2DFrameConverter jconverter = new Java2DFrameConverter();
+  transient protected Java2DFrameConverter jconverter = new Java2DFrameConverter();
 
   final public String name;
 
@@ -226,9 +227,9 @@ public abstract class OpenCVFilter implements Serializable {
 
   protected Boolean running;
 
-  public String sourceKey;
+  private  String sourceKey;
 
-  int width;
+  protected int width;
 
   public OpenCVFilter() {
     this(null);
@@ -240,6 +241,7 @@ public abstract class OpenCVFilter implements Serializable {
     } else {
       this.name = name;
     }
+    this.type = this.getClass().getSimpleName().substring("OpenCVFilter".length());
   }
 
   // TODO - refactor this back to single name constructor - the addFilter's new
@@ -247,7 +249,7 @@ public abstract class OpenCVFilter implements Serializable {
   // check to see if inputkeys and other items are valid
   public OpenCVFilter(String filterName, String sourceKey) {
     this.name = filterName;
-    this.sourceKey = sourceKey;
+    this.setSourceKey(sourceKey);
   }
 
   public void broadcastFilterState() {
@@ -502,6 +504,14 @@ public abstract class OpenCVFilter implements Serializable {
 
   public void put(PointCloud pc) {
     data.put(pc);
+  }
+
+  public String getSourceKey() {
+    return sourceKey;
+  }
+
+  public void setSourceKey(String sourceKey) {
+    this.sourceKey = sourceKey;
   }
 
 }

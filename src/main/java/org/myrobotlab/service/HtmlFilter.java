@@ -7,7 +7,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.TextListener;
 import org.myrobotlab.service.interfaces.TextPublisher;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * A service that will either strip out html from input text or wrap the input

@@ -9,7 +9,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinListener;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class Pir extends Service implements PinListener {

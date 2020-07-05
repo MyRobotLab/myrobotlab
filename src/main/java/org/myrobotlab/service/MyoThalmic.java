@@ -8,7 +8,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.MyoData;
 import org.myrobotlab.service.interfaces.MyoDataListener;
 import org.myrobotlab.service.interfaces.MyoDataPublisher;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.thalmic.myo.DeviceListener;

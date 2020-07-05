@@ -26,7 +26,6 @@ import org.myrobotlab.opencv.OpenCVFilterLloyd;
 import org.myrobotlab.programab.OOBPayload;
 import org.myrobotlab.service.interfaces.SpeechRecognizer;
 import org.myrobotlab.service.interfaces.SpeechSynthesis;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.slf4j.Logger;
 

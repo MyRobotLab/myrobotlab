@@ -15,7 +15,6 @@ import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
@@ -279,7 +278,6 @@ public class OculusRift extends Service implements PointPublisher {
     rightOpenCV = (OpenCV) Runtime.start(serviceName, "OpenCV");
     rightOpenCV.startService();
     // TODO: remove me this is a work around for opencv
-    rightOpenCV.setStreamerEnabled(false);
     rightOpenCV.setCameraIndex(rightCameraIndex);
     if (frameGrabberType != null) {
       rightOpenCV.setGrabberType(frameGrabberType);
@@ -298,7 +296,6 @@ public class OculusRift extends Service implements PointPublisher {
     leftOpenCV = (OpenCV) Runtime.start(getName() + "." + LEFT_OPEN_CV, "OpenCV");
     leftOpenCV.startService();
     // TODO: remove me this is a work around for opencv
-    leftOpenCV.setStreamerEnabled(false);
     leftOpenCV.setCameraIndex(leftCameraIndex);
     if (frameGrabberType != null) {
       leftOpenCV.setGrabberType(frameGrabberType);

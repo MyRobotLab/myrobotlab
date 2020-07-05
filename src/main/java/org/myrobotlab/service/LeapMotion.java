@@ -14,7 +14,6 @@ import org.myrobotlab.service.data.LeapData;
 import org.myrobotlab.service.interfaces.LeapDataListener;
 import org.myrobotlab.service.interfaces.LeapDataPublisher;
 import org.myrobotlab.service.interfaces.PointPublisher;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.leapmotion.leap.Controller;

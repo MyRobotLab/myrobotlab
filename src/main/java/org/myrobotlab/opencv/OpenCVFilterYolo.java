@@ -38,7 +38,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   // zero offset to where the confidence level is in the output matrix of the
   // darknet.
   private static final int CONFIDENCE_INDEX = 4;
-  private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
+  
+  transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
 
   private float confidenceThreshold = 0.25F;
   // the column in the detection matrix that contains the confidence level. (I
@@ -57,18 +58,17 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   int classifierThreadCount = 0;
 
-  DecimalFormat df2 = new DecimalFormat("#.###");
+  transient DecimalFormat df2 = new DecimalFormat("#.###");
 
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   boolean debug = false;
-  private Net net;
+  transient private Net net;
   ArrayList<String> classNames;
-  // public ArrayList<Classification> lastResult = null;
   public ArrayList<Classification> lastResult = null;
-  private volatile IplImage lastImage = null;
+  transient private volatile IplImage lastImage = null;
   private volatile boolean pending = false;
-  private transient Thread classifier;
+  transient private Thread classifier;
 
   public OpenCVFilterYolo(String name) {
     super(name);

@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractPinEncoder;
 import org.myrobotlab.service.interfaces.EncoderControl;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * AS5048A - SPI based 14 bit magnetic absolute position encoder.

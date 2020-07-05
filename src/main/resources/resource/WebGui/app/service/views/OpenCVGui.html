@@ -1,227 +1,211 @@
-<!-- OpenCVGui.html -->
-<div class="OpenCVStyle preventDragSelect">
-    <div class="row">
-        <div class="form-inline">
-            <div class="form-group">
-                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()">
-                    <span class="glyphicon glyphicon-play text-primary"></span>
-                    &nbsp;Start Capture
-                </button>
-                <label >Web View</label>
-                <toggle class="miniBTN" title="invert the motor" ng-model="webView" ng-change="toggleWebView()" on="" off="" size="btn-lg"/>
-                <label >Native View</label>
-                <toggle class="miniBTN" title="invert the motor" ng-model="nativeView" ng-change="toggleNativeView()" on="" off="" size="btn-lg"/>
-                <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
-                    <span class="glyphicon glyphicon-stop"></span>
-                    &nbsp;Stop Capture                
-                </button>
-            </div>
-            <div class="form-group">
-                <label>Grabber</label>
-                <select class="form-goup form-control" style="width: 120px!important;" title="Source list">
-                    <option selected>FIXME None</option>
-                    <option>OpenCV</option>
-                    <option>Mjpeg</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Source</label>
-                <select name="source" class="form-control" ng-model="source.type" ng-dropdown required ng-change="changeme()">
-                    <option ng-option value="Camera">Camera</option>
-                    <option ng-option value="File">InputFile</option>
-                    <option ng-option value="URL">URL</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <div id="Camera" ng-if="source.type == 'Camera'">
-                    <label>Index </label>
-                    <input type="hidden" name="sourceOption" value="camera" class="form-control"/>
-                    <select class="form-control" style="width:40px" ng-model="cameraIndexSelected" ng-change="msg.setCameraIndex(cameraIndexSelected)" id="cameraIndexSelected">
-                        <option ng-option value="0">0</option>
-                        <option ng-option value="1">1</option>
-                        <option ng-option value="2">2</option>
-                        <option ng-option value="3">3</option>
-                        <option ng-option value="4">4</option>
-                        <option ng-option value="5">5</option>
-                        <option ng-option value="6">6</option>
-                        <option ng-option value="7">7</option>
-                    </select>
-                </div>
-                <div id="File" ng-if="source.type == 'File'">
-                    <label>File </label>
-                    <input type="hidden" name="sourceOption" value="file" class="form-control"/>
-                    <input type="file" style="width:146px" class="form-control" ng-model="source.File"/>
-                </div>
-                <div id="URL" ng-if="source.type == 'URL'">
-                    <label>Address </label>
-                    <input type="hidden" name="sourceOption" value="url" class="form-control"/>
-                    <input type="text" style="width:146px" placeholder="http://example.com/video" class="form-control"/>
-                </div>
-            </div>
-            <!-- pull-right -->
-            <!--
-            <div class="form-group"> 
-                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()"><span class="glyphicon glyphicon-play text-primary"></span> &nbsp;Start Capture</button>
-                <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()"><span class="glyphicon glyphicon-stop"></span> &nbsp;Stop Capture</button>
-            </div>
-            -->
+<!-- div class="OpenCVStyle preventDragSelect" prevents dropdown-->
+<div class="row">
+    <div class="form-inline">
+        <div class="form-group">
+            <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()">
+                <span class="glyphicon glyphicon-play text-primary"></span>
+                &nbsp;Start Capture
+            
+            
+            
+            </button>
+            <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
+                <span class="glyphicon glyphicon-stop"></span>
+                &nbsp;Stop Capture
+            
+            
+            
+            </button>
+            <label>Web Viewer</label>
+            <toggle class="miniBTN" title="invert the motor" ng-model="service.webViewer" ng-change="service.webViewer?msg.startWebViewer():msg.stopWebViewer()" on="" off="" size="btn-lg"/>
+            <label>Native Viewer</label>
+            <toggle class="miniBTN" title="invert the motor" ng-model="service.nativeViewer" ng-change="service.nativeViewer?msg.startNativeViewer():msg.stopNativeViewer()" on="" off="" size="btn-lg"/>
+        </div>
+        <div class="form-group">
+            <label>Grabber</label>
+            <select ng-disabled="service.capturing" class="form-control selectpicker" ng-model="service.grabberType" ng-change="msg.setGrabberType(service.grabberType)">
+                <option ng-repeat="type in service.grabberTypes">{{type}}</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Source</label>
+            <select ng-disabled="service.capturing" class="form-control" name="source" ng-model="service.inputSource" ng-dropdown required ng-change="msg.setInputSource(service.inputSource)">
+                <option>camera</option>
+                <option>imagefile</option>
+                <option>pipeline</option>
+            </select>
+        </div>
+        <div class="form-group" ng-show="service.inputSource == 'camera'">
+            <label>Index </label>
+            <select ng-disabled="service.capturing" class="form-control" name="cIndex" ng-model="camera.index" ng-dropdown required ng-change="msg.setCameraIndex(camera.index)">
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+            </select>
+        </div>
+        <div id="File" ng-if="source.type == 'File'">
+            <label>File </label>
+            <input type="hidden" name="sourceOption" value="file" class="form-control"/>
+            <input type="file" style="width:146px" class="form-control" ng-model="source.File"/>
+        </div>
+        <div id="URL" ng-if="source.type == 'URL'">
+            <label>Address </label>
+            <input type="hidden" name="sourceOption" value="url" class="form-control"/>
+            <input type="text" style="width:146px" placeholder="http://example.com/video" class="form-control"/>
         </div>
     </div>
-    <!-- /.row -->
-    <hr>
-    <div class="row">
-        <div class="col-md-6">
-            <div>
-                <label>Video Feed</label>
-                <div class="miniBTN pull-right">
-                    <span>
-                        Undock                       
+</div>
+<hr>
+<div class="row">
+    <!-- div ng-show="service.webViewer" class="col-md-6" -->
+    <div class="col-md-6">
+        <div>
+            <label>Video Feed</label>
+            <div class="miniBTN pull-right">
+                <span>
+                    Undock                       
                         <toggle ng-model="toggleUndock" ng-change="changed()" size="btn-lg"/>
-                    </span>
-                </div>
+                </span>
             </div>
-            VIDEO TAG
-            <video src="http://localhost:9090?listen" />
-            <div class="videoContainer">
-                <!-- video canvas -->
-                <!-- Maybe if you can know the aspect ratio of the origin, it can be set here. -->
-                <!-- <canvas class="ratio" width="16" height="9"></canvas> -->
-                <!--  I am 4:3  -->
-                <canvas class="ratio" width="4" height="3"></canvas>
-                <div class="videoContent">
-                    <!-- NO SIGNAL -->
-                    <div class="vcenter">
-                        * I am 4:3 *<br/>
-                        NO SIGNAL <br/>
-                        <br/>Press [ Start Capture ]
-                    
-                    
-                    </div>
-                    <!-- VIDEO -->
+        </div>
+        <img data-ng-src="{{getDisplayImage()}}"/>
+        <!-- /videoContainer -->
+        <div class="videoInfo">
+            <span class="glyphicon glyphicon-info-sign gray1"></span>
+            {{service.displayFilter}} mouse x y 640x480 {{stats.fps}} fps  latency {{stats.latency}} ms
+        
+        </div>
+        <br/>
+        <label>Output</label>
+        <table class="col-md-12 buttonsTable">
+            <tr>
+                <td colspan="2">
+                    <input type="text" name="outputFolder" placeholder="data/OpenCV/output" value="data/OpenCV/output" class="form-control"/>
+                </td>
+                <td style="width:132px">
+                    <button class="btn btn-default" style="width:126px">Set</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <select name="output" class="form-control" ng-model="output.type" ng-dropdown required>
+                        <option ng-option value="video" selected>Video</option>
+                        <option ng-option value="frames">Frames sequence</option>
+                    </select>
+                </td>
+                <td style="width:104px">
                     <!--
-                    <img class="responsive-img" src="img/InMoov2/background.png" style="max-width:100%"/>
-                    -->
-                </div>
-            </div>
-            <!-- /videoContainer -->
-            <div class="videoInfo">
-                <span class="glyphicon glyphicon-info-sign gray1"></span>
-                mouse x y 640x480 25 fps faceDetect
-            
-            
-            </div>
-            <br/>
-            <label>Output</label>
-            <table class="col-md-12 buttonsTable">
-                <tr>
-                    <td colspan="2">
-                        <input type="text" name="outputFolder" placeholder="data/OpenCV/output" value="data/OpenCV/output" class="form-control"/>
-                    </td>
-                    <td style="width:132px">
-                        <button class="btn btn-default" style="width:126px">Set</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select name="output" class="form-control" ng-model="output.type" ng-dropdown required>
-                            <option ng-option value="video" selected>Video</option>
-                            <option ng-option value="frames">Frames sequence</option>
-                        </select>
-                    </td>
-                    <td style="width:104px">
-                        <!--
                         <button class="btn btn-default" style="width:100px">
                             <span class="glyphicon glyphicon-record"></span> REC
                         </button>
                         -->
-                        <button class="btn btn-default" style="width:100px">
-                            <span class="glyphicon glyphicon-stop"></span>
-                            STOP
-                        
-                        
-                        </button>
-                    </td>
-                    <td style="width:132px">
-                        <button class="btn btn-default" style="width:126px">
-                            <span class="glyphicon glyphicon-camera"></span>
-                            Snapshot
-                        
-                        
-                        </button>
-                    </td>
-                </tr>
-                <td colspan="3">
-                    <!-- RECORDING -->
-                    <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                        <span></span>
-                        RECORDING
+                    <button class="btn btn-default" style="width:100px">
+                        <span class="glyphicon glyphicon-stop"></span>
+                        STOP
                     
-                    </div>
-                    <!-- Stopped -->
-                    <!--   
-                    <div class="progress progress-gray" role="progressbar active" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">RECORDING</div> 
-                    -->
+                    
+                    
+                    </button>
                 </td>
-            </table>
-        </div>
-        <!-- /.col-md-6 -->
-        <div class="col-md-6">
-            <table class="col-md-12">
-                <tr>
-                    <td>
-                        <label>Current filters</label>
-                    </td>
-                    <td></td>
-                    <td>
-                        <label>Available filters</label>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <select class="custom-select col-md-12" size="7">
-                            <option selected>Open this select menu</option>
-                            <option value="1">Canny</option>
-                        </select>
-                    </td>
-                    <td class="text-center align-middle cellPadding">
-                        <button class="btn btn-default">
-                            <span class="glyphicon glyphicon-arrow-left"></span>
-                        </button>
-                        <br/>
-                        <br/>
-                        <button class="btn btn-default">
-                            <span class="glyphicon glyphicon-arrow-right"></span>
-                        </button>
-                    </td>
-                    <td>
-                        <select class="custom-select col-md-12" size="7">
-                            <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
-                        </select>
-                    </td>
-                </tr>
-            </table>
-            <div class="col-md-12">
-                <br/>
-                <hr>
-                <label>Filter parameters: FaceDetect</label>
-                <br/>
-                Lorem ipsum dolor sit amet, consectetur<br/>
-                adipiscing elit
-                <br/>
-                sed do eiusmod tempor incididunt<br/>ut labore et dolore magna aliqua.                
-            
-            
-            </div>
-        </div>
-        <!-- /.col-md-6 -->
+                <td style="width:132px">
+                    <button class="btn btn-default" style="width:126px">
+                        <span class="glyphicon glyphicon-camera"></span>
+                        Snapshot
+                    
+                    
+                    
+                    </button>
+                </td>
+            </tr>
+            <td colspan="3">
+                <!-- RECORDING -->
+                <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                    <span></span>
+                    RECORDING
+                
+                
+                
+                </div>
+            </td>
+        </table>
     </div>
-    <!-- /.row -->
-    <div class="row">
-        <div class="col-md-1">
-            <button class="btn btn-default" ng-click="msg.setDisplay(true)">display</button>
-        </div>
-        <div class="col-md-5">
-            <img class="responsive-img" src="../../OpenCV/cv-20382.png"/>
+    <div class="col-md-6">
+        <table class="col-md-12">
+            <tr>
+                <td>
+                    <label>Current filters</label>
+                </td>
+                <td></td>
+                <td>
+                    <label>Available filters</label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <select class="custom-select col-md-12" size="7" ng-model="selectedFilter" ng-change="setDisplayFilter(selectedFilter)">
+                        <option ng-repeat="(key, value) in service.filters">{{ key }}</option>
+                    </select>
+                </td>
+                <td class="text-center align-middle cellPadding">
+                    <button class="btn btn-default" ng-click="addFilter()">
+                        <span class="glyphicon glyphicon-arrow-left"></span>
+                    </button>
+                    <br/>
+                    <br/>
+                    <button class="btn btn-default" ng-click="msg.removeFilter(selectedFilter)">
+                        <span class="glyphicon glyphicon-arrow-right"></span>
+                    </button>
+                </td>
+                <td>
+                    <select class="custom-select col-md-12" ng-model="selectedFilterType" size="7">
+                        <option ng-repeat="filter in possibleFilters">{{ filter }}</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+
+        <div ng-show="displayFilterType('Canny')" class="col-md-12">
+            Canny edge detection is a technique to extract useful structural information from different vision objects and dramatically reduce the amount of data to be processed. 
+            It has been widely applied in various computer vision systems.             
+            <br/>
+            <hr>
+            Aperture Size {{getFilter().apertureSize}}  <rzslider class="custom-slider3" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/><br/>
+            Low Threshold {{getFilter().lowThreshold}}  <rzslider class="custom-slider3" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/><br/>
+            High Threshold {{getFilter().highThreshold}} <rzslider class="custom-slider3" rz-slider-model="speedSlider.value" rz-slider-options="speedSlider.options"/><br/>
+            <button class="btn" ng-click="setFilterState()"> update</button>
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-md-1">
+        <button class="btn btn-default" ng-click="msg.setDisplay(true)">display</button>
+    </div>
+    <div class="col-md-5">
+        <img class="responsive-img" src="../../OpenCV/cv-20382.png"/>
+    </div>
+</div>
+<!-- /div -->
+<script type="text/ng-template" id="addFilterDialog.html">
+    
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="cancel()" aria-hidden="true">&times;</button>
+        Add new filter:
+    </div>
+        <div class="modal-body">
+        <form class="form-inline" ng-submit="addNamedFilter(newUserName)">
+        <div class="input-group">     
+            name <input  ng-enter="addNamedFilter(newUserName)" class="form-control" type="text" ng-model="newUserName" autofocus /><br>           
+        </div>
+        </form>
+        </div>
+        <div class="modal-footer">            
+            <span class="input-group-btn"><button class="btn btn-default" ng-click="addNamedFilter(newUserName)">add</button></span>        
+            <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
+        </div>
+
+</script>

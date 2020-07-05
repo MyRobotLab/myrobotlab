@@ -6,7 +6,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
 import org.myrobotlab.service.data.Locale;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 /**
  * 
@@ -33,7 +32,7 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
 
     // Runtime.start("gui", "SwingGui");
     Runtime runtime = Runtime.getInstance();
-    // runtime.setLocale("de");
+    runtime.setLocale("de");
     
     WebkitSpeechRecognition webkit = (WebkitSpeechRecognition) Runtime.start("webkit", "WebkitSpeechRecognition");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");

@@ -15,7 +15,6 @@ import org.myrobotlab.service.data.SerialRelayData;
 import org.myrobotlab.service.interfaces.SerialDataListener;
 import org.myrobotlab.service.interfaces.SerialDevice;
 import org.myrobotlab.service.interfaces.SerialRelayListener;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class SerialRelay extends Service implements SerialDevice, Attachable {

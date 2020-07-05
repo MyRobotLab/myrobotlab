@@ -32,7 +32,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.roomba.RoombaComm;
 import org.myrobotlab.roomba.RoombaCommPort;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**

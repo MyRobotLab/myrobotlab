@@ -14,7 +14,6 @@ import org.myrobotlab.document.connector.ConnectorState;
 import org.myrobotlab.document.transformer.ConnectorConfig;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.DocumentPublisher;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 public class FileConnector extends AbstractConnector implements DocumentPublisher, FileVisitor<Path> {

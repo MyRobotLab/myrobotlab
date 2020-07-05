@@ -12,10 +12,6 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
 
 
     let panelNames = new Set()
-    panelNames.add('servo1')
-    panelNames.add('servo2')
-    panelNames.add('servo3')
-
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -123,7 +119,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     // this method removes subPanels references from released service
     this.onReleased = function(panelName) {
         if (panelNames.has(panelName)) {
-            $scope.subPanels[panelName]           
+            delete $scope.subPanels[panelName]           
         }
         console.info('here')
     }
