@@ -3451,8 +3451,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // msg
       // but just in case ...
       for (Object o : msg.data) {
-        if (msg.method.equals("remoteRegister")) {
-          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).getName(), msg.name));
+        if (o instanceof Registration) {
+          System.out.println(String.format("%s %s for %s", msg.method, ((Registration) msg.data[0]).getName(), msg.name));
         } else {
           System.out.println(CodecUtils.toPrettyJson(o));
         }
