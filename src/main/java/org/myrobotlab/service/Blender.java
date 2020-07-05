@@ -79,10 +79,12 @@ public class Blender extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Blender.class);
+  transient public final static Logger log = LoggerFactory.getLogger(Blender.class);
 
   public static final String SUCCESS = "SUCCESS";
-  Socket control = null;
+  
+  transient Socket control = null;
+  
   transient ControlHandler controlHandler = null;
 
   String host = "localhost";

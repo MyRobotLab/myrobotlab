@@ -476,6 +476,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
           si.onRegistered(new Registration(s));
         }
+        // don't register or create or start event self
+        if (s.getName().equals(si.getName())) {
+          continue;
+        }        
         si.onCreated(s.getName());
         if (si.isRunning()) {
           si.onStarted(s.getName());
@@ -3447,8 +3451,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // msg
       // but just in case ...
       for (Object o : msg.data) {
-        if (msg.method.equals("remoteRegister")) {
-          System.out.println(String.format("remoteRegister %s for %s", ((Registration) msg.data[0]).getName(), msg.name));
+        if (o instanceof Registration) {
+          System.out.println(String.format("%s %s for %s", msg.method, ((Registration) msg.data[0]).getName(), msg.name));
         } else {
           System.out.println(CodecUtils.toPrettyJson(o));
         }

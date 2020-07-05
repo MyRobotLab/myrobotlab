@@ -60,7 +60,11 @@ public class InMoov2Meta extends MetaData {
     addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
 
     // Global - undecorated by self name
-    addPeer("python", "python", "Python", "shared Python service");
+    // currently InMoov manually calls releasePeers - when it does
+    // the interpreter is in a process of shutdown while all inmoov peer services have not
+    // run their initialization scripts - npe and other errors can happen when creating and
+    // releasing all peers in quick succession
+    // addPeer("python", "python", "Python", "shared Python service");
 
     // latest - not ready until repo is ready
     addDependency("fr.inmoov", "inmoov2", null, "zip");

@@ -603,7 +603,12 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   public Python getPython() {
     try {
       if (python == null) {
-        python = (Python) startPeer("python");
+        // python = (Python) startPeer("python");
+        // REALLY NEEDS TO BE CLEANED UP - no direct references
+        // "publish" scripts which should be executed :(
+        // python = (Python) startPeer("python");
+        python = (Python)Runtime.start("python", "Python"); // this crud should stop
+
       }
 
     } catch (Exception e) {

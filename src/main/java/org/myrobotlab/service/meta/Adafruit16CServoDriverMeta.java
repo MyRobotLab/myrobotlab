@@ -14,7 +14,7 @@ public class Adafruit16CServoDriverMeta extends MetaData {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @return MetaData - returns all the data
+   * 
    * 
    */
   public Adafruit16CServoDriverMeta() {

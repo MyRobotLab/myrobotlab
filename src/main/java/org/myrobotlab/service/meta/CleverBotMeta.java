@@ -14,7 +14,7 @@ public class CleverBotMeta extends MetaData {
    * to be constructed. It has description, categories, dependencies, and peer
    * definitions.
    * 
-   * @return MetaData - returns all the data
+   * 
    * 
    */
   public CleverBotMeta() {

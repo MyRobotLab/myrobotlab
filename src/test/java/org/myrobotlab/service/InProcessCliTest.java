@@ -1,6 +1,5 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -8,14 +7,10 @@ import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.myrobotlab.client.InProcessCli;
 import org.myrobotlab.codec.CodecUtils;
-import org.myrobotlab.service.Runtime;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
@@ -31,18 +26,6 @@ public class InProcessCliTest extends AbstractTest {
     bos = new ByteArrayOutputStream();
   }
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
-  }
-  
   public void write(String str) throws IOException {
     pipe.write((str + "\n").getBytes());
     // must read it off and process the data
