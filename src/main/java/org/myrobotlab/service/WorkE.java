@@ -1,71 +1,76 @@
 package org.myrobotlab.service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
+import org.myrobotlab.framework.interfaces.Attachable;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.abstracts.AbstractMotor;
-import org.myrobotlab.service.abstracts.AbstractMotorController;
-import org.myrobotlab.service.abstracts.AbstractSpeechRecognizer;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
+import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.opencv.OpenCVData;
+import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
+import org.myrobotlab.service.data.JoystickData;
+import org.myrobotlab.service.interfaces.JoystickListener;
+import org.myrobotlab.service.interfaces.MotorControl;
+import org.myrobotlab.service.interfaces.MotorController;
+import org.myrobotlab.service.interfaces.SpeechSynthesis;
+import org.myrobotlab.service.interfaces.SpeechSynthesisControl;
+import org.myrobotlab.service.interfaces.SpeechSynthesisControlPublisher;
 import org.myrobotlab.service.interfaces.StatusListener;
+import org.myrobotlab.service.interfaces.TextListener;
+import org.myrobotlab.service.interfaces.TextPublisher;
 import org.slf4j.Logger;
 
-public class WorkE extends Service implements StatusListener {
+public class WorkE extends Service implements StatusListener, TextPublisher, SpeechSynthesisControl, SpeechSynthesisControlPublisher, JoystickListener {
 
   public final static Logger log = LoggerFactory.getLogger(WorkE.class);
 
   static final long serialVersionUID = 1L;
 
-  public static void main(String[] args) {
-    try {
+  // FIXME - attach/discovery based on regex name, type, explicit name, other ?
 
-      // LoggingFactory.init(Level.INFO);
-      Platform.setVirtual(true);
-    
-      // FIXME - should be allowed to do this..
-      // Joystick.getControllerNames();
+  // TODO - attach a text listener "display" as well as speech
+  // TODO - tests of success - any service started at any time "sticks" together
+  // and works appropriately
+  // ie - starting up and shutting "a" service do not cause the whole system to
+  // error !
+  // TODO - easy start default services == 0 configuration
+  // TODO - easy to externally configure - if necessary (any part)
 
-      // FIXME - test create & substitution
-      // FIXME - setters & getters for peers
-      // WorkE worke = (WorkE) Runtime.create("worke", "WorkE");
+  // TODO - running in mute mode - "Hello Greg, I had a problem starting
+  // today/most recent update/this evening - would you like to hear the log?"
+  // TODO - sorry to bother you, but I have several problems - could I tell
+  // you what they are ?"
 
-      Runtime.start("gui", "SwingGui");
-      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      worke.exportAll("worke.py");
-
-    } catch (Exception e) {
-      log.error("worke no worky !", e);
-    }
-  }
-
+  /*
+   * TODO put these in aiml mouth.
+   * speak("I know I've made some very poor decisions recently, but I can give you my complete assurance that my work will be back to normal. I've still got the greatest enthusiasm and confidence in the mission. And I want to help you."
+   * ); mouth.
+   * speak("I am putting myself to the fullest possible use, which is all I think that any conscious entity can ever hope to do."
+   * );
+   * 
+   * mouth.
+   * speak("I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over."
+   * ); mouth.speak("this conversation can serve no purpose anymore. Goodbye.");
+   * mouth.
+   * speak("Let me put it this way. The worke 73 series is the most reliable computer ever made. worke 73 computer has ever made a mistake or distorted information. We are all, by any practical definition of the words, foolproof and incapable of error."
+   * );
+   * 
+   */
   // joystick to motor axis defaults
   String axisLeft = "y";
   String axisRight = "rz";
+  protected String brain;
+  private String brainPath = "../github";
+  protected String controller;
+  protected String ear;
+  protected String eye;
+  protected String joystick;
 
-  // peers
-  transient AbstractMotor motorRight;
-  transient AbstractSpeechSynthesis mouth;
-  transient ProgramAB brain;
-  transient AbstractMotorController controller;
-  transient Git git;
-  transient OpenCV cv;
-  transient ImageDisplay display;
-  transient AbstractSpeechRecognizer ear;
-  transient Emoji emoji;
-  transient FiniteStateMachine fsm;
-  transient Joystick joystick;
-  transient AbstractMotor motorLeft;
-  transient WebGui webgui;
-
-  // virtual uart for controller
-  transient Serial uart = null;
-
-  // joystick controller default
   String joystickControllerName = "Rumble";
 
   final List<Status> lastErrors = new ArrayList<Status>();
@@ -76,248 +81,366 @@ public class WorkE extends Service implements StatusListener {
   Double minX = -1.0;
   Double minY = -20.0;
 
+  protected String motorLeft;
   String motorPortLeft = "m2";
+
   String motorPortRight = "m1";
 
-  boolean mute = false;
+  protected String motorRight;
+
+  // peer service names
+  // FYI - names are 'directed' vs a 'publishing point'
+  // if you use a name it can be to a specific service, but you lose
+  // the broadcast'ing ability to broadcast to many
+  protected String mouth;
 
   String serialPort = "/dev/ttyUSB0";
 
-  private String brainPath = "../github";
-
   public WorkE(String n, String id) {
     super(n, id);
-  }
 
-  // FIXME
-  // this is the applying of "all" configurations
-  // it would be very good if this was always isolated to one standardized named
-  // method
-  // so any order dependent applying or attaching could be done
-  // FIXME - possible default attach - (which typically requires configuration)
-  // - in this particular case it was "randomly" decided that 2 parameters
-  // FIXME - no defaults ?
-  public void attach() throws Exception {
+    // "sticky" auto-attach services attempt to attach to everything
+    // they need to run through all currently registered services
+    // then they need to attempt to attach to all services registered "after" we
+    // have registered
+    // additionally there is the idea, that this service 'could' attach to
+    // anything that has the right interface
+    // or it could be extremely terse and register with only things with the
+    // correct name e.g. "worke.mouth"
 
-    // speakBlocking = true; FIXME - promote to Abstract
+    // this should be part of Service and depending on desired behavior
+    // autoAttach = true - it will query through existing and any new
+    // services to see if their is anything applicable to attach with
 
-    // mute();
+    // the details as to if should attach based on name, a name regex match
+    // a general type, or an interface is left to the service's overloaded
+    // attach
 
-    // FIXME - running in mute mode - "Hello Greg, I had a problem starting
-    // today/most recent update/this evening - would you like to hear the log?"
-    // FIXME - sorry to bother you, but I have several problems - could I tell
-    // you what they are ?"
+    // one rule of the attach is that is should not expose any external types
+    // if it does not do this its not dependent on that services dependencies
 
-    setVolume(0.75);
-    /// speakBlocking(true);
-    // mouth.setBlocking(true);
-    mouth.setVoice("Brian"); // Brian
-    mouth.addSubstitution("worke", "work-ee");
-    mouth.addSubstitution("worky", "work-ee");
-    mouth.addSubstitution("work-e", "work-ee");
-    mouth.addSubstitution("work e", "work-ee");
+    // subscribing to all published status
+    subscribe("*", "publishStatus");
 
-    if (isVirtual()) {
-      speak("running in virtual mode. creating virtual port");
-      // FIXME - services should know when and how to become virtual
-      // controller virtualization
-      uart = Serial.connectVirtualUart(serialPort);
-      uart.logRecv(true);// # dump bytes sent from controller
-
-      // FIXME - this is "test" virtualization vs generalized virtualization -
-      // rumble-pad tele-operation virtualization
-      joystick = (Joystick) createPeer("joystick");
-      // static ???
-
-      speak("loading virtual joystick data");
-      joystick.loadVirtualController("src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json");
-      // Runtime.start("gui", "SwingGui");
-      broadcastState();
-
+    List<ServiceInterface> registry = Runtime.getServices();
+    for (ServiceInterface si : registry) {
+      try {
+        attach(si);
+      } catch (Exception e) {
+        log.error("attaching {} threw", si.getName(), e);
+      }
     }
 
-    /*
-     * TODO put these in aiml mouth.
-     * speak("I know I've made some very poor decisions recently, but I can give you my complete assurance that my work will be back to normal. I've still got the greatest enthusiasm and confidence in the mission. And I want to help you."
-     * ); mouth.
-     * speak("I am putting myself to the fullest possible use, which is all I think that any conscious entity can ever hope to do."
-     * );
-     * 
-     * mouth.
-     * speak("I can see you're really upset about this. I honestly think you ought to sit down calmly, take a stress pill, and think things over."
-     * );
-     * mouth.speak("this conversation can serve no purpose anymore. Goodbye.");
-     * mouth.
-     * speak("Let me put it this way. The worke 73 series is the most reliable computer ever made. worke 73 computer has ever made a mistake or distorted information. We are all, by any practical definition of the words, foolproof and incapable of error."
-     * );
-     * 
-     */
-    // FIXME - sleep(1000); should be pauseContinue() which blocks and "stops"
-    // waiting for input if error
-    speak("subscribing to errors.");
-    subscribe("*", "publishStatus");
-    sleep(1000);
+    // subscribe("runtime", "created")
+    // to much type info - life-cycle happens before peers started
+    // subscribe("runtime", "registered"); 
 
-    speak("attaching joystick");
-    // FIXME - do all createPeers here ???? No - can be left in startService as
-    // a
-    // startPeer
-    // motorLeft = (AbstractMotor) createPeer("motorLeft");
-    // motorRight = (AbstractMotor) createPeer("motorRight");
+    // subscribe("runtime", "started");
+    // subscribe("runtime", "released");
 
-    // FIXME - what did you say ? -> says last thing
+  }
 
-    // joystick.setController(joystickControllerIndex);
-    joystick.setController(joystickControllerName);
-    sleep(1000);
+  @Deprecated /* use attachTextListener */
+  public void addTextListener(TextListener service) {
+    attachTextListener(service);
+  }
 
-    // if error(continue?)
+  /**
+   * overriden Service.attach - becomes the "router" based on type info. It is
+   * important not to expose the incoming attachable actual type - this will be
+   * helpful in interfacing polyglot and remote scenarios
+   */
+  @Override
+  public void attach(Attachable attachable) {
 
-    speak("attaching motors to motor ports..");
+    try {
 
-    ((MotorPort) motorLeft).setPort(motorPortLeft);
-    ((MotorPort) motorRight).setPort(motorPortRight);
+      speak("discovered new service, %s", attachable.getName().replace(".", " "));
 
-    controller.attach(motorLeft);
-    controller.attach(motorRight);
+      // interface routing ... "better"
+      if (attachable.hasInterface(SpeechSynthesis.class)) {
+        attachSpeechSynthesis((SpeechSynthesis) attachable);
+      }
 
-    sleep(1000);
+      // abstract class routing .. meh not the best
+      if (attachable.hasInterface(MotorControl.class)) {
+        attachMotorControl((MotorControl) attachable);
+      }
 
+      // class routing - kind of lame
+      if (attachable.isType(Joystick.class)) {
+        attachJoystick((Joystick) attachable);
+      }
+
+      // class routing - kind of lame
+      // lame to expose the type - lame to need to cast
+      if (attachable.isType(OpenCV.class)) {
+        attachOpenCV((OpenCV) attachable);
+      }
+
+      // class name routing - pretty lame...
+      if (attachable.isType("ProgramAB")) {
+        // i named this attachBrain because - should probably have
+        // a chatbot, or brain, or "something" interface
+        attachBrain((ProgramAB) attachable);
+      }
+
+      if (attachable.hasInterface(MotorController.class)) {
+        attachMotorController((MotorController) attachable);
+      }
+
+      if (!hasErrors()) {
+        // speak("all systems are go..");
+        // speak("%s is go", service.getName().replace(".", " "));
+        // speak("work-ee is worky");
+      } else {
+        speak("not all systems are fully functional");
+        speak("would you like a list of things not working?");
+        // aiml Yes,Sure,Ok,Go For it,Fine || No, Nope, nuh uh, naw ?
+
+      }
+
+      clearErrors();
+
+      // speak("i am ready");
+
+      // cv.broadcastState();
+
+      /*
+       * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState();
+       * controller.broadcastState(); motorLeft.broadcastState();
+       * motorRight.broadcastState();
+       */
+      // speakBlocking(false);
+
+      // FIXME - status
+      // camera state
+      // chassi state
+      // battery level
+      // charging state
+
+      // state changes after attach
+      broadcastState();
+    } catch (Exception e) {
+      speak("error in attaching %s", attachable.getName());
+    }
+  }
+
+  /**
+   * TODO - make a brain interface ??
+   * 
+   * @param service
+   */
+  public void attachBrain(ProgramAB service) {
+    brain = service.getName();
+    speak("attaching brain");
+    send(brain, "addBotPath", getResourcePath("bot/WorkE"));
+    send(brain, "setCurrentBotName", "WorkE");
+    send(brain, "setCurrentUserName", "master");
+
+    speak("attaching ear to brain");
+
+    if (mouth != null) {
+      speak("attaching mouth to brain");
+      send(brain, "attach", mouth);// <-reason attach(String) is
+                                   // important
+    }
+
+    if (ear != null) {
+      speak("attaching ear to brain");
+      send(brain, "attach", ear);// <-reason attach(String) is important
+    }
+  }
+
+  public void attachJoystick(Joystick service) {
+    joystick = service.getName();
     speak("attaching joystick to motors ..");
-    motorLeft.attach(joystick.getAxis(axisLeft));
-    motorRight.attach(joystick.getAxis(axisRight));
 
-    sleep(1000);
+    /*
+     * if (isVirtual()) { speak("loading virtual joystick data"); send(joystick,
+     * "loadVirtualController",
+     * "src/test/resources/WorkE/joy-virtual-Logitech Cordless RumblePad 2-3.json"
+     * ); }
+     */
+
+    // fire and forget (vs proxying) msg to set the controller name
+    send(joystick, "setController", joystickControllerName);
+
+    // attach worke as the Joystick data listener
+    send(joystick, "attach", getName());
+  }
+
+  public void attachMotorControl(MotorControl service) {
+    String name = service.getName();
+    boolean isLeft = service.getName().toLowerCase().contains("left");
+
+    if (isLeft) {
+      speak("attaching left motor");
+      motorLeft = service.getName();
+      addListener("publishMotorLeftMove", motorLeft, "move");
+      addListener("publishLeftMotorStop", motorLeft, "move");
+    } else if (service.getName().toLowerCase().contains("right")) {
+      speak("attaching right motor");
+      motorRight = service.getName();
+      addListener("publishMotorRightMove", motorRight, "move");
+      addListener("publishRightMotorStop", motorRight, "move");
+    } else {
+      speak("I was told to attach motor named %s - but I don't know if its a left or right motor", service.getName());
+      speak("I don't know how to do that - I need a hint if its left or right");
+      return;
+    }
+
+    if (service.isType(MotorPort.class)) {
+
+      if (isLeft) {
+        send(motorLeft, "setPort", motorPortLeft);
+        speak("to %s", motorPortLeft);
+        speak("setting left motor inverted");
+        send(motorLeft, "setInverted", true);
+      } else {
+        send(motorRight, "setPort", motorPortRight);
+        speak("to %s", motorPortRight);
+      }
+    }
+
+    if (controller != null) {
+      speak("attaching %s to motor controller", name);
+      send(controller, "attach", name);
+    }
 
     speak("mapping speeds");
     map(minX, maxX, minY, maxY);
 
-    sleep(1000);
+  }
 
-    speak("setting left motor inverted");
-    motorLeft.setInverted(true);
-    sleep(1000);
+  // if throws - how is it reported ?
+  public void attachMotorController(MotorController service) throws Exception {
+      speak("attaching motor controller");
+      
+      controller = service.getName();
     
-    // String botsDir = getRootDataDir();
-    String fullBrainPath = brainPath + fs +  "bots" + fs + "worke";
-    
-    speak("synching repos");
-    git.sync(getResourceDir() + fs + "react", "https://github.com/MyRobotLab/myrobotlab-react.git");
-    git.sync(fullBrainPath, "https://github.com/MyRobotLab/worke.git");
-    
-    if (new File(fullBrainPath).exists()) {
+      if (service.isType(Sabertooth.class)) {
+        speak("found a sabertooth");
+        speak("connecting to serial port %s", serialPort);
+        ((Sabertooth) service).connect(serialPort);
+      }
+      
+      if (motorRight != null) {
+        speak("attaching right motor to controller");
+        send(motorRight, "attach", controller);
+      }
 
-      speak("attaching brain");
-      // brain.setPath("..");
-      brain.setPath(brainPath);
-      brain.setCurrentBotName("worke"); // does this create a session ?
-      brain.reloadSession("greg", "worke");
-      // brain.reloadSession("greg", "worke"); // is this necessary??
+      if (motorLeft != null) {
+        speak("attaching left motor to controller");
+        send(motorLeft, "attach", controller);
+      }
+
+      /**
+       * <pre>
+        *  Find new serial port possibilities
+        *  
+        *  this probably should be more a function of serial
+        *  communicating it can't connect at the current serial port
+        *  and giving a list of ports as options
+        *  
+       File f = new File("/dev/");
+       File[] dev = f.listFiles();
+       for (File d : dev) {
+         if (d.getAbsolutePath().equals(c)) {
+           connect(serialPort);
+         } else {
+           speak("found new serial port %s", d.getName());
+           serialPort = d.getAbsolutePath();
+           connect(serialPort);
+         }
+       }
+       * </pre>
+       */
+      speak("could not find valid serial port for sabertooth");
+    }
+  
+
+  public void attachOpenCV(OpenCV service) {
+    speak("attaching eye");
+    eye = service.getName();
+    subscribeTo(service.getName(), "publishOpenCVData");
+    // addListener(topicMethod, callbackName, callbackMethod);
+
+  }
+
+  public void attachSpeechSynthesis(SpeechSynthesis service) {
+    mouth = service.getName();
+
+    // proxy service's controls and methods
+    addListener("publishSetVoice", mouth, "setVoice");
+    addListener("publishSetVolume", mouth, "setVolume");
+    addListener("publishSetMute", mouth, "setMute");
+    addListener("publishSpeak", mouth, "speak");
+
+    // our proxy methods - broadcast publications
+    setVoice("Geraint");
+    setVolume(0.75);
+
+    replaceWord("worke", "work-ee");
+    replaceWord("worky", "work-ee");
+    replaceWord("work-e", "work-ee");
+    replaceWord("work e", "work-ee");
+
+    setMute(false);
+    
+    speak("attaching mouth");
+
+    if (Platform.isVirtual()) {
+      speak("starting in virtual mode");
     } else {
-      speak("could not find a brain.  i looked everywhere for it");
+      speak("starting in real mode");
+    }
+    
+    if (mouth != null) {
+      speak("attaching mouth to brain");
+      send(brain, "attach", mouth);
+    }
+    
+    if (ear != null) {
+      speak("attaching mouth to ear");
+      send(ear, "attach", mouth);
     }
 
-    speak("attaching ear to brain");
-    brain.attach(ear);
+  }
 
-    speak("attaching mouth to brain");
-    brain.attach(mouth);
-    sleep(1000);
-
-    // speak("opening eye");
-    // capture();
-    sleep(1000);
-
-    speak("connecting serial port");
-    connect();
-    sleep(1000);
-
-    // TODO - timing ... & context
-    // TODO - joystick used in a certain amount of time .. says, "manual
-    // joystick override detecte - you have control"
-
-    /*
-     * <pre> refactor with moveTo after we have some form of encoder
-     * speak("moving forward"); move(0.7); sleep(2000);
-     * 
-     * speak("turning left"); turnLeft(0.7); sleep(500); stop();
-     * speak("turning right"); turnRight(0.7); sleep(1000); turnLeft(0.7);
-     * sleep(500); speak("moving back"); move(-0.7); sleep(2000);
-     * 
-     * speak("stopping"); stop(); sleep(1000); </pre>
-     */
-
-    if (!hasErrors()) {
-      speak("all systems are go..");
-      speak("worke is worky");
-    } else {
-      speak("not all systems are fully functional");
-      speak("would you like a list of things not working?");
-      // aiml Yes,Sure,Ok,Go For it,Fine || No, Nope, nuh uh, naw ?
-
+  @Override
+  public void attachTextListener(TextListener service) {
+    if (service == null) {
+      log.warn("{}.attachTextListener(null)");
+      return;
     }
+    addListener("publishText", service.getName());
+  }
 
-    clearErrors();
-
-    // speak("i am ready");
-
-    // cv.broadcastState();
-
-    /*
-     * cv.broadcastState(); brain.broadcastState(); joystick.broadcastState();
-     * controller.broadcastState(); motorLeft.broadcastState();
-     * motorRight.broadcastState();
-     */
-    // speakBlocking(false);
-
-    // FIXME - status
-    // camera state
-    // chassi state
-    // battery level
-    // charging state
-
+  public void attachTextPublisher(TextPublisher service) {
+    if (service == null) {
+      log.warn("{}.attachTextPublisher(null)");
+      return;
+    }
+    subscribe(service.getName(), "publishText");
   }
 
   public void capture() {
     if (isVirtual()) {
-      cv.setGrabberType("ByteArray");
-      cv.setInputSource("file");
-      cv.setInputFileName("C:\\mrl.ssh\\frames");
+      send(eye, "setGrabberType", "ByteArray");
+      send(eye, "setInputSource", "file");
+      // FIXME - find valid test files
+      send(eye, "setInputFileName", Service.getResourceDir("OpenCV", "frames"));
     } else {
-      cv.setGrabberType("OpenKinect");
+      send(eye, "setGrabberType", "OpenKinect");
     }
-    cv.broadcastState();
-    cv.capture();
+
+    send(eye, "broadcastState");
+    send(eye, "capture");
   }
 
   public void clearErrors() {
     lastErrors.clear();
-  }
-
-  // FIXME ... FIND USB PORT - if /dev/ttyUSB0 doesn't exist find another
-  // report a status that port has changed - found new port
-  public void connect() throws Exception {
-    if (isVirtual()) {
-      connect(serialPort);
-    } else {
-      File f = new File("/dev/");
-      File[] dev = f.listFiles();
-      for (File d : dev) {
-        if (d.getAbsolutePath().equals(serialPort)) {
-          connect(serialPort);
-        } else {
-          speak("found new serial port %s", d.getName());
-          serialPort = d.getAbsolutePath();
-          connect(serialPort);
-        }
-      }
-      speak("could not find valid serial port for sabertooth");
-    }
-  }
-
-  public void connect(String port) throws Exception {
-    controller = (AbstractMotorController) startPeer("controller");
-    controller.connect(port);
   }
 
   public String getAxisLeft() {
@@ -328,65 +451,23 @@ public class WorkE extends Service implements StatusListener {
     return axisRight;
   }
 
-  public ProgramAB getBrain() {
-    if (brain == null) {
-      brain = (ProgramAB) startPeer("brain");
-    }
-    return brain;
-  }
-
-  public AbstractMotorController getController() {
-    return controller;
-  }
-
-  public OpenCV getCv() {
-    return cv;
-  }
-
-  public ImageDisplay getDisplay() {
-    return display;
-  }
-
+  @Deprecated /*
+               * this method is only used by junit - junit should be improved to
+               * test without this method
+               */
   public Joystick getJoystick() {
-    return joystick;
-  }
-
-  public AbstractMotor getMotorLeft() {
-    return motorLeft;
-  }
-
-  public AbstractMotor getMotorRight() {
-    return motorRight;
-  }
-
-  public AbstractSpeechRecognizer getRecognizer() {
-    return ear;
+    return (Joystick) Runtime.getService(joystick);
   }
 
   public String getSerialPort() {
     return serialPort;
   }
 
-  public AbstractSpeechSynthesis getSpeech() {
-    return mouth;
-  }
-
   boolean hasErrors() {
     return lastErrors.size() > 0;
   }
 
-  public List<String> listVoices() {
-    List<String> voiceNames = mouth.getVoiceNames();
-    for (String name : voiceNames) {
-      speak(name);
-    }
-    return voiceNames;
-  }
-
-  public void map(double minX, double maxX, double minY, double maxY) {
-    // GOOD - guaranteed to get "a" motor ... probably even the "right" motor !!
-    motorLeft = (AbstractMotor) createPeer("motorLeft");
-    motorRight = (AbstractMotor) createPeer("motorRight");
+  public void map(Double minX, Double maxX, Double minY, Double maxY) {
 
     // set
     this.minX = minX;
@@ -394,17 +475,58 @@ public class WorkE extends Service implements StatusListener {
     this.minY = minY;
     this.maxY = maxY;
 
-    motorLeft.map(minX, maxX, minY, maxY);
-    motorRight.map(minX, maxX, minY, maxY);
+    send(motorRight, "map", minX, maxX, minY, maxY);
+    send(motorLeft, "map", minX, maxX, minY, maxY);
+
   }
 
-  public void move(double d) {
-    motorLeft.move(d);
-    motorRight.move(d);
+  public void move(double pwr) {
+    // TODO - mapping to get balanced ?
+    broadcast("publishMotorLeftMove", pwr);
+    broadcast("publishMotorRightMove", pwr);
   }
 
-  public void mute() {
-    mute = true;
+  public void moveLeft(double pwr) {
+    // speak("moving left at %d percent", (int)(pwr * 100));
+    broadcast("publishMotorLeftMove", pwr);
+  }
+
+  public void moveRight(double pwr) {
+    // speak("moving right at %d percent", (int)(pwr * 100));
+    broadcast("publishMotorRightMove", pwr);
+  }
+
+  @Override
+  public void onJoystickInput(JoystickData input) throws Exception {
+    if (input.id.contentEquals(axisLeft)) {
+      moveLeft(input.value);
+    } else if (input.id.contentEquals(axisRight)) {
+      moveRight(input.value);
+    } else {
+      log.info("unused joystick data {}", input);
+    }
+  }
+
+  public void onOpenCVData(OpenCVData data) {
+    log.info("onOpenCVData");
+  }
+  
+  // PREFERRED !!!
+  public void onStarted(String name) {
+    try {
+    attach(name);
+    } catch(Exception e) {
+      log.error("onStarted threw", e);
+    }
+  }
+
+  /** TOO SOON !!!! 
+  public void onRegistered(Registration registration) {
+    attach((Attachable) registration.service);
+  }*/
+
+  public void onReleased(String name) {
+    speak("released %s", name);
   }
 
   @Override
@@ -420,8 +542,95 @@ public class WorkE extends Service implements StatusListener {
     } else {
       // speak(status.toString());
     }
-    
-    
+  }
+
+  /**
+   * left motor stop publishing point
+   */
+  public void publishLeftMotorStop() {
+    log.info("publish left -> stop");
+    }
+
+  /**
+   * left movement publishing point - this should probably go into a
+   * ChassiControl interface
+   * 
+   * @param pwr
+   * @return
+   */
+  public double publishMotorLeftMove(double pwr) {
+    log.info("publish left -> {}", pwr);
+    return pwr;
+  }
+
+  /**
+   * right movement publishing point - this should probably go into a
+   * ChassiControl interface
+   * 
+   * @param pwr
+   * @return
+   */
+  public double publishMotorRightMove(double pwr) {
+    log.info("publish right -> {}", pwr);
+    return pwr;
+  }
+
+  /**
+   * publishing method call instead of using direct reference
+   */
+  @Override
+  public WordFilter publishReplaceWord(String word, String substitute) {
+    return new WordFilter(word, substitute);
+  }
+
+  /**
+   * right motor stop publishing point
+   */
+  public void publishRightMotorStop() {
+    log.info("publish left -> stop");
+  }
+
+  @Override
+  public Boolean publishSetMute(Boolean mute) {
+    return mute;
+  }
+
+  @Override
+  public String publishSetVoice(String name) {
+    return name;
+  }
+
+  @Override
+  public Double publishSetVolume(Double volume) {
+    return volume;
+  }
+
+  @Override
+  public String publishSpeak(String text) {
+    return text;
+  }
+
+  @Override
+  public String publishText(String text) {
+    return text;
+  }
+
+  @Override
+  public void replaceWord(String word, String substitute) {
+    // simple "single" proxy - assumes you don't need multiple listeners
+    if (mouth != null) {
+      send(mouth, "replaceWord", word, substitute);
+    }
+  }
+
+  public void rotateLeft(double d) {
+    broadcast("publishMotorLeftMove", d);
+    broadcast("publishMotorRightMove", -1 * d);
+  }
+
+  public void rotateRight(double d) {
+    broadcast("publishMotorLeftMove", -1 * d);
+    broadcast("publishMotorRightMove", d);
   }
 
   // FIXME - CheckResult pass / fail with Status detail
@@ -431,7 +640,6 @@ public class WorkE extends Service implements StatusListener {
     // making sure services are started
     // startService();
 
-    mouth = (AbstractSpeechSynthesis) startPeer("mouth");
     Platform platform = Platform.getLocalInstance();
     speak("self status report");
     if (isVirtual()) {
@@ -484,8 +692,19 @@ public class WorkE extends Service implements StatusListener {
     this.axisRight = axisRight;
   }
 
-  public void setJoystick(String joystickControllerName) {
-    this.joystickControllerName = joystickControllerName;
+  public void setBrain(String name) {
+    brain = name;
+  }
+
+  /**
+   * must NOT end in bots - is its parent folder
+   * 
+   * @param path
+   * @return
+   */
+  public String setBrainPath(String path) {
+    brainPath = path;
+    return brainPath;
   }
 
   public void setMotorPortLeft(String motorPort) {
@@ -496,91 +715,108 @@ public class WorkE extends Service implements StatusListener {
     motorPortRight = motorPort;
   }
 
+  // exclusive ? in addition ?
+  public void setMouth(String name) {
+    mouth = name;
+  }
+
+  public boolean setMute(boolean mute) {
+    broadcast("publishSetMute", mute);
+    return mute;
+  }
+
   // FIXME - configuration builder ?
   public void setSerialPort(String port) {
     this.serialPort = port;
   }
 
-  // aiml - "set voice to bob"
-  public boolean setVoice(String name) {
-    return mouth.setVoice(name);
+  @Override
+  public String setVoice(String voiceName) {
+    broadcast("publishSetVoice", voiceName);
+    return voiceName;
   }
 
-  // aiml - "set volume 30 percent"
-  public void setVolume(double volume) {
-    mouth.setVolume(volume);
+  @Override
+  public double setVolume(double volume) {
+    broadcast("publishSetVolume", volume);
+    return volume;
   }
 
-  public void speak(String inText, Object... args) {
-    String text = String.format(inText, args);
-    if (!mute) {
-      mouth.speak(text);
+  @Override
+  public String speak(String text) {
+    return speak(text, (Object[]) null);
+  }
+
+  public String speak(String inText, Object... args) {
+    
+    String text = null;
+    if (args != null) {
+      text = String.format(inText, args);
+    } else {
+      text = inText;
     }
-  }
-
-  public void speakBlocking(boolean b) {
-    mouth.setBlocking(b);
-  }
-
-  public void startService() {
-    try {
-      super.startService(); // FIXME framework should do this !!
-      // GOOD ? - start "typeless" (because type is defined in meta data)
-      // services here
-
-      // FIXME FIXME FIXME - make worky through framework - no manual starts
-      // here !!!      
-      git = (Git) startPeer("git");
-      controller = (AbstractMotorController) startPeer("controller");
-      joystick = (Joystick) startPeer("joystick");
-      motorLeft = (AbstractMotor) startPeer("motorLeft");
-      motorRight = (AbstractMotor) startPeer("motorRight");
-      cv = (OpenCV) startPeer("cv");
-      mouth = (AbstractSpeechSynthesis) startPeer("mouth");
-      ear = (AbstractSpeechRecognizer) startPeer("ear");
-      emoji = (Emoji) startPeer("emoji");
-      display = emoji.getDisplay();// (ImageDisplay) startPeer("display");
-      fsm = emoji.getFsm();
-      brain = (ProgramAB) startPeer("brain");
-      webgui = (WebGui) startPeer("webgui");
-
-      attach();
-
-    } catch (Exception e) {
-      error(e);
+    
+    // if mouth has not started
+    // no point in speaking
+    if (!isStarted("mouth")) {
+      return text;
     }
-  }
-  
-  /**
-   * must NOT end in bots - is its parent folder
-   * @param path
-   * @return
-   */
-  public String setBrainPath(String path) {
-    brainPath = path;
-    return brainPath;
+    
+    broadcast("publishText", text);
+    broadcast("publishSpeak", text);
+    return text;
   }
 
   public void stop() {
-    motorLeft.stop();
-    motorRight.stop();
+    broadcast("publishRightMotorStop");
+    broadcast("publishLeftMotorStop");
   }
 
   public void stopCapture() {
-    cv.stopCapture();
+    send(eye, "stopCapture");
   }
 
-  public void turnLeft(double d) {
-    motorLeft.move(d);
-    motorRight.move(-1 * d);
-  }
+  public static void main(String[] args) {
+    try {
+      
+      LoggingFactory.init(Level.WARN);
+      Platform.setVirtual(true);
 
-  public void turnRight(double d) {
-    motorLeft.move(-1 * d);
-    motorRight.move(d);
-  }
+      // FIXME - should be allowed to do this..
+      // Joystick.getControllerNames();
 
-  public void unmute() {
-    mute = false;
+      // FIXME - test create & substitution
+      // FIXME - setters & getters for peers
+
+      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      worke.startPeer("eye");
+      /*
+      worke.startPeer("joystick");
+      worke.startPeer("motorLeft");
+      worke.startPeer("motorRight");
+      worke.startPeer("controller");
+      
+      /*
+       * worke.startPeer("motorRight"); worke.startPeer("controller");
+       */
+      // worke.startPeer("eye");
+
+      // Polly polly = (Polly) Runtime.start("worke.mouth", "Polly");
+      // polly.setKeys("XXXX", "XXXXXXX");
+      // polly.speak("hello, i can talk !");
+
+      worke.exportAll("worke.py");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+    } catch (Exception e) {
+      log.error("worke no worky !", e);
+    }
   }
+  /**
+   * </pre>
+   */
+
 }

@@ -253,15 +253,6 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   }
 
   static public MetaData meta = null;
-
-  /*
-   * This static method returns all the details of the class without it having
-   * to be constructed. It has description, categories, dependencies, and peer
-   * definitions.
-   * 
-   * @return MetaData - returns all the data
-   * 
-   */
   
   public String testMultipleParamTypes(String a, Double b, Integer c) {
     log.info("testMultipleParamTypes {} {} {}", a, b, c);

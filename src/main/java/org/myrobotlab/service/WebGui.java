@@ -268,7 +268,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       panels = desktops.get(currentDesktop);
     }
 
-    subscribe("runtime", "registered");
+    // subscribe("runtime", "registered");
     // FIXME - "unregistered" / "released"
 
     onDisconnect = new AtmosphereResourceEventListenerAdapter() {
@@ -923,9 +923,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // subscribe(si.getName(), "publishState");
 
     // for distributed Runtimes
+    /*
     if (si.isRuntime()) {
       subscribe(si.getName(), "registered");
     }
+    */
 
     invoke("publishPanel", si.getName());
   }
@@ -936,6 +938,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
   public Panel publishPanel(String panelName) {
 
+    if (panels == null) {
+      return null;
+    }
+    
     Panel panel = null;
     if (panels.containsKey(panelName)) {
       panel = panels.get(panelName);
@@ -1056,7 +1062,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } else {
       panel = new Panel(name, x, y, z);
     }
-    invoke("publishPanel", panel);
+    invoke("publishPanel", name);
   }
 
   public void setAddress(String address) {
