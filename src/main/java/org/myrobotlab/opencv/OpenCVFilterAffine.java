@@ -21,21 +21,20 @@ import org.slf4j.Logger;
 
 public class OpenCVFilterAffine extends OpenCVFilter {
 
-  private static final long serialVersionUID = 1L;
+  private final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class);
+
+  protected static final long serialVersionUID = 1L;
 
   transient IplImage dst;
-  public int flipCode = 1;
 
   // angle of rotation
-  private float angle;
+  protected float angle;
   // translation along x axis (pixels)
-  private double dx = 0;
+  protected double dx = 0;
   // tranlsation along y axis (pixels)
-  private double dy = 0;
+  protected double dy = 0;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterTranspose.class);
-
-  private Point lastClicked = null;
+  protected Point lastClicked = null;
 
   public OpenCVFilterAffine() {
     super();

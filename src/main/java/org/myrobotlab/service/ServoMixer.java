@@ -32,8 +32,8 @@ public class ServoMixer extends Service {
 
     // FIXME - make this part of framework !!!!
     //subscribe("runtime", "started");
-    subscribe("runtime", "registered");
-    subscribe("runtime", "released");
+    // subscribe("runtime", "registered");
+    // subscribe("runtime", "released");
 
     // FIXME - incorporate into framework
     // FIXME - this "should" be calling onStarted :(
@@ -44,14 +44,10 @@ public class ServoMixer extends Service {
 
   }
 
-  // FIXME - these should be Abstract Service methods
-  // which can get meta information regarding inteface
-  public void onRegistered(Registration registration) {
-    // FIXME - wait until ServiceInterface implements hasInterface(String) !
-    // then FIX
-    List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
-    for (String sc : all) {
-      allServos.add(Runtime.getFullName(sc));
+  public void onStarted(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (si instanceof ServoControl) {
+        allServos.add(Runtime.getFullName(name));
     }
     broadcastState();
   }

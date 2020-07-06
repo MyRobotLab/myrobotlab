@@ -90,6 +90,7 @@ import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
@@ -405,7 +406,7 @@ public class OpenCV extends AbstractComputerVision {
     // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
     // cv.addFilter(td);
     cv.capture();
-    
+
     // Runtime.start("gui", "SwingGui");
 
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -1250,6 +1251,7 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * conversion from buffered image to base64 encoded jpg
+   * 
    * @param img
    * @return
    */
@@ -1318,7 +1320,7 @@ public class OpenCV extends AbstractComputerVision {
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
 
-        // broadcast(???) 
+        // broadcast(???)
         WebImage webImage = new WebImage(b, getName(), frameIndex);
         // latency use the original ts from before fetch image and the filters !
         webImage.ts = data.getTs();
@@ -1391,9 +1393,10 @@ public class OpenCV extends AbstractComputerVision {
     data.dispose();
 
   } // end processVideo
-  
+
   /**
    * base 64 jpg frame image
+   * 
    * @param data
    * @return
    */
@@ -1468,7 +1471,7 @@ public class OpenCV extends AbstractComputerVision {
    * 
    * @param filterWrapper
    * @return FilterWrapper solves the problem of multiple types being resolved
-   * in the setFilterState(FilterWrapper data) method
+   *         in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(FilterWrapper filterWrapper) {
     return filterWrapper;
@@ -1478,7 +1481,8 @@ public class OpenCV extends AbstractComputerVision {
    * Publishing method for filters - uses string parameter for remote invocation
    * 
    * @param name
-   * @return  FilterWrapper solves the problem of multiple types being resolved in the setFilterState(FilterWrapper data) method
+   * @return FilterWrapper solves the problem of multiple types being resolved
+   *         in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(String name) {
     OpenCVFilter filter = getFilter(name);
@@ -1813,6 +1817,28 @@ public class OpenCV extends AbstractComputerVision {
     } else {
       error("setFilterState - could not find %s ", otherFilter.name);
     }
+  }
+
+  /**
+   * Json encoded filter to be used to update state information within the named
+   * filter
+   * 
+   * @param name
+   * @param data
+   */
+  public void setFilterState(String name, String data) {
+    OpenCVFilter filter = getFilter(name);
+    if (filter == null) {
+      error("setFilterState - could not find %s ", name);
+      return;
+    }
+    OpenCVFilter otherFilter = CodecUtils.fromJson(data, filter.getClass());
+    if (otherFilter == null) {
+      error("setFilterState - could not decode %s ", name);
+      return;
+    }
+    Service.copyShallowFrom(filter, otherFilter);
+    // broadcastState();
   }
 
   public String setGrabberType(String grabberType) {

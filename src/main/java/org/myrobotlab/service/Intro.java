@@ -41,21 +41,20 @@ public class Intro extends Service {
 
     // subscribe("runtime", "created")
     // to much type info - life-cycle happens before peers started
-    subscribe("runtime", "registered", getName(), "registered");
-    subscribe("runtime", "released", getName(), "released");
+    // no longer needed
+    // subscribe("runtime", "registered", getName(), "registered");
+    // subscribe("runtime", "released", getName(), "released");
     // subscribe("runtime", "started");
   }
 
-  public String registered(Registration registration) {
+  public void onRegistered(Registration registration) {
     String name = registration.getName();
     set(name + "IsActive", true);
-    return name;
   }
 
-  public String released(String fullName) {
+  public void onReleased(String fullName) {
     String name = CodecUtils.shortName(fullName);
     set(name + "IsActive", false);
-    return name;
   }
 
   public boolean checkInstalled(String serviceType) {
