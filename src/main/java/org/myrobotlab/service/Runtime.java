@@ -2015,12 +2015,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         
         if (options.spawnedFromAgent) {
           
+          /** FIXME - make work
           try {
             log.info("attempting to connect to local agent");
             runtime.connect();
           } catch (IOException e) {
             log.warn("could not connect to agent");
           }
+          */
         }
         
         if (options == null) {
