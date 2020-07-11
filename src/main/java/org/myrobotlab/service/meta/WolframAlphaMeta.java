@@ -14,8 +14,9 @@ public class WolframAlphaMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WolframAlphaMeta() {
+  public WolframAlphaMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addCategory("ai", "cloud");
     // TODO http should be removed as a dependency and added as a Peer

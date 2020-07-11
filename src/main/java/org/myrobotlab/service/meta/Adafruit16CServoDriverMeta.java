@@ -17,8 +17,9 @@ public class Adafruit16CServoDriverMeta extends MetaData {
    * 
    * 
    */
-  public Adafruit16CServoDriverMeta() {
+  public Adafruit16CServoDriverMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("controls 16 pwm pins for 16 servos/LED or 8 motors");

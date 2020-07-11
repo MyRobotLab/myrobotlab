@@ -14,8 +14,9 @@ public class SolrMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SolrMeta() {
+  public SolrMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Solr Service - Open source search engine");
     addCategory("search");

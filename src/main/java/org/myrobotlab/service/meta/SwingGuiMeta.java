@@ -14,8 +14,9 @@ public class SwingGuiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SwingGuiMeta() {
+  public SwingGuiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Service used to graphically display and control other services");
     addCategory("display");

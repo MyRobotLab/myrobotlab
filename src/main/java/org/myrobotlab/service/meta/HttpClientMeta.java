@@ -14,8 +14,9 @@ public class HttpClientMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public HttpClientMeta() {
+  public HttpClientMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("a general purpose http client, used to fetch information on the web");
     addCategory("network");

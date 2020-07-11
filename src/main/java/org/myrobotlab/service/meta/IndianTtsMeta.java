@@ -14,8 +14,9 @@ public class IndianTtsMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public IndianTtsMeta() {
+  public IndianTtsMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Hindi text to speech support - requires keys");

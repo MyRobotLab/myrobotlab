@@ -17,8 +17,9 @@ public class Bno055Meta extends MetaData {
    * 
    * 
    */
-  public Bno055Meta() {
+  public Bno055Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("General BNO055 acclerometer and gyro");

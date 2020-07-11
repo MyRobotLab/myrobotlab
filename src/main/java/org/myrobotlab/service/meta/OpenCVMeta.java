@@ -14,8 +14,9 @@ public class OpenCVMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OpenCVMeta() {
+  public OpenCVMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");

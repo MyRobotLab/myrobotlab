@@ -14,8 +14,9 @@ public class SphinxMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SphinxMeta() {
+  public SphinxMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("open source pure Java speech recognition");
     addCategory("speech recognition");

@@ -14,8 +14,9 @@ public class GoProMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GoProMeta() {
+  public GoProMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     // add dependency if necessary
     // addDependency("org.coolproject", "1.0.0");

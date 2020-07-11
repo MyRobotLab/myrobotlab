@@ -14,8 +14,9 @@ public class TrackingMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TrackingMeta() {
+  public TrackingMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("uses a video input and vision library to visually track objects");
     addCategory("vision", "video", "sensors", "control");

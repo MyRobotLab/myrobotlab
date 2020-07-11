@@ -14,8 +14,9 @@ public class XmppMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public XmppMeta() {
+  public XmppMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("xmpp service to access the jabber network");
     addCategory("cloud", "network");

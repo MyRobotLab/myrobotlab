@@ -14,8 +14,9 @@ public class LeapMotionMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LeapMotionMeta() {
+  public LeapMotionMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Leap Motion Service");
     addCategory("sensors", "telerobotics");

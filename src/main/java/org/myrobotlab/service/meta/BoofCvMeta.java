@@ -14,8 +14,9 @@ public class BoofCvMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public BoofCvMeta() {
+  public BoofCvMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("a very portable vision library using pure Java");
     setAvailable(true);

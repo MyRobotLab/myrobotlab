@@ -14,8 +14,9 @@ public class OculusDiyMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OculusDiyMeta() {
+  public OculusDiyMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Service to receive and compute data from a DIY Oculus");
     addCategory("video", "control", "sensors", "telerobotics");

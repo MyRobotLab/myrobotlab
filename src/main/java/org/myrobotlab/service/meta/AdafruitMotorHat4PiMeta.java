@@ -17,8 +17,9 @@ public class AdafruitMotorHat4PiMeta extends MetaData {
    * 
    * 
    */
-  public AdafruitMotorHat4PiMeta() {
+  public AdafruitMotorHat4PiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("description of service");

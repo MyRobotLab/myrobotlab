@@ -14,8 +14,9 @@ public class EmojiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public EmojiMeta() {
+  public EmojiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used as a general template");
 

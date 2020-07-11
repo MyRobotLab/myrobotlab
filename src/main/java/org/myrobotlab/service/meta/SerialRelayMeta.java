@@ -14,8 +14,9 @@ public class SerialRelayMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SerialRelayMeta() {
+  public SerialRelayMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Relaying Serial data to a different serial port on mega Arduino");
     setAvailable(false); // false if you do not want it viewable in a gui

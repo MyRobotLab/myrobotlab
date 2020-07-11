@@ -14,8 +14,9 @@ public class MotorHat4PiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MotorHat4PiMeta() {
+  public MotorHat4PiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Motor service for the Raspi Motor HAT");

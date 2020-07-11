@@ -14,8 +14,9 @@ public class Hd44780Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Hd44780Meta() {
+  public Hd44780Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("I2C LCD Display driver");
     addCategory("i2c", "display");

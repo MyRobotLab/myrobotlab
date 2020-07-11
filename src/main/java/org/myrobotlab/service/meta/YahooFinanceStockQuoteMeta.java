@@ -14,8 +14,9 @@ public class YahooFinanceStockQuoteMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public YahooFinanceStockQuoteMeta() {
+  public YahooFinanceStockQuoteMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will query Yahoo Finance to get the current stock price.  more info @ https://developer.yahoo.com/yql/");
     addCategory("filter", "finance");

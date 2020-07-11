@@ -17,8 +17,9 @@ public class CsvConnectorMeta extends MetaData {
    * 
    * 
    */
-  public CsvConnectorMeta() {
+  public CsvConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("This service crawls a csv file and publishes each row as a document");

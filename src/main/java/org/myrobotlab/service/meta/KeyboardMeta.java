@@ -14,8 +14,9 @@ public class KeyboardMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public KeyboardMeta() {
+  public KeyboardMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("keyboard interface");

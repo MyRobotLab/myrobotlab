@@ -14,8 +14,9 @@ public class OculusRiftMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OculusRiftMeta() {
+  public OculusRiftMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("The Oculus Rift Head Tracking Service");
     addCategory("video", "control", "sensors", "telerobotics");

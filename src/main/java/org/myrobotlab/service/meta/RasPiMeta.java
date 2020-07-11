@@ -14,8 +14,9 @@ public class RasPiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RasPiMeta() {
+  public RasPiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");

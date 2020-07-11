@@ -14,8 +14,9 @@ public class DatabaseMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public DatabaseMeta() {
+  public DatabaseMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("database - wrapper around jdbc access");
     setAvailable(true); // false if you do not want it viewable in a

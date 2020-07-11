@@ -14,8 +14,9 @@ public class _TemplateServiceMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public _TemplateServiceMeta() {
+  public _TemplateServiceMeta(String name) {
 
+    super(name);
     // use a platform - to do logic on dependency depending on platform
     Platform platform = Platform.getLocalInstance();
     // if (platform.isArm()) { ....

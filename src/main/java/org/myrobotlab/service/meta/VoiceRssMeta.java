@@ -14,8 +14,9 @@ public class VoiceRssMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public VoiceRssMeta() {
+  public VoiceRssMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("VoiceRss speech synthesis service.");
     addCategory("speech");

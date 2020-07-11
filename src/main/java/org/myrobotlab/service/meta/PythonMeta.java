@@ -14,8 +14,9 @@ public class PythonMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PythonMeta() {
+  public PythonMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("the Jython script engine compatible with pure Python 2.7 scripts");

@@ -14,8 +14,9 @@ public class TarsosDspMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TarsosDspMeta() {
+  public TarsosDspMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("digital signal processing - used for audio effects, although it could have many other uses");
     setAvailable(true); // false if you do not want it viewable in a gui

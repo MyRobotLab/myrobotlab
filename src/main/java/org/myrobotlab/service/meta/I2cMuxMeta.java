@@ -14,8 +14,9 @@ public class I2cMuxMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public I2cMuxMeta() {
+  public I2cMuxMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Multiplexer for i2c to be able to use multiple i2c devices");
     addCategory("i2c", "control");

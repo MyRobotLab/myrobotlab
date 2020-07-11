@@ -14,8 +14,9 @@ public class TensorflowMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TensorflowMeta() {
+  public TensorflowMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     /**
      * <pre>

@@ -14,8 +14,9 @@ public class MotorPortMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MotorPortMeta() {
+  public MotorPortMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("supports port related motor controllers such as the Sabertooth and AdaFruitMotorShield");
     addCategory("motor");

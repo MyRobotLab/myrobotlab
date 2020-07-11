@@ -14,8 +14,9 @@ public class LogMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LogMeta() {
+  public LogMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Logging Service helpful in diagnostics");

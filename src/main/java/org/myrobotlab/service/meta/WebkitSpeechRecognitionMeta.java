@@ -14,8 +14,9 @@ public class WebkitSpeechRecognitionMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WebkitSpeechRecognitionMeta() {
+  public WebkitSpeechRecognitionMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Speech recognition using Google Chrome webkit");
     addCategory("speech recognition");

@@ -14,8 +14,9 @@ public class OscMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OscMeta() {
+  public OscMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Service for the Open Sound Control using the JavaOsc library");

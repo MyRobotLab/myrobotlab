@@ -14,8 +14,9 @@ public class RekognitionMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RekognitionMeta() {
+  public RekognitionMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Amazon visual recognition cloud service");
     setAvailable(true); // false if you do not want it viewable in a gui

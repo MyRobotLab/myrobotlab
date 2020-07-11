@@ -14,8 +14,9 @@ public class LloydMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LloydMeta() {
+  public LloydMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Lloyd an evolved InMoov.");
     addCategory("robot");

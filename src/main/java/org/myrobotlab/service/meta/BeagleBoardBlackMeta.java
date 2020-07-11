@@ -17,8 +17,9 @@ public class BeagleBoardBlackMeta extends MetaData {
    * 
    * 
    */
-  public BeagleBoardBlackMeta() {
+  public BeagleBoardBlackMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("service to access the beagle board black hardware");

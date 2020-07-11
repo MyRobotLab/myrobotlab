@@ -14,8 +14,9 @@ public class InMoov2TorsoMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoov2TorsoMeta() {
+  public InMoov2TorsoMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("InMoov Torso");

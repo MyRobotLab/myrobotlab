@@ -17,8 +17,9 @@ public class AudioFileMeta extends MetaData {
    * 
    * 
    */
-  public AudioFileMeta() {
+  public AudioFileMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("can play audio files on multiple tracks");
     addCategory("sound", "music");

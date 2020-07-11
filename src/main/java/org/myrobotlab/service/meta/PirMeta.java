@@ -14,8 +14,9 @@ public class PirMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PirMeta() {
+  public PirMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("PIR - Passive Infrared Sensor");
