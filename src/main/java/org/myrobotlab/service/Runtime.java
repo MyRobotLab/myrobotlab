@@ -980,12 +980,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       List<MetaData> sts = sd.getServiceTypes();
 
       for (MetaData st : sts) {
-        if (st.getSimpleName().equals("Polly")) {
-          log.info("here");
-        }
-
+        
         Set<Class<?>> ancestry = new HashSet<Class<?>>();
-        Class<?> targetClass = Class.forName(st.getName()); // this.getClass();
+        Class<?> targetClass = Class.forName(st.getType()); // this.getClass();
 
         while (targetClass.getCanonicalName().startsWith("org.myrobotlab") && !targetClass.getCanonicalName().startsWith("org.myrobotlab.framework")) {
           ancestry.add(targetClass);
@@ -996,7 +993,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           Class<?>[] interfaces = Class.forName(c.getName()).getInterfaces();
           for (Class<?> inter : interfaces) {
             if (interfaze.equals(inter.getName())) {
-              results.serviceTypes.add(st.getName());
+              results.serviceTypes.add(st.getType());
               break;
             }
           }
