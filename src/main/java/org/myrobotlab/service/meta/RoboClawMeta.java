@@ -14,8 +14,9 @@ public class RoboClawMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RoboClawMeta() {
+  public RoboClawMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("interface for the powerful RoboClaw motor controller");
     addCategory("motor", "control");

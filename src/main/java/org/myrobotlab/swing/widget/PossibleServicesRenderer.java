@@ -58,7 +58,7 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
 
     } else if (value.getClass().equals(String.class)) {
       MetaData entry = (MetaData) table.getValueAt(row, 0);
-      availableToInstall = repo.isServiceTypeInstalled(entry.getName());
+      availableToInstall = repo.isServiceTypeInstalled(entry.getType());
 
       setIcon(null);
       setHorizontalAlignment(SwingConstants.LEFT);
@@ -83,7 +83,7 @@ public class PossibleServicesRenderer extends DefaultTableCellRenderer {
     } else {
 
       MetaData entry = (MetaData) table.getValueAt(row, 0);
-      availableToInstall = repo.isServiceTypeInstalled(entry.getName());
+      availableToInstall = repo.isServiceTypeInstalled(entry.getType());
 
       if (!availableToInstall) {
         setForeground(Style.listForeground);

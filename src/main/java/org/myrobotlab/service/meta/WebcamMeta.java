@@ -14,8 +14,9 @@ public class WebcamMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WebcamMeta() {
+  public WebcamMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     // setAutoOpenMode(true);
 

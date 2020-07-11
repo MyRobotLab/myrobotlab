@@ -14,8 +14,9 @@ public class WorkEMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WorkEMeta() {
+  public WorkEMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addPeer("git", "Git", "synching repos");
 

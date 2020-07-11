@@ -14,8 +14,9 @@ public class KafkaConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public KafkaConnectorMeta() {
+  public KafkaConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Provides a string/string consumer for a kafka topic.");
     addCategory("cloud");

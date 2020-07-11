@@ -14,8 +14,9 @@ public class SensorMonitorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SensorMonitorMeta() {
+  public SensorMonitorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("sensor monitor - capable of displaying sensor information in a crude oscilliscope fasion");
     addCategory("sensors", "display");

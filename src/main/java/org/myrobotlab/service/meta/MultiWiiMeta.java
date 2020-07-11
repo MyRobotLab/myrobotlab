@@ -14,8 +14,9 @@ public class MultiWiiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MultiWiiMeta() {
+  public MultiWiiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("MultiWii interface");

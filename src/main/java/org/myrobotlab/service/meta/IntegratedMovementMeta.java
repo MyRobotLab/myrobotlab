@@ -14,8 +14,9 @@ public class IntegratedMovementMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public IntegratedMovementMeta() {
+  public IntegratedMovementMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("a 3D kinematics service supporting D-H parameters");

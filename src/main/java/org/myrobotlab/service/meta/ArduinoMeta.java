@@ -17,8 +17,9 @@ public class ArduinoMeta extends MetaData {
    * 
    * 
    */
-  public ArduinoMeta() {
+  public ArduinoMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("controls an Arduino microcontroller as a slave, which allows control of all the devices the Arduino is attached to, such as servos, motors and sensors");

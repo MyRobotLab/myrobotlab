@@ -14,8 +14,9 @@ public class GitMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GitMeta() {
+  public GitMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used to manage source code");
     addCategory("programming");

@@ -17,8 +17,9 @@ public class ClockMeta extends MetaData {
    * 
    * 
    */
-  public ClockMeta() {
+  public ClockMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used to generate pulses and recurring messages");
     addCategory("scheduling");

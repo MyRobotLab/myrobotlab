@@ -14,8 +14,9 @@ public class OledSsd1306Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OledSsd1306Meta() {
+  public OledSsd1306Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("OLED driver using SSD1306 driver and the i2c protocol");

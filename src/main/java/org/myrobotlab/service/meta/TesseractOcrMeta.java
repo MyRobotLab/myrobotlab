@@ -14,8 +14,9 @@ public class TesseractOcrMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TesseractOcrMeta() {
+  public TesseractOcrMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Optical character recognition - the ability to read");
     addCategory("ai", "vision");

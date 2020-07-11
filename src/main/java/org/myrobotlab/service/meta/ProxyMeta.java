@@ -14,8 +14,9 @@ public class ProxyMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ProxyMeta() {
+  public ProxyMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used as a general template");
     setAvailable(false); // false if you do not want it viewable in a gui

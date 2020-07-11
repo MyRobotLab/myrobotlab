@@ -14,8 +14,9 @@ public class BodyPartMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public BodyPartMeta() {
+  public BodyPartMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("An easier way to control a body ...");

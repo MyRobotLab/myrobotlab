@@ -14,8 +14,9 @@ public class InverseKinematics3DMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InverseKinematics3DMeta() {
+  public InverseKinematics3DMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("a 3D kinematics service supporting D-H parameters");
     addCategory("robot", "control");

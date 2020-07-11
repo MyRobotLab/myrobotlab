@@ -14,8 +14,9 @@ public class InMoovHeadMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoovHeadMeta() {
+  public InMoovHeadMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("InMoov Head Service");
     addCategory("robot");

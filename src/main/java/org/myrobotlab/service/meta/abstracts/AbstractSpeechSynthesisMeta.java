@@ -12,8 +12,9 @@ public class AbstractSpeechSynthesisMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public AbstractSpeechSynthesisMeta() {
+  public AbstractSpeechSynthesisMeta(String name) {
 
+super(name);
     addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech");
 

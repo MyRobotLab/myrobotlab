@@ -14,8 +14,9 @@ public class InverseKinematicsMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InverseKinematicsMeta() {
+  public InverseKinematicsMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Inverse Kinematics");

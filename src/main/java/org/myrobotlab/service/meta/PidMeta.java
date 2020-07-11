@@ -14,8 +14,9 @@ public class PidMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PidMeta() {
+  public PidMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("A proportional integral derivative controller (Pid controller) commonly used in industrial control systems");

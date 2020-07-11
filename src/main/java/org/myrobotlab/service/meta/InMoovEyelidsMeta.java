@@ -14,8 +14,9 @@ public class InMoovEyelidsMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoovEyelidsMeta() {
+  public InMoovEyelidsMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("InMoov Eyelids");
     addCategory("robot");

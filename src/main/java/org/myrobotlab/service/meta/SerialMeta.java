@@ -14,8 +14,9 @@ public class SerialMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SerialMeta() {
+  public SerialMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("reads and writes data to a serial port");
     addCategory("sensors", "control");

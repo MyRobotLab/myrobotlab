@@ -14,8 +14,9 @@ public class WikiDataFetcherMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WikiDataFetcherMeta() {
+  public WikiDataFetcherMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service grab data from wikidata website");
     addCategory("ai");

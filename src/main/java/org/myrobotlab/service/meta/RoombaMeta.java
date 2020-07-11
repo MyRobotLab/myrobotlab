@@ -14,8 +14,9 @@ public class RoombaMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RoombaMeta() {
+  public RoombaMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("controls a Roomba robot through a blue-tooth serial port");
     addCategory("robot", "control");

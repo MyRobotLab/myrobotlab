@@ -14,8 +14,9 @@ public class ImageDisplayMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ImageDisplayMeta() {
+  public ImageDisplayMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("IBus serial protocol");
     setAvailable(true); // false if you do not want it viewable in a gui

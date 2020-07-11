@@ -14,8 +14,9 @@ public class LidarVlp16Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LidarVlp16Meta() {
+  public LidarVlp16Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("used as a general template");

@@ -14,8 +14,9 @@ public class IntroMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public IntroMeta() {
+  public IntroMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Introduction to MyRobotlab");

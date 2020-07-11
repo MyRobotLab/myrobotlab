@@ -14,8 +14,9 @@ public class InMoov2HeadMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoov2HeadMeta() {
+  public InMoov2HeadMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("The inmoov2 head");
     addPeer("jaw", "Servo", "Jaw servo");

@@ -14,8 +14,9 @@ public class Ssc32UsbServoControllerMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Ssc32UsbServoControllerMeta() {
+  public Ssc32UsbServoControllerMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Lynxmotion usb 32 servo controller");
     addCategory("servo", "control");

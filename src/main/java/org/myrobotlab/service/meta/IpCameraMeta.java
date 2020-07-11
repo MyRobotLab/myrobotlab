@@ -14,8 +14,9 @@ public class IpCameraMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public IpCameraMeta() {
+  public IpCameraMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("control and video stream capture for generic ip camera");

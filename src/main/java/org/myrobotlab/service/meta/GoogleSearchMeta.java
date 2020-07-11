@@ -14,8 +14,9 @@ public class GoogleSearchMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GoogleSearchMeta() {
+  public GoogleSearchMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used as a general google search");
     addDependency("org.jsoup", "jsoup", "1.8.3");

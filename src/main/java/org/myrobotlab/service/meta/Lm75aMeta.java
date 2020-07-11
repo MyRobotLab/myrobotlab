@@ -14,8 +14,9 @@ public class Lm75aMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Lm75aMeta() {
+  public Lm75aMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("LM75A Digital temperature sensor");
     addCategory("shield", "sensors", "i2c");

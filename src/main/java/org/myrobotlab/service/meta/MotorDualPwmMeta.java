@@ -14,8 +14,9 @@ public class MotorDualPwmMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MotorDualPwmMeta() {
+  public MotorDualPwmMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Motor service which support 2 pwr pwm pins clockwise and counterclockwise");

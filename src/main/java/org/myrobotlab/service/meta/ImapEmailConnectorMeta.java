@@ -14,8 +14,9 @@ public class ImapEmailConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ImapEmailConnectorMeta() {
+  public ImapEmailConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This connector will connect to an IMAP based email server and crawl the emails");
     addCategory("monitor", "cloud", "network");

@@ -17,8 +17,9 @@ public class ArmMeta extends MetaData {
    * 
    * 
    */
-  public ArmMeta() {
+  public ArmMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("robot arm service");

@@ -14,8 +14,9 @@ public class JMonkeyEngineMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public JMonkeyEngineMeta() {
+  public JMonkeyEngineMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("is a 3d game engine, used for simulators");
 

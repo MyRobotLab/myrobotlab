@@ -14,8 +14,9 @@ public class LidarMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LidarMeta() {
+  public LidarMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("The Lidar Service - Light Detection And Ranging");

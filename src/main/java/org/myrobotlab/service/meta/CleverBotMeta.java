@@ -17,8 +17,9 @@ public class CleverBotMeta extends MetaData {
    * 
    * 
    */
-  public CleverBotMeta() {
+  public CleverBotMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("chatbot service");
     addCategory("ai");

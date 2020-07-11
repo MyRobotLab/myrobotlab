@@ -17,8 +17,9 @@ public class AudioCaptureMeta extends MetaData {
    * 
    * 
    */
-  public AudioCaptureMeta() {
+  public AudioCaptureMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("captures and stores audio from microphone");

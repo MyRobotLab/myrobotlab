@@ -14,8 +14,9 @@ public class HtmlFilterMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public HtmlFilterMeta() {
+  public HtmlFilterMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will strip html markup from the input text");
     addCategory("filter");

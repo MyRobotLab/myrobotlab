@@ -14,8 +14,9 @@ public class SabertoothMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public SabertoothMeta() {
+  public SabertoothMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("interface for the powerful Sabertooth motor controller");
     addCategory("motor", "control");

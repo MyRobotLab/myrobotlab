@@ -14,8 +14,9 @@ public class Esp8266_01Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Esp8266_01Meta() {
+  public Esp8266_01Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("ESP8266-01 service to communicate using WiFi and i2c");
     addCategory("i2c", "control");

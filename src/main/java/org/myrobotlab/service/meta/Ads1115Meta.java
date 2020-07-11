@@ -17,8 +17,9 @@ public class Ads1115Meta extends MetaData {
    * 
    * 
    */
-  public Ads1115Meta() {
+  public Ads1115Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("a higher-precision analog to digital converter 16-bit");
     setLicenseApache();

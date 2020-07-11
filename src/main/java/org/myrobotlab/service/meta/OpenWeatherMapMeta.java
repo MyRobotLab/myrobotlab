@@ -14,8 +14,9 @@ public class OpenWeatherMapMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OpenWeatherMapMeta() {
+  public OpenWeatherMapMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will query OpenWeatherMap for the current weather.  Get an API key at http://openweathermap.org/");
     addCategory("weather");

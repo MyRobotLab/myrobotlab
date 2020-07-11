@@ -14,8 +14,9 @@ public class RuntimeMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RuntimeMeta() {
+  public RuntimeMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     addCategory("framework");

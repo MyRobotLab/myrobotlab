@@ -14,8 +14,9 @@ public class TestMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TestMeta() {
+  public TestMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Testing service");
     addCategory("testing");

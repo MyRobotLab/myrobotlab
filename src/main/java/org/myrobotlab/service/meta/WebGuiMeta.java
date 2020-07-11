@@ -14,8 +14,9 @@ public class WebGuiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WebGuiMeta() {
+  public WebGuiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("web display");
     addCategory("display");

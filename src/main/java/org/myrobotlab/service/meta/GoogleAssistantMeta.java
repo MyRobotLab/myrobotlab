@@ -14,8 +14,9 @@ public class GoogleAssistantMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GoogleAssistantMeta() {
+  public GoogleAssistantMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Access Google Assistant through voice interaction");
     setAvailable(true); // false if you do not want it viewable in a gui

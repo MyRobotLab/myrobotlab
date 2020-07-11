@@ -14,8 +14,9 @@ public class TestThrowerMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TestThrowerMeta() {
+  public TestThrowerMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("TestThrower is used with TestCatcher to test messaging");

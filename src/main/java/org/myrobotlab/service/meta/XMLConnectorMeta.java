@@ -14,8 +14,9 @@ public class XMLConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public XMLConnectorMeta() {
+  public XMLConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This is an XML Connector that will parse a large xml file into many small xml documents");
     addCategory("filter");

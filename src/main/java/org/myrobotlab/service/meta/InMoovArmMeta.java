@@ -14,8 +14,9 @@ public class InMoovArmMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoovArmMeta() {
+  public InMoovArmMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("the InMoov Arm Service");

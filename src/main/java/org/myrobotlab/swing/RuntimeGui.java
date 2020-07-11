@@ -242,7 +242,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         MetaData c = (MetaData) possibleServicesModel.getValueAt(popupRow, 0);
         releaseMenuItem.setVisible(false);
         infoMenuItem.setVisible(true);
-        if (!myRepo.isServiceTypeInstalled(c.getName())) {
+        if (!myRepo.isServiceTypeInstalled(c.getType())) {
           // need to install it
           installMenuItem.setVisible(true);
           startMenuItem.setVisible(false);
@@ -431,7 +431,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
       int selectedRow = possibleServices.getSelectedRow();
 
       MetaData entry = ((MetaData) possibleServices.getValueAt(selectedRow, 0));
-      String n = entry.getName();
+      String n = entry.getType();
       Repo repo = myRuntime.getRepo();
 
       if (!repo.isServiceTypeInstalled(n)) {
@@ -452,7 +452,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     } else if ("start".equals(cmd)) {
       int selectedRow = possibleServices.getSelectedRow();
       MetaData entry = ((MetaData) possibleServices.getValueAt(selectedRow, 0));
-      addNewService(entry.getName());
+      addNewService(entry.getType());
 
     } else if ("install all".equals(cmd)) {
       send("install");
@@ -660,7 +660,7 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
         List<MetaData> possibleService = serviceData.getServiceTypes();
         for (int i = 0; i < possibleService.size(); ++i) {
           MetaData serviceType = possibleService.get(i);
-          if (filtered == null || filtered.contains(serviceType.getName())) {
+          if (filtered == null || filtered.contains(serviceType.getType())) {
             if (serviceType.isAvailable()) {
               possibleServicesModel.addRow(new Object[] { serviceType, "" });
             }
