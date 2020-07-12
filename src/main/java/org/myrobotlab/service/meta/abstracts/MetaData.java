@@ -280,7 +280,7 @@ public class MetaData implements Serializable {
     if (peers.get(peerKey) == null) {
       log.warn("{} not found in peer keys - possible keys follow:", peerKey);
       for (String key : peers.keySet()) {
-        log.warn(key);
+        log.info(key);
       }
     }
     return peers.get(peerKey);

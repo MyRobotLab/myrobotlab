@@ -549,7 +549,7 @@ public class ServiceData implements Serializable {
       String peerKey = getPeerKey(name, entry.getKey());
       ServiceReservation peer = entry.getValue();
       
-      log.warn("pk {} => {}", peerKey, peer);
+      log.info("pk {} => {}", peerKey, peer);
       
       if (!force && planStore.containsKey(peerKey)) {
         continue;
