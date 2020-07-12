@@ -194,7 +194,7 @@ public class MetaData implements Serializable {
     return link;
   }
 
-  // FIXME - change to name ... change name to type 
+  // FIXME - change to name ... change name to type
   // check for webgui breakage
   public String getName() {
     return serviceName;
