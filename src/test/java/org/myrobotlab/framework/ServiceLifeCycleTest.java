@@ -51,7 +51,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     // pull it back out
     MetaData data = ServiceData.getMetaData("i01", "InMoov");
     log.warn("static meta data {}", data);
-    assertEquals("i01.left", data.getPeer("head.arduino").actualName);
+    assertEquals("i01.left", data.getPeer("head.arduino").actualName); 
 
     Plan plan = ServiceData.getPlan("i01", "InMoov");
     log.warn("static plan {}", plan);
