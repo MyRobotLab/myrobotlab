@@ -893,6 +893,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     if (sc == null) {
       log.error("{}.sync(null)", getName());
     }
+    if (sc.equals(this)) {
+      error("you cannot set a servo synced to itself");
+      return;
+    }
     syncedServos.add(sc.getName());
   }
 
