@@ -14,8 +14,9 @@ public class Mpr121Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Mpr121Meta() {
+  public Mpr121Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("MPR121 Touch sensor & LED Driver");

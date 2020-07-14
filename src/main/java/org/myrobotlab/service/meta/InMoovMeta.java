@@ -14,8 +14,9 @@ public class InMoovMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoovMeta() {
+  public InMoovMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("The InMoov service");
@@ -26,34 +27,36 @@ public class InMoovMeta extends MetaData {
     addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------
-    addPeer("head.arduino", "left", "Arduino", "shared left arduino");
-    addPeer("torso.arduino", "left", "Arduino", "shared left arduino");
+    addPeer("head.arduino", getName() + ".left", "Arduino", "shared left arduino");
+    addPeer("torso.arduino", getName() + ".left", "Arduino", "shared left arduino");
 
-    addPeer("leftArm.arduino", "left", "Arduino", "shared left arduino");
-    addPeer("leftHand.arduino", "left", "Arduino", "shared left arduino");
+    addPeer("leftArm.arduino", getName() + ".left", "Arduino", "shared left arduino");
+    addPeer("leftHand.arduino", getName() + ".left", "Arduino", "shared left arduino");
     // eyelidsArduino peer for backward compatibility
-    addPeer("eyelidsArduino", "right", "Arduino", "shared right arduino");
-    addPeer("rightArm.arduino", "right", "Arduino", "shared right arduino");
-    addPeer("rightHand.arduino", "right", "Arduino", "shared right arduino");
+    addPeer("eyelidsArduino", getName() + ".right", "Arduino", "shared right arduino");
+    addPeer("rightArm.arduino", getName() + ".right", "Arduino", "shared right arduino");
+    addPeer("rightHand.arduino", getName() + ".right", "Arduino", "shared right arduino");
 
     addPeer("eyesTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    addPeer("eyesTracking.controller", "left", "Arduino", "shared head Arduino");
-    addPeer("eyesTracking.x", "head.eyeX", "Servo", "shared servo");
-    addPeer("eyesTracking.y", "head.eyeY", "Servo", "shared servo");
+    addPeer("eyesTracking.controller", getName() + ".left", "Arduino", "shared head Arduino");
+    addPeer("eyesTracking.x", getName() + ".head.eyeX", "Servo", "shared servo");
+    addPeer("eyesTracking.y", getName() + ".head.eyeY", "Servo", "shared servo");
     addPeer("mouthControl.mouth", "mouth", "MarySpeech", "shared Speech");
     addPeer("headTracking.opencv", "opencv", "OpenCV", "shared head OpenCV");
-    addPeer("headTracking.controller", "left", "Arduino", "shared head Arduino");
-    addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
-    addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
+    addPeer("headTracking.controller", getName() + ".left", "Arduino", "shared head Arduino");
+    addPeer("headTracking.x", getName() + ".head.rothead", "Servo", "shared servo");
+    addPeer("headTracking.y", getName() + ".head.neck", "Servo", "shared servo");
 
     // SHARING !!! - modified key / actual name end ------
 
     // Global - undecorated by self name
     // currently InMoov manually calls releasePeers - when it does
-    // the interpreter is in a process of shutdown while all inmoov peer services have not
-    // run their initialization scripts - npe and other errors can happen when creating and
+    // the interpreter is in a process of shutdown while all inmoov peer
+    // services have not
+    // run their initialization scripts - npe and other errors can happen when
+    // creating and
     // releasing all peers in quick succession
-    // addPeer("python", "python", "Python", "shared Python service"); 
+    // addPeer("python", "python", "Python", "shared Python service");
 
     // put peer definitions in
     addPeer("torso", "InMoovTorso", "torso");

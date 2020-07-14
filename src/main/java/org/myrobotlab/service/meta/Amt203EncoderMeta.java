@@ -17,8 +17,9 @@ public class Amt203EncoderMeta extends MetaData {
    * 
    * 
    */
-  public Amt203EncoderMeta() {
+  public Amt203EncoderMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("AMT203 Encoder - Absolute position encoder");

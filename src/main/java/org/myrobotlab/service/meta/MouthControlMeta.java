@@ -14,8 +14,9 @@ public class MouthControlMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MouthControlMeta() {
+  public MouthControlMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Mouth movements based on spoken text");
     addCategory("control");

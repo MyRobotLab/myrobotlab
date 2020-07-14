@@ -14,8 +14,9 @@ public class JFugueMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public JFugueMeta() {
+  public JFugueMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("service wrapping Jfugue, used for music and sound generation");

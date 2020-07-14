@@ -17,8 +17,9 @@ public class ChessGameMeta extends MetaData {
    * 
    * 
    */
-  public ChessGameMeta() {
+  public ChessGameMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addCategory("game");
     addDependency("ChessBoard", "ChessBoard", "1.0.0");

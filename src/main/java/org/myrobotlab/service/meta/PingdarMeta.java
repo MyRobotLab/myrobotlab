@@ -14,8 +14,9 @@ public class PingdarMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PingdarMeta() {
+  public PingdarMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("used as a ultra sonic radar");
     addCategory("sensors", "display");

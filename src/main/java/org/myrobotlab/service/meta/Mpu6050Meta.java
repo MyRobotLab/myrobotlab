@@ -14,8 +14,9 @@ public class Mpu6050Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Mpu6050Meta() {
+  public Mpu6050Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("General MPU-6050 acclerometer and gyro");
     addCategory("microcontroller", "sensors");

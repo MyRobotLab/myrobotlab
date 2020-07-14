@@ -244,8 +244,8 @@ public class ServiceInterfaceTest extends AbstractTest {
                                                     // ServiceData.class);
     for (MetaData st : sd.getServiceTypes()) {
       if (!st.isAvailable()) {
-        log.info("Installing Service:" + st.getName());
-        Runtime.install(st.getName());
+        log.info("Installing Service:" + st.getType());
+        Runtime.install(st.getType());
       } else {
         log.info("already installed.");
       }

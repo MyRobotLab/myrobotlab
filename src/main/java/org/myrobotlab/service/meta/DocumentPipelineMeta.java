@@ -14,8 +14,9 @@ public class DocumentPipelineMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public DocumentPipelineMeta() {
+  public DocumentPipelineMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will pass a document through a document processing pipeline made up of transformers");
     addCategory("ingest");

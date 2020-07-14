@@ -13,8 +13,9 @@ public class LocalSpeechMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public LocalSpeechMeta() {
+  public LocalSpeechMeta(String name) {
 
+    super(name);
     addCategory("speech", "sound");
     addDescription("Local OS text to speech ( tts.exe / say etc ... )");
     setAvailable(true);

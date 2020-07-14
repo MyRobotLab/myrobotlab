@@ -14,8 +14,9 @@ public class NeoPixelMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public NeoPixelMeta() {
+  public NeoPixelMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Control a Neopixel hardware");
     setAvailable(true); // false if you do not want it viewable in a

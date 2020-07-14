@@ -14,8 +14,9 @@ public class DatabaseConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public DatabaseConnectorMeta() {
+  public DatabaseConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This service will run a select statement against a database and return the rows as documents to be published");
     addCategory("ingest");

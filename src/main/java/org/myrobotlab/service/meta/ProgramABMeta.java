@@ -14,8 +14,9 @@ public class ProgramABMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ProgramABMeta() {
+  public ProgramABMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("AIML 2.0 Reference interpreter based on Program AB");
     addCategory("ai");

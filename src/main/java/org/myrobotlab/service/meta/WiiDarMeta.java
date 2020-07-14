@@ -14,8 +14,9 @@ public class WiiDarMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public WiiDarMeta() {
+  public WiiDarMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     // addDependency("wiiuse.wiimote", "0.12b");
 

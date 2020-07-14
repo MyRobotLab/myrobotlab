@@ -17,8 +17,9 @@ public class ChassisMeta extends MetaData {
    * 
    * 
    */
-  public ChassisMeta() {
+  public ChassisMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("control platform");

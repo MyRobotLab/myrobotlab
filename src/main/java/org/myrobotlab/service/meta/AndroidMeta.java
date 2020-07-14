@@ -17,8 +17,9 @@ public class AndroidMeta extends MetaData {
    * 
    * 
    */
-  public AndroidMeta() {
+  public AndroidMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("re-publishes Android proximity and position information");

@@ -17,8 +17,9 @@ public class ChessGameManagerMeta extends MetaData {
    * 
    * 
    */
-  public ChessGameManagerMeta() {
+  public ChessGameManagerMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("manages multiple interfaces for a chess game");
     addCategory("game");

@@ -14,8 +14,9 @@ public class As5048AEncoderMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public As5048AEncoderMeta() {
+  public As5048AEncoderMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("AS5048A Encoder - 14 bit - Absolute position encoder");

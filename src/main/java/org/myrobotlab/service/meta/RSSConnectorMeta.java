@@ -14,8 +14,9 @@ public class RSSConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RSSConnectorMeta() {
+  public RSSConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("This will crawl an rss feed at the given url and break apart the page into Documents");
     setCloudService(true);

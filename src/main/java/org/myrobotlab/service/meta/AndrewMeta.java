@@ -17,8 +17,9 @@ public class AndrewMeta extends MetaData {
    * 
    * 
    */
-  public AndrewMeta() {
+  public AndrewMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("service for the Andrew robot");

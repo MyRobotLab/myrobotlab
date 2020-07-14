@@ -14,8 +14,9 @@ public class TwitterMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TwitterMeta() {
+  public TwitterMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Service which can relay tweets");
     addCategory("cloud");

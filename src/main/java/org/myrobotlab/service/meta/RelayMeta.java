@@ -14,8 +14,9 @@ public class RelayMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RelayMeta() {
+  public RelayMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Relay used by an arduino");
     addCategory("home automation");

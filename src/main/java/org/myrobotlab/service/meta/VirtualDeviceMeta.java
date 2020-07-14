@@ -14,8 +14,9 @@ public class VirtualDeviceMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public VirtualDeviceMeta() {
+  public VirtualDeviceMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("a service which can create virtual serial ports and behaviors implemented in python for them");
     addCategory("testing");

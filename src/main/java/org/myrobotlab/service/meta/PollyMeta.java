@@ -13,8 +13,9 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public PollyMeta() {
+  public PollyMeta(String name) {
 
+    super(name);
     addDescription("Amazon speech synthesis - requires keys");
     setAvailable(true); // false if you do not want it viewable in a
     // gui

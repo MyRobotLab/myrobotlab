@@ -14,8 +14,9 @@ public class ShoutboxMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ShoutboxMeta() {
+  public ShoutboxMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("shoutbox server");
     addCategory("cloud");

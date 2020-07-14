@@ -14,8 +14,9 @@ public class KeyboardSimMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public KeyboardSimMeta() {
+  public KeyboardSimMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("simulate keyboard interactions");

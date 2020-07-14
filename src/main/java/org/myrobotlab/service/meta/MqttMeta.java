@@ -14,8 +14,9 @@ public class MqttMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MqttMeta() {
+  public MqttMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription(
         "This is an Mqtt client based on the Paho Mqtt client library. Mqtt is a machine-to-machine (M2M)/'Internet of Things' connectivity protocol. See http://mqtt.org");

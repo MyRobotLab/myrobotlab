@@ -14,8 +14,9 @@ public class DruppNeckMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public DruppNeckMeta() {
+  public DruppNeckMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("InMoov Drupp Neck Service");
     addCategory("robot");

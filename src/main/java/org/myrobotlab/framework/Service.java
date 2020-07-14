@@ -616,6 +616,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
 
+    // soft set (not forced) of meta data and overrides in planStore
+    ServiceData.setMetaData(name, getClass().getSimpleName());
+    // pull back the overrides
     serviceType = ServiceData.getMetaData(name, getClass().getSimpleName());
 
     // FIXME - this is 'sort-of' static :P
@@ -1747,7 +1750,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return null;
       }
       
-      ServiceReservation sr2 = serviceType.getPeer(reservedKey);      
+      ServiceReservation sr2 = serviceType.getPeer(reservedKey);
       si.startService();
       
       if (sr2 != null) {

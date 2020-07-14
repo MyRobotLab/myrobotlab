@@ -14,8 +14,9 @@ public class MotorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MotorMeta() {
+  public MotorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Motor service which supports 1 pwr pwm pin and 1 direction pin");

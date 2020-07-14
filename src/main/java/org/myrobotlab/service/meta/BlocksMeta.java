@@ -17,8 +17,9 @@ public class BlocksMeta extends MetaData {
    * 
    * 
    */
-  public BlocksMeta() {
+  public BlocksMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("basic block programming interface");

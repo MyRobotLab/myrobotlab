@@ -14,8 +14,9 @@ public class OpenNiMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public OpenNiMeta() {
+  public OpenNiMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("OpenNI Service - 3D sensor");

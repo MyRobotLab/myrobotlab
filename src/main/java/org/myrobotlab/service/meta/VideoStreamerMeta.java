@@ -14,8 +14,9 @@ public class VideoStreamerMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public VideoStreamerMeta() {
+  public VideoStreamerMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Video streaming service");
     addCategory("video", "display");

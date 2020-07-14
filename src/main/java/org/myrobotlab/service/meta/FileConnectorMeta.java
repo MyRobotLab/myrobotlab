@@ -14,8 +14,9 @@ public class FileConnectorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public FileConnectorMeta() {
+  public FileConnectorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("This connector will scan all the files in a directory and production documents");

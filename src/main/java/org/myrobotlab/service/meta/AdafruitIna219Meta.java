@@ -17,8 +17,9 @@ public class AdafruitIna219Meta extends MetaData {
    * 
    * 
    */
-  public AdafruitIna219Meta() {
+  public AdafruitIna219Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("measures voltage and current of a circuit");

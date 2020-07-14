@@ -14,8 +14,9 @@ public class ThingSpeakMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ThingSpeakMeta() {
+  public ThingSpeakMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Service which can relay data to a ThingSpeak account");
     addCategory("monitor", "cloud");

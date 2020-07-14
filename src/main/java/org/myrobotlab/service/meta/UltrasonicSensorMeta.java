@@ -14,8 +14,9 @@ public class UltrasonicSensorMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public UltrasonicSensorMeta() {
+  public UltrasonicSensorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("ranging sensor");

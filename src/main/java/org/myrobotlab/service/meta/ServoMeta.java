@@ -14,8 +14,9 @@ public class ServoMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ServoMeta() {
+  public ServoMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("General hobby servo control with absolute positioning");
     addCategory("motor", "control", "servo");

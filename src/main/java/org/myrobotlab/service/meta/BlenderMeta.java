@@ -17,8 +17,9 @@ public class BlenderMeta extends MetaData {
    * 
    * 
    */
-  public BlenderMeta() {
+  public BlenderMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("interfaces Blender for simulation and display");

@@ -17,8 +17,9 @@ public class AzureTranslatorMeta extends MetaData {
    * 
    * 
    */
-  public AzureTranslatorMeta() {
+  public AzureTranslatorMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("interface to Azure translation services");

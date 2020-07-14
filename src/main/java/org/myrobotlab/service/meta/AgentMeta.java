@@ -19,8 +19,9 @@ public class AgentMeta extends MetaData {
    * 
    * 
    */
-  public AgentMeta() {
+  public AgentMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("responsible for spawning a MRL process. Agent can also terminate, respawn and control the spawned process");
@@ -34,7 +35,7 @@ public class AgentMeta extends MetaData {
 
   public static void main(String[] args) {
     try {
-      AgentMeta meta = new AgentMeta();
+      AgentMeta meta = new AgentMeta("agent");
       LoggingFactory.init(Level.WARN);
     } catch (Exception e) {
       log.error("main threw", e);

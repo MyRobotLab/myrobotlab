@@ -123,22 +123,15 @@ public class MetaData implements Serializable {
 
   Integer workingLevel = null;
 
-  public MetaData() {
+  public MetaData(String name) {
+
     // name is the name this meta class respresents
     // in the case of ArduinoMeta - it represents the
     // org.myrobotlab.service.Arduino
-    simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
-    name = "org.myrobotlab.service." + simpleName;
+    this.serviceName = name;
+    this.simpleName = getClass().getSimpleName().substring(0, getClass().getSimpleName().lastIndexOf("Meta"));
+    this.name = "org.myrobotlab.service." + simpleName;
   }
-
-  /*
-   * public MetaData(Class<?> clazz) { this.name = clazz.getCanonicalName();
-   * this.simpleName = clazz.getSimpleName(); }
-   * 
-   * public MetaData(String name) { this.name =
-   * CodecUtils.makeFullTypeName(name); this.simpleName =
-   * name.substring(name.lastIndexOf(".") + 1); }
-   */
 
   public void addArtifact(String orgId, String classifierId) {
     lastDependency.add(new ServiceArtifact(orgId, classifierId));
@@ -201,8 +194,10 @@ public class MetaData implements Serializable {
     return link;
   }
 
+  // FIXME - change to name ... change name to type
+  // check for webgui breakage
   public String getName() {
-    return name;
+    return serviceName;
   }
 
   public Map<String, ServiceReservation> getPeers() {
@@ -285,7 +280,7 @@ public class MetaData implements Serializable {
     if (peers.get(peerKey) == null) {
       log.warn("{} not found in peer keys - possible keys follow:", peerKey);
       for (String key : peers.keySet()) {
-        log.warn(key);
+        log.info(key);
       }
     }
     return peers.get(peerKey);
@@ -326,6 +321,11 @@ public class MetaData implements Serializable {
       }
     }
     return null;
+  }
+
+  public String getType() {
+    // FIXME - change name to type check for webgui breakage
+    return name;
   }
 
 }

@@ -14,8 +14,9 @@ public class RosMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public RosMeta() {
+  public RosMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("interface to Ros");
     addCategory("bridge");

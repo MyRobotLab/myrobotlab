@@ -14,8 +14,9 @@ public class MimicSpeechMeta extends AbstractSpeechSynthesisMeta {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MimicSpeechMeta() {
+  public MimicSpeechMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Speech synthesis based on Mimic from the MyCroft AI project.");

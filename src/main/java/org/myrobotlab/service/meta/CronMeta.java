@@ -17,8 +17,9 @@ public class CronMeta extends MetaData {
    * 
    * 
    */
-  public CronMeta() {
+  public CronMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("is a cron like service capable of scheduling future actions using cron syntax");
     addCategory("scheduling");

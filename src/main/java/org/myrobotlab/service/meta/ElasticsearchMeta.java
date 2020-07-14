@@ -14,8 +14,9 @@ public class ElasticsearchMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public ElasticsearchMeta() {
+  public ElasticsearchMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("used as a general template");

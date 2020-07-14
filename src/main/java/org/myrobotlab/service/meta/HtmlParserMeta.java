@@ -14,8 +14,9 @@ public class HtmlParserMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public HtmlParserMeta() {
+  public HtmlParserMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDependency("org.jsoup", "jsoup", "1.8.3");
     addDescription("html parser");

@@ -14,8 +14,9 @@ public class TopCodesMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public TopCodesMeta() {
+  public TopCodesMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Topcodes finds visual references and identifiers");
     addCategory("vision", "video", "sensors");

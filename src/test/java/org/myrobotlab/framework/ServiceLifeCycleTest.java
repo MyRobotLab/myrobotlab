@@ -41,9 +41,21 @@ public class ServiceLifeCycleTest extends AbstractTest {
     Runtime.release("thower02");
   }
 
-
   @Test
   public void serviceLifeCycleTest() throws Exception {
+        
+    // push the meta data into the planStore - this will persist 
+    // overrides if the meta data definition has them
+    ServiceData.setMetaData("i01", "InMoov");
+    
+    // pull it back out
+    MetaData data = ServiceData.getMetaData("i01", "InMoov");
+    log.warn("static meta data {}", data);
+    assertEquals("i01.left", data.getPeer("head.arduino").actualName); 
+
+    Plan plan = ServiceData.getPlan("i01", "InMoov");
+    log.warn("static plan {}", plan);
+    assertNotNull(plan);
     
     ServiceInterface si = null;
     
@@ -56,7 +68,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     log.info("instance meta data (with servie name) {}", metaData);
     
     // show plan
-    Plan plan = Runtime.getPlan("catcher01", "TestCatcher");
+    plan = Runtime.getPlan("catcher01", "TestCatcher");
     log.info("the plan {}", plan);
         
     // verify subkey
@@ -200,6 +212,8 @@ public class ServiceLifeCycleTest extends AbstractTest {
     assertFalse(catcher01.onReleased.contains("catcher02"));
     catcher02.releaseService();
     assertTrue(catcher01.onStopped.contains("catcher02"));
+    
+
     
     // release peer
     log.info("plan {}", metaData);    

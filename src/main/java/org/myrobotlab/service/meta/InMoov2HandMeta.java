@@ -14,8 +14,9 @@ public class InMoov2HandMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoov2HandMeta() {
+  public InMoov2HandMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("an easier way to create gestures for InMoov");
     addCategory("robot");

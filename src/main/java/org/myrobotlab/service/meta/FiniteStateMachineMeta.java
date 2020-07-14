@@ -14,8 +14,9 @@ public class FiniteStateMachineMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public FiniteStateMachineMeta() {
+  public FiniteStateMachineMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("general service which can create and maintaine multiple finite state machines");
     // addDependency("orgId", "artifactId", "2.4.0");

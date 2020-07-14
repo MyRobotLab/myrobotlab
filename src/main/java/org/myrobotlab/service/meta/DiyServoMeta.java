@@ -14,8 +14,9 @@ public class DiyServoMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public DiyServoMeta() {
+  public DiyServoMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Controls a motor so that it can be used as a Servo");
     addCategory("control", "servo");

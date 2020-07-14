@@ -14,8 +14,9 @@ public class InMoov2Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public InMoov2Meta() {
+  public InMoov2Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("InMoov2 Service");
     addCategory("robot");
@@ -61,8 +62,10 @@ public class InMoov2Meta extends MetaData {
 
     // Global - undecorated by self name
     // currently InMoov manually calls releasePeers - when it does
-    // the interpreter is in a process of shutdown while all inmoov peer services have not
-    // run their initialization scripts - npe and other errors can happen when creating and
+    // the interpreter is in a process of shutdown while all inmoov peer
+    // services have not
+    // run their initialization scripts - npe and other errors can happen when
+    // creating and
     // releasing all peers in quick succession
     // addPeer("python", "python", "Python", "shared Python service");
 

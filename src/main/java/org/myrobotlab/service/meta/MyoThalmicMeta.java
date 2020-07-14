@@ -14,8 +14,9 @@ public class MyoThalmicMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public MyoThalmicMeta() {
+  public MyoThalmicMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("Myo service to control with the Myo armband");

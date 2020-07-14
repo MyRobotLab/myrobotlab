@@ -14,8 +14,9 @@ public class Pcf8574Meta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public Pcf8574Meta() {
+  public Pcf8574Meta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("Pcf8574 i2c 8 pin I/O extender");
     addCategory("shield", "sensors");

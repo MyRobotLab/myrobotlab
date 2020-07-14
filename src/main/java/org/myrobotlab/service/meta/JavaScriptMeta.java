@@ -14,8 +14,9 @@ public class JavaScriptMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public JavaScriptMeta() {
+  public JavaScriptMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
 
     addDescription("native jvm javascript engine, which allows execution of javascript through exec method");

@@ -14,8 +14,9 @@ public class GoogleCloudMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GoogleCloudMeta() {
+  public GoogleCloudMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("google api client service");
     setAvailable(true);

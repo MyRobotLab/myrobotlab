@@ -14,8 +14,9 @@ public class GpsMeta extends MetaData {
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GpsMeta() {
+  public GpsMeta(String name) {
 
+    super(name);
     Platform platform = Platform.getLocalInstance();
     addDescription("parses NMEA sentences coming in over a Serial service");
     addCategory("location", "sensors");
