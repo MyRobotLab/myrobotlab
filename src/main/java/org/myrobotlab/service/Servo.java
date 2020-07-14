@@ -126,6 +126,11 @@ public class Servo extends AbstractServo implements ServoControl {
      * </pre>
      *
      */
+    // FIXME - poor implementation - should addListener(sync)
+    // and use pub/sub :(
+    for(String syncServo: syncedServos) {
+      send(syncServo, "moveTo", newPos);
+    }
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && !blocking) {
       // if isBlocking already, and incoming request is not blocking - we cancel
