@@ -14,7 +14,7 @@ public class AbstractSpeechSynthesisMeta extends MetaData {
    */
   public AbstractSpeechSynthesisMeta(String name) {
 
-super(name);
+    super(name);
     addPeer("audioFile", "AudioFile", "audioFile");
     addCategory("speech");
 

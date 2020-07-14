@@ -10,9 +10,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Plan;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.io.FileIO;
@@ -210,6 +212,10 @@ public class ServiceData implements Serializable {
     return getMetaData(null, type);
   }
 
+  public static MetaData getMetaData(String name, String type) {
+    return getMetaData(name, type, null);
+  }
+  
   /**
    * This method gets the meta data of a service class. If the service is
    * instance specific (ie if the service has a name) it will return that
@@ -224,8 +230,15 @@ public class ServiceData implements Serializable {
    * @param type
    * @return
    */
-  public static MetaData getMetaData(String serviceName, String type) {
+  public static MetaData getMetaData(String serviceName, String type, Set<String> cyclicalCheck) {
     try {
+      
+      if (cyclicalCheck == null) {
+        // root node
+        cyclicalCheck = new HashSet<>();
+      }
+      
+      cyclicalCheck.add(type);
 
       // test for overrides from name - name can override type
       if (serviceName != null && ServiceData.planStore.get(serviceName) != null) {
@@ -261,6 +274,7 @@ public class ServiceData implements Serializable {
             if (override.type != null) {
               sr.type = override.type;
             }
+                        
             if (override.comment != null) {
               sr.comment = override.comment;
             }
@@ -268,8 +282,13 @@ public class ServiceData implements Serializable {
             // if actual name wasn't set in the getMetaData - assign it as {parentName}.{peerKey}
             if (sr.actualName == null) {
               sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
-            }
+            }            
           }
+
+          if (cyclicalCheck.contains(sr.type)) {
+            throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
+          }
+
         }
      // }
 
@@ -516,6 +535,8 @@ public class ServiceData implements Serializable {
     // System.exit(0);
 
   }
+  
+  
 
   /**
    * Recursively pushes meta data from a service into the planStore - so that retrieval
@@ -536,9 +557,14 @@ public class ServiceData implements Serializable {
    * @param type
    * @param force
    * @return
+   * @throws MrlException 
    */
-  public static MetaData setMetaData(String name, String type, boolean force) {
+  public static MetaData setMetaData(String name, String type, boolean force, Set<String> cyclicalCheck) throws MrlException {
     MetaData metaData = getMetaData(name, type);
+    
+    if (cyclicalCheck != null && cyclicalCheck.contains(type)) {
+      throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", name, type);
+    }
     // push the configuration into the static store
     Map<String, ServiceReservation> peers = metaData.getPeers();
     for (Map.Entry<String,ServiceReservation> entry : peers.entrySet()) {
@@ -549,7 +575,7 @@ public class ServiceData implements Serializable {
       String peerKey = getPeerKey(name, entry.getKey());
       ServiceReservation peer = entry.getValue();
       
-      log.warn("pk {} => {}", peerKey, peer);
+      log.info("pk {} => {}", peerKey, peer);
       
       if (!force && planStore.containsKey(peerKey)) {
         continue;
@@ -562,7 +588,12 @@ public class ServiceData implements Serializable {
     for (ServiceReservation peer : peers.values()) {
       // for all children do the same ..
       // String peerKey = "something";
-      setMetaData(peer.actualName, peer.type, force);
+      if (cyclicalCheck == null) {
+        // root level - create a set to check
+        cyclicalCheck = new HashSet<>();
+        cyclicalCheck.add(type);
+      }
+      setMetaData(peer.actualName, peer.type, force, cyclicalCheck);
     }
     
     // get the meta data again with overrides ???
@@ -572,6 +603,11 @@ public class ServiceData implements Serializable {
   }
 
   public static MetaData setMetaData(String name, String type) {
-    return setMetaData(name, type, false);
+    try {
+      return setMetaData(name, type, false, null);
+    } catch(Exception e) {
+      log.error("setMetaData threw", e);
+    }
+    return null;
   }
 }
