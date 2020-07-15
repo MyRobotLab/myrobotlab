@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -61,12 +63,35 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.javacv.OpenKinectFrameGrabber;
+/*
+<pre>
+// extremely useful list of static imports - since auto-complete won't work with statics
+ 
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_calib3d.*;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_features2d.*;
+import static org.bytedeco.opencv.global.opencv_flann.*;
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.bytedeco.opencv.global.opencv_ml.*;
+import static org.bytedeco.opencv.global.opencv_objdetect.*;
+import static org.bytedeco.opencv.global.opencv_photo.*;
+import static org.bytedeco.opencv.global.opencv_shape.*;
+import static org.bytedeco.opencv.global.opencv_stitching.*;
+import static org.bytedeco.opencv.global.opencv_video.*;
+import static org.bytedeco.opencv.global.opencv_videostab.*;
+
+
+</pre>
+*/
 import org.bytedeco.opencv.opencv_core.CvPoint;
 import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
 import org.myrobotlab.document.Classification;
 import org.myrobotlab.document.Classifications;
@@ -74,6 +99,7 @@ import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.ColoredPoint;
 import org.myrobotlab.image.SerializableImage;
+import org.myrobotlab.image.WebImage;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -86,7 +112,6 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
-import org.myrobotlab.opencv.OpenCVFilterTextDetector;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -98,28 +123,6 @@ import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VGetParser;
 import com.github.axet.vget.info.VideoFileInfo;
 import com.github.axet.vget.info.VideoInfo;
-
-/*
-<pre>
-// extremely useful list of static imports - since auto-complete won't work with statics
- 
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
-
-</pre>
-*/
 
 /**
  * 
@@ -246,9 +249,9 @@ public class OpenCV extends AbstractComputerVision {
   transient public static final String FILTER_LK_OPTICAL_TRACK = "LKOpticalTrack";
   transient public static final String FILTER_PYRAMID_DOWN = "PyramidDown";
   transient final static public String FOREGROUND = "foreground";
-  static final Set<String> grabberTypes = new TreeSet<String>();
-  static final Set<String> videoFileExt = new TreeSet<String>();
-  static final Set<String> imageFileExt = new TreeSet<String>();
+  protected static final Set<String> globalGrabberTypes = new TreeSet<String>();
+  protected static final Set<String> globalVideoFileExt = new TreeSet<String>();
+  protected static final Set<String> globalImageFileExt = new TreeSet<String>();
   public static final String INPUT_KEY = "input";
 
   // FIXME - make more simple
@@ -281,30 +284,30 @@ public class OpenCV extends AbstractComputerVision {
       for (int i = 0; i < FrameGrabber.list.size(); ++i) {
         String ss = FrameGrabber.list.get(i);
         String fg = ss.substring(ss.lastIndexOf(".") + 1);
-        grabberTypes.add(fg);
+        globalGrabberTypes.add(fg);
       }
 
-      grabberTypes.add("ImageFile");
-      grabberTypes.add("Pipeline"); // to/from another opencv service
-      grabberTypes.add("Sarxos");
-      grabberTypes.add("MJpeg");
+      globalGrabberTypes.add("ImageFile");
+      globalGrabberTypes.add("Pipeline"); // to/from another opencv service
+      globalGrabberTypes.add("Sarxos");
+      globalGrabberTypes.add("MJpeg");
 
-      videoFileExt.add("mjpeg");
-      videoFileExt.add("mpeg");
-      videoFileExt.add("mp4");
-      videoFileExt.add("avi");
-      videoFileExt.add("mov");
-      videoFileExt.add("flv");
-      videoFileExt.add("wmv");
+      globalVideoFileExt.add("mjpeg");
+      globalVideoFileExt.add("mpeg");
+      globalVideoFileExt.add("mp4");
+      globalVideoFileExt.add("avi");
+      globalVideoFileExt.add("mov");
+      globalVideoFileExt.add("flv");
+      globalVideoFileExt.add("wmv");
 
-      imageFileExt.add("jpg");
-      imageFileExt.add("jpeg");
-      imageFileExt.add("gif");
-      imageFileExt.add("tiff");
-      imageFileExt.add("tif");
-      imageFileExt.add("png");
-      imageFileExt.add("pcd");
-      imageFileExt.add("pdf");
+      globalImageFileExt.add("jpg");
+      globalImageFileExt.add("jpeg");
+      globalImageFileExt.add("gif");
+      globalImageFileExt.add("tiff");
+      globalImageFileExt.add("tif");
+      globalImageFileExt.add("png");
+      globalImageFileExt.add("pcd");
+      globalImageFileExt.add("pdf");
 
       recordKeys.add("input.video");
       recordKeys.add("input.depth");
@@ -376,9 +379,8 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   static public Set<String> getGrabberTypes() {
-    return grabberTypes;
+    return globalGrabberTypes;
   }
-
 
   /**
    * get the current list of possible filter types
@@ -398,196 +400,82 @@ public class OpenCV extends AbstractComputerVision {
     // lkoptical disparity motion Time To Contact
     // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
     //
-    // WebGui webgui = (WebGui)Runtime.start("webgui", "WebGui");
     LoggingFactory.init("info");
 
-    Runtime runtime = Runtime.getInstance();
-    runtime.setLocale("fr");
-    Runtime.start("gui", "SwingGui");
-    
     // Runtime.start("python", "Python");
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
-    cv.addFilter(td);
+    // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
+    // cv.addFilter(td);
     cv.capture();
-    
-    // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    // webgui.autoStartBrowser(false);
-    // webgui.startService();
 
-    // cv.capture();
-    // cv.setDisplay(true);
+    // Runtime.start("gui", "SwingGui");
 
-    // cv.setGrabberType("OpenKinect");
-    // cv.setStreamerEnabled(true);
-    // cv.setGrabberType("OpenCV");
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
 
-    // cv.addFilter("LKOpticalTrack");
-    // cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    // FFmpegFrameRecorder test = new
 
-    // yoloFilter.enable();
-    // cv.addFilter(yoloFilter);
+    // FFmpegFrameRecorder recorder = new
+    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
+    // recorder.setFormat("webm");
+    // recorder.start();
 
-    /*
-     * cv.capture(TEST_LOCAL_FACE_FILE_JPEG);
+    /**
+     * <pre>
      * 
-     * OpenCVFilter yoloFilter = cv.addFilter("yolo"); yoloFilter.enable();
-     * yoloFilter.disable(); yoloFilter.enable(); yoloFilter.disable();
-     * yoloFilter.enable();
+     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
+     *
+     * private void initLiveStream() throws FrameRecorder.Exception {
+     * 
+     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
+     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
+     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+     * frameRecorder.setAudioCodec(0);
+     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
+     * frameRecorder.setFrameRate(frameRate);
+     * frameRecorder.setVideoBitrate(5000);
+     * frameRecorder.setOption("content_type","video/webm");
+     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
+     *
+     *
+     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
+     * grabber.getImageWidth(), grabber.getImageHeight());
+     * recorder.setFormat(grabber.getFormat());
+     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
+     * recorder.setFrameRate(grabber.getFrameRate());
+     * recorder.setVideoBitrate(grabber.getVideoBitrate());
+     * recorder.setVideoCodec(grabber.getVideoCodec());
+     * recorder.setVideoOption("preset", "ultrafast");
+     * recorder.setVideoCodecName("libx264");
+     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
+     * 
      */
-
-    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\I9VA-U69yaY_The
-    // Matrix - Pill Scene Short.mp4");
-    // cv.capture("C:\\mrl\\myrobotlab.worke\\myrobotlab\\data\\OpenCV\\1559052474050");
 
     boolean done = true;
     if (done) {
       return;
     }
 
-    // TODO - chaos monkey yolo
-    // for (int i = 0 ; i < 10; i++) {
-    // yoloFilter.enable();
-    // yoloFilter.disable();
-    // }
-    // Thread.sleep(2000);
-    // yoloFilter.enable();
-    // cv.capture();
-    // yoloFilter.disable();
-    // yoloFilter.enable();
-
-    // cv.load();
-
-    // single kinect image file
-    // cv.reset();
-
-    // must do this for 1 chn 16 bit
-    // cv.setGrabberType("ImageFile");
-    // cv.capture("kinect-data");
-    // cv.capture("src/test/resources/OpenCV/kinect-test-1chn-16bit.png");
-
-    // FIXME - todo FFmpeg tif, gif, jpg, mpg, avi
-
-    // FIXME - make this work :P
-    // http://192.168.0.37/videostream.cgi
-    cv.reset();
-    cv.capture("OpenCV\\1543189994036");
-
-    // set recording of frames both avi and single frames
-    cv.recordFrames();
-
-    // record a set of files
-    cv.capture();
-    cv.record();
-
-    cv.sleep(10000);
-
-    cv.stopRecording();
-
-    // directory full of kinect files
-    cv.setGrabberType("ImageFile");
-    cv.capture("src/test/resources/OpenCV/kinect");
-
-    // directory test
-    cv.capture("src/test/resources/OpenCV");
-
-    // single file test
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-
-    // mp4 test
-    cv.capture("src/test/resources/OpenCV/monkeyFace.mp4");
-
     OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
     cv.addFilter(depth);
     cv.capture();
-
-    OpenCVFilterYolo yolo = (OpenCVFilterYolo) cv.addFilter("yolo");
-
-    // cv.capture("https://www.youtube.com/watch?v=zDO1Q_ox4vk"); // matrix
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM");
-    // cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin
-    // FIXME - decompose into modular filters
-    // cv.capture("https://www.youtube.com/watch?v=JqVWD-3PdZo");//
-    // matrix-restaurant
-    // cv.capture("https://www.youtube.com/watch?v=lPOXR4dXxDQ"); // matrix 30
-    // min movie
-
-    // OpenCVFilterFaceTraining filter = new
-    // OpenCVFilterFaceTraining("training");
-    // filter.mode = Mode.TRAIN;
-    // cv.addFilter(filter);
-
     cv.addFilter("Yolo");
 
-    // filter.load("C:\\mrl\\myrobotlab.opencv-fixes\\myrobotlab\\BoundingBoxToFile\\neo");
-    // filter.mode = Mode.TRAIN;
+  }
 
-    boolean leave = true;
-    if (leave) {
-      return;
-    }
-
-    for (String fn : OpenCV.POSSIBLE_FILTERS) {
-      if (fn.startsWith("DL4J")) {
-        continue;
+  public void stopStreamer() {
+    try {
+      if (ffmpegStreamer == null) {
+        log.warn("webm already stopped");
+        return;
       }
-      log.info("trying {}", fn);
-      cv.addFilter(fn);
-      sleep(100);
-      cv.removeFilters();
+      ffmpegStreamer.close();
+      ffmpegStreamer = null;
+    } catch (Exception e) {
+      log.error("stopStreamer threw", e);
     }
-
-    for (int i = 0; i < 1000; ++i) {
-
-      Map<String, List<Classification>> classifications = cv.getClassifications();
-
-      StringBuilder sb = new StringBuilder("I found ");
-      if (classifications != null && classifications.keySet().size() > 0) {
-
-        for (String c : classifications.keySet()) {
-          List<Classification> types = classifications.get(c);
-          sb.append(types.size());
-          sb.append(" ");
-          sb.append(c);
-          if (types.size() > 1) {
-            sb.append("s");
-          }
-          sb.append(" ");
-        }
-        sb.append(".");
-      } else {
-        sb.append("nothing.");
-      }
-
-      log.info(sb.toString());
-    }
-
-    cv.addFilter("yolo");
-    cv.capture("https://www.youtube.com/watch?v=rgoYYWCCDkM"); // dublin street
-
-    cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-
-    cv.capture(0);
-    // cv.capture("C:\\mrl\\myrobotlab.opencv-fixes\\d.mp4"); dunno why
-    // ffmpeg noWorky
-
-    // check with
-    // &timestart=
-    cv.setColor("black");
-    // cv.capture("src/test/resources/OpenCV/multipleFaces.jpg");
-    // cv.capture("testAvi/rassegna2.avi");
-    // cv.addFilter("GoodFeaturesToTrack");
-    // cv.addFilter("Canny");
-    // cv.addFilter("yolo");
-    // cv.capture("googleimagesdownload/downloads/cats");
-    // cv.capture("http://www.engr.colostate.edu/me/facil/dynamics/files/cbw3.avi");
-    OpenCVFilterYolo yolo1 = new OpenCVFilterYolo("yolo");
-    cv.addFilter(yolo1);
-    log.info("here");
-
-    // cv.capture();
-
   }
 
   /**
@@ -682,7 +570,7 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * all the filters in the pipeline
    */
-  transient Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
+  Map<String, OpenCVFilter> filters = new LinkedHashMap<String, OpenCVFilter>();
 
   transient CvFont font = new CvFont();
 
@@ -737,13 +625,6 @@ public class OpenCV extends AbstractComputerVision {
   // GROG : .. perhaps just a filter in the pipeline could stream it via http
   transient VideoStreamer streamer;
 
-  // Changed default to false. Otherwise multiple opencv instances will get a
-  // port in use bind exception.
-  // TODO: fix how the opencv service can stream video to the webgui.
-  Boolean streamerEnabled;
-
-  // final Object lock = new Object();
-
   boolean undockDisplay = false;
 
   transient Thread videoThread = null;
@@ -757,8 +638,33 @@ public class OpenCV extends AbstractComputerVision {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
+  
+  /**
+   * Used to provide a thread safe way of setting filter states
+   */
+  private Map<String, OpenCVFilter> newFilterStates = new HashMap<>();
 
   boolean display = true;
+
+  /**
+   * for native canvas frame view of output
+   */
+  public boolean nativeViewer = false;
+
+  /**
+   * local reference of global frame grabber types
+   */
+  protected Set<String> grabberTypes;
+
+  /**
+   * local reference of video file ext
+   */
+  protected Set<String> videoFileExt;
+
+  /**
+   * local reference of image file ext
+   */
+  protected Set<String> imageFileExt;
 
   static String DATA_DIR;
 
@@ -784,8 +690,10 @@ public class OpenCV extends AbstractComputerVision {
     putText(20, 20, "time:  %d");
     putText(20, 30, "frame: %d");
     DATA_DIR = getDataDir();
-    File cacheDir = new File(getDataDir());
-    cacheDir.mkdirs();
+
+    grabberTypes = globalGrabberTypes;
+    videoFileExt = globalVideoFileExt;
+    imageFileExt = globalVideoFileExt;
 
     // Init default config
     if (cameraIndex == null) {
@@ -1073,7 +981,7 @@ public class OpenCV extends AbstractComputerVision {
 
     if (grabberType != null && grabberType.equals("OpenCV") && inputSource.equals(INPUT_SOURCE_FILE)) {
       log.info("invalid state of opencv and input source file - setting to FFmpeg frame grabber");
-      if (ext != null && videoFileExt.contains(ext)) {
+      if (ext != null && globalVideoFileExt.contains(ext)) {
         grabberType = "FFmpeg";
       } else {
         grabberType = "ImageFile";
@@ -1094,7 +1002,7 @@ public class OpenCV extends AbstractComputerVision {
       if (isDir.isDirectory()) {
         grabberType = "ImageFile";
       } else {
-        if (ext != null && videoFileExt.contains(ext)) {
+        if (ext != null && globalVideoFileExt.contains(ext)) {
           grabberType = "FFmpeg";
         } else {
           grabberType = "ImageFile";
@@ -1105,7 +1013,7 @@ public class OpenCV extends AbstractComputerVision {
     if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_CAMERA))) {
       grabberType = "OpenCV";
     } else if ((grabberType == null) && (inputSource.equals(INPUT_SOURCE_FILE))) {
-      if (ext != null && videoFileExt.contains(ext)) {
+      if (ext != null && globalVideoFileExt.contains(ext)) {
         grabberType = "FFmpeg";
       } else {
         grabberType = "ImageFile";
@@ -1335,10 +1243,6 @@ public class OpenCV extends AbstractComputerVision {
     return recording;
   }
 
-  public boolean isStreamerEnabled() {
-    return streamerEnabled;
-  }
-
   public boolean isUndocked() {
     return undockDisplay;
   }
@@ -1348,6 +1252,25 @@ public class OpenCV extends AbstractComputerVision {
     // capturing = false; NOT SURE WHAT TO DO ... PROBABLY stopCapture without
     // resetting frame-index
 
+  }
+
+  /**
+   * conversion from buffered image to base64 encoded jpg
+   * 
+   * @param img
+   * @return
+   */
+  public String toBase64Jpg(BufferedImage img) {
+    try {
+      final ByteArrayOutputStream os = new ByteArrayOutputStream();
+      ImageIO.write(img, "jpg", os);
+      os.close();
+      String ret = Base64.getEncoder().encodeToString(os.toByteArray());
+      return ret;
+    } catch (Exception e) {
+      log.error("toBase64Jpg threw", e);
+    }
+    return null;
   }
 
   private void processVideo(OpenCVData data) throws org.bytedeco.javacv.FrameGrabber.Exception, InterruptedException {
@@ -1366,6 +1289,7 @@ public class OpenCV extends AbstractComputerVision {
         IplImage processed = filter.process(input);
         filter.postProcess(processed);
         filter.processDisplay();
+        processFilterStateUpdates(filter);
       }
     } // for each filter
 
@@ -1402,7 +1326,13 @@ public class OpenCV extends AbstractComputerVision {
         BufferedImage b = data.getDisplay();
         invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
 
-        if (display && !isHeadless()) {
+        // broadcast(???)
+        WebImage webImage = new WebImage(b, getName(), frameIndex);
+        // latency use the original ts from before fetch image and the filters !
+        webImage.ts = data.getTs();
+        broadcast("publishWebDisplay", webImage);
+
+        if (!isHeadless() && nativeViewer) {
           if (canvasFrame == null) {
             // FIXME - strange canvaFrame's fullscreen mode is not exposed :(
             // ProjectorDevice pd = new ProjectorDevice("display 2");
@@ -1412,11 +1342,12 @@ public class OpenCV extends AbstractComputerVision {
             canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             // canvasFrame.setAlwaysOnTop(true);
             canvasFrame.setResizable(true);
+            canvasFrame.showImage(b);
             canvasFrame.pack();
           }
           canvasFrame.showImage(b);
 
-        } else if (!display && canvasFrame != null) {
+        } else if (canvasFrame != null && !nativeViewer) {
           canvasFrame.dispose();
           canvasFrame = null;
         }
@@ -1450,6 +1381,14 @@ public class OpenCV extends AbstractComputerVision {
       record(data);
     }
 
+    if (ffmpegStreamer != null) {
+      try {
+        ffmpegStreamer.record(data.getInputFrame());
+      } catch (Exception e) {
+        log.error("webm threw", e);
+      }
+    }
+
     frameEndTs = System.currentTimeMillis();
 
     // delay if needed to maxFps
@@ -1460,6 +1399,37 @@ public class OpenCV extends AbstractComputerVision {
     data.dispose();
 
   } // end processVideo
+
+  /**
+   * A new method to protect filters from other threads doing updates possibly
+   * creating invalid states from processing "partially" copied filter states
+   * 
+   * The video processing thread will be the one which does the copy of requested
+   * state changes from other threads - which will guarantee a "full" copy of
+   * variables before processing begins again
+   * 
+   * @param filter
+   */
+  private void processFilterStateUpdates(OpenCVFilter filter) {
+    // TODO Auto-generated method stub
+    OpenCVFilter newFilterState = newFilterStates.remove(filter.name);
+    if (newFilterState != null) {
+      // update our filter with a completely updates new filter
+      Service.copyShallowFrom(filter, newFilterState);
+    }
+    
+  }  
+  
+
+  /**
+   * base 64 jpg frame image
+   * 
+   * @param data
+   * @return
+   */
+  public WebImage publishWebDisplay(WebImage data) {
+    return data;
+  }
 
   // when containers are published the <T>ypes are unknown to the publishing
   // function
@@ -1523,21 +1493,23 @@ public class OpenCV extends AbstractComputerVision {
     return img;
   }
 
-  /*
-   * publishing method for filters - used internally
+  /**
+   * Publishing method for filters - used internally
    * 
+   * @param filterWrapper
    * @return FilterWrapper solves the problem of multiple types being resolved
-   * in the setFilterState(FilterWrapper data) method
+   *         in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(FilterWrapper filterWrapper) {
     return filterWrapper;
   }
 
-  /*
-   * publishing method for filters - uses string parameter for remote invocation
+  /**
+   * Publishing method for filters - uses string parameter for remote invocation
    * 
+   * @param name
    * @return FilterWrapper solves the problem of multiple types being resolved
-   * in the setFilterState(FilterWrapper data) method
+   *         in the setFilterState(FilterWrapper data) method
    */
   public FilterWrapper publishFilterState(String name) {
     OpenCVFilter filter = getFilter(name);
@@ -1625,6 +1597,41 @@ public class OpenCV extends AbstractComputerVision {
 
   public void record() {
     recording = true;
+  }
+
+  transient FFmpegFrameRecorder ffmpegStreamer = null;
+
+  protected boolean webViewer = false;
+
+  public void startStreamer() {
+    try {
+      if (ffmpegStreamer != null) {
+        log.warn("webm already initialized");
+        return;
+      }
+
+      int imageWidth = (width == null) ? 640 : width;
+      int imageHeight = (height == null) ? 480 : height;
+
+      ffmpegStreamer = new FFmpegFrameRecorder("tcp://localhost:9090?listen", imageWidth, imageHeight);
+      ffmpegStreamer.setFormat("webm");
+      ffmpegStreamer.start();
+
+      // ~~~ https://github.com/bytedeco/javacv/issues/598 ~~~
+
+      /*
+       * webm = new FFmpegFrameRecorder("http://localhost:9090", webWidth,
+       * webHeight, 0); webm.setVideoOption("preset", "ultrafast");
+       * webm.setVideoCodec(avcodec.AV_CODEC_ID_H264); webm.setAudioCodec(0);
+       * webm.setPixelFormat(avutil.AV_PIX_FMT_YUV420P); webm.setFormat("webm");
+       * webm.setGopSize(10); webm.setFrameRate(32); webm.setVideoBitrate(5000);
+       * webm.setOption("content_type", "video/webm"); webm.setOption("listen",
+       * "1"); webm.start();
+       */
+      log.info("started webm");
+    } catch (Exception e) {
+      log.error("startStreamer threw", e);
+    }
   }
 
   /**
@@ -1816,7 +1823,7 @@ public class OpenCV extends AbstractComputerVision {
     } else {
       filter.enableDisplay();
     }
-
+    broadcastState();
   }
 
   /**
@@ -1837,6 +1844,29 @@ public class OpenCV extends AbstractComputerVision {
     } else {
       error("setFilterState - could not find %s ", otherFilter.name);
     }
+  }
+
+  /**
+   * Json encoded filter to be used to update state information within the named
+   * filter
+   * 
+   * @param name
+   * @param data
+   */
+  public void setFilterState(String name, String data) {
+    OpenCVFilter filter = getFilter(name);
+    if (filter == null) {
+      error("setFilterState - could not find %s ", name);
+      return;
+    }
+    OpenCVFilter otherFilter = CodecUtils.fromJson(data, filter.getClass());
+    if (otherFilter == null) {
+      error("setFilterState - could not decode %s ", name);
+      return;
+    }
+    // not thread safe
+    // Service.copyShallowFrom(filter, otherFilter);
+    newFilterStates.put(otherFilter.name, otherFilter);
   }
 
   public String setGrabberType(String grabberType) {
@@ -1879,8 +1909,22 @@ public class OpenCV extends AbstractComputerVision {
     return source;
   }
 
-  public void setStreamerEnabled(boolean streamerEnabled) {
-    this.streamerEnabled = streamerEnabled;
+  public void startWebViewer() {
+    startPeer("streamer");
+    webViewer = true;
+  }
+
+  public void stopWebViewer() {
+    releasePeer("streamer");
+    webViewer = false;
+  }
+
+  public void startNativeViewer() {
+    nativeViewer = true;
+  }
+
+  public void stopNativeViewer() {
+    nativeViewer = false;
   }
 
   synchronized public void stopCapture() {
@@ -2022,6 +2066,15 @@ public class OpenCV extends AbstractComputerVision {
 
   public void setDisplay(boolean b) {
     display = b;
+  }
+  
+  public void samplePoint(int x, int y) {
+    samplePoint(displayFilter, x, y);
+  }
+  
+  public void samplePoint(String filter, int x, int y) {
+    OpenCVFilter f = getFilter(filter);
+    f.samplePoint(x, y);
   }
 
 }

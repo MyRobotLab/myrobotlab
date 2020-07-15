@@ -23,7 +23,6 @@ public class YoloFilterTest extends AbstractTest {
     solr.startEmbedded();
 
     OpenCV opencv = (OpenCV) Runtime.start("opencv", "OpenCV");
-    opencv.setStreamerEnabled(false);
     opencv.setCameraIndex(0);
 
     OpenCVFilterYolo yolo = new OpenCVFilterYolo("yolo");

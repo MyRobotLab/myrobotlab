@@ -1,13 +1,185 @@
-angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl, $sce) {
-    $log.info('OpenCVGuiCtrl')
-    // grab a refernce
+angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$scope', 'mrl', '$uibModal', function($scope, mrl, $uibModal) {
+    console.info('OpenCVGuiCtrl')
+    // grab a reference
     var _self = this
     // grab the message
     var msg = this.msg
 
+    var addFilterDialog = null
+
+    $scope.fps = 0
+
+    $scope.lastFrameTs = null
+
+    $scope.stats = {
+        latency: 0,
+        fps: 0
+    }
+
+    $scope.samplePoint = {
+        x:0,
+        y:0
+    }
+
+    var avgSampleCnt = 30
+
+    var latencyDeltaAccumulator = 0
+
+    var lastFrameIndex = 0
+
+    var lastFrameTs = 0
+
+    /**
+     * Filter "Types" - this is the meta data type information necessary to build
+     * filter dialogs which get and set the filter attributes.
+     * in OpenCV.html - you can find were these are used when getFilterType() is called
+     */
+    $scope.filterMetaData = {
+        'AdaptiveThreshold': {
+            algorithm: 'mean',
+            blockSize: {
+                options: {
+                    floor: 3,
+                    ceil: 13,
+                    minLimit: 3,
+                    maxLimit: 13,
+                    value: 11,
+                    step: 2,
+                    showTicks: true,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            param1: {
+                options: {
+                    floor: -10,
+                    ceil: 10,
+                    minLimit: -10,
+                    maxLimit: 10,
+                    showTicks: true,
+                    value: 2,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+
+        },
+        'Affine': {
+            angle: {
+                options: {
+                    floor: 0,
+                    ceil: 360,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            }
+        },
+
+        'Canny': {
+            apertureSize: {
+                options: {
+                    floor: 3,
+                    ceil: 7,
+                    minLimit: 3,
+                    maxLimit: 7,
+                    step: 2,
+                    showTicks: true,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            lowThreshold: {
+                options: {
+                    floor: 0,
+                    ceil: 500,
+                    minLimit: 0,
+                    maxLimit: 500,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            highThreshold: {
+                options: {
+                    floor: 0,
+                    ceil: 500,
+                    minLimit: 0,
+                    maxLimit: 500,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            }
+        },
+        // Canny
+        'LKOpticalTrack': {
+            maxPointCnt: {
+                options: {
+                    floor: 0,
+                    ceil: 256,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            minDistance: {
+                options: {
+                    floor: 0,
+                    ceil: 256,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            blockSize: {
+                options: {
+                    floor: 0,
+                    ceil: 500,
+                    minLimit: 0,
+                    maxLimit: 500,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            quality: {
+                options: {
+                    floor: 0,
+                    ceil: 100,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            }
+        }// LKOpticalTrack
+
+    }
+
+    $scope.diplayImage = null
+
+    // first in list
+    $scope.selectedFilterType = 'AdaptiveThreshold'
+    // $scope.displayFilter = null
+
     // local scope variables
-    $scope.cameraIndex = 1
-    $scope.frameGrabber = "VideoInput"
+    // necessary because service.cameraIndex is an int but ng-option only handles strings
+    // $scope.cameraIndex = "0"
+    $scope.camera = {
+        index: "0"
+    }
+
     $scope.possibleFilters = null
 
     // initial state of service.
@@ -24,32 +196,46 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     // Handle an update state call from OpenCV service.
     this.updateState = function(service) {
         $scope.service = service
-        $log.info("Open CV State had been updated")
-        $log.info(service)
+        console.info("Open CV State had been updated")
+        console.info(service)
+        // int to string conversion
+        $scope.camera.index = service.cameraIndex.toString()
         if ($scope.service.capturing) {
-            $log.info("Started capturing")
+            console.info("Started capturing")
             $scope.startCaptureLabel = "Stop Capture"
             $scope.imgSource = "http://localhost:9090/input"
         } else {
-            $log.info("Stopped capturing.")
+            console.info("Stopped capturing.")
             $scope.startCaptureLabel = "Start Capture"
             $scope.imgSource = "service/img/OpenCV.png"
         }
 
     }
 
-    // controls for select frame grabber
-    $scope.selectFrameGrabber = function selectFrameGrabber(frameGrabber) {
-        $log.info("Updating Frame Grabber ")
-        $scope.frameGrabber = frameGrabber
-        mrl.send("setGrabberType", frameGrabber)
+    $scope.addFilter = function(size) {
+
+        addFilterDialog = $uibModal.open({
+            templateUrl: "addFilterDialog.html",
+            scope: $scope,
+            controller: function($scope) {
+                $scope.cancel = function() {
+                    addFilterDialog.dismiss()
+                }
+            }
+        })
     }
 
-    // controls for select frame grabber                
-    $scope.selectCameraIndex = function(cameraIndex) {
-        $log.info("Updating Camera Index ..." + cameraIndex)
-        $scope.cameraIndex = cameraIndex
-        mrl.sendTo($scope.service.name, "setCameraIndex", cameraIndex)
+    $scope.addNamedFilter = function(name) {
+        console.info('addNamedFilter', name, $scope.selectedFilterType)
+        msg.send('addFilter', name, $scope.selectedFilterType)
+        if (addFilterDialog) {
+            addFilterDialog.dismiss()
+        }
+    }
+
+    $scope.setDisplayFilter = function(name) {
+        console.info('setDisplayFilter', name)
+        msg.send('setDisplayFilter', name)
     }
 
     this.onMsg = function(inMsg) {
@@ -63,20 +249,79 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
             $scope.possibleFilters = data
             $scope.$apply()
             break
-        case 'onDisplay':
-            // $scope.pulseData = inMsg.data[0]
+        case 'onWebDisplay':
+            // $scope.diplayImage = 'data:image/jpeg;base64,' + data
+            $scope.diplayImage = data.data
+            if (data.frameIndex % avgSampleCnt == 0) {
+                $scope.stats.latency = Math.round(latencyDeltaAccumulator / avgSampleCnt)
+                latencyDeltaAccumulator = 0
+                $scope.stats.fps = Math.round((data.frameIndex - lastFrameIndex) * 1000 / (data.ts - lastFrameTs))
+                lastFrameIndex = data.frameIndex
+                lastFrameTs = data.ts
+            }
+
+            latencyDeltaAccumulator += new Date().getTime() - data.ts
+
             $scope.$apply()
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
 
-    // TODO: we're not going to publish the display.
-    // we will start a video stream and update the page to display that stream.
-    // mrl.subscribe($scope.service.name, 'publishState')
+    // FIXME - rename isFitlerType('Canny')
+    $scope.isFilterType = function(type) {
+        if ($scope.service.filters[$scope.service.displayFilter]) {
+            return $scope.service.filters[$scope.service.displayFilter].type == type
+        }
+        return null
+    }
+
+    // get currently selected filter
+    $scope.getFilter = function() {
+        if ($scope.service.filters[$scope.service.displayFilter]) {
+            return $scope.service.filters[$scope.service.displayFilter]
+        }
+        return null
+    }
+
+    $scope.getDisplayImage = function() {
+        return $scope.diplayImage
+    }
+
+    $scope.setFilterState = function() {
+        let filter = $scope.service.filters[$scope.service.displayFilter]
+        // let meta = $scope.getFilterType().apertureSize.options
+        // let x = $scope.service.filters[$scope.service.displayFilter].apertureSize
+        msg.send('setFilterState', filter.name, JSON.stringify(filter))
+        console.info(filter)
+    }
+
+    $scope.getFilterType = function(typeName) {
+        if (!typeName) {
+            typeName = $scope.service.displayFilter
+        }
+        if ($scope.service.filters[typeName]) {
+            return $scope.filterMetaData[$scope.service.filters[$scope.service.displayFilter].type]
+        }
+        return null
+    }
+
+    $scope.meta = function() {
+        let type = $scope.isFilterType()
+    }
+
+    $scope.onSamplePoint = function($event) {
+        console.info('samplePoint ' + $event)
+        $scope.samplePoint.x = $event.offsetX
+        $scope.samplePoint.y = $event.offsetY
+        msg.send('samplePoint', $scope.samplePoint.x, $scope.samplePoint.y)
+    }
+
+
     msg.subscribe('getPossibleFilters')
+    msg.subscribe('publishWebDisplay')
     msg.subscribe('publishState')
     msg.send('getPossibleFilters')
     msg.subscribe(this)

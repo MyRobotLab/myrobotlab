@@ -90,7 +90,7 @@ public abstract class OpenCVFilterGui implements ActionListener {
   public void initFilterState(OpenCVFilter filter) {
     boundFilter = new FilterWrapper(name, filter);
     sources.setModel(sourcesModel);
-    sources.setSelectedItem(filter.sourceKey);
+    sources.setSelectedItem(filter.getSourceKey());
   }
 
   public void setFilterState(OpenCVFilter filter) {
