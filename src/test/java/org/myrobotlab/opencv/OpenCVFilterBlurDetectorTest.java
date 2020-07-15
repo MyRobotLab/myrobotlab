@@ -1,8 +1,10 @@
 package org.myrobotlab.opencv;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
-import org.nd4j.linalg.io.Assert;
 
 /**
  * validate the blur detector produces a value..
@@ -22,16 +24,16 @@ public class OpenCVFilterBlurDetectorTest  extends AbstractOpenCVFilterTest {
 
   @Override
   public IplImage createTestImage() {
+    // The default image has a pretty blurry background...
     return defaultImage();
   }
 
   @Override
   public void verify(OpenCVFilter filter, IplImage input, IplImage output) {
-    // TODO: verify!
-    log.info("CVData: {}", filter.data);
-    // TODO: more info.
-    Assert.notNull(output);
-    // waitOnAnyKey();
+    Double blurriness = filter.data.getBlurriness();
+    assertNotNull(blurriness);
+    // low scores indicate a very blurry image.
+    assertTrue(blurriness < 100.0);
   }
 
 }

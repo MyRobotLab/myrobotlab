@@ -9,6 +9,7 @@ import static org.bytedeco.opencv.global.opencv_imgproc.Laplacian;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -25,14 +26,26 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  double blurriness = 0;
-  float threshold = 400.0f;
+  // this threshold is only for the display label
+  float threshold = 100.0f;
 
+  /**
+   * This filter will detect how blurry an image is.  It does this by
+   * computing the variance of the laplacian of the image.
+   * More Info on the approach here:
+   * https://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
+   * 
+   * The blurriness score is computed over the entire image.
+   * 
+   * NOTE: Lower blurriness scores mean the image is more blurry!
+   * Scores below 100 tend to be very blurry and scores above 100 tend to be sharper.
+   *    
+   */
   public OpenCVFilterBlurDetector(String name) {
     super(name);
   }
 
-  public double varianceOfLaplacian(IplImage image) {
+  public static double varianceOfLaplacian(IplImage image) {
     // compute the Laplacian of the image and then return the focus
     // measure, which is simply the variance of the Laplacian
     Mat input = OpenCV.toMat(image);
@@ -51,7 +64,7 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    // TODO: what do we do here?
+    // NoOp?
   }
 
   @Override
@@ -60,24 +73,23 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
     IplImage gray = cvCreateImage(image.cvSize(), 8, CV_THRESH_BINARY);
     cvCvtColor(image, gray, CV_BGR2GRAY);
     // compute the variance of the laplacian.
-    blurriness = varianceOfLaplacian(gray);
-    // TODO: set the CV data to include a blur score
-    if (blurriness < threshold) {
-      System.out.println("Blurry!");
-    } else {
-      System.out.println("not blurry!");
-    }
-    System.out.println("Fizzyness: " + blurriness);
+    data.setBlurriness(varianceOfLaplacian(gray));
     return image;
   }
 
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
-    if (blurriness <= threshold) {
+    // The lower the blurriness score, the more blurry the image is (on average)
+    Double blurriness = data.getBlurriness();
+    if (blurriness == null) {
+      return image;
+    } else if (blurriness <= threshold) {
       String status = "Blurry     : " + blurriness;
+      graphics.setColor(Color.RED);
       graphics.drawString(status, 20, 40);
     } else  {
       String status = "Not Blurry : " + blurriness;
+      graphics.setColor(Color.BLUE);
       graphics.drawString(status, 20, 40);
     }
     return image;
