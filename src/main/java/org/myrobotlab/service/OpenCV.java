@@ -67,20 +67,21 @@ import org.bytedeco.javacv.OpenKinectFrameGrabber;
 <pre>
 // extremely useful list of static imports - since auto-complete won't work with statics
  
-import static org.bytedeco.javacpp.opencv_imgproc.*;
-import static org.bytedeco.javacpp.opencv_calib3d.*;
-import static org.bytedeco.javacpp.opencv_core.*;
-import static org.bytedeco.javacpp.opencv_features2d.*;
-import static org.bytedeco.javacpp.opencv_flann.*;
-import static org.bytedeco.javacpp.opencv_highgui.*;
-import static org.bytedeco.javacpp.opencv_imgcodecs.*;
-import static org.bytedeco.javacpp.opencv_ml.*;
-import static org.bytedeco.javacpp.opencv_objdetect.*;
-import static org.bytedeco.javacpp.opencv_photo.*;
-import static org.bytedeco.javacpp.opencv_shape.*;
-import static org.bytedeco.javacpp.opencv_stitching.*;
-import static org.bytedeco.javacpp.opencv_video.*;
-import static org.bytedeco.javacpp.opencv_videostab.*;
+import static org.bytedeco.opencv.global.opencv_imgproc.*;
+import static org.bytedeco.opencv.global.opencv_calib3d.*;
+import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_features2d.*;
+import static org.bytedeco.opencv.global.opencv_flann.*;
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+import static org.bytedeco.opencv.global.opencv_ml.*;
+import static org.bytedeco.opencv.global.opencv_objdetect.*;
+import static org.bytedeco.opencv.global.opencv_photo.*;
+import static org.bytedeco.opencv.global.opencv_shape.*;
+import static org.bytedeco.opencv.global.opencv_stitching.*;
+import static org.bytedeco.opencv.global.opencv_video.*;
+import static org.bytedeco.opencv.global.opencv_videostab.*;
+
 
 </pre>
 */
@@ -103,6 +104,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
+import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.opencv.FilterWrapper;
@@ -413,7 +415,6 @@ public class OpenCV extends AbstractComputerVision {
     webgui.autoStartBrowser(false);
     webgui.startService();
 
-    log.info("made it !");
     // FFmpegFrameRecorder test = new
 
     // FFmpegFrameRecorder recorder = new
@@ -638,6 +639,11 @@ public class OpenCV extends AbstractComputerVision {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
+  
+  /**
+   * Used to provide a thread safe way of setting filter states
+   */
+  private Map<String, OpenCVFilter> newFilterStates = new HashMap<>();
 
   boolean display = true;
 
@@ -1284,6 +1290,7 @@ public class OpenCV extends AbstractComputerVision {
         IplImage processed = filter.process(input);
         filter.postProcess(processed);
         filter.processDisplay();
+        processFilterStateUpdates(filter);
       }
     } // for each filter
 
@@ -1393,6 +1400,27 @@ public class OpenCV extends AbstractComputerVision {
     data.dispose();
 
   } // end processVideo
+
+  /**
+   * A new method to protect filters from other threads doing updates possibly
+   * creating invalid states from processing "partially" copied filter states
+   * 
+   * The video processing thread will be the one which does the copy of requested
+   * state changes from other threads - which will guarantee a "full" copy of
+   * variables before processing begins again
+   * 
+   * @param filter
+   */
+  private void processFilterStateUpdates(OpenCVFilter filter) {
+    // TODO Auto-generated method stub
+    OpenCVFilter newFilterState = newFilterStates.remove(filter.name);
+    if (newFilterState != null) {
+      // update our filter with a completely updates new filter
+      Service.copyShallowFrom(filter, newFilterState);
+    }
+    
+  }  
+  
 
   /**
    * base 64 jpg frame image
@@ -1837,8 +1865,9 @@ public class OpenCV extends AbstractComputerVision {
       error("setFilterState - could not decode %s ", name);
       return;
     }
-    Service.copyShallowFrom(filter, otherFilter);
-    // broadcastState();
+    // not thread safe
+    // Service.copyShallowFrom(filter, otherFilter);
+    newFilterStates.put(otherFilter.name, otherFilter);
   }
 
   public String setGrabberType(String grabberType) {
@@ -2038,6 +2067,15 @@ public class OpenCV extends AbstractComputerVision {
 
   public void setDisplay(boolean b) {
     display = b;
+  }
+  
+  public void samplePoint(int x, int y) {
+    samplePoint(displayFilter, x, y);
+  }
+  
+  public void samplePoint(String filter, int x, int y) {
+    OpenCVFilter f = getFilter(filter);
+    f.samplePoint(x, y);
   }
 
 }

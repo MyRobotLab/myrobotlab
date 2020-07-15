@@ -25,10 +25,6 @@
 
 package org.myrobotlab.opencv;
 
-import static org.bytedeco.opencv.global.opencv_core.cvAddWeighted;
-import static org.bytedeco.opencv.global.opencv_core.cvScalar;
-import static org.bytedeco.opencv.global.opencv_imgproc.cvRectangle;
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -57,11 +53,11 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAddMask.class);
-  IplImage mask = null;
-  public String maskName;
+  transient Mat transparency = OpenCVFilter.loadMat("transparent-bubble.png");
+  public String transparencyFileName;
 
-  transient IplImage dst = null;
-  transient IplImage negativeImage = null;
+  double opacity = 0.4;
+
 
   public OpenCVFilterAddMask(String name) {
     super(name);
@@ -69,97 +65,53 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   @Override
   public void imageChanged(IplImage image) {
-    dst = null;
   }
 
-  double opacity = 0.4;
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    if (mask != null) {
+    
+    if (transparency != null) {
+      transparency = OpenCVFilter.loadMat("transparent-bubble.png");
+      Mat targetImage = toMat(image.clone()); //toMat(image);      
+      Mat resultImage = targetImage.clone();
+      // IplImage src = cvCreateImage(cvGetSize(srcColor), IPL_DEPTH_8U, 1);
+      // blendFast(transparency, targetImage, resultImage);
+      blendFast(transparency, targetImage, resultImage);
 
-      // Convert uint8 to float
-      // foreground = foreground.astype(float);
-      // background = background.astype(float);
-
-      // Normalize the alpha mask to keep intensity between 0 and 1
-      // alpha = alpha.astype(float)/255
-
-      // background.convertTo(background, CV_32FC3);
-
-      // mask.convertTo(mask, CV_32FC3, 1.0/255, 0.0);
-
-      // Multiply the foreground with the alpha matte
-      // MatExpr foreground = multiply(mask, background);
-
-      // Multiply the background with ( 1 - alpha )
-      // background = multiply(1.0 - alpha, background);
-
-      // Add the masked foreground and background.
-      // MatExpr outImage = add(mask, background);
-
-      // THIS IS THE ONE !!!
-      // http://bistr-o-mathik.org/2012/06/13/simple-transparency-in-opencv/
-      // cv2.addWeighted(overlay, opacity, img, 1 - opacity, 0, img)
-      // show(image, "output");
-
-      // cvAdd(src1, src2, overlay);
+      // FIXME have a cvAddWeighted filter
+      /**<pre> overlay using geometric shapes
       IplImage output = copy(image);
-      // cvAdd(src1, src2, output);
       IplImage overlay = copy(image);
-      // Nd4j.concat(0, image, image);
-      /*
-       * 
-       * cvSetImageROI(output, cvRect(0, 0, mask.width(), mask.height()));
-       * cvAdd(mask, mask, output); cvResetImageROI(overlay);
-       */
-
       cvRectangle(overlay, new int[] { 420, 205 }, new int[] { 595, 385 }, cvScalar(0, 0, 255, 1));
       show(overlay, "output");
-      // cvFill
-
-      // must be the same size
       cvAddWeighted(overlay, opacity, output, 1 - opacity, 0.0, output);
-
       show(output, "output");
-      // Display image
-      // imshow("outImg", outImage/255);
       log.info("here");
-      /*
-       * // Convert Mat to float data type mask.convertTo(mask, CV_32FC3);
-       * background.convertTo(background, CV_32FC3);
-       * 
-       * // Normalize the alpha mask to keep intensity between 0 and 1
-       * alpha.convertTo(alpha, CV_32FC3, 1.0/255); //
-       * 
-       * // Storage for output image Mat ouImage = Mat::zeros(mask.size(),
-       * mask.type());
-       * 
-       * // Multiply the mask with the alpha matte multiply(alpha, mask, mask);
-       * 
-       * // Multiply the background with ( 1 - alpha )
-       * multiply(Scalar::all(1.0)-alpha, background, background);
-       * 
-       * // Add the masked mask and background. add(mask, background, ouImage);
-       */
-
+      </pre>
+      */
+      return toImage(resultImage.clone());
     }
-
+    
     return image;
   }
-
-  /** Does alpha blending with high-performance Indexer from JavaCPP. */
-  static void blendFast(final Mat rgbaImg, final Mat bgrImg, final Mat dstImg) {
+  
+  int cnt = 0;
+  
+   /** Does alpha blending with high-performance Indexer from JavaCPP. */
+  final void blendFast(final Mat rgbaImg, final Mat bgrImg, final Mat dstImg) {
     final UByteIndexer rgbaIdx = rgbaImg.createIndexer();
     final UByteIndexer bgrIdx = bgrImg.createIndexer();
     final UByteIndexer dstIdx = dstImg.createIndexer();
     final int rows = rgbaImg.rows(), cols = rgbaImg.cols();
-
+    
+    log.warn("cnt {}", ++cnt);
     Parallel.loop(0, rows, new Parallel.Looper() {
       public void loop(int from, int to, int looperID) {
         for (int i = from; i < to; i++) {
           for (int j = 0; j < cols; j++) {
             float a = rgbaIdx.get(i, j, 3) * (1.0f / 255.0f);
+            float x = bgrIdx.get(i, j, 0);
             float b = rgbaIdx.get(i, j, 2) * a + bgrIdx.get(i, j, 0) * (1.0f - a);
             float g = rgbaIdx.get(i, j, 1) * a + bgrIdx.get(i, j, 1) * (1.0f - a);
             float r = rgbaIdx.get(i, j, 0) * a + bgrIdx.get(i, j, 2) * (1.0f - a);
@@ -175,64 +127,20 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
     dstIdx.release();
   }
 
-  /*
-   * void overlayImage(final Mat background, final Mat foreground, Mat output,
-   * int posX, int posY){
-   * 
-   * background.copyTo(output);
-   * 
-   * BytePointer bbp = background.data(); BytePointer fbp = foreground.data();
-   * bbp.asByteBuffer();
-   * 
-   * // start at the row indicated by location, or at row 0 if posY is negative.
-   * for(int y = Math.max(posY , 0); y < background.rows(); ++y) { int fY = y -
-   * posY; // because of the translation
-   * 
-   * // we are done of we have processed all rows of the foreground image. if(fY
-   * >= foreground.rows()) break;
-   * 
-   * // start at the column indicated by location,
-   * 
-   * // or at column 0 if posX is negative. for(int x = Math.max(posX, 0); x <
-   * background.cols(); ++x) { int fX = x - posX; // because of the translation.
-   * 
-   * // we are done with this row if the column is outside of the foreground
-   * image. if(fX >= foreground.cols()) break;
-   * 
-   * 
-   * 
-   * // determine the opacity of the foregrond pixel, using its fourth (alpha)
-   * channel. double opacity = ((double)foreground.data[fY *
-   * (int)foreground.step() + fX * foreground.channels() + 3])
-   * 
-   * / 255.;
-   * 
-   * 
-   * // and now combine the background and foreground pixel, using the opacity,
-   * 
-   * // but only if opacity > 0. for(int c = 0; opacity > 0 && c <
-   * output.channels(); ++c) { char foregroundPx = foreground.data[fY *
-   * foreground.step() + fX * foreground.channels() + c]; char backgroundPx =
-   * background.data[y * background.step() + x * background.channels() + c];
-   * output.data[y*output.step + output.channels()*x + c] = backgroundPx *
-   * (1.-opacity) + foregroundPx * opacity; } } } }
-   * 
-   */
-
   public void test() {
 
-    Mat rgbaImg = OpenCVFilter.loadMat("transparent-bubble.png");
-    Mat bgrImg = OpenCVFilter.loadMat("hf512.jpg");
-    Mat dstImg = bgrImg.clone();
+    Mat transparency = OpenCVFilter.loadMat("transparent-bubble.png");
+    Mat targetImage = OpenCVFilter.loadMat("hf512.jpg");
+    Mat resultImage = targetImage.clone();
     // IplImage src = cvCreateImage(cvGetSize(srcColor), IPL_DEPTH_8U, 1);
-    blendFast(rgbaImg, bgrImg, dstImg);
-    show(dstImg, "dstImg");
+    blendFast(transparency, targetImage, resultImage);
+    show(resultImage, "dstImg");
     // setMask("https://upload.wikimedia.org/wikipedia/commons/6/6b/Bubble_3.jpg");
     setMask("transparent-bubble.png");
   }
 
   public void setMask(String maskName) {
-    mask = loadImage(maskName);
+    transparency = OpenCVFilter.loadMat(maskName);
   }
 
   @Override

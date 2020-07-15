@@ -330,7 +330,9 @@ public abstract class OpenCVFilter implements Serializable {
    * @param processed - the already processed image
    */
   public void postProcess(IplImage processed) {
-    data.put(processed);
+    if (data != null) {
+      data.put(processed);
+    }
   }
 
   public abstract IplImage process(IplImage image) throws InterruptedException;
@@ -341,7 +343,7 @@ public abstract class OpenCVFilter implements Serializable {
    */
   public BufferedImage processDisplay() {
 
-    if (enabled && displayEnabled) {
+    if (enabled && displayEnabled && data != null) {
       // TODO - this determines our "source" of image
       // and appends meta data
 
@@ -401,7 +403,7 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * when a filter is removed from the pipeline its given a chance to return
-   * resourcs
+   * resources
    */
   public void release() {
   }

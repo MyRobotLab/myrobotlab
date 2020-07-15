@@ -69,14 +69,13 @@
                 </span>
             </div>
         </div>
+        <div ng-click="onSamplePoint($event)">
         <img data-ng-src="{{getDisplayImage()}}"/>
+        </div>
         <!-- /videoContainer -->
         <div class="videoInfo">
             <span class="glyphicon glyphicon-info-sign gray1"></span>
-            {{service.displayFilter}} mouse x y 640x480 {{stats.fps}} fps  latency {{stats.latency}} ms
-        
-        
-        
+            {{service.displayFilter}} mouse x y {{samplePoint.x}}x{{samplePoint.y}} {{stats.fps}} fps  latency {{stats.latency}} ms
         </div>
         <br/>
         <label>Output</label>
@@ -105,21 +104,12 @@
                     <button class="btn btn-default" style="width:100px">
                         <span class="glyphicon glyphicon-stop"></span>
                         STOP
-                    
-                    
-                    
-                    
-                    
                     </button>
                 </td>
                 <td style="width:132px">
                     <button class="btn btn-default" style="width:126px">
                         <span class="glyphicon glyphicon-camera"></span>
                         Snapshot
-                    
-                    
-                    
-                    
                     
                     </button>
                 </td>
@@ -129,11 +119,6 @@
                 <div class="progress-bar progress-bar-danger  progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
                     <span></span>
                     RECORDING
-                
-                
-                
-                
-                
                 </div>
             </td>
         </table>
@@ -151,7 +136,7 @@
             </tr>
             <tr>
                 <td>
-                    <select class="custom-select col-md-12" size="7" ng-model="selectedFilter" ng-change="setDisplayFilter(selectedFilter)">
+                    <select class="custom-select col-md-12" size="7" ng-model="service.displayFilter" ng-change="setDisplayFilter(service.displayFilter)">
                         <option ng-repeat="(key, value) in service.filters">{{ key }}</option>
                     </select>
                 </td>
@@ -161,7 +146,7 @@
                     </button>
                     <br/>
                     <br/>
-                    <button class="btn btn-default" ng-click="msg.removeFilter(selectedFilter)">
+                    <button class="btn btn-default" ng-click="msg.removeFilter(service.displayFilter)">
                         <span class="glyphicon glyphicon-arrow-right"></span>
                     </button>
                 </td>
@@ -174,22 +159,53 @@
         </table>
         <!-- =================================== FILTER DIALOGS START =================================== -->
         &nbsp;<hr>
+        <div ng-show="isFilterType('AdaptiveThreshold')" class="col-md-12">
+            Adaptive threshold applies a threshold value based on a small region around a pixel.und it. 
+        So we get different thresholds for different regions of the same image which gives better results for images with varying illumination.
+            <hr>
+            Block Size {{getFilter().blockSize}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
+            <br/>
+            Subtracted {{getFilter().param1}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().param1" rz-slider-options="getFilterType().param1.options"/>
+            <select class="form-control"  ng-change="setFilterState()" ng-model="getFilter().algorithm">
+                <option>mean</option>
+                <option>gaussian</option>
+            </select>
+        </div>
+        <div ng-show="isFilterType('AdaptiveThreshold')" class="col-md-12">
+            AddMask allows you to add a png with transparency as an overlay. This could be useful to mask off information for training.  For example, removing a face portrait from its background.
+            <hr>
+            <button>browse</button>
+        </div>
         <div ng-show="isFilterType('Affine')" class="col-md-12">
             In Euclidean geometry, an affine transformation is a geometric transformation that preserves lines and parallelism (but not necessarily distances and angles). 
             Rotational transformation would be an example.
             <hr>
-            angle {{getFilter().angle}}  <rzslider class="custom-slider3" rz-slider-model="service.filters[service.displayFilter].angle" rz-slider-options="getFilterType().angle.options"/>
+            angle {{getFilter().angle}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().angle" rz-slider-options="getFilterType().angle.options"/>
         </div>
         <div ng-show="isFilterType('Canny')" class="col-md-12">
             Canny edge detection is a technique to extract useful structural information from different vision objects and dramatically reduce the amount of data to be processed. 
             It has been widely applied in various computer vision systems.             
             <br/>
             <hr>
-            Aperture Size {{getFilter().apertureSize}}  <rzslider class="custom-slider3" rz-slider-model="service.filters[service.displayFilter].apertureSize" rz-slider-options="getFilterType().apertureSize.options"/>
+            Aperture Size {{getFilter().apertureSize}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().apertureSize" rz-slider-options="getFilterType().apertureSize.options"/>
             <br/>
-            Low Threshold {{getFilter().lowThreshold}}  <rzslider class="custom-slider3" rz-slider-model="service.filters[service.displayFilter].lowThreshold" rz-slider-options="getFilterType().lowThreshold.options"/>
+            Low Threshold {{getFilter().lowThreshold}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().lowThreshold" rz-slider-options="getFilterType().lowThreshold.options"/>
             <br/>
-            High Threshold {{getFilter().highThreshold}} <rzslider class="custom-slider3" rz-slider-model="service.filters[service.displayFilter].highThreshold" rz-slider-options="getFilterType().highThreshold.options"/>
+            High Threshold {{getFilter().highThreshold}} <rzslider class="custom-slider3" rz-slider-model="getFilter().highThreshold" rz-slider-options="getFilterType().highThreshold.options"/>
+        </div>
+        <div ng-show="isFilterType('LKOpticalTrack')" class="col-md-12">
+            <a href="https://docs.opencv.org/3.4.1/d7/d8b/tutorial_py_lucas_kanade.html">Optical flow</a> is the pattern of apparent motion of image objects between two consecutive frames caused by the movemement of object or camera. 
+            It is 2D vector field where each vector is a displacement vector showing the movement of points from first frame to second..             
+            <br/>
+            <hr>
+            Max Points {{getFilter().maxPointCnt}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().maxPointCnt" rz-slider-options="getFilterType().maxPointCnt.options"/>
+            <hr>
+            Min Distance {{getFilter().minDistance}}  <rzslider class="custom-slider3" rz-slider-model="getFilter().minDistance" rz-slider-options="getFilterType().minDistance.options"/>
+            <br/>
+            Block Size {{getFilter().blockSize}} <rzslider class="custom-slider3" rz-slider-model="getFilter().blockSize" rz-slider-options="getFilterType().blockSize.options"/>
+            <br/>
+            Quality {{getFilter().quality/100}} <rzslider class="custom-slider3" rz-slider-model="getFilter().quality" rz-slider-options="getFilterType().quality.options"/>
+            <button class="btn btn-default" ng-click="getFilter().needTrackingPoints=true;getFilter().clearPoints=false;setFilterState()">Get Features</button><button class="btn btn-default" ng-click="getFilter().clearPoints=true;setFilterState()">Clear Point</button>
         </div>
         <!-- =================================== FILTER DIALOGS STOP =================================== -->
     </div>
@@ -204,6 +220,9 @@
 </div>
 <!-- /div -->
 <script type="text/ng-template" id="addFilterDialog.html">
+    
+    
+    
     
     
     
@@ -222,6 +241,9 @@
             <span class="input-group-btn"><button class="btn btn-default" ng-click="addNamedFilter(newUserName)">add</button></span>        
             <!-- <button ng-click="cancel()" class="btn btn-primary">Close</button> -->
         </div>
+
+
+
 
 
 

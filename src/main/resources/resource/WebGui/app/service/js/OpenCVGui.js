@@ -16,6 +16,11 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         fps: 0
     }
 
+    $scope.samplePoint = {
+        x:0,
+        y:0
+    }
+
     var avgSampleCnt = 30
 
     var latencyDeltaAccumulator = 0
@@ -24,7 +29,57 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
 
     var lastFrameTs = 0
 
+    /**
+     * Filter "Types" - this is the meta data type information necessary to build
+     * filter dialogs which get and set the filter attributes.
+     * in OpenCV.html - you can find were these are used when getFilterType() is called
+     */
     $scope.filterMetaData = {
+        'AdaptiveThreshold': {
+            algorithm: 'mean',
+            blockSize: {
+                options: {
+                    floor: 3,
+                    ceil: 13,
+                    minLimit: 3,
+                    maxLimit: 13,
+                    value: 11,
+                    step: 2,
+                    showTicks: true,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            param1: {
+                options: {
+                    floor: -10,
+                    ceil: 10,
+                    minLimit: -10,
+                    maxLimit: 10,
+                    showTicks: true,
+                    value: 2,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+
+        },
+        'Affine': {
+            angle: {
+                options: {
+                    floor: 0,
+                    ceil: 360,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            }
+        },
+
         'Canny': {
             apertureSize: {
                 options: {
@@ -63,26 +118,60 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
                     }
                 }
             }
-        }, // Canny
-        'Affine': {
-            angle: {
-            options: {
+        },
+        // Canny
+        'LKOpticalTrack': {
+            maxPointCnt: {
+                options: {
                     floor: 0,
-                    ceil: 360,
+                    ceil: 256,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            minDistance: {
+                options: {
+                    floor: 0,
+                    ceil: 256,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            blockSize: {
+                options: {
+                    floor: 0,
+                    ceil: 500,
+                    minLimit: 0,
+                    maxLimit: 500,
+                    step: 1,
+                    onChange: function(id) {
+                        $scope.setFilterState()
+                    }
+                }
+            },
+            quality: {
+                options: {
+                    floor: 0,
+                    ceil: 100,
                     step: 1,
                     onChange: function(id) {
                         $scope.setFilterState()
                     }
                 }
             }
-        }
+        }// LKOpticalTrack
+
     }
 
     $scope.diplayImage = null
 
     // first in list
     $scope.selectedFilterType = 'AdaptiveThreshold'
-    $scope.selectedFilter = null
+    // $scope.displayFilter = null
 
     // local scope variables
     // necessary because service.cameraIndex is an int but ng-option only handles strings
@@ -222,6 +311,14 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     $scope.meta = function() {
         let type = $scope.isFilterType()
     }
+
+    $scope.onSamplePoint = function($event) {
+        console.info('samplePoint ' + $event)
+        $scope.samplePoint.x = $event.offsetX
+        $scope.samplePoint.y = $event.offsetY
+        msg.send('samplePoint', $scope.samplePoint.x, $scope.samplePoint.y)
+    }
+
 
     msg.subscribe('getPossibleFilters')
     msg.subscribe('publishWebDisplay')
