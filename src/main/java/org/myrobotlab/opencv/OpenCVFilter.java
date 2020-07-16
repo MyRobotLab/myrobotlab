@@ -330,9 +330,7 @@ public abstract class OpenCVFilter implements Serializable {
    * @param processed - the already processed image
    */
   public void postProcess(IplImage processed) {
-    if (data != null) {
       data.put(processed);
-    }
   }
 
   public abstract IplImage process(IplImage image) throws InterruptedException;
