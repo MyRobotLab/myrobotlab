@@ -27,7 +27,7 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
 
   // this threshold is only for the display label
-  float threshold = 100.0f;
+  protected float threshold = 100.0f;
 
   /**
    * This filter will detect how blurry an image is.  It does this by
