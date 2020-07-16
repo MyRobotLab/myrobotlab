@@ -8,6 +8,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     this.updateState = function(service) {
         $scope.service = service
         $scope.locale.selected = service.locale.language
+        $scope.localeTag.selected = service.locale
         service.serviceData.categoryTypes["show all"] = {
             "name": "show all",
             "serviceTypes": []
@@ -32,6 +33,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     $scope.locale = {
         selected:null
+    }
+
+    $scope.localeTag = {
+        'selected':{
+            'tag':'en-US'
+        }
     }
 
     $scope.category = {
@@ -315,6 +322,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
+    }
+
+    $scope.setAllLocales = function(locale){
+        console.info(locale)
     }
 
     this.promiseTimeout = function(ms, promise) {
