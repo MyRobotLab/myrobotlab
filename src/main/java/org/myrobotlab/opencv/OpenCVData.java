@@ -150,12 +150,13 @@ public class OpenCVData extends CvData {
    */
   transient final Map<String, Object> sources = new TreeMap<>();
 
-  private long timestamp;
-
-  // for use with text detection / ocr filters.
-  private ArrayList<DetectedText> detectedText;
+  protected long timestamp;
   
-  private Double blurriness = null;
+  // set by the BlurDetector
+  protected Double blurriness = null;
+  
+  // for use with text detection / ocr filters.
+  protected ArrayList<DetectedText> detectedText;
   
   public OpenCVData() {
   }
