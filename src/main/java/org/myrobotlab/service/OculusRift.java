@@ -278,7 +278,6 @@ public class OculusRift extends Service implements PointPublisher {
     rightOpenCV = (OpenCV) Runtime.start(serviceName, "OpenCV");
     rightOpenCV.startService();
     // TODO: remove me this is a work around for opencv
-    rightOpenCV.setStreamerEnabled(false);
     rightOpenCV.setCameraIndex(rightCameraIndex);
     if (frameGrabberType != null) {
       rightOpenCV.setGrabberType(frameGrabberType);
@@ -297,7 +296,6 @@ public class OculusRift extends Service implements PointPublisher {
     leftOpenCV = (OpenCV) Runtime.start(getName() + "." + LEFT_OPEN_CV, "OpenCV");
     leftOpenCV.startService();
     // TODO: remove me this is a work around for opencv
-    leftOpenCV.setStreamerEnabled(false);
     leftOpenCV.setCameraIndex(leftCameraIndex);
     if (frameGrabberType != null) {
       leftOpenCV.setGrabberType(frameGrabberType);

@@ -31,7 +31,7 @@ public class ComboBoxModel2 implements MutableComboBoxModel<String>, ActionListe
   public void actionPerformed(ActionEvent e) {
     JComboBox<String> input = (JComboBox<String>) e.getSource();
     if ((String) input.getSelectedItem() != null) {
-      filterGui.boundFilter.filter.sourceKey = (String) input.getSelectedItem();
+      filterGui.boundFilter.filter.setSourceKey((String) input.getSelectedItem());
     }
   }
 
