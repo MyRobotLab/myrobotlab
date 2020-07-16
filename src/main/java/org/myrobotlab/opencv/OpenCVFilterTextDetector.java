@@ -73,7 +73,9 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
   Net detector = null;
   // 
   boolean thresholdEnabled = false;
-
+  // milage may vary..
+  double blurrinessThreshold = 100.0;
+  
   public OpenCVFilterTextDetector() {
     super();
     initModel();
@@ -100,6 +102,13 @@ public class OpenCVFilterTextDetector extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
+    if (data.getBlurriness() != null) {
+      // the image has had blurriness detector already run on it..
+      if (data.getBlurriness() < blurrinessThreshold) {
+        // the image is too blurry, don't bother trying to do text detection.
+        return image;
+      }
+    }
     classifications = detectText(image);
     data.setDetectedText(classifications);
     // return the original image un-altered.
