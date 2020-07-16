@@ -341,7 +341,7 @@ public abstract class OpenCVFilter implements Serializable {
    */
   public BufferedImage processDisplay() {
 
-    if (enabled && displayEnabled && data != null) {
+    if (enabled && displayEnabled) {
       // TODO - this determines our "source" of image
       // and appends meta data
 
