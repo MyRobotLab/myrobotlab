@@ -155,6 +155,8 @@ public class OpenCVData extends CvData {
   // for use with text detection / ocr filters.
   private ArrayList<DetectedText> detectedText;
   
+  private Double blurriness = null;
+  
   public OpenCVData() {
   }
 
@@ -558,6 +560,14 @@ public class OpenCVData extends CvData {
 
   public void setDetectedText(ArrayList<DetectedText> detectedText) {
     this.detectedText = detectedText;
+  }
+
+  public Double getBlurriness() {
+    return blurriness;
+  }
+
+  public void setBlurriness(Double blurriness) {
+    this.blurriness = blurriness;
   }
 
 }
