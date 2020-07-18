@@ -9,6 +9,8 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
 
     $scope.fps = 0
 
+    $scope.myFile = null
+
     $scope.lastFrameTs = null
 
     $scope.stats = {
@@ -17,8 +19,8 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     }
 
     $scope.samplePoint = {
-        x:0,
-        y:0
+        x: 0,
+        y: 0
     }
 
     var avgSampleCnt = 30
@@ -319,6 +321,22 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
         msg.send('samplePoint', $scope.samplePoint.x, $scope.samplePoint.y)
     }
 
+    $scope.uploadFile = function() {
+
+        var f = $scope.myFile;
+        var r = new FileReader();
+
+        r.onloadend = function(e) {
+            var data = e.target.result;
+            console.info('onloadend')
+            msg.send('saveFile', f.name, btoa(data))
+            $scope.loadFile = false
+            // close dialog
+        }
+
+        r.readAsBinaryString(f);
+        console.info('readAsBinaryString')
+    }
 
     msg.subscribe('getPossibleFilters')
     msg.subscribe('publishWebDisplay')
@@ -326,5 +344,19 @@ angular.module('mrlapp.service.OpenCVGui', []).controller('OpenCVGuiCtrl', ['$sc
     msg.send('getPossibleFilters')
     msg.subscribe(this)
 
+}]).directive('fileModel', ['$parse', function($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            var modelSetter = model.assign;
+
+            element.bind('change', function() {
+                scope.$apply(function() {
+                    modelSetter(scope, element[0].files[0]);
+                });
+            });
+        }
+    };
 }
-])
+]);

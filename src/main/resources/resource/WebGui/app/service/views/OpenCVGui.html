@@ -13,9 +13,9 @@
             
             </button>
             <label>Web Viewer</label>
-            <toggle class="miniBTN" title="invert the motor" ng-model="service.webViewer" ng-change="service.webViewer?msg.startWebViewer():msg.stopWebViewer()" on="" off="" size="btn-lg"/>
+            <toggle class="miniBTN" title="invert the motor" ng-model="service.webViewer" ng-change="msg.setWebViewer(service.webViewer)" on="" off="" size="btn-lg"/>
             <label>Native Viewer</label>
-            <toggle class="miniBTN" title="invert the motor" ng-model="service.nativeViewer" ng-change="service.nativeViewer?msg.startNativeViewer():msg.stopNativeViewer()" on="" off="" size="btn-lg"/>
+            <toggle class="miniBTN" title="invert the motor" ng-model="service.nativeViewer" ng-change="msg.setNativeViewer(service.nativeViewer)" on="" off="" size="btn-lg"/>
         </div>
         <div class="form-group">
             <label>Grabber</label>
@@ -44,15 +44,14 @@
                 <option>7</option>
             </select>
         </div>
-        <div id="File" ng-if="source.type == 'File'">
+        <div id="File" ng-show="service.inputSource == 'imagefile'">
             <label>File </label>
-            <input type="hidden" name="sourceOption" value="file" class="form-control"/>
-            <input type="file" style="width:146px" class="form-control" ng-model="source.File"/>
+            <input type="file" file-model="myFile"/>
+            <button ng-click="uploadFile()" class="btn btn-default">upload me</button>
         </div>
-        <div id="URL" ng-if="source.type == 'URL'">
-            <label>Address </label>
-            <input type="hidden" name="sourceOption" value="url" class="form-control"/>
-            <input type="text" style="width:146px" placeholder="http://example.com/video" class="form-control"/>
+        <div id="URL" ng-show="service.inputSource == 'imagefile'">
+            <label>Path </label>
+            <input type="text" ng-model="service.inputFile" ng-change="msg.setInputFileName(service.inputFile)" style="width:146px" placeholder="http://example.com/video" class="form-control"/>
         </div>
     </div>
 </div>
@@ -62,12 +61,13 @@
     <div class="col-md-6">
         <div>
             <label>Video Feed</label>
+            <!-- not ready for this
             <div class="miniBTN pull-right">
                 <span>
                     Undock                       
                         <toggle ng-model="toggleUndock" ng-change="changed()" size="btn-lg"/>
                 </span>
-            </div>
+            </div> -->
         </div>
         <div ng-click="onSamplePoint($event)">
         <img data-ng-src="{{getDisplayImage()}}"/>

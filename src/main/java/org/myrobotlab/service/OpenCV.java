@@ -52,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
-import javax.swing.JFrame;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -104,7 +103,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.geometry.Point2df;
-import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.net.Http;
 import org.myrobotlab.opencv.FilterWrapper;
@@ -118,6 +116,7 @@ import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
@@ -267,11 +266,12 @@ public class OpenCV extends AbstractComputerVision {
   transient final static public String PART = "part";
   static final String TEST_LOCAL_FACE_FILE_JPEG = "src/test/resources/OpenCV/multipleFaces.jpg";
 
-  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy", "CreateHistogram",
-      "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip", "FloodFill",
-      "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate", "LKOpticalTrack",
-      "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage",
-      "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
+  public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
+      "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "KinectDepth", "KinectDepthMask", "KinectNavigate",
+      "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Not", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize", "SampleArray",
+      "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose", "Undistort",
+      "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -621,11 +621,6 @@ public class OpenCV extends AbstractComputerVision {
 
   transient SimpleDateFormat sdf = new SimpleDateFormat();
 
-  // TODO: a peer, but in the future , we should use WebGui and it's http
-  // container for this if possible.
-  // GROG : .. perhaps just a filter in the pipeline could stream it via http
-  transient VideoStreamer streamer;
-
   boolean undockDisplay = false;
 
   transient Thread videoThread = null;
@@ -639,7 +634,7 @@ public class OpenCV extends AbstractComputerVision {
   private boolean singleFrame;
 
   private PointCloud lastPointCloud;
-  
+
   /**
    * Used to provide a thread safe way of setting filter states
    */
@@ -666,6 +661,8 @@ public class OpenCV extends AbstractComputerVision {
    * local reference of image file ext
    */
   protected Set<String> imageFileExt;
+
+  transient private VideoWidget2 videoWidget = null;
 
   static String DATA_DIR;
 
@@ -1325,32 +1322,47 @@ public class OpenCV extends AbstractComputerVision {
          * </pre>
          */
         BufferedImage b = data.getDisplay();
-        invoke("publishDisplay", new SerializableImage(b, displayFilter, frameIndex));
+        SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
+        invoke("publishDisplay", si);
 
-        // broadcast(???)
-        WebImage webImage = new WebImage(b, getName(), frameIndex);
-        // latency use the original ts from before fetch image and the filters !
-        webImage.ts = data.getTs();
-        broadcast("publishWebDisplay", webImage);
+        if (webViewer) {
+          // broadcast(???)
+          WebImage webImage = new WebImage(b, getName(), frameIndex);
+          // latency use the original ts from before fetch image and the filters
+          // !
+          webImage.ts = data.getTs();
+          broadcast("publishWebDisplay", webImage);
+        }
 
         if (!isHeadless() && nativeViewer) {
-          if (canvasFrame == null) {
-            // FIXME - strange canvaFrame's fullscreen mode is not exposed :(
-            // ProjectorDevice pd = new ProjectorDevice("display 2");
-            // canvasFrame = pd.createCanvasFrame();
+          /*
+           * if (canvasFrame == null) { // FIXME - strange canvaFrame's
+           * fullscreen mode is not exposed :( // ProjectorDevice pd = new
+           * ProjectorDevice("display 2"); // canvasFrame =
+           * pd.createCanvasFrame();
+           * 
+           * canvasFrame = new CanvasFrame(displayFilter,
+           * CanvasFrame.getDefaultGamma()/grabber.getGamma());
+           * canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //
+           * canvasFrame.setAlwaysOnTop(true); //
+           * canvasFrame.setResizable(false); canvasFrame.setVisible(true);
+           * canvasFrame.showImage(b); canvasFrame.invalidate();
+           * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
+           * canvasFrame.showImage(b);
+           */
 
-            canvasFrame = new CanvasFrame(displayFilter);
-            canvasFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            // canvasFrame.setAlwaysOnTop(true);
-            canvasFrame.setResizable(true);
-            canvasFrame.showImage(b);
-            canvasFrame.pack();
+          if (videoWidget == null) {
+            videoWidget = new VideoWidget2(getName());
           }
-          canvasFrame.showImage(b);
 
-        } else if (canvasFrame != null && !nativeViewer) {
-          canvasFrame.dispose();
-          canvasFrame = null;
+          videoWidget.setVisible(true);
+          videoWidget.displayFrame(si);
+
+        } else if (videoWidget != null && !nativeViewer) {
+          // canvasFrame.dispose();
+          // canvasFrame = null;
+          videoWidget.dispose();
+          videoWidget = null;
         }
 
       }
@@ -1405,9 +1417,9 @@ public class OpenCV extends AbstractComputerVision {
    * A new method to protect filters from other threads doing updates possibly
    * creating invalid states from processing "partially" copied filter states
    * 
-   * The video processing thread will be the one which does the copy of requested
-   * state changes from other threads - which will guarantee a "full" copy of
-   * variables before processing begins again
+   * The video processing thread will be the one which does the copy of
+   * requested state changes from other threads - which will guarantee a "full"
+   * copy of variables before processing begins again
    * 
    * @param filter
    */
@@ -1418,9 +1430,8 @@ public class OpenCV extends AbstractComputerVision {
       // update our filter with a completely updates new filter
       Service.copyShallowFrom(filter, newFilterState);
     }
-    
-  }  
-  
+
+  }
 
   /**
    * base 64 jpg frame image
@@ -1602,7 +1613,7 @@ public class OpenCV extends AbstractComputerVision {
 
   transient FFmpegFrameRecorder ffmpegStreamer = null;
 
-  protected boolean webViewer = false;
+  protected boolean webViewer = true;
 
   public void startStreamer() {
     try {
@@ -1910,22 +1921,12 @@ public class OpenCV extends AbstractComputerVision {
     return source;
   }
 
-  public void startWebViewer() {
-    startPeer("streamer");
-    webViewer = true;
+  public void setWebViewer(boolean b) {
+    webViewer = b;
   }
 
-  public void stopWebViewer() {
-    releasePeer("streamer");
-    webViewer = false;
-  }
-
-  public void startNativeViewer() {
-    nativeViewer = true;
-  }
-
-  public void stopNativeViewer() {
-    nativeViewer = false;
+  public void setNativeViewer(boolean b) {
+    nativeViewer = b;
   }
 
   synchronized public void stopCapture() {
@@ -2068,14 +2069,36 @@ public class OpenCV extends AbstractComputerVision {
   public void setDisplay(boolean b) {
     display = b;
   }
-  
+
   public void samplePoint(int x, int y) {
     samplePoint(displayFilter, x, y);
   }
-  
+
   public void samplePoint(String filter, int x, int y) {
     OpenCVFilter f = getFilter(filter);
     f.samplePoint(x, y);
+  }
+
+  public void saveFile(String filename, String data) {
+    log.info("here !");
+    FileOutputStream fos = null;
+    try {
+      String path = FileIO.gluePaths(getDataDir(), filename);
+      fos = new FileOutputStream(path);
+      byte[] decoded = Base64.getDecoder().decode(data);
+      fos.write(decoded);
+      fos.close();
+      setInputFileName(path);
+      // restart grabber if capturing
+      if (isCapturing()) {
+        stopCapture();
+        sleep(300);
+        capture();
+      }
+      broadcastState();
+    } catch (Exception e) {
+      error(e.getMessage());
+    }
   }
 
 }

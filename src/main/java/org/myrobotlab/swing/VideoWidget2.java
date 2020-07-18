@@ -37,37 +37,32 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.swing.widget.VideoDisplayPanel2;
 import org.slf4j.Logger;
 
-public class VideoWidget2 {
+public class VideoWidget2 extends JFrame {
+
+  private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(VideoWidget2.class);
 
-  transient JFrame frame = null;
-  
   transient JPanel display = null;
 
   HashMap<String, VideoDisplayPanel2> displays = new HashMap<String, VideoDisplayPanel2>();
-  
+
   boolean allowFork = false;
-  
+
   int videoDisplayXPos = 0;
-  
+
   int videoDisplayYPos = 0;
-  
+
   String boundServiceName;
 
   public VideoWidget2(String serviceName) {
+    super(serviceName);
     boundServiceName = serviceName;
     display = new JPanel(new BorderLayout());
+    getContentPane().add(display);
     // set initial default output
-    addVideoDisplayPanel("output");
-  }
-
-  public void setTitle(String title) {
-    frame.setTitle(title);
-  }
-
-  public VideoDisplayPanel2 addVideoDisplayPanel(String source) {
-    return addVideoDisplayPanel(source, null);
+    addVideoDisplayPanel("output", null);
+    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
   }
 
   public VideoDisplayPanel2 addVideoDisplayPanel(String source, ImageIcon icon) {
@@ -89,8 +84,7 @@ public class VideoWidget2 {
 
     ++videoDisplayXPos;
     display.invalidate();
-    frame.pack();
-
+    pack();
     return vp;
   }
 
@@ -100,7 +94,7 @@ public class VideoWidget2 {
     if (displays.containsKey(source)) {
       displays.get(source).displayFrame(img);
     } else if (allowFork) {
-      VideoDisplayPanel2 vdp = addVideoDisplayPanel(img.getSource());
+      VideoDisplayPanel2 vdp = addVideoDisplayPanel(img.getSource(), null);
       vdp.displayFrame(img);
     } else {
       displays.get("output").displayFrame(img); // FIXME - kludgy !!!
@@ -121,19 +115,11 @@ public class VideoWidget2 {
     VideoDisplayPanel2 vdp = displays.remove(source);
     display.remove(vdp.myDisplay);
     display.invalidate();
-    if (frame != null) {
-      frame.pack();
-    }
+    pack();
   }
 
   public void allowFork(boolean b) {
     allowFork = b;
-  }
-
-  public void pack() {
-   if (frame != null) {
-     frame.pack();
-   }
   }
 
 }
