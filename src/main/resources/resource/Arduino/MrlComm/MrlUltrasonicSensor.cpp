@@ -33,7 +33,7 @@ void MrlUltrasonicSensor::update() {
 	if (!isRanging) {
 		return;
 	}
-	unsigned long distance = newping->ping_cm();
+	unsigned long distance = newping->ping();
 
 	if (lastDistance != distance){
 		msg->publishUltrasonicSensorData(id, distance);
