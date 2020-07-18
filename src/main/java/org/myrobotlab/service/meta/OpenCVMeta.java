@@ -20,8 +20,6 @@ public class OpenCVMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    // addPeer("streamer", "VideoStreamer", "video streaming service
-    addPeer("streamer", "streamer", "VideoStreamer", "Shared Video Streamer");
     String javaCvVersion = "1.5.3";
     addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
