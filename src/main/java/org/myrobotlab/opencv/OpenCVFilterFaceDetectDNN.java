@@ -53,11 +53,11 @@ import org.slf4j.Logger;
 public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());
+  public transient final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetectDNN.class.getCanonicalName());
   // int x0, y0, x1, y1;
 
   private String FACE_LABEL = "face";
-  private Net net;
+  transient private Net net;
   /**
    * bounding boxes of faces
    */
