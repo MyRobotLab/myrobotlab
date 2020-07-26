@@ -19,8 +19,10 @@ stable [Manticore 1.0.2693](https://github.com/MyRobotLab/myrobotlab/releases/ta
 ## Installing Dependencies
 
 After downloading the myrobtlab.jar into a new folder, dependencies for all services can be installed with the following command 
-
+### Manticore
 `java -jar myrobotlab.jar -install`
+### Nixie
+`java -jar myrobotlab.jar --install`
 
 ## Running MyRobotLab
 
