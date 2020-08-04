@@ -37,10 +37,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.myrobotlab.client.Client;
-import org.myrobotlab.client.Client.Endpoint;
-import org.myrobotlab.client.Client.RemoteMessageHandler;
 import org.myrobotlab.client.InProcessCli;
+import org.myrobotlab.client.OldClient;
+import org.myrobotlab.client.OldClient.Endpoint;
+import org.myrobotlab.client.OldClient.RemoteMessageHandler;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
 import org.myrobotlab.framework.Heartbeat;
@@ -210,7 +210,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   private List<String> jvmArgs;
 
   private List<String> args;
-  
+
   String remoteId = null;
 
   /**
@@ -386,11 +386,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
-    
+
     if (name == null) {
       log.error("service name cannot be null");
     }
-    
+
     String fullTypeName;
     if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
@@ -405,7 +405,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } else {
       fullTypeName = type;
     }
-    
+
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
@@ -456,36 +456,38 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (runtime != null) {
-        
+
         runtime.broadcast("created", name);
-        
-        // add all the service life cycle subscriptions 
+
+        // add all the service life cycle subscriptions
         runtime.addListener("registered", name);
         runtime.addListener("created", name);
-        runtime.addListener("started", name);        
-        runtime.addListener("stopped", name);        
-        runtime.addListener("released", name);        
+        runtime.addListener("started", name);
+        runtime.addListener("stopped", name);
+        runtime.addListener("released", name);
       }
-      
+
       // initialization of the new service - it gets local registery events
       // for pre-existing registered? created/started
       List<ServiceInterface> services = getServices();// getLocalServices();
-      for (ServiceInterface s: services) {
+      for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
-          // for typeless registration - try the following ? without a service reference ??
-          // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          // for typeless registration - try the following ? without a service
+          // reference ??
+          // si.onRegistered(new Registration(s.getId(), s.getName(),
+          // s.getType(), runtime.serviceData.getServiceType(s.getType())));
           si.onRegistered(new Registration(s));
         }
         // don't register or create or start event self
         if (s.getName().equals(si.getName())) {
           continue;
-        }        
+        }
         si.onCreated(s.getName());
         if (si.isRunning()) {
           si.onStarted(s.getName());
         }
       }
-      
+
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
@@ -583,12 +585,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           if (options.spawnedFromAgent) {
             try {
-              // runtime.connect(); FIXME !!! make it work !
-            } catch(Exception e) {
+              new Thread("agent-connector") {
+                public void run() {
+                  try {
+                  Service.sleep(8000);
+                  runtime.connect(); // FIXME !!! make it work !
+                  } catch(Exception e) {
+                    log.warn("could not connect to agent");
+                  }
+                }
+              }.start();
+            } catch (Exception e) {
               runtime.error(e);
             }
           }
-          
+
           // startHeartbeat();
 
           FileIO.extractResources();
@@ -600,6 +611,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * The jvm args which started this process
+   * 
    * @return all jvm args in a list
    */
   static public List<String> getJvmArgs() {
@@ -864,7 +876,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (inName == null) {
       return null;
     }
-    
+
     String name = getFullName(inName);
 
     if (!registry.containsKey(name)) {
@@ -980,7 +992,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       List<MetaData> sts = sd.getServiceTypes();
 
       for (MetaData st : sts) {
-        
+
         Set<Class<?>> ancestry = new HashSet<Class<?>>();
         Class<?> targetClass = Class.forName(st.getType()); // this.getClass();
 
@@ -1186,7 +1198,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
       options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
       options.libraries = (platform.isWindows()) ? options.libraries.replace("/", "\\") : options.libraries.replace("\\", "/");
-      
+
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
       if (!dataDir.exists()) {
@@ -1258,7 +1270,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           shutdown();
         }
       }
-      
+
       // FIXME TEST THIS !! 0 length, single service, multiple !
       if (options.install != null) {
         // we start the runtime so there is a status publisher which will
@@ -1274,16 +1286,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         shutdown();
         return;
       }
-      
-      if (options.installDependency != null) {
-          // we start the runtime so there is a status publisher which will
-          // display status updates from the repo install
-          Repo repo = getInstance().getRepo();
-          repo.installDependency(options.libraries, options.installDependency);
-          shutdown();
-          return;
-        }
 
+      if (options.installDependency != null) {
+        // we start the runtime so there is a status publisher which will
+        // display status updates from the repo install
+        Repo repo = getInstance().getRepo();
+        repo.installDependency(options.libraries, options.installDependency);
+        shutdown();
+        return;
+      }
 
       createAndStartServices(options.services);
 
@@ -1529,7 +1540,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       try {
         if (sw != null) {
-          sw.stopService();        
+          sw.stopService();
           runtime.invoke("released", sw.getFullName());
         }
       } catch (Exception e) {
@@ -1584,8 +1595,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } catch (Exception e) {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
-    
-    System.exit(0); 
+
+    System.exit(0);
   }
 
   public Integer publishShutdown(Integer seconds) {
@@ -1633,14 +1644,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   // FIXME - NO STATICS !!!
   // FIXME - should be a map of remotes ?
-  static Client clientRemote = new Client();
+  // FIXME - REMOVE - integrate directly with Gateway interface & Runtime
+  static OldClient clientRemote = new OldClient();
   static InProcessCli stdInClient = null;
 
   public void connect() throws IOException {
-    connect("ws://localhost:8887/api/messages");
+    connect(options.connect);
   }
 
-  // FIXME - implement !
+  // FIXME - implement ! also implement the callback events  .. onDisconnect
   public void disconnect() throws IOException {
     // connect("admin", "ws://localhost:8887/api/messages");
   }
@@ -1681,13 +1693,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
   @Override
-  public void connect(String wsUrl) throws IOException {
+  public void connect(String url) throws IOException {
+    
+    if (!url.contains("api/messages")) {
+      url += "/api/messages";
+    }
+    
+    if (!url.contains("id=")) {
+      url += "?id=" + getId();
+    }
 
     clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
                                            // on client creation?
 
     UUID uuid = java.util.UUID.randomUUID();
-    Endpoint endpoint = clientRemote.connect(uuid.toString(), wsUrl);
+    Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
 
     // TODO - filter this message's serviceList according as desired
     Message msg = getDefaultMsg(uuid.toString());
@@ -1705,8 +1725,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // cli specific
     attributes.put("cwd", "/");
-    attributes.put("url", wsUrl);
-    attributes.put("uri", wsUrl); // not really correct
+    attributes.put("url", url);
+    attributes.put("uri", url); // not really correct
     attributes.put("user", "root");
     attributes.put("host", "local");
 
@@ -1736,11 +1756,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // get api - decode msg - process it
       Map<String, Object> connection = getConnection(uuid);
       if (connection == null) {
-        // error("no connection with uuid %s", uuid);
+        error("no connection with uuid %s", uuid);
         return;
       }
-
-      // ================= begin messages2 api =======================
 
       if (log.isDebugEnabled()) {
         log.debug("data - [{}]", data);
@@ -1748,7 +1766,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
-      msg.setProperty("uuid", uuid);
+      // xxx debug
+      log.debug("==> {} --to--> {}.{}",msg.sender, msg.name, msg.method);
+      msg.setProperty("uuid", uuid); // Properties ???? REMOVE ???
+
+      /**
+       * ======================================================================
+       * DYNAMIC ROUTE TABLE - Incoming messages will (must) have a identifier
+       * bound with the connection. The sender's id is put into the route table
+       * with connection information.
+       */
+      updateRoute(msg.getSrcId(), uuid);
+      
+      if (msg.containsHop(getId())) {
+        log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{} | {}", getName(), msg.sender, msg.name, msg.method, msg.getHops());
+        return;
+      }
+
+      // add our id - we don't want to see it again
+      msg.addHop(getId());
+
+      /**
+       * ======================================================================
+       */
 
       // if were blocking -
       Message retMsg = null;
@@ -1801,7 +1841,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
 
       } else {
-        log.info("<-- RELAY {} {} to {}@{} from {}@{}", msg.msgId, msg.method, msg.name, msg.getId(), msg.sender, msg.getSrcId());
+        log.info("GATEWAY {} RELAY {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
         send(msg);
       }
 
@@ -1868,6 +1908,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // AGENT INFO
     @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
     public boolean autoUpdate = false;
+    
+    ///api/messages?id=xxxxxx
+    @Option(names = { "-c", "--connect" }, description = "connect to another mrl instance - default is http://localhost:8887 to connect to local admin")
+    public String connect = "http://localhost:8887";
 
     // FIXME HOW DO YOU "nullify" values !?!?!? does this need --noWebGui ???
     // FIXME - when instances connect via ws - default will become true
@@ -1886,6 +1930,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     @Option(names = { "-g",
         "--agent" }, description = "command line options for the agent must be in quotes e.g. --agent \"--service pyadmin Python --invoke pyadmin execFile myadminfile.py\"")
     public String agent;
+
+    @Option(names = { "--agent-id" }, description = "agent id")
+    public String agentId;
 
     // AGENT INFO
     @Option(names = { "--proxy" }, description = "proxy config e.g. --proxy \"http://webproxy:8080\"")
@@ -1920,7 +1967,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     @Option(names = { "-n", "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
     public String id;
 
-    @Option(names = { "-c", "--cfg", "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+    @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
         + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
         + "If this value is set, all other configuration flags are ignored.")
     public String cfg = null;
@@ -1946,11 +1993,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     @Option(names = { "-i",
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {MetaData} installs dependencies for a specific service")
     public String install[];
-    
+
     @Option(names = { "-d",
-    "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
+        "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
     public String installDependency[];
-    
+
     @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
@@ -1983,13 +2030,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         "--client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
     public String client[];
 
-    // for AGENT used to sync to the latest via source and build
-    @Option(names = { "--src", "--use-source" }, arity = "0..1", description = "use latest source")
-    public String src;
-
     @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
     public String dataDir = "data";
-    
+
     @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
     public boolean extractResources = false;
 
@@ -2008,20 +2051,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           options = new CmdOptions();
         }
 
-        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
-        
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper");
+
         if (options.spawnedFromAgent) {
-          
-          /** FIXME - make work
-          try {
-            log.info("attempting to connect to local agent");
-            runtime.connect();
-          } catch (IOException e) {
-            log.warn("could not connect to agent");
-          }
-          */
+
+          /**
+           * FIXME - make work try { log.info("attempting to connect to local
+           * agent"); runtime.connect(); } catch (IOException e) {
+           * log.warn("could not connect to agent"); }
+           */
         }
-        
+
         if (options == null) {
           options = new CmdOptions();
         }
@@ -2029,7 +2069,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
-    setLocale(Locale.getDefault().getTag());    
+    setLocale(Locale.getDefault().getTag());
     locales = Locale.getDefaults();
 
     if (runtime.platform == null) {
@@ -2188,7 +2228,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public void checkingForUpdates() {
     log.info("checking for updates");
   }
-  
+
   static public String getInputAsString(InputStream is) {
     try (java.util.Scanner s = new java.util.Scanner(is)) {
       return s.useDelimiter("\\A").hasNext() ? s.next() : "";
@@ -2404,6 +2444,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * released event - when a service is successfully released from the registry
    * this event is triggered
+   * 
    * @param serviceName
    * @return
    */
@@ -2867,6 +2908,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return sd;
   }
 
+  public HelloResponse getHelloResponse(String uuid, String remoteId, String remoteUuid) {
+    HelloRequest hello = new HelloRequest(uuid, remoteUuid);
+    return getHelloResponse(uuid, hello);
+  }
+
   // FIXME - a way to reach in a messages meta-data ?? is this a reference
   // through the thread storage?
   // FIXME - needs to be paired with its client which has already been added
@@ -2891,10 +2937,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       response.id = getId();
-      // this.uuid = uuid;
       response.request = hello;
       response.platform = Platform.getLocalInstance();
+
+      if (connection == null) {
+        log.info("non persistant connection from {} - service based - could be session based", hello.id);
+        return response;
+      }
+
       connection.put("request", hello);
+
       // addClientAttribute(uuid, "request", request);
       updateRoute(hello.id, uuid);
       getConnection(uuid).put("id", hello.id);
@@ -3273,8 +3325,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static String getRoute(String id) {
     Set<String> ret = routeTable.get(id);
-    if (ret != null) {
-      return ret.iterator().next();
+    if (ret != null && ret.iterator() != null) {
+      String found = ret.iterator().next();
+      if (found == null) {
+        return defaultRoute;
+      } else {
+        return found;
+      }
     }
     return defaultRoute;
   }
@@ -3465,6 +3522,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.error("could not get endpoint for connection {}", uuid);
         return;
       }
+
+      /**
+       * ======================================================================
+       * DYNAMIC ROUTE TABLE - outbound msg hop starts now
+       */
+
+      // add our id - we don't want to see it again
+      msg.addHop(getId());
+      
+      log.debug("<== {} --to--> {}.{}",msg.sender, msg.name, msg.method);
+
+      /**
+       * ======================================================================
+       */
+
       endpoint.socket.fire(CodecUtils.toJson(msg));
     }
   }
@@ -3495,7 +3567,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public void setAllLocales(String code) {
     for (ServiceInterface si : getLocalServices().values()) {
-        si.setLocale(code);
+      si.setLocale(code);
     }
   }
 
@@ -3518,7 +3590,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.setPeer(fullKey, actualName, serviceType);
   }
 
-  public static Plan getPlan(String serviceName, String serviceType) {    
+  public static Plan getPlan(String serviceName, String serviceType) {
     return ServiceData.getPlan(serviceName, serviceType);
   }
 
@@ -3533,5 +3605,5 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static MetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
-  
+
 }

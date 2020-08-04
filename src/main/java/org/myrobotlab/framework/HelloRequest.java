@@ -1,8 +1,19 @@
 package org.myrobotlab.framework;
 
 public class HelloRequest {
+  
+  /**
+   * id of the foreign process
+   */
   public String id;
+  /**
+   * connection uuid
+   */
   public String uuid;
+  
+  /**
+   * platform of the foreign process
+   */
   public Platform platform;
   
   public HelloRequest(String id, String uuid) {

@@ -26,10 +26,10 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -77,7 +77,8 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  public Set<String> historyList;
+  // public Set<String> historyListx;
+  protected List<String> historyList;
 
   /**
    * Meta data regarding the message - security, origin, and other information
@@ -113,7 +114,7 @@ public class Message implements Serializable {
     name = new String(); // FIXME - allow NULL !
     sender = new String(); // FIXME - allow NULL !
     sendingMethod = new String();
-    historyList = new HashSet<String>();
+    historyList = new ArrayList<String>();
     method = new String();
   }
 
@@ -145,7 +146,7 @@ public class Message implements Serializable {
     // FIXED - not valid making a copy of a message
     // to send and copying there history list
     // historyList = other.historyList;
-    historyList = new HashSet<String>();
+    historyList = new ArrayList<String>();
     status = other.status;
     msgType = other.msgType;
     method = other.method;
@@ -258,6 +259,27 @@ public class Message implements Serializable {
 
   public void setBlocking() {
     msgType = BLOCKING;
+  }
+
+  public void addHop(String id) {
+    historyList.add(id);
+  }
+
+  public boolean containsHop(String id) {
+    for (String travelled : historyList) {
+      if (travelled.contains(id)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void clearHops() {
+    historyList = new ArrayList<>();
+  }
+
+  public List<String> getHops() {
+    return historyList;
   }
 
 }

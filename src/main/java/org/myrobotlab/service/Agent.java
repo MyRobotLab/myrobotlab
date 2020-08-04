@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,26 +18,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PullCommand;
-import org.eclipse.jgit.api.errors.CanceledException;
-import org.eclipse.jgit.api.errors.DetachedHeadException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidConfigurationException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.BranchTrackingStatus;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.TextProgressMonitor;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
@@ -101,9 +80,9 @@ public class Agent extends Service {
   Platform platform = Platform.getLocalInstance();
 
   transient WebGui webgui = null;
-  
+
   int port = 8887;
-  
+
   String address = "127.0.0.1";
 
   String currentBranch;
@@ -282,7 +261,7 @@ public class Agent extends Service {
     if (autoUpdate || checkRemoteVersions) {
       invoke("getVersions", currentBranch);
     }
-    
+
     Runtime runtime = Runtime.getInstance();
     runtime.startInteractiveMode();
   }
@@ -292,9 +271,9 @@ public class Agent extends Service {
   }
 
   public String getJarName(String branch, String version) {
-	// FIXME !!! branch name is completely unreliable :(
-	// version info which includes build number can distinguish for what we need
-	  return "myrobotlab-" + version + ".jar";
+    // FIXME !!! branch name is completely unreliable :(
+    // version info which includes build number can distinguish for what we need
+    return "myrobotlab-" + version + ".jar";
     // return "myrobotlab-" + branch + "-" + version + ".jar";
     // return getDir(branch, version) + File.separator + "myrobotlab.jar";
   }
@@ -317,24 +296,28 @@ public class Agent extends Service {
       log.info("agent versioned {} does not exist", agentMyRobotLabJar);
       String agentJar = new java.io.File(Agent.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
       if (!agentJar.endsWith(".jar")) {
-        String cwd = System.getProperty("user.dir");
-        log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
-        log.info("i will build a jar for you on src from {}", cwd);
-        // guessing the src root is in cwd
-        // globalOptions.src
-        // FIXME - what do we do on failure of compile ?
-        String newVersion = mvn(cwd, agentBranch, null);
-        if (newVersion != null) {
-          log.info("built version {}", newVersion);
-        } else {
-          log.error("could not build");
-          return;
-        }
-        log.info("agents expects its own version {} to be available version - copying from {}", agentVersion, newVersion);
-        String newJar = getJarName(agentBranch, newVersion);
-        String newJarLoc = getJarName(agentBranch, agentVersion);
-        log.info("copy {} to {}", newJar, newJarLoc);
-        Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+        /**
+         * <pre>
+         * String cwd = System.getProperty("user.dir");
+         * log.info("agent is not in a jar - i suspect your using and ide - path is [{}]", agentJar);
+         * log.info("i will build a jar for you on src from {}", cwd);
+         * // guessing the src root is in cwd
+         * // globalOptions.src
+         * // FIXME - what do we do on failure of compile ?
+         * String newVersion = mvn(cwd, agentBranch, null);
+         * if (newVersion != null) {
+         *   log.info("built version {}", newVersion);
+         * } else {
+         *   log.error("could not build");
+         *   return;
+         * }
+         * log.info("agents expects its own version {} to be available version - copying from {}", agentVersion, newVersion);
+         * String newJar = getJarName(agentBranch, newVersion);
+         * String newJarLoc = getJarName(agentBranch, agentVersion);
+         * log.info("copy {} to {}", newJar, newJarLoc);
+         * Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
+         * </pre>
+         */
       } else {
         log.info("new directory or new version perhaps - we'll copy ./myrobotlab.jar to {}", agentJar);
         Files.copy(Paths.get("myrobotlab.jar"), Paths.get(agentMyRobotLabJar), StandardCopyOption.REPLACE_EXISTING);
@@ -425,46 +408,29 @@ public class Agent extends Service {
       }
       try {
 
-        // FIXME - if options.src != null GITHUB
-        if (globalOptions.src != null) {
-          log.info("checking for github updates on branch {}", process.options.branch);
-          String newVersion = getLatestSrc(process.options.branch);
-          if (newVersion != null && process.isRunning()) {
-            warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
-            // FIXME set currentVersion ???
-            currentVersion = newVersion;
-            process.options.version = newVersion;
-            process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
-            restart(process.options.id);
-            log.info("restarted");
-          }
-        } else {
-          log.info("checking for updates on jenkins");
-          // getRemoteVersions
-          log.info("getting version");
-          String newVersion = getLatestVersion(process.options.branch, true);
-          if (newVersion == null || newVersion.equals(process.options.version)) {
-            log.info("same version {}", newVersion);
-            continue;
-          }
-
-          // we have a possible update
-          log.info("WOOHOO ! updating to version {}", newVersion);
-          process.options.version = newVersion;
-          process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
-
-          getLatestJar(process.options.branch);
-
-          log.info("WOOHOO ! updated !");
-          if (process.isRunning()) {
-            log.info("its running - we should restart");
-            restart(process.options.id);
-            log.info("restarted");
-          }
-          warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
+        log.info("checking for updates on jenkins");
+        // getRemoteVersions
+        log.info("getting version");
+        String newVersion = getLatestVersion(process.options.branch, true);
+        if (newVersion == null || newVersion.equals(process.options.version)) {
+          log.info("same version {}", newVersion);
+          continue;
         }
-      } catch (TransportException e) {
-        log.info("cannot connect to - are we connected to the internet ? {}", e.getMessage());
+
+        // we have a possible update
+        log.info("WOOHOO ! updating to version {}", newVersion);
+        process.options.version = newVersion;
+        process.jarPath = new File(getJarName(process.options.branch, process.options.version)).getAbsolutePath();
+
+        getLatestJar(process.options.branch);
+
+        log.info("WOOHOO ! updated !");
+        if (process.isRunning()) {
+          log.info("its running - we should restart");
+          restart(process.options.id);
+          log.info("restarted");
+        }
+        warn("updating process [%s] from %s -to-> %s", process.options.id, process.options.version, newVersion);
       } catch (Exception e) {
         log.error("proccessing updates from scheduled task threw", e);
       }
@@ -1028,9 +994,9 @@ public class Agent extends Service {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
-    
+
     if (pd.options.proxy != null) {
-      URI uri = new URI(pd.options.proxy); 
+      URI uri = new URI(pd.options.proxy);
       String host = uri.getHost();
       Integer port = uri.getPort();
       jvmArgs += " -Dhttp.proxyHost=" + host + " -Dhttp.proxyPort=" + port + " " + "-Dhttps.proxyHost=" + host + " -Dhttps.proxyPort=" + port;
@@ -1040,7 +1006,7 @@ public class Agent extends Service {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
-    
+
     pd.options.spawnedFromAgent = true;
 
     // user override
@@ -1052,9 +1018,9 @@ public class Agent extends Service {
       options.services.add("log");
       options.services.add("Log");
       options.services.add("webgui");
-      options.services.add("WebGui");      
+      options.services.add("WebGui");
       options.services.add("intro");
-      options.services.add("Intro");      
+      options.services.add("Intro");
       options.services.add("gui");
       options.services.add("SwingGui");
       options.services.add("python");
@@ -1162,7 +1128,7 @@ public class Agent extends Service {
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (pd.options.services.size() > 0) {
-      if (pd.options.services.size()%2 != 0) {
+      if (pd.options.services.size() % 2 != 0) {
         error("--service requires {name} {Type} {name} {Type} even number of entries - you have %d", pd.options.services.size());
         Runtime.shutdown();
       }
@@ -1197,10 +1163,10 @@ public class Agent extends Service {
         cmd.add(serviceType);
       }
     }
-    
+
     if (pd.options.installDependency != null) {
-        cmd.add("--install-dependency");
-        for (String serviceType : globalOptions.installDependency) {
+      cmd.add("--install-dependency");
+      for (String serviceType : globalOptions.installDependency) {
         cmd.add(serviceType);
       }
     }
@@ -1231,7 +1197,7 @@ public class Agent extends Service {
     if (pd.options.virtual) {
       cmd.add("--virtual");
     }
-    
+
     cmd.add("--spawned-from-agent");
 
     return cmd.toArray(new String[cmd.size()]);
@@ -1270,9 +1236,9 @@ public class Agent extends Service {
     // environment variables setup
     setEnv(pd, builder.environment());
 
-// new    
-//    builder.inheritIO();
-    
+    // new
+    // builder.inheritIO();
+
     Process process = builder.start();
     pd.process = process;
     pd.startTs = System.currentTimeMillis();
@@ -1299,12 +1265,12 @@ public class Agent extends Service {
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
-      /** FIXME - integrate with cli api
-      Cli cli = Runtime.getCli();
-      cli.add(pd.options.id, process.getInputStream(), process.getOutputStream());
-      cli.attach(pd.options.id);
-      agent.broadcastState();
-      */
+      /**
+       * FIXME - integrate with cli api Cli cli = Runtime.getCli();
+       * cli.add(pd.options.id, process.getInputStream(),
+       * process.getOutputStream()); cli.attach(pd.options.id);
+       * agent.broadcastState();
+       */
     }
     return process;
   }
@@ -1362,7 +1328,7 @@ public class Agent extends Service {
         agentArgs.addAll(Arrays.asList(globalOptions.agent.split(" ")));
       } else {
         agentArgs.add("--id");
-        agentArgs.add("agent-" + NameGenerator.getName());
+        agentArgs.add((globalOptions.agentId != null) ? globalOptions.agentId : "agent-" + NameGenerator.getName());
         agentArgs.add("-s");
         agentArgs.add("agent");
         agentArgs.add("Agent");
@@ -1419,44 +1385,12 @@ public class Agent extends Service {
       agent.setBranch(globalOptions.branch);
       agent.setVersion(globalOptions.version);
 
-      // FIXME - have a list versions ... command line !!!
-
-      // FIXME - the most common use case is the version of the spawned instance
-      // -
-      // if that is the case its needed to determine what is the "proposed"
-      // branch & version if no
-      // special command parameters were given
-      // FIXME HELP !!!! :D
-      // if (cmdline.containsKey("-h") || cmdline.containsKey("--help")) {
-      // // FIXME - add all possible command descriptions ..
-      // System.out.println(String.format("%s branch %s version %s",
-      // platform.getBranch(), platform.getPlatformId(),
-      // platform.getVersion()));
-      // return;
-      // }
-
       if (globalOptions.webgui != null) {
         agent.startWebGui(globalOptions.webgui);
       }
 
       // the user set auto-update to true
       if (globalOptions.autoUpdate) {
-        // options.fork = true;
-        // lets check and get the latest jar if there is new one
-
-        try {
-          if (globalOptions.src == null) {
-            // get the latest from Jenkins
-            agent.getLatestJar(agent.getBranch());
-          } else {
-            // get the latest from GitHub
-            agent.getLatestSrc(agent.getBranch());
-          }
-        } catch (TransportException e) {
-          log.info("could not get latest myrobotlab - {}", e.getMessage());
-        } catch (Exception e) {
-          log.error("trying to update failed", e);
-        }
 
         // the "latest" should have been downloaded
         globalOptions.version = agent.getLatestLocalVersion(agent.getBranch());
@@ -1465,7 +1399,7 @@ public class Agent extends Service {
 
       // FIXME - use wsclient for remote access
       if (globalOptions.client != null) {
-        
+
         return;
       }
 
@@ -1503,21 +1437,6 @@ public class Agent extends Service {
     }
   }
 
-  public String getLatestSrc(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
-      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
-
-    Agent agent = (Agent) Runtime.getService("agent");
-
-    RevCommit latestCommit = agent.gitPull(branch);
-    if (latestCommit != null) {
-      log.info("latest {} - will attempt to build", latestCommit);
-      String version = agent.mvn(null, branch, (long) latestCommit.getCommitTime());
-      log.info("successfully build version {} - {}", latestCommit.getCommitTime(), latestCommit.getFullMessage());
-      return version;
-    }
-    return null;
-  }
-
   public String getBranch() {
     return currentBranch;
   }
@@ -1529,195 +1448,6 @@ public class Agent extends Service {
   public String setVersion(String version) {
     currentVersion = version;
     return version;
-  }
-
-  public String mvn(String branch) {
-    return mvn(null, branch, null);
-  }
-
-  public String mvn(String src, String branch, Long buildNumber) {
-    try {
-
-      if (src == null) {
-        src = "data" + File.separator + branch + ".src";
-      }
-      String fs = File.separator;
-      File myroborlabJar = new File(src + fs + "target" + fs + "myrobotlab");
-      if (myroborlabJar.exists()) {
-        myroborlabJar.delete();
-      }
-      File snapshot = new File(src + fs + "target" + fs + "mrl-0.0.1-SNAPSHOT.jar");
-      if (snapshot.exists()) {
-        snapshot.delete();
-      }
-
-      if (buildNumber == null) {
-        // epoch minute build time number
-        buildNumber = System.currentTimeMillis() / 1000;
-      }
-
-      String version = versionPrefix + buildNumber;
-
-      Platform platform = Platform.getLocalInstance();
-      List<String> cmd = new ArrayList<>();
-
-      cmd.add((platform.isWindows()) ? "cmd" : "/bin/bash");
-      cmd.add((platform.isWindows()) ? "/c" : "-c");
-
-      // when you send a command to be interpreted by cmd or bash - you get more
-      // consistent results
-      // when you wrap the command in quotes - that's why we use a StringBuilder
-      StringBuilder sb = new StringBuilder();
-      sb.append((platform.isWindows()) ? "mvn" : "mvn"); // huh .. thought it
-                                                         // was
-      sb.append(" "); // mvn.bat
-      sb.append("-DskipTests");
-      sb.append(" ");
-      sb.append("-Dbuild.number=" + buildNumber);
-      sb.append(" ");
-      sb.append("-DGitBranch=" + branch);
-      sb.append(" ");
-      sb.append("compile");
-      sb.append(" ");
-      sb.append("prepare-package");
-      sb.append(" ");
-      sb.append("package");
-      sb.append(" ");
-      // cmd.add("-f");
-      // cmd.add(pathToPom);
-      // cmd.add("-o"); // offline
-      sb.append("-o"); // offline
-
-      // cmd.add("\"" + sb.toString() + "\"");
-      cmd.add(sb.toString());
-
-      StringBuilder sb1 = new StringBuilder();
-      for (String c : cmd) {
-        sb1.append(c);
-        sb1.append(" ");
-      }
-
-      // src path ..
-      log.info("build [{}]", sb1);
-      // ProcessBuilder pb = new
-      // ProcessBuilder("mvn","exec:java","-Dexec.mainClass="+"FunnyClass");
-      ProcessBuilder pb = new ProcessBuilder(cmd);
-      Map<String, String> envs = pb.environment();
-      log.info("PATH={}", envs.get("PATH"));
-
-      pb.directory(new File(src));
-
-      // handle stderr as a direct pass through to System.err
-      pb.redirectErrorStream(true);
-      // pb.environment().putAll(System.getenv());
-
-      pb.inheritIO().start().waitFor();
-
-      // FIXME LOOK FOR --> "BUILD FAILURE"
-
-      String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
-      String newJarLoc = getJarName(branch, version);
-      File p = new File(newJarLoc).getAbsoluteFile().getParentFile();
-      p.mkdirs();
-
-      Files.copy(Paths.get(newJar), Paths.get(newJarLoc), StandardCopyOption.REPLACE_EXISTING);
-
-      return versionPrefix + buildNumber + "";
-    } catch (Exception e) {
-      log.error("mvn threw ", e);
-    }
-    return null;
-  }
-
-  public RevCommit gitPull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
-      RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
-    return gitPull(null, branch);
-  }
-
-  public RevCommit gitPull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException,
-      InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
-
-    if (branch == null) {
-      branch = currentBranch;
-    }
-
-    if (src == null) {
-      src = getRootDataDir() + File.separator + branch + ".src";
-    }
-
-    List<String> branches = new ArrayList<String>();
-    branches.add("refs/heads/" + branch);
-
-    File repoParentFolder = new File(src);
-
-    Git git = null;
-
-    TextProgressMonitor textmonitor = new TextProgressMonitor(new PrintWriter(System.out));
-
-    Repository repo = null;
-    if (!repoParentFolder.exists()) {
-      // String branch = "master";
-      git = Git.cloneRepository().setProgressMonitor(textmonitor).setURI("https://github.com/MyRobotLab/myrobotlab.git").setDirectory(new File(src)).setBranchesToClone(branches)
-          .setBranch("refs/heads/" + branch).call();
-
-    } else {
-      // Open an existing repository
-      String gitDir = repoParentFolder.getAbsolutePath() + "/.git";
-      repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
-      git = new Git(repo);
-    }
-
-    repo = git.getRepository();
-
-    /**
-     * <pre>
-     * CheckoutCommand checkout = git.checkout().setCreateBranch(true).setName(branch).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).setStartPoint("origin/" + branch)
-     *     .call();
-     * </pre>
-     */
-
-    // git.pull().setCredentialsProvider(user).call();
-    // FIXME if currentBranch != branch - then checkout .. set current branch
-    if (!branch.equals(currentBranch)) {
-      git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch).call();
-      git.checkout().setName(branch).call();
-    }
-
-    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache
-    // remote changes
-    git.fetch().setProgressMonitor(new TextProgressMonitor(new PrintWriter(System.out))).call();
-
-    List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
-    List<RevCommit> remoteLogs = getLogs(git, "remotes/origin/" + branch, 1);
-
-    RevCommit localCommit = localLogs.get(0);
-    RevCommit remoteCommit = remoteLogs.get(0);
-
-    BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
-
-    // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
-    if (status.getBehindCount() > 0) {
-      log.info("local ts {}, remote {} - {} updating", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
-      PullCommand pullCmd = git.pull();
-      pullCmd.setProgressMonitor(textmonitor);
-      pullCmd.call();
-      return remoteCommit;
-    } else {
-      log.info("no new commits on branch {}", branch);
-    }
-
-    return null;
-  }
-
-  private List<RevCommit> getLogs(Git git, String ref, int maxCount)
-      throws RevisionSyntaxException, NoHeadException, MissingObjectException, IncorrectObjectTypeException, AmbiguousObjectException, GitAPIException, IOException {
-    List<RevCommit> ret = new ArrayList<>();
-    Repository repository = git.getRepository();
-    Iterable<RevCommit> logs = git.log().setMaxCount(maxCount).add(repository.resolve(ref)).call();
-    for (RevCommit rev : logs) {
-      ret.add(rev);
-    }
-    return ret;
   }
 
   // FIXME - move to enums for status level !
