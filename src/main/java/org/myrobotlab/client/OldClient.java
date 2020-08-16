@@ -45,9 +45,9 @@ import picocli.CommandLine.Option;
  *
  */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
-public class Client {
+public class OldClient {
   
-  public final static Logger log = LoggerFactory.getLogger(Client.class);
+  public final static Logger log = LoggerFactory.getLogger(OldClient.class);
 
   @Option(names = "--option", description = "Some option.")
   String option;
@@ -56,10 +56,7 @@ public class Client {
   String alias;
 
   @Option(names = { "-u", "--url" }, arity = "1..*", description = "client endpoints")
-  // String[] urls = new String[] { "http://192.168.0.73:8887/api/cli" };
-  String url = "http://127.0.0.1:8887/api/cli";
-  // String url = "http://192.168.0.73:8887/api/cli";
-  // String[] urls = new String[] { "http://127.0.0.1:8887/api/cli" };
+  String getHelloResponseUrl = "http://127.0.0.1:8887/api/service/runtime/getHelloResponse";
 
   @Option(names = { "-p", "--password" }, description = "password to authenticate")
   String password = null;
@@ -165,10 +162,10 @@ public class Client {
 
       // Logger.getRootLogger().setLevel(Level.INFO);
 
-      Client client = CommandLine.populateCommand(new Client(), args);
+      OldClient client = CommandLine.populateCommand(new OldClient(), args);
 
       UUID uuid = java.util.UUID.randomUUID();
-      client.connect(uuid.toString(), client.url);
+      client.connect(uuid.toString(), client.getHelloResponseUrl);
 
       // if interactive vs non-interactive which will pretty much be curl ;P BUT
       // BLOCKING !!! (ie useful)
@@ -343,7 +340,9 @@ public class Client {
   public void send(String uuid, String raw) {
     try {
       Endpoint resource = endpoints.get(uuid);
-      resource.socket.fire(raw);
+      if (resource != null) {
+        resource.socket.fire(raw);
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -42,7 +42,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
-        return 'webgui-client-' + 1234 + '-' + 5678
+        return 'webgui-client-' + new Date().getTime()
     }
 
     // The name of the gateway I am
@@ -910,15 +910,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.addService = function(service) {
-            console.debug('mrl.addService ' + service.name)
 
             var name = _self.getFullName(service)
+            console.debug('mrl.addService ' + name)
             var type = service.simpleName
             //first load & parse the controller,    //js
             //then load and save the template       //html
-            $log.debug('lazy-loading:', service.name, type)
+            $log.debug('lazy-loading:', name, type)
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
-                $log.debug('lazy-loading successful:', service.name, type)
+                $log.debug('lazy-loading successful:', name, type)
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
@@ -965,7 +965,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //WARNING: DO NOT ABUSE THIS !!!
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
-            console.debug('registering controllers scope', name, scope)
+            console.info('registering controllers scope', name, scope)
             if ('scope'in panels[name]) {
                 $log.warn('replacing an existing scope for ' + name)
             }

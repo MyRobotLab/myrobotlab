@@ -63,12 +63,14 @@ public class Inbox implements Serializable {
 
   
   public void add(Message msg) {
+    /**<pre>  Trying to only make this applicable for hops dealing with remote messages - not local one !
     if ((msg.historyList.contains(name))) {
       log.error("* {} dumping duplicate message {}.{} msgid - {} {}", name, msg.getName(), msg.method, msg.msgId, msg.historyList);
       return;
     }
 
     msg.historyList.add(name);
+    */
 
     synchronized (msgBox) {
       while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
