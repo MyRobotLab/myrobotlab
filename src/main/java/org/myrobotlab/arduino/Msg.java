@@ -275,17 +275,17 @@ public class Msg {
       ackReceived(function);
     }
     
-    if (!clearToSend && (method != PUBLISH_MRL_COMM_BEGIN && method != PUBLISH_BOARD_INFO)) {
-        // Not clear to send and not an unlock msg
+    if (method != PUBLISH_MRL_COMM_BEGIN) {
+      if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
         System.err.println("\nDumping command not clear to send.\n");
         return;
-    } else if (!clearToSend && (method == PUBLISH_MRL_COMM_BEGIN || method == PUBLISH_BOARD_INFO)) {
-      // Not clear to send and "is" an unlock msg
+      }
+    } else {
+      // Process!
       log.info("Clear to process!!!!!!!!!!!!!!!!!!");
       this.clearToSend = true;
-    } 
-
+    }
     switch (method) {
     case PUBLISH_MRLCOMM_ERROR: {
       String errorMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
@@ -2379,7 +2379,7 @@ public class Msg {
           }
           
           // If we're not clear to send, we need to unlock if this is a begin message.
-          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN || method == PUBLISH_BOARD_INFO)) {
+          if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
             // Clear to send!!
             log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
             clearToSend = true;
