@@ -31,6 +31,7 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.i2c.I2CBus;
 import com.pi4j.io.i2c.I2CDevice;
+import com.pi4j.system.SystemInfo;
 import com.pi4j.wiringpi.I2C;
 import com.pi4j.wiringpi.SoftPwm;
 
@@ -45,15 +46,12 @@ import com.pi4j.wiringpi.SoftPwm;
 // TODO Ensure that only one instance of RasPi can execute on each RaspBerry PI
 // TODO pi4j implementation NOWORKY : I/O errors, dont know why, not know this
 // enough :)
-public class RasPi extends AbstractMicrocontroller implements I2CController {
+public class RasPi extends AbstractMicrocontroller implements I2CController, GpioPinListenerDigital {
 
-  public static class GpioPinListener implements GpioPinListenerDigital {
-    @Override
-    public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-      // display pin state on console
-      log.info(" --> GPIO PIN STATE CHANGE: {} = {}", event.getPin(), event.getState());
-    }
-
+  @Override
+  public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+    // display pin state on console
+    log.info(" --> GPIO PIN STATE CHANGE: {} = {}", event.getPin(), event.getState());
   }
 
   public static class I2CDeviceMap {
@@ -83,6 +81,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   private boolean wiringPi = true; // Defined to be able to switch between
+  
+  protected com.pi4j.system.SystemInfo.BoardType boardType = null;
 
   public RasPi(String n, String id) {
     super(n, id);
@@ -91,14 +91,14 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     log.info("platform is {}", platform);
     log.info("architecture is {}", platform.getArch());
 
-    if ("arm".equals(platform.getArch()) || "armv7.hfp".equals(platform.getArch())) {
+    try {      
+      boardType = SystemInfo.getBoardType();
       gpio = GpioFactory.getInstance();
-      log.info("Executing on Raspberry PI");
-    } else {
-      // we should be running on a Raspberry Pi
-      log.error("architecture is not arm");
+      log.info("Executing on Raspberry PI");      
+      getPinList();
+    } catch (Exception e) {
+      error("%s architecture is not arm - %s", getName(), e.getMessage());
     }
-    getPinList();
   }
 
   @Override
@@ -140,8 +140,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
         }
         i2cDevices.put(key, devicedata);
         log.info("Created device for {} key {}", serviceName, key);
-      } catch (NumberFormatException | IOException e) {
-        Logging.logError(e);
+      } catch (Exception e) {
+        log.error("createI2cDevice failed", e);
+        error(e.getMessage());
       }
     }
   }
@@ -165,7 +166,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     log.info("digitalWrite {} {}", pin, value);
     // msg.digitalWrite(pin, value);
     PinDefinition pinDef = pinIndex.get(pin);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
     if (value == 0) {
       gpio.low();
     } else {
@@ -191,8 +192,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
   @Override
   public void enablePin(int address, int rate) {
     PinDefinition pinDef = pinIndex.get(address);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
-    gpio.addListener(new GpioPinListener());
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
+    gpio.addListener(this);
     pinDef.setEnabled(true);
     invoke("publishPinDefinition", pinDef); // broadcast pin change
   }
@@ -218,28 +219,28 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
     try {
       // if (SystemInfo.getBoardType() == SystemInfo.BoardType.RaspberryPi_3B) {
-        for (int i = 0; i < 32; ++i) {
-          PinDefinition pindef = new PinDefinition(getName(), i);
-          String pinName = null;
-          if (i == 16) {
-            pindef.setRx(true);
-          }
-          if (i == 15) {
-            pindef.setTx(true);
-          }
-          if (i <= 16 || i >= 21) {
-            pinName = String.format("GPIO%d", i);
-            pindef.setDigital(true);
-          } else {
-            pinName = String.format("Unused%d", i);
-            pindef.setDigital(false);
-          }
-          pindef.setPinName(pinName);
-          pindef.setAddress(i);
-          pinIndex.put(i, pindef);
-          pinMap.put(pinName, pindef);
-          pinList.add(pindef);
+      for (int i = 0; i < 32; ++i) {
+        PinDefinition pindef = new PinDefinition(getName(), i);
+        String pinName = null;
+        if (i == 16) {
+          pindef.setRx(true);
         }
+        if (i == 15) {
+          pindef.setTx(true);
+        }
+        if (i <= 16 || i >= 21) {
+          pinName = String.format("GPIO%d", i);
+          pindef.setDigital(true);
+        } else {
+          pinName = String.format("Unused%d", i);
+          pindef.setDigital(false);
+        }
+        pindef.setPinName(pinName);
+        pindef.setAddress(i);
+        pinIndex.put(i, pindef);
+        pinMap.put(pinName, pindef);
+        pinList.add(pindef);
+      }
     } catch (Exception e) {
       log.error("getPinList threw", e);
     }
@@ -367,7 +368,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     pinDef.setValue(pinData.value);
     return pinData;
   }
-  
+
   // FIXME - return array
   // FIXME - return array
   public Integer[] scanI2CDevices(int busAddress) {
@@ -492,11 +493,13 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
     int i = 0;
 
+    Runtime.start("servo01", "Servo");
+    Runtime.start("ada16", "Adafruit16CServoDriver");
     Runtime.start(String.format("rasPi%d", i), "RasPi");
-    Runtime.createAndStart(String.format("rasGUI%d", i), "SwingGui");
-    Runtime.createAndStart(String.format("rasPython%d", i), "Python");
-    // Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
-   
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+
   }
 
   @Override
@@ -507,7 +510,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
   @Override
   public BoardInfo getBoardInfo() {
-    // FIXME - this needs more work .. BoardInfo needs to be an interface where RasPiInfo is derived
+    RaspiPin.allPins();
+    // FIXME - this needs more work .. BoardInfo needs to be an interface where
+    // RasPiInfo is derived
     return null;
   }
 

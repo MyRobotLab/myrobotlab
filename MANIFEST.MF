@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+GitCommitUserEmail: grog@myrobotlab.org
+Archiver-Version: Plexus Archiver
+Built-By: jenkins
+GitCommitIdDescribe: 1.0.119-11198-g7f43b18
+GitBuildUserName: 
+GitRemoteOriginUrl: https://github.com/MyRobotLab/myrobotlab.git
+GitTags: 
+Main-Class: org.myrobotlab.service.Agent
+GitBranch: 7f43b182a0f58b27b580dd94c106679feef15c31
+Build-Host: null
+GitCommitId: 7f43b182a0f58b27b580dd94c106679feef15c31
+GitCommitIdFull: null
+GitCommitIdDescribeShort: 1.0.119-11198
+Build-Version: 245
+GitClosestTagName: 1.0.119
+Major-Version: 1.1.245
+GitCommitTime: 2020-07-21T01:27:29-0400
+GitCommitUserName: GroG
+Implementation-Version: 1.1.245
+GitDirty: false
+GitBuildUserEmail: 
+GitCommitIdAbbrev: 7f43b18
+GitBuildTime: 2020-07-21T01:28:55-0400
+GitBuildVersion: 0.0.1-SNAPSHOT
+GitClosestTagCommitCount: 11198
+Build-Time: 2020-07-21T05:28:50Z
+Build-User: jenkins
+Created-By: Apache Maven 3.6.3
+Build-Jdk: 1.8.0_232
+

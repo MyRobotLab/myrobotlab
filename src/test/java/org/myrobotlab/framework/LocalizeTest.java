@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.framework.TaskTest;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Runtime;
@@ -14,7 +15,7 @@ import org.slf4j.Logger;
 
 public class LocalizeTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(TaskTest.class);
+  public final static Logger log = LoggerFactory.getLogger(LocalizeTest.class);
   
   static Runtime runtime = null;
   static InMoov2 i01 = null;

@@ -78,3 +78,5 @@
 /libbulletjme.so
 /liblwjgl64.so
 /copyToRaspi.sh
+stdout.txt
+export.py

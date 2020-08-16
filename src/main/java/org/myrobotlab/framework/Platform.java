@@ -1,5 +1,6 @@
 package org.myrobotlab.framework;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -329,7 +330,7 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        in = Platform.class.getResource("/MANIFEST.MF").openStream();
+        in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
       // log.debug("loading manifest {}", manifest);

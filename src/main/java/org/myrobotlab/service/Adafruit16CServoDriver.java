@@ -790,7 +790,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
     if (isAttached(controller))
       return;
 
-    if (this.controllerName != controller.getName()) {
+    if (this.controllerName != null && this.controllerName != controller.getName()) {
       log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
       return;
     }

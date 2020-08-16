@@ -2241,12 +2241,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      //webgui.setPort(8887);
-      webgui.startService();
-      
-      Runtime.start("gui", "SwingGui");
+      boolean web = true;
+      if (web) {
+        WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+        webgui.autoStartBrowser(false);
+        webgui.startService();
+      }
+
+      // Runtime.start("gui", "SwingGui");
 
       // Runtime.start("gui", "SwingGui");
       Serial.listPorts();

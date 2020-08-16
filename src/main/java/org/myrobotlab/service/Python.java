@@ -281,30 +281,6 @@ public class Python extends Service {
     StringBuffer initScript = new StringBuffer();
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
-    /* NOT NECESSARY ON CONSTRUCTION - handled on event onStarted
-    Iterator<String> it = svcs.keySet().iterator();
-    while (it.hasNext()) {
-      String fullname = it.next();
-      ServiceInterface sw = svcs.get(fullname);
-
-      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
-
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
-
-      // get a handle on running service
-      initScript.append(serviceScript);
-    }
-
-    exec(initScript.toString(), false);
-    */
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
-    
-    
   }
 
   public void openScript(String scriptName, String code) {
@@ -670,12 +646,16 @@ public class Python extends Service {
     broadcastState();
   }
 
-  /* no longer needed
   @Override
   public void startService() {
     super.startService();
+    log.info("starting python {}", getName());
+    if (inputQueueThread == null) {
+      inputQueueThread = new InputQueueThread(this);
+      inputQueueThread.start();
+    }
+    log.info("started python {}", getName());
   }
-  */
 
   @Override
   public void releaseService() {

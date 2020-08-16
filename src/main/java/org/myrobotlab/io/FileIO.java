@@ -59,6 +59,7 @@ import java.util.zip.ZipException;
 
 import org.apache.commons.io.Charsets;
 import org.myrobotlab.cmdline.CmdLine;
+import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -66,7 +67,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
 
 /**
@@ -1227,6 +1227,30 @@ public class FileIO {
     }
 
     return null;
+  }
+  
+  /**
+   * Copies bytes from src to dst, src must be a file, dst may or may not
+   * exist
+   * 
+   * @param src
+   * @param dst
+   * @throws IOException
+   */
+  static public void copyBytes(String src, String dst) throws IOException {
+    FileInputStream fis = new FileInputStream(src);
+    FileOutputStream fos = new FileOutputStream(dst);
+    
+    int nRead;
+    byte[] data = new byte[65536];
+
+    while ((nRead = fis.read(data, 0, data.length)) != -1) {
+      fos.write(data, 0, nRead);
+    }
+
+    fis.close();
+    fos.close();
+    
   }
 
   static public void toFile(File dst, byte[] data) throws IOException {

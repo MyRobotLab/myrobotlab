@@ -538,7 +538,7 @@ public class MethodCache {
             // specific gson implementation
             // rather than double encode everything - i have chosen
             // to re-encode objects back to string since gson will decode them
-            // all ot linked tree maps - if the json decoder changes from gson
+            // all to linked tree maps - if the json decoder changes from gson
             // this will probably need to change too
             encodedParams[i] = CodecUtils.toJson(encodedParams[i]);
           }
