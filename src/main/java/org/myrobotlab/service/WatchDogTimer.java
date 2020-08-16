@@ -82,14 +82,14 @@ public class WatchDogTimer extends Service {
             // see if we should additionally fire a message
             for (Message action : actions) {
               log.info("watchdog {} apply corrective action {}", parent.getName(), action);
-              action.historyList.clear();
+              action.clearHops();
               action.msgId = System.currentTimeMillis();
               parent.send(action);
             }
 
             for (Message globalAction : globalActions) {
               log.info("watchdog {} apply corrective global action {}", parent.getName(), globalAction);
-              globalAction.historyList.clear();
+              globalAction.clearHops();
               globalAction.msgId = System.currentTimeMillis();
               parent.send(globalAction);
             }

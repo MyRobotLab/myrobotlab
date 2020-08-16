@@ -53,7 +53,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 /**
@@ -185,7 +184,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-
   String address = "0.0.0.0";
 
   boolean autoStartBrowser = true;
@@ -249,7 +247,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * is fixed I'm leaving it in broadcastMode
    * 
    */
-  private boolean broadcastMode = true;
+  private boolean broadcastMode = false;
 
   protected int maxMsgSize = 1048576;
 
@@ -546,7 +544,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return relays;
   }
 
-  protected void setBroadcaster(String apiKey, AtmosphereResource r) {
+  protected void setBroadcaster(AtmosphereResource r) {
     // FIXME - maintain single broadcaster for each session ?
     String uuid = r.uuid();
 
@@ -579,6 +577,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       String apiKey = getApiKey(r.getRequest().getRequestURI());
 
+      // the mrl "id" of the client
+      String id = r.getRequest().getParameter("id");
+
       if (!CodecUtils.API_SERVICE.equals(apiKey) && !CodecUtils.API_MESSAGES.equals(apiKey)) {
         // NOT A VALID API - send what we support - we're done...
         OutputStream out = r.getResponse().getOutputStream();
@@ -593,7 +594,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         r.suspend();
         // FIXME - needed ?? - we use BroadcastFactory now !
-        setBroadcaster(apiKey, r);
+        setBroadcaster(r);
       }
 
       // default return encoding
@@ -620,7 +621,15 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       MethodCache cache = MethodCache.getInstance();
 
+      // important persistent connections will have associated routes ...
+      // http/api/service requests (not persistent connections) will not
+      // (neither will udp)
       if (newPersistentConnection && apiKey.equals(CodecUtils.API_MESSAGES)) {
+
+        
+        // NEW AND IMPORTANT ! - create a route entry for this "ID" !!!
+        Runtime.updateRoute(id, uuid);
+
         // new connection with messages api means we want to send a
         // getHelloResponse(hello) to the "NEW" client - we can do it because
         // its only 1 hop away and the outstream is connected to it
@@ -665,6 +674,28 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Message msg = null;
         try {
           msg = CodecUtils.fromJson(bodyData, Message.class);
+          
+          /**
+           * ======================================================================
+           * DYNAMIC ROUTE TABLE - Incoming messages will (must) have a identifier
+           * bound with the connection. The sender's id is put into the route table
+           * with connection information.
+           */
+          Runtime.updateRoute(msg.getSrcId(), uuid);
+
+          if (msg.containsHop(getId())) {
+            log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
+            return;
+          }
+
+          // add our id - we don't want to see it again
+          msg.addHop(getId());
+
+          /**
+           * ======================================================================
+           */
+
+          
         } catch (Exception e) {
           error(e);
           return;
@@ -744,7 +775,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // msg came is and is NOT local - we will attempt to route it on its
           // way by sending it to send(msg)
           // RELAY !!!
-          log.info("<-- RELAY {} to {} from {}", msg.msgId, msg.name, msg.sender);
+          log.info("GATEWAY {} RELAY {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
           send(msg);
         }
       }
@@ -762,6 +793,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     Map<String, Object> attributes = new HashMap<>();
     String uuid = r.uuid();
     Runtime runtime = Runtime.getInstance();
+
+    // The all important mrl id
+    // this is the route table - this field should be
+    // indexed !
+    String id = r.getRequest().getParameter("id");
+    attributes.put("id", id);
+
     if (!runtime.connectionExists(r.uuid())) {
       r.addEventListener(onDisconnect);
       AtmosphereRequest request = r.getRequest();
@@ -920,10 +958,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // subscribe(si.getName(), "publishState");
     // for distributed Runtimes
     /*
-    if (si.isRuntime()) {
-      subscribe(si.getName(), "registered");
-    }
-    */
+     * if (si.isRuntime()) { subscribe(si.getName(), "registered"); }
+     */
 
     invoke("publishPanel", r.getName());
   }
@@ -937,7 +973,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     if (panels == null) {
       return null;
     }
-    
+
     Panel panel = null;
     if (panels.containsKey(panelName)) {
       panel = panels.get(panelName);
@@ -1022,6 +1058,19 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   @Override
   public void sendRemote(Message msg) {
     try {
+
+      /**
+       * ======================================================================
+       * DYNAMIC ROUTE TABLE - outbound msg hop starts now
+       */
+
+      // add our id - we don't want to see it again
+      msg.addHop(getId());
+
+      /**
+       * ======================================================================
+       */
+
       String json = CodecUtils.toJson(msg);
       if (json.length() > maxMsgSize) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
@@ -1217,7 +1266,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         return;
       }
 
-      
       for (int i = 0; i < 1000; ++i) {
         webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }
@@ -1300,11 +1348,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       log.error("could not get connection for this uuid {}", toUuid);
       return null;
     }
-
     broadcast(toUuid, CodecUtils.toJson(msg));
-
     // FIXME !!! implement !!
     return null;
   }
-
 }
