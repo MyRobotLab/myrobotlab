@@ -428,7 +428,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
 
       System.out.println("exiting " + clientId);
       done = true;
-      // System.exit(0);
+      System.exit(0);
     }
 
     if (socket != null) {

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -80,8 +79,6 @@ import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 /**
  * FIXME - AVOID STATIC FIELDS - THE ONLY STATIC FIELD SHOULD BE THE INSTANCE
@@ -1271,15 +1268,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         invokeCommands(options.invoke);
       }
 
-      if (options.install == null && (options.interactive || !options.spawnedFromAgent)) {
-        log.info("====interactive mode==== -> interactive {} spawnedFromAgent {}", options.interactive, options.spawnedFromAgent);
+      if (options.install == null && (!options.spawnedFromAgent)) {
+        log.info("====interactive mode==== -> spawnedFromAgent {}",options.spawnedFromAgent);
         getInstance().startInteractiveMode();
       }
       
       if (options.autoUpdate) {
         // initialize
-        Updater.getUpdater(args);
-        Updater.start();
+        // FIXME - use peer ?
+        Updater.main(args);
       }
 
     } catch (Exception e) {
@@ -3429,6 +3426,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public static MetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
+  }
+
+  public static boolean exists() {
+    return runtime != null;
   }
 
 }

@@ -65,8 +65,10 @@ public class CmdOptions {
   public boolean print = false;
   
   // deprecated ??? - only interaction is on a network now ???
+  /*
   @Option(names = { "--interactive" }, description = "starts in interactive mode - reading from stdin")
   public boolean interactive = false;
+  */
 
   @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
   public boolean spawnedFromAgent = false;
@@ -102,7 +104,7 @@ public class CmdOptions {
   public String logLevel = "info";
 
   @Option(names = { "-i",
-      "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {MetaData} installs dependencies for a specific service")
+      "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {serviceType} installs dependencies for a specific service, if no type is specified then all services are installed")
   public String install[];
 
   @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
@@ -117,9 +119,5 @@ public class CmdOptions {
 
   @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
   public boolean extractResources = false;
-
-  // launcher
-  @Option(names = {"--inherit-io" }, description = "inherit the io streams from the spawned process - default false")
-  public boolean inheritIO = false;
 
 }

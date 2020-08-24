@@ -38,7 +38,7 @@ public class Launcher {
   static Process process = null;
   
   // location of repo - is target (as maven expects output)
-  static final public String REPO_LOCATION = "target";
+  static final public String TARGET_LOCATION = "target";
 
   private static File NULL_FILE = new File((System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null"));
 
@@ -81,18 +81,21 @@ public class Launcher {
 
     builder.directory(spawnDir);
 
-    StringBuilder spawning = new StringBuilder();
-    for (String c : cmdLine) {
-      spawning.append(c);
-      spawning.append(" ");
-    }
-
-    log.info("SPAWNING ! -->{}$ \n{}", cwd, spawning);
+    log.info("SPAWNING ! -->{}$ \n{}", cwd, toString(cmdLine));
 
     // environment variables setup
     setEnv(builder.environment());
 
     return builder;
+  }
+
+  private static String toString(String[] cmdLine) {
+    StringBuilder spawning = new StringBuilder();
+    for (String c : cmdLine) {
+      spawning.append(c);
+      spawning.append(" ");
+    }
+    return spawning.toString();
   }
 
   /**
@@ -256,7 +259,7 @@ public class Launcher {
 
     String[] cmdLine = cmd.toArray(new String[cmd.size()]);
 
-    log.info("spawn {}", Arrays.toString(cmdLine));
+    log.info("spawn {}", toString(cmdLine));
 
     return cmdLine;
 
@@ -277,7 +280,7 @@ public class Launcher {
   public static Set<String> getLocalVersions() {
     Set<String> versions = new TreeSet<>();
     // get local file system versions
-    File branchDir = new File(REPO_LOCATION);
+    File branchDir = new File(TARGET_LOCATION);
     // get local existing versions
     File[] listOfFiles = branchDir.listFiles();
     for (int i = 0; i < listOfFiles.length; ++i) {
@@ -381,11 +384,11 @@ public class Launcher {
         socket.close();
         instanceAlreadyRunning = true;
       } catch(Exception e) {
-        log.info("could not connect to {}, will spawn new instance", options.client);
+        log.info("could not connect to {}", options.client);
       }
       
       if (!instanceAlreadyRunning && !options.print && options.client.equals(options.DEFAULT_CLIENT)) {
-
+        log.info("spawning new instance");
         // process the incoming args into spawn args
         String[] cmdLine = createSpawnArgs(args);
 
