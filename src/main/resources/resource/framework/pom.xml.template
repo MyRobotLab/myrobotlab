@@ -264,6 +264,7 @@
           <version>3.0.1</version>
           <executions>
               <execution>
+                  <phase>initialize</phase>
                   <id>get-the-git-infos</id>
                   <goals>
                       <goal>revision</goal>
@@ -276,7 +277,7 @@
               <verbose>false</verbose>
               <generateGitPropertiesFile>true</generateGitPropertiesFile>
               <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <format>json</format>
+              <!-- format>json</format -->
               <gitDescribe>
                   <skip>false</skip>
                   <always>false</always>
