@@ -205,7 +205,7 @@ public class Platform implements Serializable {
         gitProp = gitProps.getProperty("git.commit.id");
         platform.commit = (gitProp != null) ? gitProp : platform.commit;
         if (platform.commit != null) {
-          platform.shortCommit = platform.commit.substring(40 -7);
+          platform.shortCommit = platform.commit.substring(0,7);
         }
 
         gitProp = gitProps.getProperty("git.build.time");

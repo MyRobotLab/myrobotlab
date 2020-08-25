@@ -279,8 +279,6 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
 
   private transient Thread worker = null;
 
-  private RevCommit commit;
-
   private Boolean offline = false;
 
   public synchronized void start() {
@@ -382,7 +380,7 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
         // compare with current version
         // do callbacks if we have an update
 
-        boolean isSrcMode = new File("src").exists(); // FIXME !!! - the .git dir
+        boolean isSrcMode = new File(".git").exists();
         log.info("{} mode checking for updates", (isSrcMode?"SOURCE":"BINARY"));
         
         if (isSrcMode) {
@@ -391,19 +389,15 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
           String branch = Git.getBranch();
           log.info("current source branch is \"{}\"", branch);
           
-          commit = Git.pull(branch);
+          int commitsBehind = Git.pull(branch);
 
           if (gitProps == null) {
             log.info("target/classes/git.properties does not exist - will build");
             makeBuild = true;
           } else {
-            String buildCommit = (String)gitProps.get("git.commit.id");
-            log.info("build {}", buildCommit);
-            log.info("repo  {}", commit.getName());
             // compare last built commit with current commit?
-            if (commit.getName().equals(buildCommit)) {
-              log.info("match - skipping build");
-            } else {
+             if (commitsBehind > 0){
+              log.info("local \"{}\" is behind by {} commits", branch, commitsBehind);
               log.info("build and repo do not match - build required");
               makeBuild = true;
             }
@@ -412,8 +406,11 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
           if (makeBuild) {
             // FIXME - download mvn if it doesnt exist ??
             
+            // remove git properties before compile
+            Git.removeProps();
+            
             // FIXME - compile or package mode ! 
-            Builder.mvn(cwd, branch, "compile", (long)commit.getCommitTime(), offline );
+            Builder.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline );
             offline = true;
             
             // package 

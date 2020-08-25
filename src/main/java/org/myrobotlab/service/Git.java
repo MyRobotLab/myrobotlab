@@ -3,7 +3,6 @@ package org.myrobotlab.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,12 +11,12 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
@@ -194,12 +193,12 @@ public class Git extends Service {
     purgeTasks();
   }
 
-  static public RevCommit pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+  static public int pull() throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
       RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, null);
   }
 
-  static public RevCommit pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
+  static public int pull(String branch) throws WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException, CanceledException,
       RefNotFoundException, NoHeadException, TransportException, IOException, GitAPIException {
     return pull(null, branch);
   }
@@ -225,8 +224,8 @@ public class Git extends Service {
     return git;
   }
 
-  static public RevCommit pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException,
-      InvalidRemoteException, CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
+  static public int pull(String src, String branch) throws IOException, WrongRepositoryStateException, InvalidConfigurationException, DetachedHeadException, InvalidRemoteException,
+      CanceledException, RefNotFoundException, NoHeadException, TransportException, GitAPIException {
 
     if (src == null) {
       src = System.getProperty("user.dir");
@@ -244,20 +243,16 @@ public class Git extends Service {
 
     org.eclipse.jgit.api.Git git = null;
     Repository repo = null;
-  
-    // Open an existing repository
+
+    // Open an existing repository FIXME Try Git.open(dir)
     String gitDir = repoParentFolder.getAbsolutePath() + "/.git";
     repo = new FileRepositoryBuilder().setGitDir(new File(gitDir)).build();
     git = new org.eclipse.jgit.api.Git(repo);
 
     repo = git.getRepository();
-    // git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/"
-    // + branch).call();
     git.branchCreate().setForce(true).setName(branch).setStartPoint(branch).call();
     git.checkout().setName(branch).call();
 
-    // FIXME - if auto-update or auto-fetch ie .. remote allowed and cache
-    // remote changes
     git.fetch().setProgressMonitor(monitor).call();
 
     List<RevCommit> localLogs = getLogs(git, "origin/" + branch, 1);
@@ -267,18 +262,20 @@ public class Git extends Service {
     RevCommit remoteCommit = remoteLogs.get(0);
 
     BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
+    
+    // FIXME - Git.close() file handles
 
-    // if (localCommit.getCommitTime() < remoteCommit.getCommitTime()) {
     if (status.getBehindCount() > 0) {
-      log.info("local ts {}, remote {} - {} updating", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
+      log.info("local ts {}, remote {} - {} pulling", localCommit.getCommitTime(), remoteCommit.getCommitTime(), remoteCommit.getFullMessage());
       PullCommand pullCmd = git.pull();
       pullCmd.setProgressMonitor(monitor);
       pullCmd.call();
-      return remoteCommit;
-    } else {
-      log.info("no new commits on branch {}", branch);
+      git.close();
+      return status.getBehindCount();
     }
-    return localCommit;
+    log.info("no new commits on branch {}", branch);
+    git.close();
+    return 0;
   }
 
   static public Properties getProperties() {
@@ -290,7 +287,7 @@ public class Git extends Service {
         log.info("git loading properties from jar {}", rootOfClass);
         properties.load(Git.class.getResourceAsStream("/git.properties"));
       } else {
-        
+
         // get from file system
         String path = FileIO.gluePaths(rootOfClass, "git.properties");
         File check = new File(path);
@@ -298,7 +295,7 @@ public class Git extends Service {
           log.info("git.properties does not exist");
           return null;
         }
-        log.info("git loading from file {}", path);        
+        log.info("git loading from file {}", path);
         properties.load(new FileInputStream(path));
       }
       return properties;
@@ -308,12 +305,26 @@ public class Git extends Service {
     return null;
   }
 
+  static public void init() throws IllegalStateException, GitAPIException {
+    init(null);
+  }
+
+  static public void init(String directory) throws IllegalStateException, GitAPIException {
+    if (directory == null) {
+      directory = System.getProperty("user.dir");
+    }
+    File dir = new File(directory);
+    log.info("git init {}", dir);
+    org.eclipse.jgit.api.Git git = org.eclipse.jgit.api.Git.init().setDirectory(dir).call();
+  }
+
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
 
       Properties properties = Git.getProperties();
+      Git.removeProps();
       log.info("{}", properties);
 
       /*
@@ -349,6 +360,20 @@ public class Git extends Service {
     org.eclipse.jgit.api.Git git = getGit(src);
     Status status = git.status().call();
     return status;
+  }
+
+  public static void removeProps() {
+    removeProps(null);
+  }
+
+  public static void removeProps(String rootFolder) {
+    if (rootFolder == null) {
+      rootFolder = System.getProperty("user.dir");
+    }
+
+    File props = new File(rootFolder + File.separator + "target" + File.separator + "classes" + File.separator + "git.properties");
+    props.delete();
+
   }
 
 }
