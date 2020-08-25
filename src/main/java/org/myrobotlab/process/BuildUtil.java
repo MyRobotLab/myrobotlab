@@ -16,7 +16,6 @@ public class BuildUtil implements Runnable {
   public static void getManifest() {
   }
   
-
   @Override
   public void run() {
     // TODO Auto-generated method stub
@@ -56,12 +55,10 @@ public class BuildUtil implements Runnable {
       // what version ????
       // /archive/target/version.xml /txt/json/manifest ?
       
-      
       new CommandLine(builder).parseArgs(new String[] {});
       
       // download jar from branch
-      System.out.println("================= AHOY !!!!! =================");
-      
+      System.out.println("================= AHOY !!!!! =================");      
       
     } catch (Exception e) {
       log.error("main threw", e);
