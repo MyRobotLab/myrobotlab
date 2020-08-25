@@ -14,7 +14,6 @@ public class BuildUtil implements Runnable {
   public final static Logger log = LoggerFactory.getLogger(BuildUtil.class);
   
   public static void getManifest() {
-    
   }
   
 
