@@ -2304,9 +2304,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // create builder from Launcher
       ProcessBuilder pb = Launcher.createBuilder(spawnCmd);
 
-      pb.redirectErrorStream(true);
-      pb.redirectOutput(Launcher.NULL_FILE);
-
       // fire it off
       Process restarted = pb.start();
 

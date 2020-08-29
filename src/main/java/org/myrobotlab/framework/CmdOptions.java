@@ -62,8 +62,8 @@ public class CmdOptions {
   public boolean noLauncherClient = false;
 
   // launcher
-  @Option(names = { "-p","--print" }, description = "print command line instead of spawning instance")
-  public boolean print = false;
+  @Option(names = { "--std-out" }, description = "when spawning save the results of the launch in a file \"std.out\"")
+  public boolean stdout = false;
 
   // launcher
   // @Option(names = { "-s","--start-in-launcher" }, description = "starts the initial/only runtime in the launcher process")

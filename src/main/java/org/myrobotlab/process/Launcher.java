@@ -41,13 +41,17 @@ public class Launcher {
   static final public String TARGET_LOCATION = "target";
 
   public static File NULL_FILE = new File((System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null"));
-  // public static File NULL_FILE = new File("myrobotlab.log");
+  public static File STD_OUT = new File("std.out");
 
   static public ProcessBuilder createBuilder(String cwd, String[] cmdLine) throws IOException {
     return createBuilder(cwd, new ArrayList<String>(Arrays.asList(cmdLine)));
   }
 
   static public ProcessBuilder createBuilder(String cwd, List<String> cmdLine) throws IOException {
+    
+    CmdOptions options = new CmdOptions();
+    new CommandLine(options).parseArgs(toArray(cmdLine));
+
 
     // FIXME - reporting from different levels .. one is stdout the other is the
     // os before this
@@ -61,7 +65,11 @@ public class Launcher {
     builder.redirectErrorStream(true);
 
     // builder.redirectOutput(new File("stdout.txt"));
-    builder.redirectOutput(NULL_FILE);
+    if (options.stdout) {
+      builder.redirectOutput(STD_OUT);      
+    } else {
+      builder.redirectOutput(NULL_FILE);
+    }
 
     // setting working directory to wherever the jar is...
 
@@ -77,6 +85,14 @@ public class Launcher {
     setEnv(builder.environment());
 
     return builder;
+  }
+  
+  public static String[] toArray(List<String> list) {
+    return list.toArray(new String[list.size()]);
+  }
+
+  public static List<String> toList(String[] array) {
+    return new ArrayList<String>(Arrays.asList(array));
   }
 
   public static String toString(List<String> cmdLine) {
@@ -172,11 +188,6 @@ public class Launcher {
     // 3. myrobotlab.jar (normal package)
 
     String classpath = "target" + fs + "classes" + ps + "target" + fs + "myrobotlab.jar" + ps + "myrobotlab.jar" + ps + ("libraries" + fs + "jar" + fs + "*");
-    // String classpath = String.format(cpTemplate, jarPath, ps, libraries,
-    // ps, libraries, ps, ps);
-    if (platform.isWindows()) {
-      classpath = classpath.replace("/", "\\");
-    }
     cmd.add(classpath);
 
     // main class
@@ -388,7 +399,7 @@ public class Launcher {
         return;
       }
 
-      if (!instanceAlreadyRunning && !options.print && options.connect.equals(options.DEFAULT_CLIENT)) {
+      if (!instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CLIENT)) {
         log.info("spawning new instance");
         // process the incoming args into spawn args
         List<String> spawnArgs = createSpawnArgs(args);
@@ -417,7 +428,7 @@ public class Launcher {
   }
 
   public static ProcessBuilder createBuilder(String[] args) throws IOException {
-    return createBuilder(null, new ArrayList<String>(Arrays.asList(args)));
+    return createBuilder(null, toList(args));
   }
 
   public static ProcessBuilder createBuilder(List<String> args) throws IOException {
