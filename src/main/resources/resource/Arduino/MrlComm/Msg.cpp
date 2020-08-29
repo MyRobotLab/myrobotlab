@@ -84,8 +84,8 @@ Msg* Msg::getInstance() {
   void i2cWrite( byte deviceId,  byte deviceAddress,  byte dataSize, const byte*data);
   // > i2cWriteRead/deviceId/deviceAddress/readSize/writeValue
   void i2cWriteRead( byte deviceId,  byte deviceAddress,  byte readSize,  byte writeValue);
-  // > neoPixelAttach/deviceId/pin/b32 numPixels
-  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels);
+  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
+  void neoPixelAttach( byte deviceId,  byte pin,  long numPixels,  byte depth);
   // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
   void neoPixelSetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  int speed);
   // > neoPixelWriteMatrix/deviceId/[] buffer
@@ -387,7 +387,9 @@ void Msg::processCommand() {
       startPos += 1;
       long numPixels = b32(ioCmd, startPos+1);
       startPos += 4; //b32
-      mrlComm->neoPixelAttach( deviceId,  pin,  numPixels);
+      byte depth = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixelAttach( deviceId,  pin,  numPixels,  depth);
       break;
 	}
   case NEO_PIXEL_SET_ANIMATION: { // neoPixelSetAnimation
