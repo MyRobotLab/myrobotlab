@@ -53,16 +53,22 @@ public class CmdOptions {
   public final String DEFAULT_CLIENT = "http://localhost:8888"; 
 
   // launcher
-  @Option(names = { "-c", "--client" }, description = "connect to another mrl instance - default is " + DEFAULT_CLIENT)
-  public String client = DEFAULT_CLIENT;
-  
+  @Option(names = { "-c", "--connect" }, arity = "0..1", fallbackValue = DEFAULT_CLIENT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CLIENT)
+  public String connect = null;
+   
   // launcher
   @Option(names = {
       "--no-client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
-  public boolean noClient = false;
+  public boolean noLauncherClient = false;
 
+  // launcher
   @Option(names = { "-p","--print" }, description = "print command line instead of spawning instance")
   public boolean print = false;
+
+  // launcher
+  // @Option(names = { "-s","--start-in-launcher" }, description = "starts the initial/only runtime in the launcher process")
+  // public boolean startInLauncher = false;
+
   
   // deprecated ??? - only interaction is on a network now ???
   /*
@@ -70,8 +76,9 @@ public class CmdOptions {
   public boolean interactive = false;
   */
 
+  // FIXME - change to spawned-from-launcher...
   @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
-  public boolean spawnedFromAgent = false;
+  public boolean spawnedFromLauncher = false;
 
   @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
   public boolean help = false;

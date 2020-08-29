@@ -1251,7 +1251,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "intro", "Intro"});
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      Runtime.main(new String[] {"--id", "admin" });
 
       Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1261,6 +1261,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();
 
+      // Runtime runtime = Runtime.getInstance();
+      // runtime.restart();
+      
       boolean done = true;
       if (done) {
         return;

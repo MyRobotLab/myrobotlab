@@ -97,12 +97,8 @@ Create a new service
                             <tr ng-repeat="c in connectionList">
                                 <td>
                                     <img ng-src="{{'/' + c['c-type'] + '.png'}}" width="18"/>{{c['c-type']}}                                
-                                
-                                
-                                
-                                
                                 </td>
-                                <td>{{c.gateway}}</td>
+                                <td>gw {{c.gateway}}</td>
                                 <td>{{c.uuid}}</td>
                             </tr>
                         </table>

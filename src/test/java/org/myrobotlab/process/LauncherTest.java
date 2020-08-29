@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -43,6 +44,8 @@ public class LauncherTest extends AbstractTest {
   @Test
   public void test() throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
 
+    Launcher.main(new String[] {"--no-client", "-c", "-s", "runtime", "Runtime"});    
+    
     String help = Launcher.mainHelp();
 
     assertTrue(help.contains("-s") && help.contains("--service") && help.contains("-i"));
@@ -51,11 +54,10 @@ public class LauncherTest extends AbstractTest {
     // spawn)
     ProcessBuilder pb = null;
     Process p = null;
-    String[] spawnArgs = null;
 
     // default
-    spawnArgs = Launcher.createSpawnArgs(new String[] {});
-    log.warn("spawn \n{}\n", toString(spawnArgs));
+    List<String> spawnArgs = Launcher.createSpawnArgs(new String[] {});
+    log.warn("spawn \n{}\n", Launcher.toString(spawnArgs));
 
     try {
       pb = Launcher.createBuilder(null, spawnArgs);

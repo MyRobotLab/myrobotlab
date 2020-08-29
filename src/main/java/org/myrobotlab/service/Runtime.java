@@ -68,7 +68,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.HttpRequest;
-import org.myrobotlab.process.Updater;
+import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.Gateway;
@@ -765,13 +765,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         String m = StringUtil.bytesToHex(mac);
         log.info("mac address : {}", m);
-
-        /*
-         * StringBuilder sb = new StringBuilder(); for (int i = 0; i <
-         * mac.length; i++) { sb.append(String.format("%02X%s", mac[i], (i <
-         * mac.length - 1) ? "-" : "")); }
-         */
-
         ret.add(m);
         log.info("added mac");
       }
@@ -1268,11 +1261,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         invokeCommands(options.invoke);
       }
 
-      if (options.install == null && (!options.spawnedFromAgent)) {
-        log.info("====interactive mode==== -> spawnedFromAgent {}",options.spawnedFromAgent);
+      if (options.install == null && (!options.spawnedFromLauncher)) {
+        log.info("====interactive mode==== -> spawnedFromAgent {}", options.spawnedFromLauncher);
         getInstance().startInteractiveMode();
       }
-      
+
       if (options.autoUpdate) {
         // initialize
         // FIXME - use peer ?
@@ -1623,10 +1616,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static InProcessCli stdInClient = null;
 
   public void connect() throws IOException {
-    connect(options.client);
+    connect(options.connect);
   }
 
-  // FIXME - implement ! also implement the callback events  .. onDisconnect
+  // FIXME - implement ! also implement the callback events .. onDisconnect
   public void disconnect() throws IOException {
     // connect("admin", "ws://localhost:8887/api/messages");
   }
@@ -1662,55 +1655,67 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return stdInClient.process(cmd);
   }
+  
+  // FIXME - implement
+  public void autoConnect(String url) {
+    
+  }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
+  // FIXME - RETRIES TIMEOUTS OTHER COMPLEXITIES
+  // blocking connect - consider a non-blocking thread connect ... e.g. autoConnect
   @Override
-  public void connect(String url) throws IOException {
-    
-    if (!url.contains("api/messages")) {
-      url += "/api/messages";
-    }
-    
-    if (!url.contains("id=")) {
-      url += "?id=" + getId();
-    }
+  public void connect(String url) {
+      try {
+        if (!url.contains("api/messages")) {
+          url += "/api/messages";
+        }
 
-    clientRemote.addResponseHandler(this); // FIXME - only needs to be done once
-                                           // on client creation?
+        if (!url.contains("id=")) {
+          url += "?id=" + getId();
+        }
 
-    UUID uuid = java.util.UUID.randomUUID();
-    Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
+        clientRemote.addResponseHandler(this); // FIXME - only needs to be done
+                                               // once
+                                               // on client creation?
 
-    // TODO - filter this message's serviceList according as desired
-    Message msg = getDefaultMsg(uuid.toString());
-    // put as many attribs as possible in
-    Map<String, Object> attributes = new HashMap<String, Object>();
+        UUID uuid = java.util.UUID.randomUUID();
+        Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
 
-    // required data
-    // attributes.put("id", getId());
-    attributes.put("gateway", getFullName("runtime"));
-    attributes.put("uuid", uuid);
+        // TODO - filter this message's serviceList according as desired
+        Message msg = getDefaultMsg(uuid.toString());
+        // put as many attribs as possible in
+        Map<String, Object> attributes = new HashMap<String, Object>();
 
-    // connection specific
-    attributes.put("c-type", "Runtime");
-    attributes.put("c-endpoint", endpoint);
+        // required data
+        // attributes.put("id", getId());
+        attributes.put("gateway", getFullName("runtime"));
+        attributes.put("uuid", uuid);
 
-    // cli specific
-    attributes.put("cwd", "/");
-    attributes.put("url", url);
-    attributes.put("uri", url); // not really correct
-    attributes.put("user", "root");
-    attributes.put("host", "local");
+        // connection specific
+        attributes.put("c-type", "Runtime");
+        attributes.put("c-endpoint", endpoint);
 
-    // addendum
-    attributes.put("User-Agent", "runtime-client");
+        // cli specific
+        attributes.put("cwd", "/");
+        attributes.put("url", url);
+        attributes.put("uri", url); // not really correct
+        attributes.put("user", "root");
+        attributes.put("host", "local");
 
-    Runtime.getInstance().addConnection(uuid.toString(), attributes);
+        // addendum
+        attributes.put("User-Agent", "runtime-client");
 
-    // send getHelloResponse
-    clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
+        Runtime.getInstance().addConnection(uuid.toString(), attributes);
+
+        // send getHelloResponse
+        clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
+
+      } catch (Exception e) {
+        log.error("connect to {} giving up {}", url, e.getMessage());
+      }
   }
 
   /**
@@ -1741,7 +1746,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
       // xxx debug
-      log.error("==> {} --to--> {}.{}",msg.sender, msg.name, msg.method);
+      log.error("==> {} --to--> {}.{}", msg.sender, msg.name, msg.method);
       msg.setProperty("uuid", uuid); // Properties ???? REMOVE ???
 
       /**
@@ -1751,7 +1756,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
        * with connection information.
        */
       updateRoute(msg.getSrcId(), uuid);
-      
+
       if (msg.containsHop(getId())) {
         log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{} | {}", getName(), msg.sender, msg.name, msg.method, msg.getHops());
         return;
@@ -1850,8 +1855,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return createAndStart(name, type);
   }
 
-  
-
   public Runtime(String n, String id) {
     super(n, id);
 
@@ -1867,19 +1870,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
 
-        if (options.spawnedFromAgent) {
-
-          /**
-           * FIXME - make work try { log.info("attempting to connect to local
-           * agent"); runtime.connect(); } catch (IOException e) {
-           * log.warn("could not connect to agent"); }
-           */
+        // keep our normal main's easy to debug
+        // this is a flag to make Runtime aware its been launched by the
+        // launcher
+        if (options.spawnedFromLauncher) {
+          connect(options.connect);
         }
 
         if (options == null) {
           options = new CmdOptions();
         }
-
       }
     }
 
@@ -2267,9 +2267,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * FIXME - need to extend - communication to Agent ??? process request restart
-   * ???
-   *
    * restart occurs after applying updates - user or config data needs to be
    * examined and see if its an appropriate time to restart - if it is the
    * spawnBootstrap method will be called and bootstrap.jar will go through its
@@ -2279,46 +2276,51 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     try {
       info("restarting");
 
-      // FIXME - send original command line ..
-      // FIXME - SEND ***ID*** !!!!
-      // just send a restart msg to the Agent process
-      // FIXME - perhaps a "rename" is more safe .. since the file is complete
-      // ...
-      // FIXME - perhaps an idea worth investigating - inter-process file-system
-      // queues
-      // each process must have its own directory or file name type
-      // id.ts.{serviceName}.json
-      // 14604@ctnal0043108539.agent.1500211865673.json
-      // ctnal0043108539.14604.agent.1500211865673.json
-      // in this case however - the spawned process does not know the agents id
-      // agent.1500211865673.json
+      // export to file lastRestart.py
+      exportAll("lastRestart.py");
 
-      Message msg = Message.createMessage(getName(), "agent", "restart", platform.getId());
-      FileIO.toFile(String.format("msgs/agent.%d.part", msg.msgId), CodecUtils.toJson(msg));
-      File partFile = new File(String.format("msgs/agent.%d.part", msg.msgId));
-      File json = new File(String.format("msgs/agent.%d.json", msg.msgId));
-      partFile.renameTo(json);
-      
-      /**
-       * most robust way to restart
-       * 1. check if currently connected to an existing agent  
-       * 2. if no agent - copy jar so no process file locking will occur myrobotlab.jar -> myrobotlab.agent-{version}.jar
-       */
-      // 
-      //  
+      // shutdown all services process - send ready to shutdown - ask back
+      // release all services
+      for (ServiceInterface service : getServices()) {
+        service.preShutdown();
+      }
 
-      // TODO - timeout release .releaseAll nice ? - check or re-implement
-      // Runtime.releaseAll();
-      // Bootstrap.spawn(args.toArray(new String[args.size()]));
-      // System.exit(0);
+      // check if ready ???
 
-      // i've sent a message to the agent which controls me to kill me
-      // and start again.. if the agent does not kill me i can only assume
-      // the agent is lost, so i will commit suicide in 3 seconds
-      sleep(3000);
-      log.error("the agent did not kill me ! .. but I will take my cyanide pill .. goodbye ...");
+      // release all local services
+      releaseAll();
+
+      // append restart script if not there
+      int size = args.size();
+      if (size > 2 && !args.get(size - 1).equals("lastRestart.py")) {
+        args.add("-I");
+        args.add("execFile");
+        args.add("lastRestart.py");
+      }
+
+      // form command line from Launcher
+      List<String> spawnCmd = Launcher.createSpawnArgs(args);
+
+      // create builder from Launcher
+      ProcessBuilder pb = Launcher.createBuilder(spawnCmd);
+
+      pb.redirectErrorStream(true);
+      pb.redirectOutput(Launcher.NULL_FILE);
+
+      // fire it off
+      Process restarted = pb.start();
+
+      // dramatic pause
+      sleep(2000);
+
+      // check if process exists
+      if (restarted.isAlive()) {
+        log.info("yay! we continue to live in future generations !");
+      } else {
+        log.error("omg! ... I killed all the services and now there is no offspring ! :(");
+      }
+      log.error("goodbye ...");
       shutdown();
-      // shutdown / exit
     } catch (Exception e) {
       log.error("shutdown threw", e);
     }
@@ -3075,6 +3077,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // organized by process id
     for (String uuid : connections.keySet()) {
       Map<String, Object> c = connections.get(uuid);
+      if (c.get("id") == null) {
+        continue;
+      }
       String id = c.get("id").toString();
 
       List<Map<String, String>> conns = null;
@@ -3352,8 +3357,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // add our id - we don't want to see it again
       msg.addHop(getId());
-      
-      log.error("<== {} --to--> {}.{}",msg.sender, msg.name, msg.method);
+
+      log.error("<== {} --to--> {}.{}", msg.sender, msg.name, msg.method);
 
       /**
        * ======================================================================

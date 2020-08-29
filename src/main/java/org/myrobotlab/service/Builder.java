@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -11,9 +10,8 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Level;
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.slf4j.Logger;
 
 import picocli.CommandLine.Option;
@@ -28,6 +26,8 @@ public class Builder extends Service {
 
   static String currentVersion;
 
+  static boolean offline = false;
+
   // for AGENT used to sync to the latest via source and build
   @Option(names = { "--src", "--use-source" }, arity = "0..1", description = "use latest source")
   public String src;
@@ -40,20 +40,26 @@ public class Builder extends Service {
     return mvn(null, branch, phase, null, null);
   }
 
-  static public String mvn(String src, String branch, String phase, Long buildNumber, Boolean offline) {
+  static public String mvn(String src, String branch, String phase, Long buildNumber, Boolean off) {
+
+    String results = null;
+
     try {
-      
+
       // FIXME - check for pom.xml
-      // 
+      //
+      if (off != null) {
+        offline = off;
+      }
 
       if (src == null) {
         src = System.getProperty("user.dir");
       }
-      
+
       if (branch == null) {
         branch = "develop";
       }
-      
+
       if (phase == null) {
         phase = "package";
       }
@@ -68,7 +74,7 @@ public class Builder extends Service {
       if (snapshot.exists()) {
         snapshot.delete();
       }
-      
+
       if (buildNumber == null) {
         // epoch minute build time number
         buildNumber = System.currentTimeMillis() / 1000;
@@ -126,23 +132,44 @@ public class Builder extends Service {
       Map<String, String> envs = pb.environment();
       log.info("PATH={}", envs.get("PATH"));
 
+      File buildResults = new File("mvn-build.out");
+      if (buildResults.exists()) {
+        buildResults.delete();
+      }
+
       pb.directory(new File(src));
 
       // handle stderr as a direct pass through to System.err
       pb.redirectErrorStream(true);
-      // pb.environment().putAll(System.getenv());      
+      // pb.environment().putAll(System.getenv());
       // pb.redirectOutput(new File("blah"));
-      
-      pb.inheritIO().start().waitFor();
+      pb.redirectOutput(buildResults);
+      // pb.inheritIO().start().waitFor();
+      Process process = pb.start();
+      int retCode = process.waitFor();
+      if (retCode != 0) {
+        log.error("process terminated with {} return code", retCode);
+      }
 
-      // FIXME LOOK FOR --> "BUILD FAILURE"
+      if (buildResults.exists()) {
+        results = FileIO.toString(buildResults);
+        if (results != null && results.contains("BUILD SUCCESS")) {
+          log.info("BUILD SUCCESS");
+          // set next build in offline mode for faster builds
+          offline = true;
+        } else {
+          log.error("BUILD FAILURE");
+          log.error(results);
+          offline = false;
+        }
+      }
 
       String newJar = src + File.separator + "target" + File.separator + "myrobotlab.jar";
       /// String newJarLoc = getJarName(branch, version);
-      String finalName = "target" + File.separator + String.format("myrobotlab-%s-%s.jar", branch, version) ;
+      String finalName = "target" + File.separator + String.format("myrobotlab-%s-%s.jar", branch, version);
       File p = new File(newJar).getAbsoluteFile().getParentFile();
       p.mkdirs();
-      
+
       if (phase.equals("package")) {
         Files.move(Paths.get(newJar), Paths.get(finalName), StandardCopyOption.REPLACE_EXISTING);
       }
@@ -151,24 +178,24 @@ public class Builder extends Service {
     } catch (Exception e) {
       log.error("mvn threw ", e);
     }
-    return null;
+    return results;
   }
 
   public static void main(String[] args) {
     try {
-      
-      Builder builder = (Builder)Runtime.start("builder", "Builder");
-      builder.mvn("agent-removal", "package");
-      
+
+      Builder builder = (Builder) Runtime.start("builder", "Builder");
+      builder.mvn("agent-removal", "compile");
+      // builder.mvn("agent-removal", "package");
+
       // check for mvn
-        // download mvn (where ???)
-      
-      // build 
-      
-      // rename 
-      
+      // download mvn (where ???)
+
+      // build
+
+      // rename
+
       // provide info/reports
-      
 
       /**
        * <pre>

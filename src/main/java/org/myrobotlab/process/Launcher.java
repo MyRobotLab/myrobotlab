@@ -36,15 +36,21 @@ public class Launcher {
   public final static Logger log = LoggerFactory.getLogger(Launcher.class);
 
   static Process process = null;
-  
+
   // location of repo - is target (as maven expects output)
   static final public String TARGET_LOCATION = "target";
 
-  private static File NULL_FILE = new File((System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null"));
+  public static File NULL_FILE = new File((System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null"));
+  // public static File NULL_FILE = new File("myrobotlab.log");
 
   static public ProcessBuilder createBuilder(String cwd, String[] cmdLine) throws IOException {
-    
-    // FIXME - reporting from different levels .. one is stdout the other is the os before this
+    return createBuilder(cwd, new ArrayList<String>(Arrays.asList(cmdLine)));
+  }
+
+  static public ProcessBuilder createBuilder(String cwd, List<String> cmdLine) throws IOException {
+
+    // FIXME - reporting from different levels .. one is stdout the other is the
+    // os before this
     ProcessBuilder builder = new ProcessBuilder(cmdLine);
 
     // one of the nastiest bugs had to do with std out, or std err not
@@ -53,35 +59,19 @@ public class Launcher {
     // and be done with the whole silly issue
 
     builder.redirectErrorStream(true);
-    
+
     // builder.redirectOutput(new File("stdout.txt"));
     builder.redirectOutput(NULL_FILE);
 
     // setting working directory to wherever the jar is...
 
-    File spawnDir = null;
-
-    if (cwd == null) {
-      spawnDir = new File(System.getProperty("user.dir"));
-    } else {
-      spawnDir = new File(cwd);
+    File spawnDir = (cwd == null) ? new File(System.getProperty("user.dir")) : new File(cwd);
+    if (!spawnDir.exists() || !spawnDir.isDirectory()) {
+      log.error("{} not a directory", spawnDir.getAbsolutePath());
     }
-
-    // FIXME - will need to check all classpaths !!!
-    /* not applicable - now we have more jars and classes to look for ...
-    File checkJar = new File(spawnDir + File.separator + "myrobotlab.jar");
-    if (!checkJar.exists()) {
-      String error = String.format("%s does not exist", checkJar.getAbsolutePath());
-      log.error(error);
-      throw new IOException(error);
-    } else {
-      log.info("spawning in \n{}", spawnDir.getAbsolutePath());
-    }
-    */
 
     builder.directory(spawnDir);
-
-    log.info("SPAWNING ! -->{}$ \n{}", cwd, toString(cmdLine));
+    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmdLine));
 
     // environment variables setup
     setEnv(builder.environment());
@@ -89,13 +79,22 @@ public class Launcher {
     return builder;
   }
 
-  private static String toString(String[] cmdLine) {
+  public static String toString(List<String> cmdLine) {
+    return toString(cmdLine.toArray(new String[cmdLine.size()]));
+  }
+
+  public static String toString(String[] cmdLine) {
     StringBuilder spawning = new StringBuilder();
     for (String c : cmdLine) {
       spawning.append(c);
       spawning.append(" ");
     }
     return spawning.toString();
+  }
+
+  public static List<String> createSpawnArgs(List<String> args)
+      throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
+    return createSpawnArgs(args.toArray(new String[args.size()]));
   }
 
   /**
@@ -111,7 +110,7 @@ public class Launcher {
    * @throws IllegalAccessException
    * @throws ParseException
    */
-  public static String[] createSpawnArgs(String[] args)
+  public static List<String> createSpawnArgs(String[] args)
       throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException, ParseException {
 
     CmdOptions options = new CmdOptions();
@@ -123,8 +122,9 @@ public class Launcher {
       options.id = NameGenerator.getName();
     }
 
-    options.spawnedFromAgent = true;
+    options.spawnedFromLauncher = true;
 
+    // default service if non specified
     if (options.services.size() == 0) {
       options.services.add("webgui");
       options.services.add("WebGui");
@@ -134,10 +134,7 @@ public class Launcher {
       options.services.add("Python");
     }
 
-    //////////////////////////////////////////////
-    // this needs cmdLine
-    // String[] cmdLine = buildCmdLine(options);
-
+    // SETUP COMMAND !!!!!
     String fs = File.separator;
     String ps = File.pathSeparator;
 
@@ -167,24 +164,13 @@ public class Launcher {
 
     cmd.add("-cp");
 
-    // ./myrobotlab.jar (for runtime)
-    // target/???.jar ??? for pom build ?
-    // target/classes for class build (without packaging !!)
-    
-    // FIXME - if classes dir found use it ...
-    
-    // if target/classes found - do a pull of package dependencies to libraries 
-    // Runtime.install(serviceType);
-    // Repo.getInstance().install();
-    
     // classes cp first for newly built with builder
-    
     // Rules of classloading : first wins ...
-    // so highest priority 
+    // so highest priority
     // 1. target/classes (local builds)
     // 2. target/myrobotlab.jar (local packages)
     // 3. myrobotlab.jar (normal package)
-    
+
     String classpath = "target" + fs + "classes" + ps + "target" + fs + "myrobotlab.jar" + ps + "myrobotlab.jar" + ps + ("libraries" + fs + "jar" + fs + "*");
     // String classpath = String.format(cpTemplate, jarPath, ps, libraries,
     // ps, libraries, ps, ps);
@@ -193,6 +179,7 @@ public class Launcher {
     }
     cmd.add(classpath);
 
+    // main class
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (options.services.size() > 0) {
@@ -231,6 +218,7 @@ public class Launcher {
       }
     }
 
+    // FIXME THIS IS TERRIBLE !!! IT SHOULD SIMPLY BE PASS THROUGH !!
     // FIXME - adding new CmdOption
     if (options.cfg != null) {
       cmd.add("-c");
@@ -244,6 +232,12 @@ public class Launcher {
       }
     }
 
+    // TERRRIBLE !!!
+    if (options.connect != null) {
+      cmd.add("--connect");
+      cmd.add(options.connect);
+    }
+
     if (options.invoke != null) {
       cmd.add("--invoke");
       for (String keyPart : options.invoke) {
@@ -255,13 +249,12 @@ public class Launcher {
       cmd.add("--virtual");
     }
 
+    // add if not there
     cmd.add("--spawned-from-agent");
 
-    String[] cmdLine = cmd.toArray(new String[cmd.size()]);
+    log.info("spawn {}", toString(cmd));
 
-    log.info("spawn {}", toString(cmdLine));
-
-    return cmdLine;
+    return cmd;
 
   }
 
@@ -338,6 +331,9 @@ public class Launcher {
   }
 
   /**
+   * FIXME - should not be in main because of the void return :( ProcessBuilder
+   * or Process return ...
+   * 
    * Start class for myrobotlab.jar. Its primary concern is to build and launch
    * a myrobotlab instance, depending on flags it might also start a client as
    * an interface to the spawned instance
@@ -374,25 +370,30 @@ public class Launcher {
         }
         return;
       }
-      
+
       boolean instanceAlreadyRunning = false;
 
       try {
-        URI uri = new URI(options.client);      
+        URI uri = new URI(options.connect);
         Socket socket = new Socket();
         socket.connect(new InetSocketAddress(uri.getHost(), uri.getPort()), 1000);
         socket.close();
         instanceAlreadyRunning = true;
-      } catch(Exception e) {
-        log.info("could not connect to {}", options.client);
+      } catch (Exception e) {
+        log.info("could not connect to {}", options.connect);
       }
-      
-      if (!instanceAlreadyRunning && !options.print && options.client.equals(options.DEFAULT_CLIENT)) {
+
+      if (instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CLIENT)) {
+        log.error("zombie instance already running at {}", options.DEFAULT_CLIENT);
+        return;
+      }
+
+      if (!instanceAlreadyRunning && !options.print && options.connect.equals(options.DEFAULT_CLIENT)) {
         log.info("spawning new instance");
         // process the incoming args into spawn args
-        String[] cmdLine = createSpawnArgs(args);
+        List<String> spawnArgs = createSpawnArgs(args);
 
-        ProcessBuilder builder = createBuilder(options.cwd, cmdLine);
+        ProcessBuilder builder = createBuilder(options.cwd, spawnArgs);
         process = builder.start();
         if (process.isAlive()) {
           log.info("process is alive");
@@ -402,17 +403,25 @@ public class Launcher {
       }
 
       // FIXME - use wsclient for remote access
-      if (!options.noClient) {
+      if (!options.noLauncherClient) {
         // FIXME - delay & auto connect
-        Client.main(new String[] { "-c", options.client });
+        Client.main(new String[] { "-c", options.connect });
       } else {
-        // terminating
+        // terminating - "if" runtime exists - if not no biggy
         Runtime.shutdown();
       }
 
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  public static ProcessBuilder createBuilder(String[] args) throws IOException {
+    return createBuilder(null, new ArrayList<String>(Arrays.asList(args)));
+  }
+
+  public static ProcessBuilder createBuilder(List<String> args) throws IOException {
+    return createBuilder(null, args);
   }
 
 }

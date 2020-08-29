@@ -80,3 +80,5 @@
 /copyToRaspi.sh
 stdout.txt
 export.py
+lastRestart.py
+mvn-build.out

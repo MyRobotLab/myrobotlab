@@ -1,27 +1,25 @@
-package org.myrobotlab.process;
-
+package org.myrobotlab.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.interfaces.Broadcaster;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Http;
-import org.myrobotlab.service.Builder;
-import org.myrobotlab.service.Git;
-import org.myrobotlab.service.Runtime;
+import org.myrobotlab.process.Launcher;
+import org.myrobotlab.process.UpdateListener;
 import org.slf4j.Logger;
 
 import picocli.CommandLine;
@@ -44,7 +42,10 @@ import picocli.CommandLine.Option;
  *
  */
 
-public class Updater implements Runnable, FilenameFilter, Broadcaster {
+public class Updater extends Service {
+
+
+  private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Updater.class);
 
@@ -52,7 +53,6 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
 
   final static String REMOTE_BUILDS_URL_HOME = "http://build.myrobotlab.org:8080/job/myrobotlab-multibranch/";
 
-  protected boolean isRunning = false;
   protected long interval = 5000;
 
   protected transient Process updated = null;
@@ -114,6 +114,10 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     Integer number;
     String result;
     Long timestamp;
+  }
+
+  public Updater(String reservedKey, String inId) {
+    super(reservedKey, inId);
   }
 
   /**
@@ -277,22 +281,17 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     return getLatestVersion(versions);
   }
 
-  private transient Thread worker = null;
-
   private Boolean offline = false;
+  
+  long updateCheckIntervalMs = 5000;
 
   public synchronized void start() {
-
-    if (worker == null) {
-      worker = new Thread(this, "updater");
-      worker.start();
-    }
+    addTask(updateCheckIntervalMs, "checkForUpdates");
   }
 
   public synchronized void stop() {
-    if (worker != null) {
-      isRunning = false;
-    }
+    log.info("stopping updater");
+    purgeTask("checkForUpdates");
   }
 
   protected static final String MULTI_BRANCH_VERSION = "http://build.myrobotlab.org:8080/job/myrobotlab/job/%s/api/xml?xpath=/*/lastStableBuild/number";
@@ -332,11 +331,8 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     return new UpdateVersion(version, file, timestamp);
   }
 
-  @Override
-  public void run() {
-    isRunning = true;
+  public void checkForUpdates() {
     log.info("starting updater {} {} with interval {} s", branch, currentVersion, interval / 1000);
-    while (isRunning) {
       try {
         log.info("checking for update");
 
@@ -404,29 +400,26 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
           }
           
           if (makeBuild) {
-            // FIXME - download mvn if it doesnt exist ??
+            // FIXME - download mvn if it does not exist ??
             
             // remove git properties before compile
             Git.removeProps();
             
             // FIXME - compile or package mode ! 
-            Builder.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline );
-            offline = true;
+            String ret = Builder.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline);
+            if (ret != null & ret.contains("BUILD SUCCESS")) {
+              offline = true;
+            }
             
-            // package 
-            
-            // FIXME - determine mvn success !
-            // publish stream !!! inheritIO + redirect
-            
-            
+            // package ??
+  
             // FIXME - export & launch
             
             if (autoUpdate) {
               
               // FIXME !!! - default option to tear down if running webgui (single resource) 
               
-              String[] updatedArgs = new String[] { "-I", "python", "execFile", "export.py" };
-              String[] cmdLine = Launcher.createSpawnArgs(updatedArgs);
+              List<String> cmdLine = Launcher.createSpawnArgs(new String[] { "-I", "python", "execFile", "export.py" });
 
               // FIXME - if running as standalone handle other case
               if (updated == null) {
@@ -438,6 +431,7 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
                 // Process ps = launcher.buildUpdate("myrobotlab.jar", "-i",
                 // "python", "execFile", "export.py");
               } else {
+                // process already exists - tear down and restart FIXME - export !
                 updated.destroy();
                 ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
                 updated = builder.start();
@@ -524,7 +518,7 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
 
               String[] updatedArgs = new String[] { "-I", "python", "execFile", "export.py" };
 
-              String[] cmdLine = Launcher.createSpawnArgs(updatedArgs);
+              List<String> cmdLine = Launcher.createSpawnArgs(updatedArgs);
               String cwd = System.getProperty("user.dir");
 
               if (updated == null) {
@@ -544,10 +538,6 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
       } catch (Exception e) {
         log.error("UpdateUtils threw", e);
       }
-    }
-
-    log.info("stopping updater");
-    isRunning = false;
   }
 
   public String parseVersion(String filename) {
@@ -587,7 +577,7 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
       File target = new File("target");
       String latest = null;
       String latestFile = null;
-      String[] possibleUpdates = target.list(this);
+      String[] possibleUpdates = target.list((FilenameFilter)this);
       for (int i = 0; i < possibleUpdates.length; ++i) {
         String filename = possibleUpdates[i];
         String fileBranch = parseBranch(filename);
@@ -604,7 +594,7 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     return null;
   }
 
-  @Override
+  // file filter
   public boolean accept(File dir, String name) {
     String[] parts = name.split("-");
     if (name.endsWith(".jar") && parts.length == 3 && parts[1].equals(branch)) {
@@ -617,13 +607,26 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     LoggingFactory.init(Level.INFO);
 
     try {
+      
 
       // use cases - used as a command line tool
+      
+      
+      // Runtime connects to public or main mrl instance ...
+      // put in update mode   (master) --> |(runtime + updater) --> (worke) |
+      
       // - used by runtime ... in theory runtime could call/configure updater
       // through main
 
-      Updater updater = new Updater();
-      new CommandLine(new Updater()).parseArgs(args);
+      List<String> cmdLine = Launcher.createSpawnArgs(new String[] { "-I", "python", "execFile", "export.py" });
+      String cwd = System.getProperty("user.dir");
+      
+      Updater updater = (Updater)Runtime.start("updater", "Updater");
+      
+      ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
+      updater.updated = builder.start();
+      
+      new CommandLine(updater).parseArgs(args);
       if (updater.autoUpdate) {
         updater.start();
       }
@@ -635,16 +638,5 @@ public class Updater implements Runnable, FilenameFilter, Broadcaster {
     }
   }
 
-  @Override
-  public Object broadcast(String method) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Object broadcast(String method, Object... params) {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
 }
