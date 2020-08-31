@@ -1,7 +1,6 @@
 package org.myrobotlab.service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +31,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -278,33 +277,6 @@ public class Git extends Service {
     return 0;
   }
 
-  static public Properties getProperties() {
-    try {
-      Properties properties = new Properties();
-      String rootOfClass = FileIO.getRoot();
-      if (FileIO.isJar()) {
-        // extract from jar
-        log.info("git loading properties from jar {}", rootOfClass);
-        properties.load(Git.class.getResourceAsStream("/git.properties"));
-      } else {
-
-        // get from file system
-        String path = FileIO.gluePaths(rootOfClass, "git.properties");
-        File check = new File(path);
-        if (!check.exists()) {
-          log.info("git.properties does not exist");
-          return null;
-        }
-        log.info("git loading from file {}", path);
-        properties.load(new FileInputStream(path));
-      }
-      return properties;
-    } catch (Exception e) {
-      log.error("getProperties threw", e);
-    }
-    return null;
-  }
-
   static public void init() throws IllegalStateException, GitAPIException {
     init(null);
   }
@@ -323,7 +295,7 @@ public class Git extends Service {
 
       LoggingFactory.init(Level.INFO);
 
-      Properties properties = Git.getProperties();
+      Properties properties = Platform.gitProperties();
       Git.removeProps();
       log.info("{}", properties);
 

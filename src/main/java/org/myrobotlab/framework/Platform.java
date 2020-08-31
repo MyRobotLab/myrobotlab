@@ -1,5 +1,6 @@
 package org.myrobotlab.framework;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -12,11 +13,12 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
+// Do not pull in deps to this class !
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.Git;
 import org.slf4j.Logger;
 
 /**
@@ -197,7 +199,7 @@ public class Platform implements Serializable {
       platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
 
       // git properties - local build has precedence 
-      Properties gitProps = Git.getProperties();
+      Properties gitProps = gitProperties();
       if (gitProps != null) {
         String gitProp = gitProps.getProperty("git.branch");
         platform.branch = (gitProp != null) ? gitProp : platform.branch;
@@ -269,6 +271,34 @@ public class Platform implements Serializable {
     }
     return def;
   }
+  
+  static public Properties gitProperties() {
+    try {
+      Properties properties = new Properties();
+      String rootOfClass = FileIO.getRoot();
+      if (FileIO.isJar()) {
+        // extract from jar
+        log.info("git loading properties from jar {}", rootOfClass);
+        properties.load(Platform.class.getResourceAsStream("/git.properties"));
+      } else {
+
+        // get from file system
+        String path = FileIO.gluePaths(rootOfClass, "git.properties");
+        File check = new File(path);
+        if (!check.exists()) {
+          log.info("git.properties does not exist");
+          return null;
+        }
+        log.info("git loading from file {}", path);
+        properties.load(new FileInputStream(path));
+      }
+      return properties;
+    } catch (Exception e) {
+      log.error("getProperties threw", e);
+    }
+    return null;
+  }
+
 
   public Platform() {
   }
