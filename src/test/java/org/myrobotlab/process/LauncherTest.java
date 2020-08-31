@@ -56,11 +56,8 @@ public class LauncherTest extends AbstractTest {
     Process p = null;
 
     // default
-    List<String> spawnArgs = Launcher.createSpawnArgs(new String[] {});
-    log.warn("spawn \n{}\n", Launcher.toString(spawnArgs));
-
     try {
-      pb = Launcher.createBuilder(null, spawnArgs);
+      pb = Launcher.createBuilder(null, new String[] {});
     } catch(Exception e) {
       log.info("no valid myrobotlab.jar");
     }
@@ -75,7 +72,7 @@ public class LauncherTest extends AbstractTest {
 
     // FIXME validate default
     try {
-      spawnArgs = Launcher.createSpawnArgs(new String[] { "-s x" });
+      ProcessBuilder pbd = Launcher.createBuilder(new String[] { "-s x" });
     } catch (Exception e) {
       invalidArgs = true;
     }
