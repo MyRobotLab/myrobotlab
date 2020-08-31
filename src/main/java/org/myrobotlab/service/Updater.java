@@ -417,14 +417,12 @@ public class Updater extends Service {
             
             if (autoUpdate) {
               
-              // FIXME !!! - default option to tear down if running webgui (single resource) 
-              
-              List<String> cmdLine = Launcher.createSpawnArgs(new String[] { "-I", "python", "execFile", "export.py" });
-
+              // FIXME !!! - default option to tear down if running webgui (single resource)               
               // FIXME - if running as standalone handle other case
               if (updated == null) {
                 // FIXME check for null etc.. singleton
-                ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
+                // FIXME - merge original
+                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
                 updated = builder.start();
 
                 // FIXME check if alive etc...
@@ -433,7 +431,8 @@ public class Updater extends Service {
               } else {
                 // process already exists - tear down and restart FIXME - export !
                 updated.destroy();
-                ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
+                // FIXME - merge original
+                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
                 updated = builder.start();
               }
             }
@@ -516,14 +515,10 @@ public class Updater extends Service {
               // target, then start
               log.info("preparing launcher command");
 
-              String[] updatedArgs = new String[] { "-I", "python", "execFile", "export.py" };
-
-              List<String> cmdLine = Launcher.createSpawnArgs(updatedArgs);
-              String cwd = System.getProperty("user.dir");
-
               if (updated == null) {
                 // FIXME check for null etc.. singleton
-                ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
+                // FIXME - ability to merge more commands !!!
+                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
                 updated = builder.start();
 
                 // FIXME check if alive etc...
@@ -617,13 +612,10 @@ public class Updater extends Service {
       
       // - used by runtime ... in theory runtime could call/configure updater
       // through main
-
-      List<String> cmdLine = Launcher.createSpawnArgs(new String[] { "-I", "python", "execFile", "export.py" });
-      String cwd = System.getProperty("user.dir");
       
       Updater updater = (Updater)Runtime.start("updater", "Updater");
       
-      ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
+      ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
       updater.updated = builder.start();
       
       new CommandLine(updater).parseArgs(args);

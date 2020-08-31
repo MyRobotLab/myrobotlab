@@ -39,27 +39,37 @@ public class CmdOptions {
     }
   }
 
-  // launcher
-  @Option(names = {
-  "--cwd" }, arity = "0..1", description = "working directory to spawn process in")
-  public String cwd = null;
-  
-  // FIXME - override for classpath of spawn target
-  
-  // launcher
+  // launcher ??
   @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
   public boolean autoUpdate = false;
 
-  public final String DEFAULT_CLIENT = "http://localhost:8888"; 
+  public final String DEFAULT_CONNECT = "http://localhost:8888"; 
 
   // launcher
-  @Option(names = { "-c", "--connect" }, arity = "0..1", fallbackValue = DEFAULT_CLIENT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CLIENT)
+  @Option(names = { "-c", "--connect" }, arity = "0..1", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
   public String connect = null;
-   
+
   // launcher
+  @Option(names = {"--client" }, arity = "0..1", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
+  public String client = null;
+
+  // launcher
+  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+      + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
+      + "If this value is set, all other configuration flags are ignored.")
+  public String cfg = null;
+
+  // FIXME - highlight or italics for examples !!
+  // launcher
+  @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
+  public String memory = null;
+  
+  // launcher
+  /*
   @Option(names = {
       "--no-client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
   public boolean noLauncherClient = false;
+  */
 
   // launcher
   @Option(names = { "--std-out" }, description = "when spawning save the results of the launch in a file \"std.out\"")
@@ -77,7 +87,7 @@ public class CmdOptions {
   */
 
   // FIXME - change to spawned-from-launcher...
-  @Option(names = { "--spawned-from-agent" }, description = "starts in interactive mode - reading from stdin")
+  @Option(names = { "--spawned-from-launcher" }, description = "starts in interactive mode - reading from stdin")
   public boolean spawnedFromLauncher = false;
 
   @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
@@ -97,15 +107,6 @@ public class CmdOptions {
 
   @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
   public String id;
-
-  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-      + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
-      + "If this value is set, all other configuration flags are ignored.")
-  public String cfg = null;
-
-  // FIXME - highlight or italics for examples !!
-  @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
-  public String memory = null;
 
   @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
   public String logLevel = "info";

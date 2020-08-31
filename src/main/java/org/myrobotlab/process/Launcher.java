@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,97 +46,13 @@ public class Launcher {
   }
 
   static public ProcessBuilder createBuilder(String cwd, List<String> cmdLine) throws IOException {
+    // FIXME - ability to merge lists
     
+    // Parse options to handle all flags relevant to the Launcher
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(toArray(cmdLine));
 
-
-    // FIXME - reporting from different levels .. one is stdout the other is the
-    // os before this
-    ProcessBuilder builder = new ProcessBuilder(cmdLine);
-
-    // one of the nastiest bugs had to do with std out, or std err not
-    // being consumed ... now we don't bother with it - instead
-    // we have to use this clever redirect to /dev/null (os dependent) :(
-    // and be done with the whole silly issue
-
-    builder.redirectErrorStream(true);
-
-    // builder.redirectOutput(new File("stdout.txt"));
-    if (options.stdout) {
-      builder.redirectOutput(STD_OUT);      
-    } else {
-      builder.redirectOutput(NULL_FILE);
-    }
-
-    // setting working directory to wherever the jar is...
-
-    File spawnDir = (cwd == null) ? new File(System.getProperty("user.dir")) : new File(cwd);
-    if (!spawnDir.exists() || !spawnDir.isDirectory()) {
-      log.error("{} not a directory", spawnDir.getAbsolutePath());
-    }
-
-    builder.directory(spawnDir);
-    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmdLine));
-
-    // environment variables setup
-    setEnv(builder.environment());
-
-    return builder;
-  }
-  
-  public static String[] toArray(List<String> list) {
-    return list.toArray(new String[list.size()]);
-  }
-
-  public static List<String> toList(String[] array) {
-    return new ArrayList<String>(Arrays.asList(array));
-  }
-
-  public static String toString(List<String> cmdLine) {
-    return toString(cmdLine.toArray(new String[cmdLine.size()]));
-  }
-
-  public static String toString(String[] cmdLine) {
-    StringBuilder spawning = new StringBuilder();
-    for (String c : cmdLine) {
-      spawning.append(c);
-      spawning.append(" ");
-    }
-    return spawning.toString();
-  }
-
-  public static List<String> createSpawnArgs(List<String> args)
-      throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
-    return createSpawnArgs(args.toArray(new String[args.size()]));
-  }
-
-  /**
-   * Takes a list of arguments and turns them into a start cmd line to start an
-   * instance of myrobotlab
-   * 
-   * @param options
-   * @return
-   * @throws IOException
-   * @throws URISyntaxException
-   * @throws InterruptedException
-   * @throws IllegalArgumentException
-   * @throws IllegalAccessException
-   * @throws ParseException
-   */
-  public static List<String> createSpawnArgs(String[] args)
-      throws IOException, URISyntaxException, InterruptedException, IllegalArgumentException, IllegalAccessException, ParseException {
-
-    CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(args);
-
     Platform platform = Platform.getLocalInstance();
-
-    if (options.id == null) {
-      options.id = NameGenerator.getName();
-    }
-
-    options.spawnedFromLauncher = true;
 
     // default service if non specified
     if (options.services.size() == 0) {
@@ -203,76 +117,71 @@ public class Launcher {
         cmd.add(options.services.get(i + 1));
       }
     }
-
-    // FIXME !!!! - this less than ideal !
-    // "MOST" of the flags are "relayed" through so CmdOptions are handled in
-    // the spawned process - but a few are handled by the agent and should not
-    // be
-    // relayed
-    cmd.add("--id");
-    cmd.add(options.id);
-
-    cmd.add("--data-dir");
-    cmd.add(options.dataDir);
-
-    if (options.logLevel != null) {
-      cmd.add("--log-level");
-      cmd.add(options.logLevel);
+    
+    // append/merge incoming arguments
+    cmd.addAll(cmdLine);
+    
+    if (!contains(cmd, "--spawned-from-launcher")) {
+      cmd.add("--spawned-from-launcher");
     }
 
-    // FIXME - shouldn't 'everything' simply be relayed on that doesn't
-    // directly affect Agent?
-    if (options.install != null) {
-      cmd.add("--install");
-      for (String serviceType : options.install) {
-        cmd.add(serviceType);
-      }
+    
+    // FIXME - reporting from different levels .. one is stdout the other is the
+    // os before this
+    log.info("SPAWN {}", toString(cmd));
+    System.out.print("SPAWN ");
+    System.out.println(toString(cmd));
+    ProcessBuilder builder = new ProcessBuilder(cmd);
+
+    // one of the nastiest bugs had to do with std out, or std err not
+    // being consumed ... now we don't bother with it - instead
+    // we have to use this clever redirect to /dev/null (os dependent) :(
+    // and be done with the whole silly issue
+
+    builder.redirectErrorStream(true);
+
+    // builder.redirectOutput(new File("stdout.txt"));
+    if (options.stdout) {
+      builder.redirectOutput(STD_OUT);      
+    } else {
+      builder.redirectOutput(NULL_FILE);
     }
 
-    // FIXME THIS IS TERRIBLE !!! IT SHOULD SIMPLY BE PASS THROUGH !!
-    // FIXME - adding new CmdOption
-    if (options.cfg != null) {
-      cmd.add("-c");
-      cmd.add(options.cfg);
+    // setting working directory to wherever the jar is...
+
+    File spawnDir = (cwd == null) ? new File(System.getProperty("user.dir")) : new File(cwd);
+    if (!spawnDir.exists() || !spawnDir.isDirectory()) {
+      log.error("{} not a directory", spawnDir.getAbsolutePath());
     }
 
-    if (options.addKeys != null) {
-      cmd.add("-k");
-      for (String keyPart : options.addKeys) {
-        cmd.add(keyPart);
-      }
-    }
+    builder.directory(spawnDir);
+    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmd));
 
-    // TERRRIBLE !!!
-    if (options.connect != null) {
-      cmd.add("--connect");
-      cmd.add(options.connect);
-    }
+    // environment variables setup
+    setEnv(builder.environment());
 
-    if (options.invoke != null) {
-      cmd.add("--invoke");
-      for (String keyPart : options.invoke) {
-        cmd.add(keyPart);
-      }
-    }
-
-    if (options.virtual) {
-      cmd.add("--virtual");
-    }
-
-    // add if not there
-    cmd.add("--spawned-from-agent");
-
-    log.info("spawn {}", toString(cmd));
-
-    return cmd;
-
+    return builder;
+  }
+  
+  public static String[] toArray(List<String> list) {
+    return list.toArray(new String[list.size()]);
   }
 
-  public static CmdOptions getCmdOptions(String[] args) throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException {
-    CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(args);
-    return options;
+  public static List<String> toList(String[] array) {
+    return new ArrayList<String>(Arrays.asList(array));
+  }
+
+  public static String toString(List<String> cmdLine) {
+    return toString(cmdLine.toArray(new String[cmdLine.size()]));
+  }
+
+  public static String toString(String[] cmdLine) {
+    StringBuilder spawning = new StringBuilder();
+    for (String c : cmdLine) {
+      spawning.append(c);
+      spawning.append(" ");
+    }
+    return spawning.toString();
   }
 
   /**
@@ -334,11 +243,14 @@ public class Launcher {
 
     return env;
   }
-
-  public String buildUpdate(String classpath, String targetJar, long delay) {
-
-    // "--invoke python exec"
-    return null;
+  
+  static boolean contains(List<String> l, String flag) {
+    for (String f : l) {
+      if (f.equals(flag)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -361,7 +273,7 @@ public class Launcher {
       new CommandLine(options).parseArgs(args);
 
       LoggingFactory.init(options.logLevel);
-      log.info("in args {}", Arrays.toString(args));
+      log.info("in args {}", toString(args));
 
       log.info("\n" + banner);
 
@@ -394,17 +306,14 @@ public class Launcher {
         log.info("could not connect to {}", options.connect);
       }
 
-      if (instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CLIENT)) {
-        log.error("zombie instance already running at {}", options.DEFAULT_CLIENT);
+      if (instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CONNECT)) {
+        log.error("zombie instance already running at {}", options.DEFAULT_CONNECT);
         return;
       }
 
-      if (!instanceAlreadyRunning && options.connect.equals(options.DEFAULT_CLIENT)) {
+      if (!instanceAlreadyRunning || !options.connect.equals(options.DEFAULT_CONNECT)) {
         log.info("spawning new instance");
-        // process the incoming args into spawn args
-        List<String> spawnArgs = createSpawnArgs(args);
-
-        ProcessBuilder builder = createBuilder(options.cwd, spawnArgs);
+        ProcessBuilder builder = createBuilder(args);
         process = builder.start();
         if (process.isAlive()) {
           log.info("process is alive");
@@ -414,9 +323,9 @@ public class Launcher {
       }
 
       // FIXME - use wsclient for remote access
-      if (!options.noLauncherClient) {
+      if (options.client != null) {
         // FIXME - delay & auto connect
-        Client.main(new String[] { "-c", options.connect });
+        Client.main(new String[] { "-c", options.client });
       } else {
         // terminating - "if" runtime exists - if not no biggy
         Runtime.shutdown();

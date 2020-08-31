@@ -334,6 +334,15 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Git begin -->
+  <dependency>
+    <groupId>org.eclipse.jgit</groupId>
+    <artifactId>org.eclipse.jgit</artifactId>
+    <version>5.4.0.201906121030-r</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Git end -->
+
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -1205,11 +1214,6 @@
     <version>4.4.0</version>
   </dependency>
   <dependency>
-    <groupId>org.eclipse.jgit</groupId>
-    <artifactId>org.eclipse.jgit</artifactId>
-    <version>5.4.0.201906121030-r</version>
-  </dependency>
-  <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-api</artifactId>
     <version>1.7.21</version>
@@ -1371,6 +1375,11 @@
 <!-- VoiceRss end -->
 
 <!-- WebGui begin -->
+  <dependency>
+    <groupId>org.jmdns</groupId>
+    <artifactId>jmdns</artifactId>
+    <version>3.5.5</version>
+  </dependency>
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
@@ -1678,7 +1687,7 @@
           <version>3.0.1</version>
           <executions>
               <execution>
-              <phase>initialize</phase>
+                  <phase>initialize</phase>
                   <id>get-the-git-infos</id>
                   <goals>
                       <goal>revision</goal>
@@ -1691,7 +1700,7 @@
               <verbose>false</verbose>
               <generateGitPropertiesFile>true</generateGitPropertiesFile>
               <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <!--  format>json</format-->
+              <!-- format>json</format -->
               <gitDescribe>
                   <skip>false</skip>
                   <always>false</always>

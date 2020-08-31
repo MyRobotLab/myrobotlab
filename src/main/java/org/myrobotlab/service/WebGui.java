@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -626,7 +629,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // (neither will udp)
       if (newPersistentConnection && apiKey.equals(CodecUtils.API_MESSAGES)) {
 
-        
         // NEW AND IMPORTANT ! - create a route entry for this "ID" !!!
         Runtime.updateRoute(id, uuid);
 
@@ -674,12 +676,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         Message msg = null;
         try {
           msg = CodecUtils.fromJson(bodyData, Message.class);
-          
+
           /**
            * ======================================================================
-           * DYNAMIC ROUTE TABLE - Incoming messages will (must) have a identifier
-           * bound with the connection. The sender's id is put into the route table
-           * with connection information.
+           * DYNAMIC ROUTE TABLE - Incoming messages will (must) have a
+           * identifier bound with the connection. The sender's id is put into
+           * the route table with connection information.
            */
           Runtime.updateRoute(msg.getSrcId(), uuid);
 
@@ -695,7 +697,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
            * ======================================================================
            */
 
-          
         } catch (Exception e) {
           error(e);
           return;
@@ -1238,6 +1239,76 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return Runtime.getInstance().getDefaultMsg(connId);
   }
 
+
+
+  public void display(String image) {
+    // FIXME
+    // http/https can be proxied if necessary or even fetched,
+    // but what about "local" files - should they be copied to a temp directory
+    // that has webgui access ?
+    // e.g. copied to /data/WebGui/temp ?
+    // send(getName(), "display", image);
+    Message msg = Message.createMessage(getName(), "webgui", "display", new Object[] { image });
+    sendRemote(msg);
+  }
+
+  public void setSsl(boolean b) {
+    isSsl = b;
+  }
+
+  @Override
+  public Object sendBlockingRemote(Message msg, Integer timeout) {
+    String remoteId = msg.getId();
+    Gateway gateway = Runtime.getInstance().getGatway(remoteId);
+    if (!gateway.equals(this)) {
+      log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
+      return null;
+    }
+
+    // getRoute
+    String toUuid = Runtime.getRoute(msg.getId());
+    if (toUuid == null) {
+      log.error("could not get uuid from this msg id {}", msg.getId());
+      return null;
+    }
+
+    // get remote connection
+    Map<String, Object> conn = Runtime.getInstance().getConnection(toUuid);
+    if (conn == null) {
+      log.error("could not get connection for this uuid {}", toUuid);
+      return null;
+    }
+    broadcast(toUuid, CodecUtils.toJson(msg));
+    // FIXME !!! implement !!
+    return null;
+  }
+  
+  transient protected JmDNS jmdns = null;
+
+  public void startMdns() {
+    try {
+      if (jmdns == null) {
+        Runtime runtime = Runtime.getInstance();
+        String ip = runtime.getAddress();
+        log.info("starting mdns on {}", ip);
+        jmdns = JmDNS.create(InetAddress.getByName(ip), runtime.getId());
+        ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", runtime.getId(), getPort(), "myrobotlab");
+        jmdns.registerService(serviceInfo);
+        serviceInfo = ServiceInfo.create("_ws._tcp.local.", runtime.getId(), getPort(), "myrobotlab");
+        jmdns.registerService(serviceInfo);
+      }
+    } catch (Exception e) {
+      log.error("mdns threw", e);
+    }
+  }
+
+  public void stopMdns() {
+    if (jmdns != null) {
+      jmdns.unregisterAllServices();
+      jmdns = null;
+    }
+  }
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -1251,7 +1322,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "intro", "Intro"});
-      Runtime.main(new String[] {"--id", "admin" });
+      Runtime.main(new String[] { "--id", "admin" });
 
       Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1260,10 +1331,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.autoStartBrowser(false);
       webgui.setPort(8888);
       webgui.startService();
+      webgui.startMdns();
 
       // Runtime runtime = Runtime.getInstance();
       // runtime.restart();
-      
+
       boolean done = true;
       if (done) {
         return;
@@ -1312,47 +1384,5 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
-
-  public void display(String image) {
-    // FIXME
-    // http/https can be proxied if necessary or even fetched,
-    // but what about "local" files - should they be copied to a temp directory
-    // that has webgui access ?
-    // e.g. copied to /data/WebGui/temp ?
-    // send(getName(), "display", image);
-    Message msg = Message.createMessage(getName(), "webgui", "display", new Object[] { image });
-    sendRemote(msg);
-  }
-
-  public void setSsl(boolean b) {
-    isSsl = b;
-  }
-
-  @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) {
-    String remoteId = msg.getId();
-    Gateway gateway = Runtime.getInstance().getGatway(remoteId);
-    if (!gateway.equals(this)) {
-      log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
-      return null;
-    }
-
-    // getRoute
-    String toUuid = Runtime.getRoute(msg.getId());
-    if (toUuid == null) {
-      log.error("could not get uuid from this msg id {}", msg.getId());
-      return null;
-    }
-
-    // get remote connection
-    Map<String, Object> conn = Runtime.getInstance().getConnection(toUuid);
-    if (conn == null) {
-      log.error("could not get connection for this uuid {}", toUuid);
-      return null;
-    }
-    broadcast(toUuid, CodecUtils.toJson(msg));
-    // FIXME !!! implement !!
-    return null;
   }
 }

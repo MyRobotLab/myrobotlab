@@ -63,6 +63,7 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -640,6 +641,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * FIXME - change name to getIpAddresses()
+   * 
    * gets all non-loopback, active, non-virtual ip addresses
    *
    * @return list of local ipv4 IP addresses
@@ -1165,11 +1168,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // int exitCode = new CommandLine(options).execute(args);
       new CommandLine(options).parseArgs(args);
 
+      // id always required
+      if (options.id == null) {
+        options.id = NameGenerator.getName();
+      }
+
       // fix paths
       Platform platform = Platform.getLocalInstance();
-      if (options.id != null) {
         platform.setId(options.id);
-      }
+        
       options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
       LIBRARIES = (platform.isWindows()) ? LIBRARIES.replace("/", "\\") : LIBRARIES.replace("\\", "/");
 
@@ -2289,6 +2296,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // release all local services
       releaseAll();
+      
+      if (runtime != null) {
+        runtime.releaseService();
+      }
 
       // append restart script if not there
       int size = args.size();
@@ -2298,12 +2309,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         args.add("lastRestart.py");
       }
 
-      // form command line from Launcher
-      List<String> spawnCmd = Launcher.createSpawnArgs(args);
-
       // create builder from Launcher
-      ProcessBuilder pb = Launcher.createBuilder(spawnCmd);
-
+      ProcessBuilder pb = Launcher.createBuilder(args);
+      
       // fire it off
       Process restarted = pb.start();
 
@@ -3432,6 +3440,40 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public static boolean exists() {
     return runtime != null;
+  }
+
+  /**
+   * Attempt to get the most likely valid address
+   * priority would be a lan address - possibly the smallest class
+   * @return
+   */
+  public String getAddress() {
+    List<String> addresses = getLocalAddresses();
+    if (addresses.size() > 0) {
+     
+      // class priority
+      for (String ip : addresses) {
+        if (ip.startsWith("192.168")) {
+          return ip;
+        }
+      }
+      
+      for (String ip : addresses) {
+        if (ip.startsWith("172.")) {
+          return ip;
+        }
+      }
+
+      for (String ip : addresses) {
+        if (ip.startsWith("10.")) {
+          return ip;
+        }
+      }
+
+      // give up - return first :P
+      return addresses.get(0);
+    }
+    return null;
   }
 
 }

@@ -22,6 +22,8 @@ public class WebGuiMeta extends MetaData {
     addCategory("display");
 
     includeServiceInOneJar(true);
+    
+    addDependency("org.jmdns", "jmdns", "3.5.5");
     addDependency("org.atmosphere", "nettosphere", "3.2.1");
     addDependency("javax.annotation", "javax.annotation-api", "1.3.2");
 
