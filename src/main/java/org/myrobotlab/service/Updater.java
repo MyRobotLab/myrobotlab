@@ -340,7 +340,7 @@ public class Updater extends Service {
 
         // if remote get binary put in target
         // check if various parts exist
-        Properties gitProps = Git.gitProperties();
+        Properties gitProps = Platform.gitProperties();
 
         // create local repo if it does not exist
         File target = new File("target");
