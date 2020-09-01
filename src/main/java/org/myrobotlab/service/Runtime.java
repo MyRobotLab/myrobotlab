@@ -1753,7 +1753,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
       // xxx debug
-      log.error("==> {} --to--> {}.{}", msg.sender, msg.name, msg.method);
+      log.info("==> {} --to--> {}.{}", msg.sender, msg.name, msg.method);
       msg.setProperty("uuid", uuid); // Properties ???? REMOVE ???
 
       /**
@@ -3363,7 +3363,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // add our id - we don't want to see it again
       msg.addHop(getId());
 
-      log.error("<== {} --to--> {}.{}", msg.sender, msg.name, msg.method);
+      log.info("<== {} --to--> {}.{}", msg.sender, msg.name, msg.method);
 
       /**
        * ======================================================================

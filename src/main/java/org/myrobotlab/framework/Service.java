@@ -312,7 +312,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
             targetField.set(target, f.get(source));
           }
         } catch (Exception e) {
-          log.error("copy failed", e);
+          log.error("copy failed source {} to a {}", source, target, e);
         }
       } // for each field in class
     } // for each in ancestry
