@@ -90,6 +90,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         contextPath = null
 
         var cliMsg = _self.cliToMsg(contextPath, "runtime@" + mrl.getId(), "runtime@" + mrl.getRemoteId(), cmd)
+        cliMsg = _self.cliToMsg(contextPath, "runtime@" + mrl.getId(), "runtime@" + $scope.platform.id, cmd)
 
         ret = mrl.sendBlockingMessage(cliMsg)
 
@@ -262,6 +263,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.$apply()
                 break
             }
+        case 'onPlatform':
+            {
+                $scope.platform = inMsg.data[0]
+                $scope.$apply()
+                break
+            }
         case 'onStatus':
             {
                 $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
@@ -352,9 +359,11 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("sendToCli")
     msg.subscribe("getLocale")
     msg.subscribe("getLocales")
+    msg.subscribe("getPlatform")
 
     //msg.send("getLocalServices")
     msg.send("getConnectionHeaders")
+    msg.send("getPlatform")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
