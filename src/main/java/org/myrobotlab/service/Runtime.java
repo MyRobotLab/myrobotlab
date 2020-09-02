@@ -1175,8 +1175,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // fix paths
       Platform platform = Platform.getLocalInstance();
-        platform.setId(options.id);
-        
+      platform.setId(options.id);
+
       options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
       LIBRARIES = (platform.isWindows()) ? LIBRARIES.replace("/", "\\") : LIBRARIES.replace("\\", "/");
 
@@ -1550,26 +1550,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    */
   public static void shutdown() {
-    log.debug("mrl shutdown");
-
-    if (runtime != null) {
-      runtime.stopInteractiveMode();
-    }
-
-    for (ServiceInterface service : getServices()) {
-      service.preShutdown();
-    }
-
-    for (ServiceInterface service : getServices()) {
-      service.save();
-    }
-
     try {
+      log.debug("mrl shutdown");
+
+      if (runtime != null) {
+        runtime.stopInteractiveMode();
+      }
+
+      for (ServiceInterface service : getServices()) {
+        service.preShutdown();
+      }
+
+      for (ServiceInterface service : getServices()) {
+        service.save();
+      }
+
       releaseAll();
     } catch (Exception e) {
-      log.error("releaseAll threw - continuing to shutdown", e);
+      log.error("something threw - continuing to shutdown", e);
     }
-
+    
     System.exit(0);
   }
 
@@ -1662,67 +1662,68 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return stdInClient.process(cmd);
   }
-  
+
   // FIXME - implement
   public void autoConnect(String url) {
-    
+
   }
 
   // FIXME -
   // step 1 - first bind the uuids (1 local and 1 remote)
   // step 2 - Clients will contain attribute
   // FIXME - RETRIES TIMEOUTS OTHER COMPLEXITIES
-  // blocking connect - consider a non-blocking thread connect ... e.g. autoConnect
+  // blocking connect - consider a non-blocking thread connect ... e.g.
+  // autoConnect
   @Override
   public void connect(String url) {
-      try {
-        if (!url.contains("api/messages")) {
-          url += "/api/messages";
-        }
-
-        if (!url.contains("id=")) {
-          url += "?id=" + getId();
-        }
-
-        clientRemote.addResponseHandler(this); // FIXME - only needs to be done
-                                               // once
-                                               // on client creation?
-
-        UUID uuid = java.util.UUID.randomUUID();
-        Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
-
-        // TODO - filter this message's serviceList according as desired
-        Message msg = getDefaultMsg(uuid.toString());
-        // put as many attribs as possible in
-        Map<String, Object> attributes = new HashMap<String, Object>();
-
-        // required data
-        // attributes.put("id", getId());
-        attributes.put("gateway", getFullName("runtime"));
-        attributes.put("uuid", uuid);
-
-        // connection specific
-        attributes.put("c-type", "Runtime");
-        attributes.put("c-endpoint", endpoint);
-
-        // cli specific
-        attributes.put("cwd", "/");
-        attributes.put("url", url);
-        attributes.put("uri", url); // not really correct
-        attributes.put("user", "root");
-        attributes.put("host", "local");
-
-        // addendum
-        attributes.put("User-Agent", "runtime-client");
-
-        Runtime.getInstance().addConnection(uuid.toString(), attributes);
-
-        // send getHelloResponse
-        clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
-
-      } catch (Exception e) {
-        log.error("connect to {} giving up {}", url, e.getMessage());
+    try {
+      if (!url.contains("api/messages")) {
+        url += "/api/messages";
       }
+
+      if (!url.contains("id=")) {
+        url += "?id=" + getId();
+      }
+
+      clientRemote.addResponseHandler(this); // FIXME - only needs to be done
+                                             // once
+                                             // on client creation?
+
+      UUID uuid = java.util.UUID.randomUUID();
+      Endpoint endpoint = clientRemote.connect(uuid.toString(), url);
+
+      // TODO - filter this message's serviceList according as desired
+      Message msg = getDefaultMsg(uuid.toString());
+      // put as many attribs as possible in
+      Map<String, Object> attributes = new HashMap<String, Object>();
+
+      // required data
+      // attributes.put("id", getId());
+      attributes.put("gateway", getFullName("runtime"));
+      attributes.put("uuid", uuid);
+
+      // connection specific
+      attributes.put("c-type", "Runtime");
+      attributes.put("c-endpoint", endpoint);
+
+      // cli specific
+      attributes.put("cwd", "/");
+      attributes.put("url", url);
+      attributes.put("uri", url); // not really correct
+      attributes.put("user", "root");
+      attributes.put("host", "local");
+
+      // addendum
+      attributes.put("User-Agent", "runtime-client");
+
+      Runtime.getInstance().addConnection(uuid.toString(), attributes);
+
+      // send getHelloResponse
+      clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
+
+    } catch (Exception e) {
+      log.error("connect to {} giving up {}", url, e.getMessage());
+    }
   }
 
   /**
@@ -2296,7 +2297,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // release all local services
       releaseAll();
-      
+
       if (runtime != null) {
         runtime.releaseService();
       }
@@ -2311,7 +2312,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // create builder from Launcher
       ProcessBuilder pb = Launcher.createBuilder(args);
-      
+
       // fire it off
       Process restarted = pb.start();
 
@@ -3443,21 +3444,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Attempt to get the most likely valid address
-   * priority would be a lan address - possibly the smallest class
+   * Attempt to get the most likely valid address priority would be a lan
+   * address - possibly the smallest class
+   * 
    * @return
    */
   public String getAddress() {
     List<String> addresses = getLocalAddresses();
     if (addresses.size() > 0) {
-     
+
       // class priority
       for (String ip : addresses) {
         if (ip.startsWith("192.168")) {
           return ip;
         }
       }
-      
+
       for (String ip : addresses) {
         if (ip.startsWith("172.")) {
           return ip;
