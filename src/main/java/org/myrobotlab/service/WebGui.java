@@ -1200,6 +1200,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void startService() {
     super.startService();
     start();
+    startMdns();
   }
 
   public void stop() {
@@ -1290,7 +1291,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (jmdns == null) {
         Runtime runtime = Runtime.getInstance();
         String ip = runtime.getAddress();
-        log.info("starting mdns on {}", ip);
+        log.info("starting mdns {} on {}", runtime.getId(), ip);
         jmdns = JmDNS.create(InetAddress.getByName(ip), runtime.getId());
         ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", runtime.getId(), getPort(), "myrobotlab");
         jmdns.registerService(serviceInfo);
@@ -1322,7 +1323,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "intro", "Intro"});
-      Runtime.main(new String[] { "--id", "admin" });
+      Runtime.main(new String[] { "--id", "admin", "-c", "http://worke.local:8888"});
 
       Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
@@ -1332,7 +1333,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();
       webgui.startMdns();
-
+      
+      Runtime runtime = Runtime.getInstance();
+      // runtime.connect("http://worke.local:8888");
       // Runtime runtime = Runtime.getInstance();
       // runtime.restart();
 

@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', 'statusSvc', '$timeout', function($scope, $log, mrl, statusSvc, $timeout) {
+angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', 'statusSvc', '$timeout', '$uibModal', function($scope, $log, mrl, statusSvc, $timeout, $uibModal) {
     console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -25,19 +25,19 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.heartbeatTs = null
 
     $scope.languages = {
-        'en':{
-            'language':'en',
-            'displayLanguage':'English'
+        'en': {
+            'language': 'en',
+            'displayLanguage': 'English'
         }
     }
 
     $scope.locale = {
-        selected:null
+        selected: null
     }
 
     $scope.localeTag = {
-        'selected':{
-            'tag':'en-US'
+        'selected': {
+            'tag': 'en-US'
         }
     }
 
@@ -61,7 +61,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         // console.debug('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
 
-        if ($scope.category.selected != null && ($scope.category.selected == 'show all') ) {
+        if ($scope.category.selected != null && ($scope.category.selected == 'show all')) {
             return $scope.service.serviceData.serviceTypes
         }
 
@@ -229,14 +229,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onLocales':
             {
                 ls = inMsg.data[0]
-                unique = {}// new Set()
-                for (const key in ls){
-                    if (ls[key].displayLanguage){
+                unique = {}
+                // new Set()
+                for (const key in ls) {
+                    if (ls[key].displayLanguage) {
                         // unique.add(ls[key].displayLanguage)
                         // unique.push(ls[key].language)
                         unique[ls[key].language] = {
-                            'language':ls[key].language,
-                            'displayLanguage':ls[key].displayLanguage
+                            'language': ls[key].language,
+                            'displayLanguage': ls[key].displayLanguage
                         }
                     }
                 }
@@ -331,8 +332,26 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
     }
 
-    $scope.setAllLocales = function(locale){
+    $scope.setAllLocales = function(locale) {
         console.info(locale)
+    }
+
+    $scope.shutdown = function(type) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'nav/shutdown.html',
+            controller: 'shutdownCtrl',
+            resolve: {
+                type: function() {
+                    return type
+                }
+            }
+        })
+    }
+
+    $scope.connect = function(connectTo){
+        console.info('connect ' + connectTo)
+        msg.send('connect', connectTo)
     }
 
     this.promiseTimeout = function(ms, promise) {
