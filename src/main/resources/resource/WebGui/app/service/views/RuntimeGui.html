@@ -1,34 +1,31 @@
 <div class="row">
-<div class="form-inline col-md-6">    
-    <h3>&nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;
-        <span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
-        <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
+    <div class="form-inline col-md-6">
+        <h3>
+            &nbsp;&nbsp;&nbsp;{{platform.arch}}.{{platform.jvmBitness}}.{{platform.os}} {{platform.mrlVersion}} &nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-repeat" ng-click="shutdown('restart')"></span>
+            <span class="glyphicon glyphicon-off" ng-click="shutdown('shutdown')"></span>
         </h3>
-</div>
-</div>
-
-Locale
-<div class="row">
-    <div class="form-inline col-md-6">    
-    <!-- {{locale}} -->
-            <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
-                <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-                <ui-select-choices repeat="(tag, localeData) in service.locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
-            </ui-select>
     </div>
 </div>
+Locale
 
 <div class="row">
-    <div class="form-inline col-md-6">    
-
-Language {{service.locale.displayLanguage}} {{service.locale.displayCountry}}
+    <div class="form-inline col-md-6">
+        <!-- {{locale}} -->
+        <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
+            <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
+            <ui-select-choices repeat="(tag, localeData) in service.locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+        </ui-select>
+    </div>
+</div>
+<div class="row">
+    <div class="form-inline col-md-6">Language {{service.locale.displayLanguage}} {{service.locale.displayCountry}}
 </div>
 </div>
-
 Create a new service
+
 <div class="row">
-    <div class="form-inline col-md-6">    
-    <!-- category begin -->
+    <div class="form-inline col-md-6">
+        <!-- category begin -->
         <ui-select ng-model="category.selected" theme="bootstrap" style="width: 3.5em">
             <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;category&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="true">
                 <span>
@@ -38,10 +35,11 @@ Create a new service
             <ui-select-choices repeat="category.key as (key, category) in service.serviceData.categoryTypes | filter: $select.search">
                 <span>
                     <img ng-src="{{'/core/category/' + category.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{category.value.name}}
+                
                 </span>
             </ui-select-choices>
         </ui-select>
-    <!-- category end -->
+        <!-- category end -->
         <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
         <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
         <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
@@ -57,6 +55,7 @@ Create a new service
                 <td nowrap>
                     <span ng-click="setServiceType(metaData.simpleName)">
                         <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
+                    
                     </span>
                 </td>
                 <td>
@@ -73,13 +72,6 @@ Create a new service
     </div>
 </div>
 <div class="row">
-    <form ng-submit="connect(connectTo);connectTo=null">
-        <div class="form-group col-md-6">
-            <input ng-model="connectTo" class="form-control span6" placeholder="connect e.g. http://robot.local:8888" title="connect to another instance of mrl"/>
-        </div>
-    </form>
-</div>
-<div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">
         <div class="form-group col-md-6">
             <input ng-model="cmd" class="form-control span6" placeholder="command" title="send commands to myrobotlab using the command box &#10;  /{name}/{method}/{parameter0}/{parameter1}/... &#10; ls - list &#10; pwd - print working directory"/>
@@ -89,6 +81,18 @@ Create a new service
 <div class="row">
     <div class="form-group col-md-6">
         <textarea ng-model="status" class="form-control" placeholder="status display" rows="8" cols="100" readonly></textarea>
+    </div>
+</div>
+<div class="row">
+    <form ng-submit="connect(connectTo);connectTo=null">
+        <div class="form-group col-md-6">
+            <input ng-model="connectTo" class="form-control span6" placeholder="connect e.g. http://robot.local:8888" title="connect to another instance of mrl"/>
+        </div>
+    </form>
+</div>
+<div class="row">
+    <div class="form-group col-md-6">
+        <b>default route {{defaultRoute}}</b>
     </div>
 </div>
 <div class="row">
@@ -108,9 +112,10 @@ Create a new service
                             <tr ng-repeat="c in connectionList">
                                 <td>
                                     <img ng-src="{{'/' + c['c-type'] + '.png'}}" width="18"/>{{c['c-type']}}                                
+                                
                                 </td>
                                 <td>gw {{c.gateway}}</td>
-                                <td>{{c.uuid}}</td>
+                                <td>{{c.uuid}} 	<span ng-click="msg.removeConnection(c.uuid)" class="glyphicon glyphicon-remove"/> </td>
                             </tr>
                         </table>
                     </td>

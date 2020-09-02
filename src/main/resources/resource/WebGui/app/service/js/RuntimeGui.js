@@ -270,6 +270,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.$apply()
                 break
             }
+        case 'onDefaultRoute':
+            {
+                $scope.defaultRoute = inMsg.data[0]
+                $scope.$apply()
+                break
+            }
         case 'onStatus':
             {
                 $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
@@ -379,8 +385,10 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getLocale")
     msg.subscribe("getLocales")
     msg.subscribe("getPlatform")
+    msg.subscribe("getDefaultRoute")
 
     //msg.send("getLocalServices")
+    msg.send("getDefaultRoute")
     msg.send("getConnectionHeaders")
     msg.send("getPlatform")
     msg.send("getServiceTypes")

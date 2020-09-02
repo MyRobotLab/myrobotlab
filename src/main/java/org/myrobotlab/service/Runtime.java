@@ -2044,6 +2044,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
+  public String getDefaultRoute() {
+    return defaultRoute;
+  }
+  
+  public String publishDefaultRoute(String defaultRoute) {
+    return defaultRoute;
+  }
+  
   /**
    * publishing event - since checkForUpdates may take a while
    */
@@ -2913,6 +2921,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     // is this always the case - latest always wins?
     defaultRoute = uuid;
+
+    // FIXME !!*#&@(*&$ - defaultRoute nor routeTable SHOULD NOT BE STATIC !!!!    
+    Runtime.getInstance().invoke("publishDefaultRoute", defaultRoute);
   }
 
   public void removeRoute(String uuid) {
@@ -2943,6 +2954,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } else {
         defaultRoute = null;
       }
+      invoke("publishDefaultRoute", defaultRoute);
     }
   }
 
