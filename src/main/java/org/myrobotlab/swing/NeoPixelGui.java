@@ -53,10 +53,12 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
   String detach = "detach";
   JButton attachButton = new JButton(attach);
 
+  JComboBox<Item> deviceList = new JComboBox<Item>();
   JComboBox<String> controller = new JComboBox<String>();
   JComboBox<String> pinList = new JComboBox<String>();
   JComboBox<String> pixelList = new JComboBox<String>();
 
+  JLabel deviceLabel = new JLabel("Device");
   JLabel controllerLabel = new JLabel("Controller");
   JLabel pinLabel = new JLabel("Pin");
   JLabel pixelLabel = new JLabel("Num. Pixel");
@@ -97,6 +99,8 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
 
     display.setLayout(new BorderLayout());
     JPanel north = new JPanel();
+    north.add(deviceLabel);
+    north.add(deviceList);
     north.add(controllerLabel);
     north.add(controller);
     north.add(pinLabel);
@@ -164,6 +168,7 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
     }
     display.add(center, BorderLayout.CENTER);
     display.add(anim, BorderLayout.SOUTH);
+    getDeviceList();
     getPinList();
     getPixelList();
     getAnimationList();
@@ -181,7 +186,7 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
       if (attachButton.getText().equals(attach)) {
         int index = controller.getSelectedIndex();
         if (index != -1) {
-          swingGui.send(boundServiceName, attach, controller.getSelectedItem(), pinList.getSelectedItem(), pixelList.getSelectedItem());
+          swingGui.send(boundServiceName, attach, controller.getSelectedItem(), pinList.getSelectedItem(), pixelList.getSelectedItem(), deviceList.getSelectedItem().getId());
         }
       } else {
         swingGui.send(boundServiceName, detach);
@@ -303,6 +308,11 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
     }
   }
 
+  public void getDeviceList() {
+	  deviceList.addItem(new Item(3, "RGB")); // 3 channels (24bit)
+	  deviceList.addItem(new Item(4, "RGBW")); // 4 channels (32bit)
+  }
+  
   public void getPinList() {
     for (int i = 0; i < 70; i++) {
       pinList.addItem(String.format("%d", i));
@@ -329,5 +339,29 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
         controller.setSelectedItem(boundService.getControllerName());
       }
     });
+  }
+  
+  private class Item {
+
+	private int id;
+	private String description;
+
+	public Item(int id, String description) {
+	  this.id = id;
+	  this.description = description;
+	}
+
+	public int getId() {
+	  return id;
+	}
+
+	public String getDescription() {
+	  return description;
+	}
+
+	@Override
+	public String toString() {
+	  return description;
+	}
   }
 }
