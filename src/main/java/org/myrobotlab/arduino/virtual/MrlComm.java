@@ -532,12 +532,12 @@ public class MrlComm implements SerialDataListener {
   }
 
   // > neoPixelAttach/pin/b16 numPixels
-  public void neoPixelAttach(int deviceId, int pin, long numPixels) {
+  public void neoPixelAttach(int deviceId, int pin, long numPixels, int depth) {
     // msg.publishDebug("MrlNeopixel.deviceAttach!");
 
     MrlNeopixel neo = (MrlNeopixel) addDevice(new MrlNeopixel(deviceId, virtual));
     virtualMsg.publishDebug("id" + String(deviceId));
-    neo.attach(pin, numPixels);
+    neo.attach(pin, numPixels, depth);
   }
 
   // > neoPixelAttach/pin/b16 numPixels
