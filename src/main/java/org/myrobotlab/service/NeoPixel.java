@@ -488,8 +488,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void detach(String controllerName) {
-    // TODO Auto-generated method stub
-
+	  detach((NeoPixelController) Runtime.getService(controllerName));
   }
 
   @Override

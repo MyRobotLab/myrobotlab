@@ -186,10 +186,10 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
       if (attachButton.getText().equals(attach)) {
         int index = controller.getSelectedIndex();
         if (index != -1) {
-          swingGui.send(boundServiceName, attach, controller.getSelectedItem(), pinList.getSelectedItem(), pixelList.getSelectedItem(), deviceList.getSelectedItem().getId());
+          swingGui.send(boundServiceName, attach, controller.getSelectedItem(), pinList.getSelectedItem(), pixelList.getSelectedItem());
         }
       } else {
-        swingGui.send(boundServiceName, detach);
+        swingGui.send(boundServiceName, detach, controller.getSelectedItem());
       }
     }
     if (o == sendPixelMatrix) {
