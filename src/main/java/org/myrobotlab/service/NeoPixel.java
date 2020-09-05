@@ -218,6 +218,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     msg.add(pixel.red);
     msg.add(pixel.green);
     msg.add(pixel.blue);
+    msg.add(pixel.white);
     setPixel(pixel);
     controller.neoPixelWriteMatrix(this, msg);
     // savedPixelMatrix.clear();
@@ -234,7 +235,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void sendPixel(String address, String red, String green, String blue) {
-    sendPixel(address, red, green, blue, "0.0"); 
+    sendPixel(address, red, green, blue, "0"); 
   }
   
   public void sendPixel(String address, String red, String green, String blue,String white) {
@@ -256,6 +257,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
         msg.add(pix.red);
         msg.add(pix.green);
         msg.add(pix.blue);
+        msg.add(pix.white);
         pix.changed = false;
         me.setValue(pix);
       }
@@ -296,15 +298,31 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
 
   public void attach(String controllerName, int pin, int numPixel) throws Exception {
-    attach((NeoPixelController) Runtime.getService(controllerName), pin, numPixel);
+    attach(controllerName, pin, numPixel, 3);
+  }
+  
+  public void attach(String controllerName, int pin, int numPixel, int depth) throws Exception {
+	attach((NeoPixelController) Runtime.getService(controllerName), pin, numPixel, depth);
   }
 
   public void attach(String controllerName, String pin, String numPixel) throws Exception {
-    attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel));
+    attach(controllerName, pin, numPixel, "RGB");
+  }
+  
+  public void attach(String controllerName, String pin, String numPixel, String depth) throws Exception {
+	int colorDepth = 3;
+	if (depth == "RGBW") {
+	  colorDepth = 4;
+	}
+	attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel), colorDepth);
   }
 
   @Override
   public void attach(NeoPixelController controller, int pin, int numPixel) {
+	  attach(controller, pin, numPixel, 3);
+  }
+  
+  public void attach(NeoPixelController controller, int pin, int numPixel, int depth) {
     if (controller == null) {
       error("setting null as controller");
       return;
@@ -316,6 +334,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     this.pin = pin;
     this.numPixel = numPixel;
+    this.depth = depth;
 
     // clear the old matrix
     pixelMatrix.clear();
