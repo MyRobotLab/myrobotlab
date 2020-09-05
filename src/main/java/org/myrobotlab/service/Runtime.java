@@ -13,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -134,6 +135,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient private final Map<String, Map<String, Object>> connections = new HashMap<>();
 
+  protected Map<String, String> remoteIdUrls = new HashMap<>();
+
   // idToconnections ?? - FIXME - make default route !
   // id to Connection .. where id is like ip.. might need priority
   // like routeTable <String, List<RouteEntry>>
@@ -150,18 +153,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private boolean needsRestart = false;
 
   static private String runtimeName;
-
-  /**
-   * Pid file of this process
-   */
-  File pidFile = null;
-
-  /**
-   * user specified data which prefixes built id
-   */
-  // static String customId;
-
-  final static String PID_DIR = "pids";
 
   static private boolean autoAcceptLicense = true; // at the moment
 
@@ -1569,7 +1560,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } catch (Exception e) {
       log.error("something threw - continuing to shutdown", e);
     }
-    
+
     System.exit(0);
   }
 
@@ -1623,7 +1614,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static InProcessCli stdInClient = null;
 
   public void connect() throws IOException {
-    connect(options.connect);
+    connect(options.connect); // FIXME - 0 to many
   }
 
   // FIXME - implement ! also implement the callback events .. onDisconnect
@@ -1664,8 +1655,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   // FIXME - implement
-  public void autoConnect(String url) {
-
+  public void connect(String url, boolean autoReconnect) {
+      if (!autoReconnect) {
+        connect(url);
+      } else {
+        addTask(1000, "checkConnections");
+      }
+  }
+  
+  public void checkConnections() {
+    for (String url : remoteIdUrls.values()) {
+      for (Map<String,Object> connection:connections.values()) {
+        if (connection.containsKey("url")) {
+          if (connection.get("url").toString().equals(url)) {
+            // already connected
+            continue;
+          }
+        }
+      }
+      // could not find our connection for this "id" - need to reconnect
+      connect(url);
+    }
   }
 
   // FIXME -
@@ -1712,6 +1722,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       attributes.put("uri", url); // not really correct
       attributes.put("user", "root");
       attributes.put("host", "local");
+
+      try {
+        URI uri = new URI(url);
+        String host = uri.getHost();
+        if (host.endsWith(".local")) {
+          // mDns broadcast ! - means {blah}.local blah == id
+          remoteIdUrls.put(host.substring(0, host.lastIndexOf(".")), url);
+        }
+      } catch (Exception e) {
+        /* don't care */}
 
       // addendum
       attributes.put("User-Agent", "runtime-client");
@@ -2047,11 +2067,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String getDefaultRoute() {
     return defaultRoute;
   }
-  
+
   public String publishDefaultRoute(String defaultRoute) {
     return defaultRoute;
   }
-  
+
   /**
    * publishing event - since checkForUpdates may take a while
    */
@@ -2769,7 +2789,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.info("Hello {} I am {} !", hello.id, getId());
       if (getId().equals(hello.id)) {
         log.warn("incoming request was for my own id {} - loopback not supported - removing connection", getId());
-        removeConection(uuid);
+        removeConnection(uuid);
         response.status = Status.error("loopback not supported");
         return response;
       }
@@ -2785,9 +2805,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       connection.put("request", hello);
 
-      // addClientAttribute(uuid, "request", request);
+      // IMPORTANT ADDING THE ID AND UPDATING ROUTE !!
       updateRoute(hello.id, uuid);
       getConnection(uuid).put("id", hello.id);
+      remoteIdUrls.put(hello.id, (String) getConnection(uuid).get("url"));
 
       // broadcast completed connection information
       invoke("getConnectionHeaders");
@@ -2922,7 +2943,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // is this always the case - latest always wins?
     defaultRoute = uuid;
 
-    // FIXME !!*#&@(*&$ - defaultRoute nor routeTable SHOULD NOT BE STATIC !!!!    
+    // FIXME !!*#&@(*&$ - defaultRoute nor routeTable SHOULD NOT BE STATIC !!!!
     Runtime.getInstance().invoke("publishDefaultRoute", defaultRoute);
   }
 
@@ -2972,9 +2993,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       attr.putAll(attributes);
     }
     connections.put(uuid, attr);
-
-    // recently removed - no connections in route table
-    // updateRoute(null, uuid);
+    if (attr.containsKey("id") && attr.containsKey("url")) {
+      remoteIdUrls.put((String)attr.get("id"), (String)attr.get("url"));
+    }
   }
 
   @Override
@@ -3008,9 +3029,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return msg;
   }
 
-  public void removeConection(String uuid) {
+  public void removeConnection(String uuid) {
     if (connections.remove(uuid) != null) {
       invoke("publishDisconnect", uuid);
+      invoke("getConnectionHeaders");
     }
     for (String id : routeTable.keySet()) {
       Set<String> conn = routeTable.get(id);
@@ -3027,11 +3049,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // FIXME - filter only serializable objects ?
   public Map<String, Object> publishConnect(Map<String, Object> attributes) {
     return attributes;
-  }
-
-  public void removeConnection(String uuid) {
-    connections.remove(uuid);
-    invoke("getConnectionHeaders");
   }
 
   /**

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -106,11 +107,11 @@ public class LangUtils {
     sb.append((Platform.isVirtual() ? "Platform.setVirtual(True)\n" : "# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
 
     // from current running system - vs something uncreated passed in ....
-    List<ServiceInterface> allServices = Runtime.getServices();
+    Map<String,ServiceInterface> allServices = Runtime.getLocalServices();
     List<ServiceInterface> services = new ArrayList<>();
     if (nameFilters != null) {
       for (String filter : nameFilters) {
-        for (ServiceInterface service : allServices) {
+        for (ServiceInterface service : allServices.values()) {
           if (service.getName().equals(filter)) {
             services.add(service);
           }
@@ -120,7 +121,7 @@ public class LangUtils {
 
     if (typeFilters != null) {
       for (String filter : typeFilters) {
-        for (ServiceInterface service : allServices) {
+        for (ServiceInterface service : allServices.values()) {
           if (service.getSimpleName().equals(filter)) {
             services.add(service);
           }
@@ -130,7 +131,7 @@ public class LangUtils {
 
     if (nameFilters == null && typeFilters == null) {
       // no filters
-      services = allServices;
+      services = new ArrayList<ServiceInterface>(allServices.values());
     }
 
     if (includeRuntime != null && includeRuntime) {
@@ -207,6 +208,8 @@ public class LangUtils {
 
     //
 
+    // connections
+    
     return sb.toString();
 
   }
