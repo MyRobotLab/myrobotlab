@@ -332,13 +332,13 @@ void MrlComm::i2cWriteRead(byte deviceId, byte deviceAddress, byte readSize, byt
 }
 
 // > neoPixelAttach/pin/b16 numPixels
-void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels)
+void MrlComm::neoPixelAttach(byte deviceId, byte pin, long numPixels, byte depth)
 {
 	//msg->publishDebug("MrlNeopixel.deviceAttach!");
 
 	MrlNeopixel *neo = (MrlNeopixel *)addDevice(new MrlNeopixel(deviceId));
 	msg->publishDebug("id" + String(deviceId));
-	neo->attach(pin, numPixels);
+	neo->attach(pin, numPixels, depth);
 }
 
 // > neoPixelAttach/pin/b16 numPixels

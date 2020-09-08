@@ -1358,12 +1358,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   @Override
-  // > neoPixelAttach/deviceId/pin/b32 numPixels
+  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
   public void neoPixelAttach(NeoPixel neopixel, int pin, int numPixels) {
     DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numPixels });
     Integer deviceId = dm.getId();
     msg.neoPixelAttach(getDeviceId(neopixel)/* byte */, pin/* byte */,
-        numPixels/* b32 */);
+        numPixels/* b32 */, neopixel.depth);
   }
 
   @Override
