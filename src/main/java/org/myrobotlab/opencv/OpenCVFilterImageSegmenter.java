@@ -3,7 +3,6 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.global.opencv_ximgproc.createSelectiveSearchSegmentation;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -27,8 +26,14 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   private static final long serialVersionUID = 1L;
   
   String method = "fast";
-  SelectiveSearchSegmentation ss = null;
+  
   RectVector regions = null;
+  // default values 
+  int baseK = 150;
+  int incrK = 150;
+  float sigma = 0.8f;
+  // purely for display purposes, only consider the first N regions?
+  int numToDisplay = 50;
   
   public OpenCVFilterImageSegmenter() {
     super();
@@ -46,17 +51,9 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   }
 
   private void initModel() {
-    // detector = readNet(modelFile);
-    // TODO: for some reason, we need to explicitly load this class 
-    // if it hasn't already been loaded prior to attempting to load
-    // the ximgproc classes.  odd. 
+    // Known issue with JavaCV, you need to load opencv_video first before loading
+    // the ximgproc class.
     Loader.load(opencv_video.class);
-    ss = createSelectiveSearchSegmentation();
-    if ("fast".equalsIgnoreCase(method)) {
-      ss.switchToSelectiveSearchFast();
-    } else {
-      ss.switchToSelectiveSearchQuality();
-    }
   }
 
   @Override
@@ -67,11 +64,18 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
     // set the image and segment it.
+    SelectiveSearchSegmentation ss = createSelectiveSearchSegmentation();
     ss.setBaseImage(OpenCV.toMat(image));
+    if ("fast".equalsIgnoreCase(method)) {
+      ss.switchToSelectiveSearchFast(baseK,incrK,sigma);
+    } else {
+      ss.switchToSelectiveSearchQuality(baseK,incrK,sigma);
+    }
+    
     regions = new RectVector();
     ss.process(regions);
     // TODO: an easier rect list object.
-    this.data.put("regions", regions);
+    data.put("regions", regions);
     // return the original image un-altered.
     return image;
   } 
@@ -81,8 +85,13 @@ public class OpenCVFilterImageSegmenter extends OpenCVFilter {
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     graphics.setColor(Color.RED);
     if (regions != null) {
+      int i = 0;
       for (Rect r : regions.get()) {
         graphics.drawRect(r.x(), r.y(), r.width(), r.height());
+        i++;
+        if (i > numToDisplay) {
+          break;
+        }
       }
     }
     return image;

@@ -194,6 +194,10 @@ public class OpenCVData extends CvData {
     return (IplImage) sources.get(fullKey);
   }
 
+  public Object getObject(String fullKey) {
+    return sources.get(fullKey);
+  }
+  
   public List<Rectangle> getBoundingBoxArray() {
     return (List) sources.get(String.format("%s.output.BoundingBoxArray", name));
   }
