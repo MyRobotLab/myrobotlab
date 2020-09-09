@@ -17,7 +17,7 @@ import org.myrobotlab.service.OpenCV;
 
 /**
  * This stage uses the image segmentation support in OpenCV to extract interesting regions from the image.
- * This is based on :  
+ * This is based on :  https://www.pyimagesearch.com/2020/06/29/opencv-selective-search-for-object-detection/
  * 
  * @author kwatters
  *
