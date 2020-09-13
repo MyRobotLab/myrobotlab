@@ -11,6 +11,7 @@ void Pixel::clearPixel() {
 	red = 0;
 	blue = 0;
 	green = 0;
+  white = 0;
 }
 
 void Pixel::setPixel(unsigned char red, unsigned char green,
@@ -34,7 +35,7 @@ MrlNeopixel::~MrlNeopixel() {
 	delete pixels;
 }
 
-bool MrlNeopixel::attach(byte pin, long numPixels) {
+bool MrlNeopixel::attach(byte pin, long numPixels, byte depth) {
   // msg->publishDebug("MrlNeopixel.deviceAttach !" + String(pin));
 	pixels = new Pixel[numPixels + 1];
 	//if (BOARD == BOARD_TYPE_ID_UNKNOWN) { // REALLY ? WHY ?
@@ -43,6 +44,7 @@ bool MrlNeopixel::attach(byte pin, long numPixels) {
 	//}
  this->pin = pin;
  this->numPixel = numPixels;
+ this->depth = depth;
 	state = 1;
 	bitmask = digitalPinToBitMask(pin);
 	pinMode(pin, OUTPUT);
@@ -579,6 +581,9 @@ inline void MrlNeopixel::sendPixel(Pixel p) {
 	sendByte(p.green); // Neopixel wants colors in green then red then blue order
 	sendByte(p.red);
 	sendByte(p.blue);
+  if (depth == 4) {
+    sendByte(p.white);
+  }
 }
 
 void MrlNeopixel::show() {

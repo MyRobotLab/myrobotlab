@@ -69,7 +69,7 @@ public class Msg {
   public transient final static Logger log = LoggerFactory.getLogger(Msg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 66;
+  public static final int MRLCOMM_VERSION = 67;
   // send buffer
   private int sendBufferSize = 0;
   private int sendBuffer[] = new int[MAX_MSG_SIZE];
@@ -148,7 +148,7 @@ public class Msg {
   public final static int I2C_WRITE_READ = 18;
   // < publishI2cData/deviceId/[] data
   public final static int PUBLISH_I2C_DATA = 19;
-  // > neoPixelAttach/deviceId/pin/b32 numPixels
+  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
   public final static int NEO_PIXEL_ATTACH = 20;
   // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
   public final static int NEO_PIXEL_SET_ANIMATION = 21;
@@ -1082,18 +1082,19 @@ public class Msg {
     }
   }
 
-  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/) {
+  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/) {
     if (debug) {
       log.info("Sending Message: neoPixelAttach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 4); // size
+      appendMessage(baos, 1 + 1 + 1 + 4 + 1); // size
       appendMessage(baos, NEO_PIXEL_ATTACH); // msgType = 20
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
       appendMessageb32(baos, numPixels);
+      appendMessage(baos, depth);
  
       byte[] message = sendMessage(baos);
       if (ackEnabled){
@@ -1107,6 +1108,8 @@ public class Msg {
         txBuffer.append(pin);
         txBuffer.append("/");
         txBuffer.append(numPixels);
+        txBuffer.append("/");
+        txBuffer.append(depth);
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
         txBuffer.setLength(0);

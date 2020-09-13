@@ -71,7 +71,7 @@
 < publishI2cData/deviceId/[] data
 
 # NeoPixel
-> neoPixelAttach/deviceId/pin/b32 numPixels
+> neoPixelAttach/deviceId/pin/b32 numPixels/depth
 > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
 > neoPixelWriteMatrix/deviceId/[] buffer
 

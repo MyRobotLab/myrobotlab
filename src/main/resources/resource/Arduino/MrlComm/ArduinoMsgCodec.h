@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			66
+#define MRLCOMM_VERSION			67
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -63,7 +63,7 @@
 #define I2C_WRITE_READ 18
 // < publishI2cData/deviceId/[] data
 #define PUBLISH_I2C_DATA 19
-// > neoPixelAttach/deviceId/pin/b32 numPixels
+// > neoPixelAttach/deviceId/pin/b32 numPixels/depth
 #define NEO_PIXEL_ATTACH 20
 // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
 #define NEO_PIXEL_SET_ANIMATION 21

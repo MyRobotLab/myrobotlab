@@ -36,7 +36,7 @@ public class MrlNeopixel extends Device {
 
   }
 
-  public void attach(int pin, long numPixels) {
+  public void attach(int pin, long numPixels, int depth) {
     // TODO Auto-generated method stub
 
   }

@@ -57,7 +57,7 @@ public class NeoPixelTest extends AbstractTest {
   @Test
   public void testSendPixelIntIntIntInt() {
     neopixel.sendPixel(2, 0, 255, 0);
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 255, 0)));
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 255, 0, 0)));
   }
 
   /**
@@ -76,7 +76,7 @@ public class NeoPixelTest extends AbstractTest {
   @Test
   public void testSetPixelIntIntIntInt() {
     neopixel.setPixel(2, 255, 0, 0);
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 255, 0, 0)));
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 255, 0, 0, 0)));
   }
 
   /**
@@ -85,7 +85,7 @@ public class NeoPixelTest extends AbstractTest {
   @Test
   public void testTurnOff() {
     neopixel.turnOff();
-    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 0, 0)));
+    assertTrue(neopixel.pixelMatrix.get(2).isEqual(new NeoPixel.PixelColor(2, 0, 0, 0, 0)));
     neopixel.turnOn();
   }
 
