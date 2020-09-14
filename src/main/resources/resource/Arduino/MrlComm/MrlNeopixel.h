@@ -65,6 +65,8 @@ struct Pixel{
   unsigned char red;
   unsigned char blue;
   unsigned char green;
+  unsigned char white;
+  byte depth;
   Pixel();
   void clearPixel();
   void setPixel(unsigned char red, unsigned char green, unsigned char blue);
@@ -89,10 +91,11 @@ class MrlNeopixel:public Device{
     int _dir;
     int _step;
     unsigned char _alpha;
+    byte depth;
   public:
   MrlNeopixel(int deviceId);
   ~MrlNeopixel();
-  bool attach(byte pin, long numPixels);
+  bool attach(byte pin, long numPixels, byte depth);
 #ifndef ESP8266
   inline void sendBitB(bool bitVal);
   inline void sendBitC(bool bitVal);

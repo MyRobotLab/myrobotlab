@@ -69,7 +69,7 @@ public class VirtualMsg {
   public transient final static Logger log = LoggerFactory.getLogger(VirtualMsg.class);
   public static final int MAX_MSG_SIZE = 64;
   public static final int MAGIC_NUMBER = 170; // 10101010
-  public static final int MRLCOMM_VERSION = 66;
+  public static final int MRLCOMM_VERSION = 67;
   // send buffer
   private int sendBufferSize = 0;
   private int sendBuffer[] = new int[MAX_MSG_SIZE];
@@ -148,7 +148,7 @@ public class VirtualMsg {
   public final static int I2C_WRITE_READ = 18;
   // < publishI2cData/deviceId/[] data
   public final static int PUBLISH_I2C_DATA = 19;
-  // > neoPixelAttach/deviceId/pin/b32 numPixels
+  // > neoPixelAttach/deviceId/pin/b32 numPixels/depth
   public final static int NEO_PIXEL_ATTACH = 20;
   // > neoPixelSetAnimation/deviceId/animation/red/green/blue/b16 speed
   public final static int NEO_PIXEL_SET_ANIMATION = 21;
@@ -241,7 +241,7 @@ public class VirtualMsg {
   // public void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/){}
   // public void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/){}
   // public void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/){}
-  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/){}
+  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/){}
   // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/){}
   // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
   // public void analogWrite(Integer pin/*byte*/, Integer value/*byte*/){}
@@ -474,10 +474,12 @@ public class VirtualMsg {
       startPos += 1;
       Integer numPixels = b32(ioCmd, startPos+1);
       startPos += 4; //b32
+      Integer depth = ioCmd[startPos+1]; // bu8
+      startPos += 1;
       if(invoke){
-        arduino.invoke("neoPixelAttach",  deviceId,  pin,  numPixels);
+        arduino.invoke("neoPixelAttach",  deviceId,  pin,  numPixels,  depth);
       } else { 
-         arduino.neoPixelAttach( deviceId,  pin,  numPixels);
+         arduino.neoPixelAttach( deviceId,  pin,  numPixels,  depth);
       }
       break;
     }
