@@ -5,6 +5,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
+    $scope.mrl = mrl
 
 
     $scope.errorCount = 0

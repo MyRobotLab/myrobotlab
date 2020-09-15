@@ -9,14 +9,19 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
+import org.myrobotlab.swing.WolframAlphaGui;
+import org.slf4j.Logger;
 
 public class Stepper_ArduinoGui extends StepperControllerPanel implements ActionListener {
 
   private static final long serialVersionUID = 1L;
   private SwingGui myService;
+
+  public final static Logger log = LoggerFactory.getLogger(Stepper_ArduinoGui.class);
 
   JLabel powerPinLabel = new JLabel("<html>power pin<br><font color=white bgcolor=green>speed control</font></html>");
   JLabel directionPinLabel = new JLabel("direction pin");
@@ -33,7 +38,12 @@ public class Stepper_ArduinoGui extends StepperControllerPanel implements Action
     this.myService = myService;
     this.arduinoName = controllerName;
     this.motorName = motorName;
-    PinArrayControl o = (PinArrayControl) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
+    PinArrayControl o = null;
+    try {
+      o = (PinArrayControl) myService.sendBlocking(controllerName, "publishState", (Object[]) null);
+    } catch (Exception e) {
+      log.error("could not get PinArrayControl", e);
+    }
     pinList = o.getPinList();
 
     for (int i = 0; i < pinList.size(); ++i) {

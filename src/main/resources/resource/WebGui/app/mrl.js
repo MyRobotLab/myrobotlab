@@ -284,8 +284,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * and type. It will wait until the foreign process sends a onRegistered
      * with details of state info
      */
-    this.getHelloResponse = function(request) {
-        console.log('--> got getHelloResponse: and set jsRuntimeMethodCallbackMap')
+    this.authenticate = function(request) {
+        console.log('--> got authenticate: and set jsRuntimeMethodCallbackMap')
         let hello = JSON.parse(request.data[1])
 
         remotePlatform = hello.platform
@@ -310,7 +310,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.subscribe(fullname, 'released')
 
         // FIXME - remove the over-complicated promise
-        console.log('--> got getHelloResponse: end')
+        console.log('--> got authenticate: end')
     }
 
     /**
@@ -620,15 +620,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         // blocking in the sense it will take the return data switch sender & destination - place an 'R'
         // and effectively return to sender without a subscription
-        // _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
+        // _self.sendToBlocking('runtime', "authenticate", "fill-uuid", hello)
         // FIXME - this is not full address - but its being sent to a remote runtime :()
 
-        // var msg = _self.createMessage('runtime', "getHelloResponse", "fill-uuid", hello)
+        // var msg = _self.createMessage('runtime', "authenticate", "fill-uuid", hello)
         // msg.msgType = 'B' // no timeout - simple 'B'locking expects a resturn msg
         // _self.sendMessage(msg)
-        console.debug('sending getHelloResponse to host runtime with hello ' + JSON.stringify(hello))
+        console.debug('sending authenticate to host runtime with hello ' + JSON.stringify(hello))
 
-        _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
+        _self.sendTo('runtime', "authenticate", "fill-uuid", hello)
 
         console.debug('mrl.onOpen begin')
 
@@ -1498,8 +1498,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so
-    methodCallbackMap['getHelloResponse'] = []
-    methodCallbackMap['getHelloResponse'].push(_self.getHelloResponse)
+    methodCallbackMap['authenticate'] = []
+    methodCallbackMap['authenticate'].push(_self.authenticate)
     methodCallbackMap['onHelloResponse'] = []
     methodCallbackMap['onHelloResponse'].push(_self.onHelloResponse)
 

@@ -44,6 +44,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
@@ -534,14 +535,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   @Override
   public void connect(String uri) throws Exception {
     // easy single client support
-    Map<String, Object> attributes = new HashMap<>();
+    Connection attributes = new Connection();
     attributes.put("gateway", getName());
     attributes.put("c-type", getSimpleName());
     attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
     String uuid = java.util.UUID.randomUUID().toString();
     attributes.put("uuid", uuid);
     Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.updateRoute(guiId, uuid);
+    Runtime.getInstance().updateRoute(guiId, uuid);
   }
 
   public Geometry createBoundingBox(Spatial spatial, String color) {
@@ -860,10 +861,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return null;
   }
 
-  @Override
-  public Map<String, Map<String, Object>> getClients() {
-    // TODO Auto-generated method stub
-    return null;
+  @Override 
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
   }
 
   public String getCoorAxesName(Spatial spatial) {
@@ -1773,11 +1773,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return search.getResults();
   }
 
-  @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
   @Override
   public void sendRemote(Message msg) throws Exception {

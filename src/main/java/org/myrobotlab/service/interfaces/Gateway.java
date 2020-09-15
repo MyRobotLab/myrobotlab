@@ -30,6 +30,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.net.Connection;
 
 public interface Gateway extends NameProvider {
 
@@ -37,11 +38,14 @@ public interface Gateway extends NameProvider {
 
   public List<String> getClientIds();
   
-  public Map<String, Map<String, Object>> getClients();
+  // FIXME - change to getConnections !!...
+  // TODO getConnection() would be the context of a gateway which connections its responsible for
+  public Map<String, Connection> getClients();
 
   public void sendRemote(final Message msg) throws Exception;
   
-  public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
+  // FIXME - remove - not necessary - timeout implemented in waitForMsg 
+  // public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
   
   public boolean isLocal(Message msg);
   

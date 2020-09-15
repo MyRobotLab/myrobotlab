@@ -8,7 +8,7 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
 import org.myrobotlab.image.Util;
-import org.myrobotlab.net.Connection;
+import org.myrobotlab.swing.Connection;
 
 public class ConnectionNodeRenderer extends JLabel implements ListCellRenderer {
   private static final long serialVersionUID = 1L;

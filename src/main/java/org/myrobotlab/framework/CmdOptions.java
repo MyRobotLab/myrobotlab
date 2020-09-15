@@ -80,15 +80,9 @@ public class CmdOptions {
   // public boolean startInLauncher = false;
 
   
-  // deprecated ??? - only interaction is on a network now ???
-  /*
-  @Option(names = { "--interactive" }, description = "starts in interactive mode - reading from stdin")
-  public boolean interactive = false;
-  */
-
-  // FIXME - change to spawned-from-launcher...
-  @Option(names = { "--spawned-from-launcher" }, description = "starts in interactive mode - reading from stdin")
-  public boolean spawnedFromLauncher = false;
+  // FIXME - change to cli...
+  @Option(names = { "--no-cli" }, description = "prevents starting in interactive mode - reading from stdin")
+  public boolean noCli = false;
 
   @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
   public boolean help = false;

@@ -32,6 +32,7 @@ public class Launcher {
 
   public final static Logger log = LoggerFactory.getLogger(Launcher.class);
 
+  // process handles give to runtime
   static Process process = null;
 
   // location of repo - is target (as maven expects output)
@@ -120,9 +121,10 @@ public class Launcher {
     // append/merge incoming arguments
     cmd.addAll(cmdLine);
     
-    if (!contains(cmd, "--spawned-from-launcher")) {
-      cmd.add("--spawned-from-launcher");
+    if (!contains(cmd, "--no-cli")) {
+      cmd.add("--no-cli");
     }
+    
 
     
     // FIXME - reporting from different levels .. one is stdout the other is the
@@ -183,29 +185,6 @@ public class Launcher {
     return spawning.toString();
   }
 
-  /**
-   * A version to be unique is both {branch}-{version}. This finds all currently
-   * available versions.
-   * 
-   * @return
-   */
-  public static Set<String> getLocalVersions() {
-    Set<String> versions = new TreeSet<>();
-    // get local file system versions
-    File branchDir = new File(TARGET_LOCATION);
-    // get local existing versions
-    File[] listOfFiles = branchDir.listFiles();
-    for (int i = 0; i < listOfFiles.length; ++i) {
-      File file = listOfFiles[i];
-
-      if (file.getName().startsWith("myrobotlab-") && file.getName().endsWith(".jar")) {
-        String version = file.getName().substring(("myrobotlab-").length() + 1, file.getName().length() - ".jar".length());
-        log.info("found {} branch-version {}", file.getName(), version);
-        versions.add(version);
-      }
-    }
-    return versions;
-  }
 
   /**
    * prints help to the console

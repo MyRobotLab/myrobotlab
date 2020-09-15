@@ -54,6 +54,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
@@ -138,6 +139,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   private static final long serialVersionUID = 1L;
 
   transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
+  
+  transient protected JmDNS jmdns = null;
 
   /**
    * needed to get the api key to select the appropriate api processor
@@ -391,7 +394,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   @Override
-  public Map<String, Map<String, Object>> getClients() {
+  public Map<String, Connection> getClients() {
     return Runtime.getInstance().getConnections(getName());
   }
 
@@ -630,14 +633,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       if (newPersistentConnection && apiKey.equals(CodecUtils.API_MESSAGES)) {
 
         // NEW AND IMPORTANT ! - create a route entry for this "ID" !!!
-        Runtime.updateRoute(id, uuid);
+        Runtime.getInstance().updateRoute(id, uuid);
 
         // new connection with messages api means we want to send a
-        // getHelloResponse(hello) to the "NEW" client - we can do it because
+        // authenticate(hello) to the "NEW" client - we can do it because
         // its only 1 hop away and the outstream is connected to it
         // - we don't need to wait for a message from them with the outstream
         OutputStream out = r.getResponse().getOutputStream();
-        Message msg = getDefaultMsg(uuid); // SEND BACK getHelloResponse(hello)
+        Message msg = getDefaultMsg(uuid); // SEND BACK authenticate(hello)
         // Service.sleep(1000);
         log.info(String.format("new connection %s", request.getRequestURI()));
         out.write(CodecUtils.toJson(msg).getBytes());
@@ -648,7 +651,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         // decode into a String[] or json strings
 
-        Message msg = CodecUtils.cliToMsg(getName(), null, r.getRequest().getPathInfo());
+        Message msg = CodecUtils.cliToMsg(null, getName(), null, r.getRequest().getPathInfo());
 
         if (isLocal(msg)) {
           String serviceName = msg.getFullName();// getName();
@@ -683,7 +686,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
            * identifier bound with the connection. The sender's id is put into
            * the route table with connection information.
            */
-          Runtime.updateRoute(msg.getSrcId(), uuid);
+          Runtime.getInstance().updateRoute(msg.getSrcId(), uuid);
 
           if (msg.containsHop(getId())) {
             log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
@@ -725,7 +728,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
           // higher level protocol - ordered steps to establish routing
           // must add meta data of connection to system
-          if (msg.getName().equals(serviceName) && "getHelloResponse".equals(msg.method)) {
+          if (msg.getName().equals(serviceName) && "authenticate".equals(msg.method)) {
             // "fill-uuid" - FILLING UUID !!!! FOR THE FUNCTION - WOULDN'T IT BE
             // COOL IF FROM WITHIN A METHOD
             // YOU COULD GET msg.annoations ! - in the interim we have to do it
@@ -766,12 +769,13 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // TODO - at some point we want the option of not trusting the
           // sender's return address
           retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
-
+/* RECENTLY REMOVED !!
           if (msg.isBlocking()) {
             retMsg.msgId = msg.msgId;
             retMsg.msgType = Message.RETURN;
             send(retMsg);
           }
+*/          
         } else {
           // msg came is and is NOT local - we will attempt to route it on its
           // way by sending it to send(msg)
@@ -791,7 +795,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   private boolean upsertConnection(AtmosphereResource r) {
-    Map<String, Object> attributes = new HashMap<>();
+    Connection connection = new Connection();
     String uuid = r.uuid();
     Runtime runtime = Runtime.getInstance();
 
@@ -799,7 +803,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     // this is the route table - this field should be
     // indexed !
     String id = r.getRequest().getParameter("id");
-    attributes.put("id", id);
+    connection.put("id", id);
 
     if (!runtime.connectionExists(r.uuid())) {
       r.addEventListener(onDisconnect);
@@ -807,39 +811,39 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       Enumeration<String> headerNames = request.getHeaderNames();
 
       // required attributes - id ???/
-      attributes.put("uuid", r.uuid());
+      connection.put("uuid", r.uuid());
       // so this is an interesting one .. getRequestURI is less descriptive than
       // getRequestURL
       // yet by RFC definition URL is a subset of URI .. wtf ?
-      attributes.put("uri", r.getRequest().getRequestURL().toString());
+      connection.put("uri", r.getRequest().getRequestURL().toString());
       // attributes.put("url", r.getRequest().getRequestURL());
-      attributes.put("host", r.getRequest().getRemoteAddr());
-      attributes.put("gateway", getName());
+      connection.put("host", r.getRequest().getRemoteAddr());
+      connection.put("gateway", getName());
 
       // connection specific
-      attributes.put("c-r", r);
-      attributes.put("c-type", "WebGui");
+      connection.putTransient("c-r", r);
+      connection.put("c-type", "WebGui");
 
       // cli specific
-      attributes.put("cwd", "/");
+      connection.put("cwd", "/");
 
       // addendum
-      attributes.put("user", "root");
+      connection.put("user", "root");
 
       while (headerNames.hasMoreElements()) {
         String headerName = headerNames.nextElement();
         Enumeration<String> headers = request.getHeaders(headerName);
         while (headers.hasMoreElements()) {
           String headerValue = headers.nextElement();
-          attributes.put(String.format("header-%s", headerName), headerValue);
+          connection.put(String.format("header-%s", headerName), headerValue);
         }
       }
-      Runtime.getInstance().addConnection(uuid, attributes);
+      Runtime.getInstance().addConnection(uuid, connection);
       return true;
     } else {
       // keeping it "fresh" - the resource changes every request ..
       // it switches on
-      runtime.getConnection(uuid).put("c-r", r);
+      runtime.getConnection(uuid).putTransient("c-r", r);
       return false;
     }
   }
@@ -1087,7 +1091,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         broadcaster.broadcast(json);
       } else {
         // uni-cast mode - all clients have their own id
-        String uuid = Runtime.getRoute(msg.getId());
+        String uuid = Runtime.getInstance().getRoute(msg.getId());
         Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);
         broadcaster.broadcast(json);
       }
@@ -1256,36 +1260,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void setSsl(boolean b) {
     isSsl = b;
   }
-
-  @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) {
-    String remoteId = msg.getId();
-    Gateway gateway = Runtime.getInstance().getGatway(remoteId);
-    if (!gateway.equals(this)) {
-      log.error("gateway for this msg is {} but its come to me {}", gateway.getName(), getName());
-      return null;
-    }
-
-    // getRoute
-    String toUuid = Runtime.getRoute(msg.getId());
-    if (toUuid == null) {
-      log.error("could not get uuid from this msg id {}", msg.getId());
-      return null;
-    }
-
-    // get remote connection
-    Map<String, Object> conn = Runtime.getInstance().getConnection(toUuid);
-    if (conn == null) {
-      log.error("could not get connection for this uuid {}", toUuid);
-      return null;
-    }
-    broadcast(toUuid, CodecUtils.toJson(msg));
-    // FIXME !!! implement !!
-    return null;
-  }
   
-  transient protected JmDNS jmdns = null;
-
   public void startMdns() {
     try {
       if (jmdns == null) {
@@ -1323,9 +1298,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "intro", "Intro"});
-      Runtime.main(new String[] { "--id", "admin", "-c", "http://worke.local:8888"});
-
-      Runtime.start("python", "Python");
+      // Runtime.main(new String[] { "--id", "admin", "-c", "http://worke.local:8888"});
+      Runtime.main(new String[]{"--id","admin"});
+      // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);

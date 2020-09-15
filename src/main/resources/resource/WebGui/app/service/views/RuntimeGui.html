@@ -8,6 +8,7 @@
 </div>
 Locale
 
+
 <div class="row">
     <div class="form-inline col-md-6">
         <!-- {{locale}} -->
@@ -23,6 +24,7 @@ Locale
 </div>
 Create a new service
 
+
 <div class="row">
     <div class="form-inline col-md-6">
         <!-- category begin -->
@@ -35,6 +37,7 @@ Create a new service
             <ui-select-choices repeat="category.key as (key, category) in service.serviceData.categoryTypes | filter: $select.search">
                 <span>
                     <img ng-src="{{'/core/category/' + category.key + '.png'}}" width="18"/>&nbsp;&nbsp;&nbsp;&nbsp;{{category.value.name}}
+                
                 
                 </span>
             </ui-select-choices>
@@ -55,6 +58,7 @@ Create a new service
                 <td nowrap>
                     <span ng-click="setServiceType(metaData.simpleName)">
                         <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
+                    
                     
                     </span>
                 </td>
@@ -92,7 +96,7 @@ Create a new service
 </div>
 <div class="row">
     <div class="form-group col-md-6">
-        <b>default route {{defaultRoute}}</b>
+        <b>default route {{service.defaultRoute}}</b>
     </div>
 </div>
 <div class="row">
@@ -100,24 +104,22 @@ Create a new service
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th scope="col">remote id</th>
-                    <th scope="col">connections</th>
+                    <th>remote id</th>
+                    <th>type</th>
+                    <th>gateway</th>
+                    <th>connection id</th>
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="(id, connectionList) in connections">
-                    <td>{{id}}</td>
+                <tr ng-repeat="(id, entry) in connections">
+                    <!-- td>{{id}}</td -->
+                    <td>{{entry.serializable.id}}</td>
                     <td>
-                        <table class="table table-hover">
-                            <tr ng-repeat="c in connectionList">
-                                <td>
-                                    <img ng-src="{{'/' + c['c-type'] + '.png'}}" width="18"/>{{c['c-type']}}                                
-                                
-                                </td>
-                                <td>gw {{c.gateway}}</td>
-                                <td>{{c.uuid}} 	<span ng-click="msg.removeConnection(c.uuid)" class="glyphicon glyphicon-remove"/> </td>
-                            </tr>
-                        </table>
+                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                    </td>
+                    <td>{{entry.serializable.gateway}}</td>
+                    <td>
+                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
                     </td>
                 </tr>
             </tbody>

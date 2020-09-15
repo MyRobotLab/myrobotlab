@@ -44,11 +44,9 @@ import org.myrobotlab.codec.CodecUtils;
 public class Message implements Serializable {
   
   private static final long serialVersionUID = 1L;
-
-  // FIXME - change to enumeration and make it work !
-  public final static String BLOCKING = "B";
-  public final static String RETURN = "R";
-
+  
+  // FIXME msgId should be a String encoded value of src and an atomic increment 
+  // ROS comes with a seq Id, a timestamp, and a frame Id
   /**
    * unique identifier for this message
    */
@@ -77,7 +75,6 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  // public Set<String> historyListx;
   protected List<String> historyList;
 
   /**
@@ -95,7 +92,7 @@ public class Message implements Serializable {
 
   public String status;
 
-  public String msgType; // Broadcast|Blocking|Blocking Return - deprecated
+  public String dataEncoding; // null == none |json|cli|xml|stream ...
   /**
    * the method which will be invoked on the destination @see Service
    */
@@ -148,7 +145,7 @@ public class Message implements Serializable {
     // historyList = other.historyList;
     historyList = new ArrayList<String>();
     status = other.status;
-    msgType = other.msgType;
+    dataEncoding = other.dataEncoding;
     method = other.method;
     // you know the dangers of reference copy
     data = other.data;
@@ -171,23 +168,6 @@ public class Message implements Serializable {
     Message msg = new Message();
     msg.name = name; // destination instance name
     msg.sender = sender;
-    
-    /**
-     * <pre>
-     * THIS IS THE FUTURE !!!! - but both webgui and swinggui must change and maintain a "virtual" instance of
-     * all the services (which they currently do) with a "real" Runtime.getId() and be a gateway
-     *
-    if (sender == null) {
-      log.error("return address should not be null - but it is ... {}", msg);
-    } else if (!sender.contains("@")) {
-      // add our id - this pulls in Runtime (big dependency for a Message :( ) - but 
-      // its important to lay down the law and begin to write our "complete" address on our
-      // messages ..
-      msg.sender = String.format("%s@%s", sender, Runtime.getInstance().getId());
-    } else {
-      msg.sender = sender;
-    }
-    */
     msg.data = data;
     msg.method = method;
 
@@ -241,10 +221,6 @@ public class Message implements Serializable {
     return null;
   }
 
-  public boolean isBlocking() {
-    return BLOCKING.equals(msgType);
-  }
-
   public String getSrcId() {
     int pos = sender.indexOf("@");
     if (pos > 0) {
@@ -253,14 +229,21 @@ public class Message implements Serializable {
     return null;
   }
 
+  public String getSrcName() {
+    if (sender == null) {
+      return null;
+    }
+    int pos = sender.indexOf("@");
+    if (pos > 0) {
+      return sender.substring(0, pos);
+    }
+    return sender;
+  }
+  
   public String getFullName() {
     return name;
   }
-
-  public void setBlocking() {
-    msgType = BLOCKING;
-  }
-
+  
   public void addHop(String id) {
     historyList.add(id);
   }
@@ -280,6 +263,18 @@ public class Message implements Serializable {
 
   public List<String> getHops() {
     return historyList;
+  }
+
+  public String getSrcFullName() {
+    return sender;
+  }
+
+  public long getMsgId() {
+    return msgId;
+  }
+
+  public String getMethod() {
+    return method;
   }
 
 }
