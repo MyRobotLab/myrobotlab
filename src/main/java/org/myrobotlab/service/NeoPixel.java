@@ -54,18 +54,22 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   transient NeoPixelController controller;
 
+  public Integer depth = 0;
+  
   public static class PixelColor {
     public int address;
     public int red;
     public int blue;
     public int green;
+    public int white;
     public boolean changed;
 
-    PixelColor(int address, int red, int green, int blue) {
+    PixelColor(int address, int red, int green, int blue, int white) {
       this.address = address;
       this.red = red;
       this.blue = blue;
       this.green = green;
+      this.white = white;
       changed = true;
     }
 
@@ -74,6 +78,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       red = 0;
       blue = 0;
       green = 0;
+      white = 0;
       changed = true;
     }
 
@@ -173,12 +178,19 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void setPixel(int address, int red, int green, int blue) {
-    PixelColor pixel = new PixelColor(address, red, green, blue);
+    setPixel(address, red, green, blue, 0); 
+  }
+  
+  public void setPixel(int address, int red, int green, int blue, int white) {
+    PixelColor pixel = new PixelColor(address, red, green, blue, white);
     setPixel(pixel);
   }
-
   public void setPixel(String address, String red, String green, String blue) {
-    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue));
+    setPixel(address, red, green, blue, "0");
+  }
+  
+  public void setPixel(String address, String red, String green, String blue, String white) {
+    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue), Integer.parseInt(white));
     setPixel(pixel);
   }
 
@@ -206,6 +218,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
     msg.add(pixel.red);
     msg.add(pixel.green);
     msg.add(pixel.blue);
+    msg.add(pixel.white);
     setPixel(pixel);
     controller.neoPixelWriteMatrix(this, msg);
     // savedPixelMatrix.clear();
@@ -213,12 +226,20 @@ public class NeoPixel extends Service implements NeoPixelControl {
   }
 
   public void sendPixel(int address, int red, int green, int blue) {
-    PixelColor pixel = new PixelColor(address, red, green, blue);
+    sendPixel(address, red, green, blue, 0);
+  }
+  
+  public void sendPixel(int address, int red, int green, int blue, int white) {
+    PixelColor pixel = new PixelColor(address, red, green, blue, white);
     sendPixel(pixel);
   }
 
   public void sendPixel(String address, String red, String green, String blue) {
-    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue));
+    sendPixel(address, red, green, blue, "0"); 
+  }
+  
+  public void sendPixel(String address, String red, String green, String blue,String white) {
+    PixelColor pixel = new PixelColor(Integer.parseInt(address), Integer.parseInt(red), Integer.parseInt(green), Integer.parseInt(blue), Integer.parseInt(white));
     sendPixel(pixel);
   }
 
@@ -236,6 +257,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
         msg.add(pix.red);
         msg.add(pix.green);
         msg.add(pix.blue);
+        msg.add(pix.white);
         pix.changed = false;
         me.setValue(pix);
       }
@@ -261,7 +283,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   public void turnOff() {
     for (int i = 1; i <= numPixel; i++) {
-      PixelColor pixel = new PixelColor(i, 0, 0, 0);
+      PixelColor pixel = new PixelColor(i, 0, 0, 0, 0);
       setPixel(pixel);
     }
     animationStop();
@@ -276,15 +298,31 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
 
   public void attach(String controllerName, int pin, int numPixel) throws Exception {
-    attach((NeoPixelController) Runtime.getService(controllerName), pin, numPixel);
+    attach(controllerName, pin, numPixel, 3);
+  }
+  
+  public void attach(String controllerName, int pin, int numPixel, int depth) throws Exception {
+	attach((NeoPixelController) Runtime.getService(controllerName), pin, numPixel, depth);
   }
 
   public void attach(String controllerName, String pin, String numPixel) throws Exception {
-    attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel));
+    attach(controllerName, pin, numPixel, "RGB");
+  }
+  
+  public void attach(String controllerName, String pin, String numPixel, String depth) throws Exception {
+	int colorDepth = 3;
+	if (depth == "RGBW") {
+	  colorDepth = 4;
+	}
+	attach((NeoPixelController) Runtime.getService(controllerName), Integer.parseInt(pin), Integer.parseInt(numPixel), colorDepth);
   }
 
   @Override
   public void attach(NeoPixelController controller, int pin, int numPixel) {
+	  attach(controller, pin, numPixel, 3);
+  }
+  
+  public void attach(NeoPixelController controller, int pin, int numPixel, int depth) {
     if (controller == null) {
       error("setting null as controller");
       return;
@@ -296,13 +334,14 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
     this.pin = pin;
     this.numPixel = numPixel;
+    this.depth = depth;
 
     // clear the old matrix
     pixelMatrix.clear();
 
     // create a new matrix
     for (int i = 1; i < numPixel + 1; i++) {
-      setPixel(new PixelColor(i, 0, 0, 0));
+      setPixel(new PixelColor(i, 0, 0, 0, 0));
     }
 
     controller.neoPixelAttach(this, pin, numPixel);
@@ -355,7 +394,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
       // webgui.startBrowser("http://localhost:8888/#/service/neopixel");
       neopixel.attach(arduino, 6, 120);
       // sleep(50);
-      PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0);
+      PixelColor pix = new NeoPixel.PixelColor(1, 255, 255, 0, 0);
       // neopixel.setPixel(pix);
       neopixel.sendPixel(pix);
       // neopixel.setAnimation(NEOPIXEL_ANIMATION_LARSON_SCANNER, 255, 0, 0, 1);
@@ -468,8 +507,7 @@ public class NeoPixel extends Service implements NeoPixelControl {
 
   @Override
   public void detach(String controllerName) {
-    // TODO Auto-generated method stub
-
+	  detach((NeoPixelController) Runtime.getService(controllerName));
   }
 
   @Override
