@@ -16,11 +16,11 @@ import org.slf4j.Logger;
 
 import picocli.CommandLine.Option;
 
-public class Builder extends Service {
+public class Maven extends Service {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(Builder.class);
+  public final static Logger log = LoggerFactory.getLogger(Maven.class);
 
   static String currentBranch;
 
@@ -32,7 +32,7 @@ public class Builder extends Service {
   @Option(names = { "--src", "--use-source" }, arity = "0..1", description = "use latest source")
   public String src;
 
-  public Builder(String n, String id) {
+  public Maven(String n, String id) {
     super(n, id);
   }
 
@@ -184,7 +184,7 @@ public class Builder extends Service {
   public static void main(String[] args) {
     try {
 
-      Builder builder = (Builder) Runtime.start("builder", "Builder");
+      Maven builder = (Maven) Runtime.start("builder", "Builder");
       builder.mvn("agent-removal", "compile");
       // builder.mvn("agent-removal", "package");
 
