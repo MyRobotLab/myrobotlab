@@ -400,6 +400,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       removeFilterButton.addActionListener(this);
       url.addActionListener(this);
       undock.addActionListener(this);
+      currentFilters.addListSelectionListener(this);
     } else {
       // remove listeners
       addFilterButton.removeActionListener(this);
@@ -415,6 +416,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       removeFilterButton.removeActionListener(this);
       url.removeActionListener(this);
       undock.removeActionListener(this);
+      currentFilters.removeListSelectionListener(this);
     }
   }
 
@@ -456,7 +458,7 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       public void run() {
 
         enableListeners(false);
-
+// GAH !!
         // seems pretty destructive :P
         currentFilterListModel.clear();
         // add new filters from service into gui
@@ -592,13 +594,13 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
       OpenCVFilterGui filter = currentFilters.getSelectedValue();
       log.info("gui valuechange setting to {}", filter);
       if (filter != null) {
-        send("setDisplayFilter", filter.name);
+        // send("setDisplayFilter", filter.name);
         filterGuiDisplay.removeAll();
         filterGuiDisplay.add(filter.getDisplay());
         filterGuiDisplay.repaint();
         filterGuiDisplay.validate();
       } else {
-        send("setDisplayFilter", INPUT_KEY);
+        // send("setDisplayFilter", INPUT_KEY);
         filterGuiDisplay.removeAll();
         filterGuiDisplay.add(new JLabel("no filter selected"));
         filterGuiDisplay.repaint();
