@@ -406,7 +406,7 @@ public class Updater extends Service {
             Git.removeProps();
             
             // FIXME - compile or package mode ! 
-            String ret = Builder.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline);
+            String ret = Maven.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline);
             if (ret != null & ret.contains("BUILD SUCCESS")) {
               offline = true;
             }

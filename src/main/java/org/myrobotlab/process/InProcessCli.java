@@ -10,6 +10,7 @@ import java.util.Map;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
@@ -57,8 +58,11 @@ public class InProcessCli implements Runnable {
                                     // "runtime/ls/";
 
   private Map<String, NatEntry> natTable = new HashMap<>();
-  
-  
+
+  private String relayTo;
+
+  private String relayMethod;
+
   public static class NatEntry {
     // FIXME msgId !
     public String method;
@@ -66,9 +70,9 @@ public class InProcessCli implements Runnable {
 
     public NatEntry(String srcFullName, String method) {
       this.srcFullName = srcFullName;
-      this.method = method;          
+      this.method = method;
     }
-    
+
     public String toString() {
       return String.format("%s.%s", srcFullName, method);
     }
@@ -131,10 +135,17 @@ public class InProcessCli implements Runnable {
 
         readLine += (char) c;
         if (c == '\n') {
-          try {
-            process(null, readLine);
-          } catch (Exception e) {
-            log.error("cli process threw", e);
+          if (readLine.length() > 1) {
+            try {
+              if (relayTo != null) {
+                Message msg = Message.createMessage(name + '@' + id, relayTo, relayMethod, readLine);
+                service.out(msg);
+              } else {
+                process(null, readLine);
+              }
+            } catch (Exception e) {
+              log.error("cli process threw", e);
+            }
           }
           readLine = "";
           writePrompt();
@@ -228,17 +239,17 @@ public class InProcessCli implements Runnable {
       }
 
       // subscribe - setup subscription
-      // MRLListener listener = new MRLListener(cliMsg.method, name + '@' + id, CodecUtils.getCallbackTopicName(cliMsg.method));
-      // Message subscription = Message.createMessage(name + '@' + id, cliMsg.getFullName(), "addListener", listener);
+      // MRLListener listener = new MRLListener(cliMsg.method, name + '@' + id,
+      // CodecUtils.getCallbackTopicName(cliMsg.method));
+      // Message subscription = Message.createMessage(name + '@' + id,
+      // cliMsg.getFullName(), "addListener", listener);
 
       String cliFullName = name + '@' + id;
-      
+
       /*
-      if (srcFullName == null) {
-        srcFullName = name + '@' + id;
-      }
-      */
-      
+       * if (srcFullName == null) { srcFullName = name + '@' + id; }
+       */
+
       // setup cli subscription
       MRLListener listener = new MRLListener(cliMsg.method, cliFullName, CodecUtils.getCallbackTopicName(cliMsg.method));
       Message subscription = Message.createMessage(cliFullName, cliMsg.getFullName(), "addListener", listener);
@@ -246,9 +257,9 @@ public class InProcessCli implements Runnable {
       // send out subscription
       service.out(subscription);
 
-      // setup NAT - translation       
+      // setup NAT - translation
       natTable.put(String.format("%s.%s", cliFullName, CodecUtils.getCallbackTopicName(cliMsg.method)), new NatEntry(srcFullName, cliMsg.method));
-      
+
       // send command msg
       service.out(cliMsg);
 
@@ -322,26 +333,29 @@ public class InProcessCli implements Runnable {
 
   /**
    * Incoming Message - likely from local/remote runtime
+   * 
    * @param msg
    */
   public void onMsg(Message msg) {
-    
+
+    log.info("{}@{} <== {}.{}", name, id, msg.getFullName(), msg.getMethod());
+
     // if NAT match - remove subscription
     String key = String.format("%s.%s", msg.getFullName(), msg.method);
-    if (natTable.containsKey(key)){
+    if (natTable.containsKey(key)) {
       NatEntry entry = natTable.get(key);
-      
-      Message subscription = Message.createMessage(name + "@" + id, entry.srcFullName, "removeListener", new Object[] {entry.method, name + "@" + id});
+
+      Message subscription = Message.createMessage(name + "@" + id, entry.srcFullName, "removeListener", new Object[] { entry.method, name + "@" + id });
       // send out subscription
       service.out(subscription);
-      
+
       // send back to original requester with changed address
       msg.setName(entry.srcFullName);
-      
+
       // replacement of callback too - will always be onCli
       // so multiplexed methods will have single callback
       msg.method = "onCli";
-      
+
       // was nat'd - needs to be sent back
       if (entry.srcFullName != null) {
         service.out(msg);
@@ -350,14 +364,43 @@ public class InProcessCli implements Runnable {
       natTable.remove(key);
     }
     // do NAT replacement and send msg to originator
-    
+
     if (msg.data == null) {
       writeToJson(null);
     } else {
       for (Object o : msg.data) {
-        writeToJson(o);
+        if ("onRegistered".equals(msg.getMethod())) {
+          if (msg.data != null & msg.data.length == 1) {
+            // FIXME check dataEncoding ???
+            Registration registration = (Registration) msg.data[0];// CodecUtils.fromJson((String)
+                                                                   // msg.data[0],
+                                                                   // Registration.class);
+            try {
+              out.write("\n\n".getBytes());
+              out.write(String.format("%s <- registered %s %s\n\n", name + '@' + id, registration.getFullName(), registration.getTypeKey()).getBytes());
+            } catch (Exception e) {
+              log.error("writing registration threw", e);
+            }
+          }
+        } else {
+          writeToJson(o);
+        }
       }
     }
+  }
+
+  public void relay(String name, String method, String pubMethod) {
+    relayTo = name;
+    relayMethod = method;
+    String cliFullName = name + '@' + id;
+    
+    // setup cli subscription
+    MRLListener listener = new MRLListener(pubMethod, cliFullName, CodecUtils.getCallbackTopicName(pubMethod));
+    Message subscription = Message.createMessage(cliFullName, relayTo, "addListener", listener);
+
+    // send out subscription
+    service.out(subscription);
+
   }
 
   public static void main(String[] args) {

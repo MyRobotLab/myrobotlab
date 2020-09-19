@@ -1,22 +1,28 @@
 <div class="row col-md-12">
-    <div class="col-md-3">
-        <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400"/>
+    <div class="col-md-3"><b>Board Type</b> {{service.boardType}}<br />
+        <table>
+            <tr>
+                <th>pin</th>
+                <th>enable</th>
+                <th>input /<br/>output</th>
+                <th>digital /<br/>analog</th>
+            </tr>
+            <tr ng-repeat="(index, pin) in service.pinIndex">
+                <td><b>{{pin.pin}}</b></td>
+                <!-- td>{{pin.address}}</td -->
+                <td><toggle on-class="btn-success" width="35" height="28" ng-model="selectedEnable" ng-change="makeDigital(pin.address)" width="80" height="30" on="" off=""/></td>
+                <td><toggle width="70" height="28" ng-model="selectedIo" ng-change="makeDigital(pin.address)" width="80" height="30" on="input" off="output"/></td>
+                <td ng-show={{pin.isAnalog}}><toggle width="70" height="28" ng-model="selectedAnalog" title="Virtual or Real Hardware" ng-change="makeDigital(pin.address)" width="80" height="30" on="analog" off="digital"/></td>
+            </tr>
+        </table>
     </div>
-    <div class="col-md-1">&nbsp;</div>
-    <div class="col-md-2">
-        Rasberry Pi Type
-           <select class="form-control selectController" ng-model="rasPiType">
-            <option>A</option>
-            <option>A</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-        </select>
+    <div class="col-md-5">
+        <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400" />
     </div>
-    <div class="col-md-6">&nbsp;</div>
-</div>
-<div class="row col-md-12">
-    <div class="col-md-3">
-        <img src="RasPi/raspi-3-pin-out.png" width="400"/>
+    <div class="row col-md-4"></div>
+    <div class="row col-md-3"></div>
+    <div class="row col-md-5">
+        <img src="RasPi/raspi-3-pin-out.png" width="400" />
     </div>
+    <div class="row col-md-4"></div>
 </div>

@@ -367,11 +367,7 @@ public class FileIO {
    */
   static public final boolean extractResources() {
     try {
-      CmdOptions options = Runtime.getOptions();
-      // PROBLEM !!! FIXME !!
-      // extract(getRoot(), "resource", options.resourceDir,
-      // options.extractResources);
-      extract(getRoot(), "resource", null, options.extractResources);
+      extract(getRoot(), "resource", null, false);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -390,7 +386,7 @@ public class FileIO {
       if (Runtime.getOptions() == null) {
         baseDir = System.getProperty("user.dir");
       } else {
-        baseDir = Runtime.getOptions().dataDir;
+        baseDir = Runtime.DATA_DIR;
       }
       // TODO: is user.dir the same as MRL_HOME / install dir?
       // "always" associated with the data dir

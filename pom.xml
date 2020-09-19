@@ -12,6 +12,12 @@
     
     # fast build
     mvn -DskipTests -Dbuild.number=180 compile package -o
+
+    # compile only sync with raspi
+    rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
+    rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
+    # for jar in root
+    rsync -zarvh target/myrobotlab.jar pi@192.168.0.104:/opt/mrl/myrobotlab
     
     # javadoc check
     mvn -q javadoc:javadoc -o
@@ -1600,7 +1606,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                          <Main-Class>org.myrobotlab.process.Launcher</Main-Class>
+                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
                                           <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
               

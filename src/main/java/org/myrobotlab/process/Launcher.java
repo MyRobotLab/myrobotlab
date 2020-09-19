@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.myrobotlab.client.Client;
 import org.myrobotlab.framework.CmdOptions;
@@ -24,7 +22,7 @@ import picocli.CommandLine;
 
 public class Launcher {
 
-  static String banner = "   _____         __________      ___.           __  .____          ___.    \n"
+  public static String banner = "   _____         __________      ___.           __  .____          ___.    \n"
       + "  /     \\ ___.__.\\______   \\ ____\\_ |__   _____/  |_|    |   _____ \\_ |__  \n"
       + " /  \\ /  <   |  | |       _//  _ \\| __ \\ /  _ \\   __\\    |   \\__  \\ | __ \\ \n"
       + "/    Y    \\___  | |    |   (  <_> ) \\_\\ (  <_> )  | |    |___ / __ \\| \\_\\ \\\n" + "\\____|__  / ____| |____|_  /\\____/|___  /\\____/|__| |_______ (____  /___  /\n"
@@ -106,26 +104,15 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-
-    if (options.services.size() > 0) {
-      if (options.services.size() % 2 != 0) {
-        log.error("--service requires {name} {Type} {name} {Type} even number of entries - you have {}", options.services.size());
-      }
-      cmd.add("--service");
-      for (int i = 0; i < options.services.size(); i += 2) {
-        cmd.add(options.services.get(i));
-        cmd.add(options.services.get(i + 1));
-      }
-    }
     
     // append/merge incoming arguments
     cmd.addAll(cmdLine);
     
-    if (!contains(cmd, "--no-cli")) {
-      cmd.add("--no-cli");
+    if (!contains(cmd, "--from-launcher")) {
+      cmd.add("--from-launcher");
     }
     
-
+    // FIXME - daemonize? does that mean handle stream differently?
     
     // FIXME - reporting from different levels .. one is stdout the other is the
     // os before this
@@ -133,20 +120,21 @@ public class Launcher {
     System.out.print("SPAWN ");
     System.out.println(toString(cmd));
     ProcessBuilder builder = new ProcessBuilder(cmd);
+    builder.redirectErrorStream(true);
+    builder.inheritIO();
 
     // one of the nastiest bugs had to do with std out, or std err not
     // being consumed ... now we don't bother with it - instead
     // we have to use this clever redirect to /dev/null (os dependent) :(
     // and be done with the whole silly issue
 
-    builder.redirectErrorStream(true);
-
     // builder.redirectOutput(new File("stdout.txt"));
+    /*
     if (options.stdout) {
       builder.redirectOutput(STD_OUT);      
     } else {
       builder.redirectOutput(NULL_FILE);
-    }
+    }*/
 
     // setting working directory to wherever the jar is...
 
@@ -300,6 +288,7 @@ public class Launcher {
         }
       }
 
+      /*
       // FIXME - use wsclient for remote access
       if (options.client != null) {
         // FIXME - delay & auto connect
@@ -307,7 +296,7 @@ public class Launcher {
       } else {
         // terminating - "if" runtime exists - if not no biggy
         Runtime.shutdown();
-      }
+      }*/
 
     } catch (Exception e) {
       log.error("main threw", e);

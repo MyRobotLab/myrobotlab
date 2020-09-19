@@ -147,6 +147,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private Set<String> hideMethods = new HashSet<>();
 
   static private final String RUNTIME_NAME = "runtime";
+  static public final String DATA_DIR = "data";
+
 
   static private boolean autoAcceptLicense = true; // at the moment
 
@@ -196,27 +198,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   private List<String> args;
 
   /**
-   *
-   * initially I thought that is would be a good idea to dynamically load
-   * Services and append their definitions to the class path. This would
-   * "theoretically" be done with ivy to get/download the appropriate dependent
-   * jars from the repo. Then use a custom ClassLoader to load the new service.
-   *
-   * Ivy works for downloading the appropriate jars &amp; artifacts However, the
-   * ClassLoader became very problematic
-   *
-   * There is much mis-information around ClassLoaders. The most knowledgeable
-   * article I have found has been this one :
-   * http://blogs.oracle.com/sundararajan
-   * /entry/understanding_java_class_loading
-   *
-   * Overall it became a huge PITA with really very little reward. The
-   * consequence is all Services' dependencies and categories are defined here
-   * rather than the appropriate Service class.
-   *
-   */
-
-  /**
    * global startingArgs - whatever came into main each runtime will have its
    * individual copy
    */
@@ -228,15 +209,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   private static final String LIBRARIES = "libraries";
   
   String stdCliUuid = null;
+  
+  InProcessCli cli = null;
 
   /**
    * available Locales
    */
   Map<String, Locale> locales;
 
-  /*
-   * Returns the number of processors available to the Java virtual machine.
-   *
+  /**
+   * Returns the number of processors available to the Java virtual machine. 
+   * @return
    */
   public static final int availableProcessors() {
     return java.lang.Runtime.getRuntime().availableProcessors();
@@ -1134,140 +1117,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
-  /*
-   * Main starting method of MyRobotLab Parses command line options
-   *
-   * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
-   * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
-   *
-   */
-  public static void main(String[] args) {
-
-    try {
-      // options = new CmdOptions();
-
-      // for Callable execution ...
-      // int exitCode = new CommandLine(options).execute(args);
-      new CommandLine(options).parseArgs(args);
-
-      // id always required
-      if (options.id == null) {
-        options.id = NameGenerator.getName();
-      }
-
-      // fix paths
-      Platform platform = Platform.getLocalInstance();
-      platform.setId(options.id);
-
-      options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
-
-      // save an output of our cmd options
-      File dataDir = new File(Runtime.getOptions().dataDir);
-      if (!dataDir.exists()) {
-        dataDir.mkdirs();
-      }
-
-      // if a you specify a config file it becomes the "base" of configuration
-      // inline flags will still override values
-      if (options.cfg != null) {
-        try {
-          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
-        } catch (Exception e) {
-          log.error("config file {} was specified but could not be read", options.cfg);
-        }
-      }
-
-      try {
-        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.toPrettyJson(options).getBytes());
-      } catch (Exception e) {
-        log.error("writing lastOption.json failed", e);
-      }
-
-      globalArgs = args;
-      Logging logging = LoggingFactory.getInstance();
-
-      // TODO - replace with commons-cli -l
-      logging.setLevel(options.logLevel);
-
-      if (options.virtual) {
-        Platform.setVirtual(true);
-      }
-
-      // Runtime runtime = Runtime.getInstance();
-
-      // if (options.logToConsole) {
-      // logging.addAppender(Appender.CONSOLE); // this is default of logger
-      // setup :P - the parameter is not needed
-      // } else {
-      logging.addAppender(AppenderType.FILE, String.format("%s.log", RUNTIME_NAME));
-      // }
-
-      if (options.help) {
-        Runtime.mainHelp();
-        shutdown();
-        return;
-      }
-
-      // FIXME willSpawn() if not willSpawn - then shutdown with this option
-      // (and others like it)
-      if (options.addKeys != null) {
-        if (options.addKeys.length < 2) {
-          Runtime.mainHelp();
-          shutdown();
-        }
-        Security security = Runtime.getSecurity();
-        for (int i = 0; i < options.addKeys.length; i += 2) {
-          security.setKey(options.addKeys[i], options.addKeys[i + 1]);
-          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
-        }
-        // TODO - save all the crazy logic to the end with a single shutdown,
-        // which handles all cases when it should and should not be shutdown
-        if (options.services.size() == 0) {
-          shutdown();
-        }
-      }
-
-      // FIXME TEST THIS !! 0 length, single service, multiple !
-      if (options.install != null) {
-        // we start the runtime so there is a status publisher which will
-        // display status updates from the repo install
-        Repo repo = getInstance().getRepo();
-        if (options.install.length == 0) {
-          repo.install(LIBRARIES, (String) null);
-        } else {
-          for (String service : options.install) {
-            repo.install(LIBRARIES, service);
-          }
-        }
-        shutdown();
-        return;
-      }
-
-      createAndStartServices(options.services);
-
-      if (options.invoke != null) {
-        invokeCommands(options.invoke);
-      }
-
-      if (options.install == null && (!options.noCli)) {
-        log.info("====no-cli mode mode==== -> noCli {}", options.noCli);
-        log.info("====interactive mode mode==== -> !noCli {}", !options.noCli);
-        getInstance().startInteractiveMode();
-      }
-
-      if (options.autoUpdate) {
-        // initialize
-        // FIXME - use peer ?
-        Updater.main(args);
-      }
-
-    } catch (Exception e) {
-      log.error("runtime exception", e);
-      Runtime.mainHelp();
-      shutdown();
-      log.error("main threw", e);
-    }
-  }
   
   public void startInteractiveMode() {
     startInteractiveMode(System.in, System.out);
@@ -1275,9 +1124,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   // FIXME !!! add connection !!! & authentication !!
   public void startInteractiveMode(InputStream in, OutputStream out) {
-    if (stdCliUuid == null) {
+    if (cli == null) {
     
-    InProcessCli cli = new InProcessCli(this, "runtime", in, out);
+    cli = new InProcessCli(this, "runtime", in, out);
     String cliId = cli.getId();
     String uuid = java.util.UUID.randomUUID().toString();
     stdCliUuid = uuid;
@@ -1652,10 +1501,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public void sendToCli(String srcFullName, String cmd) {
     Connection c = getConnection(stdCliUuid);
+    if (c == null || c.get("cli") == null) {
+      log.info("starting interactive mode");
+      startInteractiveMode();
+      sleep(1000);
+    }
+    c = getConnection(stdCliUuid);
     if (c != null && c.get("cli") != null) {
        ((InProcessCli)c.get("cli")).process(srcFullName, cmd);
     } else {
-      log.warn("stdin client is null - did you want to run --interactive or runtime.startInteractiveMode() mode ?");      
+      log.error("could not start interactive mode");
     }    
   }
 
@@ -1843,7 +1698,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
 
         // if not requested explicitly to not have a cli - default is to start cli
-        if (!options.noCli) {
+        if (options.fromLauncher) {
           // connect(options.connect);
           startInteractiveMode(System.in, System.out);
         }
@@ -2572,7 +2427,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    */
   static public Security getSecurity() {
-    return Runtime.security;
+    return Security.getInstance();
   }
 
   public static Process exec(String... cmd) throws IOException {
@@ -3248,5 +3103,151 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
+  
+  public void python() {
+    if (cli == null) {
+      startInteractiveMode();
+    }
+    start("python", "Python");
+    cli.relay("python", "exec", "publishStdOut");
+  }
 
+  /**
+   * Main entry point for the MyRobotLab Runtime
+   * Check CmdOptions for list of options
+   * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
+   * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+   * @param args
+   */
+  public static void main(String[] args) {
+
+    try {
+      
+      globalArgs = args;
+
+      new CommandLine(options).parseArgs(args);
+
+      LoggingFactory.init(options.logLevel);
+      log.info("in args {}", Launcher.toString(args));
+
+      log.info("\n" + Launcher.banner);
+
+      // help and exit
+      if (options.help) {
+        mainHelp();
+        return;
+      }      
+      
+      // if a you specify a config file it becomes the "base" of configuration
+      // inline flags will still override values
+      if (options.cfg != null) {
+        try {
+          log.info("loading options {}", options.cfg);
+          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
+        } catch (Exception e) {
+          log.error("config file {} was specified but could not be read", options.cfg);
+          shutdown();
+        }
+      }
+            
+      // id always required
+      if (options.id == null) {
+        options.id = NameGenerator.getName();
+      }
+      
+      String id = (options.fromLauncher)?options.id:String.format("%s-launcher", options.id);
+      
+      // fix paths
+      Platform platform = Platform.getLocalInstance();
+      platform.setId(id);
+
+      // save an output of our cmd options
+      File dataDir = new File(Runtime.DATA_DIR);
+      if (!dataDir.exists()) {
+        dataDir.mkdirs();
+      }
+
+      try {
+        Files.write(Paths.get(dataDir + File.separator + "lastOptions.json"), CodecUtils.toPrettyJson(options).getBytes());
+      } catch (Exception e) {
+        log.error("writing lastOption.json failed", e);
+      }
+    
+      if (options.virtual) {
+        Platform.setVirtual(true);
+      }
+
+      if (options.addKeys != null) {
+        if (options.addKeys.length < 2) {
+          Runtime.mainHelp();
+          shutdown();
+        }
+        Security security = Runtime.getSecurity();
+        for (int i = 0; i < options.addKeys.length; i += 2) {
+          security.setKey(options.addKeys[i], options.addKeys[i + 1]);
+          log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
+        }
+        
+        if (options.services.size() == 0) {
+          shutdown();
+        }
+      }
+
+      // FIXME TEST THIS !! 0 length, single service, multiple !
+      if (options.install != null) {
+        // we start the runtime so there is a status publisher which will
+        // display status updates from the repo install
+        Repo repo = getInstance().getRepo();
+        if (options.install.length == 0) {
+          repo.install(LIBRARIES, (String) null);
+        } else {
+          for (String service : options.install) {
+            repo.install(LIBRARIES, service);
+          }
+        }
+        shutdown();
+        return;
+      }
+      
+      if (!options.fromLauncher) {
+        // ===== I AM A LAUNCHER =====
+        // spawn new instance, inherit io
+        // any options need stripping ? 
+        // handle daemon
+        // TODO handle more than one instance
+        ProcessBuilder builder = Launcher.createBuilder(args);
+        Process process = builder.start();
+        process.waitFor();
+        return;
+        
+      } else {
+        // ===== I AM A SPAWNED INSTANCE =====
+        // create service instances
+        createAndStartServices(options.services);
+        // getInstance().startInteractiveMode();
+
+        if (options.invoke != null) {
+          invokeCommands(options.invoke);
+        }
+        
+        if (options.connect != null) {
+          Runtime.getInstance().connect(options.connect);
+        }
+        
+        if (options.autoUpdate) {
+          // initialize
+          // FIXME - use peer ?
+          Updater.main(args);
+        }
+      }
+      
+      
+    } catch (Exception e) {
+      log.error("runtime exception", e);
+      Runtime.mainHelp();
+      shutdown();
+      log.error("main threw", e);
+    }
+  }
+  
 }

@@ -23,6 +23,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.process.Launcher;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 
 // FIXME - 2 layer abstraction - because to generate build files and 
@@ -388,7 +389,12 @@ public class IvyWrapper extends Repo implements Serializable {
       Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
 
       if (targetLibraries.size() == 0) {
-        info("%s already installed", (Object[]) serviceTypes);
+        StringBuilder sb = new StringBuilder();
+        for (String type : serviceTypes) {
+          sb.append(type.substring(type.lastIndexOf(".") + 1));
+          sb.append(" ");
+        }
+        info("%s already installed", sb.toString());
         return;
       }
 

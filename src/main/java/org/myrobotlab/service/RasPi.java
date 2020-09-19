@@ -2,6 +2,7 @@ package org.myrobotlab.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.RaspiPin;
@@ -79,6 +81,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   transient GpioPinDigitalOutput gpio03;
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+  
+  protected SystemInfo systemInfo = null;
 
   private boolean wiringPi = true; // Defined to be able to switch between
   
@@ -205,47 +209,35 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   @Override
   public List<PinDefinition> getPinList() {
-    // FIXME - RasPi version have different pin maps
-    // FIXME - self identify boardtype
-    // FIXME - boardType -generates-> pinList
-    // If the pinIndex is populated already, return it's values
-    if (pinIndex != null) {
-      return new ArrayList<PinDefinition>(pinIndex.values());
-    }
 
-    pinMap.clear();
-    pinIndex.clear();
-    List<PinDefinition> pinList = new ArrayList<PinDefinition>();
+    for (Pin pin : RaspiPin.allPins()) {
+     
+          // pin.getSupportedPinModes()
+          PinDefinition pindef = new PinDefinition(getName(), pin.getAddress());
+          pindef.setPinName(pin.getName());
+          EnumSet<PinMode> modes = pin.getSupportedPinModes();          
+          // FIXME - the raspi definitions are "better" they have input & ouput
+          // FIXME - reconcile rxtx
+          // FIXME - get pull up resistance
+          if (modes.contains(PinMode.DIGITAL_OUTPUT)) {
+            pindef.setDigital(true);
+          }
+          if (modes.contains(PinMode.ANALOG_OUTPUT)) {
+            pindef.setAnalog(true);
+          }
+          if (modes.contains(PinMode.PWM_OUTPUT)) {
+            pindef.setAnalog(true);
+          }
+          
+          pinIndex.put(pin.getAddress(), pindef);
+          pinMap.put(pin.getName(), pindef);
 
-    try {
-      // if (SystemInfo.getBoardType() == SystemInfo.BoardType.RaspberryPi_3B) {
-      for (int i = 0; i < 32; ++i) {
-        PinDefinition pindef = new PinDefinition(getName(), i);
-        String pinName = null;
-        if (i == 16) {
-          pindef.setRx(true);
-        }
-        if (i == 15) {
-          pindef.setTx(true);
-        }
-        if (i <= 16 || i >= 21) {
-          pinName = String.format("GPIO%d", i);
-          pindef.setDigital(true);
-        } else {
-          pinName = String.format("Unused%d", i);
-          pindef.setDigital(false);
-        }
-        pindef.setPinName(pinName);
-        pindef.setAddress(i);
-        pinIndex.put(i, pindef);
-        pinMap.put(pinName, pindef);
-        pinList.add(pindef);
+          // GpioPinDigitalInput provisionedPin = gpio.provisionDigitalInputPin(pin, pull);
+          // provisionedPin.setShutdownOptions(true); // unexport pin on program shutdown
+          // provisionedPins.add(provisionedPin);     // add provisioned pin to collection
       }
-    } catch (Exception e) {
-      log.error("getPinList threw", e);
-    }
 
-    return pinList;
+    return new ArrayList<PinDefinition>(pinIndex.values());
   }
 
   /**
@@ -427,8 +419,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       log.info("i2c initiated");
     } catch (IOException e) {
       // TODO Auto-generated catch block
-      log.error("i2c initiation failed");
-      Logging.logError(e);
+      log.error("i2c initiation failed", e);
     }
   }
 

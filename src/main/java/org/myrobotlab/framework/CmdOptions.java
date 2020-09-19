@@ -44,14 +44,14 @@ public class CmdOptions {
   public boolean autoUpdate = false;
 
   public final String DEFAULT_CONNECT = "http://localhost:8888"; 
+  
+  // TODO - daemon / fork
+  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
+  public boolean daemon = false;
 
   // launcher
-  @Option(names = { "-c", "--connect" }, arity = "0..1", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
+  @Option(names = { "-c", "--connect" }, arity = "0..*", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
   public String connect = null;
-
-  // launcher
-  @Option(names = {"--client" }, arity = "0..1", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
-  public String client = null;
 
   // launcher
   @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
@@ -66,25 +66,15 @@ public class CmdOptions {
   
   // launcher
   /*
-  @Option(names = {
-      "--no-client" }, arity = "0..1", description = "starts a command line interface and optionally connects to a remote instance - default with no host param connects to agent process --client [host]")
-  public boolean noLauncherClient = false;
-  */
-
-  // launcher
   @Option(names = { "--std-out" }, description = "when spawning save the results of the launch in a file \"std.out\"")
   public boolean stdout = false;
-
-  // launcher
-  // @Option(names = { "-s","--start-in-launcher" }, description = "starts the initial/only runtime in the launcher process")
-  // public boolean startInLauncher = false;
-
+  */
   
-  // FIXME - change to cli...
-  @Option(names = { "--no-cli" }, description = "prevents starting in interactive mode - reading from stdin")
-  public boolean noCli = false;
+  // if --from-launcher knows to createAndStart service on -s 
+  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
+  public boolean fromLauncher = false;
 
-  @Option(names = { "-h", "-?", "--?", "--help" }, description = "shows help")
+  @Option(names = { "-h", "-?", "--help" }, description = "shows help")
   public boolean help = false;
 
   @Option(names = { "-I",
@@ -115,11 +105,5 @@ public class CmdOptions {
   @Option(names = { "-s", "--service",
       "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
   public List<String> services = new ArrayList<>();
-
-  @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
-  public String dataDir = "data";
-
-  @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
-  public boolean extractResources = false;
 
 }
