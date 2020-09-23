@@ -177,6 +177,8 @@ public class Python extends Service {
   private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
+  
+  protected int newScriptCnt = 0;
 
   /**
    * Get a compiled version of the python call.
@@ -281,6 +283,12 @@ public class Python extends Service {
     StringBuffer initScript = new StringBuffer();
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
+  }
+    
+  public void newScript() {
+    if (!openedScripts.containsKey("script.py")) {
+      openScript("script.py", "");
+    }
   }
 
   public void openScript(String scriptName, String code) {
