@@ -16,15 +16,14 @@ public abstract class MapperBase implements Serializable, Mapper {
    */
   public boolean inverted = false;
   public boolean clip = true;
-/**
- * a mapper takes an a range of inputs minX to maxX
- *  applies some math to it and calculates an output Y that falls in the range 
- *  of minY to maxY.
- *  
- *  Note:This is really specific only to the linear mapper.  and will/should
- *  move to the MapperLinear class to make this interface generic.
- * 
- */
+  /**
+   * a mapper takes an a range of inputs minX to maxX applies some math to it
+   * and calculates an output Y that falls in the range of minY to maxY.
+   * 
+   * Note:This is really specific only to the linear mapper. and will/should
+   * move to the MapperLinear class to make this interface generic.
+   * 
+   */
   public double minX;
   public double maxX;
   public double minY;
@@ -42,7 +41,7 @@ public abstract class MapperBase implements Serializable, Mapper {
   }
 
   public MapperBase(int minX, int maxX, int minY, int maxY) {
-    map((double)minX, (double)maxX,(double)minY,(double)maxY);
+    map((double) minX, (double) maxX, (double) minY, (double) maxY);
   }
 
   @Override
@@ -89,7 +88,7 @@ public abstract class MapperBase implements Serializable, Mapper {
 
   @Override
   public void map(int minX, int maxX, int minY, int maxY) {
-    map((double)minX, (double)maxX,(double)minY,(double)maxY);
+    map((double) minX, (double) maxX, (double) minY, (double) maxY);
   }
 
   /**
@@ -100,10 +99,10 @@ public abstract class MapperBase implements Serializable, Mapper {
   }
 
   /**
-   * set limits for both the input and output of the mapper.  
-   * Calling this will set the minimum input and the minimum output to minXY
-   * The maximum input and maximum output values will be set to maxXY 
-   * Inputs and outputs will be constrained by the same minXY and maxXY value. 
+   * set limits for both the input and output of the mapper. Calling this will
+   * set the minimum input and the minimum output to minXY The maximum input and
+   * maximum output values will be set to maxXY Inputs and outputs will be
+   * constrained by the same minXY and maxXY value.
    */
   @Override
   public void setMinMax(double minXY, double maxXY) {
@@ -115,7 +114,7 @@ public abstract class MapperBase implements Serializable, Mapper {
 
   @Override
   public void setMinMax(int minXY, int maxXY) {
-    setMinMax((double)minXY, (double)maxXY);
+    setMinMax((double) minXY, (double) maxXY);
   }
 
   public boolean isClip() {

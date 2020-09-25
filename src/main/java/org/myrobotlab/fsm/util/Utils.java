@@ -34,29 +34,32 @@ import org.myrobotlab.fsm.api.State;
  */
 public final class Utils {
 
-    private Utils() { }
+  private Utils() {
+  }
 
-    /**
-     * Default event name.
-     */
-    public static final String DEFAULT_EVENT_NAME = "event";
+  /**
+   * Default event name.
+   */
+  public static final String DEFAULT_EVENT_NAME = "event";
 
-    /**
-     * Default transition name.
-     */
-    public static final String DEFAULT_TRANSITION_NAME = "transition";
+  /**
+   * Default transition name.
+   */
+  public static final String DEFAULT_TRANSITION_NAME = "transition";
 
-    /**
-     * Utility method to print states names as string.
-     * @param states the states set to dump
-     * @return string concatenation of states names
-     */
-    public static String dumpFSMStates(final Set<State> states) {
-        StringBuilder result = new StringBuilder();
-        for (State state : states) {
-            result.append(state.getId()).append(";");
-        }
-        return result.toString();
+  /**
+   * Utility method to print states names as string.
+   * 
+   * @param states
+   *          the states set to dump
+   * @return string concatenation of states names
+   */
+  public static String dumpFSMStates(final Set<State> states) {
+    StringBuilder result = new StringBuilder();
+    for (State state : states) {
+      result.append(state.getId()).append(";");
     }
+    return result.toString();
+  }
 
 }

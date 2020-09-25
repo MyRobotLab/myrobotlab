@@ -164,7 +164,7 @@ public class Joystick extends Service {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = Double.valueOf(mappers.get(id).calcOutput((double)input)).floatValue();
+              input = Double.valueOf(mappers.get(id).calcOutput((double) input)).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);
@@ -293,11 +293,12 @@ public class Joystick extends Service {
   }
 
   public void attach(String serviceName) {
-   attach(serviceName, null); 
+    attach(serviceName, null);
   }
-  
+
   /**
    * subscribe to a specific component - e.g. subscribe to a button, or axis
+   * 
    * @param serviceName
    * @param id
    */
@@ -306,7 +307,7 @@ public class Joystick extends Service {
       addListener("publishJoystickInput", serviceName);
       return;
     }
-    
+
     if (!components.containsKey(id)) {
       error("%s requests subscription to component %s - but %d does not exist", serviceName, id, id);
       return;
@@ -411,7 +412,6 @@ public class Joystick extends Service {
       isPolling = false;
     }
   }
-
 
   /*
    * Map<String, Set<RelativePositionControl>> axisConsumers = new
@@ -529,12 +529,12 @@ public class Joystick extends Service {
     try {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       Runtime.start("gui", "SwingGui");
 
       joy.setController(2);
@@ -579,7 +579,7 @@ public class Joystick extends Service {
 
       // joy.mapId("x", "rx");
       // joy.map("y", -1, 1, 0, 180);
-     
+
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {

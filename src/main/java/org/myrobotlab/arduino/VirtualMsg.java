@@ -1,6 +1,5 @@
 package org.myrobotlab.arduino;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -74,41 +73,45 @@ public class VirtualMsg {
   // ------ device type mapping constants
   private int method = -1;
   public boolean debug = false;
-  // when using a real service, invoke should be true, for unit tests, this should be false.
+  // when using a real service, invoke should be true, for unit tests, this
+  // should be false.
   private boolean invoke = true;
-  
+
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
-  
+
   boolean ackEnabled = false;
   private volatile boolean clearToSend = true;
+
   public static class AckLock {
     // track if there is a pending message, when sending a message
     // this goes to true. when getting an ack it goes to false.
     volatile boolean pendingMessage = false;
   }
+
   transient AckLock ackRecievedLock = new AckLock();
   // recording related
   transient OutputStream record = null;
   transient StringBuilder rxBuffer = new StringBuilder();
-  transient StringBuilder txBuffer = new StringBuilder();  
+  transient StringBuilder txBuffer = new StringBuilder();
 
-  public static final int DEVICE_TYPE_UNKNOWN   =     0;
-  public static final int DEVICE_TYPE_ARDUINO   =     1;
-  public static final int DEVICE_TYPE_ULTRASONICSENSOR   =     2;
-  public static final int DEVICE_TYPE_STEPPER   =     3;
-  public static final int DEVICE_TYPE_MOTOR   =     4;
-  public static final int DEVICE_TYPE_SERVO   =     5;
-  public static final int DEVICE_TYPE_SERIAL   =     6;
-  public static final int DEVICE_TYPE_I2C   =     7;
-  public static final int DEVICE_TYPE_NEOPIXEL   =     8;
-  public static final int DEVICE_TYPE_ENCODER   =     9;
-    
+  public static final int DEVICE_TYPE_UNKNOWN = 0;
+  public static final int DEVICE_TYPE_ARDUINO = 1;
+  public static final int DEVICE_TYPE_ULTRASONICSENSOR = 2;
+  public static final int DEVICE_TYPE_STEPPER = 3;
+  public static final int DEVICE_TYPE_MOTOR = 4;
+  public static final int DEVICE_TYPE_SERVO = 5;
+  public static final int DEVICE_TYPE_SERIAL = 6;
+  public static final int DEVICE_TYPE_I2C = 7;
+  public static final int DEVICE_TYPE_NEOPIXEL = 8;
+  public static final int DEVICE_TYPE_ENCODER = 9;
+
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
   public final static int GET_BOARD_INFO = 2;
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16
+  // sram/activePins/[] deviceSummary
   public final static int PUBLISH_BOARD_INFO = 3;
   // > enablePin/address/type/b16 rate
   public final static int ENABLE_PIN = 4;
@@ -217,27 +220,37 @@ public class VirtualMsg {
   // > servoStop/deviceId
   public final static int SERVO_STOP = 56;
 
+  /**
+   * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   */
 
-/**
- * These methods will be invoked from the Msg class as callbacks from MrlComm.
- */
-  
   // public void getBoardInfo(){}
-  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/){}
+  // public void enablePin(Integer address/*byte*/, Integer type/*byte*/,
+  // Integer rate/*b16*/){}
   // public void setDebug(Boolean enabled/*bool*/){}
   // public void setSerialRate(Integer rate/*b32*/){}
   // public void softReset(){}
   // public void enableAck(Boolean enabled/*bool*/){}
-  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
+  // public void echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float
+  // secondFloat/*f32*/){}
   // public void customMsg(int[] msg/*[]*/){}
   // public void deviceDetach(Integer deviceId/*byte*/){}
-  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/){}
-  // public void i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/){}
-  // public void i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/){}
-  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/){}
-  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/){}
-  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/){}
-  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
+  // public void i2cBusAttach(Integer deviceId/*byte*/, Integer
+  // i2cBus/*byte*/){}
+  // public void i2cRead(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, Integer size/*byte*/){}
+  // public void i2cWrite(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, int[] data/*[]*/){}
+  // public void i2cWriteRead(Integer deviceId/*byte*/, Integer
+  // deviceAddress/*byte*/, Integer readSize/*byte*/, Integer
+  // writeValue/*byte*/){}
+  // public void neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
+  // Integer numPixels/*b32*/, Integer depth/*byte*/){}
+  // public void neoPixelSetAnimation(Integer deviceId/*byte*/, Integer
+  // animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer
+  // blue/*byte*/, Integer speed/*b16*/){}
+  // public void neoPixelWriteMatrix(Integer deviceId/*byte*/, int[]
+  // buffer/*[]*/){}
   // public void analogWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void digitalWrite(Integer pin/*byte*/, Integer value/*byte*/){}
   // public void disablePin(Integer pin/*byte*/){}
@@ -245,35 +258,42 @@ public class VirtualMsg {
   // public void pinMode(Integer pin/*byte*/, Integer mode/*byte*/){}
   // public void setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/){}
   // public void setDebounce(Integer pin/*byte*/, Integer delay/*byte*/){}
-  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
+  // public void servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/,
+  // Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/){}
   // public void servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/){}
   // public void servoDetachPin(Integer deviceId/*byte*/){}
-  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/){}
-  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/){}
+  // public void servoSetVelocity(Integer deviceId/*byte*/, Integer
+  // velocity/*b16*/){}
+  // public void servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/,
+  // Integer max/*byte*/, Integer step/*byte*/){}
   // public void servoSweepStop(Integer deviceId/*byte*/){}
-  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/){}
-  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/){}
-  // public void serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/){}
+  // public void servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer
+  // target/*b16*/){}
+  // public void servoSetAcceleration(Integer deviceId/*byte*/, Integer
+  // acceleration/*b16*/){}
+  // public void serialAttach(Integer deviceId/*byte*/, Integer
+  // relayPin/*byte*/){}
   // public void serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/){}
-  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/){}
+  // public void ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer
+  // triggerPin/*byte*/, Integer echoPin/*byte*/){}
   // public void ultrasonicSensorStartRanging(Integer deviceId/*byte*/){}
   // public void ultrasonicSensorStopRanging(Integer deviceId/*byte*/){}
   // public void setAref(Integer type/*b16*/){}
-  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/){}
+  // public void motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
+  // int[] pins/*[]*/){}
   // public void motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/){}
   // public void motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/){}
-  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
+  // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/,
+  // Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
-  
-  
 
   public VirtualMsg(MrlComm arduino, SerialDevice serial) {
     this.arduino = arduino;
     this.serial = serial;
   }
-  
-  public void begin(SerialDevice serial){
+
+  public void begin(SerialDevice serial) {
     this.serial = serial;
   }
 
@@ -281,24 +301,25 @@ public class VirtualMsg {
 
   // ArduinoSerialCallBacks - TODO - extract interface
   transient private MrlComm arduino;
-  
+
   transient private SerialDevice serial;
-  
+
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
     method = ioCmd[startPos];
     // always process mrlbegin..
-    if (debug) { 
+    if (debug) {
       log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
     }
-    
+
     if (method == PUBLISH_ACK) {
-      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // We saw an ack! we ack this internally right away, and down below in the
+      // generated code,
       // call publishAck on the MrlCommPublisher
-      Integer function = ioCmd[startPos+1]; // bu8
+      Integer function = ioCmd[startPos + 1]; // bu8
       ackReceived(function);
     }
-    
+
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -311,532 +332,531 @@ public class VirtualMsg {
       this.clearToSend = true;
     }
     switch (method) {
-    case GET_BOARD_INFO: {
-      if(invoke){
-        arduino.invoke("getBoardInfo");
-      } else { 
-         arduino.getBoardInfo();
+      case GET_BOARD_INFO: {
+        if (invoke) {
+          arduino.invoke("getBoardInfo");
+        } else {
+          arduino.getBoardInfo();
+        }
+        break;
       }
-      break;
-    }
-    case ENABLE_PIN: {
-      Integer address = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer type = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer rate = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("enablePin",  address,  type,  rate);
-      } else { 
-         arduino.enablePin( address,  type,  rate);
+      case ENABLE_PIN: {
+        Integer address = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer type = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer rate = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("enablePin", address, type, rate);
+        } else {
+          arduino.enablePin(address, type, rate);
+        }
+        break;
       }
-      break;
-    }
-    case SET_DEBUG: {
-      Boolean enabled = (ioCmd[startPos+1] == 0)?false:true;
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("setDebug",  enabled);
-      } else { 
-         arduino.setDebug( enabled);
+      case SET_DEBUG: {
+        Boolean enabled = (ioCmd[startPos + 1] == 0) ? false : true;
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("setDebug", enabled);
+        } else {
+          arduino.setDebug(enabled);
+        }
+        break;
       }
-      break;
-    }
-    case SET_SERIAL_RATE: {
-      Integer rate = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
-      if(invoke){
-        arduino.invoke("setSerialRate",  rate);
-      } else { 
-         arduino.setSerialRate( rate);
+      case SET_SERIAL_RATE: {
+        Integer rate = b32(ioCmd, startPos + 1);
+        startPos += 4; // b32
+        if (invoke) {
+          arduino.invoke("setSerialRate", rate);
+        } else {
+          arduino.setSerialRate(rate);
+        }
+        break;
       }
-      break;
-    }
-    case SOFT_RESET: {
-      if(invoke){
-        arduino.invoke("softReset");
-      } else { 
-         arduino.softReset();
+      case SOFT_RESET: {
+        if (invoke) {
+          arduino.invoke("softReset");
+        } else {
+          arduino.softReset();
+        }
+        break;
       }
-      break;
-    }
-    case ENABLE_ACK: {
-      Boolean enabled = (ioCmd[startPos+1] == 0)?false:true;
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("enableAck",  enabled);
-      } else { 
-         arduino.enableAck( enabled);
+      case ENABLE_ACK: {
+        Boolean enabled = (ioCmd[startPos + 1] == 0) ? false : true;
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("enableAck", enabled);
+        } else {
+          arduino.enableAck(enabled);
+        }
+        break;
       }
-      break;
-    }
-    case ECHO: {
-      Float myFloat = f32(ioCmd, startPos+1);
-      startPos += 4; //f32
-      Integer myByte = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Float secondFloat = f32(ioCmd, startPos+1);
-      startPos += 4; //f32
-      if(invoke){
-        arduino.invoke("echo",  myFloat,  myByte,  secondFloat);
-      } else { 
-         arduino.echo( myFloat,  myByte,  secondFloat);
+      case ECHO: {
+        Float myFloat = f32(ioCmd, startPos + 1);
+        startPos += 4; // f32
+        Integer myByte = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Float secondFloat = f32(ioCmd, startPos + 1);
+        startPos += 4; // f32
+        if (invoke) {
+          arduino.invoke("echo", myFloat, myByte, secondFloat);
+        } else {
+          arduino.echo(myFloat, myByte, secondFloat);
+        }
+        break;
       }
-      break;
-    }
-    case CUSTOM_MSG: {
-      int[] msg = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("customMsg",  msg);
-      } else { 
-         arduino.customMsg( msg);
+      case CUSTOM_MSG: {
+        int[] msg = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("customMsg", msg);
+        } else {
+          arduino.customMsg(msg);
+        }
+        break;
       }
-      break;
-    }
-    case DEVICE_DETACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("deviceDetach",  deviceId);
-      } else { 
-         arduino.deviceDetach( deviceId);
+      case DEVICE_DETACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("deviceDetach", deviceId);
+        } else {
+          arduino.deviceDetach(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case I2C_BUS_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer i2cBus = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("i2cBusAttach",  deviceId,  i2cBus);
-      } else { 
-         arduino.i2cBusAttach( deviceId,  i2cBus);
+      case I2C_BUS_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer i2cBus = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("i2cBusAttach", deviceId, i2cBus);
+        } else {
+          arduino.i2cBusAttach(deviceId, i2cBus);
+        }
+        break;
       }
-      break;
-    }
-    case I2C_READ: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer deviceAddress = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer size = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("i2cRead",  deviceId,  deviceAddress,  size);
-      } else { 
-         arduino.i2cRead( deviceId,  deviceAddress,  size);
+      case I2C_READ: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer deviceAddress = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer size = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("i2cRead", deviceId, deviceAddress, size);
+        } else {
+          arduino.i2cRead(deviceId, deviceAddress, size);
+        }
+        break;
       }
-      break;
-    }
-    case I2C_WRITE: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer deviceAddress = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("i2cWrite",  deviceId,  deviceAddress,  data);
-      } else { 
-         arduino.i2cWrite( deviceId,  deviceAddress,  data);
+      case I2C_WRITE: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer deviceAddress = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] data = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("i2cWrite", deviceId, deviceAddress, data);
+        } else {
+          arduino.i2cWrite(deviceId, deviceAddress, data);
+        }
+        break;
       }
-      break;
-    }
-    case I2C_WRITE_READ: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer deviceAddress = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer readSize = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer writeValue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("i2cWriteRead",  deviceId,  deviceAddress,  readSize,  writeValue);
-      } else { 
-         arduino.i2cWriteRead( deviceId,  deviceAddress,  readSize,  writeValue);
+      case I2C_WRITE_READ: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer deviceAddress = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer readSize = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer writeValue = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("i2cWriteRead", deviceId, deviceAddress, readSize, writeValue);
+        } else {
+          arduino.i2cWriteRead(deviceId, deviceAddress, readSize, writeValue);
+        }
+        break;
       }
-      break;
-    }
-    case NEO_PIXEL_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer numPixels = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
-      Integer depth = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("neoPixelAttach",  deviceId,  pin,  numPixels,  depth);
-      } else { 
-         arduino.neoPixelAttach( deviceId,  pin,  numPixels,  depth);
+      case NEO_PIXEL_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer numPixels = b32(ioCmd, startPos + 1);
+        startPos += 4; // b32
+        Integer depth = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("neoPixelAttach", deviceId, pin, numPixels, depth);
+        } else {
+          arduino.neoPixelAttach(deviceId, pin, numPixels, depth);
+        }
+        break;
       }
-      break;
-    }
-    case NEO_PIXEL_SET_ANIMATION: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer animation = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer red = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer green = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer blue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer speed = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("neoPixelSetAnimation",  deviceId,  animation,  red,  green,  blue,  speed);
-      } else { 
-         arduino.neoPixelSetAnimation( deviceId,  animation,  red,  green,  blue,  speed);
+      case NEO_PIXEL_SET_ANIMATION: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer animation = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer red = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer green = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer blue = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer speed = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("neoPixelSetAnimation", deviceId, animation, red, green, blue, speed);
+        } else {
+          arduino.neoPixelSetAnimation(deviceId, animation, red, green, blue, speed);
+        }
+        break;
       }
-      break;
-    }
-    case NEO_PIXEL_WRITE_MATRIX: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] buffer = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("neoPixelWriteMatrix",  deviceId,  buffer);
-      } else { 
-         arduino.neoPixelWriteMatrix( deviceId,  buffer);
+      case NEO_PIXEL_WRITE_MATRIX: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] buffer = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("neoPixelWriteMatrix", deviceId, buffer);
+        } else {
+          arduino.neoPixelWriteMatrix(deviceId, buffer);
+        }
+        break;
       }
-      break;
-    }
-    case ANALOG_WRITE: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer value = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("analogWrite",  pin,  value);
-      } else { 
-         arduino.analogWrite( pin,  value);
+      case ANALOG_WRITE: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer value = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("analogWrite", pin, value);
+        } else {
+          arduino.analogWrite(pin, value);
+        }
+        break;
       }
-      break;
-    }
-    case DIGITAL_WRITE: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer value = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("digitalWrite",  pin,  value);
-      } else { 
-         arduino.digitalWrite( pin,  value);
+      case DIGITAL_WRITE: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer value = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("digitalWrite", pin, value);
+        } else {
+          arduino.digitalWrite(pin, value);
+        }
+        break;
       }
-      break;
-    }
-    case DISABLE_PIN: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("disablePin",  pin);
-      } else { 
-         arduino.disablePin( pin);
+      case DISABLE_PIN: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("disablePin", pin);
+        } else {
+          arduino.disablePin(pin);
+        }
+        break;
       }
-      break;
-    }
-    case DISABLE_PINS: {
-      if(invoke){
-        arduino.invoke("disablePins");
-      } else { 
-         arduino.disablePins();
+      case DISABLE_PINS: {
+        if (invoke) {
+          arduino.invoke("disablePins");
+        } else {
+          arduino.disablePins();
+        }
+        break;
       }
-      break;
-    }
-    case PIN_MODE: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer mode = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("pinMode",  pin,  mode);
-      } else { 
-         arduino.pinMode( pin,  mode);
+      case PIN_MODE: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer mode = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("pinMode", pin, mode);
+        } else {
+          arduino.pinMode(pin, mode);
+        }
+        break;
       }
-      break;
-    }
-    case SET_TRIGGER: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer triggerValue = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("setTrigger",  pin,  triggerValue);
-      } else { 
-         arduino.setTrigger( pin,  triggerValue);
+      case SET_TRIGGER: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer triggerValue = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("setTrigger", pin, triggerValue);
+        } else {
+          arduino.setTrigger(pin, triggerValue);
+        }
+        break;
       }
-      break;
-    }
-    case SET_DEBOUNCE: {
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer delay = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("setDebounce",  pin,  delay);
-      } else { 
-         arduino.setDebounce( pin,  delay);
+      case SET_DEBOUNCE: {
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer delay = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("setDebounce", pin, delay);
+        } else {
+          arduino.setDebounce(pin, delay);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer initPos = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer initVelocity = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      String name = str(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("servoAttach",  deviceId,  pin,  initPos,  initVelocity,  name);
-      } else { 
-         arduino.servoAttach( deviceId,  pin,  initPos,  initVelocity,  name);
+      case SERVO_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer initPos = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        Integer initVelocity = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        String name = str(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("servoAttach", deviceId, pin, initPos, initVelocity, name);
+        } else {
+          arduino.servoAttach(deviceId, pin, initPos, initVelocity, name);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_ATTACH_PIN: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("servoAttachPin",  deviceId,  pin);
-      } else { 
-         arduino.servoAttachPin( deviceId,  pin);
+      case SERVO_ATTACH_PIN: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("servoAttachPin", deviceId, pin);
+        } else {
+          arduino.servoAttachPin(deviceId, pin);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_DETACH_PIN: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("servoDetachPin",  deviceId);
-      } else { 
-         arduino.servoDetachPin( deviceId);
+      case SERVO_DETACH_PIN: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("servoDetachPin", deviceId);
+        } else {
+          arduino.servoDetachPin(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_SET_VELOCITY: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer velocity = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("servoSetVelocity",  deviceId,  velocity);
-      } else { 
-         arduino.servoSetVelocity( deviceId,  velocity);
+      case SERVO_SET_VELOCITY: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer velocity = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("servoSetVelocity", deviceId, velocity);
+        } else {
+          arduino.servoSetVelocity(deviceId, velocity);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_SWEEP_START: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer min = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer max = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer step = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("servoSweepStart",  deviceId,  min,  max,  step);
-      } else { 
-         arduino.servoSweepStart( deviceId,  min,  max,  step);
+      case SERVO_SWEEP_START: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer min = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer max = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer step = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("servoSweepStart", deviceId, min, max, step);
+        } else {
+          arduino.servoSweepStart(deviceId, min, max, step);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_SWEEP_STOP: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("servoSweepStop",  deviceId);
-      } else { 
-         arduino.servoSweepStop( deviceId);
+      case SERVO_SWEEP_STOP: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("servoSweepStop", deviceId);
+        } else {
+          arduino.servoSweepStop(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_MOVE_TO_MICROSECONDS: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer target = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("servoMoveToMicroseconds",  deviceId,  target);
-      } else { 
-         arduino.servoMoveToMicroseconds( deviceId,  target);
+      case SERVO_MOVE_TO_MICROSECONDS: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer target = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("servoMoveToMicroseconds", deviceId, target);
+        } else {
+          arduino.servoMoveToMicroseconds(deviceId, target);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_SET_ACCELERATION: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer acceleration = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("servoSetAcceleration",  deviceId,  acceleration);
-      } else { 
-         arduino.servoSetAcceleration( deviceId,  acceleration);
+      case SERVO_SET_ACCELERATION: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer acceleration = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("servoSetAcceleration", deviceId, acceleration);
+        } else {
+          arduino.servoSetAcceleration(deviceId, acceleration);
+        }
+        break;
       }
-      break;
-    }
-    case SERIAL_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer relayPin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("serialAttach",  deviceId,  relayPin);
-      } else { 
-         arduino.serialAttach( deviceId,  relayPin);
+      case SERIAL_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer relayPin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("serialAttach", deviceId, relayPin);
+        } else {
+          arduino.serialAttach(deviceId, relayPin);
+        }
+        break;
       }
-      break;
-    }
-    case SERIAL_RELAY: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("serialRelay",  deviceId,  data);
-      } else { 
-         arduino.serialRelay( deviceId,  data);
+      case SERIAL_RELAY: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] data = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("serialRelay", deviceId, data);
+        } else {
+          arduino.serialRelay(deviceId, data);
+        }
+        break;
       }
-      break;
-    }
-    case ULTRASONIC_SENSOR_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer triggerPin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer echoPin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("ultrasonicSensorAttach",  deviceId,  triggerPin,  echoPin);
-      } else { 
-         arduino.ultrasonicSensorAttach( deviceId,  triggerPin,  echoPin);
+      case ULTRASONIC_SENSOR_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer triggerPin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer echoPin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("ultrasonicSensorAttach", deviceId, triggerPin, echoPin);
+        } else {
+          arduino.ultrasonicSensorAttach(deviceId, triggerPin, echoPin);
+        }
+        break;
       }
-      break;
-    }
-    case ULTRASONIC_SENSOR_START_RANGING: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("ultrasonicSensorStartRanging",  deviceId);
-      } else { 
-         arduino.ultrasonicSensorStartRanging( deviceId);
+      case ULTRASONIC_SENSOR_START_RANGING: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("ultrasonicSensorStartRanging", deviceId);
+        } else {
+          arduino.ultrasonicSensorStartRanging(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case ULTRASONIC_SENSOR_STOP_RANGING: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("ultrasonicSensorStopRanging",  deviceId);
-      } else { 
-         arduino.ultrasonicSensorStopRanging( deviceId);
+      case ULTRASONIC_SENSOR_STOP_RANGING: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("ultrasonicSensorStopRanging", deviceId);
+        } else {
+          arduino.ultrasonicSensorStopRanging(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case SET_AREF: {
-      Integer type = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("setAref",  type);
-      } else { 
-         arduino.setAref( type);
+      case SET_AREF: {
+        Integer type = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("setAref", type);
+        } else {
+          arduino.setAref(type);
+        }
+        break;
       }
-      break;
-    }
-    case MOTOR_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer type = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] pins = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("motorAttach",  deviceId,  type,  pins);
-      } else { 
-         arduino.motorAttach( deviceId,  type,  pins);
+      case MOTOR_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer type = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] pins = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("motorAttach", deviceId, type, pins);
+        } else {
+          arduino.motorAttach(deviceId, type, pins);
+        }
+        break;
       }
-      break;
-    }
-    case MOTOR_MOVE: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pwr = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("motorMove",  deviceId,  pwr);
-      } else { 
-         arduino.motorMove( deviceId,  pwr);
+      case MOTOR_MOVE: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pwr = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("motorMove", deviceId, pwr);
+        } else {
+          arduino.motorMove(deviceId, pwr);
+        }
+        break;
       }
-      break;
-    }
-    case MOTOR_MOVE_TO: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pos = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("motorMoveTo",  deviceId,  pos);
-      } else { 
-         arduino.motorMoveTo( deviceId,  pos);
+      case MOTOR_MOVE_TO: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pos = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("motorMoveTo", deviceId, pos);
+        } else {
+          arduino.motorMoveTo(deviceId, pos);
+        }
+        break;
       }
-      break;
-    }
-    case ENCODER_ATTACH: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer type = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer pin = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("encoderAttach",  deviceId,  type,  pin);
-      } else { 
-         arduino.encoderAttach( deviceId,  type,  pin);
+      case ENCODER_ATTACH: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer type = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer pin = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("encoderAttach", deviceId, type, pin);
+        } else {
+          arduino.encoderAttach(deviceId, type, pin);
+        }
+        break;
       }
-      break;
-    }
-    case SET_ZERO_POINT: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("setZeroPoint",  deviceId);
-      } else { 
-         arduino.setZeroPoint( deviceId);
+      case SET_ZERO_POINT: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("setZeroPoint", deviceId);
+        } else {
+          arduino.setZeroPoint(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    case SERVO_STOP: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("servoStop",  deviceId);
-      } else { 
-         arduino.servoStop( deviceId);
+      case SERVO_STOP: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("servoStop", deviceId);
+        } else {
+          arduino.servoStop(deviceId);
+        }
+        break;
       }
-      break;
-    }
-    
+
     }
   }
-  
 
   // Java-land --to--> MrlComm
 
-  public synchronized byte[] publishMRLCommError(String errorMsg/*str*/) {
+  public synchronized byte[] publishMRLCommError(String errorMsg/* str */) {
     if (debug) {
       log.info("Sending Message: publishMRLCommError to {}", serial.getName());
     }
@@ -846,12 +866,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + (1 + errorMsg.length())); // size
       appendMessage(baos, PUBLISH_MRLCOMM_ERROR); // msgType = 1
       appendMessage(baos, errorMsg);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishMRLCommError");
         txBuffer.append("/");
         txBuffer.append(errorMsg);
@@ -861,13 +881,16 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishMRLCommError threw",e);
+    } catch (Exception e) {
+      log.error("publishMRLCommError threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/) {
+  public synchronized byte[] publishBoardInfo(Integer version/* byte */,
+      Integer boardType/* byte */, Integer microsPerLoop/* b16 */,
+      Integer sram/* b16 */, Integer activePins/* byte */,
+      int[] deviceSummary/* [] */) {
     if (debug) {
       log.info("Sending Message: publishBoardInfo to {}", serial.getName());
     }
@@ -882,12 +905,12 @@ public class VirtualMsg {
       appendMessageb16(baos, sram);
       appendMessage(baos, activePins);
       appendMessage(baos, deviceSummary);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishBoardInfo");
         txBuffer.append("/");
         txBuffer.append(version);
@@ -907,13 +930,13 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishBoardInfo threw",e);
+    } catch (Exception e) {
+      log.error("publishBoardInfo threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishAck(Integer function/*byte*/) {
+  public synchronized byte[] publishAck(Integer function/* byte */) {
     if (debug) {
       log.info("Sending Message: publishAck to {}", serial.getName());
     }
@@ -923,12 +946,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, PUBLISH_ACK); // msgType = 9
       appendMessage(baos, function);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishAck");
         txBuffer.append("/");
         txBuffer.append(function);
@@ -938,13 +961,14 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishAck threw",e);
+    } catch (Exception e) {
+      log.error("publishAck threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+  public synchronized byte[] publishEcho(Float myFloat/* f32 */,
+      Integer myByte/* byte */, Float secondFloat/* f32 */) {
     if (debug) {
       log.info("Sending Message: publishEcho to {}", serial.getName());
     }
@@ -956,12 +980,12 @@ public class VirtualMsg {
       appendMessagef32(baos, myFloat);
       appendMessage(baos, myByte);
       appendMessagef32(baos, secondFloat);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishEcho");
         txBuffer.append("/");
         txBuffer.append(myFloat);
@@ -975,13 +999,13 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishEcho threw",e);
+    } catch (Exception e) {
+      log.error("publishEcho threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishCustomMsg(int[] msg/*[]*/) {
+  public synchronized byte[] publishCustomMsg(int[] msg/* [] */) {
     if (debug) {
       log.info("Sending Message: publishCustomMsg to {}", serial.getName());
     }
@@ -991,12 +1015,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + (1 + msg.length)); // size
       appendMessage(baos, PUBLISH_CUSTOM_MSG); // msgType = 13
       appendMessage(baos, msg);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishCustomMsg");
         txBuffer.append("/");
         txBuffer.append(Arrays.toString(msg));
@@ -1006,13 +1030,14 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishCustomMsg threw",e);
+    } catch (Exception e) {
+      log.error("publishCustomMsg threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] publishI2cData(Integer deviceId/* byte */,
+      int[] data/* [] */) {
     if (debug) {
       log.info("Sending Message: publishI2cData to {}", serial.getName());
     }
@@ -1023,12 +1048,12 @@ public class VirtualMsg {
       appendMessage(baos, PUBLISH_I2C_DATA); // msgType = 19
       appendMessage(baos, deviceId);
       appendMessage(baos, data);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishI2cData");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1040,13 +1065,13 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishI2cData threw",e);
+    } catch (Exception e) {
+      log.error("publishI2cData threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishDebug(String debugMsg/*str*/) {
+  public synchronized byte[] publishDebug(String debugMsg/* str */) {
     if (debug) {
       log.info("Sending Message: publishDebug to {}", serial.getName());
     }
@@ -1056,12 +1081,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + (1 + debugMsg.length())); // size
       appendMessage(baos, PUBLISH_DEBUG); // msgType = 28
       appendMessage(baos, debugMsg);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishDebug");
         txBuffer.append("/");
         txBuffer.append(debugMsg);
@@ -1071,13 +1096,13 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishDebug threw",e);
+    } catch (Exception e) {
+      log.error("publishDebug threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishPinArray(int[] data/*[]*/) {
+  public synchronized byte[] publishPinArray(int[] data/* [] */) {
     if (debug) {
       log.info("Sending Message: publishPinArray to {}", serial.getName());
     }
@@ -1087,12 +1112,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + (1 + data.length)); // size
       appendMessage(baos, PUBLISH_PIN_ARRAY); // msgType = 29
       appendMessage(baos, data);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishPinArray");
         txBuffer.append("/");
         txBuffer.append(Arrays.toString(data));
@@ -1102,13 +1127,15 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishPinArray threw",e);
+    } catch (Exception e) {
+      log.error("publishPinArray threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/) {
+  public synchronized byte[] publishServoEvent(Integer deviceId/* byte */,
+      Integer eventType/* byte */, Integer currentPos/* b16 */,
+      Integer targetPos/* b16 */) {
     if (debug) {
       log.info("Sending Message: publishServoEvent to {}", serial.getName());
     }
@@ -1121,12 +1148,12 @@ public class VirtualMsg {
       appendMessage(baos, eventType);
       appendMessageb16(baos, currentPos);
       appendMessageb16(baos, targetPos);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishServoEvent");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1142,13 +1169,14 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishServoEvent threw",e);
+    } catch (Exception e) {
+      log.error("publishServoEvent threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] publishSerialData(Integer deviceId/* byte */,
+      int[] data/* [] */) {
     if (debug) {
       log.info("Sending Message: publishSerialData to {}", serial.getName());
     }
@@ -1159,12 +1187,12 @@ public class VirtualMsg {
       appendMessage(baos, PUBLISH_SERIAL_DATA); // msgType = 43
       appendMessage(baos, deviceId);
       appendMessage(baos, data);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishSerialData");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1176,13 +1204,14 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishSerialData threw",e);
+    } catch (Exception e) {
+      log.error("publishSerialData threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/) {
+  public synchronized byte[] publishUltrasonicSensorData(
+      Integer deviceId/* byte */, Integer echoTime/* b16 */) {
     if (debug) {
       log.info("Sending Message: publishUltrasonicSensorData to {}", serial.getName());
     }
@@ -1193,12 +1222,12 @@ public class VirtualMsg {
       appendMessage(baos, PUBLISH_ULTRASONIC_SENSOR_DATA); // msgType = 47
       appendMessage(baos, deviceId);
       appendMessageb16(baos, echoTime);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishUltrasonicSensorData");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1210,13 +1239,14 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishUltrasonicSensorData threw",e);
+    } catch (Exception e) {
+      log.error("publishUltrasonicSensorData threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/) {
+  public synchronized byte[] publishEncoderData(Integer deviceId/* byte */,
+      Integer position/* b16 */) {
     if (debug) {
       log.info("Sending Message: publishEncoderData to {}", serial.getName());
     }
@@ -1227,12 +1257,12 @@ public class VirtualMsg {
       appendMessage(baos, PUBLISH_ENCODER_DATA); // msgType = 54
       appendMessage(baos, deviceId);
       appendMessageb16(baos, position);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishEncoderData");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1244,13 +1274,13 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishEncoderData threw",e);
+    } catch (Exception e) {
+      log.error("publishEncoderData threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] publishMrlCommBegin(Integer version/*byte*/) {
+  public synchronized byte[] publishMrlCommBegin(Integer version/* byte */) {
     if (debug) {
       log.info("Sending Message: publishMrlCommBegin to {}", serial.getName());
     }
@@ -1260,12 +1290,12 @@ public class VirtualMsg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, PUBLISH_MRL_COMM_BEGIN); // msgType = 55
       appendMessage(baos, version);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> publishMrlCommBegin");
         txBuffer.append("/");
         txBuffer.append(version);
@@ -1275,236 +1305,232 @@ public class VirtualMsg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("publishMrlCommBegin threw",e);
+    } catch (Exception e) {
+      log.error("publishMrlCommBegin threw", e);
       return null;
     }
   }
 
-
   public static String methodToString(int method) {
     switch (method) {
-    case PUBLISH_MRLCOMM_ERROR:{
-      return "publishMRLCommError";
-    }
-    case GET_BOARD_INFO:{
-      return "getBoardInfo";
-    }
-    case PUBLISH_BOARD_INFO:{
-      return "publishBoardInfo";
-    }
-    case ENABLE_PIN:{
-      return "enablePin";
-    }
-    case SET_DEBUG:{
-      return "setDebug";
-    }
-    case SET_SERIAL_RATE:{
-      return "setSerialRate";
-    }
-    case SOFT_RESET:{
-      return "softReset";
-    }
-    case ENABLE_ACK:{
-      return "enableAck";
-    }
-    case PUBLISH_ACK:{
-      return "publishAck";
-    }
-    case ECHO:{
-      return "echo";
-    }
-    case PUBLISH_ECHO:{
-      return "publishEcho";
-    }
-    case CUSTOM_MSG:{
-      return "customMsg";
-    }
-    case PUBLISH_CUSTOM_MSG:{
-      return "publishCustomMsg";
-    }
-    case DEVICE_DETACH:{
-      return "deviceDetach";
-    }
-    case I2C_BUS_ATTACH:{
-      return "i2cBusAttach";
-    }
-    case I2C_READ:{
-      return "i2cRead";
-    }
-    case I2C_WRITE:{
-      return "i2cWrite";
-    }
-    case I2C_WRITE_READ:{
-      return "i2cWriteRead";
-    }
-    case PUBLISH_I2C_DATA:{
-      return "publishI2cData";
-    }
-    case NEO_PIXEL_ATTACH:{
-      return "neoPixelAttach";
-    }
-    case NEO_PIXEL_SET_ANIMATION:{
-      return "neoPixelSetAnimation";
-    }
-    case NEO_PIXEL_WRITE_MATRIX:{
-      return "neoPixelWriteMatrix";
-    }
-    case ANALOG_WRITE:{
-      return "analogWrite";
-    }
-    case DIGITAL_WRITE:{
-      return "digitalWrite";
-    }
-    case DISABLE_PIN:{
-      return "disablePin";
-    }
-    case DISABLE_PINS:{
-      return "disablePins";
-    }
-    case PIN_MODE:{
-      return "pinMode";
-    }
-    case PUBLISH_DEBUG:{
-      return "publishDebug";
-    }
-    case PUBLISH_PIN_ARRAY:{
-      return "publishPinArray";
-    }
-    case SET_TRIGGER:{
-      return "setTrigger";
-    }
-    case SET_DEBOUNCE:{
-      return "setDebounce";
-    }
-    case SERVO_ATTACH:{
-      return "servoAttach";
-    }
-    case SERVO_ATTACH_PIN:{
-      return "servoAttachPin";
-    }
-    case SERVO_DETACH_PIN:{
-      return "servoDetachPin";
-    }
-    case SERVO_SET_VELOCITY:{
-      return "servoSetVelocity";
-    }
-    case SERVO_SWEEP_START:{
-      return "servoSweepStart";
-    }
-    case SERVO_SWEEP_STOP:{
-      return "servoSweepStop";
-    }
-    case SERVO_MOVE_TO_MICROSECONDS:{
-      return "servoMoveToMicroseconds";
-    }
-    case SERVO_SET_ACCELERATION:{
-      return "servoSetAcceleration";
-    }
-    case PUBLISH_SERVO_EVENT:{
-      return "publishServoEvent";
-    }
-    case SERIAL_ATTACH:{
-      return "serialAttach";
-    }
-    case SERIAL_RELAY:{
-      return "serialRelay";
-    }
-    case PUBLISH_SERIAL_DATA:{
-      return "publishSerialData";
-    }
-    case ULTRASONIC_SENSOR_ATTACH:{
-      return "ultrasonicSensorAttach";
-    }
-    case ULTRASONIC_SENSOR_START_RANGING:{
-      return "ultrasonicSensorStartRanging";
-    }
-    case ULTRASONIC_SENSOR_STOP_RANGING:{
-      return "ultrasonicSensorStopRanging";
-    }
-    case PUBLISH_ULTRASONIC_SENSOR_DATA:{
-      return "publishUltrasonicSensorData";
-    }
-    case SET_AREF:{
-      return "setAref";
-    }
-    case MOTOR_ATTACH:{
-      return "motorAttach";
-    }
-    case MOTOR_MOVE:{
-      return "motorMove";
-    }
-    case MOTOR_MOVE_TO:{
-      return "motorMoveTo";
-    }
-    case ENCODER_ATTACH:{
-      return "encoderAttach";
-    }
-    case SET_ZERO_POINT:{
-      return "setZeroPoint";
-    }
-    case PUBLISH_ENCODER_DATA:{
-      return "publishEncoderData";
-    }
-    case PUBLISH_MRL_COMM_BEGIN:{
-      return "publishMrlCommBegin";
-    }
-    case SERVO_STOP:{
-      return "servoStop";
-    }
+      case PUBLISH_MRLCOMM_ERROR: {
+        return "publishMRLCommError";
+      }
+      case GET_BOARD_INFO: {
+        return "getBoardInfo";
+      }
+      case PUBLISH_BOARD_INFO: {
+        return "publishBoardInfo";
+      }
+      case ENABLE_PIN: {
+        return "enablePin";
+      }
+      case SET_DEBUG: {
+        return "setDebug";
+      }
+      case SET_SERIAL_RATE: {
+        return "setSerialRate";
+      }
+      case SOFT_RESET: {
+        return "softReset";
+      }
+      case ENABLE_ACK: {
+        return "enableAck";
+      }
+      case PUBLISH_ACK: {
+        return "publishAck";
+      }
+      case ECHO: {
+        return "echo";
+      }
+      case PUBLISH_ECHO: {
+        return "publishEcho";
+      }
+      case CUSTOM_MSG: {
+        return "customMsg";
+      }
+      case PUBLISH_CUSTOM_MSG: {
+        return "publishCustomMsg";
+      }
+      case DEVICE_DETACH: {
+        return "deviceDetach";
+      }
+      case I2C_BUS_ATTACH: {
+        return "i2cBusAttach";
+      }
+      case I2C_READ: {
+        return "i2cRead";
+      }
+      case I2C_WRITE: {
+        return "i2cWrite";
+      }
+      case I2C_WRITE_READ: {
+        return "i2cWriteRead";
+      }
+      case PUBLISH_I2C_DATA: {
+        return "publishI2cData";
+      }
+      case NEO_PIXEL_ATTACH: {
+        return "neoPixelAttach";
+      }
+      case NEO_PIXEL_SET_ANIMATION: {
+        return "neoPixelSetAnimation";
+      }
+      case NEO_PIXEL_WRITE_MATRIX: {
+        return "neoPixelWriteMatrix";
+      }
+      case ANALOG_WRITE: {
+        return "analogWrite";
+      }
+      case DIGITAL_WRITE: {
+        return "digitalWrite";
+      }
+      case DISABLE_PIN: {
+        return "disablePin";
+      }
+      case DISABLE_PINS: {
+        return "disablePins";
+      }
+      case PIN_MODE: {
+        return "pinMode";
+      }
+      case PUBLISH_DEBUG: {
+        return "publishDebug";
+      }
+      case PUBLISH_PIN_ARRAY: {
+        return "publishPinArray";
+      }
+      case SET_TRIGGER: {
+        return "setTrigger";
+      }
+      case SET_DEBOUNCE: {
+        return "setDebounce";
+      }
+      case SERVO_ATTACH: {
+        return "servoAttach";
+      }
+      case SERVO_ATTACH_PIN: {
+        return "servoAttachPin";
+      }
+      case SERVO_DETACH_PIN: {
+        return "servoDetachPin";
+      }
+      case SERVO_SET_VELOCITY: {
+        return "servoSetVelocity";
+      }
+      case SERVO_SWEEP_START: {
+        return "servoSweepStart";
+      }
+      case SERVO_SWEEP_STOP: {
+        return "servoSweepStop";
+      }
+      case SERVO_MOVE_TO_MICROSECONDS: {
+        return "servoMoveToMicroseconds";
+      }
+      case SERVO_SET_ACCELERATION: {
+        return "servoSetAcceleration";
+      }
+      case PUBLISH_SERVO_EVENT: {
+        return "publishServoEvent";
+      }
+      case SERIAL_ATTACH: {
+        return "serialAttach";
+      }
+      case SERIAL_RELAY: {
+        return "serialRelay";
+      }
+      case PUBLISH_SERIAL_DATA: {
+        return "publishSerialData";
+      }
+      case ULTRASONIC_SENSOR_ATTACH: {
+        return "ultrasonicSensorAttach";
+      }
+      case ULTRASONIC_SENSOR_START_RANGING: {
+        return "ultrasonicSensorStartRanging";
+      }
+      case ULTRASONIC_SENSOR_STOP_RANGING: {
+        return "ultrasonicSensorStopRanging";
+      }
+      case PUBLISH_ULTRASONIC_SENSOR_DATA: {
+        return "publishUltrasonicSensorData";
+      }
+      case SET_AREF: {
+        return "setAref";
+      }
+      case MOTOR_ATTACH: {
+        return "motorAttach";
+      }
+      case MOTOR_MOVE: {
+        return "motorMove";
+      }
+      case MOTOR_MOVE_TO: {
+        return "motorMoveTo";
+      }
+      case ENCODER_ATTACH: {
+        return "encoderAttach";
+      }
+      case SET_ZERO_POINT: {
+        return "setZeroPoint";
+      }
+      case PUBLISH_ENCODER_DATA: {
+        return "publishEncoderData";
+      }
+      case PUBLISH_MRL_COMM_BEGIN: {
+        return "publishMrlCommBegin";
+      }
+      case SERVO_STOP: {
+        return "servoStop";
+      }
 
-    default: {
-      return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
+      default: {
+        return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
 
-    } // default
+      } // default
     }
   }
 
   public String str(int[] buffer, int start, int size) {
     byte[] b = new byte[size];
-    for (int i = start; i < start + size; ++i){
-      b[i - start] = (byte)(buffer[i] & 0xFF);
+    for (int i = start; i < start + size; ++i) {
+      b[i - start] = (byte) (buffer[i] & 0xFF);
     }
     return new String(b);
   }
 
-  public int[] subArray(int[] buffer, int start, int size) {    
+  public int[] subArray(int[] buffer, int start, int size) {
     return Arrays.copyOfRange(buffer, start, start + size);
   }
 
   // signed 16 bit bucket
-  public int b16(int[] buffer, int start/*=0*/) {
-    return  (short)(buffer[start] << 8) + buffer[start + 1];
+  public int b16(int[] buffer, int start/* =0 */) {
+    return (short) (buffer[start] << 8) + buffer[start + 1];
   }
-  
+
   // signed 32 bit bucket
-  public int b32(int[] buffer, int start/*=0*/) {
-    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  public int b32(int[] buffer, int start/* =0 */) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16) + (buffer[start + 2] << 8) + buffer[start + 3]);
   }
-  
+
   // unsigned 32 bit bucket
-  public long bu32(int[] buffer, int start/*=0*/) {
-    long ret = ((buffer[start + 0] << 24)
-        + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
-    if (ret < 0){
+  public long bu32(int[] buffer, int start/* =0 */) {
+    long ret = ((buffer[start + 0] << 24) + (buffer[start + 1] << 16) + (buffer[start + 2] << 8) + buffer[start + 3]);
+    if (ret < 0) {
       return 4294967296L + ret;
     }
-    
+
     return ret;
   }
 
   // float 32 bit bucket
-  public float f32(int[] buffer, int start/*=0*/) {
+  public float f32(int[] buffer, int start/* =0 */) {
     byte[] b = new byte[4];
-    for (int i = 0; i < 4; ++i){
-      b[i] = (byte)buffer[start + i];
+    for (int i = 0; i < 4; ++i) {
+      b[i] = (byte) buffer[start + i];
     }
     float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
     return f;
   }
-  
+
   public void onBytes(byte[] bytes) {
     if (debug) {
       // debug message.. semi-human readable?
@@ -1512,7 +1538,7 @@ public class VirtualMsg {
       log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
     // this gives us the current full buffer that was read from the seral
-    for (int i = 0 ; i < bytes.length; i++) {
+    for (int i = 0; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
@@ -1522,7 +1548,8 @@ public class VirtualMsg {
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
-            // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            // warn(String.format("Arduino->MRL error - bad magic number %d - %d
+            // rx errors", newByte, ++errorServiceToHardwareRxCnt));
             log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
           }
           continue;
@@ -1532,7 +1559,8 @@ public class VirtualMsg {
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             // This is an error scenario.. we should reset our byte count also.
-            // error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt ));
+            // error(String.format("Arduino->MRL error %d rx sz errors",
+            // ++errorServiceToHardwareRxCnt ));
             log.error("Arduino->MRL error {} rx sz errors", ++errorServiceToHardwareRxCnt);
             continue;
           }
@@ -1541,44 +1569,50 @@ public class VirtualMsg {
           // This is the method..
           int method = newByte.intValue();
           if (methodToString(method).startsWith("ERROR")) {
-            // we've got an error scenario here.. reset the parser and try again!
+            // we've got an error scenario here.. reset the parser and try
+            // again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             continue;
           }
-          
-          // If we're not clear to send, we need to unlock if this is a begin message.
+
+          // If we're not clear to send, we need to unlock if this is a begin
+          // message.
           if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
             // Clear to send!!
             log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
             clearToSend = true;
-          } 
-          
+          }
+
           if (!clearToSend) {
             log.warn("NOT CLEAR TO SEND! resetting parser!");
-            // We opened the port, and we got some data that isn't a Begin message.
-            // so, I think we need to reset the parser and continue processing bytes...
+            // We opened the port, and we got some data that isn't a Begin
+            // message.
+            // so, I think we need to reset the parser and continue processing
+            // bytes...
             // there will be errors until the next magic byte is seen.
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             continue;
           }
-          // we are in a valid parse state.    
+          // we are in a valid parse state.
           ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
           // This is the body of the message copy it to the buffer
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
-          // the case where byteCount is negative?! not got.  You should probably never see this.
+          // the case where byteCount is negative?! not got. You should probably
+          // never see this.
           log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
-          //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
+          // error(String.format("Arduino->MRL error %d rx negsz errors",
+          // ++errorServiceToHardwareRxCnt));
           continue;
         }
         // we have a complete message here.
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
-          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get() - 2);
           if (debug) {
             log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
           }
@@ -1591,23 +1625,24 @@ public class VirtualMsg {
           byteCount = new AtomicInteger(0);
         }
       } catch (Exception e) {
-        ++errorHardwareToServiceRxCnt ;
+        ++errorHardwareToServiceRxCnt;
         // error("msg structure violation %d", errorHardwareToServiceRxCnt);
         log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
-        // TODO: perhaps we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // TODO: perhaps we could find the first occurance of 170.. and then
+        // attempt to re-parse at that point.
         // find the first occurance of 170 in the bytes subbytes
-        // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
-        i = i - byteCount.get()+1;
+        // Maybe we can just walk the iterater back to the beginning based on
+        // the byte count .. and advance it by 1.. and continue.
+        i = i - byteCount.get() + 1;
         log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
         log.error("Original Byte Array: {}", StringUtil.byteArrayToIntString(bytes));
         System.err.println("Try to consume more messages!");
         msgSize = 0;
         byteCount = new AtomicInteger(0);
-        // TODO: this is wonky.. what?! 
+        // TODO: this is wonky.. what?!
         i = 0;
         return;
-        
-        
+
       }
     }
     return;
@@ -1616,18 +1651,18 @@ public class VirtualMsg {
   String F(String msg) {
     return msg;
   }
-  
+
   public void publishError(String error) {
     log.error(error);
   }
-  
+
   void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
     }
     baos.write(b8 & 0xFF);
   }
-  
+
   void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
     if (b1) {
       appendMessage(baos, 1);
@@ -1650,21 +1685,21 @@ public class VirtualMsg {
     appendMessage(baos, b32 >> 8 & 0xFF);
     appendMessage(baos, b32 & 0xFF);
   }
-  
+
   void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
-    //  int x = Float.floatToIntBits(f32);
+    // int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
     appendMessage(baos, f[3] & 0xFF);
     appendMessage(baos, f[2] & 0xFF);
     appendMessage(baos, f[1] & 0xFF);
     appendMessage(baos, f[0] & 0xFF);
   }
-  
+
   void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
-    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
-    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
-    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
-    appendMessage(baos, (int)(b32 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 24 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 16 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 8 & 0xFF));
+    appendMessage(baos, (int) (b32 & 0xFF));
   }
 
   void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
@@ -1688,7 +1723,7 @@ public class VirtualMsg {
       appendMessage(baos, array[i]);
     }
   }
-  
+
   synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
@@ -1698,7 +1733,7 @@ public class VirtualMsg {
     // write data if serial not null.
     if (serial != null) {
       // mark it pending before we write the data.
-      if (ackEnabled){
+      if (ackEnabled) {
         // flip our flag because we're going to send the message now.
         // TODO: is this deadlocked because it's synchronized?!
         // TODO: should this be set regardless of if the serial is null?
@@ -1707,13 +1742,14 @@ public class VirtualMsg {
       serial.write(message);
       // TODO: if there's an exception, we should clear our pending status?
       if (ackEnabled) {
-        // wait for a pending ack to be received before we process our message.^M
+        // wait for a pending ack to be received before we process our
+        // message.^M
         waitForAck();
       }
     }
     return message;
   }
-  
+
   public void markPending() {
     if (debug) {
       log.info("Setting pending flag.");
@@ -1723,11 +1759,11 @@ public class VirtualMsg {
       ackRecievedLock.notifyAll();
     }
   }
-  
+
   public boolean isRecording() {
     return record != null;
   }
-  
+
   public void record() throws Exception {
     if (record == null) {
       record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
@@ -1744,67 +1780,67 @@ public class VirtualMsg {
       record = null;
     }
   }
-  
+
   public static String deviceTypeToString(int typeId) {
-    switch(typeId){
-    case 0 :  {
-      return "unknown";
+    switch (typeId) {
+      case 0: {
+        return "unknown";
 
-    }
-    case 1 :  {
-      return "Arduino";
+      }
+      case 1: {
+        return "Arduino";
 
-    }
-    case 2 :  {
-      return "UltrasonicSensor";
+      }
+      case 2: {
+        return "UltrasonicSensor";
 
-    }
-    case 3 :  {
-      return "Stepper";
+      }
+      case 3: {
+        return "Stepper";
 
-    }
-    case 4 :  {
-      return "Motor";
+      }
+      case 4: {
+        return "Motor";
 
-    }
-    case 5 :  {
-      return "Servo";
+      }
+      case 5: {
+        return "Servo";
 
-    }
-    case 6 :  {
-      return "Serial";
+      }
+      case 6: {
+        return "Serial";
 
-    }
-    case 7 :  {
-      return "I2c";
+      }
+      case 7: {
+        return "I2c";
 
-    }
-    case 8 :  {
-      return "NeoPixel";
+      }
+      case 8: {
+        return "NeoPixel";
 
-    }
-    case 9 :  {
-      return "Encoder";
+      }
+      case 9: {
+        return "Encoder";
 
-    }
-    
-    default: {
-      return "unknown";
-    }
+      }
+
+      default: {
+        return "unknown";
+      }
     }
   }
-  
-  public void enableAcks(boolean b){
+
+  public void enableAcks(boolean b) {
     ackEnabled = b;
     // if (!localOnly){
     // shutdown MrlComm from sending acks
     // below is a method only in Msg.java not in VirtualMsg.java
-    // it depends on the definition of enableAck in arduinoMsg.schema  
+    // it depends on the definition of enableAck in arduinoMsg.schema
     // enableAck(b);
     // }
   }
-  
-  public void waitForAck(){
+
+  public void waitForAck() {
     if (!ackEnabled) {
       return;
     }
@@ -1817,35 +1853,35 @@ public class VirtualMsg {
         }
         if (ackRecievedLock.pendingMessage) {
           log.error("Ack not received, ack timeout!");
-          // TODO: should we just reset and hope for the best? maybe trigger a sync?
+          // TODO: should we just reset and hope for the best? maybe trigger a
+          // sync?
           // ackRecievedLock.pendingMessage = false;
           arduino.ackTimeout();
         }
       }
     }
   }
-  
+
   public void ackReceived(int function) {
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
   }
-  
-  public int getMethod(){
+
+  public int getMethod() {
     return method;
   }
-  
 
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
     sendBufferSize += 1;
   }
-  
-  public int[] getBuffer() {    
+
+  public int[] getBuffer() {
     return sendBuffer;
   }
-  
+
   public static void main(String[] args) {
     try {
       // FIXME - Test service started or reference retrieved
@@ -1859,24 +1895,19 @@ public class VirtualMsg {
       String port = "COM10";
       LoggingFactory.init(Level.INFO);
       /*
-      Runtime.start("gui","SwingGui");
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
-      virtual.connectVirtualUart(port, port + "UART");
-      */
-      MrlComm arduino = (MrlComm)Runtime.start("arduino","MrlComm");
-      Servo servo01 = (Servo)Runtime.start("servo01","Servo");
+       * Runtime.start("gui","SwingGui"); VirtualArduino virtual =
+       * (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+       * virtual.connectVirtualUart(port, port + "UART");
+       */
+      MrlComm arduino = (MrlComm) Runtime.start("arduino", "MrlComm");
+      Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
       /*
-      arduino.connect(port);
-      // test pins
-      arduino.enablePin(5);
-      arduino.disablePin(5);
-      // test status list enabled
-      arduino.enableBoardStatus(true);
-      servo01.attach(arduino, 8);
-      servo01.moveTo(30);
-      servo01.moveTo(130);
-      arduino.enableBoardStatus(false);
-      */
+       * arduino.connect(port); // test pins arduino.enablePin(5);
+       * arduino.disablePin(5); // test status list enabled
+       * arduino.enableBoardStatus(true); servo01.attach(arduino, 8);
+       * servo01.moveTo(30); servo01.moveTo(130);
+       * arduino.enableBoardStatus(false);
+       */
       // test ack
       // test heartbeat
     } catch (Exception e) {
@@ -1907,22 +1938,22 @@ public class VirtualMsg {
   public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.
     // can't be null
-    if (bytes == null) 
+    if (bytes == null)
       return false;
-    // it's got to be at least 3 bytes long.  magic + method + size
-    if (bytes.length <= 2) 
+    // it's got to be at least 3 bytes long. magic + method + size
+    if (bytes.length <= 2)
       return false;
     // first byte has to be magic
-    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER) 
+    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER)
       return false;
-    
+
     int method = bytes[1] & 0xFF;
-    String strMethod = Msg.methodToString(method); 
-    // only known methods. 
+    String strMethod = Msg.methodToString(method);
+    // only known methods.
     // TODO: make the methodToString return null for an unknown lookup.
-    if (strMethod.startsWith("ERROR")) 
+    if (strMethod.startsWith("ERROR"))
       return false;
-    
+
     // now it's got to be the proper length
     int length = bytes[1] & 0xFF;
     // max message size is 64 bytes
@@ -1930,19 +1961,18 @@ public class VirtualMsg {
       return false;
 
     // it's a exactly a full message or a message and more.
-    if (bytes.length >= length+2)
+    if (bytes.length >= length + 2)
       return true;
 
-    
     return false;
   }
 
   public boolean isClearToSend() {
     return clearToSend;
   }
-  
-  public void setInvoke(boolean b){	
-    invoke = b;	
+
+  public void setInvoke(boolean b) {
+    invoke = b;
   }
 
 }

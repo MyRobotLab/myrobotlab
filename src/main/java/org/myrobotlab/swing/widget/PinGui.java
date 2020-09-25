@@ -159,12 +159,9 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
     // onOff.setText(pinDef.getName());
     // stateButton.setText("ab");
     /*
-    if (displayAddress) {
-      popupLauncher.setText(pinDef.getAddress() + "");
-    } else {
-      popupLauncher.setText("");
-    }
-    */
+     * if (displayAddress) { popupLauncher.setText(pinDef.getAddress() + ""); }
+     * else { popupLauncher.setText(""); }
+     */
     popupLauncher.addActionListener(this);
 
     //////////// button end /////////////////
@@ -174,7 +171,7 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
       slider = new JSlider(orientation, 0, 255, 0);
       slider.setOpaque(false);
       slider.addChangeListener(this);
-      
+
       popupPanel.add(slider);
       sliderOutput = new JLabel("0");
       popupPanel.add(sliderOutput);
@@ -227,9 +224,9 @@ public class PinGui implements DisplayProvider, ActionListener, ChangeListener {
     // simple 2 state at the moment ...
     if (o == popupLauncher) {
       /*
-      Color activeSelectingColor = Color.CYAN;
-      popupLauncher.setBackground(activeSelectingColor); 
-      */     
+       * Color activeSelectingColor = Color.CYAN;
+       * popupLauncher.setBackground(activeSelectingColor);
+       */
       popup.show(popupLauncher, popupLauncher.getBounds().x, popupLauncher.getBounds().y + popupLauncher.getBounds().height);
       return;
     }

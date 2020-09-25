@@ -12,7 +12,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 public class TcpServer {
-  
+
   public final static Logger log = LoggerFactory.getLogger(TcpServer.class);
 
   boolean listening;
@@ -21,13 +21,16 @@ public class TcpServer {
   int nThreads = 2; // 20
 
   public static void main(String[] args) throws Exception {
-    
+
   }
-  
+
   /**
    * Maximum complexity start
-   * @param inPort - listening port
-   * @param inThreads - number of handler threads
+   * 
+   * @param inPort
+   *          - listening port
+   * @param inThreads
+   *          - number of handler threads
    */
   public void start(Integer inPort, Integer inThreads) {
     try {

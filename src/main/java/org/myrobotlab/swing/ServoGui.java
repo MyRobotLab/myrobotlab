@@ -119,8 +119,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   JButton restButton = new JButton("rest");
   JTextField speed = new JTextField("         ");
   JTextField rest = new JTextField("");
-  
-  ImageIcon movingIcon = Util.getImageIcon(Service.getResourceDir(Servo.class),"gifOk.gif");
+
+  ImageIcon movingIcon = Util.getImageIcon(Service.getResourceDir(Servo.class), "gifOk.gif");
 
   JLabel moving = new JLabel(movingIcon);
 
@@ -242,7 +242,8 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
     JPanel blockingPanel = new JPanel();
     // blockingPanel.setBorder(BorderFactory.createTitledBorder("blocking"));
     blockingPanel.setBorder(blockingTitle);
-    // ImageIcon icon = new ImageIcon(ImageIO.read(new File(Service.getResourceDir(Servo.class, "green.png"))));
+    // ImageIcon icon = new ImageIcon(ImageIO.read(new
+    // File(Service.getResourceDir(Servo.class, "green.png"))));
     ImageIcon icon = Util.getImageIcon("green.png");
     JLabel isBlocking = new JLabel();
     isBlocking.setIcon(icon);
@@ -537,8 +538,9 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
         moving.setVisible(servo.isMoving());
         enabledIcon.setVisible(servo.isEnabled());
 
-        // TODO: KW review/remove this if possible in the UI?  maxSpeed should go away. there is only "fullSpeed" 
-        double maxSpd =  500.0;
+        // TODO: KW review/remove this if possible in the UI? maxSpeed should go
+        // away. there is only "fullSpeed"
+        double maxSpd = 500.0;
         maxSpeed.setText(String.format("%.1f", maxSpd));
         speedSlider.setMaximum((int) maxSpd);
 
@@ -575,7 +577,6 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
         if (servoPin != null)
           pinList.setSelectedItem(servoPin);
-        
 
         if (servo.isEnabled()) {
           enable.setText("disable");
@@ -592,7 +593,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           autoDisable.setSelected(false);
           setIdleTimeEnabled(false);
         }
-        
+
         if (servo.isSweeping()) {
           sweepButton.setText("stop");
         } else {
@@ -638,21 +639,18 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
           mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
         }
 
-
         // FIXME - invert gui components so the next moveTo will not go crazy
         // !!!
         if (servo.isInverted() != mapOutput.getInverted()) {
           mapOutput.setInverted(servo.isInverted());
         }
 
-      
-
         minPos.setText(String.format("%.1f", servo.getMin()));
         maxPos.setText(String.format("%.1f", servo.getMax()));
-       
+
         mapInput.setLowValue(Double.valueOf(servo.getMin()).intValue());
         mapInput.setHighValue(Double.valueOf(servo.getMax()).intValue());
-       
+
         addListeners();
       }
     });

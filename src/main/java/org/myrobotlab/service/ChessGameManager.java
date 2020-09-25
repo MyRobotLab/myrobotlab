@@ -37,5 +37,4 @@ public class ChessGameManager extends Service {
     super(n, id);
   }
 
-
 }

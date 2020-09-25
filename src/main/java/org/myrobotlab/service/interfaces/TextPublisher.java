@@ -8,7 +8,7 @@ public interface TextPublisher {
 
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service);
-  
+
   public void attachTextListener(TextListener service);
 
 }

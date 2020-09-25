@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 
 public class Http {
   /**
-   * FIXME = there should be no statics - and when a file is downloaded or errors occur
-   * there should be published statuses
+   * FIXME = there should be no statics - and when a file is downloaded or
+   * errors occur there should be published statuses
    * 
    * FIXME - OFFER PROXY !!!! See Below !!! NOT APACHE HTTPCLIENT IN FACT
    * HTTPCLIENT SHOULD ABEND TO THE ENV SET HERE !!!!
@@ -79,11 +79,11 @@ public class Http {
     log.info(version + " " + v);
 
   }
-  
+
   /**
-   * download the file as {filename}.part until it is complete, then do an os rename
-   * this is a common safety technique, so that other processes or threads do not consume
-   * a partially downloaded file.
+   * download the file as {filename}.part until it is complete, then do an os
+   * rename this is a common safety technique, so that other processes or
+   * threads do not consume a partially downloaded file.
    * 
    * @param theUrl
    * @param outFile
@@ -91,17 +91,17 @@ public class Http {
   public static void getSafePartFile(String theUrl, String outFile) {
     getSafePartFile(theUrl, outFile, true);
   }
-  
+
   public static void getSafePartFile(String theUrl, String outFile, boolean removePrevious) {
     try {
-        get(theUrl, outFile  + ".part");
-        File f = new File(outFile);
-        if (f.exists() && removePrevious) {
-          f.delete();
-        }
-        File newFile = new File(outFile  + ".part");
-        newFile.renameTo(new File(outFile));
-    } catch(Exception e) {
+      get(theUrl, outFile + ".part");
+      File f = new File(outFile);
+      if (f.exists() && removePrevious) {
+        f.delete();
+      }
+      File newFile = new File(outFile + ".part");
+      newFile.renameTo(new File(outFile));
+    } catch (Exception e) {
       log.error("getSafePartFile threw", e);
     }
   }
@@ -109,22 +109,22 @@ public class Http {
   public static void get(String theUrl, String outFile) throws IOException {
     log.info("get {} --save to--> {}", theUrl, outFile);
 
-      URL url = new URL(theUrl);
-      URLConnection urlConnection = url.openConnection();
-      InputStream in = urlConnection.getInputStream();
-      FileOutputStream out = new FileOutputStream(outFile);
-      
-      byte[] buffer = new byte[8192]; // you can configure the buffer size
-      int length;
+    URL url = new URL(theUrl);
+    URLConnection urlConnection = url.openConnection();
+    InputStream in = urlConnection.getInputStream();
+    FileOutputStream out = new FileOutputStream(outFile);
 
-      while ((length = in.read(buffer)) != -1) {
-        out.write(buffer, 0, length); // copy streams
-      }
-      
-      in.close(); // call this in a finally block
-      out.close();
+    byte[] buffer = new byte[8192]; // you can configure the buffer size
+    int length;
+
+    while ((length = in.read(buffer)) != -1) {
+      out.write(buffer, 0, length); // copy streams
+    }
+
+    in.close(); // call this in a finally block
+    out.close();
   }
-  
+
   public static void getFile(String url) throws IOException {
     getFile(url, null);
   }
@@ -135,6 +135,5 @@ public class Http {
     }
     get(url, outFile);
   }
-
 
 }

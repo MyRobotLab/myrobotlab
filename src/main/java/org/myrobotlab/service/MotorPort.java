@@ -29,5 +29,4 @@ public class MotorPort extends AbstractMotor {
     return port;
   }
 
-
 }

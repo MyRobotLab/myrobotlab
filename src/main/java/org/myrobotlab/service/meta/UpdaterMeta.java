@@ -20,7 +20,7 @@ public class UpdaterMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("used to manage updates");
     addCategory("system");
-    
+
     addPeer("git", "Git", "git source control");
     addPeer("builder", "Builder", "mvn build");
   }

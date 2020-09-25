@@ -129,13 +129,14 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   public void startEmbedded(String path) throws SolrServerException, IOException {
     // let's extract our default configs into the directory/
     // FileIO.extract(Util.getResourceDir() , "Solr/core1", path);
-    // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path + File.separator + "solr.xml");
+    // FileIO.extract(Util.getResourceDir() , "Solr/solr.xml", path +
+    // File.separator + "solr.xml");
     // load up the solr core container and start solr
-    
+
     // FIXME - a bit unsatisfactory
     File f = new File(getDataInstanceDir());
     f.mkdirs();
-    
+
     File check = new File(FileIO.gluePaths(path, "core1"));
     if (!check.exists()) {
       FileIO.copy(getResourceDirList(), path);
@@ -234,7 +235,8 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
   /**
    * Returns a document given the doc id from the index if it exists otherwise
    *
-   * @param docId - the doc id
+   * @param docId
+   *          - the doc id
    * @return - the solor document
    */
   public SolrDocument getDocById(String docId) {
@@ -599,7 +601,6 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     this.commitOnFlush = commitOnFlush;
   }
 
-
   // Attach Pattern stuff!
   public void attach(OpenCV opencv) {
     opencv.addListener("publishOpenCVData", getName(), "onOpenCVData");
@@ -912,13 +913,11 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("message_name", message.getName());
     doc.setField("sender_method", message.sendingMethod);
     doc.setField("message_status", message.status);
-    /* This makes no sense..
-    if (message.getHops() != null) {
-      for (String history : message.getHops()) {
-        doc.addField("history", message.getHops());
-      }
-    }
-    */
+    /*
+     * This makes no sense.. if (message.getHops() != null) { for (String
+     * history : message.getHops()) { doc.addField("history",
+     * message.getHops()); } }
+     */
 
     // System.out.println("Data: " + message.data);
     // TODO: now we need to introspect the array of objects and figure out how
@@ -943,15 +942,13 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       // Create a test document
       SolrInputDocument doc = new SolrInputDocument();
       /*
-      doc.setField("id", "Doc1");
-      doc.setField("title", "My title");
-      doc.setField("content", "This is the text field, for a sample document in myrobotlab.  ");
-      // add the document to the index
-      solr.addDocument(doc);
-      // commit the index
-      solr.commit();
-      */
-      
+       * doc.setField("id", "Doc1"); doc.setField("title", "My title");
+       * doc.setField("content",
+       * "This is the text field, for a sample document in myrobotlab.  "); //
+       * add the document to the index solr.addDocument(doc); // commit the
+       * index solr.commit();
+       */
+
       doc = new SolrInputDocument();
       doc.setField("id", "Doc3");
       doc.setField("title", "My title 3");
@@ -961,7 +958,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
       solr.addDocument(doc);
       // commit the index
       solr.commit();
-      
+
       // search for the word myrobotlab
       String queryString = "myrobotlab";
       QueryResponse resp = solr.search(queryString);
@@ -1030,7 +1027,7 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     }
 
   }
-  
+
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {

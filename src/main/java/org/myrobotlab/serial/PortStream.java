@@ -55,7 +55,7 @@ public class PortStream extends Port {
     // the "pure" Java (non-JNI/JNA) world...
     return new ArrayList<String>();
   }
-  
+
   public byte[] readBytes() {
     try {
       int size = in.available();
@@ -63,7 +63,7 @@ public class PortStream extends Port {
         // no data to read.. just return null
         return null;
       }
-      // ok, we have data! so, let's read 
+      // ok, we have data! so, let's read
       byte[] data = new byte[size];
       int numRead = in.read(data);
       if (numRead != size) {
@@ -74,7 +74,7 @@ public class PortStream extends Port {
       }
       // Assume that all data was read properly and return the full buffer
       return data;
-      
+
     } catch (IOException e) {
       log.warn("Interrupted PortStream in readBytes.  Perhaps port was closed?", e);
     }

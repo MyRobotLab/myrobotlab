@@ -39,16 +39,17 @@ public class Proxy extends Service {
   public Proxy(String name, String id) {
     super(name, id);
   }
-    public Proxy(String name, String id, String type) {
+
+  public Proxy(String name, String id, String type) {
     super(name, id);
-    
+
     // necessary for serialized transport
     this.id = id;
     serviceClass = type;
     int period = type.lastIndexOf(".");
     simpleName = type.substring(period);
     MethodCache cache = MethodCache.getInstance();
-    
+
     // hmm interesting ....
     cache.cacheMethodEntries(this.getClass());
 
@@ -65,7 +66,7 @@ public class Proxy extends Service {
     }
 
     if (interfaceSet == null) {
-   // FIXME - this is handled elsewhere (but very important)
+      // FIXME - this is handled elsewhere (but very important)
       interfaceSet = getInterfaceSet();
     }
 
@@ -73,39 +74,38 @@ public class Proxy extends Service {
     this.outbox = new Outbox(this);
     Runtime.register(new Registration(this));
   }
-  
+
   String type = null;
-  
+
   LinkedTreeMap<String, Object> state = null;
-  
+
   // pre-processor hook
   // overloaded invoke ?
   // methodMap data - dynaFuncs
   // overloaded serialization toJson ...
-  
+
   public String getId() {
     return "unknown";
   }
-  
+
   public boolean isLocal() {
     return false;
   }
-  
+
   public String getType() {
     // overloaded to support other types
     return Proxy.class.getCanonicalName();
   }
-  
+
   public void setState(String json) {
     state = CodecUtils.toTree(json);
   }
-
 
   public static void main(String[] args) {
     try {
 
       LoggingFactory.init(Level.INFO);
-      Runtime.main(new String[] { "--interactive", "--id", "id"});
+      Runtime.main(new String[] { "--interactive", "--id", "id" });
       Runtime.start("proxy", "Proxy");
 
     } catch (Exception e) {
@@ -114,17 +114,15 @@ public class Proxy extends Service {
   }
 
   /*
-  public void setId(String id) {
-    this.id = id;
-  }*/
+   * public void setId(String id) { this.id = id; }
+   */
 
   public void setState(LinkedTreeMap<String, Object> state) {
     this.state = state;
   }
 
   /*
-  public void setType(String type) {
-      this.type = type;
-  } */
+   * public void setType(String type) { this.type = type; }
+   */
 
 }

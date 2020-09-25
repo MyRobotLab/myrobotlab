@@ -59,7 +59,8 @@ public class BotInfo {
       // this now is lazy Bot creation time - so we merge what the user has
       // then set our reference to the same set of properties
       bot.properties.putAll(properties);
-      // bot.toJson(String.format("%s.json",name)); - pretty cool to see Mr.Turings brain in json
+      // bot.toJson(String.format("%s.json",name)); - pretty cool to see
+      // Mr.Turings brain in json
 
       // setting reference of BotInfo properties to bot properties
       properties = bot.properties;

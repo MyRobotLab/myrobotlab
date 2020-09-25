@@ -104,7 +104,7 @@ public class Keyboard extends Service {
       mouseEvent = null;
       return;
     }
-    
+
     keyboard = new NativeKeyboard();
     mouseEvent = new MouseEvent();
   }

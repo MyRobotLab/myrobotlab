@@ -19,7 +19,7 @@ import picocli.CommandLine.Option;
  *         test serialization
  *         
  * FIXME - there are in parameters - ones supplied by the user of ProcessUtils, and out params which will become 
- * behavior changes in the Runtime 
+ * behavior changes in the Runtime
  * 
  * </pre>
  */
@@ -42,14 +42,18 @@ public class CmdOptions {
   @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
   public boolean autoUpdate = false;
 
-  public final String DEFAULT_CONNECT = "http://localhost:8888"; 
-  
+  public final String DEFAULT_CONNECT = "http://localhost:8888";
+
   // TODO - daemon / fork
   @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
   public boolean daemon = false;
 
   // launcher
-  @Option(names = { "-c", "--connect" }, arity = "0..*", /*defaultValue = DEFAULT_CONNECT,*/ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
+  @Option(names = { "-c", "--connect" }, arity = "0..*", /*
+                                                          * defaultValue =
+                                                          * DEFAULT_CONNECT,
+                                                          */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is "
+      + DEFAULT_CONNECT)
   public String connect = null;
 
   // launcher
@@ -62,14 +66,15 @@ public class CmdOptions {
   // launcher
   @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
   public String memory = null;
-  
+
   // launcher
   /*
-  @Option(names = { "--std-out" }, description = "when spawning save the results of the launch in a file \"std.out\"")
-  public boolean stdout = false;
-  */
-  
-  // if --from-launcher knows to createAndStart service on -s 
+   * @Option(names = { "--std-out" }, description =
+   * "when spawning save the results of the launch in a file \"std.out\"")
+   * public boolean stdout = false;
+   */
+
+  // if --from-launcher knows to createAndStart service on -s
   @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
   public boolean fromLauncher = false;
 

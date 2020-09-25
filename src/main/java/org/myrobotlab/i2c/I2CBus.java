@@ -9,10 +9,11 @@ import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.I2CBusControl;
 import org.myrobotlab.service.interfaces.I2CBusController;
 import org.slf4j.Logger;
+
 /**
  * 
- * FIXME - this probably should be its own service - one that manages writing into and reading out of
- * a I2C bus
+ * FIXME - this probably should be its own service - one that manages writing
+ * into and reading out of a I2C bus
  *
  */
 public class I2CBus implements Attachable, I2CBusControl {
@@ -173,25 +174,25 @@ public class I2CBus implements Attachable, I2CBusControl {
   @Override
   public void addListener(String localTopic, String otherService, String callback) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void addListener(String localTopic, String otherService) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void removeListener(String localTopic, String otherService, String callback) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void removeListener(String localTopic, String otherService) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

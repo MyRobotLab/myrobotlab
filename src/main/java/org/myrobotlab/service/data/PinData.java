@@ -11,7 +11,7 @@ public class PinData implements Serializable {
    * identifier/label
    */
   public String pin;
-  
+
   /**
    * The value of the pin - can support analog or digital pins
    */
@@ -26,7 +26,7 @@ public class PinData implements Serializable {
     this.pin = String.format("%.2f", pin);
     this.value = new Double(value);
   }
-  
+
   public PinData(int pin, double value) {
     this.pin = String.format("%.2f", pin);
     this.value = value;

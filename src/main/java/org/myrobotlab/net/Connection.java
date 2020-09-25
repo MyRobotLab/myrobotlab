@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class to describe all the necessary connection details of
- * an mrl instance
+ * Class to describe all the necessary connection details of an mrl instance
  */
 public class Connection {
 
@@ -13,7 +12,7 @@ public class Connection {
    * serializable references
    */
   protected Map<String, Object> serializable = new HashMap<>();
-  
+
   /**
    * all references to connection information
    */

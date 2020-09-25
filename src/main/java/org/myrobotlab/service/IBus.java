@@ -57,7 +57,6 @@ public class IBus extends Service implements SerialDataListener {
     serial.attach(serial);
   }
 
-
   static long millis() {
     return System.currentTimeMillis();
   }

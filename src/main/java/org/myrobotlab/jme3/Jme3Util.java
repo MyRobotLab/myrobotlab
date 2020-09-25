@@ -61,7 +61,8 @@ public class Jme3Util {
   public Object invoke(Jme3Msg msg) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     MethodCache cache = MethodCache.getInstance();
     Method method = cache.getMethod(this.getClass(), msg.method, msg.data);
-    return method.invoke(this, msg.data);// jme.invokeOn(false, this, msg.method, msg.data);
+    return method.invoke(this, msg.data);// jme.invokeOn(false, this,
+                                         // msg.method, msg.data);
   }
 
   public void info(String format, Object... params) {
@@ -221,7 +222,8 @@ public class Jme3Util {
 
     p.attachChild(c);
 
-    // FIXME - possibly subtract out the parents "world" transform & rotation ???
+    // FIXME - possibly subtract out the parents "world" transform & rotation
+    // ???
 
   }
 

@@ -22,6 +22,5 @@ public class BuilderMeta extends MetaData {
     addDescription("service capable of building mrl locally");
     addCategory("framework");
   }
-  
 
 }

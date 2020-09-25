@@ -45,7 +45,7 @@ public class ThingSpeak extends Service {
 
       log.info("hello");
 
-      ThingSpeak thingSpeak = (ThingSpeak)Runtime.start("thingSpeak", "ThingSpeak");
+      ThingSpeak thingSpeak = (ThingSpeak) Runtime.start("thingSpeak", "ThingSpeak");
       thingSpeak.update(33);
       thingSpeak.startService();
 

@@ -158,7 +158,6 @@ public class DruppNeck extends Service {
     this.downOffset = downOffset;
   }
 
-
   public static void main(String[] args) throws Exception {
     LoggingFactory.init("INFO");
     // To use the drup service you need to configure and attach the servos

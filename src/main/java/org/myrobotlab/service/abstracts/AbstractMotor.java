@@ -63,9 +63,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   private static final long serialVersionUID = 1L;
 
-
   public final static Logger log = LoggerFactory.getLogger(AbstractMotor.class);
-
 
   /**
    * list of names of possible controllers
@@ -88,12 +86,10 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   // feedback
   protected Double positionCurrent; // aka currentPos
 
-
   /**
    * a new "un-set" mapper for merging with default motorcontroller
    */
   protected MapperLinear mapper = new MapperLinear();
-
 
   // FIXME - implements an Encoder interface
   // get a named instance - stopping and tarting should not be creating &
@@ -107,7 +103,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
   // FIXME - use a timer encoder !
   transient MotorEncoder encoder = null;
-
 
   public AbstractMotor(String n, String id) {
     super(n, id);
@@ -195,7 +190,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     broadcast("publishMotorStop", this);
     broadcastState();
   }
-  
+
   // FIXME - proxy to MotorControllerx
   @Override
   public void stopAndLock() {
@@ -204,7 +199,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     lock();
     broadcastState();
   }
-  
+
   @Override
   public void unlock() {
     info("unLock");
@@ -250,7 +245,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     // TODO Auto-generated method stub
 
   }
-    
+
   // hmm
   public void onPin(PinData data) {
     Double pwr = null;
@@ -269,7 +264,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   }
 
   //////////////// begin new stuff ///////////////////////
-  
+
   public void attach(PinDefinition pindef) {
     // SINGLE PIN MAN !! not ALL PINS !
     // must be local now :P
@@ -287,7 +282,7 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
       error("motor.attach(controller) - controller cannot be null");
       return;
     }
-    
+
     // FIXME - remove this !!!
     if (isAttached(controller)) {
       log.info("motor {} already attached to motor controller {}", getName(), controller.getName());
@@ -316,7 +311,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
     error("%s doesn't know how to attach a %s", getClass().getSimpleName(), service.getClass().getSimpleName());
   }
 
-
   public MotorControl publishMotorMove(MotorControl motor) {
     return motor;
   }
@@ -324,7 +318,6 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
   public MotorControl publishMotorStop(MotorControl motor) {
     return motor;
   }
-
 
   // FIXME promote to interface
   public Mapper getMapper() {

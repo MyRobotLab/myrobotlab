@@ -45,7 +45,8 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.connect("COM15");
       Arduino arduino1 = (Arduino) Runtime.start("arduino1", "Arduino");
-      // arduino1.connect(arduino, "Serial1"); HOW DO YOU EVEN attach to the different pins
+      // arduino1.connect(arduino, "Serial1"); HOW DO YOU EVEN attach to the
+      // different pins
       // FIXME - should be arduino1.attach(arduino2.getSerial("s1"));
       // or - arduino1.attach(arduino2, "s3");
     } catch (Exception e) {
@@ -114,8 +115,8 @@ public class SerialRelay extends Service implements SerialDevice, Attachable {
     if (data.deviceId == controller.getDeviceId(this)) {
       byte[] byteData = new byte[data.data.length];
       // TODO: convert serial relay data to pass around a byte array..
-      for (int i = 0 ; i < data.data.length; i++) {
-        byteData[i] = (byte)(data.data[i] & 0xFF);
+      for (int i = 0; i < data.data.length; i++) {
+        byteData[i] = (byte) (data.data[i] & 0xFF);
       }
       if (listener instanceof SerialDataListener) {
         try {

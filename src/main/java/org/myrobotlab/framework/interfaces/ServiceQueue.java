@@ -11,7 +11,7 @@ public interface ServiceQueue {
    * put message in inbox, so it will be processed by this service
    * 
    * @param msg
-   *        
+   * 
    */
 
   public void in(Message msg);

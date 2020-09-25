@@ -107,7 +107,7 @@ public class AudioFile extends Service {
       // log.info("switching to track %s", trackName);
     }
   }
-  
+
   @Override
   public void stopService() {
     super.stopService();
@@ -219,9 +219,12 @@ public class AudioFile extends Service {
   };
 
   /**
-   * plays a resource file - currently there are very few resource files - and that's how it should
-   * be they are only used for demonstration/tutorial functionality
-   * @param filename - name of file relative to the resource dir
+   * plays a resource file - currently there are very few resource files - and
+   * that's how it should be they are only used for demonstration/tutorial
+   * functionality
+   * 
+   * @param filename
+   *          - name of file relative to the resource dir
    * @param isBlocking
    */
   public void playResource(String filename, Boolean isBlocking) {
@@ -274,7 +277,7 @@ public class AudioFile extends Service {
   public void stop() {
     AudioProcessor ap = processors.get(currentTrack);
     // dump the current song
-   
+
     // pause the next one if queued
     ap.pause(false); // FIXME me shouldn't it be true ?
     ap.stopPlaying();
@@ -426,7 +429,8 @@ public class AudioFile extends Service {
 
         Joystick joystick = (Joystick) Runtime.createAndStart("joy", "Joystick");
         Runtime.createAndStart("python", "Python");
-        AudioFile player = (AudioFile)Runtime.start("player", "AudioFile"); // new AudioFile("player");
+        AudioFile player = (AudioFile) Runtime.start("player", "AudioFile"); // new
+                                                                             // AudioFile("player");
         // player.playFile(filename, true);
         player.startService();
         Runtime.createAndStart("gui", "SwingGui");
@@ -509,6 +513,5 @@ public class AudioFile extends Service {
   public void setMute(boolean mute) {
     this.mute = mute;
   }
-
 
 }

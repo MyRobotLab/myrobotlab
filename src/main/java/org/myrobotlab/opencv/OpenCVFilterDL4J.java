@@ -143,10 +143,11 @@ public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
     running = true;
     // in a loop, grab the current image and classify it and update the result.
     while (running) {// FIXME - must be able to release !!
-      
+
       if (!enabled) {
         // sleep to avoid cpu usage
-        // TODO: come up with a better way of doing this (maybe shutdown this thread and restart when it enables/disbales?)
+        // TODO: come up with a better way of doing this (maybe shutdown this
+        // thread and restart when it enables/disbales?)
         try {
           Thread.sleep(10);
         } catch (InterruptedException e) {

@@ -10,7 +10,9 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
 public @interface Config {
-    boolean required() default true;
-    int order() default 50;
-    String description() default "";
+  boolean required() default true;
+
+  int order() default 50;
+
+  String description() default "";
 }

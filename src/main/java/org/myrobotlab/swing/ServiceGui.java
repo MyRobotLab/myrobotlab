@@ -91,7 +91,7 @@ public abstract class ServiceGui implements WindowListener {
     // cache methods
     MethodCache cache = MethodCache.getInstance();
     cache.cacheMethodEntries(this.getClass());
-    
+
     self = this;
     this.boundServiceName = boundServiceName;
     this.swingGui = myService;
@@ -117,7 +117,7 @@ public abstract class ServiceGui implements WindowListener {
     // gcCenter.fill = GridBagConstraints.HORIZONTAL;
     gcCenter.weightx = 1;
     gcCenter.weighty = 1;
-    
+
     // addTop(new JButton("save"), new JButton("load"));
   }
 
@@ -452,19 +452,21 @@ public abstract class ServiceGui implements WindowListener {
   public void onStatus(Status inStatus) {
     swingGui.setStatus(inStatus);
   }
-  
+
   /**
    * onRegistered is called on all service guis when a ne service is registered.
-   * To be overriden if the ServiceGui designer wants to be notified of new services.
+   * To be overriden if the ServiceGui designer wants to be notified of new
+   * services.
+   * 
    * @param sw
    */
   public void onRegistered(final ServiceInterface sw) {
-    
+
   }
-  
+
   /**
-   * method to enable or disable all the children of a container - useful when a single checkbox
-   * or button controls many other sub-configuration elements
+   * method to enable or disable all the children of a container - useful when a
+   * single checkbox or button controls many other sub-configuration elements
    * 
    * @param container
    * @param enabled
@@ -474,10 +476,10 @@ public abstract class ServiceGui implements WindowListener {
     for (int i = 0; i < children.length; ++i) {
       Component c = children[i];
       if (c instanceof Container) {
-        setEnabled((Container)c, enabled);
+        setEnabled((Container) c, enabled);
       }
       c.setEnabled(enabled);
-    }    
+    }
   }
 
 }

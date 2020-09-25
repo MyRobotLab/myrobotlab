@@ -41,14 +41,14 @@ public class Emoji extends Service
   transient ImageDisplay display = null;
   transient HttpClient http = null;
   transient FiniteStateMachine fsm = null;
-  
-  int defaultSize = 32;//px
+
+  int defaultSize = 32;// px
 
   Map<String, String> descriptionIndex = new TreeMap<String, String>();
 
   State lastState = null;
 
-  String mode =  "small";
+  String mode = "small";
 
   static public class EmojiData {
     String name;
@@ -61,9 +61,9 @@ public class Emoji extends Service
   // FIXME ! - emoji are multi-unicode !!! - create unicode key
   public Emoji(String n, String id) {
     super(n, id);
-    
+
     startPeer("fsm");
-    
+
   }
 
   public void addEmojis(String... states) {
@@ -91,11 +91,10 @@ public class Emoji extends Service
     } else {
       fsm.startService();
     }
-    
+
     // subscribing to errors
     subscribe("*", "publishStatus");
   }
-  
 
   public void onStatus(org.myrobotlab.framework.Status status) {
     if (status.isError()) {
@@ -114,7 +113,7 @@ public class Emoji extends Service
   }
 
   public void display(String source) {
-    display(new State(source)); 
+    display(new State(source));
   }
 
   public void display(State state) {
@@ -154,18 +153,18 @@ public class Emoji extends Service
     if (filename == null) {
       filename = source;
     }
-    
-    // defaults 
-        // worke = fullscreen, black bg, single frame
-        // small = 32px, no window, always on top (work on moving image)
-    
+
+    // defaults
+    // worke = fullscreen, black bg, single frame
+    // small = 32px, no window, always on top (work on moving image)
+
     // common display attributes
     display.setMultiFrame(false);
 
     if (mode.equals("small")) {
       defaultSize = 32;
       display.setAlwaysOnTop(true);
-      display.setFullScreen(false);      
+      display.setFullScreen(false);
     } else {
       defaultSize = 1024;
       display.setAlwaysOnTop(false);
@@ -298,7 +297,7 @@ public class Emoji extends Service
     // check display properties fullscreen / popfront / icon / vs toolbar icon ?
     display(state); // it
   }
-  
+
   public void initEmojiState() {
 
     // build the emotional finite state machine
@@ -390,7 +389,7 @@ public class Emoji extends Service
 
     fsm.addScheduledEvent("clear-event", 1000 * 30);
     // emotionalState.addScheduledEvent("clear-event", 1000);
-    
+
     // FIXME - DUMP INFO sorted tree map based on source state !
     log.info(fsm.getFsmMap());
 
@@ -421,7 +420,7 @@ public class Emoji extends Service
 
       Emoji emoji = (Emoji) Runtime.start("emoji", "Emoji");
       emoji.fire("ill-event");
-      
+
       emoji.fire("clear-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
@@ -429,9 +428,9 @@ public class Emoji extends Service
       emoji.fire("ill-event");
       Service.sleep(2000);
       emoji.fire("ill-event");
-      
+
       Runtime.release("emoji");
-     
+
       log.info("here");
 
       /**
@@ -508,7 +507,7 @@ public class Emoji extends Service
   public FiniteStateMachine getFsm() {
     return fsm;
   }
-  
+
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {

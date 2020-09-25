@@ -89,7 +89,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     return arm;
   }
 
-
   /**
    * peer services FIXME - framework should always - startPeers() unless
    * configured not to
@@ -109,7 +108,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     // Config will be managed by LangUtils
 
   }
-  
+
   @Override
   public void startService() {
     super.startService();
@@ -135,16 +134,20 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     rotate.setPosition(90.0);
     omoplate.setPosition(10.0);
 
-    setSpeed(20.0, 20.0, 20.0, 20.0);    
+    setSpeed(20.0, 20.0, 20.0, 20.0);
   }
 
   @Override
   public void broadcastState() {
     super.broadcastState();
-    if (bicep != null)bicep.broadcastState();
-    if (rotate != null)rotate.broadcastState();
-    if (shoulder != null)shoulder.broadcastState();
-    if (omoplate != null)omoplate.broadcastState();
+    if (bicep != null)
+      bicep.broadcastState();
+    if (rotate != null)
+      rotate.broadcastState();
+    if (shoulder != null)
+      shoulder.broadcastState();
+    if (omoplate != null)
+      omoplate.broadcastState();
   }
 
   public void disable() {
@@ -195,8 +198,8 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   public String getScript(String inMoovServiceName) {
     // FIXME - this is cheesy
     String side = inMoovServiceName.contains("left") ? "left" : "right";
-    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(), shoulder.getCurrentInputPos(),
-        omoplate.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(),
+        shoulder.getCurrentInputPos(), omoplate.getCurrentInputPos());
   }
 
   public ServoControl getShoulder() {
@@ -289,7 +292,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
@@ -311,7 +314,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
     omoplate.save();
     return true;
   }
-  
+
   @Deprecated
   public boolean loadFile(String file) {
     File f = new File(file);
@@ -337,7 +340,7 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
       log.debug("Successfully loaded {}", f.getAbsolutePath());
     }
     return true;
-  }  
+  }
 
   public void setAutoDisable(Boolean idleTimeoutMs) {
     bicep.setAutoDisable(idleTimeoutMs);
@@ -351,8 +354,8 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
   }
 
   /**
-   * This method sets the output min/max limits for all of the servos in the arm.
-   * Input limits are unchanged.
+   * This method sets the output min/max limits for all of the servos in the
+   * arm. Input limits are unchanged.
    * 
    * @param bicepMin
    * @param bicepMax

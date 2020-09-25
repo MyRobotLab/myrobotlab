@@ -172,12 +172,12 @@ public class DockableTabPane implements ActionListener {
 
     }
   }
-  
+
   public String getSelected() {
     Component c = tabs.getTabComponentAt(tabs.getSelectedIndex());
     if (c instanceof JLabel) {
-      return ((JLabel)c).getText();
-    }    
+      return ((JLabel) c).getText();
+    }
     return null;
   }
 

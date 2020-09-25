@@ -4,8 +4,8 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * Initially we wanted some abstraction between slf4j and mrl library (to support Android)
- * Now its no longer needed.
+ * Initially we wanted some abstraction between slf4j and mrl library (to
+ * support Android) Now its no longer needed.
  * 
  * @author GroG
  *

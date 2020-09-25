@@ -1,6 +1,5 @@
 package org.myrobotlab.client;
 
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
@@ -443,54 +442,59 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
   }
 
   public static void main(String[] args) {
-    
+
     try {
       // Create a JmDNS instance
       // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
       // JmDNS jmdns = JmDNS.create(null, null);
-      // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost().getHostName()); prefers Ipv6 :(
-      // JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"),InetAddress.getLocalHost().getHostName());
-      // JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"), "shmooker01");
+      // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost().getHostName());
+      // prefers Ipv6 :(
+      // JmDNS jmdns =
+      // JmDNS.create(InetAddress.getByName("192.168.0.102"),InetAddress.getLocalHost().getHostName());
+      // JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"),
+      // "shmooker01");
       JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"), "raspi01");
       // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
       // Register a service
-      // ServiceInfo serviceInfo = ServiceInfo.create("_myrobotlab._tcp.local.", "admin", 8888, "websocket connection");
-       ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "raspi01", 8888, "websocket connection");
+      // ServiceInfo serviceInfo = ServiceInfo.create("_myrobotlab._tcp.local.",
+      // "admin", 8888, "websocket connection");
+      ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "raspi01", 8888, "websocket connection");
       jmdns.registerService(serviceInfo);
-      
+
       /*
-      ServiceInfo serviceInfo = ServiceInfo.create("myrobotlab.local.", "raspi01", 8888, "path=index.html");
-
-      serviceInfo = ServiceInfo.create("myrobotlab.local.", "raspi02", 8888, "path=index.html");
-      jmdns.registerService(serviceInfo);
-
-
-      serviceInfo = ServiceInfo.create("myrobotlab.local.", "admin", 8888, "path=index.html");
-      jmdns.registerService(serviceInfo);
-*/
+       * ServiceInfo serviceInfo = ServiceInfo.create("myrobotlab.local.",
+       * "raspi01", 8888, "path=index.html");
+       * 
+       * serviceInfo = ServiceInfo.create("myrobotlab.local.", "raspi02", 8888,
+       * "path=index.html"); jmdns.registerService(serviceInfo);
+       * 
+       * 
+       * serviceInfo = ServiceInfo.create("myrobotlab.local.", "admin", 8888,
+       * "path=index.html"); jmdns.registerService(serviceInfo);
+       */
       // Wait a bit
       Thread.sleep(25000);
 
       // Unregister all services
       jmdns.unregisterAllServices();
 
-  } catch (Exception e) {
+    } catch (Exception e) {
       System.out.println(e.getMessage());
-  }
+    }
 
     try {
       // Service service = Service.fromName("_tivo-mindrpc._tcp");
       // Service service = Service.fromName("_smb._tcp.local");
       // Service service = Service.fromName("_homekit._tcp.local");
       // Service service = Service.fromName("_homekit._tcp.local");
-      // Service service = Service.fromName("_airplay._tcp.local");      
+      // Service service = Service.fromName("_airplay._tcp.local");
       // Query query = Query.createFor(service, Domain.LOCAL);
       // Set<Instance> instances = query.runOnce();
       // instances.stream().forEach(System.out::println);
     } catch (Exception e) {
       e.printStackTrace();
     }
-    
+
     boolean done = true;
     if (done) {
       return;

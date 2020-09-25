@@ -44,7 +44,7 @@ import org.slf4j.Logger;
  */
 public class Pin implements Serializable {
   public final static Logger log = LoggerFactory.getLogger(Pin.class);
-  
+
   private static final long serialVersionUID = 1L;
 
   public static final int DIGITAL_VALUE = 1; // normalized with data coming

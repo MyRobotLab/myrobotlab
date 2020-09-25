@@ -393,7 +393,7 @@ public class InProcessCli implements Runnable {
     relayTo = name;
     relayMethod = method;
     String cliFullName = name + '@' + id;
-    
+
     // setup cli subscription
     MRLListener listener = new MRLListener(pubMethod, cliFullName, CodecUtils.getCallbackTopicName(pubMethod));
     Message subscription = Message.createMessage(cliFullName, relayTo, "addListener", listener);

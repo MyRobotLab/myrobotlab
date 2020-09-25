@@ -30,7 +30,7 @@ public class WebImage {
   public String source;
 
   public long ts;
-    
+
   public Integer frameIndex;
 
   public WebImage(final BufferedImage img, final String source, int frameIndex) {
@@ -57,7 +57,7 @@ public class WebImage {
       if (quality == null) {
         ImageIO.write(img, imgType, os);
         os.close();
-        data = String.format("data:image/jpeg;base64,%s",Base64.getEncoder().encodeToString(os.toByteArray()));
+        data = String.format("data:image/jpeg;base64,%s", Base64.getEncoder().encodeToString(os.toByteArray()));
       } else {
 
         // save jpeg image with specific quality. "1f" corresponds to 100% ,
@@ -74,7 +74,7 @@ public class WebImage {
         writer.dispose();
         os.close();
 
-        data = String.format("data:image/jpeg;base64,%s",Base64.getEncoder().encodeToString(os.toByteArray()));
+        data = String.format("data:image/jpeg;base64,%s", Base64.getEncoder().encodeToString(os.toByteArray()));
       }
     } catch (Exception e) {
       log.error("could not create WebImage", e);

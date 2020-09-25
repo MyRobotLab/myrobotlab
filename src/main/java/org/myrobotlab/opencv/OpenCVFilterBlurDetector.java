@@ -25,16 +25,15 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
   protected float threshold = 100.0f;
 
   /**
-   * This filter will detect how blurry an image is.  It does this by
-   * computing the variance of the laplacian of the image.
-   * More Info on the approach here:
+   * This filter will detect how blurry an image is. It does this by computing
+   * the variance of the laplacian of the image. More Info on the approach here:
    * https://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
    * 
    * The blurriness score is computed over the entire image.
    * 
-   * NOTE: Lower blurriness scores mean the image is more blurry!
-   * Scores below 100 tend to be very blurry and scores above 100 tend to be sharper.
-   *    
+   * NOTE: Lower blurriness scores mean the image is more blurry! Scores below
+   * 100 tend to be very blurry and scores above 100 tend to be sharper.
+   * 
    */
   public OpenCVFilterBlurDetector(String name) {
     super(name);
@@ -51,10 +50,10 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
     meanStdDev(output, mean, stdDev);
     // float meanF = mean.getFloatBuffer().get();
     DoubleRawIndexer indexer = stdDev.createIndexer();
-    double f = indexer.get(0,0);
+    double f = indexer.get(0, 0);
     indexer.close();
     // stddev squared is the variance.
-    return f*f;
+    return f * f;
   }
 
   @Override
@@ -82,7 +81,7 @@ public class OpenCVFilterBlurDetector extends OpenCVFilter {
       String status = "Blurry     : " + blurriness;
       graphics.setColor(Color.RED);
       graphics.drawString(status, 20, 40);
-    } else  {
+    } else {
       String status = "Not Blurry : " + blurriness;
       graphics.setColor(Color.BLUE);
       graphics.drawString(status, 20, 40);

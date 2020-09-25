@@ -12,9 +12,9 @@ import org.slf4j.Logger;
  *
  */
 public class RTTTLParser {
-  
+
   public final static Logger log = LoggerFactory.getLogger(RTTTLParser.class);
-  
+
   public static HashMap<String, Integer> noteToNum;
 
   static {

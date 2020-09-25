@@ -108,17 +108,17 @@ public class Tracking extends Service {
 
   // statistics
   public int updateModulus = 1;
-  
+
   public long cnt = 0;
-  
+
   public Point2df lastPoint = new Point2df(0.5F, 0.5F);
 
   double sizeIndexForBackgroundForegroundFlip = 0.10;
 
   int faceFoundFrameCount = 0;
-  
+
   int faceFoundFrameCountMin = 2;
-  
+
   boolean scan = false;
 
   String[] axis = new String[] { "x", "y" };
@@ -266,12 +266,12 @@ public class Tracking extends Service {
   public void rest() {
     log.info("rest");
     for (TrackingServoEvent sc : servoControls.values()) {
-   
-        Double velocity = sc.servoControl.getSpeed();
-        sc.servoControl.setSpeed(20.0);
-        sc.servoControl.moveToBlocking(sc.servoControl.getRest());
-        sc.servoControl.setSpeed(velocity);
-      
+
+      Double velocity = sc.servoControl.getSpeed();
+      sc.servoControl.setSpeed(20.0);
+      sc.servoControl.moveToBlocking(sc.servoControl.getRest());
+      sc.servoControl.setSpeed(velocity);
+
     }
   }
 
@@ -329,7 +329,8 @@ public class Tracking extends Service {
             TrackingServoEvent x = servoControls.get("x");
             TrackingServoEvent y = servoControls.get("y");
             double xpos = x.servoControl.getCurrentInputPos();
-            // TODO: kw review that this should actually be the input maxX not the getMax maxY.
+            // TODO: kw review that this should actually be the input maxX not
+            // the getMax maxY.
             if (xpos + x.scanStep >= x.servoControl.getMax() && x.scanStep > 0 || xpos + x.scanStep <= x.servoControl.getMin() && x.scanStep < 0) {
               x.scanStep *= -1;
               double newY = y.servoControl.getMin() + (Math.random() * (y.servoControl.getMax() - y.servoControl.getMin()));

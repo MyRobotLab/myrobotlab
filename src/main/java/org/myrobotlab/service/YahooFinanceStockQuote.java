@@ -47,7 +47,7 @@ public class YahooFinanceStockQuote extends HttpClient {
   }
 
   public static void main(String[] args) {
-    YahooFinanceStockQuote owm = (YahooFinanceStockQuote)Runtime.start("quote", "YahooFinanceStockQuote");
+    YahooFinanceStockQuote owm = (YahooFinanceStockQuote) Runtime.start("quote", "YahooFinanceStockQuote");
     owm.startService();
     try {
       String response = owm.fetchQuote("NVDA");

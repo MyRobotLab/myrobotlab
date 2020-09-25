@@ -20,8 +20,6 @@ public class BoofCv extends Service implements Point2DfPublisher, Point2DfListen
     super(n, id);
   }
 
-
-
   public Point2df publishPoint2Df(Point2df point) {
     return point;
   }

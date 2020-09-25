@@ -23,18 +23,20 @@ public interface Attachable extends NameProvider {
    * @throws Exception
    */
   public void attach(Attachable service) throws Exception;
-  
+
   /**
    * Explicit/custom callback name
+   * 
    * @param localTopic
    * @param otherService
    * @param callback
    */
   public void addListener(String localTopic, String otherService, String callback);
-  
+
   /**
-   * Preferred add listener, a callback will be created.
-   * from CodecUtils.getCallbackTopicName pub/get{Method} called on on{Method}
+   * Preferred add listener, a callback will be created. from
+   * CodecUtils.getCallbackTopicName pub/get{Method} called on on{Method}
+   * 
    * @param localTopic
    * @param otherService
    */
@@ -44,6 +46,7 @@ public interface Attachable extends NameProvider {
 
   /**
    * Preferred remove listener
+   * 
    * @param localTopic
    * @param otherService
    */
@@ -103,7 +106,8 @@ public interface Attachable extends NameProvider {
   public boolean isLocal();
 
   /**
-   * safe method to query interface without having to invoke class 
+   * safe method to query interface without having to invoke class
+   * 
    * @param interfaze
    * @return
    */
@@ -114,7 +118,8 @@ public interface Attachable extends NameProvider {
   public boolean isType(Class<?> clazz);
 
   /**
-   * safe method to query interface without having to invoke class 
+   * safe method to query interface without having to invoke class
+   * 
    * @param clazz
    * @return
    */

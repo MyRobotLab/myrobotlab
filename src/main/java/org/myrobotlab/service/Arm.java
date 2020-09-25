@@ -41,10 +41,10 @@ public class Arm extends Service {
   private static final long serialVersionUID = 1L;
   public transient final static int IR_PIN = 1;
 
-  Servo shoulder = (Servo)Runtime.start("shoulder", "Servo");
-  Servo elbow = (Servo)Runtime.start("elbow", "Servo");
-  Servo wrist = (Servo)Runtime.start("wrist", "Servo");
-  Servo hand = (Servo)Runtime.start("hand", "Servo");
+  Servo shoulder = (Servo) Runtime.start("shoulder", "Servo");
+  Servo elbow = (Servo) Runtime.start("elbow", "Servo");
+  Servo wrist = (Servo) Runtime.start("wrist", "Servo");
+  Servo hand = (Servo) Runtime.start("hand", "Servo");
 
   int armLength = 0;
   int formArmLength = 0;
@@ -53,7 +53,7 @@ public class Arm extends Service {
   public static void main(String[] args) {
 
     try {
-      Arm arm = (Arm)Runtime.start("arm", "Arm"); //new Arm("arm");
+      Arm arm = (Arm) Runtime.start("arm", "Arm"); // new Arm("arm");
       arm.startService();
       arm.startRobot();
     } catch (Exception e) {

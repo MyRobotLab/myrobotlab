@@ -81,9 +81,9 @@ public class Blender extends Service {
   transient public final static Logger log = LoggerFactory.getLogger(Blender.class);
 
   public static final String SUCCESS = "SUCCESS";
-  
+
   transient Socket control = null;
-  
+
   transient ControlHandler controlHandler = null;
 
   String host = "localhost";
@@ -347,6 +347,5 @@ public class Blender extends Service {
       Logging.logError(e);
     }
   }
-
 
 }

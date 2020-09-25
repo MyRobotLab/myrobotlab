@@ -76,63 +76,57 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     public Fader(String name) {
       this.name = name;
     }
-    
 
     public void run() {
       try {
         JFrame frame = frames.get(name);
         ImageIcon icon = getIcon(name);
         JLabel label = getLabel(name);
-        
+
         // get current BufferedImage
         BufferedImage bi = (BufferedImage) icon.getImage();
         Graphics g = bi.createGraphics();
         Graphics2D g2 = (Graphics2D) g.create();
-        
-        
+
         AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
         g2.setComposite(composite);
         AffineTransform xform = AffineTransform.getTranslateInstance(bi.getWidth(), bi.getHeight());
         g2.drawRenderedImage(bi, xform);
         label.setIcon(new ImageIcon(bi));
-        
-        
+
         for (int i = 0; i < 100; ++i) {
-          
-     /*     
-          
-          
-          icon.setImage();
-          g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
-          frame.repaint();
 
-          g2d.drawImage(bi, bi.getWidth(), bi.getHeight(), icon);
-          // make new Buffered Image with reduced alpha
-          
-          
-          // set Label with new Icon
-
-
-          BufferedImage bi = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
-          Graphics g = bi.createGraphics();
-          Graphics2D g2d = (Graphics2D) g.create();
-
-          // paint the Icon to the BufferedImage.
-          icon.paintIcon(null, g, 0, 0);
-          g.dispose();
-
-          Graphics2D g2d = (Graphics2D) g.create();
-          g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
-          int x = (getWidth() - inImage.getWidth()) / 2;
-          int y = (getHeight() - inImage.getHeight()) / 2;
-          g2d.drawImage(inImage, x, y, this);
-
-          g2d.setComposite(AlphaComposite.SrcOver.derive(1f - alpha));
-          x = (getWidth() - outImage.getWidth()) / 2;
-          y = (getHeight() - outImage.getHeight()) / 2;
-          g2d.drawImage(outImage, x, y, this);
-          g2d.dispose();
-*/        frame.setVisible(true);
+          /*
+           * 
+           * 
+           * icon.setImage();
+           * g2d.setComposite(AlphaComposite.SrcOver.derive(alpha));
+           * frame.repaint();
+           * 
+           * g2d.drawImage(bi, bi.getWidth(), bi.getHeight(), icon); // make new
+           * Buffered Image with reduced alpha
+           * 
+           * 
+           * // set Label with new Icon
+           * 
+           * 
+           * BufferedImage bi = new BufferedImage(icon.getIconWidth(),
+           * icon.getIconHeight(), BufferedImage.TYPE_INT_RGB); Graphics g =
+           * bi.createGraphics(); Graphics2D g2d = (Graphics2D) g.create();
+           * 
+           * // paint the Icon to the BufferedImage. icon.paintIcon(null, g, 0,
+           * 0); g.dispose();
+           * 
+           * Graphics2D g2d = (Graphics2D) g.create();
+           * g2d.setComposite(AlphaComposite.SrcOver.derive(alpha)); int x =
+           * (getWidth() - inImage.getWidth()) / 2; int y = (getHeight() -
+           * inImage.getHeight()) / 2; g2d.drawImage(inImage, x, y, this);
+           * 
+           * g2d.setComposite(AlphaComposite.SrcOver.derive(1f - alpha)); x =
+           * (getWidth() - outImage.getWidth()) / 2; y = (getHeight() -
+           * outImage.getHeight()) / 2; g2d.drawImage(outImage, x, y, this);
+           * g2d.dispose();
+           */ frame.setVisible(true);
           sleep(sleepTime);
         }
         g.dispose();
@@ -142,14 +136,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       log.info("fader done");
     }
   }
-  
+
   static BufferedImage deepCopy(BufferedImage bi) {
     ColorModel cm = bi.getColorModel();
     boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
     WritableRaster raster = bi.copyData(null);
     return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
-   }
-
+  }
 
   // Returns the Height-factor of the DisplayResolution.
   public static int getResolutionOfH() {
@@ -272,14 +265,14 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     BufferedImage image = loadImage(src);
     if (image == null)
 
-    // FIXME - this will explode if image comes back null (which it will for
-    // animated gifs)
-    // FIXME - vs explicit width height vs explicit proportional width !
-    if (scaling != null && scaling != 1.0f) {
-      int scaledWidth = Math.round(image.getWidth() * scaling.floatValue());
-      int scaledHeight = Math.round(image.getHeight() * scaling.floatValue());
-      image = resizeImage(image, scaledWidth, scaledHeight);
-    }
+      // FIXME - this will explode if image comes back null (which it will for
+      // animated gifs)
+      // FIXME - vs explicit width height vs explicit proportional width !
+      if (scaling != null && scaling != 1.0f) {
+        int scaledWidth = Math.round(image.getWidth() * scaling.floatValue());
+        int scaledHeight = Math.round(image.getHeight() * scaling.floatValue());
+        image = resizeImage(image, scaledWidth, scaledHeight);
+      }
 
     boolean fade = defaultFadeIn;
     if (fadeIn != null) {
@@ -379,8 +372,8 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       fader.start();
     } else {
 
-    // make it visible
-    currentFrame.setVisible(true);
+      // make it visible
+      currentFrame.setVisible(true);
     }
 
   }
@@ -552,15 +545,15 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   public void setMultiFrame(boolean b) {
     defaultMultiFrame = b;
   }
-  
+
   public JLabel getLabel(String name) {
     JFrame frame = frames.get(name);
     JLabel label = (JLabel) frame.getContentPane().getComponent(0);
     return label;
   }
-  
+
   public ImageIcon getIcon(String name) {
-    JLabel label =  getLabel(name);
+    JLabel label = getLabel(name);
     ImageIcon icon = (ImageIcon) label.getIcon();
     return icon;
   }
@@ -580,13 +573,13 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
     super.stopService();
     closeAll();
   }
-  
+
   public void attachSearchPublisher(SearchPublisher search) {
     subscribe(search.getName(), "publishImage");
   }
-  
+
   public String onImage(String urlRef) throws MalformedURLException, AWTException {
-    //display(urlRef);
+    // display(urlRef);
     setAlwaysOnTop(true);
     displayFadeIn(urlRef);
     return urlRef;
@@ -601,20 +594,20 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
       // FIXME - get gifs working
       display.setAlwaysOnTop(true);
       // display.displayFadeIn("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");
-      
+
       display.displayFadeIn("https://www.ntchosting.com/images/png-compression-example.png");
-      
-      GoogleSearch search = (GoogleSearch)Runtime.start("google","GoogleSearch");
+
+      GoogleSearch search = (GoogleSearch) Runtime.start("google", "GoogleSearch");
       List<String> images = search.imageSearch("dogs");
       for (String img : images) {
         display.displayFadeIn(img);
       }
-     
+
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       // display.display("https://media.giphy.com/media/snA2OVsg9sMRW/giphy.gif");
       // display.display("http://www.pngmart.com/files/7/SSL-Download-PNG-Image.png");
       display.display("https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Noto_Emoji_Pie_1f62c.svg/256px-Noto_Emoji_Pie_1f62c.svg.png");

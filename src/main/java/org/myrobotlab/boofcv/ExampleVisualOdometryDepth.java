@@ -70,7 +70,7 @@ import georegression.struct.se.Se3_F64;
  * @author Peter Abeles
  */
 public class ExampleVisualOdometryDepth {
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(ExampleVisualOdometryDepth.class);
 
   Resolution resolution = Resolution.MEDIUM;

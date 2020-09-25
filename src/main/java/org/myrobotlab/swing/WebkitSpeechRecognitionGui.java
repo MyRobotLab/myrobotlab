@@ -39,8 +39,8 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
   public final static Logger log = LoggerFactory.getLogger(WebkitSpeechRecognitionGui.class);
 
   private JTextField onRecognized = new JTextField("Waiting orders...", 24);
-  BufferedImage microOn = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class),"microOn.png")));
-  BufferedImage microOff = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class),"microOff.png"))); 
+  BufferedImage microOn = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class), "microOn.png")));
+  BufferedImage microOff = ImageIO.read(new File(FileIO.gluePaths(Service.getResourceDir(WebkitSpeechRecognitionGui.class), "microOff.png")));
 
   private JButton micro = new JButton(new ImageIcon(microOn));
   JComboBox comboLanguage = new JComboBox();
@@ -159,34 +159,26 @@ public class WebkitSpeechRecognitionGui extends ServiceGui implements ActionList
       public void run() {
         removeListeners();
         /*
-        onRecognized.setText(WebkitSpeechRecognition.lastThingRecognized);
-        if (WebkitSpeechRecognition.getautoListen()) {
-          autoListen.setText("Auto Listening ON");
-          autoListen.setBackground(Color.green);
-        } else {
-          autoListen.setText("Auto Listening OFF");
-          autoListen.setBackground(Color.RED);
-        }
-
-        if (WebkitSpeechRecognition.getContinuous()) {
-          continuous.setText("Speedup recognition OFF");
-          continuous.setBackground(Color.RED);
-        } else {
-          continuous.setText("Speedup recognition ON");
-          continuous.setBackground(Color.GREEN);
-        }
-
-        if (WebkitSpeechRecognition.isListening()) {
-          micro.setIcon(new ImageIcon(microOn));
-          listeningStatus = true;
-        } else {
-          micro.setIcon(new ImageIcon(microOff));
-          listeningStatus = false;
-        }
-        //for (Entry<String, String> e : WebkitSpeechRecognition.languages.entrySet()) {
-         // comboLanguage.addItem(e.getKey());
-        //}
-        // comboLanguage.setSelectedItem(WebkitSpeechRecognition.language);
+         * onRecognized.setText(WebkitSpeechRecognition.lastThingRecognized); if
+         * (WebkitSpeechRecognition.getautoListen()) {
+         * autoListen.setText("Auto Listening ON");
+         * autoListen.setBackground(Color.green); } else {
+         * autoListen.setText("Auto Listening OFF");
+         * autoListen.setBackground(Color.RED); }
+         * 
+         * if (WebkitSpeechRecognition.getContinuous()) {
+         * continuous.setText("Speedup recognition OFF");
+         * continuous.setBackground(Color.RED); } else {
+         * continuous.setText("Speedup recognition ON");
+         * continuous.setBackground(Color.GREEN); }
+         * 
+         * if (WebkitSpeechRecognition.isListening()) { micro.setIcon(new
+         * ImageIcon(microOn)); listeningStatus = true; } else {
+         * micro.setIcon(new ImageIcon(microOff)); listeningStatus = false; }
+         * //for (Entry<String, String> e :
+         * WebkitSpeechRecognition.languages.entrySet()) { //
+         * comboLanguage.addItem(e.getKey()); //} //
+         * comboLanguage.setSelectedItem(WebkitSpeechRecognition.language);
          * 
          */
         restoreListeners();

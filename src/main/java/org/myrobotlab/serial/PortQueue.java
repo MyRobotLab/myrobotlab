@@ -47,10 +47,10 @@ public class PortQueue extends Port {
   }
 
   /**
-   * Returns a byte array containing what's available on the in queue.
-   * Null if no data is available.
-   * This reads bytes from the output queue.  That data written to the queue
-   * by MrlCommIno can be read here and taken off the queue.
+   * Returns a byte array containing what's available on the in queue. Null if
+   * no data is available. This reads bytes from the output queue. That data
+   * written to the queue by MrlCommIno can be read here and taken off the
+   * queue.
    */
   public byte[] readBytes() {
     try {
@@ -61,7 +61,7 @@ public class PortQueue extends Port {
         return null;
       }
       byte[] data = new byte[size];
-      for (int i = 0 ; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         data[i] = in.take().byteValue();
       }
       return data;
@@ -70,7 +70,7 @@ public class PortQueue extends Port {
       return null;
     }
   }
-  
+
   public boolean setParams(int rate, int databits, int stopbits, int parity) {
     log.debug("setSerialPortParams {} {} {} {}", rate, databits, stopbits, parity);
     return true;
@@ -82,12 +82,13 @@ public class PortQueue extends Port {
   }
 
   public void write(byte[] data) throws IOException {
-    // convert this to match the output queue of integer by upcasting the byte array
+    // convert this to match the output queue of integer by upcasting the byte
+    // array
     for (int i = 0; i < data.length; i++) {
       out.add(data[i] & 0xFF);
     }
   }
-  
+
   @Override
   public boolean isHardware() {
     return false;

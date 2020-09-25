@@ -257,7 +257,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     invoke("publishRequest", text); // publisher used by uis
     invoke("publishResponse", response);
     invoke("publishText", response.msg);
-    
+
     return response;
   }
 
@@ -537,13 +537,13 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public void removeBotProperty(String name) {
     removeBotProperty(getCurrentBotName(), name);
   }
-    
+
   public void removeBotProperty(String botName, String name) {
     info("removing %s property %s", getCurrentBotName(), name);
     BotInfo botInfo = getBotInfo(botName);
     botInfo.removeProperty(name);
   }
-  
+
   public Session startSession() throws IOException {
     return startSession(currentUserName);
   }
@@ -1018,7 +1018,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error("cannot get bot %s", botName);
       return null;
     }
-    
+
     File f = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), "aiml" + fs + name));
     if (!f.exists()) {
       error("cannot find file %s", f.getAbsolutePath());
@@ -1029,7 +1029,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       ret = FileIO.toString(f);
     } catch (IOException e) {
       log.error("getAimlFile threw", e);
-    }    
+    }
     return ret;
   }
 
@@ -1039,39 +1039,36 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       error("cannot get bot %s", botName);
       return;
     }
-    
+
     File f = new File(FileIO.gluePaths(botInfo.path.getAbsolutePath(), "aiml" + fs + filename));
-    
+
     try {
       FileIO.toFile(f, data.getBytes("UTF8"));
       info("saved %s", filename);
     } catch (IOException e) {
       log.error("getAimlFile threw", e);
-    }    
+    }
   }
 
-  
   public static void main(String args[]) {
     LoggingFactory.init("INFO");
     // Runtime.start("gui", "SwingGui");
-    
+
     Runtime runtime = Runtime.getInstance();
     runtime.setLocale("it");
     /*
-    InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2");
-    String startLeft = i01.localize("STARTINGLEFTONLY");
-    log.info(startLeft);
-    */
-    
+     * InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2"); String startLeft
+     * = i01.localize("STARTINGLEFTONLY"); log.info(startLeft);
+     */
+
     ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
     Runtime.start("polly", "Polly");
-    
+
     // brain.localize(key);
-    
-    
+
     String x = brain.getResourceImage("human.png");
     log.info(x);
-    
+
     /*
      * String x = brain.getBotImage("Alice"); log.info(x); Response response =
      * brain.getResponse("Hi, How are you?"); log.info(response.toString());
