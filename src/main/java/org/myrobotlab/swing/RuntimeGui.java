@@ -499,7 +499,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     }
   }
 
-
   @Override
   public void subscribeGui() {
     subscribe("registered");

@@ -1226,10 +1226,9 @@ public class FileIO {
 
     return null;
   }
-  
+
   /**
-   * Copies bytes from src to dst, src must be a file, dst may or may not
-   * exist
+   * Copies bytes from src to dst, src must be a file, dst may or may not exist
    * 
    * @param src
    * @param dst
@@ -1238,7 +1237,7 @@ public class FileIO {
   static public void copyBytes(String src, String dst) throws IOException {
     FileInputStream fis = new FileInputStream(src);
     FileOutputStream fos = new FileOutputStream(dst);
-    
+
     int nRead;
     byte[] data = new byte[65536];
 
@@ -1248,7 +1247,7 @@ public class FileIO {
 
     fis.close();
     fos.close();
-    
+
   }
 
   static public void toFile(File dst, byte[] data) throws IOException {

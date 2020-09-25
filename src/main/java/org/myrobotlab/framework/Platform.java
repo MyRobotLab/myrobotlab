@@ -198,7 +198,7 @@ public class Platform implements Serializable {
       // build version or git commit timestamp
       platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
 
-      // git properties - local build has precedence 
+      // git properties - local build has precedence
       Properties gitProps = gitProperties();
       if (gitProps != null) {
         String gitProp = gitProps.getProperty("git.branch");
@@ -207,7 +207,7 @@ public class Platform implements Serializable {
         gitProp = gitProps.getProperty("git.commit.id");
         platform.commit = (gitProp != null) ? gitProp : platform.commit;
         if (platform.commit != null) {
-          platform.shortCommit = platform.commit.substring(0,7);
+          platform.shortCommit = platform.commit.substring(0, 7);
         }
 
         gitProp = gitProps.getProperty("git.build.time");
@@ -271,7 +271,7 @@ public class Platform implements Serializable {
     }
     return def;
   }
-  
+
   static public Properties gitProperties() {
     try {
       Properties properties = new Properties();
@@ -298,7 +298,6 @@ public class Platform implements Serializable {
     }
     return null;
   }
-
 
   public Platform() {
   }

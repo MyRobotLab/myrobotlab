@@ -107,7 +107,7 @@ public class LangUtils {
     sb.append((Platform.isVirtual() ? "Platform.setVirtual(True)\n" : "# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
 
     // from current running system - vs something uncreated passed in ....
-    Map<String,ServiceInterface> allServices = Runtime.getLocalServices();
+    Map<String, ServiceInterface> allServices = Runtime.getLocalServices();
     List<ServiceInterface> services = new ArrayList<>();
     if (nameFilters != null) {
       for (String filter : nameFilters) {
@@ -207,7 +207,7 @@ public class LangUtils {
     //
 
     // connections
-    
+
     return sb.toString();
 
   }

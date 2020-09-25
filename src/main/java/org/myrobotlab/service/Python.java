@@ -175,7 +175,7 @@ public class Python extends Service {
   private static final transient HashMap<String, PyObject> objectCache = new HashMap<String, PyObject>();
 
   private static final long serialVersionUID = 1L;
-  
+
   protected int newScriptCnt = 0;
 
   /**
@@ -267,12 +267,13 @@ public class Python extends Service {
     attachPythonConsole();
 
     //////// was in startService
-    
+
     String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-    // FIXME !!! myService is SO WRONG it will collide on more than 1 python service :(
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
@@ -281,7 +282,7 @@ public class Python extends Service {
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
   }
-    
+
   public void newScript() {
     if (!openedScripts.containsKey("script.py")) {
       openScript("script.py", "");
@@ -317,8 +318,9 @@ public class Python extends Service {
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
-      // FIXME - this console script has hardcoded globals to 
-      // reference this service that will break with more than on python service !
+      // FIXME - this console script has hardcoded globals to
+      // reference this service that will break with more than on python service
+      // !
       String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
       pythonConsoleInitialized = true;

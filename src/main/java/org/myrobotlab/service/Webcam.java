@@ -42,15 +42,15 @@ public class Webcam extends Service implements WebcamListener {
   protected Integer port = 8080;
 
   protected int fps = 30;
-  
+
   protected int frameIndex = 0;
 
   protected boolean capturing = false;
-  
-  protected boolean useWebcamStreamer = false; 
+
+  protected boolean useWebcamStreamer = false;
 
   protected double quality = 0.9;
-  
+
   transient Thread worker = null;
 
   static {
@@ -67,7 +67,7 @@ public class Webcam extends Service implements WebcamListener {
   }
 
   public synchronized void stopCapture() {
-      capturing = false;
+    capturing = false;
   }
 
   public void capture() {
@@ -120,7 +120,7 @@ public class Webcam extends Service implements WebcamListener {
     if (height != null) {
       this.height = height;
     }
-    
+
     if (quality != null) {
       this.quality = quality;
     }
@@ -149,9 +149,9 @@ public class Webcam extends Service implements WebcamListener {
     }
 
     // webcam.addWebcamListener(this);
-    
+
     webcam.open();
-    
+
     worker = new Thread(new VideoProcessor(), String.format("%s-video-processor", getName()));
     worker.start();
   }
@@ -179,7 +179,6 @@ public class Webcam extends Service implements WebcamListener {
     // TODO Auto-generated method stub
 
   }
-  
 
   protected class VideoProcessor implements Runnable {
 
@@ -203,8 +202,8 @@ public class Webcam extends Service implements WebcamListener {
   }
 
   protected void processVideo() {
-    long start = System.currentTimeMillis(); 
-        
+    long start = System.currentTimeMillis();
+
     BufferedImage bi = webcam.getImage();
     ++frameIndex;
     // TODO change jpg quality !!! B&W option ?
@@ -214,12 +213,11 @@ public class Webcam extends Service implements WebcamListener {
     // broadcast - blocking direct call for this thread
     // which is what we want
     broadcast("publishWebDisplay", webImage);
-    
-    if (frameIndex%30 == 0) {
+
+    if (frameIndex % 30 == 0) {
       log.info("process time {} ms", System.currentTimeMillis() - start);
     }
   }
-   
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
@@ -255,7 +253,7 @@ public class Webcam extends Service implements WebcamListener {
       webcamx.capture("/dev/video0", 8080, 30, 640, 480, 0.5);
 
       // webcamx.start();
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
       //

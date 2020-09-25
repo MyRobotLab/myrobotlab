@@ -45,7 +45,7 @@ public class Launcher {
 
   static public ProcessBuilder createBuilder(String cwd, List<String> cmdLine) throws IOException {
     // FIXME - ability to merge lists
-    
+
     // Parse options to handle all flags relevant to the Launcher
     CmdOptions options = new CmdOptions();
     new CommandLine(options).parseArgs(toArray(cmdLine));
@@ -104,16 +104,16 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-    
+
     // append/merge incoming arguments
     cmd.addAll(cmdLine);
-    
+
     if (!contains(cmd, "--from-launcher")) {
       cmd.add("--from-launcher");
     }
-    
+
     // FIXME - daemonize? does that mean handle stream differently?
-    
+
     // FIXME - reporting from different levels .. one is stdout the other is the
     // os before this
     log.info("SPAWN {}", toString(cmd));
@@ -130,11 +130,9 @@ public class Launcher {
 
     // builder.redirectOutput(new File("stdout.txt"));
     /*
-    if (options.stdout) {
-      builder.redirectOutput(STD_OUT);      
-    } else {
-      builder.redirectOutput(NULL_FILE);
-    }*/
+     * if (options.stdout) { builder.redirectOutput(STD_OUT); } else {
+     * builder.redirectOutput(NULL_FILE); }
+     */
 
     // setting working directory to wherever the jar is...
 
@@ -151,7 +149,7 @@ public class Launcher {
 
     return builder;
   }
-  
+
   public static String[] toArray(List<String> list) {
     return list.toArray(new String[list.size()]);
   }
@@ -172,7 +170,6 @@ public class Launcher {
     }
     return spawning.toString();
   }
-
 
   /**
    * prints help to the console
@@ -209,7 +206,7 @@ public class Launcher {
 
     return env;
   }
-  
+
   static boolean contains(List<String> l, String flag) {
     for (String f : l) {
       if (f.equals(flag)) {
@@ -289,14 +286,11 @@ public class Launcher {
       }
 
       /*
-      // FIXME - use wsclient for remote access
-      if (options.client != null) {
-        // FIXME - delay & auto connect
-        Client.main(new String[] { "-c", options.client });
-      } else {
-        // terminating - "if" runtime exists - if not no biggy
-        Runtime.shutdown();
-      }*/
+       * // FIXME - use wsclient for remote access if (options.client != null) {
+       * // FIXME - delay & auto connect Client.main(new String[] { "-c",
+       * options.client }); } else { // terminating - "if" runtime exists - if
+       * not no biggy Runtime.shutdown(); }
+       */
 
     } catch (Exception e) {
       log.error("main threw", e);

@@ -1563,9 +1563,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // processing
           continue;
         }
-        
+
         Object ret = invoke(m);
-        
+
       }
     } catch (InterruptedException edown) {
       info("shutting down");
@@ -1724,12 +1724,13 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     String subscriber = null;
     if (sendMsg != null) {
-      // InProcCli proxies - so the subscription needs to be from the sender NOT from runtime !
+      // InProcCli proxies - so the subscription needs to be from the sender NOT
+      // from runtime !
       subscriber = sendMsg.getSrcFullName();
     } else {
       subscriber = getFullName();
     }
-    
+
     // put in-process lock in map
     String callbackMethod = CodecUtils.getCallbackTopicName(method);
     String blockingKey = String.format("%s.%s", subscriber, callbackMethod);

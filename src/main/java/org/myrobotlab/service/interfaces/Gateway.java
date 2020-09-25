@@ -38,16 +38,18 @@ public interface Gateway extends NameProvider {
                                                     // assume ?
 
   public List<String> getClientIds();
-  
+
   // FIXME - change to getConnections !!...
-  // TODO getConnection() would be the context of a gateway which connections its responsible for
+  // TODO getConnection() would be the context of a gateway which connections
+  // its responsible for
   public Map<String, Connection> getClients();
 
   public void sendRemote(final Message msg) throws Exception;
-  
-  // FIXME - remove - not necessary - timeout implemented in waitForMsg 
-  // public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
-  
+
+  // FIXME - remove - not necessary - timeout implemented in waitForMsg
+  // public Object sendBlockingRemote(final Message msg, Integer timeout) throws
+  // Exception;
+
   public boolean isLocal(Message msg);
 
   public Message getDefaultMsg(String connId);

@@ -286,9 +286,10 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         // CodecUtils.PREFIX_API, body); FIXME - wow that was horrific
         String pathInfo = String.format("/%s%s", CodecUtils.PREFIX_API, body);
         try {
-          // org.myrobotlab.framework.Message msg = CodecUri.decodePathInfo(pathInfo);
-          org.myrobotlab.framework.Message msg =  CodecUtils.cliToMsg(null, getName(), null, pathInfo);
-          
+          // org.myrobotlab.framework.Message msg =
+          // CodecUri.decodePathInfo(pathInfo);
+          org.myrobotlab.framework.Message msg = CodecUtils.cliToMsg(null, getName(), null, pathInfo);
+
           // FIXME - do the same as InProcessCli & WebGui
           Object ret = null;
           ServiceInterface si = Runtime.getService(msg.getName());

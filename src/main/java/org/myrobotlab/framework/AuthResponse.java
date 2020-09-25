@@ -10,7 +10,7 @@ public class AuthResponse {
   public Status status;
 
   // FIXME move serviceList into authenticate ... result of introduction ... !
-  
+
   public String toString() {
     return CodecUtils.toJson(this);
   }

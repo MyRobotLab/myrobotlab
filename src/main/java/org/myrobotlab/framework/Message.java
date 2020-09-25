@@ -44,8 +44,8 @@ import org.myrobotlab.codec.CodecUtils;
 public class Message implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  
-  // FIXME msgId should be a String encoded value of src and an atomic increment 
+
+  // FIXME msgId should be a String encoded value of src and an atomic increment
   // ROS comes with a seq Id, a timestamp, and a frame Id
   /**
    * unique identifier for this message
@@ -239,11 +239,11 @@ public class Message implements Serializable {
     }
     return sender;
   }
-  
+
   public String getFullName() {
     return name;
   }
-  
+
   public void addHop(String id) {
     historyList.add(id);
   }

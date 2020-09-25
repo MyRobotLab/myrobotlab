@@ -861,7 +861,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     return null;
   }
 
-  @Override 
+  @Override
   public Map<String, Connection> getClients() {
     return Runtime.getInstance().getConnections(getName());
   }
@@ -1772,7 +1772,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     beginNode.breadthFirstTraversal(search);
     return search.getResults();
   }
-
 
   @Override
   public void sendRemote(Message msg) throws Exception {

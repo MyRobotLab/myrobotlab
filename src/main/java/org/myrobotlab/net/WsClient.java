@@ -61,7 +61,7 @@ public class WsClient implements Decoder<String, Reader> {
 
   public Connection connect(RemoteMessageHandler handler, String gatewayFullName, String srcId, String url) {
     try {
-      
+
       if (!url.contains("api/messages")) {
         // websocket endpoint
         url += "/api/messages";
