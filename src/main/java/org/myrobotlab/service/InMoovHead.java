@@ -43,21 +43,20 @@ public class InMoovHead extends Service {
     rollNeck = (ServoControl) createPeer("rollNeck");
     initServoDefaults();
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
 
-  
   public List<String> getServoNames() {
     List<String> servos = new ArrayList<>();
-    
+
     if (jaw != null) {
       servos.add(jaw.getName());
     }
@@ -75,7 +74,7 @@ public class InMoovHead extends Service {
     }
     if (rollNeck != null) {
       servos.add(rollNeck.getName());
-    }  
+    }
     Collections.sort(servos);
     return servos;
   }
@@ -102,14 +101,14 @@ public class InMoovHead extends Service {
     eyeY.setPosition(90.0);
 
     setVelocity(45.0, 45.0, -1.0, -1.0, -1.0, 45.0);
-    
+
     neck.setAutoDisable(true);
     rollNeck.setAutoDisable(true);
     rothead.setAutoDisable(true);
     jaw.setAutoDisable(true);
     eyeX.setAutoDisable(true);
     eyeY.setAutoDisable(true);
-    
+
   }
 
   /*
@@ -179,21 +178,21 @@ public class InMoovHead extends Service {
         error("controller for head is not connected");
       }
     }
-    
+
     neck.setPin(neckPin);
     rothead.setPin(rotheadPin);
     eyeX.setPin(eyeXPin);
     eyeY.setPin(eyeYPin);
     jaw.setPin(jawPin);
     rollNeck.setPin(rollNeckPin);
-    
+
     neck.attach(controller);
     rothead.attach(controller);
     jaw.attach(controller);
     eyeX.attach(controller);
     eyeY.attach(controller);
     rollNeck.attach(controller);
-    
+
     broadcastState();
 
     return true;
@@ -242,10 +241,9 @@ public class InMoovHead extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(), eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(),
-        jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
+        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
   }
-
 
   public boolean isValid() {
     rothead.moveTo(rothead.getRest() + 2);
@@ -396,8 +394,8 @@ public class InMoovHead extends Service {
   }
 
   /**
-   * Sets the output min/max values for all servos in the inmoov head.
-   * input limits are not modified.
+   * Sets the output min/max values for all servos in the inmoov head. input
+   * limits are not modified.
    * 
    * @param headXMin
    * @param headXMax
@@ -487,7 +485,7 @@ public class InMoovHead extends Service {
     startPeer("rothead");
     startPeer("neck");
     startPeer("rollNeck");
-    
+
     if (jaw == null) {
       jaw = (ServoControl) startPeer("jaw");
       jaw.map(10.0, 25.0, 10.0, 25.0);

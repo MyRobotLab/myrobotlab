@@ -62,7 +62,6 @@ public class Inbox implements Serializable {
     this.name = name;
   }
 
-  
   public void add(Message msg) {
     /**<pre>  Trying to only make this applicable for hops dealing with remote messages - not local one !
     if ((msg.historyList.contains(name))) {

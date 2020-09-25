@@ -112,7 +112,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
 
   public Mqtt(String n, String id) {
     super(n, id);
-    try {      
+    try {
       inTopic = String.format("myrobotlab/%s/in", getName());
       outTopic = String.format("myrobotlab/%s/out", getName());
       conOpt.setCleanSession(true);
@@ -408,7 +408,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener {
     sb.append(" isComplete:").append(token.isComplete());
     return sb.toString();
   }
-
 
   public int getQos() {
     return qos;

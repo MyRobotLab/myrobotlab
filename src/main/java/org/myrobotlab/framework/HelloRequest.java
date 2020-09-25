@@ -15,7 +15,7 @@ public class HelloRequest {
    * platform of the foreign process
    */
   public Platform platform;
-  
+
   public HelloRequest(String id, String uuid) {
     this.id = id;
     this.uuid = uuid;

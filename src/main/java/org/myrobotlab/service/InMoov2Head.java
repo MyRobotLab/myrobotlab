@@ -52,7 +52,7 @@ public class InMoov2Head extends Service {
     moveToBlocking(0, 0);
 
   }
-  
+
   @Override
   public void startService() {
     super.startService();
@@ -84,10 +84,10 @@ public class InMoov2Head extends Service {
     eyeX.setPin(22);
     eyeY.setPin(24);
     jaw.setPin(26);
-    //FIXME rollNeck and eyelids must be connected to right controller
-    //rollNeck.setPin(12);
-    //eyelidLeft.setPin(22);
-    //eyelidRight.setPin(24);
+    // FIXME rollNeck and eyelids must be connected to right controller
+    // rollNeck.setPin(12);
+    // eyelidLeft.setPin(22);
+    // eyelidRight.setPin(24);
 
     neck.map(20.0, 160.0, 20.0, 160.0);
     rollNeck.map(20.0, 160.0, 20.0, 160.0);
@@ -145,14 +145,22 @@ public class InMoov2Head extends Service {
 
   @Override
   public void broadcastState() {
-    if (rothead != null)rothead.broadcastState();
-    if (rollNeck != null)rollNeck.broadcastState();
-    if (neck != null)neck.broadcastState();
-    if (eyeX != null)eyeX.broadcastState();
-    if (eyeY != null)eyeY.broadcastState();
-    if (jaw != null)jaw.broadcastState();
-    if (eyelidLeft != null)eyelidLeft.broadcastState();
-    if (eyelidRight != null)eyelidRight.broadcastState();
+    if (rothead != null)
+      rothead.broadcastState();
+    if (rollNeck != null)
+      rollNeck.broadcastState();
+    if (neck != null)
+      neck.broadcastState();
+    if (eyeX != null)
+      eyeX.broadcastState();
+    if (eyeY != null)
+      eyeY.broadcastState();
+    if (jaw != null)
+      jaw.broadcastState();
+    if (eyelidLeft != null)
+      eyelidLeft.broadcastState();
+    if (eyelidRight != null)
+      eyelidRight.broadcastState();
   }
 
   public void stop() {
@@ -192,8 +200,8 @@ public class InMoov2Head extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(), eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(),
-        jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveHead(%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, neck.getCurrentInputPos(), rothead.getCurrentInputPos(),
+        eyeX.getCurrentInputPos(), eyeY.getCurrentInputPos(), jaw.getCurrentInputPos(), rollNeck.getCurrentInputPos());
   }
 
   public boolean isValid() {
@@ -301,7 +309,7 @@ public class InMoov2Head extends Service {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
@@ -333,7 +341,7 @@ public class InMoov2Head extends Service {
     eyelidRight.save();
     return true;
   }
-  
+
   @Deprecated
   public boolean loadFile(String file) {
     File f = new File(file);
@@ -359,7 +367,7 @@ public class InMoov2Head extends Service {
       log.debug("Successfully loaded {}", f.getAbsolutePath());
     }
     return true;
-  }  
+  }
 
   public void setAutoDisable(Boolean rotheadParam, Boolean neckParam, Boolean rollNeckParam) {
     rothead.setAutoDisable(rotheadParam);
@@ -379,7 +387,8 @@ public class InMoov2Head extends Service {
   }
 
   /**
-   * Set the put min and max values for all servoes in the head.  input limits are not modified.
+   * Set the put min and max values for all servoes in the head. input limits
+   * are not modified.
    * 
    * @param headXMin
    * @param headXMax
@@ -453,7 +462,6 @@ public class InMoov2Head extends Service {
       new blinkEyesTimertask().run();
     }
   }
-
 
   @Deprecated /* use setSpeed */
   public void setVelocity(Double headXSpeed, Double headYSpeed, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {

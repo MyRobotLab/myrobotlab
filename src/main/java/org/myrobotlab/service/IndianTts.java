@@ -13,9 +13,8 @@ import org.myrobotlab.service.data.HttpData;
 import org.slf4j.Logger;
 
 /**
- * Indian TTS speech to text service based on http://indiantts.com 
- * This is a cloud service and depends on a subscription key to the
- * cloud provider
+ * Indian TTS speech to text service based on http://indiantts.com This is a
+ * cloud service and depends on a subscription key to the cloud provider
  * 
  * http://indiantts.com/
  */
@@ -113,6 +112,5 @@ public class IndianTts extends AbstractSpeechSynthesis {
 
     // }
   }
-
 
 }

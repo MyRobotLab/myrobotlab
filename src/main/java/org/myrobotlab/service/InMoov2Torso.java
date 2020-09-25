@@ -37,9 +37,9 @@ public class InMoov2Torso extends Service {
     // lowStom = (ServoControl) createPeer("lowStom");
     // // controller = (ServoController) createPeer("arduino");
 
-    // FIXME - createPeers ?    
+    // FIXME - createPeers ?
   }
-  
+
   public void startService() {
     super.startService();
     startPeers();
@@ -60,17 +60,16 @@ public class InMoov2Torso extends Service {
     setVelocity(5.0, 5.0, 5.0);
 
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public void enable() {
     topStom.enable();
@@ -86,9 +85,12 @@ public class InMoov2Torso extends Service {
 
   @Override
   public void broadcastState() {
-    if (topStom != null)topStom.broadcastState();
-    if (midStom != null)midStom.broadcastState();
-    if (lowStom != null)lowStom.broadcastState();
+    if (topStom != null)
+      topStom.broadcastState();
+    if (midStom != null)
+      midStom.broadcastState();
+    if (lowStom != null)
+      lowStom.broadcastState();
   }
 
   public void disable() {
@@ -105,7 +107,8 @@ public class InMoov2Torso extends Service {
 
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(), lowStom.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(),
+        lowStom.getCurrentInputPos());
   }
 
   public void moveTo(double topStom, double midStom, double lowStom) {
@@ -145,7 +148,7 @@ public class InMoov2Torso extends Service {
     lowStom.save();
     return true;
   }
-  
+
   @Deprecated
   public boolean loadFile(String file) {
     File f = new File(file);
@@ -171,11 +174,11 @@ public class InMoov2Torso extends Service {
       log.debug("Successfully loaded {}", f.getAbsolutePath());
     }
     return true;
-  }  
+  }
 
   /**
-   * Sets the output min/max values for all servos in the torso.  input limits on servos
-   * are not modified in this method.
+   * Sets the output min/max values for all servos in the torso. input limits on
+   * servos are not modified in this method.
    * 
    * @param topStomMin
    * @param topStomMax
@@ -222,7 +225,6 @@ public class InMoov2Torso extends Service {
 
     moveTo(35.0, 45.0, 55.0);
   }
-
 
   @Deprecated /* use setSpeed */
   public void setVelocity(Double topStom, Double midStom, Double lowStom) {

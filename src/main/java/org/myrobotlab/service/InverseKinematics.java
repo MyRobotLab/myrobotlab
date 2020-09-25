@@ -23,7 +23,8 @@ public class InverseKinematics extends Service {
 
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
-    InverseKinematics inversekinematics = (InverseKinematics)Runtime.start("inversekinematics", "InverseKinematics");// new InverseKinematics("inversekinematics");
+    InverseKinematics inversekinematics = (InverseKinematics) Runtime.start("inversekinematics", "InverseKinematics");// new
+                                                                                                                      // InverseKinematics("inversekinematics");
     inversekinematics.setDOF(3);
     inversekinematics.setStructure(0, 100);
     inversekinematics.setStructure(1, 100);
@@ -78,6 +79,5 @@ public class InverseKinematics extends Service {
   public void setStructure(int nlink, double length) {
     ikEngine.setLinkLength(nlink, length);
   }
-
 
 }

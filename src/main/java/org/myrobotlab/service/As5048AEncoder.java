@@ -17,14 +17,13 @@ public class As5048AEncoder extends AbstractPinEncoder implements EncoderControl
   public As5048AEncoder(String n, String id) {
     super(n, id);
     // 14 bit encoder is 2^16 steps of resolution
-    resolution = 4096*4;
+    resolution = 4096 * 4;
   }
-  
+
   @Override
   public void setZeroPoint() {
     log.warn("Setting the Zero point not supported on AS5048A because memory register is OTP");
   }
-
 
   public static void main(String[] args) throws Exception {
 

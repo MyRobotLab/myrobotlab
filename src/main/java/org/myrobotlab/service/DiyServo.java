@@ -288,9 +288,9 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public transient static final int SERVO_EVENT_STARTED = 0;
   public transient static final int SERVO_EVENT_STOPPED = 1;
 
-  // TODO: KW moved from base class.  should remove it here too.
+  // TODO: KW moved from base class. should remove it here too.
   private double currentPosInput = 0;
-  
+
   /**
    * Constructor
    * 
@@ -474,15 +474,15 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   }
 
   /**
-   * update the output min/max for the mapper
-   * input values to the mapper are unchanged.
+   * update the output min/max for the mapper input values to the mapper are
+   * unchanged.
    */
   @Override
   public void setMinMaxOutput(double minY, double maxY) {
     mapper.map(mapper.getMinX(), mapper.getMaxX(), minY, maxY);
     broadcastState();
   }
-  
+
   @Override
   public void setMinMax(double min, double max) {
     map(min, max, min, max);
@@ -598,7 +598,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     // we need to read here real angle / seconds
     // before try to control velocity
 
-    // TODO: kw:  is this computing the "mapped" velocity? or the calibrated "output" speed of the servo?
+    // TODO: kw: is this computing the "mapped" velocity? or the calibrated
+    // "output" speed of the servo?
     currentVelocity = MathUtils.round(Math.abs(((currentPosInput - currentOutputPos) * (500 / sampleTime))), roundPos);
 
     // log.info("currentPosInput : " + currentPosInput);
@@ -614,7 +615,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
       targetPos = mapper.calcInput(currentOutputPos);
       broadcastState();
     }
-    // TODO: kw: this seems wrong. the input position should be the invsere mapped input position.
+    // TODO: kw: this seems wrong. the input position should be the invsere
+    // mapped input position.
     currentOutputPos = currentPosInput;
 
   }
@@ -657,8 +659,6 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
   public void setPowerLevel(double power) {
     this.powerLevel = power;
   }
-
-
 
   @Override
   public Double moveToBlocking(Double pos) {
@@ -798,8 +798,8 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
 
       Thread.sleep(1000);
       // let's start the encoder!! Amt203Encoder("encoder");
-      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder"); 
-                                                                                         
+      Amt203Encoder encoder = (Amt203Encoder) Runtime.start("encoder", "Amt203Encoder");
+
       encoder.setPin(3);
 
       arduino.attach(encoder);

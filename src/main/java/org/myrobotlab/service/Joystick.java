@@ -164,7 +164,7 @@ public class Joystick extends Service {
           if (Math.abs(input - component.value) > 0.0001) {
 
             if (mappers.containsKey(id)) {
-              input = Double.valueOf(mappers.get(id).calcOutput((double)input)).floatValue();
+              input = Double.valueOf(mappers.get(id).calcOutput((double) input)).floatValue();
             }
 
             JoystickData data = new JoystickData(id, input);
@@ -412,7 +412,6 @@ public class Joystick extends Service {
     }
   }
 
-
   /*
    * Map<String, Set<RelativePositionControl>> axisConsumers = new
    * HashMap<String, Set<RelativePositionControl>>();
@@ -529,12 +528,12 @@ public class Joystick extends Service {
     try {
 
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
-      
+
       boolean done = true;
       if (done) {
         return;
       }
-      
+
       Runtime.start("gui", "SwingGui");
 
       joy.setController(2);
@@ -579,7 +578,7 @@ public class Joystick extends Service {
 
       // joy.mapId("x", "rx");
       // joy.map("y", -1, 1, 0, 180);
-     
+
       Runtime.start("gui", "SwingGui");
 
     } catch (Exception e) {

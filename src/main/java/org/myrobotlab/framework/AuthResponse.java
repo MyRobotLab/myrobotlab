@@ -1,4 +1,5 @@
 package org.myrobotlab.framework;
+
 import org.myrobotlab.codec.CodecUtils;
 
 public class AuthResponse {

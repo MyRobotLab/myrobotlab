@@ -234,7 +234,7 @@ public class DHRobotArm implements Serializable {
     // we know where we are.. we know where we want to go.
     int numSteps = 0;
     double iterStep = 0.05;
-    // we're in millimeters.. 
+    // we're in millimeters..
     double errorThreshold = 2.0;
     // what's the current point
     while (true) {
@@ -298,7 +298,7 @@ public class DHRobotArm implements Serializable {
   public boolean armMovementEnds() {
     for (DHLink link : links) {
       // if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
-      //  return false;
+      // return false;
       // }
     }
     return true;

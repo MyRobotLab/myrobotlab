@@ -75,8 +75,7 @@ public class FileUtil {
       return writeFile(data, filename);
     }
   }
-  
-  
+
   static public String saveAsFileName(JFrame frame, String filename) {
     FileDialog fd = new FileDialog(frame, "Save File", FileDialog.SAVE);
     fd.setFile(filename);
@@ -91,7 +90,6 @@ public class FileUtil {
     }
     return filename;
   }
-
 
   static public String saveAs(JFrame frame, String data, String filename) {
     FileDialog fd = new FileDialog(frame, "Save File", FileDialog.SAVE);

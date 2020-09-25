@@ -12,8 +12,8 @@ import org.myrobotlab.service.BodyPart;
 import org.myrobotlab.service.interfaces.ServoControl;
 
 /**
- * Shared some methods between bodyPart and root controller ( like inmoov service
- * )
+ * Shared some methods between bodyPart and root controller ( like inmoov
+ * service )
  */
 public abstract class AbstractBodyPart extends Service {
 

@@ -64,7 +64,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   private int sensorPin;
 
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -102,7 +101,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     // FIXME - NO DIRECT REFERENCES ALL PUB SUB
 
   }
-  
+
   public void startService() {
     super.startService();
     // FIXME - creatPeers()
@@ -180,12 +179,18 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
 
   @Override
   public void broadcastState() {
-    if (thumb != null) thumb.broadcastState();
-    if (index != null) index.broadcastState();
-    if (majeure != null) majeure.broadcastState();
-    if (ringFinger != null) ringFinger.broadcastState();
-    if (pinky != null) pinky.broadcastState();
-    if (wrist != null) wrist.broadcastState();
+    if (thumb != null)
+      thumb.broadcastState();
+    if (index != null)
+      index.broadcastState();
+    if (majeure != null)
+      majeure.broadcastState();
+    if (ringFinger != null)
+      ringFinger.broadcastState();
+    if (pinky != null)
+      pinky.broadcastState();
+    if (wrist != null)
+      wrist.broadcastState();
   }
 
   public void close() {
@@ -301,8 +306,8 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   @Deprecated /* use LangUtils */
   public String getScript(String inMoovServiceName) {
     String side = getName().contains("left") ? "left" : "right";
-    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(), majeure.getCurrentInputPos(),
-        ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(),
+        majeure.getCurrentInputPos(), ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
   }
 
   public void hangTen() {
@@ -528,7 +533,7 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
     wrist.save();
     return true;
   }
-  
+
   @Deprecated
   public boolean loadFile(String file) {
     File f = new File(file);

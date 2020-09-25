@@ -3,7 +3,7 @@ package org.myrobotlab.service.interfaces;
 import org.myrobotlab.framework.Registration;
 
 public interface ServiceLifeCycle {
-  
+
   public Registration registered(Registration registration);
 
   public String created(String serviceName);

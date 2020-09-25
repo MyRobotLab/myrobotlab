@@ -26,7 +26,7 @@ public class Pose {
     List<String> servoNames = new ArrayList<String>();
     for (ServoControl sc : servos) {
       positions.put(sc.getName(), sc.getCurrentInputPos());
-      speeds.put(sc.getName(),  sc.getSpeed());
+      speeds.put(sc.getName(), sc.getSpeed());
       servoNames.add(sc.getName());
     }
   }
@@ -34,7 +34,7 @@ public class Pose {
   public HashMap<String, Double> getSpeeds() {
     return speeds;
   }
-  
+
   public HashMap<String, Double> getPositions() {
     return positions;
   }

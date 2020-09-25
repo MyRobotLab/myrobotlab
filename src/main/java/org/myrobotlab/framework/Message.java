@@ -42,7 +42,7 @@ import org.myrobotlab.codec.CodecUtils;
  * 
  */
 public class Message implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
   
   // FIXME msgId should be a String encoded value of src and an atomic increment 

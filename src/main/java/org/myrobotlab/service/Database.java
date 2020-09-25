@@ -57,7 +57,6 @@ public class Database extends Service {
     return statement.execute(sql);
   }
 
-  
   public static void main(String[] args) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
     LoggingFactory.init("INFO");

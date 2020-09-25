@@ -49,7 +49,6 @@ public class OpenCVFilterMiniXceptionGui extends OpenCVFilterGui implements Acti
   SliderWithText slopSize = new SliderWithText(JSlider.HORIZONTAL, 0, 100, 10);
   JLabel slopSizeText = new JLabel("10");
 
-  
   public OpenCVFilterMiniXceptionGui(String boundFilterName, String boundServiceName, SwingGui myService) {
     super(boundFilterName, boundServiceName, myService);
 
@@ -57,19 +56,19 @@ public class OpenCVFilterMiniXceptionGui extends OpenCVFilterGui implements Acti
     north.add(new JLabel("confidence threshold"));
     north.add(confidence);
     north.add(confidenceText);
-    
+
     JPanel north2 = new JPanel();
     north2.add(new JLabel("box slop"));
     north2.add(slopSize);
     north2.add(slopSizeText);
-    
+
     display.setLayout(new BorderLayout());
     display.add(north, BorderLayout.NORTH);
     display.add(north2, BorderLayout.SOUTH);
 
     confidence.addChangeListener(this);
     slopSize.addChangeListener(this);
-    
+
   }
 
   @Override
@@ -95,11 +94,11 @@ public class OpenCVFilterMiniXceptionGui extends OpenCVFilterGui implements Acti
       @Override
       public void run() {
         OpenCVFilterMiniXception bf = (OpenCVFilterMiniXception) filterWrapper.filter;
-        confidenceText.setText(Double.toString((bf.getConfidence() * 100 )));
-        confidence.setValue((int) (bf.getConfidence() * 100 ));
-        
+        confidenceText.setText(Double.toString((bf.getConfidence() * 100)));
+        confidence.setValue((int) (bf.getConfidence() * 100));
+
         slopSizeText.setText(Integer.toString(bf.getBoxSlop()));
-        slopSize.setValue((int) (bf.getBoxSlop() ));
+        slopSize.setValue((int) (bf.getBoxSlop()));
       }
     });
   }

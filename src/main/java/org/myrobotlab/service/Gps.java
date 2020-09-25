@@ -171,7 +171,8 @@ public class Gps extends Service implements SerialDataListener {
       Gps template = (Gps) Runtime.start("gps1", "Gps");
       template.startService();
 
-      Python python = (Python) Runtime.start("python", "Python"); // new Python("python");
+      Python python = (Python) Runtime.start("python", "Python"); // new
+                                                                  // Python("python");
       python.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -191,7 +192,7 @@ public class Gps extends Service implements SerialDataListener {
   public void addGPSListener(Service service) {
     addListener("publishGPS", service.getName(), "onGPS");
   }
-  
+
   @Override
   public void onBytes(byte[] bytes) {
     for (int i = 0; i < bytes.length; i++) {
@@ -237,8 +238,8 @@ public class Gps extends Service implements SerialDataListener {
             log.info("MSS string detected");
             invoke("publishMSSData");
           } else if (messageString.contains("POLYN")) // San Jose
-            // navigation FV-M8
-            // specific?
+          // navigation FV-M8
+          // specific?
           {
             log.info("POLYN string detected");
             // invoke("publishPOLYNData");
@@ -872,6 +873,5 @@ public class Gps extends Service implements SerialDataListener {
   public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
   }
-
 
 }

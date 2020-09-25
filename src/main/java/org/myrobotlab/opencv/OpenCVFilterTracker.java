@@ -189,7 +189,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     if (mat != null) {
       synchronized (mat) {
         tracker.init(mat, boundingBox);
-      } 
+      }
     } else {
       log.warn("Sample point called on a null mat.");
     }

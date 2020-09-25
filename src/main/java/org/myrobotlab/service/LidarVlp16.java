@@ -49,7 +49,6 @@ public class LidarVlp16 extends Service {
     positionSocket.receive(receivePacket);
   }
 
-
   public static void main(String[] args) {
     try {
 

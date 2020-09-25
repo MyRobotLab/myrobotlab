@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -267,8 +265,7 @@ public class Python extends Service {
 
     createPythonInterpreter();
     attachPythonConsole();
-    
-    
+
     //////// was in startService
     
     String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
@@ -656,16 +653,11 @@ public class Python extends Service {
     broadcastState();
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
-  }
+  /*
+   * no longer needed
+   * 
+   * @Override public void startService() { super.startService(); }
+   */
 
   @Override
   public void releaseService() {

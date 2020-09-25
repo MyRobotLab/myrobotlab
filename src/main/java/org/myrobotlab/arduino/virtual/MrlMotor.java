@@ -56,9 +56,9 @@ public class MrlMotor extends Device {
     // msg->publishDebug("MrlMotor.deviceAttach !");
     // Simulator sim = virtual.getSimulator();
     // if (sim != null) {
-    //   motor = sim.createVirtualMotor(name);
+    // motor = sim.createVirtualMotor(name);
     // } else {
-      motor = new HardwareMotor();
+    motor = new HardwareMotor();
     // }
     motor.move(initPosUs);
     currentPosUs = initPosUs;

@@ -36,7 +36,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
   public PortJSSC() {
     super(NULL_PORT);
   }
-  
+
   public PortJSSC(String portName, int rate, int dataBits, int stopBits, int parity) throws IOException {
     super(portName, rate, dataBits, stopBits, parity);
   }
@@ -106,7 +106,7 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
     }
     port = null;
   }
-  
+
   public byte[] readBytes() {
     try {
       // read what's available
@@ -177,7 +177,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
    */
   @Override
   public void serialEvent(SerialPortEvent event) {
-    // FYI - if you want more events processed here - you need to register them in addEventListener
+    // FYI - if you want more events processed here - you need to register them
+    // in addEventListener
     if (event.isRXCHAR()) {
       try {
         int byteCount = event.getEventValue();
@@ -193,7 +194,8 @@ public class PortJSSC extends Port implements SerialControl, SerialPortEventList
         // we have data, let's notify the listeners.
         // log.info("Reading Data from port {} - Data:>{}<", getName(), buffer);
         for (String key : listeners.keySet()) {
-          // TODO: feels like this should be synchronized or maybe the buffer should be immutable?
+          // TODO: feels like this should be synchronized or maybe the buffer
+          // should be immutable?
           listeners.get(key).onBytes(buffer);
         }
         // gather stats about this serial event (bytes read...)

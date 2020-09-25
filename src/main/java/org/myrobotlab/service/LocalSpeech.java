@@ -25,28 +25,23 @@ import org.slf4j.Logger;
  * 
  *         Linux possibilities
  *         https://launchpad.net/ubuntu/precise/+source/svox/
- *         
+ * 
  *         More Voices can be found for Windows at
  *         https://www.microsoft.com/en-us/download/details.aspx?id=3971
- *         
- *         ESPEAK - 
- *            list voices :
- *                espeak --voices  
- *            use voice :
- *                espeak  -v en "Hello world, how are you doing today?"
- *                espeak  -v en-sc "Hello world, how are you doing today?"
- *                
- *            using mbrola voice
- *            install voice :
- *                sudo apt-get install mbrola mbrola-us3 mbrola-en1 ...
- *            use voice :
- *                espeak -v mb-en1 "Hello world"
- *                espeak -v mb-en1 "Hello world" -w out.wav
- *                espeak -f speak.txt -v mb-en1 -w out.wav
- *                espeak  -v mb-us1 "Hello world, how are you doing today?"
- *                
- *                
- *         MBROLA voices - https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
+ * 
+ *         ESPEAK - list voices : espeak --voices use voice : espeak -v en
+ *         "Hello world, how are you doing today?" espeak -v en-sc "Hello world,
+ *         how are you doing today?"
+ * 
+ *         using mbrola voice install voice : sudo apt-get install mbrola
+ *         mbrola-us3 mbrola-en1 ... use voice : espeak -v mb-en1 "Hello world"
+ *         espeak -v mb-en1 "Hello world" -w out.wav espeak -f speak.txt -v
+ *         mb-en1 -w out.wav espeak -v mb-us1 "Hello world, how are you doing
+ *         today?"
+ * 
+ * 
+ *         MBROLA voices -
+ *         https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
  */
 public class LocalSpeech extends AbstractSpeechSynthesis {
@@ -60,7 +55,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     super(n, id);
   }
 
-
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
@@ -71,7 +65,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (filename == null) {
       return null;
     }
-    
+
     if (platform.isWindows()) {
       // GAH ! .. tts.exe isn't like a Linux app where -o means output file to
       // "exact" name ...
@@ -94,10 +88,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // "");
       // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
       // --tts");
-      
-      // apt install espeak 
+
+      // apt install espeak
       // sudo apt-get install mbrola mbrola-en1
-      // espeak -f speak.txt -w out.wav 
+      // espeak -f speak.txt -w out.wav
       // espeak -ven-sc -f speak.txt -w out.wav
       Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
       // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
@@ -172,23 +166,26 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
           break;
         }
         String[] parts = line.split(" ");
-        if (parts.length < 2) { // some voices are not based on a standard pattern
+        if (parts.length < 2) { // some voices are not based on a standard
+                                // pattern
           continue;
         }
         // lame-ass parsing ..
         // standard sapi pattern is 5 parameters :
         // INDEX PROVIDER VOICE_NAME PLATEFORM - LANG
         // we need INDEX, VOICE_NAME, LANG
-        // but .. some voices dont use it, we will try to detect pattern and adapt if no respect about it :
+        // but .. some voices dont use it, we will try to detect pattern and
+        // adapt if no respect about it :
 
         // INDEX :
         String voiceProvider = parts[0];
 
         // VOICE_NAME
-        String voiceName = "Unknown" + voiceProvider; //default name if there is an issue
+        String voiceName = "Unknown" + voiceProvider; // default name if there
+                                                      // is an issue
         // it is standard, cool
         if (parts.length >= 6) {
-          voiceName = parts[2];//line.trim();
+          voiceName = parts[2];// line.trim();
         }
         // almost standard, we have INDEX PROVIDER VOICE_NAME
         else if (parts.length > 2) {
@@ -199,7 +196,8 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
           voiceName = line.split(" ")[1];
         }
 
-        // LANG ( we just detect for a keyword inside the whole string, because position is random sometime )
+        // LANG ( we just detect for a keyword inside the whole string, because
+        // position is random sometime )
         // TODO: locale converter from keyword somewhere ?
 
         if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
@@ -241,13 +239,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public String getTtsPath() {
     return ttsPath;
   }
-  
 
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
   }
-
 
   public static void main(String[] args) throws Exception {
 

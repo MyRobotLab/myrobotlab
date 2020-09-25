@@ -24,7 +24,7 @@ public class LanguagePack {
   public void load(String locale) {
     String extension = "lang";
     File dir = Utils.makeDirectory("InMoov" + File.separator + "system" + File.separator + "languagePack" + File.separator + locale);
-    if (dir.exists()) { 
+    if (dir.exists()) {
       lpVars.clear();
       for (File f : dir.listFiles()) {
         if (f.isDirectory()) {

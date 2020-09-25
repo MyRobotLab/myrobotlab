@@ -38,7 +38,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   // zero offset to where the confidence level is in the output matrix of the
   // darknet.
   private static final int CONFIDENCE_INDEX = 4;
-  
+
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
 
   private float confidenceThreshold = 0.25F;

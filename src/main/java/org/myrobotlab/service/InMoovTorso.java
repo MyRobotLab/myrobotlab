@@ -22,11 +22,10 @@ public class InMoovTorso extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(InMoovTorso.class);
 
-  
   private static final Integer DEFAULT_TOPSTOM_PIN = 27;
   private static final Integer DEFAULT_MIDSTOM_PIN = 28;
   private static final Integer DEFAULT_LOWSTOM_PIN = 29;
-  
+
   transient public ServoControl topStom;
   transient public ServoControl midStom;
   transient public ServoControl lowStom;
@@ -50,14 +49,14 @@ public class InMoovTorso extends Service {
   public InMoovTorso(String n, String id) {
     super(n, id);
     // TODO: just call startPeers here.
-    //    // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
-    //    // FRAMEWORK !!!!!
-    //    topStom = (ServoControl) createPeer("topStom");
-    //    midStom = (ServoControl) createPeer("midStom");
-    //    lowStom = (ServoControl) createPeer("lowStom");
-    //    // controller = (ServoController) createPeer("arduino");
+    // // createReserves(n); // Ok this might work but IT CANNOT BE IN SERVICE
+    // // FRAMEWORK !!!!!
+    // topStom = (ServoControl) createPeer("topStom");
+    // midStom = (ServoControl) createPeer("midStom");
+    // lowStom = (ServoControl) createPeer("lowStom");
+    // // controller = (ServoController) createPeer("arduino");
   }
-  
+
   public void startService() {
     if (topStom == null) {
       topStom = (ServoControl) createPeer("topStom");
@@ -69,14 +68,13 @@ public class InMoovTorso extends Service {
       lowStom = (ServoControl) createPeer("lowStom");
     }
     /*
-    if (controller == null) {
-      controller = (ServoController) createPeer("arduino");
-    }
-    */
+     * if (controller == null) { controller = (ServoController)
+     * createPeer("arduino"); }
+     */
   }
 
   private void initServoDefaults() {
-    
+
     if (topStom.getPin() == null) {
       topStom.setPin(DEFAULT_TOPSTOM_PIN);
       topStom.map(60.0, 120.0, 60.0, 120.0);
@@ -98,9 +96,9 @@ public class InMoovTorso extends Service {
       lowStom.setPosition(90.0);
       lowStom.setAutoDisable(true);
     }
-    
+
     setSpeed(5.0, 5.0, 5.0);
-    
+
   }
 
   /*
@@ -147,14 +145,14 @@ public class InMoovTorso extends Service {
     midStom.broadcastState();
     lowStom.broadcastState();
   }
-  
+
   public void setController(ServoController controller) {
     this.controller = controller;
   }
 
   public boolean connect(String port) throws Exception {
-    controller = (ServoController)startPeer("arduino");
-    
+    controller = (ServoController) startPeer("arduino");
+
     if (controller == null) {
       error("arduino is invalid");
       return false;
@@ -169,10 +167,11 @@ public class InMoovTorso extends Service {
       }
     }
 
-    // incase the peers haven't been started, or the peers don't have their defaults set
+    // incase the peers haven't been started, or the peers don't have their
+    // defaults set
     startPeers();
     initServoDefaults();
-    
+
     enableAutoEnable(true);
 
     broadcastState();
@@ -218,9 +217,9 @@ public class InMoovTorso extends Service {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(), lowStom.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveTorso(%.2f,%.2f,%.2f)\n", inMoovServiceName, topStom.getCurrentInputPos(), midStom.getCurrentInputPos(),
+        lowStom.getCurrentInputPos());
   }
-
 
   public void moveTo(double topStom, double midStom, double lowStom) {
     if (log.isDebugEnabled()) {
@@ -261,8 +260,8 @@ public class InMoovTorso extends Service {
   }
 
   /**
-   * Sets the output min and max limits for all servos in the torso.  input limits
-   * are not changed. 
+   * Sets the output min and max limits for all servos in the torso. input
+   * limits are not changed.
    * 
    * @param topStomMin
    * @param topStomMax
@@ -319,7 +318,6 @@ public class InMoovTorso extends Service {
     String move = getScript("i01");
     log.info(move);
   }
-
 
   @Deprecated /* use setSpeed instead. */
   public void setVelocity(Double topStom, Double midStom, Double lowStom) {

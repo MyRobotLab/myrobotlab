@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 public class OOBPayload {
 
   transient public final static Logger log = LoggerFactory.getLogger(OOBPayload.class);
-  // TODO: something better than regex to parse the xml.  (Problem is that the service/method/param values 
-  // could end up double encoded ... So we had to switch to hamd crafting the aiml for the oob/mrl tag.
+  // TODO: something better than regex to parse the xml. (Problem is that the
+  // service/method/param values
+  // could end up double encoded ... So we had to switch to hamd crafting the
+  // aiml for the oob/mrl tag.
   public transient static final Pattern oobPattern = Pattern.compile("<oob>.*?</oob>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   public transient static final Pattern mrlPattern = Pattern.compile("<mrl>.*?</mrl>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
   public transient static final Pattern servicePattern = Pattern.compile("<service>(.*?)</service>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
@@ -117,22 +119,20 @@ public class OOBPayload {
     // log.info(payload.toString());
     return payload;
   }
-  
-  
+
   public static boolean invokeOOBPayload(OOBPayload payload, String sender, boolean blocking) {
     ServiceInterface s = Runtime.getService(payload.getServiceName());
     // the service must exist and the method name must be set.
     if (s == null || StringUtils.isEmpty(payload.getMethodName())) {
       return false;
     }
-    
-    
+
     if (!blocking) {
       s.in(Message.createMessage(sender, payload.getServiceName(), payload.getMethodName(), payload.getParams().toArray()));
       // non-blocking.. fire and forget!
       return true;
     }
-    
+
     // TODO: should you be able to be synchronous for this
     // execution?
     Object result = null;
@@ -172,5 +172,5 @@ public class OOBPayload {
     res = matcher.replaceAll("");
     return res;
   }
-  
+
 }

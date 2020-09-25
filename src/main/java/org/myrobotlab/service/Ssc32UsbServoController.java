@@ -165,7 +165,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
     write(sb.toString());
   }
 
-  
   @Override
   public void onServoSetSpeed(ServoControl servo) {
     // TODO Auto-generated method stub
@@ -354,7 +353,6 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
 
   }
 
-  
   @Override
   public void onServoDisable(ServoControl servo) {
     // TODO Auto-generated method stub
@@ -364,7 +362,7 @@ public class Ssc32UsbServoController extends Service implements PortConnector, S
   @Override
   public void onServoStop(ServoControl servo) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

@@ -5,10 +5,10 @@ package org.myrobotlab.jme3;
  * call its methods directly
  */
 public class Jme3Msg {
-  
+
   String method;
   Object data[];
-  
+
   public Jme3Msg(String method, Object[] params) {
     this.method = method;
     this.data = params;

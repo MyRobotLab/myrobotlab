@@ -185,19 +185,17 @@ public class LangUtils {
       // do peers with comments
       // top level peers - others commented out
     }
-/**<pre>
-    sb.append("##############################################################\n");
-    sb.append(String.format("## starting %d services ####\n", services.size()));
-
-    for (ServiceInterface si2 : services) {
-      if (si2.isRuntime()) {
-        continue;
-      }
-      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si2), si2.getName(), si2.getSimpleName()));
-      // do peers with comments
-      // top level peers - others commented out
-    }
-*/
+    /**
+     * <pre>
+     * sb.append("##############################################################\n");
+     * sb.append(String.format("## starting %d services ####\n",
+     * services.size()));
+     * 
+     * for (ServiceInterface si2 : services) { if (si2.isRuntime()) { continue;
+     * } sb.append(String.format("%s = Runtime.start('%s', '%s')\n",
+     * safeRefName(si2), si2.getName(), si2.getSimpleName())); // do peers with
+     * comments // top level peers - others commented out }
+     */
     // attach all ????
 
     // subscribe all ??? (really should be attach)

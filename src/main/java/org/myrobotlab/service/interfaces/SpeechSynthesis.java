@@ -101,14 +101,17 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    */
   @Deprecated /* use setMute */
   public void unmute();
-  
+
   /**
-   * mute or unmute 
+   * mute or unmute
+   * 
    * @param mute
    */
   public void setMute(boolean mute);
 
-  @Deprecated /* this should be type specific named - use attachSpeechRecognizer*/
+  @Deprecated /*
+               * this should be type specific named - use attachSpeechRecognizer
+               */
   public void addEar(SpeechRecognizer ear);
 
   // FIXME - is this in the wrong place ??? - this seems like bot logic ...
@@ -116,27 +119,31 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * get a list of voices this speech synthesis supports
+   * 
    * @return
    */
   public List<Voice> getVoices();
-  
+
   /**
    * puts all speaking into blocking mode - default is false
+   * 
    * @param b
    * @return
    */
   public Boolean setBlocking(Boolean b);
 
   /**
-   * This attach subscribes the the SpeechRecognizer to the SpeechSynthesizer so the bot won't incorrectly
-   * recognize itself when its speaking ... otherwise silly things can happen when talking to self...
+   * This attach subscribes the the SpeechRecognizer to the SpeechSynthesizer so
+   * the bot won't incorrectly recognize itself when its speaking ... otherwise
+   * silly things can happen when talking to self...
    * 
    * @param ear
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
-    
+
   /**
    * Speech control controls volume, setting the voice, and of course "speak"
+   * 
    * @param control
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
@@ -148,10 +155,11 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * @param replacement
    */
   public void replaceWord(String key, String replacement);
-  
+
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
+   * 
    * @param filter
    */
-  public void replaceWord(WordFilter filter);  
+  public void replaceWord(WordFilter filter);
 }

@@ -119,7 +119,6 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     return cleanText.trim();
   }
 
- 
   @Override
   public void attachTextListener(TextListener service) {
     if (service == null) {
@@ -128,7 +127,7 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
     }
     addListener("publishText", service.getName());
   }
-  
+
   @Override
   public void attachTextPublisher(TextPublisher service) {
     if (service == null) {

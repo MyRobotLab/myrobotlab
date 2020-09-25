@@ -153,8 +153,6 @@ public class I2cMux extends Service implements I2CControl, I2CController {
     return readBuffer.length;
   }
 
-
-
   @Override
   public void attachI2CControl(I2CControl control) {
     // This part adds the service to the mapping between
