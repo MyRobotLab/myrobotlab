@@ -11,8 +11,8 @@ import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
-public interface ServiceInterface
-    extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker, StatePublisher, StatusPublisher, ServiceStatus, Attachable {
+public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
+    StatePublisher, StatusPublisher, ServiceStatus, Attachable {
 
   /**
    * this is a local method which adds a request from some foreign service with
@@ -27,16 +27,19 @@ public interface ServiceInterface
    *          c
    * 
    */
-  
+
   /**
-   * virtualize the service, in this mode the service should not use any "real" hardware
+   * virtualize the service, in this mode the service should not use any "real"
+   * hardware
+   * 
    * @param b
-   * @return 
+   * @return
    */
   public boolean setVirtual(boolean b);
-  
+
   /**
    * check to see if the service is running in a virtual mode
+   * 
    * @return
    */
   public boolean isVirtual();
@@ -60,7 +63,7 @@ public interface ServiceInterface
   public Outbox getOutbox();
 
   public String getSimpleName();
-  
+
   // important to maintain a method to return canonical type
   // important in the future when other services are expressed differently
   // e.g.(node js services)
@@ -121,10 +124,11 @@ public interface ServiceInterface
 
   /**
    * the order this service was created in relation to the other service
+   * 
    * @param creationCount
    */
   public void setOrder(int creationCount);
-  
+
   public String getId();
 
   public String getFullName();
@@ -132,6 +136,5 @@ public interface ServiceInterface
   public void loadLocalizations();
 
   public void setLocale(String code);
-
 
 }

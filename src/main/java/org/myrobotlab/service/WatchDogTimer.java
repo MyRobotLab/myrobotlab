@@ -44,7 +44,7 @@ public class WatchDogTimer extends Service {
      * < defaultIntervalMs
      */
     int sleepIntervalMs = 200;
-    private boolean autoDeactivate = false;    
+    private boolean autoDeactivate = false;
 
     public String toString() {
       return CodecUtils.toJson(this);
@@ -265,7 +265,8 @@ public class WatchDogTimer extends Service {
    * default method to "check-in" - a service calls this function to say
    * "everything is ok"
    * 
-   * @param watchDogTimerName - name of timer
+   * @param watchDogTimerName
+   *          - name of timer
    */
   public void checkPoint(String watchDogTimerName) {
     checkPoint(watchDogTimerName, getName());
@@ -287,7 +288,8 @@ public class WatchDogTimer extends Service {
    * "everything is ok" the next time it will "check-in" is in future
    * milliseconds
    * 
-   * @param timerName - name of timer
+   * @param timerName
+   *          - name of timer
    * @return - the timer
    */
   public Timer onCheckPoint(String timerName) {
@@ -341,7 +343,6 @@ public class WatchDogTimer extends Service {
     super.stopService();
     stop();
   }
-
 
   public void addCheckPoint(String watchDogName) {
     CheckPointWorker cpw = null;

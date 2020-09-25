@@ -81,7 +81,6 @@ public class CleverBot extends Service {
     return input;
   }
 
-
   public static void main(String[] args) {
     LoggingFactory.init();
     try {

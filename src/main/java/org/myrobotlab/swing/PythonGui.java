@@ -163,7 +163,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     if (o == stop) {
       stop.activate();
       send("stop");
-      //send("attachPythonConsole");
+      // send("attachPythonConsole");
       return;
     } else if (o == execute) {
       execute.activate();
@@ -243,7 +243,7 @@ public class PythonGui extends ServiceGui implements ActionListener, MouseListen
     subscribe("publishStdOut");
     subscribe("appendScript");
     // subscribe("publishLoadedScript", "addNewEditorPanel");
-    //send("attachPythonConsole");
+    // send("attachPythonConsole");
   }
 
   @Override

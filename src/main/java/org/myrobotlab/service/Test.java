@@ -211,7 +211,6 @@ public class Test extends Service implements StatusListener {
 
   public final static Logger log = LoggerFactory.getLogger(Test.class);
 
-
   /**
    * pre-test
    */

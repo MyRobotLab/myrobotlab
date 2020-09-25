@@ -69,7 +69,7 @@ import org.slf4j.Logger;
 public class InstallCert {
 
   public final static Logger log = LoggerFactory.getLogger(InstallCert.class);
-      
+
   private static class SavingTrustManager implements X509TrustManager {
 
     private final X509TrustManager tm;
@@ -117,22 +117,25 @@ public class InstallCert {
   public static void install(String urlstr) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
     install(urlstr, null);
   }
+
   public static void install(String urlstr, String pass) throws KeyManagementException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
     URL url = new URL(urlstr);
     install(url.getHost(), url.getPort(), pass);
   }
-  
-  public static void install(String host, String inport, String pass) throws KeyManagementException, NumberFormatException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-    String port = (inport != null)?"443":inport;
+
+  public static void install(String host, String inport, String pass)
+      throws KeyManagementException, NumberFormatException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+    String port = (inport != null) ? "443" : inport;
     install(host, Integer.parseInt(port), pass);
   }
-  
-  public static void install(String host, Integer inport, String pass) throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException, KeyManagementException {
-  
-    Integer port = (inport == null || inport == -1)?443:inport;
-    
+
+  public static void install(String host, Integer inport, String pass)
+      throws NoSuchAlgorithmException, IOException, CertificateException, KeyStoreException, KeyManagementException {
+
+    Integer port = (inport == null || inport == -1) ? 443 : inport;
+
     char[] passphrase;
-    
+
     final String p = (pass == null) ? "changeit" : pass;
     passphrase = p.toCharArray();
 

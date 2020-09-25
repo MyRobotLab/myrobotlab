@@ -213,20 +213,22 @@ public class Util {
 
   /**
    * this method should be avoided - it uses getResourceDir while is should
-   * expect full path - the calling Service should be using getResource or if its
-   * not a Service it should be using Service.getResource(class, resourceName)
+   * expect full path - the calling Service should be using getResource or if
+   * its not a Service it should be using Service.getResource(class,
+   * resourceName)
+   * 
    * @param path
    * @param defaultImage
    * @return
    */
-  @Deprecated 
+  @Deprecated
   public static Image getImage(String path, String defaultImage) {
     Image icon = null;
     File imgURL = new File(getResourceDir() + File.separator + path);
     if (isExistRessourceElement(path)) {
       try {
         icon = ImageIO.read(imgURL);
-        //log.info("getImage({})", imgURL.getPath());
+        // log.info("getImage({})", imgURL.getPath());
         return icon;
       } catch (IOException e) {
         log.error("getImage threw", e);
@@ -256,39 +258,39 @@ public class Util {
 
   /**
    * this method should be avoided - it uses getResourceDir while is should
-   * expect full path - the calling Service should be using getResource or if its
-   * not a Service it should be using Service.getResource(class, resourceName)
-   * by default will take the resource.dir property if set.
+   * expect full path - the calling Service should be using getResource or if
+   * its not a Service it should be using Service.getResource(class,
+   * resourceName) by default will take the resource.dir property if set.
    * 
-   * If mrl is running inside of a jar it will use the user.dir + "resource" as the directory.
-   * If mrl is not in a jar, it will use src/main/resources/resource  
+   * If mrl is running inside of a jar it will use the user.dir + "resource" as
+   * the directory. If mrl is not in a jar, it will use
+   * src/main/resources/resource
    * 
    * @return current resource directory
    */
   @Deprecated
   public static String getResourceDir() {
     // first try for the resource.dir system property
-    /* THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE 
-    String resourceDir = System.getProperty("resource.dir");
-    if (resourceDir != null) {
-      // log.info("Returning {}", resourceDir);
-      return resourceDir;
-    }
-    if (!FileIO.isJar()) {
-      // log.info("Not in a jar...you're running in an IDE likely.");
-      resourceDir = System.getProperty("user.dir") + File.separator + "src"+File.separator+"main"+File.separator+"resources"+File.separator+"resource";
-    } else {
-      resourceDir = System.getProperty("user.dir") + File.separator + "resource";
-    }
-    */
+    /*
+     * THIS CANNOT BE DONE IN TWO PLACES - ONE WILL ALWAYS BE String resourceDir
+     * = System.getProperty("resource.dir"); if (resourceDir != null) { //
+     * log.info("Returning {}", resourceDir); return resourceDir; } if
+     * (!FileIO.isJar()) { //
+     * log.info("Not in a jar...you're running in an IDE likely."); resourceDir
+     * = System.getProperty("user.dir") + File.separator +
+     * "src"+File.separator+"main"+File.separator+"resources"+File.separator+
+     * "resource"; } else { resourceDir = System.getProperty("user.dir") +
+     * File.separator + "resource"; }
+     */
     // log.info("Returning {}", resourceDir);
     return Service.getResourceRoot();
   }
-  
 
   /**
    * Check if file exist from current resource directory
-   * @param element - element to be tested
+   * 
+   * @param element
+   *          - element to be tested
    * @return boolean
    */
   @Deprecated /* expect full path - don't use getResourceDir */
@@ -309,13 +311,13 @@ public class Util {
       icon = new ImageIcon(Util.getResourceDir() + File.separator + imgURL);
       return icon;
     } else {
-      log.error("Get Resource Icon - Couldn't find file: {}" ,  path);
+      log.error("Get Resource Icon - Couldn't find file: {}", path);
       return null;
     }
   }
-  
+
   public static ImageIcon getScaledIcon(final String name, final int x, final int y) {
-    return new ImageIcon(getImage(name).getScaledInstance(x, y,  java.awt.Image.SCALE_SMOOTH));
+    return new ImageIcon(getImage(name).getScaledInstance(x, y, java.awt.Image.SCALE_SMOOTH));
   }
 
   public static ImageIcon getScaledIcon(final Image image, final double scale) {
@@ -448,12 +450,11 @@ public class Util {
       BufferedImage img = ImageIO.read(file);
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       ImageIO.write(img, "png", bos);
-      return String.format("data:image/%s;base64,%s", type,  Base64.getEncoder().encodeToString(bos.toByteArray()));
+      return String.format("data:image/%s;base64,%s", type, Base64.getEncoder().encodeToString(bos.toByteArray()));
     } catch (IOException e) {
       return null;
     }
   }
-
 
   /**
    * Produces a resized image that is of the given dimensions
@@ -515,13 +516,14 @@ public class Util {
   public static ImageIcon getImageIcon(String path, String description) {
     ImageIcon icon = null;
     String resourcePath = Util.getResourceDir() + File.separator + path;
-    // ImageIcon requires forward slash in the filename (unix/internet style convention)
+    // ImageIcon requires forward slash in the filename (unix/internet style
+    // convention)
     resourcePath = resourcePath.replaceAll("\\\\", "/");
     icon = new ImageIcon(resourcePath, description);
     return icon;
   }
 
-  // 
+  //
   public static void fourPointsTransform(Mat frame, Point2f vertices, Mat result, Size outputSize) {
     Point2f targetVertices = new Point2f(4);
     // write the data into the array
@@ -544,10 +546,10 @@ public class Util {
   public static Point2f scaleVertices(RotatedRect box, Point2f ratio) {
     Point2f vertices = new Point2f(4);
     box.points(vertices);
-    for (int i = 0 ; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       vertices.position(i);
-      vertices.x( vertices.x() * ratio.x() );
-      vertices.y( vertices.y() * ratio.y() );
+      vertices.x(vertices.x() * ratio.x());
+      vertices.y(vertices.y() * ratio.y());
     }
     vertices.position(0);
     return vertices;
@@ -559,24 +561,26 @@ public class Util {
     Point2f vertices = Util.scaleVertices(largerBox, ratio);
     // a target for the cropped image
     Mat cropped = new Mat();
-    // do the cropping of the original image, scaled vertices and a target output size
+    // do the cropping of the original image, scaled vertices and a target
+    // output size
     Util.fourPointsTransform(frame, vertices, cropped, outputSize);
-    // return the cropped mat that is populated with the cropped image from the original input image.
+    // return the cropped mat that is populated with the cropped image from the
+    // original input image.
     return cropped;
   }
 
-  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {    
+  public static ArrayList<DetectedText> applyNMSBoxes(float threshold, ArrayList<RotatedRect> boxes, ArrayList<Float> confidences, float nmsThreshold) {
     RectVector boxesRV = new RectVector();
     for (RotatedRect rr : boxes) {
       boxesRV.push_back(rr.boundingRect());
     }
     FloatPointer confidencesFV = arrayListToFloatPointer(confidences);
     IntPointer indicesIp = new IntPointer();
-    NMSBoxes(boxesRV, confidencesFV, (float)threshold, nmsThreshold, indicesIp);
+    NMSBoxes(boxesRV, confidencesFV, (float) threshold, nmsThreshold, indicesIp);
     ArrayList<DetectedText> goodOnes = new ArrayList<DetectedText>();
-    for (int m=0;m<indicesIp.limit();m++) {
+    for (int m = 0; m < indicesIp.limit(); m++) {
       int i = indicesIp.get(m);
-      RotatedRect box = boxes.get(i); 
+      RotatedRect box = boxes.get(i);
       confidencesFV.position(i);
       // we don't have text yet, that will be filled in later by the ocr step.
       DetectedText dt = new DetectedText(box, confidencesFV.get(), null);
@@ -585,12 +589,13 @@ public class Util {
     return goodOnes;
   }
 
-  // utilty helper function to put an array of floats into a javacpp float pointer
+  // utilty helper function to put an array of floats into a javacpp float
+  // pointer
   public static FloatPointer arrayListToFloatPointer(ArrayList<Float> confidences) {
     // create a float pointer of the correct size
     FloatPointer confidencesFV = new FloatPointer(confidences.size());
     for (int i = 0; i < confidences.size(); i++) {
-      // update the pointer and put the float in 
+      // update the pointer and put the float in
       confidencesFV.position(i);
       confidencesFV.put(confidences.get(i));
     }
@@ -598,5 +603,5 @@ public class Util {
     confidencesFV.position(0);
     return confidencesFV;
   }
-  
+
 }

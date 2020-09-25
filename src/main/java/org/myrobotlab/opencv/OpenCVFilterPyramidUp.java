@@ -49,7 +49,7 @@ public class OpenCVFilterPyramidUp extends OpenCVFilter {
   public OpenCVFilterPyramidUp(String name) {
     super(name);
   }
-    
+
   public OpenCVFilterPyramidUp() {
     super();
   }

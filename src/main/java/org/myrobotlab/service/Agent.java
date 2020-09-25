@@ -101,9 +101,9 @@ public class Agent extends Service {
   Platform platform = Platform.getLocalInstance();
 
   transient WebGui webgui = null;
-  
+
   int port = 8887;
-  
+
   String address = "127.0.0.1";
 
   String currentBranch;
@@ -282,7 +282,7 @@ public class Agent extends Service {
     if (autoUpdate || checkRemoteVersions) {
       invoke("getVersions", currentBranch);
     }
-    
+
     Runtime runtime = Runtime.getInstance();
     runtime.startInteractiveMode();
   }
@@ -292,9 +292,9 @@ public class Agent extends Service {
   }
 
   public String getJarName(String branch, String version) {
-	// FIXME !!! branch name is completely unreliable :(
-	// version info which includes build number can distinguish for what we need
-	  return "myrobotlab-" + version + ".jar";
+    // FIXME !!! branch name is completely unreliable :(
+    // version info which includes build number can distinguish for what we need
+    return "myrobotlab-" + version + ".jar";
     // return "myrobotlab-" + branch + "-" + version + ".jar";
     // return getDir(branch, version) + File.separator + "myrobotlab.jar";
   }
@@ -1028,9 +1028,9 @@ public class Agent extends Service {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
-    
+
     if (pd.options.proxy != null) {
-      URI uri = new URI(pd.options.proxy); 
+      URI uri = new URI(pd.options.proxy);
       String host = uri.getHost();
       Integer port = uri.getPort();
       jvmArgs += " -Dhttp.proxyHost=" + host + " -Dhttp.proxyPort=" + port + " " + "-Dhttps.proxyHost=" + host + " -Dhttps.proxyPort=" + port;
@@ -1040,7 +1040,7 @@ public class Agent extends Service {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", pd.options.memory, pd.options.memory);
     }
     pd.jvm = jvmArgs.split(" ");
-    
+
     pd.options.spawnedFromAgent = true;
 
     // user override
@@ -1052,9 +1052,9 @@ public class Agent extends Service {
       options.services.add("log");
       options.services.add("Log");
       options.services.add("webgui");
-      options.services.add("WebGui");      
+      options.services.add("WebGui");
       options.services.add("intro");
-      options.services.add("Intro");      
+      options.services.add("Intro");
       options.services.add("gui");
       options.services.add("SwingGui");
       options.services.add("python");
@@ -1162,7 +1162,7 @@ public class Agent extends Service {
     cmd.add("org.myrobotlab.service.Runtime");
 
     if (pd.options.services.size() > 0) {
-      if (pd.options.services.size()%2 != 0) {
+      if (pd.options.services.size() % 2 != 0) {
         error("--service requires {name} {Type} {name} {Type} even number of entries - you have %d", pd.options.services.size());
         Runtime.shutdown();
       }
@@ -1197,10 +1197,10 @@ public class Agent extends Service {
         cmd.add(serviceType);
       }
     }
-    
+
     if (pd.options.installDependency != null) {
-        cmd.add("--install-dependency");
-        for (String serviceType : globalOptions.installDependency) {
+      cmd.add("--install-dependency");
+      for (String serviceType : globalOptions.installDependency) {
         cmd.add(serviceType);
       }
     }
@@ -1231,7 +1231,7 @@ public class Agent extends Service {
     if (pd.options.virtual) {
       cmd.add("--virtual");
     }
-    
+
     cmd.add("--spawned-from-agent");
 
     return cmd.toArray(new String[cmd.size()]);
@@ -1270,9 +1270,9 @@ public class Agent extends Service {
     // environment variables setup
     setEnv(pd, builder.environment());
 
-// new    
-//    builder.inheritIO();
-    
+    // new
+    // builder.inheritIO();
+
     Process process = builder.start();
     pd.process = process;
     pd.startTs = System.currentTimeMillis();
@@ -1299,12 +1299,12 @@ public class Agent extends Service {
 
     log.info("Agent finished spawn {}", formatter.format(new Date()));
     if (agent != null) {
-      /** FIXME - integrate with cli api
-      Cli cli = Runtime.getCli();
-      cli.add(pd.options.id, process.getInputStream(), process.getOutputStream());
-      cli.attach(pd.options.id);
-      agent.broadcastState();
-      */
+      /**
+       * FIXME - integrate with cli api Cli cli = Runtime.getCli();
+       * cli.add(pd.options.id, process.getInputStream(),
+       * process.getOutputStream()); cli.attach(pd.options.id);
+       * agent.broadcastState();
+       */
     }
     return process;
   }
@@ -1465,7 +1465,7 @@ public class Agent extends Service {
 
       // FIXME - use wsclient for remote access
       if (globalOptions.client != null) {
-        
+
         return;
       }
 

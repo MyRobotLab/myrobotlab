@@ -191,8 +191,6 @@ public class MethodCache {
 
       addMethodEntry(mi.methodOrdinalIndex, ordinalKey, me);
 
-
-
       if (!hasInterfaceInParamList) {
         addMethodEntry(mi.remoteOrdinalIndex, ordinalKey, me);
       }

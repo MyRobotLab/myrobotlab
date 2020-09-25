@@ -146,7 +146,7 @@ public class SwingInMethodDialog extends JDialog implements ActionListener {
   public String formatOutMethod(MethodEntry me) {
     StringBuffer ret = new StringBuffer();
     ret.append(me.getName());
-    Class<?>[]  paramTypes = me.getParameterTypes();
+    Class<?>[] paramTypes = me.getParameterTypes();
     if (paramTypes != null) {
       ret.append(" (");
       for (int i = 0; i < paramTypes.length; ++i) {

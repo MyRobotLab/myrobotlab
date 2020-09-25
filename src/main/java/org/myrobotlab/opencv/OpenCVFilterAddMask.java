@@ -58,7 +58,6 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
 
   double opacity = 0.4;
 
-
   public OpenCVFilterAddMask(String name) {
     super(name);
   }
@@ -67,44 +66,45 @@ public class OpenCVFilterAddMask extends OpenCVFilter {
   public void imageChanged(IplImage image) {
   }
 
-
   @Override
   public IplImage process(IplImage image) throws InterruptedException {
-    
+
     if (transparency != null) {
       transparency = OpenCVFilter.loadMat("transparent-bubble.png");
-      Mat targetImage = toMat(image.clone()); //toMat(image);      
+      Mat targetImage = toMat(image.clone()); // toMat(image);
       Mat resultImage = targetImage.clone();
       // IplImage src = cvCreateImage(cvGetSize(srcColor), IPL_DEPTH_8U, 1);
       // blendFast(transparency, targetImage, resultImage);
       blendFast(transparency, targetImage, resultImage);
 
       // FIXME have a cvAddWeighted filter
-      /**<pre> overlay using geometric shapes
-      IplImage output = copy(image);
-      IplImage overlay = copy(image);
-      cvRectangle(overlay, new int[] { 420, 205 }, new int[] { 595, 385 }, cvScalar(0, 0, 255, 1));
-      show(overlay, "output");
-      cvAddWeighted(overlay, opacity, output, 1 - opacity, 0.0, output);
-      show(output, "output");
-      log.info("here");
-      </pre>
-      */
+      /**
+       * <pre>
+       *  overlay using geometric shapes
+       IplImage output = copy(image);
+       IplImage overlay = copy(image);
+       cvRectangle(overlay, new int[] { 420, 205 }, new int[] { 595, 385 }, cvScalar(0, 0, 255, 1));
+       show(overlay, "output");
+       cvAddWeighted(overlay, opacity, output, 1 - opacity, 0.0, output);
+       show(output, "output");
+       log.info("here");
+       * </pre>
+       */
       return toImage(resultImage.clone());
     }
-    
+
     return image;
   }
-  
+
   int cnt = 0;
-  
-   /** Does alpha blending with high-performance Indexer from JavaCPP. */
+
+  /** Does alpha blending with high-performance Indexer from JavaCPP. */
   final void blendFast(final Mat rgbaImg, final Mat bgrImg, final Mat dstImg) {
     final UByteIndexer rgbaIdx = rgbaImg.createIndexer();
     final UByteIndexer bgrIdx = bgrImg.createIndexer();
     final UByteIndexer dstIdx = dstImg.createIndexer();
     final int rows = rgbaImg.rows(), cols = rgbaImg.cols();
-    
+
     log.warn("cnt {}", ++cnt);
     Parallel.loop(0, rows, new Parallel.Looper() {
       public void loop(int from, int to, int looperID) {

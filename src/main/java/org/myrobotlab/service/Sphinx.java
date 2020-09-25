@@ -69,7 +69,6 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 @Deprecated /* we need another offline solution - one that doesn't suck */
 public class Sphinx extends AbstractSpeechRecognizer {
 
-
   class SpeechProcessor extends Thread {
     Sphinx myService = null;
     public boolean isRunning = false;
@@ -222,7 +221,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
   transient SpeechProcessor speechProcessor = null;
 
   HashSet<String> lockPhrases = new HashSet<String>();
-  
+
   HashMap<String, Message> confirmations = null;
 
   HashMap<String, Message> negations = null;
@@ -236,7 +235,7 @@ public class Sphinx extends AbstractSpeechRecognizer {
     LoggingFactory.init(Level.DEBUG);
     try {
       Sphinx ear = (Sphinx) Runtime.start("ear", "Sphinx");
-      SpeechSynthesis speech = (MarySpeech)Runtime.start("speech", "MarySpeech");
+      SpeechSynthesis speech = (MarySpeech) Runtime.start("speech", "MarySpeech");
       ((MarySpeech) speech).startService();
 
       // attache speech to ear -
@@ -574,7 +573,6 @@ public class Sphinx extends AbstractSpeechRecognizer {
     return clean;
   }
 
- 
   public void startRecordingx() {
     microphone.clear();
     microphone.startRecording();
@@ -628,12 +626,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
 
   }
 
-
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
   }
-
-  
 
 }

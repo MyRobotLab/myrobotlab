@@ -6,9 +6,8 @@ import org.myrobotlab.service.Serial;
 import org.myrobotlab.service.VirtualArduino;
 import org.slf4j.Logger;
 
-
 public class MrlCommIno {
-  
+
   public final static Logger log = LoggerFactory.getLogger(MrlCommIno.class);
   transient Serial serial;// = new Serial();
   transient VirtualArduino virtual;
@@ -82,7 +81,7 @@ public class MrlCommIno {
    * STANDARD ARDUINO LOOP BEGIN This method will be called over and over again
    * by the arduino, it is the main loop any arduino sketch runs
    * 
-   *           - error if processing of a command blows up for some reason.
+   * - error if processing of a command blows up for some reason.
    */
   public void loop() {
     // This is NoOp, real messages are read in the onBytes of VirtualMsg

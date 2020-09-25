@@ -43,7 +43,7 @@ public class Twitter extends Service {
     LoggingFactory.init(Level.WARN);
 
     try {
-      Twitter twitter = (Twitter)Runtime.start("twitter", "Twitter");
+      Twitter twitter = (Twitter) Runtime.start("twitter", "Twitter");
 
       twitter.startService();
 

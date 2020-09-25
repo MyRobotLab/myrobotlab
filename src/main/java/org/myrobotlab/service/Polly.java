@@ -121,7 +121,7 @@ public class Polly extends AbstractSpeechSynthesis {
     if (defaultRegion == null) {
       defaultRegion = Regions.DEFAULT_REGION;
     }
-    
+
     String key = getKey(AMAZON_POLLY_USER_KEY);
     String secret = getKey(AMAZON_POLLY_USER_SECRET);
 
@@ -221,8 +221,9 @@ public class Polly extends AbstractSpeechSynthesis {
 
     LoggingFactory.init(Level.INFO);
 
-    Runtime.getInstance(args); // <-- nice in that you can process command line args this way
-    
+    Runtime.getInstance(args); // <-- nice in that you can process command line
+                               // args this way
+
     // set language universally
     // Runtime.setLanguage("pt");
 

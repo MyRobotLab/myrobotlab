@@ -25,9 +25,10 @@ import org.myrobotlab.service.interfaces.PinDefinition;
 
 /**
  * class to display a specific pin's data
+ * 
  * @author GroG
  * 
- * FIXME - 
+ *         FIXME -
  *
  */
 public class OscopePinTrace extends JPanel implements ActionListener {
@@ -36,7 +37,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
   BufferedImage b0;
   BufferedImage b1;
-  
+
   Color bgColor = Color.BLACK;
   int blit = 0;
   Color color;
@@ -51,7 +52,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   int lastY = 0;
 
   Oscope oscope;
-  
+
   JButton pause;
 
   boolean paused = false;
@@ -64,7 +65,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   JLabel minLabel = new JLabel("0.00");
   JLabel maxLabel = new JLabel("0.00");
   JLabel avgLabel = new JLabel("0.00");
-  
+
   double min = 0;
   double max = 0;
   double avg = 0;
@@ -86,7 +87,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   double multiplier = 20.0;
 
   boolean initialized = false;
-  
+
   // mapper to provide auto-scaling
   Mapper pinMapper = new MapperLinear(0, 1, 0, 1);
 
@@ -95,13 +96,13 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   public OscopePinTrace(Oscope oscope, PinDefinition pinDef, float hsv) {
     super();
     setLayout(new BorderLayout());
-    
+
     this.oscope = oscope;
     this.pinDef = pinDef;
-    
-    color =  new Color(Color.HSBtoRGB((hsv), 0.9f, 1.0f));
-    inactiveColor =  new Color(Color.HSBtoRGB((hsv), 0.5f, 0.7f));
-    
+
+    color = new Color(Color.HSBtoRGB((hsv), 0.9f, 1.0f));
+    inactiveColor = new Color(Color.HSBtoRGB((hsv), 0.5f, 0.7f));
+
     // screen 0 setup
     b0 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     g0 = b0.createGraphics();
@@ -124,11 +125,11 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     // on the top-level Canvas to prevent AWT from repainting it, as
     // you'll
     // typically be doing this yourself within the animation loop.
-    
-//    FIXME - not sure about these ..    
-//    setIgnoreRepaint(true);
-//    setDoubleBuffered(false); // weird no access
-//    setOpaque(false);
+
+    // FIXME - not sure about these ..
+    // setIgnoreRepaint(true);
+    // setDoubleBuffered(false); // weird no access
+    // setOpaque(false);
 
     pinButton = new JButton(pinDef.getPinName());
     pinButton.setMargin(new Insets(0, 0, 0, 0));
@@ -144,7 +145,7 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     traceControl.setLayout(new GridLayout(0, 2));
     traceControl.add(new JLabel(" " + pinDef.getPinName()));
     traceControl.add(valueLabel);
-    
+
     traceControl.add(new JLabel("  min"));
     traceControl.add(minLabel);
 
@@ -153,11 +154,11 @@ public class OscopePinTrace extends JPanel implements ActionListener {
 
     traceControl.add(new JLabel("  avg"));
     traceControl.add(avgLabel);
-    
+
     pause = new JButton(Util.getScaledIcon(Util.getImage("pause.png"), 0.25));
     pause.setBorder(BorderFactory.createEmptyBorder());
     pause.setContentAreaFilled(false);
-    
+
     traceControl.add(pause);
     pause.addActionListener(this);
 
@@ -175,7 +176,8 @@ public class OscopePinTrace extends JPanel implements ActionListener {
       paused = !paused;
     } else if (o == pinButton) {
       if (pinDef.isEnabled()) {
-        oscope.send("disablePin", pinDef.getAddress()); //<- wrong .. getPin() !
+        oscope.send("disablePin", pinDef.getAddress()); // <- wrong .. getPin()
+                                                        // !
         pinButton.setBackground(inactiveColor);
         setVisible(false);
       } else {
@@ -203,7 +205,8 @@ public class OscopePinTrace extends JPanel implements ActionListener {
   }
 
   /**
-   * used by oscope to set a pin's display 
+   * used by oscope to set a pin's display
+   * 
    * @return
    */
   public Component getScreenDisplay() {
@@ -245,27 +248,28 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     if (paused) {
       return;
     }
-    
+
     ++cnt;
-    
+
     if (!initialized) {
       min = pinData.value;
       minLabel.setText(String.format("%.2f", min));
-   
+
       max = pinData.value;
       maxLabel.setText(String.format("%.2f", max));
-      
+
       avg = pinData.value;
       avgLabel.setText(String.format("%.2f", avg));
-      
+
       initialized = true;
     }
 
     screen0X += timeDivisor;
     screen1X += timeDivisor;
-    
+
     ////////////////////////////////////////////////////
-    // ======= begin some values here can be initialized once or in some modulus =========
+    // ======= begin some values here can be initialized once or in some modulus
+    //////////////////////////////////////////////////// =========
     // FIXME - if (autoScale) ....
     // FIXME - this needs to be inspected/refactored
     double y = 0;
@@ -273,14 +277,13 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     int yLow = yMargin;
     int yHi = height - yMargin;
     int yMaxDelta = yHi - yLow;
-    
+
     ////////////////////////////////////////////////////
-    
+
     // y = pinMapper.calcOutput(pinData.value) + yMargin;
     y = yHi - pinMapper.calcOutput(pinData.value);
-    
+
     ////////////////////////////////////////////////////
-        
 
     // find active bit blit screen - its the one who's xpos is negative
     // because its "left" of the current viewing area being scrolled "right"
@@ -293,7 +296,6 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     // currently
     // scrolled left point of where it is in view
     int drawPointX = (blit % 2 == 0) ? (-1 * screen1X) : (-1 * screen0X);
-
 
     double yTest = height / 2 - pinData.value * multiplier;
     g.drawLine(lastX, lastY, drawPointX, (int) y);
@@ -334,26 +336,26 @@ public class OscopePinTrace extends JPanel implements ActionListener {
     // TODO - optimization of shifting the raster data ?
 
     lastY = (int) y;
-    
+
     if (pinData.value < min) {
       min = pinData.value;
       minLabel.setText(String.format("%.2f", min));
-      newMinOrMax  = true;
+      newMinOrMax = true;
     }
-    
+
     if (pinData.value > max) {
       max = pinData.value;
       maxLabel.setText(String.format("%.2f", max));
       newMinOrMax = true;
     }
-    
+
     if (newMinOrMax) {
-      pinMapper = new MapperLinear(min, max, 0.0, (double)yMaxDelta);
+      pinMapper = new MapperLinear(min, max, 0.0, (double) yMaxDelta);
     }
-    
-    avg = ((cnt - 1) * avg + pinData.value)/cnt;
+
+    avg = ((cnt - 1) * avg + pinData.value) / cnt;
     avgLabel.setText(String.format("%.2f", avg));
-  
+
     lastPinData = pinData;
     // request a repaint to swing thread
     repaint();

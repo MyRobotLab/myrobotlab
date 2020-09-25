@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  *
  */
 public class MathUtils {
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(MathUtils.class);
 
   // convert degrees to radians.

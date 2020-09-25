@@ -89,12 +89,12 @@ public class IpCamera extends Service {
     LoggingFactory.init(Level.INFO);
 
     try {
-      IpCamera foscam = (IpCamera)Runtime.start("foscam", "IpCamera");
+      IpCamera foscam = (IpCamera) Runtime.start("foscam", "IpCamera");
       foscam.startService();
 
       foscam.startService();
 
-      SwingGui gui = (SwingGui)Runtime.start("gui", "SwingGui"); 
+      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
       gui.startService();
 
     } catch (Exception e) {

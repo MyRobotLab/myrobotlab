@@ -34,19 +34,20 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 /**
- * This class is a minimal Java websocket client which can attach to a MyRobotLab running instance.
- * From the command line it should be capable of sending any command using the Cli Api notation.
- * There are system commands such as ls, lp, cd, etc - but most invoking of service methods will be of the
+ * This class is a minimal Java websocket client which can attach to a
+ * MyRobotLab running instance. From the command line it should be capable of
+ * sending any command using the Cli Api notation. There are system commands
+ * such as ls, lp, cd, etc - but most invoking of service methods will be of the
  * form
  * 
- *  /{service}/{method}/{param0}/{param1}....
- *  
+ * /{service}/{method}/{param0}/{param1}....
+ * 
  * @author GroG
  *
  */
 @Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
 public class Client {
-  
+
   public final static Logger log = LoggerFactory.getLogger(Client.class);
 
   @Option(names = "--option", description = "Some option.")
@@ -83,45 +84,45 @@ public class Client {
 
     @Override
     public Reader decode(Event e, String dataIn) {
-      //public Reader decode(Event type, String data) {
-        // System.out.println("=========== decode <----- ===========");
-        // System.out.println("decoding [{} - {}]", type, s);
+      // public Reader decode(Event type, String data) {
+      // System.out.println("=========== decode <----- ===========");
+      // System.out.println("decoding [{} - {}]", type, s);
       String data = (String) dataIn;
-        if (data != null && "X".equals(data)) {
-          // System.out.println("MESSAGE - X");
-          return null;
-        }
-        if ("OPEN".equals(data)) {
-          return null;
-        }
-
-        // main response
-        //System.out.println(data);
-        for (RemoteMessageHandler handler : handlers) {
-          handler.onRemoteMessage(uuid, data);
-        }
-
-        // response
-        // System.out.println("OPENED" + s);
-
-        return new StringReader(data);
-        //return null;
+      if (data != null && "X".equals(data)) {
+        // System.out.println("MESSAGE - X");
+        return null;
       }
+      if ("OPEN".equals(data)) {
+        return null;
+      }
+
+      // main response
+      // System.out.println(data);
+      for (RemoteMessageHandler handler : handlers) {
+        handler.onRemoteMessage(uuid, data);
+      }
+
+      // response
+      // System.out.println("OPENED" + s);
+
+      return new StringReader(data);
+      // return null;
+    }
   }
 
   Set<RemoteMessageHandler> handlers = new HashSet<>();
-  
+
   public class AutoConnector implements Runnable {
     transient Thread worker;
     boolean isRunning = false;
     long interval = 1000;
-    
+
     public void run() {
       isRunning = true;
-      while(isRunning) {
+      while (isRunning) {
         try {
-        Thread.sleep(interval);
-        } catch(Exception e) {
+          Thread.sleep(interval);
+        } catch (Exception e) {
           isRunning = false;
         }
         for (String url : endpoints.keySet()) {
@@ -129,7 +130,7 @@ public class Client {
             if (endpoints.get(url).socket == null) {
               connect(url);
             }
-          } catch(Exception e) {
+          } catch (Exception e) {
             log.error("could not connect to {}", url, e);
           }
         }
@@ -137,19 +138,18 @@ public class Client {
       isRunning = false;
       worker = null;
     }
-    
+
     synchronized public void start() {
       if (worker == null) {
         worker = new Thread(this, "auto-connector");
         worker.start();
       }
     }
-    
-   synchronized public void stop() {
-     isRunning = false;
+
+    synchronized public void stop() {
+      isRunning = false;
     }
   }
-  
 
   public void addResponseHandler(RemoteMessageHandler handler) {
     handlers.add(handler);
@@ -193,7 +193,7 @@ public class Client {
     try {
 
       Endpoint endpoint = new Endpoint();
-      
+
       if (uuid == null) {
         UUID u = java.util.UUID.randomUUID();
         uuid = u.toString();
@@ -217,8 +217,8 @@ public class Client {
           // System.out.println("encoding [{}]", s);
           return new StringReader(s);
         }
-      }).decoder(endpoint
-          ).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
+      }).decoder(endpoint).transport(Request.TRANSPORT.WEBSOCKET) // Try
+                                                                  // WebSocket
           .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
                                                       // Long-Polling
 
@@ -239,7 +239,6 @@ public class Client {
       b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
       AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
       AsyncHttpClient asc = new AsyncHttpClient(config);
-      
 
       Socket socket = client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
@@ -285,7 +284,6 @@ public class Client {
         }
       }).open(request.build());
 
-  
       endpoint.socket = socket;
       currentUuid = uuid;
 
@@ -296,7 +294,6 @@ public class Client {
     }
     return null;
   }
-  
 
   public class Worker implements Runnable {
 
@@ -361,7 +358,7 @@ public class Client {
   public void stopInteractiveMode() {
     worker.stop();
   }
-  
+
   public void broadcast(String raw) {
     for (Endpoint endpoint : endpoints.values()) {
       try {

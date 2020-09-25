@@ -32,7 +32,7 @@ public class Task extends TimerTask {
     // info("task %s running - next run %s", taskName,
     // MathUtils.msToString(interval));
     myService.invoke(msg);
-    
+
     // GroG commented out 2019.07.14 for preferrable "blocking" task
     // myService.getInbox().add(msg);
 

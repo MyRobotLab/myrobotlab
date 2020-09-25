@@ -33,7 +33,7 @@ public class WolframAlpha extends Service {
 
     try {
 
-      WolframAlpha template = (WolframAlpha)Runtime.start("wolfram", "WolframAlpha");
+      WolframAlpha template = (WolframAlpha) Runtime.start("wolfram", "WolframAlpha");
       template.startService();
 
       Runtime.createAndStart("gui", "SwingGui");
@@ -187,6 +187,5 @@ public class WolframAlpha extends Service {
     String get = wolframAlpha(query, pod);
     return parseString(get);
   }
-
 
 }

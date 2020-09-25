@@ -29,5 +29,4 @@ public class HtmlParser extends Service {
     super(n, id);
   }
 
-
 }

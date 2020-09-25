@@ -164,7 +164,7 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     LoggingFactory.init(Level.INFO);
     try {
 
-      LeapMotion leap =  (LeapMotion) Runtime.start("leap", "LeapMotion");
+      LeapMotion leap = (LeapMotion) Runtime.start("leap", "LeapMotion");
       leap.startService();
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
@@ -195,6 +195,5 @@ public class LeapMotion extends Service implements LeapDataListener, LeapDataPub
     // TODO - reflect on a public heard method - if doesn't exist error ?
     addListener("publishPoints", s.getName(), "onPoints");
   }
-
 
 }

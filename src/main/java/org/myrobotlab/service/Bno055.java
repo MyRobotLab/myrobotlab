@@ -434,8 +434,6 @@ public class Bno055 extends Service implements I2CControl, PinListener {
     broadcastState();
   }
 
-
-
   public boolean begin() {
     return begin(OperationMode.NDOF);
   }

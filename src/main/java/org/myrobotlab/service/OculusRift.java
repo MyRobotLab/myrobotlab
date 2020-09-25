@@ -188,8 +188,7 @@ public class OculusRift extends Service implements PointPublisher {
 
       // start the left camera.
       capture();
-      
-      
+
       // TODO: handle the "end of the pipeline" as the input source.
       boolean addYolo = false;
       if (addYolo) {
@@ -496,7 +495,6 @@ public class OculusRift extends Service implements PointPublisher {
     return point;
   }
 
-
   public static void main(String s[]) {
     // LoggingFactory.init("INFO");
 
@@ -510,10 +508,10 @@ public class OculusRift extends Service implements PointPublisher {
 
     String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
     String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
-    
+
     rift.setLeftEyeURL(leftEyeURL);
     rift.setRightEyeURL(rightEyeURL);
-    
+
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
     rift.rightCameraDy = -5;

@@ -59,8 +59,7 @@ public class CheckBoxTitledBorder extends AbstractBorder {
           Point pt = me.getPoint();
           pt.translate(-5, 0);
           _checkBox.setBounds(rectangle);
-          _checkBox.dispatchEvent(new MouseEvent(_checkBox, me.getID(),
-            me.getWhen(), me.getModifiers(), pt.x, pt.y, me.getClickCount(), me.isPopupTrigger(), me.getButton()));
+          _checkBox.dispatchEvent(new MouseEvent(_checkBox, me.getID(), me.getWhen(), me.getModifiers(), pt.x, pt.y, me.getClickCount(), me.isPopupTrigger(), me.getButton()));
           if (!_checkBox.isValid()) {
             container.repaint();
           }
@@ -77,7 +76,7 @@ public class CheckBoxTitledBorder extends AbstractBorder {
     });
     SwingUtilities.paintComponent(g, _checkBox, container, rectangle);
   }
-  
+
   public JCheckBox getCheckBox() {
     return _checkBox;
   }

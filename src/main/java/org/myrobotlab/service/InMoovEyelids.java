@@ -55,17 +55,16 @@ public class InMoovEyelids extends Service {
       }
     }
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public void test() {
     if (controller == null) {
@@ -237,7 +236,6 @@ public class InMoovEyelids extends Service {
     eyelidleft.setAutoDisable(param);
     eyelidright.setAutoDisable(param);
   }
-
 
   public void setVelocity(Double eyelidleftVelo, Double eyelidrightVelo) {
     if (eyelidleft != null) {

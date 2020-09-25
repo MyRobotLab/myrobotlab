@@ -29,8 +29,8 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 /**
- * this opencv filter will load the keras model for emotion detection published on this open source project
- * https://github.com/omar178/Emotion-recognition
+ * this opencv filter will load the keras model for emotion detection published
+ * on this open source project https://github.com/omar178/Emotion-recognition
  * 
  * @author kwatters
  *
@@ -47,11 +47,13 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
   private volatile IplImage lastImage = null;
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
-  // the additional border around the face detection to include in the emotion classification. (in pixels)
+  // the additional border around the face detection to include in the emotion
+  // classification. (in pixels)
   private int boxSlop = 10;
-  // a confidence threshold typically from 0.0 to 1.0 on how confident the classification is.
+  // a confidence threshold typically from 0.0 to 1.0 on how confident the
+  // classification is.
   private double confidence = 0.25;
-  
+
   public OpenCVFilterMiniXception(String name) {
     super(name);
     loadDL4j();
@@ -82,33 +84,33 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       // log.info("Display result " );
       displayResult(image, lastResult);
     }
-    
-    
+
     // there's something currently being processed.. skip
     if (lastImage != null) {
       return image;
     }
     // here we want to update the lastImage as the one with the bounding box.
-    
+
     List<Rectangle> boxes = data.getBoundingBoxArray();
-    // we should grab the center of the first box.. 
-    // crop a square around that center.. and set that as the last image to pass to the emotion detector.
+    // we should grab the center of the first box..
+    // crop a square around that center.. and set that as the last image to pass
+    // to the emotion detector.
     if (boxes != null) {
       for (Rectangle box : boxes) {
         // log.info("Processing Box : {}", box);
-        int x = (int)(box.x + box.width/2);
-        int y = (int)(box.y + box.height/2);
+        int x = (int) (box.x + box.width / 2);
+        int y = (int) (box.y + box.height / 2);
         // now we have the center point
         // create a new box
-        int miniExceptionWidth = (int)Math.max(box.width , box.height) + boxSlop;
-        //int miniExceptionWidth = 64;
-        Rect miniBox = new Rect(x-miniExceptionWidth/2, y-miniExceptionWidth/2, miniExceptionWidth, miniExceptionWidth);
+        int miniExceptionWidth = (int) Math.max(box.width, box.height) + boxSlop;
+        // int miniExceptionWidth = 64;
+        Rect miniBox = new Rect(x - miniExceptionWidth / 2, y - miniExceptionWidth / 2, miniExceptionWidth, miniExceptionWidth);
         // now.. we need to crap the image for this bounding box..
         lastImage = extractSubImage(OpenCV.toMat(image), miniBox);
         // Here
       }
     }
-    
+
     return image;
   }
 
@@ -118,7 +120,6 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
     return image;
   }
 
-  
   public static String padRight(String s, int n) {
     return String.format("%1$-" + n + "s", s);
   }
@@ -168,10 +169,11 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
     running = true;
     // in a loop, grab the current image and classify it and update the result.
     while (running) {// FIXME - must be able to release !!
-      
+
       if (!enabled) {
         // sleep to avoid cpu usage
-        // TODO: come up with a better way of doing this (maybe shutdown this thread and restart when it enables/disbales?)
+        // TODO: come up with a better way of doing this (maybe shutdown this
+        // thread and restart when it enables/disbales?)
         try {
           Thread.sleep(10);
         } catch (InterruptedException e) {
@@ -199,7 +201,8 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
         } catch (IOException e) {
           log.warn("Exception classifying image!", e);
         }
-        // at this point, presumably we've finished classifying this image.. we should null it out.
+        // at this point, presumably we've finished classifying this image.. we
+        // should null it out.
         lastImage = null;
       } else {
         // log.info("No Image to classify...");
@@ -215,7 +218,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
       }
     }
   }
-  
+
   @Override
   public BufferedImage processDisplay(Graphics2D graphics, BufferedImage image) {
     return image;

@@ -51,7 +51,7 @@ public class Elasticsearch extends Service {
          * .build())
          */
         .build().start();
-    
+
     elastic.createIndex("test");
   }
 
@@ -59,7 +59,6 @@ public class Elasticsearch extends Service {
     // stops server, destroys index, removes directories
     elastic.stop();
   }
-
 
   public static void main(String[] args) {
     try {

@@ -134,5 +134,4 @@ public class KeyboardSim extends Service {
     keysim.pressAndRelease(new int[] { KeyEvent.VK_SHIFT, KeyEvent.VK_A }, 1000);
   }
 
-
 }

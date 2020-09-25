@@ -127,7 +127,7 @@ public class VoiceRss extends AbstractSpeechSynthesis {
     addVoice("Camila", "female", "es-es", "es-es"); // Spanish (Spain)
     addVoice("Elsa", "female", "sv-se", "sv-se"); // Swedish (Sweden)
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
     // Runtime.start("gui", "SwingGui");

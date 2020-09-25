@@ -14,7 +14,7 @@ public interface AbsolutePositionControl {
   public boolean moveTo(Double newPos);
 
   public Double moveToBlocking(Double newPos);
-    
+
   public Double moveToBlocking(Double newPos, Long timeoutMs);
 
 }

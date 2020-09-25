@@ -12,9 +12,9 @@ public class DeviceSummary implements Serializable {
     this.name = name;
     this.id = id;
   }
-  
+
   public String toString() {
     return String.format("%s device id %d", name, id);
   }
-  
+
 }

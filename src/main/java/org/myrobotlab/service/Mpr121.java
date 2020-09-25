@@ -73,7 +73,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
         // cache last value
         PinDefinition pinDef = getPin(i);
         pinDef.setValue(pinData.value);
-        
+
         pinArray[i] = pinData;
         int address = pinDef.getAddress();
 
@@ -709,7 +709,6 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   public PinDefinition publishPinDefinition(PinDefinition pinDef) {
     return pinDef;
   }
-
 
   @Override
   // TODO Implement individula sample rates per pin

@@ -43,9 +43,6 @@ import ch.qos.logback.core.LogbackException;
 import ch.qos.logback.core.spi.FilterReply;
 import ch.qos.logback.core.status.Status;
 
-
-
-
 public class Log extends Service implements Appender<ILoggingEvent> {
 
   public static class LogEntry {
@@ -62,18 +59,16 @@ public class Log extends Service implements Appender<ILoggingEvent> {
       className = event.getLoggerName();
       body = event.getFormattedMessage();
     }
-    
+
     public String toString() {
       return String.format("%d %s %s %s %s", ts, level, threadName, className, body);
     }
   }
-  
 
   public final static Logger log = LoggerFactory.getLogger(Log.class);
 
   private static final long serialVersionUID = 1L;
 
-  
   /**
    * log file name
    */
@@ -109,12 +104,12 @@ public class Log extends Service implements Appender<ILoggingEvent> {
    * minimal time between log broadcasts
    */
   long minIntervalMs = 1000;
-  
+
   public Log(String n, String id) {
     super(n, id);
     getLogLevel();
   }
-  
+
   public String getLogLevel() {
     ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     logLevel = root.getLevel().toString();
@@ -179,10 +174,11 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   public void doAppend(ILoggingEvent event) throws LogbackException {
     String name = Thread.currentThread().getName();
     buffer.add(new LogEntry(event));
-//    if (buffer.size() > maxSize || System.currentTimeMillis() - lastPublishLogTimeTs > minIntervalMs) {
-//      // event.get
-//      flush();
-//    }
+    // if (buffer.size() > maxSize || System.currentTimeMillis() -
+    // lastPublishLogTimeTs > minIntervalMs) {
+    // // event.get
+    // flush();
+    // }
   }
 
   /**
@@ -284,7 +280,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   public String getLog() throws IOException {
     return FileIO.toString(MYROBOTLAB_LOG);
   }
-  
+
   public void stopLogging() {
     ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     root.detachAppender(this);
@@ -307,7 +303,7 @@ public class Log extends Service implements Appender<ILoggingEvent> {
 
       Runtime.start("log", "Log");
       Runtime.start("python", "Python");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
       Runtime runtime = Runtime.getInstance();

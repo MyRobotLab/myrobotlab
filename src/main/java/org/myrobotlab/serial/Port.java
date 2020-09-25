@@ -40,10 +40,9 @@ public abstract class Port implements Runnable, SerialControl {
   int rxErrors;
   private boolean isOpen = false;
 
-
-  /** 
-   * Default constructor for a port at a minimum requires a port name.  Typically something like COM4 or /dev/ttyACM0 
-   * or even a virtual port name.
+  /**
+   * Default constructor for a port at a minimum requires a port name. Typically
+   * something like COM4 or /dev/ttyACM0 or even a virtual port name.
    * 
    * @param portName
    */
@@ -131,20 +130,23 @@ public abstract class Port implements Runnable, SerialControl {
   }
 
   abstract public byte[] readBytes() throws Exception;
+
   /**
    * reads from Ports input stream and puts it on the Serials main RX line - to
-   * be published and buffered - PortJSSC uses the thread of the library to "push" serial data
+   * be published and buffered - PortJSSC uses the thread of the library to
+   * "push" serial data
    */
   @Override
   public void run() {
-    // JSSC port doesn't need this, it has it's own thread that publishes SerialEvents for us.
+    // JSSC port doesn't need this, it has it's own thread that publishes
+    // SerialEvents for us.
     log.info("Listening on port {}", portName);
     listening = true;
     try {
       while (listening) {
         // read everything that's available on the port.
         byte[] buffer = readBytes();
-        if (buffer == null) { 
+        if (buffer == null) {
           // We want to have a small delay to spare the cpu,
           // give it a millisecond for data to arrive.
           Thread.sleep(1);
@@ -162,7 +164,7 @@ public abstract class Port implements Runnable, SerialControl {
           listeners.get(key).onBytes(buffer);
         }
         // TODO: better stats.. for now.. keeping previous behavior.
-        for (int i = 0; i<buffer.length;i++) {
+        for (int i = 0; i < buffer.length; i++) {
           ++stats.total;
           if (stats.total % stats.interval == 0) {
             stats.ts = System.currentTimeMillis();

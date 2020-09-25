@@ -47,9 +47,9 @@ public class ServiceData implements Serializable {
 
   /**
    * A plan of what services and peers to create. If not defined, the default
-   * will be used as its defined in the {MetaData}Meta data class. The
-   * default build plan can be modified. This static object will be empty unless
-   * there are overrides that modify default meta data.
+   * will be used as its defined in the {MetaData}Meta data class. The default
+   * build plan can be modified. This static object will be empty unless there
+   * are overrides that modify default meta data.
    * 
    * All entries in planOverrides are all absolute key paths !
    */
@@ -215,7 +215,7 @@ public class ServiceData implements Serializable {
   public static MetaData getMetaData(String name, String type) {
     return getMetaData(name, type, null);
   }
-  
+
   /**
    * This method gets the meta data of a service class. If the service is
    * instance specific (ie if the service has a name) it will return that
@@ -232,12 +232,12 @@ public class ServiceData implements Serializable {
    */
   public static MetaData getMetaData(String serviceName, String type, Set<String> cyclicalCheck) {
     try {
-      
+
       if (cyclicalCheck == null) {
         // root node
         cyclicalCheck = new HashSet<>();
       }
-      
+
       cyclicalCheck.add(type);
 
       // test for overrides from name - name can override type
@@ -253,44 +253,45 @@ public class ServiceData implements Serializable {
       // RETRO-GRADED for "nice" sized pr :(
       Class<?> c = Class.forName(type);
       Constructor<?> mc = c.getConstructor(String.class);
-      MetaData metaData = (MetaData)mc.newInstance(serviceName);
+      MetaData metaData = (MetaData) mc.newInstance(serviceName);
 
       // if this is an instance description of the meta data
       // there is the possibility of overrides
       // if (serviceName != null) {
-      //   metaData.setServiceName(serviceName);
+      // metaData.setServiceName(serviceName);
 
-        Map<String, ServiceReservation> peers = metaData.getPeers();
-        for (ServiceReservation sr : peers.values()) {
+      Map<String, ServiceReservation> peers = metaData.getPeers();
+      for (ServiceReservation sr : peers.values()) {
 
-          // handle overrides !
-          String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
-          // return override if exists
-          ServiceReservation override = ServiceData.planStore.get(fullkey);
-          if (override != null) {
-            if (override.actualName != null) {
-              sr.actualName = override.actualName;
-            }
-            if (override.type != null) {
-              sr.type = override.type;
-            }
-                        
-            if (override.comment != null) {
-              sr.comment = override.comment;
-            }
-          } else {
-            // if actual name wasn't set in the getMetaData - assign it as {parentName}.{peerKey}
-            if (sr.actualName == null) {
-              sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
-            }            
+        // handle overrides !
+        String fullkey = ServiceData.getPeerKey(serviceName, sr.key);
+        // return override if exists
+        ServiceReservation override = ServiceData.planStore.get(fullkey);
+        if (override != null) {
+          if (override.actualName != null) {
+            sr.actualName = override.actualName;
+          }
+          if (override.type != null) {
+            sr.type = override.type;
           }
 
-          if (cyclicalCheck.contains(sr.type)) {
-            throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
+          if (override.comment != null) {
+            sr.comment = override.comment;
           }
-
+        } else {
+          // if actual name wasn't set in the getMetaData - assign it as
+          // {parentName}.{peerKey}
+          if (sr.actualName == null) {
+            sr.actualName = ServiceData.getPeerKey(serviceName, sr.key);
+          }
         }
-     // }
+
+        if (cyclicalCheck.contains(sr.type)) {
+          throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", serviceName, type);
+        }
+
+      }
+      // }
 
       return metaData;
 
@@ -308,7 +309,6 @@ public class ServiceData implements Serializable {
     return String.format("%s.%s", name, key);
   }
 
-  
   public static void setPeer(String key, String actualName, String serviceType) {
     planStore.put(key, new ServiceReservation(key, actualName, serviceType, serviceType));
   }
@@ -447,35 +447,35 @@ public class ServiceData implements Serializable {
   }
 
   /**
-   * Start at root and build all the meta data - add 
+   * Start at root and build all the meta data - add
    * 
    * @param serviceName
    * @param serviceType
    * @return
    */
   public static Plan getPlan(String serviceName, String serviceType) {
-    
+
     Plan root = new Plan();
-    
+
     // get the root meta data
     MetaData temp = getMetaData(serviceName, serviceType);
     if (temp != null) {
       root.put(serviceName, serviceType);
     }
-    
+
     // recursively process all the children and add them to peers
     Map<String, ServiceReservation> peers = temp.getPeers();
-    for (ServiceReservation peer : peers.values()) {      
+    for (ServiceReservation peer : peers.values()) {
       // just get overrides :P
-      getPlan(root, serviceName,  peer);
+      getPlan(root, serviceName, peer);
     }
-    
+
     return root;
   }
 
-  /** 
-   * Recursively build the peers until the tree is complete.
-   * Useful to get a full plan regarding some complex description
+  /**
+   * Recursively build the peers until the tree is complete. Useful to get a
+   * full plan regarding some complex description
    * 
    * @param root
    * @param parentName
@@ -483,16 +483,16 @@ public class ServiceData implements Serializable {
    */
   public static void getPlan(Plan root, String parentName, ServiceReservation sr) {
     // FIXME figure out if overrides can happen here !?!?!?
-  
+
     MetaData branch = getMetaData(sr.actualName, sr.type);
-    //root.getPeers().putAll(branch.getPeers());
+    // root.getPeers().putAll(branch.getPeers());
     root.put(sr.actualName, sr.type);
-    for (ServiceReservation peer : branch.getPeers().values()) {      
+    for (ServiceReservation peer : branch.getPeers().values()) {
       // just get overrides :PT
       root.put(sr.actualName, sr.type);
       getPlan(root, getPeerKey(parentName, sr.actualName), peer);
     }
-   
+
   }
 
   public static void main(String[] args) {
@@ -535,55 +535,54 @@ public class ServiceData implements Serializable {
     // System.exit(0);
 
   }
-  
-  
 
   /**
-   * Recursively pushes meta data from a service into the planStore - so that retrieval
-   * of meta data getMetaData(name, type) - will be able to pick up the definition.
+   * Recursively pushes meta data from a service into the planStore - so that
+   * retrieval of meta data getMetaData(name, type) - will be able to pick up
+   * the definition.
    * 
-   * This is done because services may have complex definitions of meta data that affect the
-   * tree of references to other peer services.  
+   * This is done because services may have complex definitions of meta data
+   * that affect the tree of references to other peer services.
    * 
    * force will over write any pre-existing ServiceReservations in the planStore
-   * if force == false it will leave any pre-existing ServiceReservations and only
-   * add ServiceReservations that did not exist
+   * if force == false it will leave any pre-existing ServiceReservations and
+   * only add ServiceReservations that did not exist
    * 
-   * its an important detail that this has to be a breadth level push of config into
-   * the planStore rather than a depth first, since upper/root peers can dictate changes
-   * on sub-peers, their "mods" must be pushed first
+   * its an important detail that this has to be a breadth level push of config
+   * into the planStore rather than a depth first, since upper/root peers can
+   * dictate changes on sub-peers, their "mods" must be pushed first
    * 
    * @param name
    * @param type
    * @param force
    * @return
-   * @throws MrlException 
+   * @throws MrlException
    */
   public static MetaData setMetaData(String name, String type, boolean force, Set<String> cyclicalCheck) throws MrlException {
     MetaData metaData = getMetaData(name, type);
-    
+
     if (cyclicalCheck != null && cyclicalCheck.contains(type)) {
       throw new MrlException("cyclical type error %s is of type %s has a parent of the same type - please adjust your meta data", name, type);
     }
     // push the configuration into the static store
     Map<String, ServiceReservation> peers = metaData.getPeers();
-    for (Map.Entry<String,ServiceReservation> entry : peers.entrySet()) {
-      
+    for (Map.Entry<String, ServiceReservation> entry : peers.entrySet()) {
+
       // name is actual name - peer.getKey() is key of peer
       // peerKey is actualParent + . + peer.getKey()
       // this peerKey is used to look up "actual" name of peer
       String peerKey = getPeerKey(name, entry.getKey());
       ServiceReservation peer = entry.getValue();
-      
+
       log.info("pk {} => {}", peerKey, peer);
-      
+
       if (!force && planStore.containsKey(peerKey)) {
         continue;
       }
       planStore.put(peerKey, entry.getValue());
-     
+
     }
-    
+
     // breadth first recursion
     for (ServiceReservation peer : peers.values()) {
       // for all children do the same ..
@@ -595,17 +594,17 @@ public class ServiceData implements Serializable {
       }
       setMetaData(peer.actualName, peer.type, force, cyclicalCheck);
     }
-    
+
     // get the meta data again with overrides ???
     // metaData = getMetaData(name, type);
-    
+
     return null;
   }
 
   public static MetaData setMetaData(String name, String type) {
     try {
       return setMetaData(name, type, false, null);
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("setMetaData threw", e);
     }
     return null;

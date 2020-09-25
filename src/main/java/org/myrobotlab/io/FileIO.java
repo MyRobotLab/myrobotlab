@@ -117,16 +117,15 @@ public class FileIO {
 
     return true;
   }
-  
-  
+
   /**
-   * Copy the contents of dir into the path destination
-   * s
+   * Copy the contents of dir into the path destination s
+   * 
    * @param dir
    * @param path
    * @throws IOException
    */
-  
+
   final public static void copy(File[] dir, String path) throws IOException {
     for (File f : dir) {
       copy(f, new File(path));
@@ -457,9 +456,9 @@ public class FileIO {
   }
 
   /**
-   * "Clever" function to get the list of service based on class files.
-   * It is so "clever" because dev-time may have source files, but test-time utilities
-   * might not know where the source is.  Runtime has no source.
+   * "Clever" function to get the list of service based on class files. It is so
+   * "clever" because dev-time may have source files, but test-time utilities
+   * might not know where the source is. Runtime has no source.
    * 
    * A better solution might be to maintain a list of services as a text file :(
    * 
@@ -624,7 +623,7 @@ public class FileIO {
         String urlStr = String.format("jar:file:%s!/%s", root, jarEntry.getName());
         boolean isSubDir = (src.split("/").length + 1 < jarEntry.getName().split("/").length);
 
-        if (jarEntry.isDirectory() || (isSubDir && !recurse) ||  jarEntry.getName().contains("$")) {
+        if (jarEntry.isDirectory() || (isSubDir && !recurse) || jarEntry.getName().contains("$")) {
           log.info("filtering out {}", urlStr);
         } else {
           log.info("adding url {}", urlStr);
@@ -898,7 +897,8 @@ public class FileIO {
       List<URL> urls = null;
 
       log.info("findPackageContents resource/Python/examples");
-     // urls = listContents(root, gluePaths(Service.getResourceRoot(), "/Python/examples"));
+      // urls = listContents(root, gluePaths(Service.getResourceRoot(),
+      // "/Python/examples"));
 
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
@@ -1031,7 +1031,7 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return byte array
    */
-  @Deprecated /*user Service.getResource(src)*/
+  @Deprecated /* user Service.getResource(src) */
   static public final byte[] resourceToByteArray(String src) {
 
     // this path assumes in a jar ?
@@ -1113,12 +1113,14 @@ public class FileIO {
   static public final boolean rm(String filename) {
     return rm(new File(filename));
   }
-  
+
   /**
    * recursively remove files and directories, leaving exlusions
    * 
-   * @param directory - the directory to remove
-   * @param exclude - the exceptions to save
+   * @param directory
+   *          - the directory to remove
+   * @param exclude
+   *          - the exceptions to save
    * @return true/false
    */
   static public final boolean rmDir(File directory, Set<File> exclude) {
@@ -1394,6 +1396,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @return
    */
@@ -1403,6 +1406,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @param encoding
    * @return
@@ -1413,6 +1417,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @param encoding
    * @return
@@ -1491,6 +1496,5 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
-
 
 }

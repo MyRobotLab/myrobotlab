@@ -15,14 +15,14 @@ import org.slf4j.Logger;
  *
  */
 public class ProcessData implements Serializable {
-  
+
   public final static Logger log = LoggerFactory.getLogger(ProcessData.class);
 
   private static final long serialVersionUID = 1L;
 
   // public List<String> initialServices = new ArrayList<>();
   // public boolean autoUpdate = false;
-  
+
   public Runtime.CmdOptions options;
 
   public Long startTs;
@@ -43,12 +43,12 @@ public class ProcessData implements Serializable {
    * actual java process
    */
   transient public Process process;
-  
+
   /**
-   * must read std out of 
+   * must read std out of
    */
   transient public StreamGobbler stdout;
-  
+
   /**
    * std error or the process must be consumed as well
    */
@@ -108,7 +108,7 @@ public class ProcessData implements Serializable {
    *          the process data
    */
   public ProcessData(ProcessData pd) {
-    this.options = pd.options;  
+    this.options = pd.options;
     this.javaExe = pd.javaExe;
     this.jarPath = pd.jarPath;
     this.jvm = pd.jvm;
@@ -125,7 +125,7 @@ public class ProcessData implements Serializable {
   public boolean isRestarting() {
     return state == stateType.restarting;
   }
-  
+
   public String toString() {
     return String.format("id:%s branch:%s version:%s", options.id, options.branch, options.version);
   }

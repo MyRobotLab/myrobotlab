@@ -133,7 +133,7 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
       }
       System.out.println(loops + " reflective method calls with lookup:" + (System.currentTimeMillis() - start) + " milliseconds.");
 
-      Wii wii = (Wii)Runtime.start("wii", "Wii");
+      Wii wii = (Wii) Runtime.start("wii", "Wii");
 
       // add the port as a possible option for the Arduino
       /*
@@ -145,10 +145,10 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
        * (NoSuchPortException e1) { // TODO Auto-generated catch block
        * e1.printStackTrace(); }
        */
-      Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
       arduino.startService();
 
-      Servo servo = (Servo)Runtime.start("servo", "Servo");
+      Servo servo = (Servo) Runtime.start("servo", "Servo");
       servo.startService();
 
       // SwingGui gui = new SwingGui("gui");
@@ -396,6 +396,5 @@ public class Wii extends Service implements WiimoteListener, SerialPortEventList
   public void setSensorBarBelowScreen() {
     wiimote.setSensorBarBelowScreen();
   }
-
 
 }

@@ -12,7 +12,7 @@ import org.myrobotlab.framework.interfaces.Attachable;
  *
  */
 
-// FIXME !!! refactor this stuff out - create an AbstractSimulator ... 
+// FIXME !!! refactor this stuff out - create an AbstractSimulator ...
 public interface Simulator extends Attachable {
   // ServoController getServoController();
 }

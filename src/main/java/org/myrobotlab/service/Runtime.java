@@ -210,7 +210,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   private List<String> jvmArgs;
 
   private List<String> args;
-  
+
   String remoteId = null;
 
   /**
@@ -386,11 +386,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
-    
+
     if (name == null) {
       log.error("service name cannot be null");
     }
-    
+
     String fullTypeName;
     if (name.contains("/")) {
       throw new IllegalArgumentException(String.format("can not have forward slash / in name %s", name));
@@ -405,7 +405,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } else {
       fullTypeName = type;
     }
-    
+
     String id = (inId == null) ? Platform.getLocalInstance().getId() : inId;
     if (name == null || name.length() == 0 || fullTypeName == null || fullTypeName.length() == 0) {
       log.error("{} not a type or {} not defined ", fullTypeName, name);
@@ -456,36 +456,38 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       if (runtime != null) {
-        
+
         runtime.broadcast("created", name);
-        
-        // add all the service life cycle subscriptions 
+
+        // add all the service life cycle subscriptions
         runtime.addListener("registered", name);
         runtime.addListener("created", name);
-        runtime.addListener("started", name);        
-        runtime.addListener("stopped", name);        
-        runtime.addListener("released", name);        
+        runtime.addListener("started", name);
+        runtime.addListener("stopped", name);
+        runtime.addListener("released", name);
       }
-      
+
       // initialization of the new service - it gets local registery events
       // for pre-existing registered? created/started
       List<ServiceInterface> services = getServices();// getLocalServices();
-      for (ServiceInterface s: services) {
+      for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
-          // for typeless registration - try the following ? without a service reference ??
-          // si.onRegistered(new Registration(s.getId(), s.getName(), s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          // for typeless registration - try the following ? without a service
+          // reference ??
+          // si.onRegistered(new Registration(s.getId(), s.getName(),
+          // s.getType(), runtime.serviceData.getServiceType(s.getType())));
           si.onRegistered(new Registration(s));
         }
         // don't register or create or start event self
         if (s.getName().equals(si.getName())) {
           continue;
-        }        
+        }
         si.onCreated(s.getName());
         if (si.isRunning()) {
           si.onStarted(s.getName());
         }
       }
-      
+
       return (Service) newService;
     } catch (Exception e) {
       log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
@@ -584,11 +586,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           if (options.spawnedFromAgent) {
             try {
               // runtime.connect(); FIXME !!! make it work !
-            } catch(Exception e) {
+            } catch (Exception e) {
               runtime.error(e);
             }
           }
-          
+
           // startHeartbeat();
 
           FileIO.extractResources();
@@ -600,6 +602,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * The jvm args which started this process
+   * 
    * @return all jvm args in a list
    */
   static public List<String> getJvmArgs() {
@@ -864,7 +867,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (inName == null) {
       return null;
     }
-    
+
     String name = getFullName(inName);
 
     if (!registry.containsKey(name)) {
@@ -980,7 +983,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       List<MetaData> sts = sd.getServiceTypes();
 
       for (MetaData st : sts) {
-        
+
         Set<Class<?>> ancestry = new HashSet<Class<?>>();
         Class<?> targetClass = Class.forName(st.getType()); // this.getClass();
 
@@ -1186,7 +1189,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
       options.dataDir = (platform.isWindows()) ? options.dataDir.replace("/", "\\") : options.dataDir.replace("\\", "/");
       options.libraries = (platform.isWindows()) ? options.libraries.replace("/", "\\") : options.libraries.replace("\\", "/");
-      
+
       // save an output of our cmd options
       File dataDir = new File(Runtime.getOptions().dataDir);
       if (!dataDir.exists()) {
@@ -1258,7 +1261,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           shutdown();
         }
       }
-      
+
       // FIXME TEST THIS !! 0 length, single service, multiple !
       if (options.install != null) {
         // we start the runtime so there is a status publisher which will
@@ -1274,16 +1277,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         shutdown();
         return;
       }
-      
-      if (options.installDependency != null) {
-          // we start the runtime so there is a status publisher which will
-          // display status updates from the repo install
-          Repo repo = getInstance().getRepo();
-          repo.installDependency(options.libraries, options.installDependency);
-          shutdown();
-          return;
-        }
 
+      if (options.installDependency != null) {
+        // we start the runtime so there is a status publisher which will
+        // display status updates from the repo install
+        Repo repo = getInstance().getRepo();
+        repo.installDependency(options.libraries, options.installDependency);
+        shutdown();
+        return;
+      }
 
       createAndStartServices(options.services);
 
@@ -1529,7 +1531,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       try {
         if (sw != null) {
-          sw.stopService();        
+          sw.stopService();
           runtime.invoke("released", sw.getFullName());
         }
       } catch (Exception e) {
@@ -1584,8 +1586,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } catch (Exception e) {
       log.error("releaseAll threw - continuing to shutdown", e);
     }
-    
-    System.exit(0); 
+
+    System.exit(0);
   }
 
   public Integer publishShutdown(Integer seconds) {
@@ -1946,11 +1948,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     @Option(names = { "-i",
         "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {MetaData} installs dependencies for a specific service")
     public String install[];
-    
+
     @Option(names = { "-d",
-    "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
+        "--install-dependency" }, arity = "0..*", description = "installs specific version of dependencies, --install-version {groupId} {artifactId} [{version}|\"latest\"] ")
     public String installDependency[];
-    
+
     @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
     public boolean virtual = false;
 
@@ -1989,7 +1991,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     @Option(names = { "--data-dir" }, description = "sets the location of the data directory")
     public String dataDir = "data";
-    
+
     @Option(names = { "-x", "--extract-resources" }, description = "force extraction of resources tot he resource dir")
     public boolean extractResources = false;
 
@@ -2008,20 +2010,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           options = new CmdOptions();
         }
 
-        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper"); 
-        
+        repo = (IvyWrapper) Repo.getInstance(options.libraries, "IvyWrapper");
+
         if (options.spawnedFromAgent) {
-          
-          /** FIXME - make work
-          try {
-            log.info("attempting to connect to local agent");
-            runtime.connect();
-          } catch (IOException e) {
-            log.warn("could not connect to agent");
-          }
-          */
+
+          /**
+           * FIXME - make work try { log.info("attempting to connect to local
+           * agent"); runtime.connect(); } catch (IOException e) {
+           * log.warn("could not connect to agent"); }
+           */
         }
-        
+
         if (options == null) {
           options = new CmdOptions();
         }
@@ -2029,7 +2028,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
 
-    setLocale(Locale.getDefault().getTag());    
+    setLocale(Locale.getDefault().getTag());
     locales = Locale.getDefaults();
 
     if (runtime.platform == null) {
@@ -2188,7 +2187,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public void checkingForUpdates() {
     log.info("checking for updates");
   }
-  
+
   static public String getInputAsString(InputStream is) {
     try (java.util.Scanner s = new java.util.Scanner(is)) {
       return s.useDelimiter("\\A").hasNext() ? s.next() : "";
@@ -2404,6 +2403,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * released event - when a service is successfully released from the registry
    * this event is triggered
+   * 
    * @param serviceName
    * @return
    */
@@ -3495,7 +3495,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public void setAllLocales(String code) {
     for (ServiceInterface si : getLocalServices().values()) {
-        si.setLocale(code);
+      si.setLocale(code);
     }
   }
 
@@ -3518,7 +3518,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     ServiceData.setPeer(fullKey, actualName, serviceType);
   }
 
-  public static Plan getPlan(String serviceName, String serviceType) {    
+  public static Plan getPlan(String serviceName, String serviceType) {
     return ServiceData.getPlan(serviceName, serviceType);
   }
 
@@ -3533,5 +3533,5 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static MetaData getMetaData(String serviceType) {
     return ServiceData.getMetaData(serviceType);
   }
-  
+
 }

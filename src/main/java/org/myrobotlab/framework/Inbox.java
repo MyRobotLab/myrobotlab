@@ -61,7 +61,6 @@ public class Inbox implements Serializable {
     this.name = name;
   }
 
-  
   public void add(Message msg) {
     if ((msg.historyList.contains(name))) {
       log.error("* {} dumping duplicate message {}.{} msgid - {} {}", name, msg.getName(), msg.method, msg.msgId, msg.historyList);

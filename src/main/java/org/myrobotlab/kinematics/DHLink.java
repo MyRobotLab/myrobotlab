@@ -249,7 +249,7 @@ public class DHLink implements Serializable {
       // I suppose this means min/max are in radians..
       if (destAngle > max || destAngle < min) {
         // we're out of range
-        //log.info("Link {} angle out of range {} ", name, destAngle);
+        // log.info("Link {} angle out of range {} ", name, destAngle);
       } else {
         this.theta = destAngle;
       }
@@ -361,13 +361,15 @@ public class DHLink implements Serializable {
   public void setOffset(double offset) {
     this.offset = offset;
   }
-  
+
   /**
-   * This represents the difference in angles between the DH model and the real world encoder/joint angle for the link.
-   * This value will be added to the IK solved angles prior to invoking publishJointAngle.
+   * This represents the difference in angles between the DH model and the real
+   * world encoder/joint angle for the link. This value will be added to the IK
+   * solved angles prior to invoking publishJointAngle.
+   * 
    * @return
    */
   public double getOffset() {
-    return offset ;
+    return offset;
   }
 }
