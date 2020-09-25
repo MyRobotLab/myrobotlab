@@ -74,22 +74,21 @@ public class Git extends Service {
     File repoLocation = new File(location);
     org.eclipse.jgit.api.Git git = null;
     Repository repo = null;
-    
+
     List<String> branches = new ArrayList<>();
     for (String b : inbranches) {
       if (!b.contains("refs")) {
         branches.add("refs/heads/" + b);
       }
     }
-    
-    String checkout = (incheckout.contains("refs"))?incheckout:"refs/heads/"+incheckout;   
+
+    String checkout = (incheckout.contains("refs")) ? incheckout : "refs/heads/" + incheckout;
 
     if (!repoLocation.exists()) {
       // clone
       log.info("cloning {} {} into {}", url, incheckout, location);
-      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url).setDirectory(repoLocation).setBranchesToClone(branches)
-          .setBranch(checkout).call();
-      
+      git = org.eclipse.jgit.api.Git.cloneRepository().setProgressMonitor(monitor).setURI(url).setDirectory(repoLocation).setBranchesToClone(branches).setBranch(checkout).call();
+
     } else {
       // Open an existing repository
       String gitDir = repoLocation.getAbsolutePath() + File.separator + ".git";

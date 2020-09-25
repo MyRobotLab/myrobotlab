@@ -79,7 +79,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       this.virtual = virtual;
       this.ino = ino;
     }
-    
+
     synchronized public void start() {
       if (myThread == null) {
         myThread = new Thread(this, String.format("%s.mrlcomm", virtual.getName()));
@@ -87,7 +87,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
         log.info("start called in virtual arduino.");
       }
     }
-    
+
     synchronized public void stop() {
       log.info("stop called for mrlcomm ino script.");
       if (myThread != null) {
@@ -99,8 +99,9 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
     public void run() {
       // prior to running reset, MrlComm would be reset,
-      // this is also what happens if you press the reset button on 
-      // the actual arduino.  (alternatively, we could create a new MrlComm instance.. 
+      // this is also what happens if you press the reset button on
+      // the actual arduino. (alternatively, we could create a new MrlComm
+      // instance..
       // and not rely on calling softReset()...
       // make sure our serial port is ready for us.
       if (virtual.getSerial() == null) {
@@ -109,10 +110,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
       log.info("Starting up virtual arduino thread.");
       ino.getMrlComm().softReset();
-      // add our byte listener...  TODO: push this up farther?
+      // add our byte listener... TODO: push this up farther?
       virtual.getSerial().addByteListener(virtual);
       ino.setup();
-      // make sure the serial port is up and running ..  perhaps we should add a small sleep in here?
+      // make sure the serial port is up and running .. perhaps we should add a
+      // small sleep in here?
       // TODO: poll the serial device to make sure it's started & connected?
       log.info("Starting loop");
       isRunning = true;
@@ -123,7 +125,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
         try {
           // a small delay that can be interrupted
           Thread.sleep(1);
-        } catch(InterruptedException e1) {
+        } catch (InterruptedException e1) {
           // we were interrupted.. we need to shut down.
           isRunning = false;
           log.info("MrlCommIno runner thread interrupted.");
@@ -131,11 +133,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       }
       log.info("leaving InoScriptRunner");
     }
-    
+
     public boolean isRunning() {
       return isRunning;
     }
-      
+
   }
 
   public VirtualArduino(String n, String id) {
@@ -154,24 +156,25 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       log.info("already connected");
       return;
     }
-    // create our ino script.  
+    // create our ino script.
     ino = new MrlCommIno(this);
-    // grab a handle to the mrlcomm 
+    // grab a handle to the mrlcomm
     mrlComm = ino.getMrlComm();
     if (board == null) {
       setBoardUno();
-    }    
+    }
     // update our board info
     if (runner == null) {
       runner = new InoScriptRunner(this, ino);
     }
-    // register our selves to listen for the bytes 
+    // register our selves to listen for the bytes
     uart.addByteListener(this);
     // connect the DCE/uart port side
     uart = Serial.connectVirtualUart(uart, portName, portName + ".UART");
     // create a new mrlcommino runner..
     start();
-    // There is a small race condition. so wait for the runner to actually be started.
+    // There is a small race condition. so wait for the runner to actually be
+    // started.
     // TODO: remove this sleep statement, replace with a better lock.
     while (!runner.isRunning()) {
       try {
@@ -181,10 +184,11 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
         break;
       }
     }
-    // at this point we should also register ourselves as the byteListener for this uart.
-    // TODO: after this is a good place to start the mrlCommIno runner.. isn't it?
+    // at this point we should also register ourselves as the byteListener for
+    // this uart.
+    // TODO: after this is a good place to start the mrlCommIno runner.. isn't
+    // it?
   }
-
 
   public String setBoard(String board) {
     // TODO: if the board type changes we need to reinit the pin map.
@@ -195,7 +199,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
     return board;
   }
 
-  public void start() {    
+  public void start() {
     runner.start();
   }
 
@@ -226,7 +230,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   @Override
   public void startService() {
     super.startService();
-    // first thing's first. let's create a virtual serial port for the uart/dce side 
+    // first thing's first. let's create a virtual serial port for the uart/dce
+    // side
     // create our uart serial port service.
     uart = (Serial) startPeer("uart");
   }
@@ -253,7 +258,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Deprecated
   public int readBlocking(int address, int i) {
-    // TODO This method doesn't do anything and is only referenced in a unit test.
+    // TODO This method doesn't do anything and is only referenced in a unit
+    // test.
     return 0;
   }
 
@@ -288,7 +294,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   // chaining Serial's disconnect event ..
   @Override
   public void onDisconnect(String portName) {
-    // pass the disconnect message down to mrlcomm 
+    // pass the disconnect message down to mrlcomm
     mrlComm.onDisconnect(portName);
     // chain
     invoke("publishDisconnect", portName);
@@ -296,7 +302,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public boolean isConnected() {
-    if (uart == null) {      
+    if (uart == null) {
       return false;
     }
     return uart.isConnected();
@@ -438,7 +444,7 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
       log.error("main threw", e);
     }
   }
-  
+
   public void stopService() {
     super.stopService();
     stop();
@@ -451,7 +457,8 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
 
   @Override
   public void onBytes(byte[] bytes) {
-    // It's the responsibility of VirtualArduino to relay the bytes down to mrlComm.
+    // It's the responsibility of VirtualArduino to relay the bytes down to
+    // mrlComm.
     mrlComm.onBytes(bytes);
   }
 

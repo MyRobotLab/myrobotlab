@@ -23,7 +23,7 @@ import com.leapmotion.leap.Vector;
 public class SampleListener extends Listener {
 
   public final static Logger log = LoggerFactory.getLogger(SampleListener.class);
-  
+
   @Override
   public void onConnect(Controller controller) {
     log.info("Connected");
@@ -61,8 +61,8 @@ public class SampleListener extends Listener {
       Vector direction = hand.direction();
 
       // Calculate the hand's pitch, roll, and yaw angles
-      log.info("  pitch: " + Math.toDegrees(direction.pitch()) + " degrees, " + "roll: " + Math.toDegrees(normal.roll()) + " degrees, " + "yaw: "
-          + Math.toDegrees(direction.yaw()) + " degrees");
+      log.info("  pitch: " + Math.toDegrees(direction.pitch()) + " degrees, " + "roll: " + Math.toDegrees(normal.roll()) + " degrees, " + "yaw: " + Math.toDegrees(direction.yaw())
+          + " degrees");
 
       // Get arm bone
       Arm arm = hand.arm();

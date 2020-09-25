@@ -64,7 +64,7 @@ public class SensorMonitor extends Service {
 
     try {
 
-      SensorMonitor sm = (SensorMonitor)Runtime.start("sensors","SensorMonitor");
+      SensorMonitor sm = (SensorMonitor) Runtime.start("sensors", "SensorMonitor");
       sm.startService();
 
       Runtime.createAndStart("arduino", "Arduino");

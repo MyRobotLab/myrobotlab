@@ -24,9 +24,9 @@ import org.slf4j.Logger;
  * It must NOT have references to mrl services, or Runtime, or 3rd party library
  * dependencies except perhaps for logging
  * 
- * FIXME - it's silly to have some values in variables and others in the manifest map - 
- * probably should have all in a Tree map but I didn't want to break any javascript which accessed
- * the members directly
+ * FIXME - it's silly to have some values in variables and others in the
+ * manifest map - probably should have all in a Tree map but I didn't want to
+ * break any javascript which accessed the members directly
  *
  */
 public class Platform implements Serializable {
@@ -94,7 +94,7 @@ public class Platform implements Serializable {
 
     if (localInstance == null) {
       log.debug("initializing Platform");
-      
+
       Platform platform = new Platform();
       platform.startTime = new Date();
 
@@ -228,7 +228,7 @@ public class Platform implements Serializable {
     return localInstance;
   }
 
-  static public String get(Map<String,String> manifest, String key, String def) {
+  static public String get(Map<String, String> manifest, String key, String def) {
     if (manifest != null & manifest.containsKey(key)) {
       return manifest.get(key);
     }

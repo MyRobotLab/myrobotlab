@@ -61,8 +61,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   /**
    * our default classifier - pre-trained
    */
-  // cannot be this because - gets changed to src/main/resources/resource/OpenCV if src is present !!!!
-  // public String cascadeDir = FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
+  // cannot be this because - gets changed to src/main/resources/resource/OpenCV
+  // if src is present !!!!
+  // public String cascadeDir =
+  // FileIO.gluePathsForwardSlash(Service.getResourceDir(OpenCV.class),"haarcascades");
   public String cascadeDir = "resource/OpenCV/haarcascades";
   public String cascadeFile = "haarcascade_frontalface_alt2.xml";
   // public String cascadeFile = "haarcascade_frontalface_default.xml";
@@ -111,9 +113,9 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     option |= CASCADE_DO_ROUGH_SEARCH;
   }
 
-//  public void addOptionFeatureMax() {
-//    option |= CASCADE_FEATURE_MAX;
-//  }
+  // public void addOptionFeatureMax() {
+  // option |= CASCADE_FEATURE_MAX;
+  // }
 
   /**
    * tells the detector to return the biggest - hence # of objects will be 1 or
@@ -123,17 +125,17 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     option |= CASCADE_FIND_BIGGEST_OBJECT;
   }
 
-//  public void addOptionMagicVal() {
-//    option |= CASCADE_MAGIC_VAL;
-//  }
+  // public void addOptionMagicVal() {
+  // option |= CASCADE_MAGIC_VAL;
+  // }
 
   public void addOptionScaleImage() {
     option |= CASCADE_SCALE_IMAGE;
   }
 
-//  public void addStageMax() {
-//    option |= CASCADE_STAGE_MAX;
-//  }
+  // public void addStageMax() {
+  // option |= CASCADE_STAGE_MAX;
+  // }
 
   /**
    * causes flat regions (no lines) to be skipped
@@ -146,9 +148,9 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     option &= 0xFF ^ CASCADE_DO_ROUGH_SEARCH;
   }
 
-//  public void removeOptionFeatureMax() {
-//    option &= 0xFF ^ CASCADE_FEATURE_MAX;
-//  }
+  // public void removeOptionFeatureMax() {
+  // option &= 0xFF ^ CASCADE_FEATURE_MAX;
+  // }
 
   /**
    * tells the detector to return the biggest - hence # of objects will be 1 or
@@ -158,17 +160,17 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     option &= 0xFF ^ CASCADE_FIND_BIGGEST_OBJECT;
   }
 
-//  public void removeOptionMagicVal() {
-//    option &= 0xFF ^ CASCADE_MAGIC_VAL;
-//  }
+  // public void removeOptionMagicVal() {
+  // option &= 0xFF ^ CASCADE_MAGIC_VAL;
+  // }
 
   public void removeOptionScaleImage() {
     option &= 0xFF ^ CASCADE_SCALE_IMAGE;
   }
 
-//  public void removeStageMax() {
-//    option &= 0xFF ^ CASCADE_STAGE_MAX;
-//  }
+  // public void removeStageMax() {
+  // option &= 0xFF ^ CASCADE_STAGE_MAX;
+  // }
 
   public void setOption(int option) {
     this.option = option;
@@ -177,16 +179,16 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   @Override
   public void imageChanged(IplImage image) {
     // Allocate the memory storage TODO make this globalData
-//    if (storage == null) {
-//      storage = cvCreateMemStorage(0);
-//    }
+    // if (storage == null) {
+    // storage = cvCreateMemStorage(0);
+    // }
 
     if (cascade == null) {
       // Preload the opencv_objdetect module to work around a known bug.
       // Loader.load(opencv_objdetect.class);
 
       log.info("Starting new classifier {}", cascadeFile);
-      String filename = cascadeDir + File.separator +  cascadeFile;
+      String filename = cascadeDir + File.separator + cascadeFile;
       // cascade = new CvHaarClassifierCascade()
       cascade = new CascadeClassifier(filename);
 
@@ -203,20 +205,21 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
     bb = new ArrayList<Rectangle>();
 
     // Clear the memory storage which was used before
-    //cvClearMemStorage(storage);
+    // cvClearMemStorage(storage);
 
-    if (image == null) 
+    if (image == null)
       return image;
     // Find whether the cascade is loaded, to find the faces. If yes, then:
     if (cascade != null) {
       RectVector vec = new RectVector();
-      
+
       Mat imageMat = converterToImage.convertToMat(converterToMat.convert(image));
       cascade.detectMultiScale(imageMat, vec);
-//      CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor, minNeighbors, option);
+      // CvSeq faces = cvHaarDetectObjects(image, cascade, storage, scaleFactor,
+      // minNeighbors, option);
       if (vec != null) {
-        
-        faceCnt = (int)vec.size();
+
+        faceCnt = (int) vec.size();
         for (i = 0; i < faceCnt; i++) {
           try {
             Rect r = vec.get(i);

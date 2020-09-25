@@ -42,7 +42,7 @@ import org.myrobotlab.codec.CodecUtils;
  * 
  */
 public class Message implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
 
   // FIXME - change to enumeration and make it work !
@@ -170,23 +170,20 @@ public class Message implements Serializable {
     Message msg = new Message();
     msg.name = name; // destination instance name
     msg.sender = sender;
-    
+
     /**
      * <pre>
-     * THIS IS THE FUTURE !!!! - but both webgui and swinggui must change and maintain a "virtual" instance of
-     * all the services (which they currently do) with a "real" Runtime.getId() and be a gateway
+     * THIS IS THE FUTURE !!!! - but both webgui and swinggui must change and
+     * maintain a "virtual" instance of all the services (which they currently
+     * do) with a "real" Runtime.getId() and be a gateway
      *
-    if (sender == null) {
-      log.error("return address should not be null - but it is ... {}", msg);
-    } else if (!sender.contains("@")) {
-      // add our id - this pulls in Runtime (big dependency for a Message :( ) - but 
-      // its important to lay down the law and begin to write our "complete" address on our
-      // messages ..
-      msg.sender = String.format("%s@%s", sender, Runtime.getInstance().getId());
-    } else {
-      msg.sender = sender;
-    }
-    */
+     * if (sender == null) { log.error("return address should not be null - but
+     * it is ... {}", msg); } else if (!sender.contains("@")) { // add our id -
+     * this pulls in Runtime (big dependency for a Message :( ) - but // its
+     * important to lay down the law and begin to write our "complete" address
+     * on our // messages .. msg.sender = String.format("%s@%s", sender,
+     * Runtime.getInstance().getId()); } else { msg.sender = sender; }
+     */
     msg.data = data;
     msg.method = method;
 

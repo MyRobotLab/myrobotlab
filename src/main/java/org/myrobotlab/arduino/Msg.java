@@ -1,18 +1,15 @@
 package org.myrobotlab.arduino;
 
-
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.myrobotlab.logging.Level;
-
-import org.myrobotlab.arduino.virtual.MrlComm;
-import org.myrobotlab.string.StringUtil;
 
 /**
  * <pre>
@@ -45,14 +42,11 @@ import org.myrobotlab.string.StringUtil;
 
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.VirtualArduino;
-
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Servo;
+import org.myrobotlab.service.interfaces.MrlCommPublisher;
 import org.myrobotlab.service.interfaces.SerialDevice;
+import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
 /**
@@ -80,41 +74,45 @@ public class Msg {
   // ------ device type mapping constants
   private int method = -1;
   public boolean debug = false;
-  // when using a real service, invoke should be true, for unit tests, this should be false.
+  // when using a real service, invoke should be true, for unit tests, this
+  // should be false.
   private boolean invoke = true;
-  
+
   private int errorServiceToHardwareRxCnt = 0;
   private int errorHardwareToServiceRxCnt = 0;
-  
+
   boolean ackEnabled = true;
   private volatile boolean clearToSend = false;
+
   public static class AckLock {
     // track if there is a pending message, when sending a message
     // this goes to true. when getting an ack it goes to false.
     volatile boolean pendingMessage = false;
   }
+
   transient AckLock ackRecievedLock = new AckLock();
   // recording related
   transient OutputStream record = null;
   transient StringBuilder rxBuffer = new StringBuilder();
-  transient StringBuilder txBuffer = new StringBuilder();  
+  transient StringBuilder txBuffer = new StringBuilder();
 
-  public static final int DEVICE_TYPE_UNKNOWN   =     0;
-  public static final int DEVICE_TYPE_ARDUINO   =     1;
-  public static final int DEVICE_TYPE_ULTRASONICSENSOR   =     2;
-  public static final int DEVICE_TYPE_STEPPER   =     3;
-  public static final int DEVICE_TYPE_MOTOR   =     4;
-  public static final int DEVICE_TYPE_SERVO   =     5;
-  public static final int DEVICE_TYPE_SERIAL   =     6;
-  public static final int DEVICE_TYPE_I2C   =     7;
-  public static final int DEVICE_TYPE_NEOPIXEL   =     8;
-  public static final int DEVICE_TYPE_ENCODER   =     9;
-    
+  public static final int DEVICE_TYPE_UNKNOWN = 0;
+  public static final int DEVICE_TYPE_ARDUINO = 1;
+  public static final int DEVICE_TYPE_ULTRASONICSENSOR = 2;
+  public static final int DEVICE_TYPE_STEPPER = 3;
+  public static final int DEVICE_TYPE_MOTOR = 4;
+  public static final int DEVICE_TYPE_SERVO = 5;
+  public static final int DEVICE_TYPE_SERIAL = 6;
+  public static final int DEVICE_TYPE_I2C = 7;
+  public static final int DEVICE_TYPE_NEOPIXEL = 8;
+  public static final int DEVICE_TYPE_ENCODER = 9;
+
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
   // > getBoardInfo
   public final static int GET_BOARD_INFO = 2;
-  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16 sram/activePins/[] deviceSummary
+  // < publishBoardInfo/version/boardType/b16 microsPerLoop/b16
+  // sram/activePins/[] deviceSummary
   public final static int PUBLISH_BOARD_INFO = 3;
   // > enablePin/address/type/b16 rate
   public final static int ENABLE_PIN = 4;
@@ -223,33 +221,36 @@ public class Msg {
   // > servoStop/deviceId
   public final static int SERVO_STOP = 56;
 
+  /**
+   * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   */
 
-/**
- * These methods will be invoked from the Msg class as callbacks from MrlComm.
- */
-  
   // public void publishMRLCommError(String errorMsg/*str*/){}
-  // public void publishBoardInfo(Integer version/*byte*/, Integer boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/, Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
+  // public void publishBoardInfo(Integer version/*byte*/, Integer
+  // boardType/*byte*/, Integer microsPerLoop/*b16*/, Integer sram/*b16*/,
+  // Integer activePins/*byte*/, int[] deviceSummary/*[]*/){}
   // public void publishAck(Integer function/*byte*/){}
-  // public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/){}
+  // public void publishEcho(Float myFloat/*f32*/, Integer myByte/*byte*/, Float
+  // secondFloat/*f32*/){}
   // public void publishCustomMsg(int[] msg/*[]*/){}
   // public void publishI2cData(Integer deviceId/*byte*/, int[] data/*[]*/){}
   // public void publishDebug(String debugMsg/*str*/){}
   // public void publishPinArray(int[] data/*[]*/){}
-  // public void publishServoEvent(Integer deviceId/*byte*/, Integer eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
+  // public void publishServoEvent(Integer deviceId/*byte*/, Integer
+  // eventType/*byte*/, Integer currentPos/*b16*/, Integer targetPos/*b16*/){}
   // public void publishSerialData(Integer deviceId/*byte*/, int[] data/*[]*/){}
-  // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer echoTime/*b16*/){}
-  // public void publishEncoderData(Integer deviceId/*byte*/, Integer position/*b16*/){}
+  // public void publishUltrasonicSensorData(Integer deviceId/*byte*/, Integer
+  // echoTime/*b16*/){}
+  // public void publishEncoderData(Integer deviceId/*byte*/, Integer
+  // position/*b16*/){}
   // public void publishMrlCommBegin(Integer version/*byte*/){}
-  
-  
 
   public Msg(MrlCommPublisher arduino, SerialDevice serial) {
     this.arduino = arduino;
     this.serial = serial;
   }
-  
-  public void begin(SerialDevice serial){
+
+  public void begin(SerialDevice serial) {
     this.serial = serial;
   }
 
@@ -257,24 +258,25 @@ public class Msg {
 
   // ArduinoSerialCallBacks - TODO - extract interface
   transient private MrlCommPublisher arduino;
-  
+
   transient private SerialDevice serial;
-  
+
   public void processCommand(int[] ioCmd) {
     int startPos = 0;
     method = ioCmd[startPos];
     // always process mrlbegin..
-    if (debug) { 
+    if (debug) {
       log.info("Process Command: {} Method: {}", Msg.methodToString(method), ioCmd);
     }
-    
+
     if (method == PUBLISH_ACK) {
-      // We saw an ack!  we ack this internally right away, and down below in the generated code, 
+      // We saw an ack! we ack this internally right away, and down below in the
+      // generated code,
       // call publishAck on the MrlCommPublisher
-      Integer function = ioCmd[startPos+1]; // bu8
+      Integer function = ioCmd[startPos + 1]; // bu8
       ackReceived(function);
     }
-    
+
     if (method != PUBLISH_MRL_COMM_BEGIN) {
       if (!clearToSend) {
         log.warn("Not Clear to send yet.  Dumping command {}", ioCmd);
@@ -287,365 +289,364 @@ public class Msg {
       this.clearToSend = true;
     }
     switch (method) {
-    case PUBLISH_MRLCOMM_ERROR: {
-      String errorMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishMRLCommError",  errorMsg);
-      } else { 
-         arduino.publishMRLCommError( errorMsg);
-      }
-      if(record != null){
-        rxBuffer.append("< publishMRLCommError");
-        rxBuffer.append("/");
-        rxBuffer.append(errorMsg);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
+      case PUBLISH_MRLCOMM_ERROR: {
+        String errorMsg = str(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishMRLCommError", errorMsg);
+        } else {
+          arduino.publishMRLCommError(errorMsg);
         }
+        if (record != null) {
+          rxBuffer.append("< publishMRLCommError");
+          rxBuffer.append("/");
+          rxBuffer.append(errorMsg);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_BOARD_INFO: {
+        Integer version = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer boardType = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer microsPerLoop = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        Integer sram = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        Integer activePins = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] deviceSummary = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishBoardInfo", version, boardType, microsPerLoop, sram, activePins, deviceSummary);
+        } else {
+          arduino.publishBoardInfo(version, boardType, microsPerLoop, sram, activePins, deviceSummary);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishBoardInfo");
+          rxBuffer.append("/");
+          rxBuffer.append(version);
+          rxBuffer.append("/");
+          rxBuffer.append(boardType);
+          rxBuffer.append("/");
+          rxBuffer.append(microsPerLoop);
+          rxBuffer.append("/");
+          rxBuffer.append(sram);
+          rxBuffer.append("/");
+          rxBuffer.append(activePins);
+          rxBuffer.append("/");
+          rxBuffer.append(Arrays.toString(deviceSummary));
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_ACK: {
+        Integer function = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("publishAck", function);
+        } else {
+          arduino.publishAck(function);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishAck");
+          rxBuffer.append("/");
+          rxBuffer.append(function);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_ECHO: {
+        Float myFloat = f32(ioCmd, startPos + 1);
+        startPos += 4; // f32
+        Integer myByte = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Float secondFloat = f32(ioCmd, startPos + 1);
+        startPos += 4; // f32
+        if (invoke) {
+          arduino.invoke("publishEcho", myFloat, myByte, secondFloat);
+        } else {
+          arduino.publishEcho(myFloat, myByte, secondFloat);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishEcho");
+          rxBuffer.append("/");
+          rxBuffer.append(myFloat);
+          rxBuffer.append("/");
+          rxBuffer.append(myByte);
+          rxBuffer.append("/");
+          rxBuffer.append(secondFloat);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_CUSTOM_MSG: {
+        int[] msg = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishCustomMsg", msg);
+        } else {
+          arduino.publishCustomMsg(msg);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishCustomMsg");
+          rxBuffer.append("/");
+          rxBuffer.append(Arrays.toString(msg));
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_I2C_DATA: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] data = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishI2cData", deviceId, data);
+        } else {
+          arduino.publishI2cData(deviceId, data);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishI2cData");
+          rxBuffer.append("/");
+          rxBuffer.append(deviceId);
+          rxBuffer.append("/");
+          rxBuffer.append(Arrays.toString(data));
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_DEBUG: {
+        String debugMsg = str(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishDebug", debugMsg);
+        } else {
+          arduino.publishDebug(debugMsg);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishDebug");
+          rxBuffer.append("/");
+          rxBuffer.append(debugMsg);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_PIN_ARRAY: {
+        int[] data = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishPinArray", data);
+        } else {
+          arduino.publishPinArray(data);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishPinArray");
+          rxBuffer.append("/");
+          rxBuffer.append(Arrays.toString(data));
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_SERVO_EVENT: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer eventType = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer currentPos = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        Integer targetPos = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("publishServoEvent", deviceId, eventType, currentPos, targetPos);
+        } else {
+          arduino.publishServoEvent(deviceId, eventType, currentPos, targetPos);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishServoEvent");
+          rxBuffer.append("/");
+          rxBuffer.append(deviceId);
+          rxBuffer.append("/");
+          rxBuffer.append(eventType);
+          rxBuffer.append("/");
+          rxBuffer.append(currentPos);
+          rxBuffer.append("/");
+          rxBuffer.append(targetPos);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_SERIAL_DATA: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        int[] data = subArray(ioCmd, startPos + 2, ioCmd[startPos + 1]);
+        startPos += 1 + ioCmd[startPos + 1];
+        if (invoke) {
+          arduino.invoke("publishSerialData", deviceId, data);
+        } else {
+          arduino.publishSerialData(deviceId, data);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishSerialData");
+          rxBuffer.append("/");
+          rxBuffer.append(deviceId);
+          rxBuffer.append("/");
+          rxBuffer.append(Arrays.toString(data));
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_ULTRASONIC_SENSOR_DATA: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer echoTime = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("publishUltrasonicSensorData", deviceId, echoTime);
+        } else {
+          arduino.publishUltrasonicSensorData(deviceId, echoTime);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishUltrasonicSensorData");
+          rxBuffer.append("/");
+          rxBuffer.append(deviceId);
+          rxBuffer.append("/");
+          rxBuffer.append(echoTime);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_ENCODER_DATA: {
+        Integer deviceId = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        Integer position = b16(ioCmd, startPos + 1);
+        startPos += 2; // b16
+        if (invoke) {
+          arduino.invoke("publishEncoderData", deviceId, position);
+        } else {
+          arduino.publishEncoderData(deviceId, position);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishEncoderData");
+          rxBuffer.append("/");
+          rxBuffer.append(deviceId);
+          rxBuffer.append("/");
+          rxBuffer.append(position);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
+      }
+      case PUBLISH_MRL_COMM_BEGIN: {
+        Integer version = ioCmd[startPos + 1]; // bu8
+        startPos += 1;
+        if (invoke) {
+          arduino.invoke("publishMrlCommBegin", version);
+        } else {
+          arduino.publishMrlCommBegin(version);
+        }
+        if (record != null) {
+          rxBuffer.append("< publishMrlCommBegin");
+          rxBuffer.append("/");
+          rxBuffer.append(version);
+          rxBuffer.append("\n");
+          try {
+            record.write(rxBuffer.toString().getBytes());
+            rxBuffer.setLength(0);
+          } catch (IOException e) {
+            log.warn("failed recording bytes.", e);
+          }
+        }
+
+        break;
       }
 
-      break;
-    }
-    case PUBLISH_BOARD_INFO: {
-      Integer version = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer boardType = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer microsPerLoop = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer sram = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer activePins = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] deviceSummary = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishBoardInfo",  version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
-      } else { 
-         arduino.publishBoardInfo( version,  boardType,  microsPerLoop,  sram,  activePins,  deviceSummary);
-      }
-      if(record != null){
-        rxBuffer.append("< publishBoardInfo");
-        rxBuffer.append("/");
-        rxBuffer.append(version);
-        rxBuffer.append("/");
-        rxBuffer.append(boardType);
-        rxBuffer.append("/");
-        rxBuffer.append(microsPerLoop);
-        rxBuffer.append("/");
-        rxBuffer.append(sram);
-        rxBuffer.append("/");
-        rxBuffer.append(activePins);
-        rxBuffer.append("/");
-        rxBuffer.append(Arrays.toString(deviceSummary));
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_ACK: {
-      Integer function = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("publishAck",  function);
-      } else { 
-         arduino.publishAck( function);
-      }
-      if(record != null){
-        rxBuffer.append("< publishAck");
-        rxBuffer.append("/");
-        rxBuffer.append(function);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_ECHO: {
-      Float myFloat = f32(ioCmd, startPos+1);
-      startPos += 4; //f32
-      Integer myByte = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Float secondFloat = f32(ioCmd, startPos+1);
-      startPos += 4; //f32
-      if(invoke){
-        arduino.invoke("publishEcho",  myFloat,  myByte,  secondFloat);
-      } else { 
-         arduino.publishEcho( myFloat,  myByte,  secondFloat);
-      }
-      if(record != null){
-        rxBuffer.append("< publishEcho");
-        rxBuffer.append("/");
-        rxBuffer.append(myFloat);
-        rxBuffer.append("/");
-        rxBuffer.append(myByte);
-        rxBuffer.append("/");
-        rxBuffer.append(secondFloat);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_CUSTOM_MSG: {
-      int[] msg = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishCustomMsg",  msg);
-      } else { 
-         arduino.publishCustomMsg( msg);
-      }
-      if(record != null){
-        rxBuffer.append("< publishCustomMsg");
-        rxBuffer.append("/");
-        rxBuffer.append(Arrays.toString(msg));
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_I2C_DATA: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishI2cData",  deviceId,  data);
-      } else { 
-         arduino.publishI2cData( deviceId,  data);
-      }
-      if(record != null){
-        rxBuffer.append("< publishI2cData");
-        rxBuffer.append("/");
-        rxBuffer.append(deviceId);
-        rxBuffer.append("/");
-        rxBuffer.append(Arrays.toString(data));
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_DEBUG: {
-      String debugMsg = str(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishDebug",  debugMsg);
-      } else { 
-         arduino.publishDebug( debugMsg);
-      }
-      if(record != null){
-        rxBuffer.append("< publishDebug");
-        rxBuffer.append("/");
-        rxBuffer.append(debugMsg);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_PIN_ARRAY: {
-      int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishPinArray",  data);
-      } else { 
-         arduino.publishPinArray( data);
-      }
-      if(record != null){
-        rxBuffer.append("< publishPinArray");
-        rxBuffer.append("/");
-        rxBuffer.append(Arrays.toString(data));
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_SERVO_EVENT: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer eventType = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer currentPos = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      Integer targetPos = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("publishServoEvent",  deviceId,  eventType,  currentPos,  targetPos);
-      } else { 
-         arduino.publishServoEvent( deviceId,  eventType,  currentPos,  targetPos);
-      }
-      if(record != null){
-        rxBuffer.append("< publishServoEvent");
-        rxBuffer.append("/");
-        rxBuffer.append(deviceId);
-        rxBuffer.append("/");
-        rxBuffer.append(eventType);
-        rxBuffer.append("/");
-        rxBuffer.append(currentPos);
-        rxBuffer.append("/");
-        rxBuffer.append(targetPos);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_SERIAL_DATA: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      int[] data = subArray(ioCmd, startPos+2, ioCmd[startPos+1]);
-      startPos += 1 + ioCmd[startPos+1];
-      if(invoke){
-        arduino.invoke("publishSerialData",  deviceId,  data);
-      } else { 
-         arduino.publishSerialData( deviceId,  data);
-      }
-      if(record != null){
-        rxBuffer.append("< publishSerialData");
-        rxBuffer.append("/");
-        rxBuffer.append(deviceId);
-        rxBuffer.append("/");
-        rxBuffer.append(Arrays.toString(data));
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_ULTRASONIC_SENSOR_DATA: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer echoTime = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("publishUltrasonicSensorData",  deviceId,  echoTime);
-      } else { 
-         arduino.publishUltrasonicSensorData( deviceId,  echoTime);
-      }
-      if(record != null){
-        rxBuffer.append("< publishUltrasonicSensorData");
-        rxBuffer.append("/");
-        rxBuffer.append(deviceId);
-        rxBuffer.append("/");
-        rxBuffer.append(echoTime);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_ENCODER_DATA: {
-      Integer deviceId = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      Integer position = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      if(invoke){
-        arduino.invoke("publishEncoderData",  deviceId,  position);
-      } else { 
-         arduino.publishEncoderData( deviceId,  position);
-      }
-      if(record != null){
-        rxBuffer.append("< publishEncoderData");
-        rxBuffer.append("/");
-        rxBuffer.append(deviceId);
-        rxBuffer.append("/");
-        rxBuffer.append(position);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    case PUBLISH_MRL_COMM_BEGIN: {
-      Integer version = ioCmd[startPos+1]; // bu8
-      startPos += 1;
-      if(invoke){
-        arduino.invoke("publishMrlCommBegin",  version);
-      } else { 
-         arduino.publishMrlCommBegin( version);
-      }
-      if(record != null){
-        rxBuffer.append("< publishMrlCommBegin");
-        rxBuffer.append("/");
-        rxBuffer.append(version);
-        rxBuffer.append("\n");
-        try{
-          record.write(rxBuffer.toString().getBytes());
-          rxBuffer.setLength(0);
-        } catch (IOException e) {
-          log.warn("failed recording bytes.", e); 
-        }
-      }
-
-      break;
-    }
-    
     }
   }
-  
 
   // Java-land --to--> MrlComm
 
@@ -658,12 +659,12 @@ public class Msg {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1); // size
       appendMessage(baos, GET_BOARD_INFO); // msgType = 2
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> getBoardInfo");
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
@@ -671,13 +672,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("getBoardInfo threw",e);
+    } catch (Exception e) {
+      log.error("getBoardInfo threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] enablePin(Integer address/*byte*/, Integer type/*byte*/, Integer rate/*b16*/) {
+  public synchronized byte[] enablePin(Integer address/* byte */,
+      Integer type/* byte */, Integer rate/* b16 */) {
     if (debug) {
       log.info("Sending Message: enablePin to {}", serial.getName());
     }
@@ -689,12 +691,12 @@ public class Msg {
       appendMessage(baos, address);
       appendMessage(baos, type);
       appendMessageb16(baos, rate);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> enablePin");
         txBuffer.append("/");
         txBuffer.append(address);
@@ -708,13 +710,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("enablePin threw",e);
+    } catch (Exception e) {
+      log.error("enablePin threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setDebug(Boolean enabled/*bool*/) {
+  public synchronized byte[] setDebug(Boolean enabled/* bool */) {
     if (debug) {
       log.info("Sending Message: setDebug to {}", serial.getName());
     }
@@ -724,12 +726,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, SET_DEBUG); // msgType = 5
       appendMessagebool(baos, enabled);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setDebug");
         txBuffer.append("/");
         txBuffer.append(enabled);
@@ -739,13 +741,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setDebug threw",e);
+    } catch (Exception e) {
+      log.error("setDebug threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setSerialRate(Integer rate/*b32*/) {
+  public synchronized byte[] setSerialRate(Integer rate/* b32 */) {
     if (debug) {
       log.info("Sending Message: setSerialRate to {}", serial.getName());
     }
@@ -755,12 +757,12 @@ public class Msg {
       appendMessage(baos, 1 + 4); // size
       appendMessage(baos, SET_SERIAL_RATE); // msgType = 6
       appendMessageb32(baos, rate);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setSerialRate");
         txBuffer.append("/");
         txBuffer.append(rate);
@@ -770,8 +772,8 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setSerialRate threw",e);
+    } catch (Exception e) {
+      log.error("setSerialRate threw", e);
       return null;
     }
   }
@@ -785,12 +787,12 @@ public class Msg {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1); // size
       appendMessage(baos, SOFT_RESET); // msgType = 7
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> softReset");
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
@@ -798,13 +800,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("softReset threw",e);
+    } catch (Exception e) {
+      log.error("softReset threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] enableAck(Boolean enabled/*bool*/) {
+  public synchronized byte[] enableAck(Boolean enabled/* bool */) {
     if (debug) {
       log.info("Sending Message: enableAck to {}", serial.getName());
     }
@@ -814,12 +816,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, ENABLE_ACK); // msgType = 8
       appendMessagebool(baos, enabled);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> enableAck");
         txBuffer.append("/");
         txBuffer.append(enabled);
@@ -829,13 +831,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("enableAck threw",e);
+    } catch (Exception e) {
+      log.error("enableAck threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] echo(Float myFloat/*f32*/, Integer myByte/*byte*/, Float secondFloat/*f32*/) {
+  public synchronized byte[] echo(Float myFloat/* f32 */,
+      Integer myByte/* byte */, Float secondFloat/* f32 */) {
     if (debug) {
       log.info("Sending Message: echo to {}", serial.getName());
     }
@@ -847,12 +850,12 @@ public class Msg {
       appendMessagef32(baos, myFloat);
       appendMessage(baos, myByte);
       appendMessagef32(baos, secondFloat);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> echo");
         txBuffer.append("/");
         txBuffer.append(myFloat);
@@ -866,13 +869,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("echo threw",e);
+    } catch (Exception e) {
+      log.error("echo threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] customMsg(int[] msg/*[]*/) {
+  public synchronized byte[] customMsg(int[] msg/* [] */) {
     if (debug) {
       log.info("Sending Message: customMsg to {}", serial.getName());
     }
@@ -882,12 +885,12 @@ public class Msg {
       appendMessage(baos, 1 + (1 + msg.length)); // size
       appendMessage(baos, CUSTOM_MSG); // msgType = 12
       appendMessage(baos, msg);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> customMsg");
         txBuffer.append("/");
         txBuffer.append(Arrays.toString(msg));
@@ -897,13 +900,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("customMsg threw",e);
+    } catch (Exception e) {
+      log.error("customMsg threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] deviceDetach(Integer deviceId/*byte*/) {
+  public synchronized byte[] deviceDetach(Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: deviceDetach to {}", serial.getName());
     }
@@ -913,12 +916,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, DEVICE_DETACH); // msgType = 14
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> deviceDetach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -928,13 +931,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("deviceDetach threw",e);
+    } catch (Exception e) {
+      log.error("deviceDetach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] i2cBusAttach(Integer deviceId/*byte*/, Integer i2cBus/*byte*/) {
+  public synchronized byte[] i2cBusAttach(Integer deviceId/* byte */,
+      Integer i2cBus/* byte */) {
     if (debug) {
       log.info("Sending Message: i2cBusAttach to {}", serial.getName());
     }
@@ -945,12 +949,12 @@ public class Msg {
       appendMessage(baos, I2C_BUS_ATTACH); // msgType = 15
       appendMessage(baos, deviceId);
       appendMessage(baos, i2cBus);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> i2cBusAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -962,13 +966,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("i2cBusAttach threw",e);
+    } catch (Exception e) {
+      log.error("i2cBusAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] i2cRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer size/*byte*/) {
+  public synchronized byte[] i2cRead(Integer deviceId/* byte */,
+      Integer deviceAddress/* byte */, Integer size/* byte */) {
     if (debug) {
       log.info("Sending Message: i2cRead to {}", serial.getName());
     }
@@ -980,12 +985,12 @@ public class Msg {
       appendMessage(baos, deviceId);
       appendMessage(baos, deviceAddress);
       appendMessage(baos, size);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> i2cRead");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -999,13 +1004,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("i2cRead threw",e);
+    } catch (Exception e) {
+      log.error("i2cRead threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] i2cWrite(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] i2cWrite(Integer deviceId/* byte */,
+      Integer deviceAddress/* byte */, int[] data/* [] */) {
     if (debug) {
       log.info("Sending Message: i2cWrite to {}", serial.getName());
     }
@@ -1017,12 +1023,12 @@ public class Msg {
       appendMessage(baos, deviceId);
       appendMessage(baos, deviceAddress);
       appendMessage(baos, data);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> i2cWrite");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1036,13 +1042,15 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("i2cWrite threw",e);
+    } catch (Exception e) {
+      log.error("i2cWrite threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] i2cWriteRead(Integer deviceId/*byte*/, Integer deviceAddress/*byte*/, Integer readSize/*byte*/, Integer writeValue/*byte*/) {
+  public synchronized byte[] i2cWriteRead(Integer deviceId/* byte */,
+      Integer deviceAddress/* byte */, Integer readSize/* byte */,
+      Integer writeValue/* byte */) {
     if (debug) {
       log.info("Sending Message: i2cWriteRead to {}", serial.getName());
     }
@@ -1055,12 +1063,12 @@ public class Msg {
       appendMessage(baos, deviceAddress);
       appendMessage(baos, readSize);
       appendMessage(baos, writeValue);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> i2cWriteRead");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1076,13 +1084,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("i2cWriteRead threw",e);
+    } catch (Exception e) {
+      log.error("i2cWriteRead threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] neoPixelAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/) {
+  public synchronized byte[] neoPixelAttach(Integer deviceId/* byte */,
+      Integer pin/* byte */, Integer numPixels/* b32 */, Integer depth/* byte */) {
     if (debug) {
       log.info("Sending Message: neoPixelAttach to {}", serial.getName());
     }
@@ -1095,12 +1104,12 @@ public class Msg {
       appendMessage(baos, pin);
       appendMessageb32(baos, numPixels);
       appendMessage(baos, depth);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> neoPixelAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1116,13 +1125,15 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("neoPixelAttach threw",e);
+    } catch (Exception e) {
+      log.error("neoPixelAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] neoPixelSetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer speed/*b16*/) {
+  public synchronized byte[] neoPixelSetAnimation(Integer deviceId/* byte */,
+      Integer animation/* byte */, Integer red/* byte */,
+      Integer green/* byte */, Integer blue/* byte */, Integer speed/* b16 */) {
     if (debug) {
       log.info("Sending Message: neoPixelSetAnimation to {}", serial.getName());
     }
@@ -1137,12 +1148,12 @@ public class Msg {
       appendMessage(baos, green);
       appendMessage(baos, blue);
       appendMessageb16(baos, speed);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> neoPixelSetAnimation");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1162,13 +1173,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("neoPixelSetAnimation threw",e);
+    } catch (Exception e) {
+      log.error("neoPixelSetAnimation threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] neoPixelWriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/) {
+  public synchronized byte[] neoPixelWriteMatrix(Integer deviceId/* byte */,
+      int[] buffer/* [] */) {
     if (debug) {
       log.info("Sending Message: neoPixelWriteMatrix to {}", serial.getName());
     }
@@ -1179,12 +1191,12 @@ public class Msg {
       appendMessage(baos, NEO_PIXEL_WRITE_MATRIX); // msgType = 22
       appendMessage(baos, deviceId);
       appendMessage(baos, buffer);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> neoPixelWriteMatrix");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1196,13 +1208,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("neoPixelWriteMatrix threw",e);
+    } catch (Exception e) {
+      log.error("neoPixelWriteMatrix threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] analogWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+  public synchronized byte[] analogWrite(Integer pin/* byte */,
+      Integer value/* byte */) {
     if (debug) {
       log.info("Sending Message: analogWrite to {}", serial.getName());
     }
@@ -1213,12 +1226,12 @@ public class Msg {
       appendMessage(baos, ANALOG_WRITE); // msgType = 23
       appendMessage(baos, pin);
       appendMessage(baos, value);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> analogWrite");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1230,13 +1243,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("analogWrite threw",e);
+    } catch (Exception e) {
+      log.error("analogWrite threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] digitalWrite(Integer pin/*byte*/, Integer value/*byte*/) {
+  public synchronized byte[] digitalWrite(Integer pin/* byte */,
+      Integer value/* byte */) {
     if (debug) {
       log.info("Sending Message: digitalWrite to {}", serial.getName());
     }
@@ -1247,12 +1261,12 @@ public class Msg {
       appendMessage(baos, DIGITAL_WRITE); // msgType = 24
       appendMessage(baos, pin);
       appendMessage(baos, value);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> digitalWrite");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1264,13 +1278,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("digitalWrite threw",e);
+    } catch (Exception e) {
+      log.error("digitalWrite threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] disablePin(Integer pin/*byte*/) {
+  public synchronized byte[] disablePin(Integer pin/* byte */) {
     if (debug) {
       log.info("Sending Message: disablePin to {}", serial.getName());
     }
@@ -1280,12 +1294,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, DISABLE_PIN); // msgType = 25
       appendMessage(baos, pin);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> disablePin");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1295,8 +1309,8 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("disablePin threw",e);
+    } catch (Exception e) {
+      log.error("disablePin threw", e);
       return null;
     }
   }
@@ -1310,12 +1324,12 @@ public class Msg {
       appendMessage(baos, MAGIC_NUMBER);
       appendMessage(baos, 1); // size
       appendMessage(baos, DISABLE_PINS); // msgType = 26
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> disablePins");
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
@@ -1323,13 +1337,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("disablePins threw",e);
+    } catch (Exception e) {
+      log.error("disablePins threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] pinMode(Integer pin/*byte*/, Integer mode/*byte*/) {
+  public synchronized byte[] pinMode(Integer pin/* byte */,
+      Integer mode/* byte */) {
     if (debug) {
       log.info("Sending Message: pinMode to {}", serial.getName());
     }
@@ -1340,12 +1355,12 @@ public class Msg {
       appendMessage(baos, PIN_MODE); // msgType = 27
       appendMessage(baos, pin);
       appendMessage(baos, mode);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> pinMode");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1357,13 +1372,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("pinMode threw",e);
+    } catch (Exception e) {
+      log.error("pinMode threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setTrigger(Integer pin/*byte*/, Integer triggerValue/*byte*/) {
+  public synchronized byte[] setTrigger(Integer pin/* byte */,
+      Integer triggerValue/* byte */) {
     if (debug) {
       log.info("Sending Message: setTrigger to {}", serial.getName());
     }
@@ -1374,12 +1390,12 @@ public class Msg {
       appendMessage(baos, SET_TRIGGER); // msgType = 30
       appendMessage(baos, pin);
       appendMessage(baos, triggerValue);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setTrigger");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1391,13 +1407,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setTrigger threw",e);
+    } catch (Exception e) {
+      log.error("setTrigger threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setDebounce(Integer pin/*byte*/, Integer delay/*byte*/) {
+  public synchronized byte[] setDebounce(Integer pin/* byte */,
+      Integer delay/* byte */) {
     if (debug) {
       log.info("Sending Message: setDebounce to {}", serial.getName());
     }
@@ -1408,12 +1425,12 @@ public class Msg {
       appendMessage(baos, SET_DEBOUNCE); // msgType = 31
       appendMessage(baos, pin);
       appendMessage(baos, delay);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setDebounce");
         txBuffer.append("/");
         txBuffer.append(pin);
@@ -1425,13 +1442,15 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setDebounce threw",e);
+    } catch (Exception e) {
+      log.error("setDebounce threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoAttach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer initPos/*b16*/, Integer initVelocity/*b16*/, String name/*str*/) {
+  public synchronized byte[] servoAttach(Integer deviceId/* byte */,
+      Integer pin/* byte */, Integer initPos/* b16 */,
+      Integer initVelocity/* b16 */, String name/* str */) {
     if (debug) {
       log.info("Sending Message: servoAttach to {}", serial.getName());
     }
@@ -1445,12 +1464,12 @@ public class Msg {
       appendMessageb16(baos, initPos);
       appendMessageb16(baos, initVelocity);
       appendMessage(baos, name);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1468,13 +1487,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoAttach threw",e);
+    } catch (Exception e) {
+      log.error("servoAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoAttachPin(Integer deviceId/*byte*/, Integer pin/*byte*/) {
+  public synchronized byte[] servoAttachPin(Integer deviceId/* byte */,
+      Integer pin/* byte */) {
     if (debug) {
       log.info("Sending Message: servoAttachPin to {}", serial.getName());
     }
@@ -1485,12 +1505,12 @@ public class Msg {
       appendMessage(baos, SERVO_ATTACH_PIN); // msgType = 33
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoAttachPin");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1502,13 +1522,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoAttachPin threw",e);
+    } catch (Exception e) {
+      log.error("servoAttachPin threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoDetachPin(Integer deviceId/*byte*/) {
+  public synchronized byte[] servoDetachPin(Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: servoDetachPin to {}", serial.getName());
     }
@@ -1518,12 +1538,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, SERVO_DETACH_PIN); // msgType = 34
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoDetachPin");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1533,13 +1553,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoDetachPin threw",e);
+    } catch (Exception e) {
+      log.error("servoDetachPin threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoSetVelocity(Integer deviceId/*byte*/, Integer velocity/*b16*/) {
+  public synchronized byte[] servoSetVelocity(Integer deviceId/* byte */,
+      Integer velocity/* b16 */) {
     if (debug) {
       log.info("Sending Message: servoSetVelocity to {}", serial.getName());
     }
@@ -1550,12 +1571,12 @@ public class Msg {
       appendMessage(baos, SERVO_SET_VELOCITY); // msgType = 35
       appendMessage(baos, deviceId);
       appendMessageb16(baos, velocity);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoSetVelocity");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1567,13 +1588,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoSetVelocity threw",e);
+    } catch (Exception e) {
+      log.error("servoSetVelocity threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoSweepStart(Integer deviceId/*byte*/, Integer min/*byte*/, Integer max/*byte*/, Integer step/*byte*/) {
+  public synchronized byte[] servoSweepStart(Integer deviceId/* byte */,
+      Integer min/* byte */, Integer max/* byte */, Integer step/* byte */) {
     if (debug) {
       log.info("Sending Message: servoSweepStart to {}", serial.getName());
     }
@@ -1586,12 +1608,12 @@ public class Msg {
       appendMessage(baos, min);
       appendMessage(baos, max);
       appendMessage(baos, step);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoSweepStart");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1607,13 +1629,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoSweepStart threw",e);
+    } catch (Exception e) {
+      log.error("servoSweepStart threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoSweepStop(Integer deviceId/*byte*/) {
+  public synchronized byte[] servoSweepStop(Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: servoSweepStop to {}", serial.getName());
     }
@@ -1623,12 +1645,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, SERVO_SWEEP_STOP); // msgType = 37
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoSweepStop");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1638,13 +1660,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoSweepStop threw",e);
+    } catch (Exception e) {
+      log.error("servoSweepStop threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoMoveToMicroseconds(Integer deviceId/*byte*/, Integer target/*b16*/) {
+  public synchronized byte[] servoMoveToMicroseconds(Integer deviceId/* byte */,
+      Integer target/* b16 */) {
     if (debug) {
       log.info("Sending Message: servoMoveToMicroseconds to {}", serial.getName());
     }
@@ -1655,12 +1678,12 @@ public class Msg {
       appendMessage(baos, SERVO_MOVE_TO_MICROSECONDS); // msgType = 38
       appendMessage(baos, deviceId);
       appendMessageb16(baos, target);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoMoveToMicroseconds");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1672,13 +1695,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoMoveToMicroseconds threw",e);
+    } catch (Exception e) {
+      log.error("servoMoveToMicroseconds threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoSetAcceleration(Integer deviceId/*byte*/, Integer acceleration/*b16*/) {
+  public synchronized byte[] servoSetAcceleration(Integer deviceId/* byte */,
+      Integer acceleration/* b16 */) {
     if (debug) {
       log.info("Sending Message: servoSetAcceleration to {}", serial.getName());
     }
@@ -1689,12 +1713,12 @@ public class Msg {
       appendMessage(baos, SERVO_SET_ACCELERATION); // msgType = 39
       appendMessage(baos, deviceId);
       appendMessageb16(baos, acceleration);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoSetAcceleration");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1706,13 +1730,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoSetAcceleration threw",e);
+    } catch (Exception e) {
+      log.error("servoSetAcceleration threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] serialAttach(Integer deviceId/*byte*/, Integer relayPin/*byte*/) {
+  public synchronized byte[] serialAttach(Integer deviceId/* byte */,
+      Integer relayPin/* byte */) {
     if (debug) {
       log.info("Sending Message: serialAttach to {}", serial.getName());
     }
@@ -1723,12 +1748,12 @@ public class Msg {
       appendMessage(baos, SERIAL_ATTACH); // msgType = 41
       appendMessage(baos, deviceId);
       appendMessage(baos, relayPin);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> serialAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1740,13 +1765,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("serialAttach threw",e);
+    } catch (Exception e) {
+      log.error("serialAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] serialRelay(Integer deviceId/*byte*/, int[] data/*[]*/) {
+  public synchronized byte[] serialRelay(Integer deviceId/* byte */,
+      int[] data/* [] */) {
     if (debug) {
       log.info("Sending Message: serialRelay to {}", serial.getName());
     }
@@ -1757,12 +1783,12 @@ public class Msg {
       appendMessage(baos, SERIAL_RELAY); // msgType = 42
       appendMessage(baos, deviceId);
       appendMessage(baos, data);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> serialRelay");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1774,13 +1800,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("serialRelay threw",e);
+    } catch (Exception e) {
+      log.error("serialRelay threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] ultrasonicSensorAttach(Integer deviceId/*byte*/, Integer triggerPin/*byte*/, Integer echoPin/*byte*/) {
+  public synchronized byte[] ultrasonicSensorAttach(Integer deviceId/* byte */,
+      Integer triggerPin/* byte */, Integer echoPin/* byte */) {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorAttach to {}", serial.getName());
     }
@@ -1792,12 +1819,12 @@ public class Msg {
       appendMessage(baos, deviceId);
       appendMessage(baos, triggerPin);
       appendMessage(baos, echoPin);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> ultrasonicSensorAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1811,13 +1838,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("ultrasonicSensorAttach threw",e);
+    } catch (Exception e) {
+      log.error("ultrasonicSensorAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] ultrasonicSensorStartRanging(Integer deviceId/*byte*/) {
+  public synchronized byte[] ultrasonicSensorStartRanging(
+      Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorStartRanging to {}", serial.getName());
     }
@@ -1827,12 +1855,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, ULTRASONIC_SENSOR_START_RANGING); // msgType = 45
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> ultrasonicSensorStartRanging");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1842,13 +1870,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("ultrasonicSensorStartRanging threw",e);
+    } catch (Exception e) {
+      log.error("ultrasonicSensorStartRanging threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] ultrasonicSensorStopRanging(Integer deviceId/*byte*/) {
+  public synchronized byte[] ultrasonicSensorStopRanging(
+      Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: ultrasonicSensorStopRanging to {}", serial.getName());
     }
@@ -1858,12 +1887,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, ULTRASONIC_SENSOR_STOP_RANGING); // msgType = 46
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> ultrasonicSensorStopRanging");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1873,13 +1902,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("ultrasonicSensorStopRanging threw",e);
+    } catch (Exception e) {
+      log.error("ultrasonicSensorStopRanging threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setAref(Integer type/*b16*/) {
+  public synchronized byte[] setAref(Integer type/* b16 */) {
     if (debug) {
       log.info("Sending Message: setAref to {}", serial.getName());
     }
@@ -1889,12 +1918,12 @@ public class Msg {
       appendMessage(baos, 1 + 2); // size
       appendMessage(baos, SET_AREF); // msgType = 48
       appendMessageb16(baos, type);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setAref");
         txBuffer.append("/");
         txBuffer.append(type);
@@ -1904,13 +1933,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setAref threw",e);
+    } catch (Exception e) {
+      log.error("setAref threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] motorAttach(Integer deviceId/*byte*/, Integer type/*byte*/, int[] pins/*[]*/) {
+  public synchronized byte[] motorAttach(Integer deviceId/* byte */,
+      Integer type/* byte */, int[] pins/* [] */) {
     if (debug) {
       log.info("Sending Message: motorAttach to {}", serial.getName());
     }
@@ -1922,12 +1952,12 @@ public class Msg {
       appendMessage(baos, deviceId);
       appendMessage(baos, type);
       appendMessage(baos, pins);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> motorAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1941,13 +1971,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("motorAttach threw",e);
+    } catch (Exception e) {
+      log.error("motorAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] motorMove(Integer deviceId/*byte*/, Integer pwr/*byte*/) {
+  public synchronized byte[] motorMove(Integer deviceId/* byte */,
+      Integer pwr/* byte */) {
     if (debug) {
       log.info("Sending Message: motorMove to {}", serial.getName());
     }
@@ -1958,12 +1989,12 @@ public class Msg {
       appendMessage(baos, MOTOR_MOVE); // msgType = 50
       appendMessage(baos, deviceId);
       appendMessage(baos, pwr);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> motorMove");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -1975,13 +2006,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("motorMove threw",e);
+    } catch (Exception e) {
+      log.error("motorMove threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] motorMoveTo(Integer deviceId/*byte*/, Integer pos/*byte*/) {
+  public synchronized byte[] motorMoveTo(Integer deviceId/* byte */,
+      Integer pos/* byte */) {
     if (debug) {
       log.info("Sending Message: motorMoveTo to {}", serial.getName());
     }
@@ -1992,12 +2024,12 @@ public class Msg {
       appendMessage(baos, MOTOR_MOVE_TO); // msgType = 51
       appendMessage(baos, deviceId);
       appendMessage(baos, pos);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> motorMoveTo");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -2009,13 +2041,14 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("motorMoveTo threw",e);
+    } catch (Exception e) {
+      log.error("motorMoveTo threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/) {
+  public synchronized byte[] encoderAttach(Integer deviceId/* byte */,
+      Integer type/* byte */, Integer pin/* byte */) {
     if (debug) {
       log.info("Sending Message: encoderAttach to {}", serial.getName());
     }
@@ -2027,12 +2060,12 @@ public class Msg {
       appendMessage(baos, deviceId);
       appendMessage(baos, type);
       appendMessage(baos, pin);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> encoderAttach");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -2046,13 +2079,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("encoderAttach threw",e);
+    } catch (Exception e) {
+      log.error("encoderAttach threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] setZeroPoint(Integer deviceId/*byte*/) {
+  public synchronized byte[] setZeroPoint(Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: setZeroPoint to {}", serial.getName());
     }
@@ -2062,12 +2095,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, SET_ZERO_POINT); // msgType = 53
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> setZeroPoint");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -2077,13 +2110,13 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("setZeroPoint threw",e);
+    } catch (Exception e) {
+      log.error("setZeroPoint threw", e);
       return null;
     }
   }
 
-  public synchronized byte[] servoStop(Integer deviceId/*byte*/) {
+  public synchronized byte[] servoStop(Integer deviceId/* byte */) {
     if (debug) {
       log.info("Sending Message: servoStop to {}", serial.getName());
     }
@@ -2093,12 +2126,12 @@ public class Msg {
       appendMessage(baos, 1 + 1); // size
       appendMessage(baos, SERVO_STOP); // msgType = 56
       appendMessage(baos, deviceId);
- 
+
       byte[] message = sendMessage(baos);
-      if (ackEnabled){
+      if (ackEnabled) {
         waitForAck();
       }
-      if(record != null){
+      if (record != null) {
         txBuffer.append("> servoStop");
         txBuffer.append("/");
         txBuffer.append(deviceId);
@@ -2108,236 +2141,232 @@ public class Msg {
       }
 
       return message;
-	} catch (Exception e) {
-      log.error("servoStop threw",e);
+    } catch (Exception e) {
+      log.error("servoStop threw", e);
       return null;
     }
   }
 
-
   public static String methodToString(int method) {
     switch (method) {
-    case PUBLISH_MRLCOMM_ERROR:{
-      return "publishMRLCommError";
-    }
-    case GET_BOARD_INFO:{
-      return "getBoardInfo";
-    }
-    case PUBLISH_BOARD_INFO:{
-      return "publishBoardInfo";
-    }
-    case ENABLE_PIN:{
-      return "enablePin";
-    }
-    case SET_DEBUG:{
-      return "setDebug";
-    }
-    case SET_SERIAL_RATE:{
-      return "setSerialRate";
-    }
-    case SOFT_RESET:{
-      return "softReset";
-    }
-    case ENABLE_ACK:{
-      return "enableAck";
-    }
-    case PUBLISH_ACK:{
-      return "publishAck";
-    }
-    case ECHO:{
-      return "echo";
-    }
-    case PUBLISH_ECHO:{
-      return "publishEcho";
-    }
-    case CUSTOM_MSG:{
-      return "customMsg";
-    }
-    case PUBLISH_CUSTOM_MSG:{
-      return "publishCustomMsg";
-    }
-    case DEVICE_DETACH:{
-      return "deviceDetach";
-    }
-    case I2C_BUS_ATTACH:{
-      return "i2cBusAttach";
-    }
-    case I2C_READ:{
-      return "i2cRead";
-    }
-    case I2C_WRITE:{
-      return "i2cWrite";
-    }
-    case I2C_WRITE_READ:{
-      return "i2cWriteRead";
-    }
-    case PUBLISH_I2C_DATA:{
-      return "publishI2cData";
-    }
-    case NEO_PIXEL_ATTACH:{
-      return "neoPixelAttach";
-    }
-    case NEO_PIXEL_SET_ANIMATION:{
-      return "neoPixelSetAnimation";
-    }
-    case NEO_PIXEL_WRITE_MATRIX:{
-      return "neoPixelWriteMatrix";
-    }
-    case ANALOG_WRITE:{
-      return "analogWrite";
-    }
-    case DIGITAL_WRITE:{
-      return "digitalWrite";
-    }
-    case DISABLE_PIN:{
-      return "disablePin";
-    }
-    case DISABLE_PINS:{
-      return "disablePins";
-    }
-    case PIN_MODE:{
-      return "pinMode";
-    }
-    case PUBLISH_DEBUG:{
-      return "publishDebug";
-    }
-    case PUBLISH_PIN_ARRAY:{
-      return "publishPinArray";
-    }
-    case SET_TRIGGER:{
-      return "setTrigger";
-    }
-    case SET_DEBOUNCE:{
-      return "setDebounce";
-    }
-    case SERVO_ATTACH:{
-      return "servoAttach";
-    }
-    case SERVO_ATTACH_PIN:{
-      return "servoAttachPin";
-    }
-    case SERVO_DETACH_PIN:{
-      return "servoDetachPin";
-    }
-    case SERVO_SET_VELOCITY:{
-      return "servoSetVelocity";
-    }
-    case SERVO_SWEEP_START:{
-      return "servoSweepStart";
-    }
-    case SERVO_SWEEP_STOP:{
-      return "servoSweepStop";
-    }
-    case SERVO_MOVE_TO_MICROSECONDS:{
-      return "servoMoveToMicroseconds";
-    }
-    case SERVO_SET_ACCELERATION:{
-      return "servoSetAcceleration";
-    }
-    case PUBLISH_SERVO_EVENT:{
-      return "publishServoEvent";
-    }
-    case SERIAL_ATTACH:{
-      return "serialAttach";
-    }
-    case SERIAL_RELAY:{
-      return "serialRelay";
-    }
-    case PUBLISH_SERIAL_DATA:{
-      return "publishSerialData";
-    }
-    case ULTRASONIC_SENSOR_ATTACH:{
-      return "ultrasonicSensorAttach";
-    }
-    case ULTRASONIC_SENSOR_START_RANGING:{
-      return "ultrasonicSensorStartRanging";
-    }
-    case ULTRASONIC_SENSOR_STOP_RANGING:{
-      return "ultrasonicSensorStopRanging";
-    }
-    case PUBLISH_ULTRASONIC_SENSOR_DATA:{
-      return "publishUltrasonicSensorData";
-    }
-    case SET_AREF:{
-      return "setAref";
-    }
-    case MOTOR_ATTACH:{
-      return "motorAttach";
-    }
-    case MOTOR_MOVE:{
-      return "motorMove";
-    }
-    case MOTOR_MOVE_TO:{
-      return "motorMoveTo";
-    }
-    case ENCODER_ATTACH:{
-      return "encoderAttach";
-    }
-    case SET_ZERO_POINT:{
-      return "setZeroPoint";
-    }
-    case PUBLISH_ENCODER_DATA:{
-      return "publishEncoderData";
-    }
-    case PUBLISH_MRL_COMM_BEGIN:{
-      return "publishMrlCommBegin";
-    }
-    case SERVO_STOP:{
-      return "servoStop";
-    }
+      case PUBLISH_MRLCOMM_ERROR: {
+        return "publishMRLCommError";
+      }
+      case GET_BOARD_INFO: {
+        return "getBoardInfo";
+      }
+      case PUBLISH_BOARD_INFO: {
+        return "publishBoardInfo";
+      }
+      case ENABLE_PIN: {
+        return "enablePin";
+      }
+      case SET_DEBUG: {
+        return "setDebug";
+      }
+      case SET_SERIAL_RATE: {
+        return "setSerialRate";
+      }
+      case SOFT_RESET: {
+        return "softReset";
+      }
+      case ENABLE_ACK: {
+        return "enableAck";
+      }
+      case PUBLISH_ACK: {
+        return "publishAck";
+      }
+      case ECHO: {
+        return "echo";
+      }
+      case PUBLISH_ECHO: {
+        return "publishEcho";
+      }
+      case CUSTOM_MSG: {
+        return "customMsg";
+      }
+      case PUBLISH_CUSTOM_MSG: {
+        return "publishCustomMsg";
+      }
+      case DEVICE_DETACH: {
+        return "deviceDetach";
+      }
+      case I2C_BUS_ATTACH: {
+        return "i2cBusAttach";
+      }
+      case I2C_READ: {
+        return "i2cRead";
+      }
+      case I2C_WRITE: {
+        return "i2cWrite";
+      }
+      case I2C_WRITE_READ: {
+        return "i2cWriteRead";
+      }
+      case PUBLISH_I2C_DATA: {
+        return "publishI2cData";
+      }
+      case NEO_PIXEL_ATTACH: {
+        return "neoPixelAttach";
+      }
+      case NEO_PIXEL_SET_ANIMATION: {
+        return "neoPixelSetAnimation";
+      }
+      case NEO_PIXEL_WRITE_MATRIX: {
+        return "neoPixelWriteMatrix";
+      }
+      case ANALOG_WRITE: {
+        return "analogWrite";
+      }
+      case DIGITAL_WRITE: {
+        return "digitalWrite";
+      }
+      case DISABLE_PIN: {
+        return "disablePin";
+      }
+      case DISABLE_PINS: {
+        return "disablePins";
+      }
+      case PIN_MODE: {
+        return "pinMode";
+      }
+      case PUBLISH_DEBUG: {
+        return "publishDebug";
+      }
+      case PUBLISH_PIN_ARRAY: {
+        return "publishPinArray";
+      }
+      case SET_TRIGGER: {
+        return "setTrigger";
+      }
+      case SET_DEBOUNCE: {
+        return "setDebounce";
+      }
+      case SERVO_ATTACH: {
+        return "servoAttach";
+      }
+      case SERVO_ATTACH_PIN: {
+        return "servoAttachPin";
+      }
+      case SERVO_DETACH_PIN: {
+        return "servoDetachPin";
+      }
+      case SERVO_SET_VELOCITY: {
+        return "servoSetVelocity";
+      }
+      case SERVO_SWEEP_START: {
+        return "servoSweepStart";
+      }
+      case SERVO_SWEEP_STOP: {
+        return "servoSweepStop";
+      }
+      case SERVO_MOVE_TO_MICROSECONDS: {
+        return "servoMoveToMicroseconds";
+      }
+      case SERVO_SET_ACCELERATION: {
+        return "servoSetAcceleration";
+      }
+      case PUBLISH_SERVO_EVENT: {
+        return "publishServoEvent";
+      }
+      case SERIAL_ATTACH: {
+        return "serialAttach";
+      }
+      case SERIAL_RELAY: {
+        return "serialRelay";
+      }
+      case PUBLISH_SERIAL_DATA: {
+        return "publishSerialData";
+      }
+      case ULTRASONIC_SENSOR_ATTACH: {
+        return "ultrasonicSensorAttach";
+      }
+      case ULTRASONIC_SENSOR_START_RANGING: {
+        return "ultrasonicSensorStartRanging";
+      }
+      case ULTRASONIC_SENSOR_STOP_RANGING: {
+        return "ultrasonicSensorStopRanging";
+      }
+      case PUBLISH_ULTRASONIC_SENSOR_DATA: {
+        return "publishUltrasonicSensorData";
+      }
+      case SET_AREF: {
+        return "setAref";
+      }
+      case MOTOR_ATTACH: {
+        return "motorAttach";
+      }
+      case MOTOR_MOVE: {
+        return "motorMove";
+      }
+      case MOTOR_MOVE_TO: {
+        return "motorMoveTo";
+      }
+      case ENCODER_ATTACH: {
+        return "encoderAttach";
+      }
+      case SET_ZERO_POINT: {
+        return "setZeroPoint";
+      }
+      case PUBLISH_ENCODER_DATA: {
+        return "publishEncoderData";
+      }
+      case PUBLISH_MRL_COMM_BEGIN: {
+        return "publishMrlCommBegin";
+      }
+      case SERVO_STOP: {
+        return "servoStop";
+      }
 
-    default: {
-      return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
+      default: {
+        return "ERROR UNKNOWN METHOD (" + Integer.toString(method) + ")";
 
-    } // default
+      } // default
     }
   }
 
   public String str(int[] buffer, int start, int size) {
     byte[] b = new byte[size];
-    for (int i = start; i < start + size; ++i){
-      b[i - start] = (byte)(buffer[i] & 0xFF);
+    for (int i = start; i < start + size; ++i) {
+      b[i - start] = (byte) (buffer[i] & 0xFF);
     }
     return new String(b);
   }
 
-  public int[] subArray(int[] buffer, int start, int size) {    
+  public int[] subArray(int[] buffer, int start, int size) {
     return Arrays.copyOfRange(buffer, start, start + size);
   }
 
   // signed 16 bit bucket
-  public int b16(int[] buffer, int start/*=0*/) {
-    return  (short)(buffer[start] << 8) + buffer[start + 1];
+  public int b16(int[] buffer, int start/* =0 */) {
+    return (short) (buffer[start] << 8) + buffer[start + 1];
   }
-  
+
   // signed 32 bit bucket
-  public int b32(int[] buffer, int start/*=0*/) {
-    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
+  public int b32(int[] buffer, int start/* =0 */) {
+    return ((buffer[start + 0] << 24) + (buffer[start + 1] << 16) + (buffer[start + 2] << 8) + buffer[start + 3]);
   }
-  
+
   // unsigned 32 bit bucket
-  public long bu32(int[] buffer, int start/*=0*/) {
-    long ret = ((buffer[start + 0] << 24)
-        + (buffer[start + 1] << 16)
-        + (buffer[start + 2] << 8) + buffer[start + 3]);
-    if (ret < 0){
+  public long bu32(int[] buffer, int start/* =0 */) {
+    long ret = ((buffer[start + 0] << 24) + (buffer[start + 1] << 16) + (buffer[start + 2] << 8) + buffer[start + 3]);
+    if (ret < 0) {
       return 4294967296L + ret;
     }
-    
+
     return ret;
   }
 
   // float 32 bit bucket
-  public float f32(int[] buffer, int start/*=0*/) {
+  public float f32(int[] buffer, int start/* =0 */) {
     byte[] b = new byte[4];
-    for (int i = 0; i < 4; ++i){
-      b[i] = (byte)buffer[start + i];
+    for (int i = 0; i < 4; ++i) {
+      b[i] = (byte) buffer[start + i];
     }
     float f = ByteBuffer.wrap(b).order(ByteOrder.BIG_ENDIAN).getFloat();
     return f;
   }
-  
+
   public void onBytes(byte[] bytes) {
     if (debug) {
       // debug message.. semi-human readable?
@@ -2345,7 +2374,7 @@ public class Msg {
       log.info("onBytes called byteCount: {} data: >{}<", byteCount, byteString);
     }
     // this gives us the current full buffer that was read from the seral
-    for (int i = 0 ; i < bytes.length; i++) {
+    for (int i = 0; i < bytes.length; i++) {
       // For now, let's just call onByte for each byte upcasted as an int.
       Integer newByte = bytes[i] & 0xFF;
       try {
@@ -2355,7 +2384,8 @@ public class Msg {
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             Arrays.fill(ioCmd, 0); // FIXME - optimize - remove
-            // warn(String.format("Arduino->MRL error - bad magic number %d - %d rx errors", newByte, ++errorServiceToHardwareRxCnt));
+            // warn(String.format("Arduino->MRL error - bad magic number %d - %d
+            // rx errors", newByte, ++errorServiceToHardwareRxCnt));
             log.warn("Arduino->MRL error - bad magic number {} - {} rx errors", newByte, ++errorServiceToHardwareRxCnt);
           }
           continue;
@@ -2365,7 +2395,8 @@ public class Msg {
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             // This is an error scenario.. we should reset our byte count also.
-            // error(String.format("Arduino->MRL error %d rx sz errors", ++errorServiceToHardwareRxCnt ));
+            // error(String.format("Arduino->MRL error %d rx sz errors",
+            // ++errorServiceToHardwareRxCnt ));
             log.error("Arduino->MRL error {} rx sz errors", ++errorServiceToHardwareRxCnt);
             continue;
           }
@@ -2374,73 +2405,80 @@ public class Msg {
           // This is the method..
           int method = newByte.intValue();
           if (methodToString(method).startsWith("ERROR")) {
-            // we've got an error scenario here.. reset the parser and try again!
+            // we've got an error scenario here.. reset the parser and try
+            // again!
             log.error("Arduino->MRL error unknown method error. resetting parser.");
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             continue;
           }
-          
-          // If we're not clear to send, we need to unlock if this is a begin message.
+
+          // If we're not clear to send, we need to unlock if this is a begin
+          // message.
           if (!clearToSend && (method == Msg.PUBLISH_MRL_COMM_BEGIN)) {
             // Clear to send!!
             log.info("Saw the MRL COMM BEGIN!!!!!!!!!!!!! Clear To Send.");
             clearToSend = true;
-          } 
-          
+          }
+
           if (!clearToSend) {
             log.warn("NOT CLEAR TO SEND! resetting parser!");
-            // We opened the port, and we got some data that isn't a Begin message.
-            // so, I think we need to reset the parser and continue processing bytes...
+            // We opened the port, and we got some data that isn't a Begin
+            // message.
+            // so, I think we need to reset the parser and continue processing
+            // bytes...
             // there will be errors until the next magic byte is seen.
             byteCount = new AtomicInteger(0);
             msgSize = 0;
             continue;
           }
-          // we are in a valid parse state.    
+          // we are in a valid parse state.
           ioCmd[byteCount.get() - 3] = method;
         } else if (byteCount.get() > 3) {
           // This is the body of the message copy it to the buffer
           ioCmd[byteCount.get() - 3] = newByte.intValue();
         } else {
-          // the case where byteCount is negative?! not got.  You should probably never see this.
+          // the case where byteCount is negative?! not got. You should probably
+          // never see this.
           log.warn("MRL error rx zero/negative size error: {} {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()));
-          //error(String.format("Arduino->MRL error %d rx negsz errors", ++errorServiceToHardwareRxCnt));
+          // error(String.format("Arduino->MRL error %d rx negsz errors",
+          // ++errorServiceToHardwareRxCnt));
           continue;
         }
         // we have a complete message here.
         if (byteCount.get() == 2 + msgSize) {
           // we've received a full message
-          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get()-2);
+          int[] actualCommand = Arrays.copyOf(ioCmd, byteCount.get() - 2);
           if (debug) {
             log.info("Full message received: {} Data:{}", VirtualMsg.methodToString(ioCmd[0]), actualCommand);
           }
           // process the command.
           processCommand(actualCommand);
-          
+
           // re-init parser
           Arrays.fill(ioCmd, 0); // optimize remove
           msgSize = 0;
           byteCount = new AtomicInteger(0);
         }
       } catch (Exception e) {
-        ++errorHardwareToServiceRxCnt ;
+        ++errorHardwareToServiceRxCnt;
         // error("msg structure violation %d", errorHardwareToServiceRxCnt);
         log.warn("msg_structure violation byteCount {} buffer {}", byteCount, Arrays.copyOf(ioCmd, byteCount.get()), e);
-        // TODO: perhaps we could find the first occurance of 170.. and then attempt to re-parse at that point.
+        // TODO: perhaps we could find the first occurance of 170.. and then
+        // attempt to re-parse at that point.
         // find the first occurance of 170 in the bytes subbytes
-        // Maybe we can just walk the iterater back to the beginning based on the byte count .. and advance it by 1.. and continue.
-        i = i - byteCount.get()+1;
+        // Maybe we can just walk the iterater back to the beginning based on
+        // the byte count .. and advance it by 1.. and continue.
+        i = i - byteCount.get() + 1;
         log.error("Trying to resume parsing the byte stream at position {} bytecount: {}", i, byteCount);
         log.error("Original Byte Array: {}", StringUtil.byteArrayToIntString(bytes));
         System.err.println("Try to consume more messages!");
         msgSize = 0;
         byteCount = new AtomicInteger(0);
-        // TODO: this is wonky.. what?! 
+        // TODO: this is wonky.. what?!
         i = 0;
         return;
-        
-        
+
       }
     }
     return;
@@ -2449,18 +2487,18 @@ public class Msg {
   String F(String msg) {
     return msg;
   }
-  
+
   public void publishError(String error) {
     log.error(error);
   }
-  
+
   void appendMessage(ByteArrayOutputStream baos, int b8) throws Exception {
     if ((b8 < 0) || (b8 > 255)) {
       log.error("writeByte overrun - should be  0 <= value <= 255 - value = {}", b8);
     }
     baos.write(b8 & 0xFF);
   }
-  
+
   void appendMessagebool(ByteArrayOutputStream baos, boolean b1) throws Exception {
     if (b1) {
       appendMessage(baos, 1);
@@ -2483,21 +2521,21 @@ public class Msg {
     appendMessage(baos, b32 >> 8 & 0xFF);
     appendMessage(baos, b32 & 0xFF);
   }
-  
+
   void appendMessagef32(ByteArrayOutputStream baos, float f32) throws Exception {
-    //  int x = Float.floatToIntBits(f32);
+    // int x = Float.floatToIntBits(f32);
     byte[] f = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putFloat(f32).array();
     appendMessage(baos, f[3] & 0xFF);
     appendMessage(baos, f[2] & 0xFF);
     appendMessage(baos, f[1] & 0xFF);
     appendMessage(baos, f[0] & 0xFF);
   }
-  
+
   void appendMessagebu32(ByteArrayOutputStream baos, long b32) throws Exception {
-    appendMessage(baos, (int)(b32 >> 24 & 0xFF));
-    appendMessage(baos, (int)(b32 >> 16 & 0xFF));
-    appendMessage(baos, (int)(b32 >> 8 & 0xFF));
-    appendMessage(baos, (int)(b32 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 24 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 16 & 0xFF));
+    appendMessage(baos, (int) (b32 >> 8 & 0xFF));
+    appendMessage(baos, (int) (b32 & 0xFF));
   }
 
   void appendMessage(ByteArrayOutputStream baos, String str) throws Exception {
@@ -2521,7 +2559,7 @@ public class Msg {
       appendMessage(baos, array[i]);
     }
   }
-  
+
   synchronized byte[] sendMessage(ByteArrayOutputStream baos) throws Exception {
     byte[] message = baos.toByteArray();
     if (ackEnabled) {
@@ -2531,7 +2569,7 @@ public class Msg {
     // write data if serial not null.
     if (serial != null) {
       // mark it pending before we write the data.
-      if (ackEnabled){
+      if (ackEnabled) {
         // flip our flag because we're going to send the message now.
         // TODO: is this deadlocked because it's synchronized?!
         // TODO: should this be set regardless of if the serial is null?
@@ -2540,13 +2578,14 @@ public class Msg {
       serial.write(message);
       // TODO: if there's an exception, we should clear our pending status?
       if (ackEnabled) {
-        // wait for a pending ack to be received before we process our message.^M
+        // wait for a pending ack to be received before we process our
+        // message.^M
         waitForAck();
       }
     }
     return message;
   }
-  
+
   public void markPending() {
     if (debug) {
       log.info("Setting pending flag.");
@@ -2556,11 +2595,11 @@ public class Msg {
       ackRecievedLock.notifyAll();
     }
   }
-  
+
   public boolean isRecording() {
     return record != null;
   }
-  
+
   public void record() throws Exception {
     if (record == null) {
       record = new FileOutputStream(String.format("%s.ard", arduino.getName()));
@@ -2577,67 +2616,67 @@ public class Msg {
       record = null;
     }
   }
-  
+
   public static String deviceTypeToString(int typeId) {
-    switch(typeId){
-    case 0 :  {
-      return "unknown";
+    switch (typeId) {
+      case 0: {
+        return "unknown";
 
-    }
-    case 1 :  {
-      return "Arduino";
+      }
+      case 1: {
+        return "Arduino";
 
-    }
-    case 2 :  {
-      return "UltrasonicSensor";
+      }
+      case 2: {
+        return "UltrasonicSensor";
 
-    }
-    case 3 :  {
-      return "Stepper";
+      }
+      case 3: {
+        return "Stepper";
 
-    }
-    case 4 :  {
-      return "Motor";
+      }
+      case 4: {
+        return "Motor";
 
-    }
-    case 5 :  {
-      return "Servo";
+      }
+      case 5: {
+        return "Servo";
 
-    }
-    case 6 :  {
-      return "Serial";
+      }
+      case 6: {
+        return "Serial";
 
-    }
-    case 7 :  {
-      return "I2c";
+      }
+      case 7: {
+        return "I2c";
 
-    }
-    case 8 :  {
-      return "NeoPixel";
+      }
+      case 8: {
+        return "NeoPixel";
 
-    }
-    case 9 :  {
-      return "Encoder";
+      }
+      case 9: {
+        return "Encoder";
 
-    }
-    
-    default: {
-      return "unknown";
-    }
+      }
+
+      default: {
+        return "unknown";
+      }
     }
   }
-  
-  public void enableAcks(boolean b){
+
+  public void enableAcks(boolean b) {
     ackEnabled = b;
     // if (!localOnly){
     // shutdown MrlComm from sending acks
     // below is a method only in Msg.java not in VirtualMsg.java
-    // it depends on the definition of enableAck in arduinoMsg.schema  
+    // it depends on the definition of enableAck in arduinoMsg.schema
     // enableAck(b);
     // }
   }
-  
-  public void waitForAck(){
+
+  public void waitForAck() {
     if (!ackEnabled) {
       return;
     }
@@ -2650,35 +2689,35 @@ public class Msg {
         }
         if (ackRecievedLock.pendingMessage) {
           log.error("Ack not received, ack timeout!");
-          // TODO: should we just reset and hope for the best? maybe trigger a sync?
+          // TODO: should we just reset and hope for the best? maybe trigger a
+          // sync?
           // ackRecievedLock.pendingMessage = false;
           arduino.ackTimeout();
         }
       }
     }
   }
-  
+
   public void ackReceived(int function) {
     synchronized (ackRecievedLock) {
       ackRecievedLock.pendingMessage = false;
       ackRecievedLock.notifyAll();
     }
   }
-  
-  public int getMethod(){
+
+  public int getMethod() {
     return method;
   }
-  
 
   public void add(int value) {
     sendBuffer[sendBufferSize] = (value & 0xFF);
     sendBufferSize += 1;
   }
-  
-  public int[] getBuffer() {    
+
+  public int[] getBuffer() {
     return sendBuffer;
   }
-  
+
   public static void main(String[] args) {
     try {
       // FIXME - Test service started or reference retrieved
@@ -2692,24 +2731,19 @@ public class Msg {
       String port = "COM10";
       LoggingFactory.init(Level.INFO);
       /*
-      Runtime.start("gui","SwingGui");
-      VirtualArduino virtual = (VirtualArduino)Runtime.start("varduino","VirtualArduino");
-      virtual.connectVirtualUart(port, port + "UART");
-      */
-      MrlCommPublisher arduino = (MrlCommPublisher)Runtime.start("arduino","MrlCommPublisher");
-      Servo servo01 = (Servo)Runtime.start("servo01","Servo");
+       * Runtime.start("gui","SwingGui"); VirtualArduino virtual =
+       * (VirtualArduino)Runtime.start("varduino","VirtualArduino");
+       * virtual.connectVirtualUart(port, port + "UART");
+       */
+      MrlCommPublisher arduino = (MrlCommPublisher) Runtime.start("arduino", "MrlCommPublisher");
+      Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
       /*
-      arduino.connect(port);
-      // test pins
-      arduino.enablePin(5);
-      arduino.disablePin(5);
-      // test status list enabled
-      arduino.enableBoardStatus(true);
-      servo01.attach(arduino, 8);
-      servo01.moveTo(30);
-      servo01.moveTo(130);
-      arduino.enableBoardStatus(false);
-      */
+       * arduino.connect(port); // test pins arduino.enablePin(5);
+       * arduino.disablePin(5); // test status list enabled
+       * arduino.enableBoardStatus(true); servo01.attach(arduino, 8);
+       * servo01.moveTo(30); servo01.moveTo(130);
+       * arduino.enableBoardStatus(false);
+       */
       // test ack
       // test heartbeat
     } catch (Exception e) {
@@ -2740,22 +2774,22 @@ public class Msg {
   public static boolean isFullMessage(byte[] bytes) {
     // Criteria that a sequence of bytes could be parsed as a complete message.
     // can't be null
-    if (bytes == null) 
+    if (bytes == null)
       return false;
-    // it's got to be at least 3 bytes long.  magic + method + size
-    if (bytes.length <= 2) 
+    // it's got to be at least 3 bytes long. magic + method + size
+    if (bytes.length <= 2)
       return false;
     // first byte has to be magic
-    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER) 
+    if ((bytes[0] & 0xFF) != Msg.MAGIC_NUMBER)
       return false;
-    
+
     int method = bytes[1] & 0xFF;
-    String strMethod = Msg.methodToString(method); 
-    // only known methods. 
+    String strMethod = Msg.methodToString(method);
+    // only known methods.
     // TODO: make the methodToString return null for an unknown lookup.
-    if (strMethod.startsWith("ERROR")) 
+    if (strMethod.startsWith("ERROR"))
       return false;
-    
+
     // now it's got to be the proper length
     int length = bytes[1] & 0xFF;
     // max message size is 64 bytes
@@ -2763,19 +2797,18 @@ public class Msg {
       return false;
 
     // it's a exactly a full message or a message and more.
-    if (bytes.length >= length+2)
+    if (bytes.length >= length + 2)
       return true;
 
-    
     return false;
   }
 
   public boolean isClearToSend() {
     return clearToSend;
   }
-  
-  public void setInvoke(boolean b){	
-    invoke = b;	
+
+  public void setInvoke(boolean b) {
+    invoke = b;
   }
 
 }

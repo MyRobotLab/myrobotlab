@@ -438,7 +438,6 @@ public class ImapEmailConnector extends AbstractConnector {
     this.docIdPrefix = docIdPrefix;
   }
 
-
   public static void main(String[] args) throws Exception {
     ImapEmailConnector connector = (ImapEmailConnector) Runtime.start("email", "ImapEmailConnector");
     connector.setEmailServer("imap.gmail.com");

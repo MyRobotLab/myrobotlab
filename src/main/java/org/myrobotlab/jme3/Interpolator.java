@@ -22,7 +22,6 @@ public class Interpolator {
     public Float startPos;
     public int direction;
     public String axis;
-    
 
     public String toString() {
       return String.format("%s %s %.2f %.2f %d", name, method, newPos, speed, startTs);
@@ -41,12 +40,12 @@ public class Interpolator {
   // external thread does a request
   // processed into a data object which generates the next Msg
   public void addAnimation(String method, String name, String axis, double newPos, double speed) {
-    
+
     // TODO Auto-generated method stub
     Move move = new Move();
     // thingy we are moving
     move.name = name;
-    move.newPos = newPos; 
+    move.newPos = newPos;
     move.startPos = jme.getAngle(name, axis);
     move.axis = axis;
     if (move.startPos == null) {
@@ -57,12 +56,12 @@ public class Interpolator {
     move.method = method;
     move.speed = speed;
     // FIXME - this needs to be the difference ??? - get
-                          // current pos => find distance and direction
+    // current pos => find distance and direction
     // move.newPos = jme.getAngle(move.name) - newPos; // FIXME - this needs to
     // be the difference ??? - get current pos => find distance and direction
 
     move.startTs = System.currentTimeMillis();
-    
+
     log.info("addAnimation {} {} from {} to {} @ {} degrees/sec", name, method, move.startPos, newPos, speed);
     futureMoves.put(name, move);
   }
@@ -88,7 +87,8 @@ public class Interpolator {
       // instantaneous api to rotate - don't generate an animation from an
       // animation
       // jme.rotateTo(move.name, null, interPos);
-      util.rotateTo(name, move.axis, interPos);;
+      util.rotateTo(name, move.axis, interPos);
+      ;
 
       if (Math.abs(interPos - move.newPos) < 0.5 /* if we're close enough */
           || /* or we overrun */ (move.direction < 0 && interPos < move.newPos)

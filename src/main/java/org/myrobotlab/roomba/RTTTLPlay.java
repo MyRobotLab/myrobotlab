@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 public class RTTTLPlay {
 
   public final static Logger log = LoggerFactory.getLogger(RTTTLPlay.class);
-  
+
   static String usage = "Usage: \n" + "  roombacomm.RTTTLPlay <serialportname> [protocol] <rttl string> [options]\n" + "where:\n" + "protocol (optional) is SCI or OI\n"
       + "rttl string is a string of notes\n" + "[options] can be one or more of:\n" + " -debug       -- turn on debug output\n"
       + " -hwhandshake -- use hardware-handshaking, for Windows Bluetooth\n" + " -nohwhandshake -- don't use hardware-handshaking\n"

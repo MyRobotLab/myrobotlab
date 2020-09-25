@@ -70,8 +70,8 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     public String name;
     public String type;
     public Integer rating;
-    
-    public Ball() {      
+
+    public Ball() {
     }
   }
 
@@ -79,9 +79,9 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public Set<String> onCreated = new HashSet<>();
 
-  public Map<String,Registration> onRegistered = new HashMap<String,Registration>();
+  public Map<String, Registration> onRegistered = new HashMap<String, Registration>();
 
-  public Set<String> onStarted  = new HashSet<>();
+  public Set<String> onStarted = new HashSet<>();
 
   public Set<String> onReleased = new HashSet<>();
 
@@ -253,7 +253,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   }
 
   static public MetaData meta = null;
-  
+
   public String testMultipleParamTypes(String a, Double b, Integer c) {
     log.info("testMultipleParamTypes {} {} {}", a, b, c);
     return a;
@@ -275,7 +275,7 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     log.info("onInteger {}", data);
     return data;
   }
-  
+
   public int onInt(int data) {
     log.info("onInteger {}", data);
     return data;
@@ -402,17 +402,17 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
     log.info("invokeTest(Boolean)");
     return p0;
   }
-  
+
   public SerialDataListener invokeTest(SerialDataListener p0) {
     log.info("invokeTest(SerialDataListener)");
     return p0;
   }
-  
+
   public HttpDataListener invokeTest(HttpDataListener p0) {
     log.info("invokeTest(HttpDataListener)");
     return p0;
   }
-  
+
   public TestCatcher invokeTestCatcher(TestCatcher p0) {
     return p0;
   }
@@ -426,36 +426,35 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   public void onPitch(Integer i) {
     log.info("onPitch({})", i);
   }
-  
+
   public Ball catchBall(Ball ball) {
     return ball;
   }
-  
+
   public String catchBall(String ball) {
     return ball;
   }
-  
+
   public int catchBall(int ball) {
     return ball;
   }
-  
+
   public Integer catchBall(Integer ball) {
     return ball;
   }
-  
+
   public Double catchBall(Double ball) {
     return ball;
   }
-  
+
   public String onUptime(String str) {
     return str;
   }
 
-
   public void onCreated(String serviceName) {
     onCreated.add(serviceName);
   }
-  
+
   public void onRegistered(Registration registration) {
     if (onRegistered != null) {
       onRegistered.put(registration.getName(), registration);
@@ -463,16 +462,15 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
   }
 
   public void onStarted(String serviceName) {
-    onStarted.add(serviceName);    
+    onStarted.add(serviceName);
   }
 
   public void onStopped(String serviceName) {
-    onStopped.add(serviceName);    
+    onStopped.add(serviceName);
   }
 
   public void onReleased(String serviceName) {
     onReleased.add(serviceName);
   }
 
-  
 }

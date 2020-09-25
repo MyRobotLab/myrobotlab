@@ -165,7 +165,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     log.info("digitalWrite {} {}", pin, value);
     // msg.digitalWrite(pin, value);
     PinDefinition pinDef = pinIndex.get(pin);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
     if (value == 0) {
       gpio.low();
     } else {
@@ -191,7 +191,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
   @Override
   public void enablePin(int address, int rate) {
     PinDefinition pinDef = pinIndex.get(address);
-    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose)pinDef.getPinImpl());
+    GpioPinDigitalMultipurpose gpio = ((GpioPinDigitalMultipurpose) pinDef.getPinImpl());
     gpio.addListener(new GpioPinListener());
     pinDef.setEnabled(true);
     invoke("publishPinDefinition", pinDef); // broadcast pin change
@@ -218,28 +218,28 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
     try {
       // if (SystemInfo.getBoardType() == SystemInfo.BoardType.RaspberryPi_3B) {
-        for (int i = 0; i < 32; ++i) {
-          PinDefinition pindef = new PinDefinition(getName(), i);
-          String pinName = null;
-          if (i == 16) {
-            pindef.setRx(true);
-          }
-          if (i == 15) {
-            pindef.setTx(true);
-          }
-          if (i <= 16 || i >= 21) {
-            pinName = String.format("GPIO%d", i);
-            pindef.setDigital(true);
-          } else {
-            pinName = String.format("Unused%d", i);
-            pindef.setDigital(false);
-          }
-          pindef.setPinName(pinName);
-          pindef.setAddress(i);
-          pinIndex.put(i, pindef);
-          pinMap.put(pinName, pindef);
-          pinList.add(pindef);
+      for (int i = 0; i < 32; ++i) {
+        PinDefinition pindef = new PinDefinition(getName(), i);
+        String pinName = null;
+        if (i == 16) {
+          pindef.setRx(true);
         }
+        if (i == 15) {
+          pindef.setTx(true);
+        }
+        if (i <= 16 || i >= 21) {
+          pinName = String.format("GPIO%d", i);
+          pindef.setDigital(true);
+        } else {
+          pinName = String.format("Unused%d", i);
+          pindef.setDigital(false);
+        }
+        pindef.setPinName(pinName);
+        pindef.setAddress(i);
+        pinIndex.put(i, pindef);
+        pinMap.put(pinName, pindef);
+        pinList.add(pindef);
+      }
     } catch (Exception e) {
       log.error("getPinList threw", e);
     }
@@ -367,7 +367,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     pinDef.setValue(pinData.value);
     return pinData;
   }
-  
+
   // FIXME - return array
   // FIXME - return array
   public Integer[] scanI2CDevices(int busAddress) {
@@ -496,7 +496,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
     Runtime.createAndStart(String.format("rasGUI%d", i), "SwingGui");
     Runtime.createAndStart(String.format("rasPython%d", i), "Python");
     // Runtime.createAndStart(String.format("rasClock%d",i), "Clock");
-   
+
   }
 
   @Override
@@ -507,7 +507,8 @@ public class RasPi extends AbstractMicrocontroller implements I2CController {
 
   @Override
   public BoardInfo getBoardInfo() {
-    // FIXME - this needs more work .. BoardInfo needs to be an interface where RasPiInfo is derived
+    // FIXME - this needs more work .. BoardInfo needs to be an interface where
+    // RasPiInfo is derived
     return null;
   }
 

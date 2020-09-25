@@ -31,7 +31,7 @@ public class ServoMixer extends Service {
     super(n, id);
 
     // FIXME - make this part of framework !!!!
-    //subscribe("runtime", "started");
+    // subscribe("runtime", "started");
     subscribe("runtime", "registered");
     subscribe("runtime", "released");
 

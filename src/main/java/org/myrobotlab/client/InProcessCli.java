@@ -40,7 +40,8 @@ public class InProcessCli implements Runnable {
 
   private String remoteId;
 
-  private String contextPath = null;// TODO - make this stateful ?? - "runtime/ls/";
+  private String contextPath = null;// TODO - make this stateful ?? -
+                                    // "runtime/ls/";
 
   /**
    * The inProcessCli behave like a remote id - although it is in the same
@@ -54,7 +55,7 @@ public class InProcessCli implements Runnable {
    * @param out
    */
   public InProcessCli(String id, String senderName, InputStream in, OutputStream out) {
-    this.id = id + "-cli" ; // this becomes a local/remote id with prepended cli-
+    this.id = id + "-cli"; // this becomes a local/remote id with prepended cli-
     this.remoteId = id; // remote id is the mrl instance
     this.name = senderName;
     this.in = in;
@@ -118,14 +119,15 @@ public class InProcessCli implements Runnable {
     myThread = null;
   }
 
-  // FIXME determine if GET notation should use encoded ? (probably) - ie should it "always" be decoded ?
+  // FIXME determine if GET notation should use encoded ? (probably) - ie should
+  // it "always" be decoded ?
   public Object process(String cmd) {
     try {
 
       cmd = cmd.trim();
-   
+
       Message cliMsg = null;
-      
+
       if (!cmd.startsWith("/")) {
         // FIXME - THIS IS LOCAL ONLY !!!!
         // cd is a "local" command
@@ -139,7 +141,7 @@ public class InProcessCli implements Runnable {
               cwd += parts[1];
             }
           }
-          // cmd = String.format("/runtime/cd %s", cwd);  LOCAL !
+          // cmd = String.format("/runtime/cd %s", cwd); LOCAL !
           writeToJson(cwd);
           writePrompt(out, uuid);
           return cwd;
@@ -163,8 +165,8 @@ public class InProcessCli implements Runnable {
           }
           cliMsg = cliToMsg(cmd);
           cliMsg.method = "ls";
-          cliMsg.data = new Object[] {"\"" + lsPath + "\""};
-          //cmd = String.format("/runtime/ls %s", lsPath);
+          cliMsg.data = new Object[] { "\"" + lsPath + "\"" };
+          // cmd = String.format("/runtime/ls %s", lsPath);
         } else if (cwd.equals("/")) {
           cmd = "/runtime/" + cmd;
         } else {
@@ -184,17 +186,17 @@ public class InProcessCli implements Runnable {
       if (cliMsg == null) {
         cliMsg = cliToMsg(cmd);
       }
-      
+
       // fully address destination
       if (!cliMsg.name.contains("@")) {
         cliMsg.name += "@" + remoteId;
       }
-      
+
       // FIXME - remove .. no special exceptions - use contextPath
       // agent specific commands
       if ("lp".equals(cliMsg.method)) {
         if (Runtime.getService("agent") == null) {
-          
+
         }
         cliMsg.name = "agent";
       }
@@ -212,7 +214,7 @@ public class InProcessCli implements Runnable {
 
       // THIS IS NOT CORRECT !! - USE YOUR OWN isLocal !!!
       if (Runtime.getInstance().isLocal(cliMsg)) {
-        
+
         // webgui way with decoding of parameters - begin
         String serviceName = cliMsg.getName();
         Class<?> clazz = Runtime.getClass(serviceName);
@@ -247,7 +249,7 @@ public class InProcessCli implements Runnable {
       return null;
     }
   }
-  
+
   /**
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
@@ -257,9 +259,8 @@ public class InProcessCli implements Runnable {
    * @return
    */
   public Message cliToMsg(String data) {
-    return CodecUtils.cliToMsg(contextPath , "runtime@" + id, "runtime@" + remoteId, data);
+    return CodecUtils.cliToMsg(contextPath, "runtime@" + id, "runtime@" + remoteId, data);
   }
-
 
   public void write(String o) throws IOException {
     if (o == null) {
@@ -335,7 +336,7 @@ public class InProcessCli implements Runnable {
   }
 
   public void setPrefix(String path) {
-      cwd = path;
+    cwd = path;
   }
 
   public String getCwd() {

@@ -84,8 +84,11 @@ public class RoombaGui extends ServiceGui implements ListSelectionListener, Acti
 
   /**
    * Returns an ImageIcon, or null if the path was invalid.
-   * @param path - path to the location of the image
-   * @param description - description of the image
+   * 
+   * @param path
+   *          - path to the location of the image
+   * @param description
+   *          - description of the image
    * @return the image
    */
   protected static ImageIcon createImageIcon(String path, String description) {

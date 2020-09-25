@@ -324,7 +324,8 @@ abstract public class AbstractMotor extends Service implements MotorControl, Enc
 
     this.controller = controller;
     this.controllerName = controller.getName();
-    // TODO: KW: set a reasonable mapper.  for pwm motor it's probable -1 to 1 to 0 to 255 ? not sure.
+    // TODO: KW: set a reasonable mapper. for pwm motor it's probable -1 to 1 to
+    // 0 to 255 ? not sure.
     this.mapper = controller.getDefaultMapper();
 
     broadcastState();

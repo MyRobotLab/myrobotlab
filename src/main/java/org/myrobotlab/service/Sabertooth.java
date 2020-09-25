@@ -224,7 +224,6 @@ public class Sabertooth extends AbstractMotorController implements PortConnector
     return false;
   }
 
-
   /**
    * Sabertooth is a serial device, so it has a PortConnector interface.
    */

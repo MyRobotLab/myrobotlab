@@ -189,7 +189,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
 
-
   String address = "0.0.0.0";
 
   boolean autoStartBrowser = true;
@@ -924,10 +923,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
     // for distributed Runtimes
     /*
-    if (si.isRuntime()) {
-      subscribe(si.getName(), "registered");
-    }
-    */
+     * if (si.isRuntime()) { subscribe(si.getName(), "registered"); }
+     */
 
     invoke("publishPanel", si.getName());
   }
@@ -941,7 +938,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     if (panels == null) {
       return null;
     }
-    
+
     Panel panel = null;
     if (panels.containsKey(panelName)) {
       panel = panels.get(panelName);
@@ -1221,7 +1218,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         return;
       }
 
-      
       for (int i = 0; i < 1000; ++i) {
         webgui.display("https://i.kinja-img.com/gawker-media/image/upload/c_scale,f_auto,fl_progressive,q_80,w_800/pytutcxcrfjvuhz2jipa.jpg");
       }

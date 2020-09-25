@@ -28,7 +28,6 @@ public class Webcam extends Service implements WebcamListener {
     super(n, id);
   }
 
-
   public void start() {
     start(null);
   }

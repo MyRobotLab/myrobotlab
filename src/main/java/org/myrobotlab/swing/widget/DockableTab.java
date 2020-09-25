@@ -93,9 +93,9 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
   }
 
   public DockableTab(DockableTabPane tabPane, String title, Component display) {
-	  if (title.contains("@")) {
-		  title = title.substring(0, title.indexOf("@"));
-	  }
+    if (title.contains("@")) {
+      title = title.substring(0, title.indexOf("@"));
+    }
     this.title = new JLabel(title);
     this.tabPane = tabPane;
     this.display = display;
@@ -240,7 +240,7 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
         // "/mrl_logo_36_36.png");
         URL url = null;
         try {
-          
+
           url = new URL(Service.getResourceRoot() + "/mrl_logo_36_36.png");
           Toolkit kit = Toolkit.getDefaultToolkit();
           Image img = kit.createImage(url);
@@ -431,12 +431,12 @@ public class DockableTab implements ActionListener, MouseListener, MouseMotionLi
   public void setData(DockableTabData tabData) {
     this.tabData = tabData;
   }
-  
+
   public Component getDisplay() {
     return display;
   }
 
-  public void setTab(String title, Component display) {   
+  public void setTab(String title, Component display) {
     int index = tabs.indexOfTabComponent(getTitleLabel());
     tabs.setComponentAt(index, display);
   }

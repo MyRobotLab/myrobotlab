@@ -102,7 +102,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
   // constructor
   public RoombaCommPort() {
     super();
-    serial = (Serial)Runtime.start("serial", "Serial");
+    serial = (Serial) Runtime.start("serial", "Serial");
     serial.startService();
     makePorts();
   }
@@ -224,7 +224,7 @@ public class RoombaCommPort extends RoombaComm implements SerialDataListener {
    * org.myrobotlab.roomba.Z#serialEvent(org.myrobotlab.serial.SerialDeviceEvent
    * )
    */
-  
+
   @Override
   public void onBytes(byte[] bytes) {
     for (int i = 0; i < bytes.length; i++) {

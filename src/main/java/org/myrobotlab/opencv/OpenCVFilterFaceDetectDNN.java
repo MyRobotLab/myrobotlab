@@ -65,10 +65,13 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   final Map<String, List<Classification>> classifications = new TreeMap<>();
   // if deps were checked in it would be like this
   /*
-  public String model = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel");
-  public String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/deploy.prototxt.txt");
-  */
-  // but 
+   * public String model =
+   * FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
+   * "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel"); public
+   * String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
+   * "models/facedetectdnn/deploy.prototxt.txt");
+   */
+  // but
   public String model = "resource/OpenCV/models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "resource/OpenCV/models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;

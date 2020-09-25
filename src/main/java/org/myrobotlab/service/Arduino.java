@@ -1745,10 +1745,12 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public Integer publishServoEvent(Integer deviceId, Integer eventType, Integer currentPos, Integer targetPos) {
     if (getDevice(deviceId) != null) {
       if (eventType == 0) {
-        // ((ServoStatusPublisher) getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
+        // ((ServoStatusPublisher)
+        // getDevice(deviceId)).publishServoStarted(getDevice(deviceId).getName());
         broadcast("publishServoStarted", getDevice(deviceId).getName());
       } else if (eventType == 1) {
-        // ((ServoStatusPublisher) getDevice(deviceId)).publishServoStopped(getDevice(deviceId).getName());
+        // ((ServoStatusPublisher)
+        // getDevice(deviceId)).publishServoStopped(getDevice(deviceId).getName());
         broadcast("publishServoStopped", getDevice(deviceId).getName());
       } else {
         log.error("unknown servo event type {}", eventType);

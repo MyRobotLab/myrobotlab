@@ -336,7 +336,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
   static int GAIN_TWOTHIRDS = ADS1015_REG_CONFIG_PGA_6_144V;
   public final static Logger log = LoggerFactory.getLogger(Ads1115.class);
   private static final long serialVersionUID = 1L;
- 
+
   public int adc0 = 0;
 
   public int adc1 = 0;
@@ -1117,7 +1117,7 @@ public class Ads1115 extends Service implements I2CControl, PinArrayControl {
     byte[] writebuffer = { (byte) reg, (byte) (value >> 8), (byte) (value & 0xff) };
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
-  
+
   @Override
   public Integer getAddress(String pin) {
     // TODO Auto-generated method stub

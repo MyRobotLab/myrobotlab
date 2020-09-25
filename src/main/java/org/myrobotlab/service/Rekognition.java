@@ -108,7 +108,8 @@ public class Rekognition extends Service {
    * returns label from file
    * 
    * 
-   * @param path - the path
+   * @param path
+   *          - the path
    * @return - labels
    * @throws FileNotFoundException
    * @throws IOException
@@ -134,7 +135,9 @@ public class Rekognition extends Service {
 
   /**
    * get labels
-   * @param inputStream - the stream of data
+   * 
+   * @param inputStream
+   *          - the stream of data
    * @return - labels found
    * @throws FileNotFoundException
    * @throws IOException

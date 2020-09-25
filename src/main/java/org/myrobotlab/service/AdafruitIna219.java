@@ -195,7 +195,6 @@ public class AdafruitIna219 extends Service implements I2CControl, VoltageSensor
     return busVoltage;
   }
 
-
   // This section contains all the new attach logic
   @Override
   public void attach(String service) throws Exception {

@@ -85,9 +85,7 @@ public class StringUtil {
   }
 
   public static void main(String[] args) throws ClassNotFoundException, IOException {
-    
-    
-    
+
     File serviceDir = new File("src/main/java/org/myrobotlab/service");
     String template = FileIO.toString("template.java");
     for (File f : serviceDir.listFiles()) {
@@ -194,7 +192,7 @@ public class StringUtil {
     return chunks;
 
   }
-  
+
   public static String toString(List<?> l) {
     StringBuilder sb = new StringBuilder();
     sb.append("[");
@@ -218,8 +216,10 @@ public class StringUtil {
   }
 
   /**
-   * This method will promote the bytes to integers and create a comma separated list of the integer values of the bytes.
-   * This ensures that the human readable string values for the bytes are considered unsigned.  (range 0-255)  not (-128 to 127)
+   * This method will promote the bytes to integers and create a comma separated
+   * list of the integer values of the bytes. This ensures that the human
+   * readable string values for the bytes are considered unsigned. (range 0-255)
+   * not (-128 to 127)
    * 
    * @param bytes
    * @return
@@ -229,25 +229,24 @@ public class StringUtil {
       // TODO: null or string?
       return null;
     }
-    
+
     StringBuilder builder = new StringBuilder();
-    for (int i = 0 ; i < bytes.length-1; i++) {
+    for (int i = 0; i < bytes.length - 1; i++) {
       builder.append((bytes[i] & 0xFF));
       builder.append(",");
     }
-    builder.append(bytes[bytes.length-1] & 0xFF);
+    builder.append(bytes[bytes.length - 1] & 0xFF);
     return builder.toString();
   }
 
   public static String intArrayToString(int[] ints) {
     StringBuilder builder = new StringBuilder();
-    for (int i = 0 ; i < ints.length-1; i++) {
+    for (int i = 0; i < ints.length - 1; i++) {
       builder.append(ints[i]);
       builder.append(",");
     }
-    builder.append(ints[ints.length-1]);
+    builder.append(ints[ints.length - 1]);
     return builder.toString();
   }
-
 
 }

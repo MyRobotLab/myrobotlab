@@ -17,9 +17,9 @@ import org.slf4j.Logger;
  */
 public class ServiceReservation implements Serializable {
   private static final long serialVersionUID = 1L;
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(ServiceReservation.class);
-  
+
   public String key;
   public String actualName;
   public String type;
@@ -34,6 +34,7 @@ public class ServiceReservation implements Serializable {
 
   /**
    * key type and comment are all that is needed to define a peer
+   * 
    * @param key
    * @param typeName
    * @param comment
@@ -43,7 +44,9 @@ public class ServiceReservation implements Serializable {
   }
 
   /**
-   * when actual name is specified whatever key is then mapped to the actual name
+   * when actual name is specified whatever key is then mapped to the actual
+   * name
+   * 
    * @param key
    * @param actualName
    * @param typeName
@@ -57,11 +60,11 @@ public class ServiceReservation implements Serializable {
     if (key == null) {
       log.error("key cannot be null");
     }
-        
+
     if (typeName == null) {
       log.error("typeName cannot be null");
     }
-    
+
     this.key = key;
     this.actualName = actualName;
     this.type = typeName;
@@ -73,7 +76,7 @@ public class ServiceReservation implements Serializable {
   public String toString() {
 
     StringBuffer sb = new StringBuffer();
-    //sb.append(key).append("=");
+    // sb.append(key).append("=");
     if (actualName != null) {
       sb.append("[");
       sb.append(actualName);

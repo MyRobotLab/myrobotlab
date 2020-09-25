@@ -7,16 +7,19 @@ public class DetectedText {
   public RotatedRect box;
   public float confidence;
   public String text;
+
   public DetectedText(RotatedRect box, float confidence, String text) {
     super();
     this.box = box;
     this.confidence = confidence;
     this.text = text;
   }
+
   @Override
   public String toString() {
     return "DetectedText [box=" + box + ", confidence=" + confidence + ", text=" + text + "]";
   }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -26,6 +29,7 @@ public class DetectedText {
     result = prime * result + ((text == null) ? 0 : text.hashCode());
     return result;
   }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -49,5 +53,5 @@ public class DetectedText {
       return false;
     return true;
   }
- 
+
 }

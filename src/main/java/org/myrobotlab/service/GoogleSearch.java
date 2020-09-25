@@ -58,7 +58,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   /**
    * language of search and results
    */
-  
+
   protected List<String> excludeTextFilter = new ArrayList<String>();
 
   public GoogleSearch(String n, String id) {
@@ -88,8 +88,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   public void clearFilters() {
     excludeTextFilter.clear();
   }
-
-
 
   @Override
   public SearchResults search(String searchText) throws IOException {
@@ -288,15 +286,16 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       LoggingFactory.init(Level.INFO);
 
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
-      // ImageDisplay display = (ImageDisplay) Runtime.start("display", "ImageDisplay");
+      // ImageDisplay display = (ImageDisplay) Runtime.start("display",
+      // "ImageDisplay");
       // display.attachSearchPublisher(google);
-      //display.setAlwaysOnTop(true);
-      
+      // display.setAlwaysOnTop(true);
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.setPort(8887);
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
+
       boolean isDone = true;
       if (isDone) {
         return;
@@ -319,10 +318,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       log.info("response - \n{}", results);
       results = google.search("how tall is the empire state building");
       log.info("response - \n{}", results);
-
-    
-
-   
 
     } catch (Exception e) {
       log.error("main threw", e);

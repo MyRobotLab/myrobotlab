@@ -36,64 +36,63 @@ import org.slf4j.Logger;
 
 public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
 
-	public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
+  public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
-	public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
+  public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-	// FIXME - why
-	@Deprecated
-	static boolean RobotCanMoveRandom = true;
-	private static final long serialVersionUID = 1L;
-	
-	public Arduino neopixelArduino = null;
+  // FIXME - why
+  @Deprecated
+  static boolean RobotCanMoveRandom = true;
+  private static final long serialVersionUID = 1L;
 
-	static String speechRecognizer = "WebkitSpeechRecognition";
+  public Arduino neopixelArduino = null;
 
- 
-  
+  static String speechRecognizer = "WebkitSpeechRecognition";
+
   /**
    * execute a resource script
+   * 
    * @param someScriptName
    */
   public void execScript(String someScriptName) {
     try {
-      Python p = (Python)Runtime.start("python", "Python");
+      Python p = (Python) Runtime.start("python", "Python");
       String script = getResourceAsString(someScriptName);
       p.exec(script, true);
     } catch (Exception e) {
-      error("unable to execute script %s", someScriptName); 
+      error("unable to execute script %s", someScriptName);
     }
   }
 
-	/**
-	 * This method will load a python file into the python interpreter.
-	 */
+  /**
+   * This method will load a python file into the python interpreter.
+   */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
-	public static boolean loadFile(String file) {
-		File f = new File(file);
-		Python p = (Python) Runtime.getService("python");
-		log.info("Loading  Python file {}", f.getAbsolutePath());
-		if (p == null) {
-			log.error("Python instance not found");
-			return false;
-		}
-		String script = null;
-		try {
-			script = FileIO.toString(f.getAbsolutePath());
-		} catch (IOException e) {
-			log.error("IO Error loading file : ", e);
-			return false;
-		}
-		// evaluate the scripts in a blocking way.
-		boolean result = p.exec(script, true);
-		if (!result) {
-			log.error("Error while loading file {}", f.getAbsolutePath());
-			return false;
-		} else {
-			log.debug("Successfully loaded {}", f.getAbsolutePath());
-		}
-		return true;
-	}
+  public static boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
+  }
 
   public static void main(String[] args) {
     try {
@@ -265,7 +264,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super(n, id);
 
     // by default all servos will auto-disable
-    //Servo.setAutoDisableDefault(true); //until peer servo services for InMoov2 have the auto disable behavior, we should keep this
+    // Servo.setAutoDisableDefault(true); //until peer servo services for
+    // InMoov2 have the auto disable behavior, we should keep this
 
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
     locale = Runtime.getInstance().getLocale();
@@ -273,7 +273,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // REALLY NEEDS TO BE CLEANED UP - no direct references
     // "publish" scripts which should be executed :(
     // python = (Python) startPeer("python");
-    python = (Python)Runtime.start("python", "Python"); // this crud should stop
+    python = (Python) Runtime.start("python", "Python"); // this crud should
+                                                         // stop
     load(locale.getTag());
 
     // get events of new services and shutdown
@@ -287,8 +288,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // peers to start on construction
     // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
-  
-
 
   @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
@@ -654,9 +653,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public boolean isUltraSonicLeftActivated() {
     return isUltraSonicLeftActivated;
   }
-		// by default all servos will auto-disable
-		// TODO: KW : make peer servo services for InMoov2 have the auto disable behavior.
-		// Servo.setAutoDisableDefault(true);
+  // by default all servos will auto-disable
+  // TODO: KW : make peer servo services for InMoov2 have the auto disable
+  // behavior.
+  // Servo.setAutoDisableDefault(true);
 
   public boolean isServoMixerActivated() {
     return isServoMixerActivated;
@@ -1573,7 +1573,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName();
+    String assetPath = /* getResourceDir() */ getResourceRoot() + fs + InMoov2.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);

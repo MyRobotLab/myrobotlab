@@ -23,7 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class ApiSwagger  {
+public class ApiSwagger {
 
   public final static Logger log = LoggerFactory.getLogger(Runtime.class);
 
@@ -197,21 +197,14 @@ public class ApiSwagger  {
 
   public static void main(String[] args) {
     try {
-      List<String> myList =
-          Arrays.asList("a1", "a2", "b1", "c2", "c1");
+      List<String> myList = Arrays.asList("a1", "a2", "b1", "c2", "c1");
 
-      myList
-          .stream()
+      myList.stream()
           // .filter(s -> s.startsWith("c"))
-          .map(String::toUpperCase)
-          .map(s -> s + "blah")
-          .map(s -> s + "oink")
-          .sorted()
-          .forEach(System.out::println);
-      
-      
+          .map(String::toUpperCase).map(s -> s + "blah").map(s -> s + "oink").sorted().forEach(System.out::println);
+
       ApiSwagger swagger = new ApiSwagger();
-      
+
       log.info("{}", CodecUtils.toJson(swagger.getSwagger()));
     } catch (Exception e) {
       log.error("main threw", e);

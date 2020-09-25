@@ -37,8 +37,9 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
 /**
- * This is a data class to hold method description. Its constructed from java.reflect.Method and quickly
- * moves the relevant data to serializable types on construction.
+ * This is a data class to hold method description. Its constructed from
+ * java.reflect.Method and quickly moves the relevant data to serializable types
+ * on construction.
  * 
  * @author GroG
  *
@@ -81,25 +82,26 @@ public class MethodEntry implements Serializable {
   public MethodEntry(Method m) {
     this.method = m;
     this.name = m.getName();
-    
+
     Class<?>[] paramTypes = m.getParameterTypes();
     Parameter[] parameters = method.getParameters();
-    
+
     objectName = m.getDeclaringClass().getCanonicalName();
-    
+
     parameterNames = new String[paramTypes.length];
 
     for (int i = 0; i < paramTypes.length; ++i) {
       Parameter parameter = parameters[i];
       if (!parameter.isNamePresent()) {
-        // log.warn("{}.{} parameter names are not present!", m.getDeclaringClass().getSimpleName(), m.getName());
+        // log.warn("{}.{} parameter names are not present!",
+        // m.getDeclaringClass().getSimpleName(), m.getName());
         continue;
       }
 
       String parameterName = parameter.getName();
       parameterNames[i] = parameterName;
     }
-        
+
     this.parameterTypeNames = new String[paramTypes.length];
     for (int i = 0; i < paramTypes.length; ++i) {
       parameterTypeNames[i] = paramTypes[i].getCanonicalName();
@@ -108,13 +110,13 @@ public class MethodEntry implements Serializable {
     this.returnTypeName = method.getReturnType().getCanonicalName();
     this.simpleReturnTypeName = method.getReturnType().getSimpleName();
   }
-  
-  public String [] getSimpleParameterNames() {
+
+  public String[] getSimpleParameterNames() {
     String[] ret = new String[parameterTypeNames.length];
     for (int i = 0; i < parameterTypeNames.length; ++i) {
-      String s = parameterTypeNames[i].substring(parameterTypeNames[i].lastIndexOf(".")+1);      
+      String s = parameterTypeNames[i].substring(parameterTypeNames[i].lastIndexOf(".") + 1);
       ret[i] = s;
-    }  
+    }
     return ret;
   }
 
@@ -122,7 +124,8 @@ public class MethodEntry implements Serializable {
     return parameterNames;
   }
 
-  // FIXME - rename getSignature(boolean simple) - with getSignature(true) default - don't make static
+  // FIXME - rename getSignature(boolean simple) - with getSignature(true)
+  // default - don't make static
   final static public String getPrettySignature(String methodName, Class<?>[] parameterTypes, Class<?> returnType) {
 
     StringBuffer sb = new StringBuffer();
@@ -179,7 +182,7 @@ public class MethodEntry implements Serializable {
   public Class<?> getReturnType() {
     return method.getReturnType();
   }
-  
+
   public String getReturnTypeName() {
     return returnTypeName;
   }
@@ -192,7 +195,7 @@ public class MethodEntry implements Serializable {
   public String toString() {
     // recently changed 2019.08.17 GroG
     // return getSignature();
-    
+
     StringBuilder sb = new StringBuilder();
     String[] p = getSimpleParameterNames();
     for (int i = 0; i < p.length; ++i) {

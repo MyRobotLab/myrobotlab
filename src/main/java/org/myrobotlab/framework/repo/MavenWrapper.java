@@ -152,9 +152,9 @@ public class MavenWrapper extends Repo implements Serializable {
         }
         if (dependency.getVersion() == null) {
           dep.append("<!-- skipping " + dependency.getOrgId() + " " + dependency.getArtifactId() + " " + depKey + " null version/latest -->\n");
-          continue;          
+          continue;
         }
-        
+
         listedDeps.add(depKey);
         dep.append("  <dependency>\n");
         dep.append(String.format("    <groupId>%s</groupId>\n", dependency.getOrgId()));
@@ -209,7 +209,9 @@ public class MavenWrapper extends Repo implements Serializable {
 
   /**
    * (non-Javadoc)
-   * @see org.myrobotlab.framework.repo.Repo#createBuildFiles(java.lang.String, java.lang.String[])
+   * 
+   * @see org.myrobotlab.framework.repo.Repo#createBuildFiles(java.lang.String,
+   *      java.lang.String[])
    */
   public void createBuildFiles(String location, String[] serviceTypes) {
     try {
@@ -256,10 +258,10 @@ public class MavenWrapper extends Repo implements Serializable {
 
   }
 
-@Override
-public void installDependency(String location, ServiceDependency serviceTypes) {
-	// TODO Auto-generated method stub
-	
-}
+  @Override
+  public void installDependency(String location, ServiceDependency serviceTypes) {
+    // TODO Auto-generated method stub
+
+  }
 
 }

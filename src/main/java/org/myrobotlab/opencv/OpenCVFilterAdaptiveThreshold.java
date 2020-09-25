@@ -44,13 +44,13 @@ import org.slf4j.Logger;
 public class OpenCVFilterAdaptiveThreshold extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterAdaptiveThreshold.class);
-  
+
   protected String algorithm = "mean";
-  
+
   protected int blockSize = 11;
-  
+
   protected int param1 = 2;
 
   transient IplImage gray = null;

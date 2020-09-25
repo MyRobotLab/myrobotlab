@@ -91,7 +91,7 @@ public class Hd44780Gui extends ServiceGui implements ActionListener {
 
         if (o == save) {
           send("clear");
-          //parse jtextarea and send lines to lcd
+          // parse jtextarea and send lines to lcd
           String[] arrayOfLines = screenContent.getText().split("\n");
           int i = 0;
           for (String line : arrayOfLines) {

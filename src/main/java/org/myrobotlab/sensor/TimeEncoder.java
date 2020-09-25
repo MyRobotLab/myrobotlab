@@ -24,8 +24,8 @@ import org.slf4j.Logger;
  * @author GroG
  * 
  *         FIXME controlled clear units (degrees cm per s vs ms .. etc)
- *         
- *         FIXME - THIS SHOULD BE A SERVICE - similar to PID where it can manage 
+ * 
+ *         FIXME - THIS SHOULD BE A SERVICE - similar to PID where it can manage
  *         multiple calculations/trajectories/encoding for many other services
  *
  */
@@ -175,8 +175,8 @@ public class TimeEncoder implements Runnable, EncoderControl {
   }
 
   /**
-   * Static position saver for all servos which use a time encoder.
-   * the positions are read back in on starting the Servo
+   * Static position saver for all servos which use a time encoder. the
+   * positions are read back in on starting the Servo
    */
   Positions positions = null;
 
@@ -253,7 +253,7 @@ public class TimeEncoder implements Runnable, EncoderControl {
         }
 
         boolean started = true;
-        
+
         while (now < endMoveTs && isRunning) {
 
           now = System.currentTimeMillis();
@@ -274,8 +274,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
           positions.setPosition(name, estimatedPos);
           if (enableServoEvents && started) {
-            // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
-            ((Broadcaster)servo).broadcast("publishServoStarted", servo.getName());
+            // ((Broadcaster)servo).broadcast("publishedServoStopped",
+            // ServoStatus.SERVO_STOPPED, estimatedPos);
+            ((Broadcaster) servo).broadcast("publishServoStarted", servo.getName());
             started = false;
           }
           servo.onEncoderData(d);// FIXME !! - broadcast this
@@ -287,8 +288,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
         EncoderData d = new EncoderData(name, null, estimatedPos, estimatedPos);
         servo.onEncoderData(d);
         if (enableServoEvents) {
-          // ((Broadcaster)servo).broadcast("publishedServoStopped", ServoStatus.SERVO_STOPPED, estimatedPos);
-          ((Broadcaster)servo).broadcast("publishServoStopped", servo.getName());
+          // ((Broadcaster)servo).broadcast("publishedServoStopped",
+          // ServoStatus.SERVO_STOPPED, estimatedPos);
+          ((Broadcaster) servo).broadcast("publishServoStopped", servo.getName());
         }
         positions.setPosition(name, estimatedPos);
       }
@@ -433,24 +435,24 @@ public class TimeEncoder implements Runnable, EncoderControl {
   @Override
   public void addListener(String localTopic, String otherService, String callback) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void addListener(String localTopic, String otherService) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void removeListener(String localTopic, String otherService, String callback) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void removeListener(String localTopic, String otherService) {
     // TODO Auto-generated method stub
-    
+
   }
 }

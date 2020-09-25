@@ -33,18 +33,19 @@ import org.myrobotlab.framework.interfaces.NameProvider;
 
 public interface Gateway extends NameProvider {
 
-  public void connect(String uri) throws Exception; // <-- FIXME invalid I assume ?
+  public void connect(String uri) throws Exception; // <-- FIXME invalid I
+                                                    // assume ?
 
   public List<String> getClientIds();
-  
+
   public Map<String, Map<String, Object>> getClients();
 
   public void sendRemote(final Message msg) throws Exception;
-  
+
   public Object sendBlockingRemote(final Message msg, Integer timeout) throws Exception;
-  
+
   public boolean isLocal(Message msg);
-  
+
   public Message getDefaultMsg(String connId);
 
 }

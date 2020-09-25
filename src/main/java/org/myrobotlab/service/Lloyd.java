@@ -102,31 +102,31 @@ public class Lloyd extends Service {
   @Override
   public void startService() {
     try {
-    super.startService();
-    // additional initialization here i guess?
-    startBrain();
-    startCortex();
-    // start memory last :( can't attach eyes until the eyes exist.
+      super.startService();
+      // additional initialization here i guess?
+      startBrain();
+      startCortex();
+      // start memory last :( can't attach eyes until the eyes exist.
 
-    if (enableSpeech) {
-      startEar();
-      startMouth();
-    }
-    if (enableEyes) {
-      startEyes();
-    }
+      if (enableSpeech) {
+        startEar();
+        startMouth();
+      }
+      if (enableEyes) {
+        startEyes();
+      }
 
-    startMemory();
+      startMemory();
 
-    // If we're in telepresence mode start the oculus service.
-    if (enableOculus) {
-      startOculus();
-    }
+      // If we're in telepresence mode start the oculus service.
+      if (enableOculus) {
+        startOculus();
+      }
 
-    if (enableIK) {
-      startIK();
-    }
-    } catch(Exception e) {
+      if (enableIK) {
+        startIK();
+      }
+    } catch (Exception e) {
       log.error("startService threw", e);
     }
   }
@@ -344,7 +344,7 @@ public class Lloyd extends Service {
       log.warn("model file {} does not exist", yoloPersonImageRecognizerModelFilename);
       return;
     }
-    
+
     CustomModel imageRecognizer = visualCortex.trainModel(labels, trainIter, testIter, yoloPersonImageRecognizerModelFilename, maxEpochs, targetAccuracy, featureExtractionLayer);
     // update the cv filter with the new model
     // ((OpenCVFilterDL4JTransfer)leftEye.getFilter("dl4jTransfer")).setModel(imageRecognizer);
@@ -415,7 +415,7 @@ public class Lloyd extends Service {
   }
 
   public void startEyes() {
-    
+
     // TODO: enable right eye / config
     // rightEye = (OpenCV)Runtime.start("rightEye", "OpenCV");
     leftEye = (OpenCV) Runtime.start("leftEye", "OpenCV");
@@ -463,7 +463,7 @@ public class Lloyd extends Service {
 
   public void startIK() {
     String partName = "currentArm";
-    
+
     leftIK = (InverseKinematics3D) Runtime.start("leftIK", "InverseKinematics3D");
     rightIK = (InverseKinematics3D) Runtime.start("rightIK", "InverseKinematics3D");
 

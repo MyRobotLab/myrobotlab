@@ -70,7 +70,7 @@ public class Outbox implements Runnable, Serializable {
   transient ArrayList<Thread> outboxThreadPool = new ArrayList<Thread>();
 
   /**
-   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt; 
+   * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
    */
   public HashMap<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
@@ -79,11 +79,11 @@ public class Outbox implements Runnable, Serializable {
   public Outbox(NameProvider myService) {
     this.myService = myService;
   }
-  
-  public Set<String> getAttached(){    
+
+  public Set<String> getAttached() {
     Set<String> unique = new TreeSet<>();
     for (List<MRLListener> subcribers : notifyList.values()) {
-      for (MRLListener listener: subcribers) {
+      for (MRLListener listener : subcribers) {
         unique.add(listener.callbackName);
       }
     }
@@ -111,8 +111,8 @@ public class Outbox implements Runnable, Serializable {
       // we warn if over 10 messages are in the queue - but we will still
       // process them
       if (msgBox.size() > maxQueue) {
-        
-        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method );
+
+        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
       }
       msgBox.addFirst(msg);
 
@@ -296,7 +296,7 @@ public class Outbox implements Runnable, Serializable {
       log.error("outbox threw", e);
     }
   }
-  
+
   /**
    * remove ALL listeners/subscribers
    */
@@ -306,19 +306,20 @@ public class Outbox implements Runnable, Serializable {
 
   /**
    * Safe detach for single subscriber
+   * 
    * @param name
    */
   synchronized public void detach(String name) {
     for (String topic : notifyList.keySet()) {
       List<MRLListener> subscribers = notifyList.get(topic);
       ArrayList<MRLListener> smallerList = new ArrayList<>();
-      for (MRLListener listener: subscribers) {
+      for (MRLListener listener : subscribers) {
         if (!listener.callbackName.equals(name)) {
           smallerList.add(listener);
-        }        
+        }
       }
       notifyList.put(topic, smallerList);
     }
   }
-  
+
 }

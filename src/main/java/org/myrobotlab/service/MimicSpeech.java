@@ -29,7 +29,6 @@ public class MimicSpeech extends AbstractSpeechSynthesis {
     setReady(Platform.getLocalInstance().isWindows());
   }
 
-
   public static void main(String[] args) throws Exception {
     Runtime.start("gui", "SwingGui");
     MimicSpeech mimic = (MimicSpeech) Runtime.createAndStart("mimic", "MimicSpeech");

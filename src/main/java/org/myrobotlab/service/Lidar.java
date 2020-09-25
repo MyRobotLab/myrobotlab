@@ -47,7 +47,7 @@ public class Lidar extends Service implements SerialDataListener {
 
     try {
 
-      Lidar template =  (Lidar)Runtime.start("Lidar", "Lidar");
+      Lidar template = (Lidar) Runtime.start("Lidar", "Lidar");
       template.startService();
 
       // Lidar lidar01 = (Lidar) Runtime.createAndStart("lidar01",
@@ -85,7 +85,8 @@ public class Lidar extends Service implements SerialDataListener {
 
   public Lidar(String n, String id) {
     super(n, id);
-    // reserve(String.format("%s_serial", n), "Serial", "serial port for Lidar"); describe it in meta data
+    // reserve(String.format("%s_serial", n), "Serial", "serial port for
+    // Lidar"); describe it in meta data
   }
 
   @Override
@@ -351,6 +352,5 @@ public class Lidar extends Service implements SerialDataListener {
   public void onDisconnect(String portName) {
     info("%s disconnected from %s", getName(), portName);
   }
-
 
 }

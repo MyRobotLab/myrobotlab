@@ -297,7 +297,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   private void createMicroPinDisplay(JLayeredPane imageMap, List<PinDefinition> pins) {
     // TODO Auto-generated method stub
-    
+
   }
 
   private void createUnoPinDisplay(JLayeredPane imageMap, List<PinDefinition> pins) {
@@ -371,14 +371,14 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     JPanel uploadPanel = new JPanel(new BorderLayout());
     String mrlIno = null;
     try {
-        pathToMrlComm.setText(FileIO.gluePaths(Service.getResourceDir(Arduino.class),"/MrlComm/MrlComm.ino"));
+      pathToMrlComm.setText(FileIO.gluePaths(Service.getResourceDir(Arduino.class), "/MrlComm/MrlComm.ino"));
       mrlIno = FileIO.toString(pathToMrlComm.getText());
     } catch (Exception e) {
       log.warn("MrlComm.ino not found", e);
     }
 
     JPanel top = new JPanel(new GridLayout(0, 1));
-    
+
     JPanel firstLine = new JPanel(new BorderLayout());
     firstLine.add(new JLabel("Arduino IDE Path "), BorderLayout.WEST);
     firstLine.add(arduinoPath, BorderLayout.CENTER);
@@ -391,15 +391,15 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
     flow.add(chooser);
     flow.add(openMrlComm);
     firstLine.add(flow, BorderLayout.EAST);
-    
+
     top.add(firstLine);
-    
+
     JPanel secondLine = new JPanel(new BorderLayout());
-    secondLine.add(new JLabel("MrlComm.ino location :"), BorderLayout.WEST);    
+    secondLine.add(new JLabel("MrlComm.ino location :"), BorderLayout.WEST);
     top.add(secondLine);
-    
+
     top.add(pathToMrlComm);
-    
+
     uploadPanel.add(top, BorderLayout.NORTH);
 
     editor = new TextEditorPane();
