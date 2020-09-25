@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -44,7 +43,7 @@ public class LauncherTest extends AbstractTest {
   @Test
   public void test() throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
 
-    Launcher.main(new String[] {"--no-client", "-c", "-s", "runtime", "Runtime"});    
+    Launcher.main(new String[] {"--from-launcherent", "-c", "-s", "runtime", "Runtime"});    
     
     String help = Launcher.mainHelp();
 

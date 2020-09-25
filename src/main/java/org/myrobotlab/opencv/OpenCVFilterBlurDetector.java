@@ -7,19 +7,14 @@ import static org.bytedeco.opencv.global.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.opencv.global.opencv_imgproc.CV_THRESH_BINARY;
 import static org.bytedeco.opencv.global.opencv_imgproc.Laplacian;
 import static org.bytedeco.opencv.global.opencv_imgproc.cvCvtColor;
-import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import org.bytedeco.javacpp.indexer.DoubleRawIndexer;
-import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacpp.indexer.Indexer;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.Test;
 import org.myrobotlab.service.OpenCV;
 
 public class OpenCVFilterBlurDetector extends OpenCVFilter {

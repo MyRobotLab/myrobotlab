@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.image.WebImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.math.geometry.Point;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 
@@ -53,12 +52,21 @@ public class Webcam extends Service implements WebcamListener {
   
   transient Thread worker = null;
 
+  // FIXME - dynamic loading of driver - a selection ?
   static {
     com.github.sarxos.webcam.Webcam.setDriver(new V4l4jDriver());
   }
 
   public WebImage publishWebDisplay(WebImage img) {
     return img;
+  }
+  
+  public void samplePoint(int x, int y) {
+    invoke("publishSamplePoint", x, y);
+  }
+
+  public Point publishSamplePoint(int x, int y) {
+    return new Point(x, y);
   }
 
   public Webcam(String n, String id) {
@@ -265,7 +273,7 @@ public class Webcam extends Service implements WebcamListener {
       // webcam.startStreamClient("127.0.0.1", 22222);
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
   }
 

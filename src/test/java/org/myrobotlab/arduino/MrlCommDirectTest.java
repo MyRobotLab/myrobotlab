@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.myrobotlab.arduino.BoardInfo;
-import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.QueueStats;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.sensor.EncoderData;

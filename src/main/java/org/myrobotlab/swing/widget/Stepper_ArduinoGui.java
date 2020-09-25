@@ -13,7 +13,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.PinArrayControl;
 import org.myrobotlab.service.interfaces.PinDefinition;
-import org.myrobotlab.swing.WolframAlphaGui;
 import org.slf4j.Logger;
 
 public class Stepper_ArduinoGui extends StepperControllerPanel implements ActionListener {

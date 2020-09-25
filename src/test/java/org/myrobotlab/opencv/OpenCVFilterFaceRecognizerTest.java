@@ -2,18 +2,19 @@ package org.myrobotlab.opencv;
 
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertNotNull;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.rules.TemporaryFolder;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.OpenCV;
 import org.slf4j.Logger;
-import org.junit.Assert;
 
 public class OpenCVFilterFaceRecognizerTest extends AbstractOpenCVFilterTest {
   transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceRecognizerTest.class);

@@ -1,8 +1,7 @@
 package org.myrobotlab.deeplearning4j;
 
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Ignore;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.service.Deeplearning4j;
 import org.myrobotlab.service.OpenCV;
 import org.myrobotlab.service.Runtime;

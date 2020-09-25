@@ -7,7 +7,6 @@ import java.util.Set;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.math.MapperLinear;
-import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;

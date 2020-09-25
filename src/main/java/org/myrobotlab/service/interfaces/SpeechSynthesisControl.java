@@ -1,7 +1,6 @@
 package org.myrobotlab.service.interfaces;
 
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis.WordFilter;
 
 public interface SpeechSynthesisControl extends NameProvider {
 

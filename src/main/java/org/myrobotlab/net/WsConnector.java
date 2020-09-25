@@ -5,7 +5,6 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.atmosphere.wasync.Client;
 import org.atmosphere.wasync.ClientFactory;
 import org.atmosphere.wasync.Decoder;
 import org.atmosphere.wasync.Encoder;

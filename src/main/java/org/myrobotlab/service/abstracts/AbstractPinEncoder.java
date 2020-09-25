@@ -4,7 +4,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class AbstractPinEncoder extends Service implements EncoderControl {
 

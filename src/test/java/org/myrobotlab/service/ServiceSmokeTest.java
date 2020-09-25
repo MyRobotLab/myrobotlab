@@ -1,11 +1,8 @@
 package org.myrobotlab.service;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 
 import org.junit.Test;

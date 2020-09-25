@@ -75,7 +75,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
 import org.myrobotlab.swing.Welcome;

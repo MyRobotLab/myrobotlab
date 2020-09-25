@@ -23,6 +23,12 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
         fps: 0
     }
 
+        $scope.samplePoint = {
+        x: 0,
+        y: 0
+    }
+
+
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
         $scope.service = service
@@ -45,7 +51,8 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
             if (data.frameIndex % avgSampleCnt == 0) {
                 $scope.stats.latency = Math.round(latencyDeltaAccumulator / avgSampleCnt)
                 latencyDeltaAccumulator = 0
-                $scope.stats.fps = Math.round((data.frameIndex - lastFrameIndex) * 1000 / (data.ts - lastFrameTs))
+                $scope.stats.fps = (data.ts - lastFrameTs)
+                //$scope.stats.fps = Math.round((data.frameIndex - lastFrameIndex) * 1000 / (data.ts - lastFrameTs))
                 lastFrameIndex = data.frameIndex
                 lastFrameTs = data.ts
             }
@@ -58,6 +65,13 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
+    }
+
+    $scope.onSamplePoint = function($event) {
+        console.info('samplePoint ' + $event)
+        $scope.samplePoint.x = $event.offsetX
+        $scope.samplePoint.y = $event.offsetY
+        msg.send('samplePoint', $scope.samplePoint.x, $scope.samplePoint.y)
     }
 
     $scope.getDisplayImage = function() {

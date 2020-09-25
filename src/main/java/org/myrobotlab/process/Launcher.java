@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.myrobotlab.client.Client;
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;

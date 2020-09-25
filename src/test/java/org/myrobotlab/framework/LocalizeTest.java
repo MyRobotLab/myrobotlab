@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNull;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.framework.TaskTest;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.InMoov2;
 import org.myrobotlab.service.Runtime;
