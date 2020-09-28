@@ -44,7 +44,7 @@ public interface MessageSender extends NameProvider {
   public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException;
 
   public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException;
-  
+
   public Object waitFor(String fullName, String method, Integer timeout) throws InterruptedException, TimeoutException;
 
 }

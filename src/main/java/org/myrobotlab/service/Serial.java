@@ -184,10 +184,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   int parity = 0;
 
   private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
-  
+
   transient TcpSerialHub tcpSerialHub = new TcpSerialHub();
-
-
 
   /**
    * list of RX listeners - if "local" they will be immediately called back by
@@ -200,9 +198,12 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * conversion utility TODO - support endianess
    * 
-   * @param bytes - bytes to convert
-   * @param offset - offset into bytes
-   * @param length - length of data to convert
+   * @param bytes
+   *          - bytes to convert
+   * @param offset
+   *          - offset into bytes
+   * @param length
+   *          - length of data to convert
    * @return
    */
   public static int bytesToInt(int[] bytes, int offset, int length) {
@@ -254,21 +255,23 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   /**
-   * Method which either sets up the pub/sub remote or assigns a local
-   * reference from the publishing thread
+   * Method which either sets up the pub/sub remote or assigns a local reference
+   * from the publishing thread
    * 
-   * FIXME - this is no longer a "Good" pattern - the framework now does this auto-magically, where local pub/sub listeners
-   * will "directly" be invoked, and remote pub/sub listeners will be sent remotely
+   * FIXME - this is no longer a "Good" pattern - the framework now does this
+   * auto-magically, where local pub/sub listeners will "directly" be invoked,
+   * and remote pub/sub listeners will be sent remotely
    * 
-   * FIXME - this now violates the good pattern.  A good pattern simply lets the framework handle the details of local/remote
-   * and this function should definitely NOT get a direct reference to the service
+   * FIXME - this now violates the good pattern. A good pattern simply lets the
+   * framework handle the details of local/remote and this function should
+   * definitely NOT get a direct reference to the service
    * 
    * @param name
    */
   public void addByteListener(String name) {
     log.info("Add Byte Listener for Name {}", name);
     ServiceInterface si = Runtime.getService(name);
-    
+
     if (si == null) {
       log.error("{} service interface is null!");
       return;
@@ -278,7 +281,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       // local optimization
       addByteListener((SerialDataListener) si);
     } else {
-      // TODO: review this section here..  we might have double publishing going on.
+      // TODO: review this section here.. we might have double publishing going
+      // on.
       // pub sub
       addListener("publishRX", name, "onByte");
       addListener("publishBytes", name, "onBytes");
@@ -395,7 +399,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     // #2 connect to a pre-existing
     if (ports.containsKey(inPortName)) {
       info("#2 connect to a pre-existing port");
-      connectPort(ports.get(inPortName), null);     
+      connectPort(ports.get(inPortName), null);
       lastPortName = portName;
       return;
     }
@@ -412,7 +416,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
         throw new IOException(e);
       }
     }
-    
+
     // #2.5 - Platform is in virtual mode - create a virtual uart
 
     if (Platform.isVirtual()) {
@@ -420,7 +424,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       connect(inPortName);
       return;
     }
-    
 
     // #3 we dont have an existing port - so we'll try a hardware port
     // connect at default parameters - if you need custom parameters
@@ -431,7 +434,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       return;
     }
 
-    connectPort(port, null);  
+    connectPort(port, null);
 
     // even when the JNI says it is connected
     // rarely is everything ready to go
@@ -571,7 +574,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
     uart.connectPort(uPort, uart);
     log.info("connectToVirtualUart - creating uart {} <--> {}", myPort, uartPort);
-    // returning the serial service that is connected to the DCE side of the virtual port.
+    // returning the serial service that is connected to the DCE side of the
+    // virtual port.
     return uart;
   }
 
@@ -644,8 +648,8 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   public String getPortName() {
     return portName;
   }
-  
-  static public List<String> listPorts(){
+
+  static public List<String> listPorts() {
     // all current ports
     portNames.addAll(ports.keySet());
 
@@ -661,13 +665,13 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     log.info("ports: {}", Arrays.toString(ports.toArray()));
     return ports;
   }
-  
+
   static public String getPorts() {
     StringBuffer sb = new StringBuffer("[");
     List<String> ports = listPorts();
     for (int i = 0; i < ports.size(); ++i) {
       sb.append("\"" + ports.get(i) + "\"");
-      if (i != ports.size() -1) {
+      if (i != ports.size() - 1) {
         sb.append(",");
       }
     }
@@ -702,7 +706,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     // broadcastState(); // FIXME - REMOVE !!! publishPortNames should be used !
     return ports;
   }
-  
+
   static SerialControl getPortSource() {
     try {
       hardwareLibrary = getHardwareLibrary();
@@ -730,7 +734,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   }
 
   public boolean isConnected() {
-    // really?  shouldn't this be something like...
+    // really? shouldn't this be something like...
     // if the port is actually connected?
     return portName != null;
   }
@@ -749,13 +753,14 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     if (bytes == null) {
       return;
     }
-    if (listeners.size() ==0) {
+    if (listeners.size() == 0) {
       log.warn("No Listeners !!!  we are invoking publishBytes.. data is likely getting dropped? ");
     }
     invoke("publishBytes", bytes);
     // String byteIntString = StringUtil.byteArrayToIntString(bytes);
-    // log.info("On bytes called len: {}  data: {}" , bytes.length, byteIntString);
-    for (int i = 0 ; i < bytes.length; i ++) {
+    // log.info("On bytes called len: {} data: {}" , bytes.length,
+    // byteIntString);
+    for (int i = 0; i < bytes.length; i++) {
       Integer newByte = bytes[i] & 0xff;
       ++rxCount;
       // publish the rx byte !
@@ -778,7 +783,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       }
     }
   }
-  
+
   @Override
   public void onConnect(String portName) {
     info("%s connected to %s", getName(), portName);
@@ -814,7 +819,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return portNames;
   }
 
-
   /**
    * publish a byte array of data that was read from the serial port.
    * 
@@ -828,6 +832,7 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   /**
    * Publishing receive data to and end point
+   * 
    * @param data
    * @return
    */
@@ -835,9 +840,9 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     return data;
   }
 
-
   /**
    * Publishing transmit data to a publishing point
+   * 
    * @param data
    * @return
    */
@@ -863,11 +868,10 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
     return newByte;
   }
-  
 
   /**
-   * return a byte array represending all the input pending data at the time it's called.
-   * If there is no input data, null is returned.
+   * return a byte array represending all the input pending data at the time
+   * it's called. If there is no input data, null is returned.
    * 
    * @return
    * @throws IOException
@@ -1104,24 +1108,25 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    */
   @Override
   public void write(byte[] data) throws Exception {
-    
+
     if (data == null) {
       return;
     }
 
     for (String portName : connectedPorts.keySet()) {
       Port writePort = connectedPorts.get(portName);
-      // log.info("Writing data to port {} data:{} -- WritePort:{}", portName, data, writePort);
+      // log.info("Writing data to port {} data:{} -- WritePort:{}", portName,
+      // data, writePort);
       writePort.write(data);
     }
 
     // TODO: invoke publishTX with the array?
-    for (int i = 0 ; i < data.length;i++) {
-      invoke("publishTX", (int)data[i]);
+    for (int i = 0; i < data.length; i++) {
+      invoke("publishTX", (int) data[i]);
     }
-    
+
   }
-  
+
   public void writeInt(int b) throws Exception {
     write(b);
   }
@@ -1235,18 +1240,18 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
       recordRx = null;
     }
   }
-  
+
   public void startTcpServer() throws IOException {
-    startTcpServer(null); // default port 
+    startTcpServer(null); // default port
   }
-  
+
   public void startTcpServer(Integer port) throws IOException {
-      tcpSerialHub.start(port);    
-      tcpSerialHub.attach(this);
+    tcpSerialHub.start(port);
+    tcpSerialHub.attach(this);
   }
-  
+
   public void stopTcpServer() throws IOException {
-      tcpSerialHub.stop();     
+    tcpSerialHub.stop();
   }
 
   public static void main(String[] args) {
@@ -1272,28 +1277,26 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     try {
 
       Platform.setVirtual(true);
-      
-      Serial s = (Serial)Runtime.start("s1", "Serial");
+
+      Serial s = (Serial) Runtime.start("s1", "Serial");
       String vport1 = "vport1";
       s.connect(vport1);
-      Serial uart = (Serial)Runtime.getService(vport1 + ".UART");
-      
+      Serial uart = (Serial) Runtime.getService(vport1 + ".UART");
+
       Runtime.start("webgui", "WebGui");
-      
+
       Runtime.start("gui", "SwingGui");
-      VirtualArduino hub = (VirtualArduino)Runtime.start("varduino", "VirtualArduino");
-     //  Serial serial = (Serial) Runtime.start("serial", "Serial");
+      VirtualArduino hub = (VirtualArduino) Runtime.start("varduino", "VirtualArduino");
+      // Serial serial = (Serial) Runtime.start("serial", "Serial");
       Serial serial = hub.getSerial();
       serial.startTcpServer();
       // serial.connect("COM88");
       hub.connect("COM888");
 
-
       boolean done = true;
       if (done) {
         return;
       }
-      
 
       List<String> ports = new ArrayList<String>(portNames);
       serial.invoke("publishPortNames", ports);
@@ -1314,7 +1317,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
       // EASY VIRTUAL SWITCH
 
-      
       uart.setTimeout(300);
       // ---- Virtual End -----
 
@@ -1476,6 +1478,5 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
     }
 
   }
-
 
 }

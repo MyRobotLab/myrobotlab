@@ -18,6 +18,5 @@ public interface SearchPublisher extends TextPublisher, LocaleProvider {
   List<String> publishImages(List<String> images);
 
   int setMaxImages(int cnt);
-  
 
-} 
+}

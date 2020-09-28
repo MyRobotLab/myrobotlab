@@ -75,7 +75,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
 import org.myrobotlab.swing.Welcome;
@@ -171,7 +170,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   transient private JMenu importMenu;
   transient private JMenu refresh;
   private String guiId;
-  private boolean firstHeadlessError =  true;
+  private boolean firstHeadlessError = true;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -270,7 +269,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // subscribe("runtime", "registered", getName(), "addTab");
     subscribeToRuntime("registered");
   }
-  
+
   public void onRegistered(Registration registration) {
     addTab(registration.service);
   }
@@ -387,7 +386,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
-    if (Runtime.isHeadless() && firstHeadlessError ) {
+    if (Runtime.isHeadless() && firstHeadlessError) {
       log.warn("{} SwingGui is in headless environment", getName());
       firstHeadlessError = false;
       return;
@@ -402,13 +401,14 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        
+
         if (isHeadless()) {
           log.info("headless - no swing gui");
           return;
         }
 
-    	// FIXME - this will be an issue of name collision in distributed mrl !!!
+        // FIXME - this will be an issue of name collision in distributed mrl
+        // !!!
         String name = sw.getFullName();// sw.getName();
 
         // change tab color based on name
@@ -713,7 +713,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     if (sgs == null) {
       log.error("attempting to update derived ServiceGui with - callback " + key + " not available in map " + getName());
     } else {
-      
+
       for (int i = 0; i < sgs.size(); ++i) {
         ServiceGui sg = sgs.get(i);
         invokeOn(false, sg, m.method, m.data);
@@ -722,7 +722,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
     return false;
   }
-  
+
   public void onReleased(String serviceName) {
     removeTab(serviceName);
   }
@@ -939,12 +939,10 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
       /*
-      Runtime.start("clock01", "Clock");
-      Runtime.start("clock02", "Clock");
-      Runtime.start("clock03", "Clock");
-      Runtime.start("clock04", "Clock");
-      Runtime.start("clock05", "Clock");
-      */
+       * Runtime.start("clock01", "Clock"); Runtime.start("clock02", "Clock");
+       * Runtime.start("clock03", "Clock"); Runtime.start("clock04", "Clock");
+       * Runtime.start("clock05", "Clock");
+       */
 
       boolean done = true;
       if (done) {
@@ -975,7 +973,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // TODO understand why we need a sleep(1000); - cuz swing is lame :(
     this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
-
 
   public Component getDisplay() {
     return (Component) tabs.getTabs();

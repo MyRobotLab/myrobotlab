@@ -53,17 +53,16 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   public boolean attach() {
     return enable();
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public boolean enable() {
     sleep(InMoov.attachPauseMs);
@@ -157,7 +156,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   private void initServoDefaults() {
-    // if the pins aren't set, we will assume they haven't been initialized and we should
+    // if the pins aren't set, we will assume they haven't been initialized and
+    // we should
     // specify the normal inmoov default values.
     if (bicep.getPin() == null) {
       bicep.setPin(DEFAULT_BICEP_PIN);
@@ -256,8 +256,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(), shoulder.getCurrentInputPos(),
-        omoplate.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveArm(\"%s\",%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, bicep.getCurrentInputPos(), rotate.getCurrentInputPos(),
+        shoulder.getCurrentInputPos(), omoplate.getCurrentInputPos());
   }
 
   public ServoControl getShoulder() {
@@ -318,8 +318,8 @@ public class InMoovArm extends Service implements IKJointAngleListener {
   }
 
   /**
-   * This method sets the output limits on all servos for the inmoov arm.
-   * Input limits are not modified in this method.
+   * This method sets the output limits on all servos for the inmoov arm. Input
+   * limits are not modified in this method.
    * 
    * @param bicepMin
    * @param bicepMax
@@ -520,7 +520,6 @@ public class InMoovArm extends Service implements IKJointAngleListener {
 
     return arm;
   }
-
 
   @Deprecated /* use setSpeed instead. */
   public void setVelocity(Double bicep, Double rotate, Double shoulder, Double omoplate) {

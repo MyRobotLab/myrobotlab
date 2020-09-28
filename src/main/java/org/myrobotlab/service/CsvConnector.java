@@ -220,5 +220,4 @@ public class CsvConnector extends AbstractConnector {
     this.idColumn = idColumn;
   }
 
-
 }

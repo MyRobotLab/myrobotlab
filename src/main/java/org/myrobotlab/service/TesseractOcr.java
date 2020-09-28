@@ -31,24 +31,11 @@ import org.slf4j.Logger;
  * Tesseract will take an Image and extract any recognizable text from that
  * image as a string.
  * 
- * ara - arabic
- * chi_sim - simplified chinese
- * deu - german
- * eng - english
- * fra - french
- * grc - greek
- * heb - hebrew
- * hin - hindi
- * isl - icelandic
- * ita - italian
- * jpn - japanese
- * kor - korean
- * por - portugues
- * rus - russian
- * spa - spanish
- * tha - thai
- * vie - vietnamese
- *     
+ * ara - arabic chi_sim - simplified chinese deu - german eng - english fra -
+ * french grc - greek heb - hebrew hin - hindi isl - icelandic ita - italian jpn
+ * - japanese kor - korean por - portugues rus - russian spa - spanish tha -
+ * thai vie - vietnamese
+ * 
  */
 public class TesseractOcr extends Service {
 
@@ -79,7 +66,8 @@ public class TesseractOcr extends Service {
   /**
    * Load the language specific model as the current language model.
    * 
-   * @param lang - the 3 leter code
+   * @param lang
+   *          - the 3 leter code
    */
   public void initModel(String lang) {
     api = new TessBaseAPI();
@@ -91,10 +79,11 @@ public class TesseractOcr extends Service {
   }
 
   public String ocr(BufferedImage image) throws IOException {
-    // The tesseract api has some issues reading the image directly as a byte array.
-    // so for now... until that changes, we'll write a temp file to be ocr'd and 
+    // The tesseract api has some issues reading the image directly as a byte
+    // array.
+    // so for now... until that changes, we'll write a temp file to be ocr'd and
     String tempFilename = "tesseract." + UUID.randomUUID().toString() + ".png";
-    File tempFile = new File(getDataDir(), tempFilename);  
+    File tempFile = new File(getDataDir(), tempFilename);
     FileOutputStream fos = new FileOutputStream(tempFile);
     ImageIO.write(image, "png", fos);
     String result = ocr(tempFile.getAbsolutePath());
@@ -125,7 +114,8 @@ public class TesseractOcr extends Service {
     try {
       TesseractOcr tesseract = (TesseractOcr) Runtime.start("tesseract", "TesseractOcr");
       String found = tesseract.ocr("src/test/resources/OpenCV/i_am_a_droid.jpg");
-      // String found = tesseract.ocr("src/test/resources/OpenCV/hiring_humans.jpg");
+      // String found =
+      // tesseract.ocr("src/test/resources/OpenCV/hiring_humans.jpg");
       log.info("found {}", found);
       Runtime.start("gui", "SwingGui");
     } catch (Exception e) {

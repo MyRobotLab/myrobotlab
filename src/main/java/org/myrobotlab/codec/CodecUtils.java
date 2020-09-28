@@ -44,7 +44,7 @@ import com.google.gson.internal.LinkedTreeMap;
 public class CodecUtils {
 
   public final static Logger log = LoggerFactory.getLogger(CodecUtils.class);
-  
+
   public static class ApiDescription {
     String key;
     String path; // {scheme}://{host}:{port}/api/messages
@@ -58,7 +58,7 @@ public class CodecUtils {
       this.description = description;
     }
   }
-  
+
   public final static String PARAMETER_API = "/api/";
   public final static String PREFIX_API = "api";
 
@@ -114,8 +114,8 @@ public class CodecUtils {
   public final static <T extends Object> T fromJson(String json, Type type) {
     return gson.fromJson(json, type);
   }
-  
-  public final static LinkedTreeMap<String,Object> toTree(String json) {
+
+  public final static LinkedTreeMap<String, Object> toTree(String json) {
     return gson.fromJson(json, LinkedTreeMap.class);
   }
 
@@ -147,10 +147,10 @@ public class CodecUtils {
     os.flush();
     return byteStream.toByteArray();
   }
-  
+
   static public final String shortName(String name) {
     if (name.contains("@")) {
-      return name.substring(0,name.indexOf("@"));
+      return name.substring(0, name.indexOf("@"));
     } else {
       return name;
     }
@@ -245,7 +245,7 @@ public class CodecUtils {
   public static boolean isWrapper(String className) {
     return WRAPPER_TYPES_CANONICAL.contains(className);
   }
-  
+
   static public String toCamelCase(String s) {
     String[] parts = s.split("_");
     String camelCaseString = "";
@@ -493,8 +493,10 @@ public class CodecUtils {
       for (int i = 1; i < spaces.length; ++i) {
         // webgui will never use this section of code
         // currently the codepath is only excercised by InProcessCli
-        // all of this methods will be "optimized" single commands to runtime (i think)
-        // so we are going to error on the side of String parameters - other data types will have problems
+        // all of this methods will be "optimized" single commands to runtime (i
+        // think)
+        // so we are going to error on the side of String parameters - other
+        // data types will have problems
         payload[i - 1] = "\"" + spaces[i] + "\"";
       }
       msg.data = payload;
@@ -502,7 +504,7 @@ public class CodecUtils {
       return msg;
     }
   }
-  
+
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
     ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
@@ -511,7 +513,7 @@ public class CodecUtils {
         "An synchronous api useful for simple REST responses"));
     return ret;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -523,8 +525,8 @@ public class CodecUtils {
       json = CodecUtils.fromJson("\"a/test\"", String.class);
       log.info("json {}", json);
       CodecUtils.fromJson("a/test", String.class);
-      
-    } catch(Exception e) {
+
+    } catch (Exception e) {
       log.error("main threw", e);
     }
   }

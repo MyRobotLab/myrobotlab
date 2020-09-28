@@ -91,7 +91,7 @@ public class OculusDiy extends Service implements OrientationListener {
   public void computeAnglesAndroid(float yaw, float roll, float pitch) {
 
     // head = (int) (180.0 +(((az - 9.82)/(-9.82 - 9.82))*(0.0 - 180.0)));
-    head =  mapperPitch.calcOutput((double)pitch);
+    head = mapperPitch.calcOutput((double) pitch);
     // headingint = (int) mapperYaw.calc(yaw);
     headingint = (int) yaw;
 

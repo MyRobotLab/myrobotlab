@@ -36,7 +36,6 @@ public class Tensorflow extends Service {
     super(name, id);
   }
 
-
   public static void main(String[] args) throws Exception {
     // Test code taken directly from the tensorflow webpage to verify that the
     // libraries have loaded as expected.

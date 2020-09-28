@@ -311,10 +311,10 @@ public class NeoPixelGui extends ServiceGui implements ActionListener {
   }
 
   public void getDeviceList() {
-	  deviceList.addItem("RGB"); // 3 channels (24bit)
-	  deviceList.addItem("RGBW"); // 4 channels (32bit)
+    deviceList.addItem("RGB"); // 3 channels (24bit)
+    deviceList.addItem("RGBW"); // 4 channels (32bit)
   }
-  
+
   public void getPinList() {
     for (int i = 0; i < 70; i++) {
       pinList.addItem(String.format("%d", i));

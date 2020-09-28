@@ -139,7 +139,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   private static final long serialVersionUID = 1L;
 
   transient private static final AtomicBoolean TRUST_SERVER_CERT = new AtomicBoolean(true);
-  
+
   transient protected JmDNS jmdns = null;
 
   /**
@@ -769,13 +769,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
           // TODO - at some point we want the option of not trusting the
           // sender's return address
           retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
-/* RECENTLY REMOVED !!
-          if (msg.isBlocking()) {
-            retMsg.msgId = msg.msgId;
-            retMsg.msgType = Message.RETURN;
-            send(retMsg);
-          }
-*/          
+          /*
+           * RECENTLY REMOVED !! if (msg.isBlocking()) { retMsg.msgId =
+           * msg.msgId; retMsg.msgType = Message.RETURN; send(retMsg); }
+           */
         } else {
           // msg came is and is NOT local - we will attempt to route it on its
           // way by sending it to send(msg)
@@ -1244,8 +1241,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return Runtime.getInstance().getDefaultMsg(connId);
   }
 
-
-
   public void display(String image) {
     // FIXME
     // http/https can be proxied if necessary or even fetched,
@@ -1260,7 +1255,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void setSsl(boolean b) {
     isSsl = b;
   }
-  
+
   public void startMdns() {
     try {
       if (jmdns == null) {
@@ -1298,8 +1293,9 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       // "intro", "Intro", "python", "Python", "brain", "ProgramAB" });
       // Runtime.main(new String[] { "--interactive", "--id", "admin", "-s",
       // "intro", "Intro"});
-      // Runtime.main(new String[] { "--id", "admin", "-c", "http://worke.local:8888"});
-      Runtime.main(new String[]{"--id","admin"});
+      // Runtime.main(new String[] { "--id", "admin", "-c",
+      // "http://worke.local:8888"});
+      Runtime.main(new String[] { "--id", "admin" });
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
@@ -1308,7 +1304,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.setPort(8888);
       webgui.startService();
       webgui.startMdns();
-      
+
       Runtime runtime = Runtime.getInstance();
       // runtime.connect("http://worke.local:8888");
       // Runtime runtime = Runtime.getInstance();

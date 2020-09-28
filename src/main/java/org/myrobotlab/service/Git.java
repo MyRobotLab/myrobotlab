@@ -261,7 +261,7 @@ public class Git extends Service {
     RevCommit remoteCommit = remoteLogs.get(0);
 
     BranchTrackingStatus status = BranchTrackingStatus.of(repo, branch);
-    
+
     // FIXME - Git.close() file handles
 
     if (status.getBehindCount() > 0) {

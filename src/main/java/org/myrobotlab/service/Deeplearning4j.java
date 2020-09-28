@@ -150,11 +150,11 @@ public class Deeplearning4j extends Service {
   transient private TinyYOLO tinyYOLOModel = null;
 
   transient private ComputationGraph miniXCEPTION = null;
-  
+
   transient private TextGenerationLSTM textGenLSTM = null;
-  
+
   transient OpenCVFrameConverter.ToIplImage converterToImage = new OpenCVFrameConverter.ToIplImage();
-  
+
   // constructor.
   public Deeplearning4j(String reservedKey, String id) {
     super(reservedKey, id);
@@ -393,69 +393,49 @@ public class Deeplearning4j extends Service {
   /* From the animals classification example */
   public MultiLayerNetwork lenetModel(int numLabels) {
     /**
-     * Revisde Lenet Model approach developed by ramgo2 achieves slightly above random
-     * Reference: https://gist.github.com/ramgo2/833f12e92359a2da9e5c2fb6333351c5
+     * Revisde Lenet Model approach developed by ramgo2 achieves slightly above
+     * random Reference:
+     * https://gist.github.com/ramgo2/833f12e92359a2da9e5c2fb6333351c5
      **/
-    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-        .seed(seed)
-        .l2(0.005)
-        .activation(Activation.RELU)
-        .weightInit(WeightInit.XAVIER)
-//        .updater(new Nadam(1e-4))
-        .updater(new AdaDelta())
-        .list()
-        .layer(0, convInit("cnn1", channels, 50 ,  new int[]{5, 5}, new int[]{1, 1}, new int[]{0, 0}, 0))
-        .layer(1, maxPool("maxpool1", new int[]{2,2}))
-        .layer(2, conv5x5("cnn2", 100, new int[]{5, 5}, new int[]{1, 1}, 0))
-        .layer(3, maxPool("maxool2", new int[]{2,2}))
-        .layer(4, new DenseLayer.Builder().nOut(500).build())
-        .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-            .nOut(numLabels)
-            .activation(Activation.SOFTMAX)
-            .build())
-        .setInputType(InputType.convolutional(height, width, channels))
-        .build();
+    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).l2(0.005).activation(Activation.RELU).weightInit(WeightInit.XAVIER)
+        // .updater(new Nadam(1e-4))
+        .updater(new AdaDelta()).list().layer(0, convInit("cnn1", channels, 50, new int[] { 5, 5 }, new int[] { 1, 1 }, new int[] { 0, 0 }, 0))
+        .layer(1, maxPool("maxpool1", new int[] { 2, 2 })).layer(2, conv5x5("cnn2", 100, new int[] { 5, 5 }, new int[] { 1, 1 }, 0))
+        .layer(3, maxPool("maxool2", new int[] { 2, 2 })).layer(4, new DenseLayer.Builder().nOut(500).build())
+        .layer(5, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).nOut(numLabels).activation(Activation.SOFTMAX).build())
+        .setInputType(InputType.convolutional(height, width, channels)).build();
 
-    return new MultiLayerNetwork(conf);  }
+    return new MultiLayerNetwork(conf);
+  }
 
   /* From the animals classification example */
   public MultiLayerNetwork alexnetModel(int numLabels) {
     /**
-     * AlexNet model interpretation based on the original paper ImageNet Classification with Deep Convolutional Neural Networks
-     * and the imagenetExample code referenced.
+     * AlexNet model interpretation based on the original paper ImageNet
+     * Classification with Deep Convolutional Neural Networks and the
+     * imagenetExample code referenced.
      * http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
      **/
 
     double nonZeroBias = 1;
     double dropOut = 0.5;
 
-    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-        .seed(seed)
-        .weightInit(new NormalDistribution(0.0, 0.01))
-        .activation(Activation.RELU)
-        .updater(new AdaDelta())
-        .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize to prevent vanishing or exploding gradients
-        .l2(5 * 1e-4)
-        .list()
-        .layer(convInit("cnn1", channels, 96, new int[]{11, 11}, new int[]{4, 4}, new int[]{3, 3}, 0))
-        .layer(new LocalResponseNormalization.Builder().name("lrn1").build())
-        .layer(maxPool("maxpool1", new int[]{3,3}))
-        .layer(conv5x5("cnn2", 256, new int[] {1,1}, new int[] {2,2}, nonZeroBias))
-        .layer(new LocalResponseNormalization.Builder().name("lrn2").build())
-        .layer(maxPool("maxpool2", new int[]{3,3}))
-        .layer(conv3x3("cnn3", 384, 0))
-        .layer(conv3x3("cnn4", 384, nonZeroBias))
-        .layer(conv3x3("cnn5", 256, nonZeroBias))
-        .layer(maxPool("maxpool3", new int[]{3,3}))
-        .layer(fullyConnected("ffn1", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
+    MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(seed).weightInit(new NormalDistribution(0.0, 0.01)).activation(Activation.RELU).updater(new AdaDelta())
+        .gradientNormalization(GradientNormalization.RenormalizeL2PerLayer) // normalize
+                                                                            // to
+                                                                            // prevent
+                                                                            // vanishing
+                                                                            // or
+                                                                            // exploding
+                                                                            // gradients
+        .l2(5 * 1e-4).list().layer(convInit("cnn1", channels, 96, new int[] { 11, 11 }, new int[] { 4, 4 }, new int[] { 3, 3 }, 0))
+        .layer(new LocalResponseNormalization.Builder().name("lrn1").build()).layer(maxPool("maxpool1", new int[] { 3, 3 }))
+        .layer(conv5x5("cnn2", 256, new int[] { 1, 1 }, new int[] { 2, 2 }, nonZeroBias)).layer(new LocalResponseNormalization.Builder().name("lrn2").build())
+        .layer(maxPool("maxpool2", new int[] { 3, 3 })).layer(conv3x3("cnn3", 384, 0)).layer(conv3x3("cnn4", 384, nonZeroBias)).layer(conv3x3("cnn5", 256, nonZeroBias))
+        .layer(maxPool("maxpool3", new int[] { 3, 3 })).layer(fullyConnected("ffn1", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
         .layer(fullyConnected("ffn2", 4096, nonZeroBias, dropOut, new GaussianDistribution(0, 0.005)))
-        .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-            .name("output")
-            .nOut(numLabels)
-            .activation(Activation.SOFTMAX)
-            .build())
-        .setInputType(InputType.convolutional(height, width, channels))
-        .build();
+        .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD).name("output").nOut(numLabels).activation(Activation.SOFTMAX).build())
+        .setInputType(InputType.convolutional(height, width, channels)).build();
 
     return new MultiLayerNetwork(conf);
   }
@@ -495,12 +475,13 @@ public class Deeplearning4j extends Service {
     // TODO: we have to build a model.. and load it in mrl..
     // there is no model available as far as i can tell.
     Model m = textGenLSTM.initPretrained();
-    
-    // TODO: add all the good stuff here. and refactor it out into useful methods later.
+
+    // TODO: add all the good stuff here. and refactor it out into useful
+    // methods later.
     System.out.println(m);
-    
+
   }
-  
+
   // This is for the Model Zoo support to load in the VGG16 model.
   public void loadVGG16() throws IOException {
     log.info("Loading the VGG16 Model.  Download is large 500+ MB.. this will be cached after it downloads");
@@ -537,10 +518,10 @@ public class Deeplearning4j extends Service {
     // pretrained imagenet
     tinyyolo = (ComputationGraph) tinyYOLOModel.initPretrained();
   }
-  
+
   public void loadMiniEXCEPTION() throws IOException, UnsupportedKerasConfigurationException, InvalidKerasConfigurationException {
     // load it up!
-    String filename = "models"+File.separator+"miniXCEPTION"+File.separator+"_mini_XCEPTION.102-0.66.hdf5";
+    String filename = "models" + File.separator + "miniXCEPTION" + File.separator + "_mini_XCEPTION.102-0.66.hdf5";
     miniXCEPTION = KerasModelImport.importKerasModelAndWeights(filename);
   }
 
@@ -550,23 +531,25 @@ public class Deeplearning4j extends Service {
     // resize to 64x64
     IplImage ret = IplImage.create(64, 64, iplImage.depth(), iplImage.nChannels());
     cvResize(iplImage, ret, Imgproc.INTER_AREA);
-    
-    //show(ret, "resized");
-    //log.info("Resized Image is : height {} width {}", ret.height(), ret.width()); 
-    // ok.. here we probably need to re-size the input?  possibly some other input transforms?
+
+    // show(ret, "resized");
+    // log.info("Resized Image is : height {} width {}", ret.height(),
+    // ret.width());
+    // ok.. here we probably need to re-size the input? possibly some other
+    // input transforms?
     BufferedImage buffImg = OpenCV.toBufferedImage(ret);
-    NativeImageLoader loader = new NativeImageLoader(64, 64, 1,  new ColorConversionTransform(COLOR_BGR2GRAY));
+    NativeImageLoader loader = new NativeImageLoader(64, 64, 1, new ColorConversionTransform(COLOR_BGR2GRAY));
     INDArray image = loader.asMatrix(buffImg);
     DataNormalization scaler = new ImagePreProcessingScaler(0, 1);
     scaler.transform(image);
-    
+
     HashMap<String, Double> emotionMap = new HashMap<String, Double>();
     INDArray[] out = miniXCEPTION.output(image);
-    // presumably the first column is the output for the first input.  
+    // presumably the first column is the output for the first input.
     // System.out.println("Output Size" + out.length);
     // Now.. what do we do with this output?
-    String[] emotionLabels = new String[]{"angry" ,"disgust","scared", "happy", "sad", "surprised", "neutral"};
-    for (int i = 0 ; i < out.length; i++) {
+    String[] emotionLabels = new String[] { "angry", "disgust", "scared", "happy", "sad", "surprised", "neutral" };
+    for (int i = 0; i < out.length; i++) {
       // System.out.println(out[i].toString());
       INDArray result = out[i];
       int j = -1;
@@ -582,18 +565,16 @@ public class Deeplearning4j extends Service {
           // not a good classification.. throw it away.
         }
       }
-      //now for each label, we have the confidence
+      // now for each label, we have the confidence
     }
     // sort the resulting map accoring to the confidence
     return sortHashMapByValues(emotionMap);
   }
-  
-  
-  // TODO: this was taken from stackoverflow 
+
+  // TODO: this was taken from stackoverflow
   // https://stackoverflow.com/questions/8119366/sorting-hashmap-by-values
   // seems like there should be a better way to sort a hashmap.
-  public LinkedHashMap<String, Double> sortHashMapByValues(
-      HashMap<String, Double> passedMap) {
+  public LinkedHashMap<String, Double> sortHashMapByValues(HashMap<String, Double> passedMap) {
     List<String> mapKeys = new ArrayList<>(passedMap.keySet());
     List<Double> mapValues = new ArrayList<>(passedMap.values());
     Collections.sort(mapValues);
@@ -601,9 +582,8 @@ public class Deeplearning4j extends Service {
 
     Collections.reverse(mapValues);
     Collections.reverse(mapKeys);
-    
-    LinkedHashMap<String, Double> sortedMap =
-        new LinkedHashMap<>();
+
+    LinkedHashMap<String, Double> sortedMap = new LinkedHashMap<>();
 
     Iterator<Double> valueIt = mapValues.iterator();
     while (valueIt.hasNext()) {
@@ -624,15 +604,14 @@ public class Deeplearning4j extends Service {
     }
     return sortedMap;
   }
-  
-  
+
   public CanvasFrame show(final IplImage image, final String title) {
     CanvasFrame canvas = new CanvasFrame(title);
     // canvas.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     canvas.showImage(converterToImage.convert(image));
     return canvas;
   }
-  
+
   public List<List<ClassPrediction>> classifyImageDarknet(IplImage iplImage) throws IOException {
     NativeImageLoader loader = new NativeImageLoader(224, 224, 3, new ColorConversionTransform(COLOR_BGR2RGB));
     BufferedImage buffImg = OpenCV.toBufferedImage(iplImage);
@@ -837,7 +816,7 @@ public class Deeplearning4j extends Service {
     // TODO: return a more native datastructure!
     // String predictions = TrainedModels.VGG16.decodePredictions(output[0]);
     // log.info("Image Predictions: {}", predictions);
-    
+
     return decodeVGG16Predictions(output[0]);
   }
 
@@ -970,12 +949,12 @@ public class Deeplearning4j extends Service {
 
   public static void main(String[] args) throws IOException {
     LoggingFactory.init("info");
-    
+
     Deeplearning4j dl4j = (Deeplearning4j) Runtime.createAndStart("dl4j", "Deeplearning4j");
     // this is how many generations to iterate on training the dataset. larger
     // number means longer training time.
     // dl4j.loadDarknet();
-   // dl4j.loadTinyYOLO();
+    // dl4j.loadTinyYOLO();
     dl4j.loadTextGenLSTM();
     System.out.println("done.");
     // dl4j.classifyImageTinyYolo();
@@ -996,7 +975,7 @@ public class Deeplearning4j extends Service {
     // dl4j.evaluateModel(testIm);
     // // dl4j.evaluateModel(img);
     // log.info("Done evaluating the model.");
-  
+
   }
 
 }

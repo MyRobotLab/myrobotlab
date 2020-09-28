@@ -1,11 +1,10 @@
 package util;
 
-import java.nio.charset.Charset;
+import static org.junit.Assert.assertEquals;
 
+import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.UUID;
-
-import static org.junit.Assert.*;
 
 public class StringUtil {
     

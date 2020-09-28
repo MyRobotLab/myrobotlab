@@ -44,7 +44,7 @@ import com.jme3.ui.Picture;
  * @author Christian version 1.0.3
  */
 public class InMoov3DApp extends SimpleApplication implements IntegratedMovementInterface {
-  
+
   transient public final static Logger log = LoggerFactory.getLogger(InMoov3DApp.class);
 
   private transient HashMap<String, Node> nodes = new HashMap<String, Node>();
@@ -640,7 +640,7 @@ public class InMoov3DApp extends SimpleApplication implements IntegratedMovement
         float rotation = (float) ((map.calcOutput(event.pos)) * Math.PI / 180 - currentAngle * Math.PI / 180);
         Vector3f angle = rotMask.mult((float) rotation);
         node.rotate(angle.x, angle.y, angle.z);
-        node.setUserData("currentAngle",  (map.calcOutput(event.pos)));
+        node.setUserData("currentAngle", (map.calcOutput(event.pos)));
         servoToNode.put(event.name, node);
         nodes.put(node.getName(), node);
       }

@@ -77,7 +77,7 @@ public class ArduinoUtils {
    *           - if interrupted.
    */
   public static boolean uploadSketch(String port, String boardKey, String arduinoPath) throws IOException, InterruptedException {
-    FileIO.extractResources(); 
+    FileIO.extractResources();
     String sketchFilename = Service.getResourceDir(Arduino.class, "MRLComm/MRLComm.ino");
     File sketch = new File(sketchFilename);
     // Create the command to run (and it's args.)

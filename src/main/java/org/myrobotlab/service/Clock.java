@@ -100,7 +100,7 @@ public class Clock extends Service {
 
   private boolean restartMe;
 
-  public Clock(String n, String id){
+  public Clock(String n, String id) {
     super(n, id);
   }
 
@@ -129,7 +129,7 @@ public class Clock extends Service {
   public Date pulse(Date time) {
     return time;
   }
-  
+
   public Date publishTime(Date time) {
     return time;
   }
@@ -193,23 +193,19 @@ public class Clock extends Service {
   @Override
   public void stopService() {
     super.stopService();
-    stopClock();    
+    stopClock();
   }
 
   public static void main(String[] args) throws Exception {
     LoggingFactory.init(Level.DEBUG);
-    Runtime.main(new String[]{"--id","r7", "--log-level", "DEBUG"});
+    Runtime.main(new String[] { "--id", "r7", "--log-level", "DEBUG" });
     Clock clock = (Clock) Runtime.start("clock02", "Clock");
     Runtime runtime = Runtime.getInstance();
     runtime.connect("http://admin.local:8888");
     /*
-    clock.setInterval(1000);
-    clock.restartClock();
-    sleep(2000);
-    clock.restartClock();
-    sleep(2000);
-    clock.stopClock();
-    */
+     * clock.setInterval(1000); clock.restartClock(); sleep(2000);
+     * clock.restartClock(); sleep(2000); clock.stopClock();
+     */
   }
 
 }

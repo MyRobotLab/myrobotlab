@@ -149,7 +149,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private final String RUNTIME_NAME = "runtime";
   static public final String DATA_DIR = "data";
 
-
   static private boolean autoAcceptLicense = true; // at the moment
 
   /**
@@ -207,9 +206,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static Set<String> networkPeers = null;
 
   private static final String LIBRARIES = "libraries";
-  
+
   String stdCliUuid = null;
-  
+
   InProcessCli cli = null;
 
   /**
@@ -218,7 +217,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   Map<String, Locale> locales;
 
   /**
-   * Returns the number of processors available to the Java virtual machine. 
+   * Returns the number of processors available to the Java virtual machine.
+   * 
    * @return
    */
   public static final int availableProcessors() {
@@ -1117,7 +1117,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return ret;
   }
 
-  
   public void startInteractiveMode() {
     startInteractiveMode(System.in, System.out);
   }
@@ -1125,34 +1124,35 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // FIXME !!! add connection !!! & authentication !!
   public void startInteractiveMode(InputStream in, OutputStream out) {
     if (cli == null) {
-    
-    cli = new InProcessCli(this, "runtime", in, out);
-    String cliId = cli.getId();
-    String uuid = java.util.UUID.randomUUID().toString();
-    stdCliUuid = uuid;
-    Connection attributes = new Connection();
-    attributes.put("gateway", "runtime");
-    attributes.put("uuid", uuid);
-    attributes.put("id", cliId);
-    attributes.put("header-User-Agent", "stdin-client");
-    attributes.put("cwd", "/");
-    attributes.put("uri", "/api/cli");
-    attributes.put("user", "root");
-    attributes.put("host", "local");
-    attributes.put("c-type", "Cli");
-    attributes.put("cli", cli);
 
-    addConnection(uuid, attributes);
+      cli = new InProcessCli(this, "runtime", in, out);
+      String cliId = cli.getId();
+      String uuid = java.util.UUID.randomUUID().toString();
+      stdCliUuid = uuid;
+      Connection attributes = new Connection();
+      attributes.put("gateway", "runtime");
+      attributes.put("uuid", uuid);
+      attributes.put("id", cliId);
+      attributes.put("header-User-Agent", "stdin-client");
+      attributes.put("cwd", "/");
+      attributes.put("uri", "/api/cli");
+      attributes.put("user", "root");
+      attributes.put("host", "local");
+      attributes.put("c-type", "Cli");
+      attributes.put("cli", cli);
 
-    // VERY GOOD ! - except the helloRequest should come from the remote process ;)
-    runtime.authenticate(uuid, new HelloRequest(cliId, uuid));
+      addConnection(uuid, attributes);
+
+      // VERY GOOD ! - except the helloRequest should come from the remote
+      // process ;)
+      runtime.authenticate(uuid, new HelloRequest(cliId, uuid));
 
     }
   }
 
   public void stopInteractiveMode() {
     if (stdCliUuid != null && getConnection(stdCliUuid) != null) {
-      ((InProcessCli)getConnection(stdCliUuid).get("cli")).stop();
+      ((InProcessCli) getConnection(stdCliUuid).get("cli")).stop();
       stdCliUuid = null;
     }
   }
@@ -1433,9 +1433,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
-
   /**
    * shutdown and remove a service from the registry
+   * 
    * @param name
    */
   static public void releaseService(String name) {
@@ -1472,21 +1472,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    */
   // FIXME - remove - the way to 'jump' is just to change
-  // context to the correct mrl id  e.g. cd /runtime@remote07
+  // context to the correct mrl id e.g. cd /runtime@remote07
   public String jump(String id) {
     String route = getRoute(id);
     if (route == null) {
       // log.error("cannot attach - no routing information for {}", id);
       return "cannot attach - no routing information for " + id;
     }
-    
+
     Connection c = getConnection(stdCliUuid);
     if (c != null && c.get("cli") != null) {
-      ((InProcessCli)c.get("cli")).setRemote(id);
+      ((InProcessCli) c.get("cli")).setRemote(id);
     } else {
       log.error("connection or cli is null for uuid {}", stdCliUuid);
     }
-    
+
     return id;
   }
 
@@ -1494,7 +1494,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String exit() {
     Connection c = getConnection(stdCliUuid);
     if (c != null && c.get("cli") != null) {
-      ((InProcessCli)c.get("cli")).setRemote(getId());
+      ((InProcessCli) c.get("cli")).setRemote(getId());
     }
     return getId();
   }
@@ -1508,35 +1508,34 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     c = getConnection(stdCliUuid);
     if (c != null && c.get("cli") != null) {
-       ((InProcessCli)c.get("cli")).process(srcFullName, cmd);
+      ((InProcessCli) c.get("cli")).process(srcFullName, cmd);
     } else {
       log.error("could not start interactive mode");
-    }    
+    }
   }
 
   // FIXME - implement
   public void connect(String url, boolean autoReconnect) {
-      if (!autoReconnect) {
-        connect(url);
-      } else {
-        addTask(1000, "checkConnections");
-      }
+    if (!autoReconnect) {
+      connect(url);
+    } else {
+      addTask(1000, "checkConnections");
+    }
   }
-  
+
   // FIXME - implement
   public void checkConnections() {
-      for (Connection connection:connections.values()) {
-        if (connection.containsKey("url")) {
-          /* FIXME - check on "STATE" ... means we support disconnected connections ..
-          if (connection.get("url").toString().equals(url)) {
-            // already connected
-            continue;
-          }
-          */
-        }
+    for (Connection connection : connections.values()) {
+      if (connection.containsKey("url")) {
+        /*
+         * FIXME - check on "STATE" ... means we support disconnected
+         * connections .. if (connection.get("url").toString().equals(url)) { //
+         * already connected continue; }
+         */
       }
-      // could not find our connection for this "id" - need to reconnect
-      // connect(url);
+    }
+    // could not find our connection for this "id" - need to reconnect
+    // connect(url);
   }
 
   // FIXME -
@@ -1548,7 +1547,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   @Override
   public void connect(String url) {
     try {
-      
+
       WsClient client = new WsClient();
       Connection c = client.connect(this, getFullName(), getId(), url);
 
@@ -1556,7 +1555,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // send authenticate - FIXME - should not be necessary to send uuid
       client.send(CodecUtils.toJson(getDefaultMsg(client.getUuid())));
-      
+
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
     }
@@ -1672,7 +1671,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         log.info("GATEWAY {} RELAY {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
         send(msg);
       }
-      
+
     } catch (Exception e) {
       log.error("processing msg threw", e);
     } // this, apiKey, uuid, endpoint, data);
@@ -1697,7 +1696,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
 
-        // if not requested explicitly to not have a cli - default is to start cli
+        // if not requested explicitly to not have a cli - default is to start
+        // cli
         if (options.fromLauncher) {
           // connect(options.connect);
           startInteractiveMode(System.in, System.out);
@@ -2444,7 +2444,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public static void backup() {
 
     try {
-      
+
       StringBuilder sb = new StringBuilder();
       sb.append("import json\n");
 
@@ -2961,12 +2961,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (filterHeartBeatsFromCli && msg.method.equals("onHeartbeat")) {
         return;
       }
-      
+
       invoke("publishCli", msg);
-      
-      InProcessCli cli = ((InProcessCli)conn.get("cli"));
+
+      InProcessCli cli = ((InProcessCli) conn.get("cli"));
       cli.onMsg(msg);
-      
+
     } else {
       // websocket Client !
       WsClient client = (WsClient) conn.get("c-client");
@@ -2992,12 +2992,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       client.send(CodecUtils.toJson(msg));
     }
   }
-  
+
   public Object publishCli(Message msg) {
     if (msg.data == null || msg.data.length == 0) {
       return null;
-    }    
-    return msg.data[0];    
+    }
+    return msg.data[0];
   }
 
   /**
@@ -3103,7 +3103,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
     return null;
   }
-  
+
   public void python() {
     if (cli == null) {
       startInteractiveMode();
@@ -3113,16 +3113,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Main entry point for the MyRobotLab Runtime
-   * Check CmdOptions for list of options
-   * -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
+   * Main entry point for the MyRobotLab Runtime Check CmdOptions for list of
+   * options -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
    * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+   * 
    * @param args
    */
   public static void main(String[] args) {
 
     try {
-      
+
       globalArgs = args;
 
       new CommandLine(options).parseArgs(args);
@@ -3136,8 +3136,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (options.help) {
         mainHelp();
         return;
-      }      
-      
+      }
+
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
       if (options.cfg != null) {
@@ -3149,14 +3149,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           shutdown();
         }
       }
-            
+
       // id always required
       if (options.id == null) {
         options.id = NameGenerator.getName();
       }
-      
-      String id = (options.fromLauncher)?options.id:String.format("%s-launcher", options.id);
-      
+
+      String id = (options.fromLauncher) ? options.id : String.format("%s-launcher", options.id);
+
       // fix paths
       Platform platform = Platform.getLocalInstance();
       platform.setId(id);
@@ -3172,7 +3172,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } catch (Exception e) {
         log.error("writing lastOption.json failed", e);
       }
-    
+
       if (options.virtual) {
         Platform.setVirtual(true);
       }
@@ -3187,7 +3187,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           security.setKey(options.addKeys[i], options.addKeys[i + 1]);
           log.info("encrypted key : {} XXXXXXXXXXXXXXXXXXXXXXX added to {}", options.addKeys[i], security.getStoreFileName());
         }
-        
+
         if (options.services.size() == 0) {
           shutdown();
         }
@@ -3208,18 +3208,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         shutdown();
         return;
       }
-      
+
       if (!options.fromLauncher) {
         // ===== I AM A LAUNCHER =====
         // spawn new instance, inherit io
-        // any options need stripping ? 
+        // any options need stripping ?
         // handle daemon
         // TODO handle more than one instance
         ProcessBuilder builder = Launcher.createBuilder(args);
         Process process = builder.start();
         process.waitFor();
         return;
-        
+
       } else {
         // ===== I AM A SPAWNED INSTANCE =====
         // create service instances
@@ -3229,19 +3229,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (options.invoke != null) {
           invokeCommands(options.invoke);
         }
-        
+
         if (options.connect != null) {
           Runtime.getInstance().connect(options.connect);
         }
-        
+
         if (options.autoUpdate) {
           // initialize
           // FIXME - use peer ?
           Updater.main(args);
         }
       }
-      
-      
+
     } catch (Exception e) {
       log.error("runtime exception", e);
       Runtime.mainHelp();
@@ -3249,5 +3248,5 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       log.error("main threw", e);
     }
   }
-  
+
 }

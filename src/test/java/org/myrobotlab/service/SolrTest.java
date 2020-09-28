@@ -1,11 +1,10 @@
 package org.myrobotlab.service;
 
-import static org.bytedeco.opencv.global.opencv_imgcodecs.cvLoadImage;
+import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;

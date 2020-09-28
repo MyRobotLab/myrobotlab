@@ -135,19 +135,16 @@ public class IMEngine extends Thread implements Genetic {
       for (int i = 0; i < maxIter; i++) {
         for (DHLink link : computeArm.getLinks()) {
           /*
-          if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
-            link.addPositionValue(link.getTargetPos());
-            continue;
-          }
-          */
+           * if (link.getState() != Servo.SERVO_EVENT_STOPPED) {
+           * link.addPositionValue(link.getTargetPos()); continue; }
+           */
         }
         for (int j = computeArm.getNumLinks() - 1; j >= 0; j--) {
           // for (int j = 0; j < computeArm.getNumLinks(); j++) {
           /*
-          if (computeArm.getLink(j).getState() != Servo.SERVO_EVENT_STOPPED) {
-            continue;
-          }
-          */
+           * if (computeArm.getLink(j).getState() != Servo.SERVO_EVENT_STOPPED)
+           * { continue; }
+           */
           Point cogIni = service.cog.computeCoG(cd);
           cogIni.setZ(0.0);
           // cogIni.setY(0.0);
@@ -699,8 +696,8 @@ public class IMEngine extends Thread implements Genetic {
           continue;
         }
         // if (link.getState() == Servo.SERVO_EVENT_STARTED) {
-        //  decodedGenome.add(link.getTargetPos());
-        //   continue;
+        // decodedGenome.add(link.getTargetPos());
+        // continue;
         // }
         Mapper map = null;
         if (link.servoMin == link.servoMax) {

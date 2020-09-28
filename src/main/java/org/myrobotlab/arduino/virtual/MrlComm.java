@@ -36,7 +36,7 @@ import org.slf4j.Logger;
  */
 public class MrlComm implements SerialDataListener {
 
-  // TODO: default to 1000, for debugging i've increased it to 10 seconds.  
+  // TODO: default to 1000, for debugging i've increased it to 10 seconds.
   private static final int BOARD_INFO_DELAY = 1000;
 
   public final static Logger log = LoggerFactory.getLogger(MrlComm.class);
@@ -227,8 +227,8 @@ public class MrlComm implements SerialDataListener {
    * deviceList TODO: KW: i think it's pretty dynamic now. G: the nextDeviceId &
    * Id leaves something to be desired - and the "index" does not spin through
    * the deviceList to find it .. a dynamic array of pointers would only expand
-   * if it could not accommodate the current number of devices, when a device was
-   * removed - the slot could be re-used by the next device request
+   * if it could not accommodate the current number of devices, when a device
+   * was removed - the slot could be re-used by the next device request
    */
   Device addDevice(Device device) {
     deviceList.add(device);
@@ -855,11 +855,16 @@ public class MrlComm implements SerialDataListener {
   }
 
   public boolean readMsg() {
-    // TODO: we really should be reading the byte stream from the serial port here
-    // and passing it to the virtualmessage parser to trigger the callbacks on the listener.  
-    // However, those bytes are automagically getting pushed to the onBytes method of VirtualMsg for us
-    // by the Serial port service connected to the uart (DCE) side of the virtual arduino.
-    // So, this method is a no-op in virtual land..  in real MrlComm this method reads from the serial port.
+    // TODO: we really should be reading the byte stream from the serial port
+    // here
+    // and passing it to the virtualmessage parser to trigger the callbacks on
+    // the listener.
+    // However, those bytes are automagically getting pushed to the onBytes
+    // method of VirtualMsg for us
+    // by the Serial port service connected to the uart (DCE) side of the
+    // virtual arduino.
+    // So, this method is a no-op in virtual land.. in real MrlComm this method
+    // reads from the serial port.
     return false;
   }
 
@@ -887,9 +892,9 @@ public class MrlComm implements SerialDataListener {
   }
 
   public void ackTimeout() {
-    // TODO: this is required for the VirtualMsg class to handle ack timeouts. 
-    // in reality, the uart/DCE side doesn't do anything with this.  We only care
-    // about this on the real Msg side of the interface.  
+    // TODO: this is required for the VirtualMsg class to handle ack timeouts.
+    // in reality, the uart/DCE side doesn't do anything with this. We only care
+    // about this on the real Msg side of the interface.
     log.warn("Ack timeout seen, this shouldn't happen in virtual device land.");
   }
 

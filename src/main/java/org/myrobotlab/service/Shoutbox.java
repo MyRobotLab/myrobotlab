@@ -142,11 +142,11 @@ public class Shoutbox extends Service {
   transient FileWriter fw = null;
 
   transient BufferedWriter bw = null;
-  
+
   transient protected SimpleDateFormat tsFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
   transient protected Calendar cal = Calendar.getInstance(new SimpleTimeZone(0, "GMT"));
-  
+
   int maxArchiveRecordCount = 50;
 
   public Shoutbox(String n, String id) {
@@ -530,6 +530,5 @@ public class Shoutbox extends Service {
     }
 
   }
-
 
 }

@@ -12,7 +12,7 @@ public class OpenCVFilterTextDetectorGui extends OpenCVFilterGui {
 
   @Override
   public void getFilterState(FilterWrapper filterWrapper) {
-    // TODO: implement a gui 
+    // TODO: implement a gui
   }
 
 }

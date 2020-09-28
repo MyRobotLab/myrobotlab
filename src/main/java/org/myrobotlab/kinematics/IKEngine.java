@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 public class IKEngine {
 
   public final static Logger log = LoggerFactory.getLogger(IKEngine.class);
-  
+
   /**
    * Used to synchronize the methods w/ the animating thread
    */
@@ -91,7 +91,7 @@ public class IKEngine {
       // System.out.println("x" + i + " " + x2);
       // System.out.println("y" + i + " " + z2);
       angles[i] = Math.toDegrees(Math.atan((z2 - z1) / (x2 - x1)));
-      log.info("angle {} {}" , i , angles[i]);
+      log.info("angle {} {}", i, angles[i]);
       x1 = x2;
       z1 = z2;
 

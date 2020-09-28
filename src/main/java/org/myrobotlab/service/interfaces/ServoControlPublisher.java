@@ -23,7 +23,6 @@ public interface ServoControlPublisher {
 
   ServoControl publishServoDisable(ServoControl sc);
 
-
   /**
    * Publishing topic for a servo stop event - returns position
    * 
@@ -31,7 +30,5 @@ public interface ServoControlPublisher {
    * @return
    */
   ServoControl publishServoStop(ServoControl sc);
-
-
 
 }

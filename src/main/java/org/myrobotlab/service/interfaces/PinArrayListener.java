@@ -7,5 +7,5 @@ public interface PinArrayListener extends Listener {
   public void onPinArray(PinData[] pindata);
 
   public String[] getActivePins();
-  
+
 }

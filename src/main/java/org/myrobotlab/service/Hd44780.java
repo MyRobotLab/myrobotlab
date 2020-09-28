@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 
 /**
  * 
- * HD44780 - Driver to play with lcd display panel
- * Tested with HD44780 1602 panel, attached to pcf8574
- * Driver pasted from Poduzov : https://github.com/Poduzov/PI4J-I2C-LCD
+ * HD44780 - Driver to play with lcd display panel Tested with HD44780 1602
+ * panel, attached to pcf8574 Driver pasted from Poduzov :
+ * https://github.com/Poduzov/PI4J-I2C-LCD
  * 
  * @author Moz4r
  * 
@@ -40,7 +40,7 @@ public class Hd44780 extends Service {
   private final byte LCD_SETCGRAMADDR = (byte) 0x40;
   private final byte LCD_SETDDRAMADDR = (byte) 0x80;
 
-  // flags for display entry mode 
+  // flags for display entry mode
   private final byte LCD_ENTRYRIGHT = (byte) 0x00;
   private final byte LCD_ENTRYLEFT = (byte) 0x02;
   private final byte LCD_ENTRYSHIFTINCREMENT = (byte) 0x01;
@@ -107,6 +107,7 @@ public class Hd44780 extends Service {
 
   /**
    * Send byte to PCF controller
+   * 
    * @param cmd
    */
   public void writeRegister(byte cmd) {
@@ -119,6 +120,7 @@ public class Hd44780 extends Service {
 
   /**
    * Turn ON/OFF LCD backlight
+   * 
    * @param status
    */
   public void setBackLight(boolean status) {
@@ -137,7 +139,8 @@ public class Hd44780 extends Service {
   }
 
   /**
-   * Display string on LCD, by line 
+   * Display string on LCD, by line
+   * 
    * @param string
    * @param line
    */
@@ -186,7 +189,7 @@ public class Hd44780 extends Service {
   }
 
   /**
-   * clear lcd and set to home 
+   * clear lcd and set to home
    */
   public void clear() {
     lcdWrite((byte) LCD_CLEARDISPLAY);
@@ -223,7 +226,7 @@ public class Hd44780 extends Service {
     webgui.autoStartBrowser(true);
     webgui.startService();
     webgui.startBrowser("http://localhost:8888/#/service/lcd");
-   
+
     lcd.attach(pcf8574t);
     lcd.init();
     lcd.setBackLight(true);

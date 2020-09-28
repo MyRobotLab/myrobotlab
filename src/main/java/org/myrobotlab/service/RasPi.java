@@ -81,11 +81,11 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   transient GpioPinDigitalOutput gpio03;
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
-  
+
   protected SystemInfo systemInfo = null;
 
   private boolean wiringPi = true; // Defined to be able to switch between
-  
+
   protected com.pi4j.system.SystemInfo.BoardType boardType = null;
 
   public RasPi(String n, String id) {
@@ -95,10 +95,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     log.info("platform is {}", platform);
     log.info("architecture is {}", platform.getArch());
 
-    try {      
+    try {
       boardType = SystemInfo.getBoardType();
       gpio = GpioFactory.getInstance();
-      log.info("Executing on Raspberry PI");      
+      log.info("Executing on Raspberry PI");
       getPinList();
     } catch (Exception e) {
       error("%s architecture is not arm - %s", getName(), e.getMessage());
@@ -211,31 +211,34 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   public List<PinDefinition> getPinList() {
 
     for (Pin pin : RaspiPin.allPins()) {
-     
-          // pin.getSupportedPinModes()
-          PinDefinition pindef = new PinDefinition(getName(), pin.getAddress());
-          pindef.setPinName(pin.getName());
-          EnumSet<PinMode> modes = pin.getSupportedPinModes();          
-          // FIXME - the raspi definitions are "better" they have input & ouput
-          // FIXME - reconcile rxtx
-          // FIXME - get pull up resistance
-          if (modes.contains(PinMode.DIGITAL_OUTPUT)) {
-            pindef.setDigital(true);
-          }
-          if (modes.contains(PinMode.ANALOG_OUTPUT)) {
-            pindef.setAnalog(true);
-          }
-          if (modes.contains(PinMode.PWM_OUTPUT)) {
-            pindef.setAnalog(true);
-          }
-          
-          pinIndex.put(pin.getAddress(), pindef);
-          pinMap.put(pin.getName(), pindef);
 
-          // GpioPinDigitalInput provisionedPin = gpio.provisionDigitalInputPin(pin, pull);
-          // provisionedPin.setShutdownOptions(true); // unexport pin on program shutdown
-          // provisionedPins.add(provisionedPin);     // add provisioned pin to collection
+      // pin.getSupportedPinModes()
+      PinDefinition pindef = new PinDefinition(getName(), pin.getAddress());
+      pindef.setPinName(pin.getName());
+      EnumSet<PinMode> modes = pin.getSupportedPinModes();
+      // FIXME - the raspi definitions are "better" they have input & ouput
+      // FIXME - reconcile rxtx
+      // FIXME - get pull up resistance
+      if (modes.contains(PinMode.DIGITAL_OUTPUT)) {
+        pindef.setDigital(true);
       }
+      if (modes.contains(PinMode.ANALOG_OUTPUT)) {
+        pindef.setAnalog(true);
+      }
+      if (modes.contains(PinMode.PWM_OUTPUT)) {
+        pindef.setAnalog(true);
+      }
+
+      pinIndex.put(pin.getAddress(), pindef);
+      pinMap.put(pin.getName(), pindef);
+
+      // GpioPinDigitalInput provisionedPin = gpio.provisionDigitalInputPin(pin,
+      // pull);
+      // provisionedPin.setShutdownOptions(true); // unexport pin on program
+      // shutdown
+      // provisionedPins.add(provisionedPin); // add provisioned pin to
+      // collection
+    }
 
     return new ArrayList<PinDefinition>(pinIndex.values());
   }

@@ -1,12 +1,10 @@
 
-import org.myrobotlab.service.*;
-import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.interfaces.PinArrayListener;
-
-import java.io.IOException;
-
 import org.junit.Ignore;
 import org.junit.Test;
+import org.myrobotlab.service.Arduino;
+import org.myrobotlab.service.InMoovHand;
+import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.interfaces.PinArrayListener;
 
 /**
  * A quick little scratch .. TODO: delete this before checking in and add a proper unit test for this.

@@ -167,9 +167,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       log.info("{} moveTo {}", slider.getName(), slider.getValue());
       // At this point we need to get the servo and move it to the new value
       ServoControl s = (ServoControl) Runtime.getService(slider.getName());
-    
-        s.moveTo((double)slider.getValue());
-      
+
+      s.moveTo((double) slider.getValue());
+
     }
   }
 

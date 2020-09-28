@@ -212,5 +212,4 @@ public class ChessGame extends Service {
     return hmoveMsg;
   }
 
-
 }

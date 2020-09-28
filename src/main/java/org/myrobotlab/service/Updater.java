@@ -1,10 +1,10 @@
 package org.myrobotlab.service;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -43,7 +43,6 @@ import picocli.CommandLine.Option;
  */
 
 public class Updater extends Service {
-
 
   private static final long serialVersionUID = 1L;
 
@@ -282,7 +281,7 @@ public class Updater extends Service {
   }
 
   private Boolean offline = false;
-  
+
   long updateCheckIntervalMs = 5000;
 
   public synchronized void start() {
@@ -333,206 +332,204 @@ public class Updater extends Service {
 
   public void checkForUpdates() {
     log.info("starting updater {} {} with interval {} s", branch, currentVersion, interval / 1000);
-      try {
-        log.info("checking for update");
+    try {
+      log.info("checking for update");
 
-        // remote or local
+      // remote or local
 
-        // if remote get binary put in target
-        // check if various parts exist
-        Properties gitProps = Platform.gitProperties();
+      // if remote get binary put in target
+      // check if various parts exist
+      Properties gitProps = Platform.gitProperties();
 
-        // create local repo if it does not exist
-        File target = new File("target");
-        if (!target.exists()) {
-          target.mkdir();
+      // create local repo if it does not exist
+      File target = new File("target");
+      if (!target.exists()) {
+        target.mkdir();
+      }
+
+      /**
+       * <pre>
+       * TWO SOURCES EXISTS 
+       *    1. Remote Binaries 
+       *    2. Local Sources
+       * 
+       * Local sources will always be considered "later" than Remote Binaries
+       * so the mode will switch to only checking Git - This "switch" is
+       * determined if a src directory exists.
+       * 
+       * Update life cycle
+       *    1. check if available update (jenkins url, or git pull)
+       *    2. publish availability status
+       *    3. if auto prepare - download (jenkins binary or mvn build)
+       *    4. publish status
+       *    6. if auto update
+       *         create export.py
+       *         if isSrcMode
+       * 
+       * 
+       * 
+       * </pre>
+       */
+
+      // get local or remote latest version
+      // compare with current version
+      // do callbacks if we have an update
+
+      boolean isSrcMode = new File(".git").exists();
+      log.info("{} mode checking for updates", (isSrcMode ? "SOURCE" : "BINARY"));
+
+      if (isSrcMode) {
+        String cwd = System.getProperty("user.dir");
+        boolean makeBuild = false;
+        String branch = Git.getBranch();
+        log.info("current source branch is \"{}\"", branch);
+
+        int commitsBehind = Git.pull(branch);
+
+        if (gitProps == null) {
+          log.info("target/classes/git.properties does not exist - will build");
+          makeBuild = true;
+        } else {
+          // compare last built commit with current commit?
+          if (commitsBehind > 0) {
+            log.info("local \"{}\" is behind by {} commits", branch, commitsBehind);
+            log.info("build and repo do not match - build required");
+            makeBuild = true;
+          }
         }
 
-        /**
-         * <pre>
-         * TWO SOURCES EXISTS 
-         *    1. Remote Binaries 
-         *    2. Local Sources
-         * 
-         * Local sources will always be considered "later" than Remote Binaries
-         * so the mode will switch to only checking Git - This "switch" is
-         * determined if a src directory exists.
-         * 
-         * Update life cycle
-         *    1. check if available update (jenkins url, or git pull)
-         *    2. publish availability status
-         *    3. if auto prepare - download (jenkins binary or mvn build)
-         *    4. publish status
-         *    6. if auto update
-         *         create export.py
-         *         if isSrcMode 
-         *        
-         *        
-         * 
-         * </pre>
+        if (makeBuild) {
+          // FIXME - download mvn if it does not exist ??
+
+          // remove git properties before compile
+          Git.removeProps();
+
+          // FIXME - compile or package mode !
+          String ret = Maven.mvn(cwd, branch, "compile", System.currentTimeMillis() / 1000, offline);
+          if (ret != null & ret.contains("BUILD SUCCESS")) {
+            offline = true;
+          }
+
+          // package ??
+
+          // FIXME - export & launch
+
+          if (autoUpdate) {
+
+            // FIXME !!! - default option to tear down if running webgui (single
+            // resource)
+            // FIXME - if running as standalone handle other case
+            if (updated == null) {
+              // FIXME check for null etc.. singleton
+              // FIXME - merge original
+              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              updated = builder.start();
+
+              // FIXME check if alive etc...
+              // Process ps = launcher.buildUpdate("myrobotlab.jar", "-i",
+              // "python", "execFile", "export.py");
+            } else {
+              // process already exists - tear down and restart FIXME - export !
+              updated.destroy();
+              // FIXME - merge original
+              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              updated = builder.start();
+            }
+          }
+        }
+        /*
+         * if (updated == null) { String[] updatedArgs = new String[] { "-I",
+         * "python", "execFile", "export.py" }; String[] cmdLine =
+         * Launcher.createSpawnArgs(updatedArgs); ProcessBuilder builder =
+         * Launcher.createBuilder(cwd, cmdLine); updated = builder.start(); }
          */
 
-        // get local or remote latest version
-        // compare with current version
-        // do callbacks if we have an update
+        // if last not ! current check git properties !!
+        log.info("updater loop");
 
-        boolean isSrcMode = new File(".git").exists();
-        log.info("{} mode checking for updates", (isSrcMode?"SOURCE":"BINARY"));
-        
-        if (isSrcMode) {
-          String cwd = System.getProperty("user.dir");
-          boolean makeBuild = false;
-          String branch = Git.getBranch();
-          log.info("current source branch is \"{}\"", branch);
-          
-          int commitsBehind = Git.pull(branch);
+      } else {
+        // REMOTE BINARIES UPDATE FROM JENKINS
 
-          if (gitProps == null) {
-            log.info("target/classes/git.properties does not exist - will build");
-            makeBuild = true;
-          } else {
-            // compare last built commit with current commit?
-             if (commitsBehind > 0){
-              log.info("local \"{}\" is behind by {} commits", branch, commitsBehind);
-              log.info("build and repo do not match - build required");
-              makeBuild = true;
+        String remoteVersion = getRemoteVersion(branch);
+        String targetFile = String.format("target/myrobotlab-%s-%s.jar", branch, remoteVersion);
+
+        if (isGreaterThan(remoteVersion, currentVersion) && autoCache && !(new File(targetFile).exists())) {
+          log.info("available update exists remotely {} is greater than current version {}", remoteVersion, currentVersion);
+          // FIXME - make Http.getPart file ?
+          // FIXME !!!! MAKE PART FILE !!!!!!!
+          Http.getFile(String.format(MULTI_BRANCH_LATEST_BUILD_URL, branch), targetFile);
+          log.info("successfully downloaded %s", targetFile);
+
+        }
+        // Http.get(String.format(MULTI_BRANCH_LATEST_BUILD_URL, branch));
+        // config on launcher - auto-relaunch ?
+
+        // determine if ready to update (important this is all done in a
+        // single
+        // thread)
+
+        // find the latest in the target - compare with current version -
+        // update
+        // if appropriate
+        String latestFile = getLatestTargetFile(branch);
+
+        String latestVersion = parseVersion(latestFile);
+        if (isGreaterThan(latestVersion, currentVersion)) {
+          log.info("found applicable update {}", latestFile);
+          broadcast("versionAvailable", latestVersion, latestFile, System.currentTimeMillis());
+          // update ready (nonDismissed) event
+
+          // we have ability to update now (all clearance to proceed)
+
+          // request for export.all
+
+          /**
+           * <pre>
+            * 1. make copy of current jar if applicable (isJar) into target if not already there..
+            * 2.
+           * </pre>
+           */
+
+          if (autoUpdate) {
+            // see if we need to make a copy of ourselves to the target
+            String currentJar = FileIO.getRoot();
+            if (FileIO.isJar() && currentJar != null && currentVersion != null) {
+              log.info("writing backup of curent jar to {} to myrobotlab.jar", latestFile);
+              FileIO.copy(currentJar, String.format("target/myrobotlab-%s-%s.jar", branch, currentVersion));
             }
-          }
-          
-          if (makeBuild) {
-            // FIXME - download mvn if it does not exist ??
-            
-            // remove git properties before compile
-            Git.removeProps();
-            
-            // FIXME - compile or package mode ! 
-            String ret = Maven.mvn(cwd, branch, "compile", System.currentTimeMillis()/1000, offline);
-            if (ret != null & ret.contains("BUILD SUCCESS")) {
-              offline = true;
+
+            // export current state
+            if (Runtime.exists()) {
+              Runtime.getInstance().exportAll("export.py");
             }
-            
-            // package ??
-  
-            // FIXME - export & launch
-            
-            if (autoUpdate) {
-              
-              // FIXME !!! - default option to tear down if running webgui (single resource)               
-              // FIXME - if running as standalone handle other case
-              if (updated == null) {
-                // FIXME check for null etc.. singleton
-                // FIXME - merge original
-                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
-                updated = builder.start();
 
-                // FIXME check if alive etc...
-                // Process ps = launcher.buildUpdate("myrobotlab.jar", "-i",
-                // "python", "execFile", "export.py");
-              } else {
-                // process already exists - tear down and restart FIXME - export !
-                updated.destroy();
-                // FIXME - merge original
-                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
-                updated = builder.start();
-              }
+            // replace our current jar (classes ? build?)
+            log.info("writing {} to myrobotlab.jar", latestFile);
+            writeBytesFromTarget(String.format("target/%s", latestFile), "./myrobotlab.jar");
+
+            // prepare launcher command to delete current file and replace
+            // with
+            // target, then start
+            log.info("preparing launcher command");
+
+            if (updated == null) {
+              // FIXME check for null etc.. singleton
+              // FIXME - ability to merge more commands !!!
+              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              updated = builder.start();
+
+              // FIXME check if alive etc...
+              // Process ps = launcher.buildUpdate("myrobotlab.jar", "-i",
+              // "python", "execFile", "export.py");
             }
-          }
-          /*
-          if (updated == null) {
-            String[] updatedArgs = new String[] { "-I", "python", "execFile", "export.py" };
-            String[] cmdLine = Launcher.createSpawnArgs(updatedArgs);
-            ProcessBuilder builder = Launcher.createBuilder(cwd, cmdLine);
-            updated = builder.start();
-          }
-          */
 
-          // if last not ! current check git properties !!
-          log.info("updater loop");
-
-        } else {
-          // REMOTE BINARIES UPDATE FROM JENKINS
-          
-
-          String remoteVersion = getRemoteVersion(branch);
-          String targetFile = String.format("target/myrobotlab-%s-%s.jar", branch, remoteVersion);
-
-          if (isGreaterThan(remoteVersion, currentVersion) && autoCache && !(new File(targetFile).exists())) {
-            log.info("available update exists remotely {} is greater than current version {}", remoteVersion, currentVersion);
-            // FIXME - make Http.getPart file ?
-            // FIXME !!!! MAKE PART FILE !!!!!!!
-            Http.getFile(String.format(MULTI_BRANCH_LATEST_BUILD_URL, branch), targetFile);
-            log.info("successfully downloaded %s", targetFile);
-
-          }
-          // Http.get(String.format(MULTI_BRANCH_LATEST_BUILD_URL, branch));
-          // config on launcher - auto-relaunch ?
-
-          // determine if ready to update (important this is all done in a
-          // single
-          // thread)
-
-          // find the latest in the target - compare with current version -
-          // update
-          // if appropriate
-          String latestFile = getLatestTargetFile(branch);
-
-          String latestVersion = parseVersion(latestFile);
-          if (isGreaterThan(latestVersion, currentVersion)) {
-            log.info("found applicable update {}", latestFile);
-            broadcast("versionAvailable", latestVersion, latestFile, System.currentTimeMillis());
-            // update ready (nonDismissed) event
-
-            // we have ability to update now (all clearance to proceed)
-
-            // request for export.all
-
-            /**
-             * <pre>
-              * 1. make copy of current jar if applicable (isJar) into target if not already there..
-              * 2.
-             * </pre>
-             */
-
-            if (autoUpdate) {
-              // see if we need to make a copy of ourselves to the target
-              String currentJar = FileIO.getRoot();
-              if (FileIO.isJar() && currentJar != null && currentVersion != null) {
-                log.info("writing backup of curent jar to {} to myrobotlab.jar", latestFile);
-                FileIO.copy(currentJar, String.format("target/myrobotlab-%s-%s.jar", branch, currentVersion));
-              }
-
-              // export current state
-              if (Runtime.exists()) {
-                Runtime.getInstance().exportAll("export.py");
-              }
-
-              // replace our current jar (classes ? build?)
-              log.info("writing {} to myrobotlab.jar", latestFile);
-              writeBytesFromTarget(String.format("target/%s", latestFile), "./myrobotlab.jar");
-
-              // prepare launcher command to delete current file and replace
-              // with
-              // target, then start
-              log.info("preparing launcher command");
-
-              if (updated == null) {
-                // FIXME check for null etc.. singleton
-                // FIXME - ability to merge more commands !!!
-                ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
-                updated = builder.start();
-
-                // FIXME check if alive etc...
-                // Process ps = launcher.buildUpdate("myrobotlab.jar", "-i",
-                // "python", "execFile", "export.py");
-              }
-
-            }
           }
         }
-        Thread.sleep(interval);
-      } catch (Exception e) {
-        log.error("UpdateUtils threw", e);
       }
+      Thread.sleep(interval);
+    } catch (Exception e) {
+      log.error("UpdateUtils threw", e);
+    }
   }
 
   public String parseVersion(String filename) {
@@ -572,7 +569,7 @@ public class Updater extends Service {
       File target = new File("target");
       String latest = null;
       String latestFile = null;
-      String[] possibleUpdates = target.list((FilenameFilter)this);
+      String[] possibleUpdates = target.list((FilenameFilter) this);
       for (int i = 0; i < possibleUpdates.length; ++i) {
         String filename = possibleUpdates[i];
         String fileBranch = parseBranch(filename);
@@ -602,22 +599,20 @@ public class Updater extends Service {
     LoggingFactory.init(Level.INFO);
 
     try {
-      
 
       // use cases - used as a command line tool
-      
-      
+
       // Runtime connects to public or main mrl instance ...
-      // put in update mode   (master) --> |(runtime + updater) --> (worke) |
-      
+      // put in update mode (master) --> |(runtime + updater) --> (worke) |
+
       // - used by runtime ... in theory runtime could call/configure updater
       // through main
-      
-      Updater updater = (Updater)Runtime.start("updater", "Updater");
-      
+
+      Updater updater = (Updater) Runtime.start("updater", "Updater");
+
       ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
       updater.updated = builder.start();
-      
+
       new CommandLine(updater).parseArgs(args);
       if (updater.autoUpdate) {
         updater.start();
@@ -629,6 +624,5 @@ public class Updater extends Service {
       log.error("main threw", e);
     }
   }
-
 
 }

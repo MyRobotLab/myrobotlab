@@ -82,9 +82,9 @@ public class SimpleEvent extends Event {
   public void setTransition(Transition transition) {
     this.transition = transition;
   }
-  
+
   public Transition getTransition() {
     return transition;
   }
-  
+
 }

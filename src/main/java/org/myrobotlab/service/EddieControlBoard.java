@@ -452,5 +452,4 @@ public class EddieControlBoard extends Service implements KeyListener, SerialDat
     info("%s disconnected from %s", getName(), portName);
   }
 
-
 }

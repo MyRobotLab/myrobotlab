@@ -36,7 +36,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   private static final Integer DEFAULT_RINGFINGER_PIN = 5;
   private static final Integer DEFAULT_PINKY_PIN = 6;
   private static final Integer DEFAULT_WRIST_PIN = 7;
-  
+
   /**
    * peer services
    */
@@ -49,10 +49,10 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   transient public ServoControl wrist;
   transient public ServoController controller;
   private String side;
-  
+
   // The pins for the finger tip sensors
-  public String[] sensorPins = new String[]{"A0","A1","A2","A3","A4"};
-  public int[] sensorThresholds = new int[] {500,500,500,500,500}; 
+  public String[] sensorPins = new String[] { "A0", "A1", "A2", "A3", "A4" };
+  public int[] sensorThresholds = new int[] { 500, 500, 500, 500, 500 };
   // public int[] sensorLastValues = new int[] {0,0,0,0,0};
   public boolean sensorsEnabled = false;
 
@@ -68,7 +68,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       // arduino.pinMode(13, ServoController.OUTPUT);
       // arduino.digitalWrite(13, 1);
 
-      InMoovHand rightHand = (InMoovHand)Runtime.start("r01", "InMoovHand");//InMoovHand("r01");
+      InMoovHand rightHand = (InMoovHand) Runtime.start("r01", "InMoovHand");// InMoovHand("r01");
       Runtime.createAndStart("gui", "SwingGui");
       rightHand.connect("COM15");
       rightHand.startService();
@@ -87,17 +87,16 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       log.error("main threw", e);
     }
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public InMoovHand(String n, String id) {
     super(n, id);
@@ -135,12 +134,18 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
 
   @Override
   public void broadcastState() {
-    if (thumb != null)thumb.broadcastState();
-    if (index != null)index.broadcastState();
-    if (majeure != null)majeure.broadcastState();
-    if (ringFinger != null)ringFinger.broadcastState();
-    if (pinky != null)pinky.broadcastState();
-    if (wrist != null)wrist.broadcastState();
+    if (thumb != null)
+      thumb.broadcastState();
+    if (index != null)
+      index.broadcastState();
+    if (majeure != null)
+      majeure.broadcastState();
+    if (ringFinger != null)
+      ringFinger.broadcastState();
+    if (pinky != null)
+      pinky.broadcastState();
+    if (wrist != null)
+      wrist.broadcastState();
   }
 
   public void close() {
@@ -167,8 +172,8 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
 
     // justin case we haven't started our peers yet.
     startPeers();
-    controller = (ServoController)startPeer("arduino");
-    
+    controller = (ServoController) startPeer("arduino");
+
     if (controller == null) {
       error("controller is invalid");
       return false;
@@ -183,12 +188,12 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
         return false;
       }
     }
-    
+
     // set defaults for the servos
     initServoDefaults();
-    
+
     // TODO: initSensorPin defaults.
-    
+
     thumb.attach(controller);
     index.attach(controller);
     majeure.attach(controller);
@@ -234,10 +239,10 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
       pinky.setAutoDisable(true);
     }
     if (wrist.getPin() == null) {
-        wrist.setPin(DEFAULT_WRIST_PIN);    
-        wrist.setRest(90.0);
-        wrist.setPosition(90.0);
-        wrist.setAutoDisable(true);
+      wrist.setPin(DEFAULT_WRIST_PIN);
+      wrist.setRest(90.0);
+      wrist.setPosition(90.0);
+      wrist.setAutoDisable(true);
     }
     // force initial finger speed to 45 deg/sec
     setSpeed(45.0, 45.0, 45.0, 45.0, 45.0, 45.0);
@@ -333,8 +338,8 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   public String getScript(String inMoovServiceName) {
-    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(), majeure.getCurrentInputPos(),
-        ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
+    return String.format(Locale.ENGLISH, "%s.moveHand(\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f)\n", inMoovServiceName, side, thumb.getCurrentInputPos(), index.getCurrentInputPos(),
+        majeure.getCurrentInputPos(), ringFinger.getCurrentInputPos(), pinky.getCurrentInputPos(), wrist.getCurrentInputPos());
   }
 
   public String getSide() {
@@ -542,37 +547,36 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   @Override
-  public void startService() { 
+  public void startService() {
     super.startService();
     // Handled lazily on connect method now.
     // TODO:
-    //    if (controller == null) {
-    //      controller = (ServoController) startPeer("arduino");
-    //    }
-    
+    // if (controller == null) {
+    // controller = (ServoController) startPeer("arduino");
+    // }
+
     if (thumb == null) {
-      thumb = (ServoControl)startPeer("thumb");
+      thumb = (ServoControl) startPeer("thumb");
     }
     if (index == null) {
-      index = (ServoControl)startPeer("index");
+      index = (ServoControl) startPeer("index");
     }
     if (majeure == null) {
-      majeure = (ServoControl)startPeer("majeure");
+      majeure = (ServoControl) startPeer("majeure");
     }
     if (ringFinger == null) {
-      ringFinger = (ServoControl)startPeer("ringFinger");
+      ringFinger = (ServoControl) startPeer("ringFinger");
     }
     if (pinky == null) {
-      pinky = (ServoControl)startPeer("pinky");
+      pinky = (ServoControl) startPeer("pinky");
     }
     if (wrist == null) {
-      wrist = (ServoControl)startPeer("wrist");
+      wrist = (ServoControl) startPeer("wrist");
     }
     /*
-    if (controller == null) {
-      controller = (ServoController) createPeer("arduino");
-    }
-    */
+     * if (controller == null) { controller = (ServoController)
+     * createPeer("arduino"); }
+     */
   }
 
   public void stopLeapTracking() {
@@ -635,52 +639,52 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
 
   @Override
   public void onPinArray(PinData[] pindata) {
-    
+
     log.info("On Pin Data: {}", pindata.length);
     if (!sensorsEnabled)
       return;
-      // just return ?  TOOD: maybe still track the last read values...
-    // TODO : change the interface to get a map of pin data, keyed off the name. ?
+    // just return ? TOOD: maybe still track the last read values...
+    // TODO : change the interface to get a map of pin data, keyed off the name.
+    // ?
     for (PinData pin : pindata) {
       log.info("Pin Data: {}", pin);
       // p
-      //      if (sensorPins.contains(pin.pin)) {
-      //        // it's one of our finger pins.. let's operate on it.
-      //        log.info("Pin Data : {} value {}", pin.pin, pin.value );
-      //        if (sensorPins[0].equalsIgnoreCase(pin.pin)) {
-      //          // thumb / A0
-      //          // here we want to test the pin state.. and potentially take an action 
-      //          // based on the updated sensor pin state
-      //          if (pin.value > sensorThresholds[0])
-      //            thumb.stop();
-      //        } else if (sensorPins[1].equalsIgnoreCase(pin.pin)) {
-      //          // index / A1
-      //          if (pin.value > sensorThresholds[1])
-      //            index.stop();
+      // if (sensorPins.contains(pin.pin)) {
+      // // it's one of our finger pins.. let's operate on it.
+      // log.info("Pin Data : {} value {}", pin.pin, pin.value );
+      // if (sensorPins[0].equalsIgnoreCase(pin.pin)) {
+      // // thumb / A0
+      // // here we want to test the pin state.. and potentially take an action
+      // // based on the updated sensor pin state
+      // if (pin.value > sensorThresholds[0])
+      // thumb.stop();
+      // } else if (sensorPins[1].equalsIgnoreCase(pin.pin)) {
+      // // index / A1
+      // if (pin.value > sensorThresholds[1])
+      // index.stop();
       //
-      //        } else if (sensorPins[2].equalsIgnoreCase(pin.pin)) {
-      //          // middle / A2
-      //          if (pin.value > sensorThresholds[2])
-      //            majeure.stop();
+      // } else if (sensorPins[2].equalsIgnoreCase(pin.pin)) {
+      // // middle / A2
+      // if (pin.value > sensorThresholds[2])
+      // majeure.stop();
       //
-      //        } else if (sensorPins[3].equalsIgnoreCase(pin.pin)) {
-      //          // ring / A3
-      //          if (pin.value > sensorThresholds[3])
-      //            ringFinger.stop();
+      // } else if (sensorPins[3].equalsIgnoreCase(pin.pin)) {
+      // // ring / A3
+      // if (pin.value > sensorThresholds[3])
+      // ringFinger.stop();
       //
-      //        } else if (sensorPins[4].equalsIgnoreCase(pin.pin)) {
-      //          // pinky / A4
-      //          if (pin.value > sensorThresholds[4])
-      //            pinky.stop();
-      //        }
-      //      }
+      // } else if (sensorPins[4].equalsIgnoreCase(pin.pin)) {
+      // // pinky / A4
+      // if (pin.value > sensorThresholds[4])
+      // pinky.stop();
+      // }
+      // }
     }
   }
 
-
   /**
-   * this method returns the analog pins that the hand is listening to.
-   * The InMoovHand listens on analog pins A0-A4 for the finger tip sensors.
+   * this method returns the analog pins that the hand is listening to. The
+   * InMoovHand listens on analog pins A0-A4 for the finger tip sensors.
    * 
    */
   @Override
@@ -691,12 +695,13 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   /**
-   * Set the array of pins that should be listened to. 
+   * Set the array of pins that should be listened to.
    * 
    * @param pins
    */
   public void setSensorPins(String[] pins) {
-    // TODO, this should probably be a sorted set.. and sensorPins itself should probably be a map to keep the mapping of pin to finger 
+    // TODO, this should probably be a sorted set.. and sensorPins itself should
+    // probably be a map to keep the mapping of pin to finger
     this.sensorPins = pins;
   }
 

@@ -46,7 +46,7 @@ public class Mail extends Service {
     LoggingFactory.init(Level.WARN);
 
     try {
-      Mail mail = (Mail)Runtime.start("mail", "Mail");
+      Mail mail = (Mail) Runtime.start("mail", "Mail");
       mail.startService();
       // sendMailSSL();
       /*
@@ -124,6 +124,5 @@ public class Mail extends Service {
   public Mail(String n, String id) {
     super(n, id);
   }
-
 
 }

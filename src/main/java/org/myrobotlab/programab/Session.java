@@ -36,7 +36,7 @@ public class Session {
   transient ProgramAB programab;
 
   public File predicatesFile;
-  
+
   // public Map<String,String> predicates = new TreeMap<>();
   public Predicates predicates = null;
 
@@ -70,7 +70,7 @@ public class Session {
       if (userPredicates.exists()) {
         predicatesFile = userPredicates;
         chat.predicates.getPredicateDefaults(userPredicates.getAbsolutePath());
-      } 
+      }
     }
     predicates = chat.predicates;
     return chat;

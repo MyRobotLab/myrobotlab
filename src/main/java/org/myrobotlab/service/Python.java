@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -178,6 +176,8 @@ public class Python extends Service {
 
   private static final long serialVersionUID = 1L;
 
+  protected int newScriptCnt = 0;
+
   /**
    * Get a compiled version of the python call.
    * 
@@ -265,15 +265,15 @@ public class Python extends Service {
 
     createPythonInterpreter();
     attachPythonConsole();
-    
-    
+
     //////// was in startService
-    
+
     String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
         + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-    // FIXME !!! myService is SO WRONG it will collide on more than 1 python service :(
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
@@ -281,6 +281,12 @@ public class Python extends Service {
     StringBuffer initScript = new StringBuffer();
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
+  }
+
+  public void newScript() {
+    if (!openedScripts.containsKey("script.py")) {
+      openScript("script.py", "");
+    }
   }
 
   public void openScript(String scriptName, String code) {
@@ -312,8 +318,9 @@ public class Python extends Service {
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
-      // FIXME - this console script has hardcoded globals to 
-      // reference this service that will break with more than on python service !
+      // FIXME - this console script has hardcoded globals to
+      // reference this service that will break with more than on python service
+      // !
       String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
       pythonConsoleInitialized = true;
@@ -648,16 +655,11 @@ public class Python extends Service {
     broadcastState();
   }
 
-  @Override
-  public void startService() {
-    super.startService();
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
-  }
+  /*
+   * no longer needed
+   * 
+   * @Override public void startService() { super.startService(); }
+   */
 
   @Override
   public void releaseService() {

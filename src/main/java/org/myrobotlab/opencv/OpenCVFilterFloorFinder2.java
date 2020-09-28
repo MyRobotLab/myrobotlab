@@ -199,7 +199,7 @@ public class OpenCVFilterFloorFinder2 extends OpenCVFilter {
 
           if (origin == null) {
             origin = new CvPoint();
-            origin.x(width/2);
+            origin.x(width / 2);
             origin.y(10 /* height?? */);
           }
 

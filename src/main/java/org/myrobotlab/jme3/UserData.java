@@ -37,15 +37,16 @@ public class UserData implements Savable {
   public Mapper mapper;
 
   transient public Vector3f rotationMask;
-  
-  transient public Vector3f localTranslation; // transitory ? init only ? INIT !!!
-                                    // probably - which means its local first
-                                    // loaded
+
+  transient public Vector3f localTranslation; // transitory ? init only ? INIT
+                                              // !!!
+  // probably - which means its local first
+  // loaded
 
   transient public Vector3f initialRotation;
 
   transient Node meta;
-  
+
   public Double currentAngle;
 
   public String assetPath;
@@ -126,16 +127,13 @@ public class UserData implements Savable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(spatial);
-    //sb.append(" ") TODO - other parts
+    // sb.append(" ") TODO - other parts
     return sb.toString();
   }
-/*
-  // scales a node and all its children
-  public void scale(float scale) {
-    spatial.scale(scale);
-    spatial.updateGeometricState();
-    spatial.updateModelBound();
-  }
-  */
+  /*
+   * // scales a node and all its children public void scale(float scale) {
+   * spatial.scale(scale); spatial.updateGeometricState();
+   * spatial.updateModelBound(); }
+   */
 
 }

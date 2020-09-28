@@ -69,7 +69,7 @@ public class TestThrower extends Service {
 
     }
   }
-  
+
   public void attach(Attachable attachable) {
     if (attachable.isType("TestCatcher")) {
       addListener("publishInteger", attachable.getName());
@@ -103,12 +103,12 @@ public class TestThrower extends Service {
       new RapidThrower(this, pitches, throwInterval);
     }
   }
-  
+
   public Integer publishInteger(Integer count) {
     log.debug("publishInteger " + count);
     return count;
   }
-  
+
   public Boolean publishBoolean(Boolean b) {
     log.debug("publishBoolean " + b);
     return b;
@@ -132,6 +132,5 @@ public class TestThrower extends Service {
     send(nameOfTargetService, nameOfMethod, data);
     return data;
   }
-
 
 }

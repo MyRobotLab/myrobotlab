@@ -240,9 +240,8 @@ public class OpenWeatherMap extends HttpClient {
     return localUnits;
   }
 
-
   public static void main(String[] args) {
-    OpenWeatherMap owm = (OpenWeatherMap)Runtime.start("weather", "OpenWeatherMap");
+    OpenWeatherMap owm = (OpenWeatherMap) Runtime.start("weather", "OpenWeatherMap");
     // owm.setKey("XXX");
     owm.setLocation("Paris,FR");
     owm.setPeriod(1);

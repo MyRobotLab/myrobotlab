@@ -259,7 +259,7 @@ public class Andrew extends Service {
    */
   public void setHead(double[] tilt, double[] pan) {
     neckTilt = new ServoConfig(tilt);
-    neckPan =  new ServoConfig(pan);
+    neckPan = new ServoConfig(pan);
   }
 
   // set Adafruit16CServoDriver setup
@@ -1110,11 +1110,11 @@ public class Andrew extends Service {
     }
 
     script.append(indentSpace);
-    script.append(String.format("Andrew.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getCurrentInputPos(), rightArmServo.getCurrentInputPos(), rightBicepsServo.getCurrentInputPos(),
-        rightElbowServo.getCurrentInputPos(), rightWristServo.getCurrentInputPos()));
+    script.append(String.format("Andrew.setRightArmPosition(%f,%f,%f,%f,%f)\n", rightShoulderServo.getCurrentInputPos(), rightArmServo.getCurrentInputPos(),
+        rightBicepsServo.getCurrentInputPos(), rightElbowServo.getCurrentInputPos(), rightWristServo.getCurrentInputPos()));
     script.append(indentSpace);
-    script.append(String.format("Andrew.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getCurrentInputPos(), leftArmServo.getCurrentInputPos(), leftBicepsServo.getCurrentInputPos(), leftElbowServo.getCurrentInputPos(),
-        leftWristServo.getCurrentInputPos()));
+    script.append(String.format("Andrew.setLeftArmPosition(%f,%f,%f,%f,%f)\n", leftShoulderServo.getCurrentInputPos(), leftArmServo.getCurrentInputPos(),
+        leftBicepsServo.getCurrentInputPos(), leftElbowServo.getCurrentInputPos(), leftWristServo.getCurrentInputPos()));
     script.append(indentSpace);
     script.append(String.format("Andrew.setHeadPosition(%f,%f)\n", neckTiltServo.getCurrentInputPos(), neckPanServo.getCurrentInputPos()));
 

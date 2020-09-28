@@ -1,12 +1,7 @@
 package org.myrobotlab.service;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-
 import org.junit.Assert;
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.image.Util;
 import org.myrobotlab.service.data.AudioData;
 
 

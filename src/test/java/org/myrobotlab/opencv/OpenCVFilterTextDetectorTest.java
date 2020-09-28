@@ -3,6 +3,7 @@ package org.myrobotlab.opencv;
 import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 

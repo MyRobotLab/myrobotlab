@@ -40,7 +40,6 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 
-
 public class OpenCVFilterResize extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;

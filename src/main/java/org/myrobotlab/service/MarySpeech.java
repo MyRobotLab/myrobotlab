@@ -38,25 +38,25 @@ import marytts.util.data.audio.MaryAudioUtils;
 public class MarySpeech extends AbstractSpeechSynthesis {
 
   public final static Logger log = LoggerFactory.getLogger(MarySpeech.class);
-  
+
   private static final long serialVersionUID = 1L;
 
   private transient MaryInterface marytts = null;
 
   String maryBase = "mary";
- 
+
   public MarySpeech(String n, String id) throws MaryConfigurationException {
     super(n, id);
     getMaryTts();
   }
-  
+
   synchronized MaryInterface getMaryTts() {
     if (marytts != null) {
       return marytts;
     }
-    
+
     String maryBase = "mary";
-      
+
     // Set some envirionment variables so we can load Mary libraries.
     System.setProperty("mary.base", maryBase);
     System.setProperty("mary.downloadDir", new File(maryBase + "/download").getPath());
@@ -147,7 +147,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     return ".wav";
   }
 
-
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, SynthesisException {
     getMaryTts();
@@ -176,7 +175,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     list.size();
 
     for (String k : list) {
-      log.info("voice-{}" , k);
+      log.info("voice-{}", k);
     }
 
     // compare against installer and config files to find more voices
@@ -185,8 +184,8 @@ public class MarySpeech extends AbstractSpeechSynthesis {
      * "https://raw.github.com/marytts/marytts/master/download/marytts-components.xml"
      * )); List<VoiceComponentDescription> moreVoices =
      * installer.getVoiceDescriptions(); for (VoiceComponentDescription k :
-     * moreVoices) { log.info("voice-" + k.getName()); }
-     * moreVoices.size(); </pre>
+     * moreVoices) { log.info("voice-" + k.getName()); } moreVoices.size();
+     * </pre>
      */
 
     // installComponentsAcceptLicense("bits2");
@@ -196,10 +195,12 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Emma", "female", "de", "bits1-hsmm");
     addVoice("Henry", "male", "en", "cmu-rms-hsmm");
     addVoice("Alim", "male", "tr", "dfki-ot-hsmm");
-    //addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm"); this is useless because it is totally non understandable
+    // addVoice("Jessica", "female", "fr", "upmc-jessica-hsmm"); this is useless
+    // because it is totally non understandable
     addVoice("Spike", "male", "en-GB", "dfki-spike-hsmm");
     addVoice("Sally", "female", "en-US", "cmu-slt-hsmm");
-    //addVoice("Camille", "female", "fr", "enst-camille-hsmm"); this is useless because it is totally non understandable
+    // addVoice("Camille", "female", "fr", "enst-camille-hsmm"); this is useless
+    // because it is totally non understandable
     addVoice("Hans", "male", "de", "dfki-pavoque-neutral-hsmm");
     addVoice("Poppy", "female", "en-GB", "dfki-poppy-hsmm");
     addVoice("Mark", "male", "en-US", "cmu-bdl-hsmm");
@@ -210,7 +211,6 @@ public class MarySpeech extends AbstractSpeechSynthesis {
     addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
     // addVoice("Prudence", "female", "en-GB", "dfki-prudence-hsmm");
   }
-  
 
   public String setAudioEffects(String audioEffects) {
     marytts.setAudioEffects(audioEffects);
@@ -225,7 +225,7 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       Runtime.start("gui", "SwingGui");
       Runtime.start("webgui", "WebGui");
       MarySpeech mary = (MarySpeech) Runtime.start("mary", "MarySpeech");
-     
+
       // mary.grabRemoteAudioEffect("LAUGH01_F");
       Runtime.start("python", "Python");
 
@@ -279,9 +279,5 @@ public class MarySpeech extends AbstractSpeechSynthesis {
       Logging.logError(e);
     }
   }
-
-
-
- 
 
 }

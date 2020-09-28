@@ -24,14 +24,14 @@ public class Jme3App extends SimpleApplication {
   public final static Logger log = LoggerFactory.getLogger(Jme3App.class);
   protected transient JMonkeyEngine jme = null;
   MainMenuState menu;
-  
+
   public Jme3App(JMonkeyEngine jme) {
     super(new StatsAppState(), new DebugKeysAppState(), new BasicProfilerState(false),
         // new OptionPanelState(), // from Lemur
         // menu = new MainMenuState(jme),
         new ScreenshotAppState("", System.currentTimeMillis()));
     menu = new MainMenuState(jme);
-    stateManager.attach(menu);    
+    stateManager.attach(menu);
     this.jme = jme;
     // setShowSettings(true);
   }
@@ -47,7 +47,7 @@ public class Jme3App extends SimpleApplication {
 
   @Override
   public void simpleInitApp() {
-    
+
     // callbacks to Service - since it cannot "extend" from SimpleApplication
     // jme service provides the "default app" - if you really need something
     // different

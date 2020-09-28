@@ -13,7 +13,6 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -82,9 +81,9 @@ public class Blender extends Service {
   transient public final static Logger log = LoggerFactory.getLogger(Blender.class);
 
   public static final String SUCCESS = "SUCCESS";
-  
+
   transient Socket control = null;
-  
+
   transient ControlHandler controlHandler = null;
 
   String host = "localhost";
@@ -348,6 +347,5 @@ public class Blender extends Service {
       Logging.logError(e);
     }
   }
-
 
 }

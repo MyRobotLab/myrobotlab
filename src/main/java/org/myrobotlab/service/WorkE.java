@@ -133,7 +133,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
     // subscribe("runtime", "created")
     // to much type info - life-cycle happens before peers started
-    // subscribe("runtime", "registered"); 
+    // subscribe("runtime", "registered");
 
     // subscribe("runtime", "started");
     // subscribe("runtime", "released");
@@ -315,50 +315,49 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   // if throws - how is it reported ?
   public void attachMotorController(MotorController service) throws Exception {
-      speak("attaching motor controller");
-      
-      controller = service.getName();
-    
-      if (service.isType(Sabertooth.class)) {
-        speak("found a sabertooth");
-        speak("connecting to serial port %s", serialPort);
-        ((Sabertooth) service).connect(serialPort);
-      }
-      
-      if (motorRight != null) {
-        speak("attaching right motor to controller");
-        send(motorRight, "attach", controller);
-      }
+    speak("attaching motor controller");
 
-      if (motorLeft != null) {
-        speak("attaching left motor to controller");
-        send(motorLeft, "attach", controller);
-      }
+    controller = service.getName();
 
-      /**
-       * <pre>
-        *  Find new serial port possibilities
-        *  
-        *  this probably should be more a function of serial
-        *  communicating it can't connect at the current serial port
-        *  and giving a list of ports as options
-        *  
-       File f = new File("/dev/");
-       File[] dev = f.listFiles();
-       for (File d : dev) {
-         if (d.getAbsolutePath().equals(c)) {
-           connect(serialPort);
-         } else {
-           speak("found new serial port %s", d.getName());
-           serialPort = d.getAbsolutePath();
-           connect(serialPort);
-         }
-       }
-       * </pre>
-       */
-      speak("could not find valid serial port for sabertooth");
+    if (service.isType(Sabertooth.class)) {
+      speak("found a sabertooth");
+      speak("connecting to serial port %s", serialPort);
+      ((Sabertooth) service).connect(serialPort);
     }
-  
+
+    if (motorRight != null) {
+      speak("attaching right motor to controller");
+      send(motorRight, "attach", controller);
+    }
+
+    if (motorLeft != null) {
+      speak("attaching left motor to controller");
+      send(motorLeft, "attach", controller);
+    }
+
+    /**
+     * <pre>
+      *  Find new serial port possibilities
+      *  
+      *  this probably should be more a function of serial
+      *  communicating it can't connect at the current serial port
+      *  and giving a list of ports as options
+      *  
+     File f = new File("/dev/");
+     File[] dev = f.listFiles();
+     for (File d : dev) {
+       if (d.getAbsolutePath().equals(c)) {
+         connect(serialPort);
+       } else {
+         speak("found new serial port %s", d.getName());
+         serialPort = d.getAbsolutePath();
+         connect(serialPort);
+       }
+     }
+     * </pre>
+     */
+    speak("could not find valid serial port for sabertooth");
+  }
 
   public void attachOpenCV(OpenCV service) {
     speak("attaching eye");
@@ -387,7 +386,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     replaceWord("work e", "work-ee");
 
     setMute(false);
-    
+
     speak("attaching mouth");
 
     if (Platform.isVirtual()) {
@@ -395,12 +394,12 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
     } else {
       speak("starting in real mode");
     }
-    
+
     if (mouth != null) {
       speak("attaching mouth to brain");
       send(brain, "attach", mouth);
     }
-    
+
     if (ear != null) {
       speak("attaching mouth to ear");
       send(ear, "attach", mouth);
@@ -510,20 +509,20 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   public void onOpenCVData(OpenCVData data) {
     log.info("onOpenCVData");
   }
-  
+
   // PREFERRED !!!
   public void onStarted(String name) {
     try {
-    attach(name);
-    } catch(Exception e) {
+      attach(name);
+    } catch (Exception e) {
       log.error("onStarted threw", e);
     }
   }
 
-  /** TOO SOON !!!! 
-  public void onRegistered(Registration registration) {
-    attach((Attachable) registration.service);
-  }*/
+  /**
+   * TOO SOON !!!! public void onRegistered(Registration registration) {
+   * attach((Attachable) registration.service); }
+   */
 
   public void onReleased(String name) {
     speak("released %s", name);
@@ -549,7 +548,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    */
   public void publishLeftMotorStop() {
     log.info("publish left -> stop");
-    }
+  }
 
   /**
    * left movement publishing point - this should probably go into a
@@ -748,20 +747,20 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   }
 
   public String speak(String inText, Object... args) {
-    
+
     String text = null;
     if (args != null) {
       text = String.format(inText, args);
     } else {
       text = inText;
     }
-    
+
     // if mouth has not started
     // no point in speaking
     if (!isStarted("mouth")) {
       return text;
     }
-    
+
     broadcast("publishText", text);
     broadcast("publishSpeak", text);
     return text;
@@ -778,7 +777,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
 
   public static void main(String[] args) {
     try {
-      
+
       LoggingFactory.init(Level.WARN);
       Platform.setVirtual(true);
 
@@ -791,13 +790,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
       worke.startPeer("eye");
       /*
-      worke.startPeer("joystick");
-      worke.startPeer("motorLeft");
-      worke.startPeer("motorRight");
-      worke.startPeer("controller");
-      
-      /*
+       * worke.startPeer("joystick"); worke.startPeer("motorLeft");
        * worke.startPeer("motorRight"); worke.startPeer("controller");
+       * 
+       * /* worke.startPeer("motorRight"); worke.startPeer("controller");
        */
       // worke.startPeer("eye");
 

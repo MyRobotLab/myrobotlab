@@ -31,5 +31,5 @@ public interface SerialDataListener extends NameProvider, QueueReporter, PortLis
 
   // TODO: other lifecycle methods like connected / disconnected
   public void onBytes(byte[] bytes);
-  
+
 }

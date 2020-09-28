@@ -3,11 +3,17 @@ package org.myrobotlab.service;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.atmosphere.wasync.*;
-
+import org.atmosphere.wasync.Client;
+import org.atmosphere.wasync.ClientFactory;
+import org.atmosphere.wasync.Decoder;
+import org.atmosphere.wasync.Encoder;
+import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Function;
+import org.atmosphere.wasync.Request;
+import org.atmosphere.wasync.RequestBuilder;
+import org.atmosphere.wasync.Socket;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -47,54 +53,50 @@ public class WebSocketConnector extends Service implements TextPublisher {
    * @param url
    *          the url of the websocket
    * @throws URISyntaxException
-   * @throws IOException 
+   * @throws IOException
    */
   public void connect(String url) throws URISyntaxException, IOException {
 
     client = ClientFactory.getDefault().newClient();
     socket = null;
 
-    RequestBuilder request = client.newRequestBuilder()
-            .method(Request.METHOD.GET)
-            .uri(url)
-            .encoder(new Encoder<String, Reader>() {        // Stream the request body
-                @Override
-                public Reader encode(String s) {
-                    return new StringReader(s);
-                }
-            })
-            .decoder(new Decoder<String, Reader>() {
-                @Override
-                public Reader decode(Event type, String s) {
-                    return new StringReader(s);
-                }
-            })
-            .transport(Request.TRANSPORT.WEBSOCKET)                        // Try WebSocket
-            .transport(Request.TRANSPORT.LONG_POLLING);                    // Fallback to Long-Polling
+    RequestBuilder request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() { // Stream
+                                                                                                                                    // the
+                                                                                                                                    // request
+                                                                                                                                    // body
+      @Override
+      public Reader encode(String s) {
+        return new StringReader(s);
+      }
+    }).decoder(new Decoder<String, Reader>() {
+      @Override
+      public Reader decode(Event type, String s) {
+        return new StringReader(s);
+      }
+    }).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
+        .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to Long-Polling
 
     Socket socket = client.create();
     socket.on(new Function<Reader>() {
-        @Override
-        public void on(Reader r) {
-            // Read the response
-        }
+      @Override
+      public void on(Reader r) {
+        // Read the response
+      }
     }).on(new Function<IOException>() {
 
-        @Override
-        public void on(IOException ioe) {
-            // Some IOException occurred
-        }
+      @Override
+      public void on(IOException ioe) {
+        // Some IOException occurred
+      }
 
-    }).open(request.build())
-        .fire("echo")
-        .fire("bong");
+    }).open(request.build()).fire("echo").fire("bong");
   }
 
   /**
    * Send a message over the websocket
    * 
    * @param message
-   * @throws IOException 
+   * @throws IOException
    */
   public void send(String message) throws IOException {
     socket.fire(message);
@@ -108,7 +110,6 @@ public class WebSocketConnector extends Service implements TextPublisher {
     WebSocketConnector wsc = (WebSocketConnector) Runtime.start("wsc", "WebSocketConnector");
   }
 
- 
   @Override
   public void attachTextListener(TextListener service) {
     addListener("publishText", service.getName());

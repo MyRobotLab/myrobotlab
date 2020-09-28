@@ -66,7 +66,7 @@ public class OpenKinectPointCloud {
     // location of your shared library!
     NativeLibrary.addSearchPath("freenect", OpenKinectExampleParam.PATH_TO_SHARED_LIBRARY);
   }
-  
+
   static final Logger log = LoggerFactory.getLogger(OpenKinectPointCloud.class);
 
   private PointCloudViewer viewer;

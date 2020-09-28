@@ -49,7 +49,6 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event);
 
-
   /**
    * speech synthesis interface - to not listen while speaking
    * 
@@ -110,26 +109,26 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    */
   public void startListening();
 
-
   /**
-   * Stop recognizing continues listening and recording audio, but will not publish recognized events
+   * Stop recognizing continues listening and recording audio, but will not
+   * publish recognized events
    */
   public void stopListening();
 
-  
   /**
-   * Start recording begins recording and initially starts recognizing unless a wake word is used.  
-   * If a wake word is used - recording starts but listening and publishing recognized speech is prevented from publishing until the wake word is recognized
+   * Start recording begins recording and initially starts recognizing unless a
+   * wake word is used. If a wake word is used - recording starts but listening
+   * and publishing recognized speech is prevented from publishing until the
+   * wake word is recognized
    */
   public void startRecording();
 
-  
   /**
-   * Stop listening stops the recording and and any possibility of recognizing incoming audio
+   * Stop listening stops the recording and and any possibility of recognizing
+   * incoming audio
    */
   public void stopRecording();
 
-  
   /**
    * Setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
@@ -149,7 +148,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * Stop wake word functionality .. after being called stop and start
    */
   public void unsetWakeWord();
-  
+
   public void lockOutAllGrammarExcept(String lockPhrase);
 
 }

@@ -27,7 +27,6 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
 
   private static final long serialVersionUID = 1L;
 
-
   ArrayList<String> currentStates;
   Set<State> finalStates;
   Set<EventHandler> handlers = new HashSet<>();
@@ -250,11 +249,13 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
   }
 
   /**
-   * FIXME - do we want to publish 2 channels ? events and states ? - states has a
-   * superset of info, state not as much state change - new state is published
+   * FIXME - do we want to publish 2 channels ? events and states ? - states has
+   * a superset of info, state not as much state change - new state is published
    * 
-   * @param state - incoming state to handle
-   * @throws Exception - possible state exception
+   * @param state
+   *          - incoming state to handle
+   * @throws Exception
+   *           - possible state exception
    */
   @Override
   public void handleState(State state) throws Exception {
@@ -300,7 +301,7 @@ public class FiniteStateMachine extends Service implements EventHandler, StateHa
     this.states = states;
     currentStates.add(initialState.getId());
   }
-  
+
   public SimpleEvent publishEvent(SimpleEvent event) {
     return event;
   }

@@ -12,7 +12,7 @@ public class WebGuiLang extends LangUtils {
     sb.append(name + ".autoStartBrowser(" + toPython(s.getAutoStartBrowser()) + ")\n");
     sb.append(name + ".setPort(" + s.getPort() + ")\n");
     sb.append(name + ".setAddress(" + escape(s.getAddress()) + ")\n");
-    
+
     return sb.toString();
   }
 

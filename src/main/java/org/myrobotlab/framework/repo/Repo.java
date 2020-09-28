@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 public abstract class Repo {
 
-  public static String DEFAULT_INSTALL_DIR = null;//"libraries/jar";
+  public static String DEFAULT_INSTALL_DIR = null;// "libraries/jar";
 
   // Repo is an interface to a singleton of each "type" of repo
   private static String defaultRepoManagerType = "IvyWrapper";
@@ -46,9 +46,9 @@ public abstract class Repo {
   private final String REPO_STATE_FILE_NAME = "repo.json";
 
   public static final String INSTALL_PROGRESS = "installProgress";
-  
+
   /**
-   * location of repo's libraries - if not explicitly set will be set to 
+   * location of repo's libraries - if not explicitly set will be set to
    * "libraries"
    */
   protected static String LOCATION = null;
@@ -56,7 +56,7 @@ public abstract class Repo {
   List<Status> errors = new ArrayList<Status>();
 
   Map<String, ServiceDependency> installedLibraries = new TreeMap<String, ServiceDependency>();
-  
+
   public String getRepoPath() {
     return LOCATION + File.separator + REPO_STATE_FILE_NAME;
   }
@@ -68,7 +68,7 @@ public abstract class Repo {
   static public Repo getInstance() {
     return getInstance(null, defaultRepoManagerType);
   }
-  
+
   public static Repo getInstance(String simpleType) {
     return getInstance(null, simpleType);
   }
@@ -76,15 +76,15 @@ public abstract class Repo {
   public static Repo getInstance(String location, String simpleType) {
 
     if (LOCATION == null && location != null) {
-     LOCATION = location;
+      LOCATION = location;
     } else {
       LOCATION = "libraries";
     }
-    
-    if (DEFAULT_INSTALL_DIR == null) {      
-      DEFAULT_INSTALL_DIR = LOCATION; //+ File.separator + "jar";
+
+    if (DEFAULT_INSTALL_DIR == null) {
+      DEFAULT_INSTALL_DIR = LOCATION; // + File.separator + "jar";
     }
-    
+
     File libraries = new File(LOCATION);
     libraries.mkdirs();
     if (!libraries.exists()) {
@@ -92,7 +92,7 @@ public abstract class Repo {
     } else {
       log.info("create repo {}", LOCATION);
     }
-    
+
     String type = makeFullTypeName(simpleType);
 
     if (localInstances.containsKey(type)) {
@@ -116,7 +116,7 @@ public abstract class Repo {
       return null;
     }
   }
-  
+
   public String getInstallDir() {
     return DEFAULT_INSTALL_DIR;
   }
@@ -288,7 +288,6 @@ public abstract class Repo {
         log.error("{} not found", type);
         return ret;
       }
-     
 
       MetaData st = ServiceData.getMetaData(type);
 
@@ -341,36 +340,34 @@ public abstract class Repo {
   }
 
   synchronized public void install(String location, String serviceType) {
-    
+
     String[] types = null;
     if (serviceType == null) {
       ServiceData sd = ServiceData.getLocalInstance();
       types = sd.getServiceTypeNames();
     } else {
       types = new String[] { serviceType };
-    }    
+    }
     install(location, types);
   }
-  
+
   synchronized public void installDependency(String libraries, String[] installDependency) {
-		// unpack the --install-dependency options
-	  if (installDependency.length < 3) {
-		  error("format must be --install-dependency {groupId} {artifactId} [{version}|\"latest\"] [ext] ");
-		  return;
-	  }
-	  
-	  
-		  String organisation = installDependency[0];
-		  String artifactId = installDependency[1];
-		  String inV = installDependency[2];
-		  String version = (inV.equals("latest"))?"latest.integration":inV;
-		  String ext = (installDependency.length == 4)?installDependency[3]:null;
-		  ServiceDependency sd = new ServiceDependency(organisation, artifactId, version, ext);
-		  
-	  
-	  installDependency(libraries, sd);
-	}
-  
+    // unpack the --install-dependency options
+    if (installDependency.length < 3) {
+      error("format must be --install-dependency {groupId} {artifactId} [{version}|\"latest\"] [ext] ");
+      return;
+    }
+
+    String organisation = installDependency[0];
+    String artifactId = installDependency[1];
+    String inV = installDependency[2];
+    String version = (inV.equals("latest")) ? "latest.integration" : inV;
+    String ext = (installDependency.length == 4) ? installDependency[3] : null;
+    ServiceDependency sd = new ServiceDependency(organisation, artifactId, version, ext);
+
+    installDependency(libraries, sd);
+  }
+
   abstract public void installDependency(String location, ServiceDependency serviceTypes);
 
   abstract public void install(String location, String[] serviceTypes);

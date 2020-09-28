@@ -170,8 +170,9 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
   /**
    * The Arduino sketch currently uses NewPing for its non-blocking sampling
-   * characteristics. That sketch currently returns cm of distance, while previously
-   * the MrlUltrasonicSensor.cpp return micro-seconds.
+   * characteristics. That sketch currently returns cm of distance, while
+   * previously the MrlUltrasonicSensor.cpp return micro-seconds.
+   * 
    * @return
    */
   synchronized public Double range() {

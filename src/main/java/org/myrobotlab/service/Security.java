@@ -128,7 +128,6 @@ public class Security extends Service implements AuthorizationProvider {
     return (Security) Runtime.start("security", "Security");
   }
 
-
   public static void main(String[] args) throws Exception {
     // LoggingFactory.init(Level.INFO);
 
@@ -194,7 +193,7 @@ public class Security extends Service implements AuthorizationProvider {
     /*
      * FIXME - set predefined levels - high security medium low
      * allowExportByType.put("Xmpp", false);
-    
+     * 
      * allowExportByType.put("WebGui", false); allowExportByType.put("SwingGui",
      * false);
      * 
@@ -227,7 +226,7 @@ public class Security extends Service implements AuthorizationProvider {
     groups.put(groupId, g);
     return true;
   }
-  
+
   @Deprecated // use setKey - name seems more appropriate
   public void addSecret(String name, String keyValue) {
     setKey(name, keyValue);
@@ -340,6 +339,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * remove a key from the keystore
+   * 
    * @param keyName
    */
   public void deleteKey(String keyName) {
@@ -411,6 +411,7 @@ public class Security extends Service implements AuthorizationProvider {
 
   /**
    * return the set of key names currently stored in the key store
+   * 
    * @return
    */
   public Set<String> getKeyNames() {

@@ -449,16 +449,17 @@ public class OpenCVGui extends ServiceGui implements ListSelectionListener, Vide
    * to provide the updated state information. Typically "publishState" is the
    * function which provides the event for onState.
    * 
-   *  @param opencv - the OpenCV service
-   *  
-   */  
+   * @param opencv
+   *          - the OpenCV service
+   * 
+   */
   public void onState(final OpenCV opencv) {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
 
         enableListeners(false);
-// GAH !!
+        // GAH !!
         // seems pretty destructive :P
         currentFilterListModel.clear();
         // add new filters from service into gui

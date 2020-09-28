@@ -74,11 +74,8 @@ public class OpenCVFilterBoundingBoxToFile extends OpenCVFilter {
 
         Rectangle r = bb.get(i);
         CvRect roiRect = new CvRect();
-        roiRect.x((int)r.x)
-               .y((int) r.y)
-               .width((int) r.width)
-               .height((int) r.height);
-        
+        roiRect.x((int) r.x).y((int) r.y).width((int) r.width).height((int) r.height);
+
         cvSetImageROI(image, roiRect);
         CvSize size = new CvSize();
         size.width((int) r.width).height((int) r.height);

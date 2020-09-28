@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.kinematics.Pose;
@@ -31,7 +30,7 @@ public class ServoMixer extends Service {
     super(n, id);
 
     // FIXME - make this part of framework !!!!
-    //subscribe("runtime", "started");
+    // subscribe("runtime", "started");
     // subscribe("runtime", "registered");
     // subscribe("runtime", "released");
 
@@ -47,7 +46,7 @@ public class ServoMixer extends Service {
   public void onStarted(String name) {
     ServiceInterface si = Runtime.getService(name);
     if (si instanceof ServoControl) {
-        allServos.add(Runtime.getFullName(name));
+      allServos.add(Runtime.getFullName(name));
     }
     broadcastState();
   }

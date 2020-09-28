@@ -27,18 +27,18 @@ public class Search implements SceneGraphVisitor {
     if (name == null) {
       return;
     }
-    
+
     if (!exactMatch) {
-      if (name.toLowerCase().contains(searchText.toLowerCase())){
+      if (name.toLowerCase().contains(searchText.toLowerCase())) {
         if (spatial instanceof Node) {
           results.add(spatial);
         } else if (spatial instanceof Geometry && includeGeometries) {
           results.add(spatial);
         }
-      }      
+      }
     }
   }
-  
+
   public List<Spatial> getResults() {
     return results;
   }
