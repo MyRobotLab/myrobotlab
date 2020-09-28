@@ -78,10 +78,11 @@ public class OculusRift extends Service implements PointPublisher {
   public String leftEyeURL = null;
   public String rightEyeURL = null;
 
-  public String frameGrabberType = "MJpeg";
+  public String frameGrabberType = "OpenCV";
+  
   public String cvInputSource = null;
 
-  private HmdDesc hmdDesc;
+  transient private HmdDesc hmdDesc;
 
   transient public OculusTracking headTracker = null;
 
@@ -188,8 +189,7 @@ public class OculusRift extends Service implements PointPublisher {
 
       // start the left camera.
       capture();
-      
-      
+
       // TODO: handle the "end of the pipeline" as the input source.
       boolean addYolo = false;
       if (addYolo) {
@@ -496,7 +496,6 @@ public class OculusRift extends Service implements PointPublisher {
     return point;
   }
 
-
   public static void main(String s[]) {
     // LoggingFactory.init("INFO");
 
@@ -504,16 +503,16 @@ public class OculusRift extends Service implements PointPublisher {
     // LoggingFactory.getInstance().setLevel(Level.INFO);
     LoggingFactory.init("INFO");
 
-    Runtime.createAndStart("gui", "SwingGui");
+    // Runtime.createAndStart("gui", "SwingGui");
     Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
     String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
     String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
-    
+
     rift.setLeftEyeURL(leftEyeURL);
     rift.setRightEyeURL(rightEyeURL);
-    
+
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
     rift.rightCameraDy = -5;

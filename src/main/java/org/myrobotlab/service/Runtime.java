@@ -441,11 +441,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       List<ServiceInterface> services = getServices();// getLocalServices();
       for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
-          // for typeless registration - try the following ? without a service
-          // reference ??
-          // si.onRegistered(new Registration(s.getId(), s.getName(),
-          // s.getType(), runtime.serviceData.getServiceType(s.getType())));
+          try {
           si.onRegistered(new Registration(s));
+          } catch(Exception e){
+            runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
+          }
         }
         // don't register or create or start event self
         if (s.getName().equals(si.getName())) {
@@ -459,7 +459,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       return (Service) newService;
     } catch (Exception e) {
-      log.error("createService failed for {}@{} of type {}", name, inId, fullTypeName, e);
+      log.error("createService failed for {}@{} of type {}", name, id, fullTypeName, e);
     }
     return null;
   }
