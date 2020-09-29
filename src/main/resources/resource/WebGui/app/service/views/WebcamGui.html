@@ -1,56 +1,56 @@
 <div class="col-md-6">
     <div class="row">
-        <!--
-        <iframe scrolling="no" width=640 height=480 src={{url}} title="mjpg-streamer"></iframe>
-    </div>
-    <video src={{url}} />
-    -->
         <div ng-click="onSamplePoint($event)">
             <img data-ng-src="{{getDisplayImage()}}"/>
         </div>
         <!-- /videoContainer -->
         <div class="videoInfo">
             <span class="glyphicon glyphicon-info-sign gray1"></span>
-            mouse x y {{samplePoint.x}}x{{samplePoint.y}} {{stats.fps}} fps  latency {{stats.latency}} ms
-        
-        
+            mouse x y {{samplePoint.x}}x{{samplePoint.y}} fps {{stats.fps}} latency {{stats.latency}} ms <br/>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label>cameras</label>
+                <select ng-disabled="service.capturing" class="form-control selectpicker" ng-model="service.selectedCamera">
+                    <option ng-repeat="name in service.webcams" value="{{name}}">{{name}}</option>
+                </select>
+            </div>
         </div>
         <div class="row">
             <div class="form-group col-md-2">
-                <label for="port">port</label>
-                <input ng-disabled="service.capturing" type="text" class="form-control" id="port" value={{service.port}}>
+                <label for="fps">type</label>
+                <input ng-disabled="true" type="text" class="form-control" id="type" ng-model="service.type">
             </div>
             <div class="form-group col-md-2">
-                <label for="fps">fps</label>
-                <input ng-disabled="service.capturing" type="text" class="form-control" id="fps" value={{service.fps}}>
+                <label for="requestedFps">fps</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="requestedFps" ng-model="service.requestedFps">
             </div>
             <div class="form-group col-md-2">
                 <label for="width">width</label>
-                <input ng-disabled="service.capturing" type="text" class="form-control" id="width" value={{service.width}}>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="width" ng-model="service.width">
             </div>
             <div class="form-group col-md-2">
                 <label for="height">height</label>
-                <input ng-disabled="service.capturing" type="text" class="form-control" id="height" value={{service.height}}>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="height" ng-model="service.height">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="height">quality</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="quaility" ng-model="service.quality">
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-2">
-                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="msg.capture()">
+                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="capture()">
                     <span class="glyphicon glyphicon-play text-primary"></span>
                     &nbsp;Start Capture
-        
-        
-            
                 
                 </button>
                 <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
                     <span class="glyphicon glyphicon-stop"></span>
                     &nbsp;Stop Capture
-        
-        
-            
                 
                 </button>
             </div>
         </div>
     </div>
+</div>

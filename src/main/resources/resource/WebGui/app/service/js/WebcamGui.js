@@ -3,15 +3,20 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
     var _self = this
     var msg = this.msg
 
-    var avgSampleCnt = 30
-
     var latencyDeltaAccumulator = 0
+
+    var frameIndex = 0
 
     var lastFrameIndex = 0
 
     var lastFrameTs = 0
 
     var port = 8080
+
+    $scope.webImage = null
+
+    $scope.selectedCamera = null
+
     $scope.url = location.protocol + '//' + location.hostname + (port ? ':' + port : '')
 
     $scope.fps = 0
@@ -20,14 +25,16 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
 
     $scope.stats = {
         latency: 0,
-        fps: 0
+        fps: 0,
+        deltaTime: 0,
+        deltaFrames: 0,
+        diff: 0
     }
 
-        $scope.samplePoint = {
+    $scope.samplePoint = {
         x: 0,
         y: 0
     }
-
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -46,19 +53,33 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
             $scope.$apply()
             break
         case 'onWebDisplay':
-            // $scope.diplayImage = 'data:image/jpeg;base64,' + data
-            $scope.diplayImage = data.data
-            if (data.frameIndex % avgSampleCnt == 0) {
-                $scope.stats.latency = Math.round(latencyDeltaAccumulator / avgSampleCnt)
+            $scope.webImage = data
+            
+            frameIndex++;
+            let now = new Date().getTime()
+            let deltaTime = now - lastFrameTs
+
+            if (deltaTime > 1000) {
+                // ~ 1 sec
+                $scope.stats.deltaFrames = frameIndex - lastFrameIndex
+
+                // latency
+                $scope.stats.latency = Math.abs(Math.round(latencyDeltaAccumulator / deltaTime))
                 latencyDeltaAccumulator = 0
-                $scope.stats.fps = (data.ts - lastFrameTs)
-                //$scope.stats.fps = Math.round((data.frameIndex - lastFrameIndex) * 1000 / (data.ts - lastFrameTs))
-                lastFrameIndex = data.frameIndex
-                lastFrameTs = data.ts
+
+                $scope.stats.fps = Math.round((frameIndex - lastFrameIndex) * 1000 / (deltaTime))
+                lastFrameTs = now
+
+                // frames lost
+                $scope.stats.diff = data.frameIndex - frameIndex
+
+                // reset
+                lastFrameIndex = frameIndex;
+                lastFrameTs = now
+
             }
 
-            latencyDeltaAccumulator += new Date().getTime() - data.ts
-
+            latencyDeltaAccumulator += now - data.ts
             $scope.$apply()
             break
         default:
@@ -75,7 +96,12 @@ angular.module('mrlapp.service.WebcamGui', []).controller('WebcamGuiCtrl', ['$sc
     }
 
     $scope.getDisplayImage = function() {
-        return $scope.diplayImage
+        return $scope.webImage.data
+    }
+
+    $scope.capture = function(){
+        console.info('capture', $scope.service.selectedCamera, $scope.service.type, $scope.service.requestedFps, $scope.service.width, $scope.service.height, $scope.service.quality)
+        msg.send('capture', $scope.service.selectedCamera, $scope.service.type, $scope.service.requestedFps, $scope.service.width, $scope.service.height, $scope.service.quality)
     }
 
     //mrl.subscribe($scope.service.name, 'pulse')

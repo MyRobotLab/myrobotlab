@@ -22,7 +22,13 @@ public class WebcamMeta extends MetaData {
 
     addDescription("used as a general webcam");
     addCategory("video");
-
+    // if (platform.isLinux()) {
+      addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.13-SNAPSHOT");
+    // } else {
+      // ?? windows ok with default of v4l4j ???
+      // addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.12");
+      // }
+   
   }
 
 }
