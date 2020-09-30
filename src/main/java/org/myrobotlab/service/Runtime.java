@@ -121,22 +121,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * The set of client connections to this mrl instance Some of the connections
    * are outbound to other webguis, others may be inbound if a webgui is
    * listening in this instance. These details and many others (such as from
-   * which connection a client is from) is in the Map<String, Object> information.
+   * which connection a client is from) is in the Map &lt;String, Object&gt; information.
    * Since different connections have different requirements, and details regarding
    * clients the only "fixed" required info to add a client is :
    * 
    * uuid - key unique identifier for the client
    * connection - name of the connection currently managing the clients connection
    * state - state of the client and/or connection
-   * (lots more attributes with the Map<String, Object> to provide necessary data for the connection)
+   * (lots more attributes with the Map&lt;String, Object&gt; to provide necessary data for the connection)
    * </pre>
    */
   protected final Map<String, Connection> connections = new HashMap<>();
 
-  // idToconnections ?? - FIXME - make default route !
-  // id to Connection .. where id is like ip.. might need priority
-  // like routeTable <String, List<RouteEntry>>
-  // currently its <id, list<uuid>>
+  /**
+   * route Table - ids to a set of connections
+   * similar to network to interfaces
+   */
   protected final Map<String, Set<String>> routeTable = new HashMap<>();
 
   protected String defaultRoute = null;
@@ -1121,38 +1121,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     startInteractiveMode(System.in, System.out);
   }
 
-  // FIXME !!! add connection !!! & authentication !!
-  public void startInteractiveMode(InputStream in, OutputStream out) {
-    if (cli == null) {
+  public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
+    stopInteractiveMode();
 
-      cli = new InProcessCli(this, "runtime", in, out);
-      String cliId = cli.getId();
-      String uuid = java.util.UUID.randomUUID().toString();
-      stdCliUuid = uuid;
-      Connection attributes = new Connection();
-      attributes.put("gateway", "runtime");
-      attributes.put("uuid", uuid);
-      attributes.put("id", cliId);
-      attributes.put("header-User-Agent", "stdin-client");
-      attributes.put("cwd", "/");
-      attributes.put("uri", "/api/cli");
-      attributes.put("user", "root");
-      attributes.put("host", "local");
-      attributes.put("c-type", "Cli");
-      attributes.put("cli", cli);
+    cli = new InProcessCli(this, "runtime", in, out);
+    Connection c = cli.getConnection();
+    stdCliUuid = (String)c.get("uuid");
 
-      addConnection(uuid, attributes);
+    addConnection(stdCliUuid, c);
 
-      // VERY GOOD ! - except the helloRequest should come from the remote
-      // process ;)
-      runtime.authenticate(uuid, new HelloRequest(cliId, uuid));
+    runtime.authenticate(stdCliUuid, new HelloRequest(cli.getId(), stdCliUuid));
 
-    }
+    return cli;
   }
 
   public void stopInteractiveMode() {
-    if (stdCliUuid != null && getConnection(stdCliUuid) != null) {
-      ((InProcessCli) getConnection(stdCliUuid).get("cli")).stop();
+    if (cli != null) {
+      cli.stop();
+      cli = null;
+    }
+    if (stdCliUuid != null) {
+      removeConnection(stdCliUuid);
       stdCliUuid = null;
     }
   }

@@ -13,6 +13,7 @@ import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -84,7 +85,7 @@ public class InProcessCli implements Runnable {
    * stdin/stdout is a pipe into and out of the instance, so just like
    * websockets, mqtt or xmpp it should behave the same
    * 
-   * @param id
+   * @param s
    * @param senderName
    * @param in
    * @param out
@@ -182,9 +183,11 @@ public class InProcessCli implements Runnable {
           }
           // cmd = String.format("/runtime/cd %s", cwd); LOCAL !
           writeToJson(cwd);
+          return;
         } else if (cmd.startsWith("pwd")) {
           // FIXME - THIS IS LOCAL ONLY !!!!
           writeToJson(cwd);
+          return;
         } else if (cmd.startsWith("ls")) {
           // "ls" is a special query
           // FIXME - ls with params !
@@ -421,6 +424,24 @@ public class InProcessCli implements Runnable {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public Connection getConnection() {
+    String cliId = getId();
+    String uuid = java.util.UUID.randomUUID().toString();
+    Connection attributes = new Connection();
+    attributes.put("gateway", "runtime");
+    attributes.put("uuid", uuid);
+    attributes.put("id", cliId);
+    attributes.put("header-User-Agent", "stdin-client");
+    attributes.put("cwd", "/");
+    attributes.put("uri", "/api/cli");
+    attributes.put("user", "root");
+    attributes.put("host", "local");
+    attributes.put("c-type", "Cli");
+    attributes.put("cli", this);
+    return attributes;
+
   }
 
 }

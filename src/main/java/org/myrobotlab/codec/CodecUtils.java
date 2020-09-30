@@ -409,7 +409,8 @@ public class CodecUtils {
    *          - target service
    * @param cmd
    *          - cli encoded msg
-   * @return
+   * @return 
+   *          - a Message derived from cli
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);

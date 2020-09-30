@@ -36,7 +36,6 @@ public class ServiceSmokeTest extends AbstractTest {
     ArrayList<String> blacklist = new ArrayList<String>();
     blacklist.add("org.myrobotlab.service.OpenNi");
     blacklist.add("org.myrobotlab.service.Blender");
-    blacklist.add("org.myrobotlab.service.Agent");
     blacklist.add("org.myrobotlab.service.WorkE");
     blacklist.add("org.myrobotlab.service.PythonProxy");
     blacklist.add("org.myrobotlab.service.Sweety");
