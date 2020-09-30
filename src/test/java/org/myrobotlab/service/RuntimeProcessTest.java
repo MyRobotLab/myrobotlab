@@ -72,24 +72,7 @@ public class RuntimeProcessTest extends AbstractTest {
      * cli - / context cwd / from  / to /  ?q={json}  ??  complex param
      */
     
-    
-    // null context
-    // CodecUtils.cliToMsg(contextPath, from, to, cmd);
-    
-    // cli test
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-    buffer.write("ls\n".getBytes());
-    ByteArrayInputStream in = new ByteArrayInputStream(buffer.toByteArray());
-    Runtime runtime = Runtime.getInstance();
-    runtime.startInteractiveMode(in, out);
-    
-    Service.sleep(100);
-    assertTrue(contains(out, "\"runtime\""));
-    
-    // add cli loopback connection
-    // String[] args = new String[]{""};
-    // Runtime.main(args);
+       
   }
 
 

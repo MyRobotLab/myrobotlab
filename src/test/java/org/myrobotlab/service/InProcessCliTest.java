@@ -28,8 +28,9 @@ public class InProcessCliTest extends AbstractTest {
 
   public void write(String str) throws IOException {
     pipe.write((str + "\n").getBytes());
+    pipe.flush();
     // must read it off and process the data
-    sleep(300);
+    sleep(50);
   }
   
   public void clear() {
@@ -51,28 +52,22 @@ public class InProcessCliTest extends AbstractTest {
   public void testProcess() throws IOException, InterruptedException {
     
     Runtime runtime = Runtime.getInstance();
-    // runtime.startInteractiveMode();
- 
-    InProcessCli cli = new InProcessCli(runtime, "runtime", in, bos);
-    cli.start();
+    runtime.startInteractiveMode(in, bos);
     
-   
+    // wait for pipe to clear
+    Thread.sleep(300);
     clear();
     write("pwd");
-    Thread.sleep(1000);
     String ret = getResponse();    
-    assertTrue(ret.startsWith(toJson("/")));
-    
+    assertTrue(ret.startsWith("\"/\""));
     
     clear();
     write("ls");
-    Thread.sleep(1000);
     assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
     
     
     clear();
     write("route");
-    Thread.sleep(1000);
     assertTrue(getResponse().contains(toJson(Runtime.getInstance().route())));
     
     // cd to different directory with and without /

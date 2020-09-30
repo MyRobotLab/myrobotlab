@@ -60,6 +60,10 @@ public class Launcher {
       options.services.add("python");
       options.services.add("Python");
     }
+    
+    if (options.services.size() % 2 != 0) {
+      throw new IOException("invalid choice - services must be -s {name} {type} ...");
+    }
 
     // SETUP COMMAND !!!!!
     String fs = File.separator;

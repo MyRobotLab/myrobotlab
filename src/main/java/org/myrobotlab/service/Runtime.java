@@ -1121,38 +1121,27 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     startInteractiveMode(System.in, System.out);
   }
 
-  // FIXME !!! add connection !!! & authentication !!
-  public void startInteractiveMode(InputStream in, OutputStream out) {
-    if (cli == null) {
+  public InProcessCli startInteractiveMode(InputStream in, OutputStream out) {
+    stopInteractiveMode();
 
-      cli = new InProcessCli(this, "runtime", in, out);
-      String cliId = cli.getId();
-      String uuid = java.util.UUID.randomUUID().toString();
-      stdCliUuid = uuid;
-      Connection attributes = new Connection();
-      attributes.put("gateway", "runtime");
-      attributes.put("uuid", uuid);
-      attributes.put("id", cliId);
-      attributes.put("header-User-Agent", "stdin-client");
-      attributes.put("cwd", "/");
-      attributes.put("uri", "/api/cli");
-      attributes.put("user", "root");
-      attributes.put("host", "local");
-      attributes.put("c-type", "Cli");
-      attributes.put("cli", cli);
+    cli = new InProcessCli(this, "runtime", in, out);
+    Connection c = cli.getConnection();
+    stdCliUuid = (String)c.get("uuid");
 
-      addConnection(uuid, attributes);
+    addConnection(stdCliUuid, c);
 
-      // VERY GOOD ! - except the helloRequest should come from the remote
-      // process ;)
-      runtime.authenticate(uuid, new HelloRequest(cliId, uuid));
+    runtime.authenticate(stdCliUuid, new HelloRequest(cli.getId(), stdCliUuid));
 
-    }
+    return cli;
   }
 
   public void stopInteractiveMode() {
-    if (stdCliUuid != null && getConnection(stdCliUuid) != null) {
-      ((InProcessCli) getConnection(stdCliUuid).get("cli")).stop();
+    if (cli != null) {
+      cli.stop();
+      cli = null;
+    }
+    if (stdCliUuid != null) {
+      removeConnection(stdCliUuid);
       stdCliUuid = null;
     }
   }
