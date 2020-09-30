@@ -73,6 +73,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
@@ -1027,14 +1028,14 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   @Override
   public void connect(String uri) throws Exception {
     // easy single client support
-    Map<String, Object> attributes = new HashMap<>();
+    Connection attributes = new Connection();
     attributes.put("gateway", getName());
     attributes.put("c-type", getSimpleName());
     attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
     attributes.put("uuid", uuid);
     Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.updateRoute(guiId, uuid);
+    Runtime.getInstance().updateRoute(guiId, uuid);
   }
 
   @Override
@@ -1043,21 +1044,14 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   @Override
-  public Map<String, Map<String, Object>> getClients() {
-    // TODO Auto-generated method stub
-    return null;
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
   }
 
   @Override
   public void sendRemote(Message msg) throws Exception {
     // TODO Auto-generated method stub
     log.info("sendRemote");
-  }
-
-  @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
-    log.info("sendBlockingRemote");
-    return null;
   }
 
   @Override

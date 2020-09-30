@@ -9,8 +9,8 @@ import java.io.PipedOutputStream;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.myrobotlab.client.InProcessCli;
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.test.AbstractTest;
 
 public class InProcessCliTest extends AbstractTest {
@@ -53,8 +53,7 @@ public class InProcessCliTest extends AbstractTest {
     Runtime runtime = Runtime.getInstance();
     // runtime.startInteractiveMode();
  
-    InProcessCli cli = new InProcessCli(runtime.getId(), "runtime", in, bos);
-    Runtime.stdInClient = cli;
+    InProcessCli cli = new InProcessCli(runtime, "runtime", in, bos);
     cli.start();
     
    
@@ -74,7 +73,7 @@ public class InProcessCliTest extends AbstractTest {
     clear();
     write("route");
     Thread.sleep(1000);
-    assertTrue(getResponse().contains(toJson(Runtime.route())));
+    assertTrue(getResponse().contains(toJson(Runtime.getInstance().route())));
     
     // cd to different directory with and without /
     

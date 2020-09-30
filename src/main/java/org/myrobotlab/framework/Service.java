@@ -69,7 +69,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
-import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.QueueReporter;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
@@ -309,7 +308,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
             targetField.set(target, f.get(source));
           }
         } catch (Exception e) {
-          log.error("copy failed", e);
+          log.error("copy failed source {} to a {}", source, target, e);
         }
       } // for each field in class
     } // for each in ancestry
@@ -377,7 +376,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getRootDataDir() {
-    return Runtime.getOptions().dataDir;
+    return Runtime.DATA_DIR;
   }
 
   public String getHomeDir() {
@@ -385,12 +384,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   static public String getDataDir(String typeName) {
-    String dataDir = Runtime.getOptions().dataDir + fs + typeName;
+    String dataDir = Runtime.DATA_DIR + fs + typeName;
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().dataDir + fs + typeName;
+    return Runtime.DATA_DIR + fs + typeName;
   }
 
   public String getDataDir() {
@@ -398,12 +397,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String getDataInstanceDir() {
-    String dataDir = Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
+    String dataDir = Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
     File f = new File(dataDir);
     if (!f.exists()) {
       f.mkdirs();
     }
-    return Runtime.getOptions().dataDir + fs + getClass().getSimpleName() + fs + getName();
+    return Runtime.DATA_DIR + fs + getClass().getSimpleName() + fs + getName();
   }
 
   // ============== resources begin ======================================
@@ -1039,9 +1038,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // been serialized with a transient outbox
       // and your in a skeleton
       // use the runtime to send a message
-      @SuppressWarnings("unchecked")
       // FIXME - parameters !
-      ArrayList<MRLListener> remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+      ArrayList<MRLListener> remote = null;
+      try {
+        remote = (ArrayList<MRLListener>) Runtime.getInstance().sendBlocking(getName(), "getNotifyList", new Object[] { key });
+      } catch (Exception e) {
+        log.error("remote getNotifyList threw", e);
+      }
+
       return remote;
 
     } else {
@@ -1057,8 +1061,14 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // been serialized with a transient outbox
       // and your in a skeleton
       // use the runtime to send a message
-      @SuppressWarnings("unchecked")
-      ArrayList<String> remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet");
+
+      ArrayList<String> remote = null;
+      try {
+        remote = (ArrayList<String>) Runtime.getInstance().sendBlocking(getName(), "getNotifyListKeySet");
+      } catch (Exception e) {
+        log.error("remote getNotifyList threw", e);
+      }
+
       return remote;
     } else {
       ret.addAll(getOutbox().notifyList.keySet());
@@ -1552,20 +1562,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           // processing
           continue;
         }
-        // TODO should this declaration be outside the while loop?
-        Object ret = invoke(m);
-        if (Message.BLOCKING.equals(m.status)) {
-          // TODO should this declaration be outside the while loop?
-          // create new message reverse sender and name set to same
-          // msg id
-          Message msg = Message.createMessage(getName(), m.sender, m.method, ret);
-          msg.sender = this.getFullName();
-          msg.msgId = m.msgId;
-          // msg.status = Message.BLOCKING;
-          msg.status = Message.RETURN;
 
-          outbox.add(msg);
-        }
+        Object ret = invoke(m);
+
       }
     } catch (InterruptedException edown) {
       info("shutting down");
@@ -1668,10 +1667,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     outbox.add(msg);
   }
 
-  public Object sendBlocking(String name, Integer timeout, String method, Object... data) {
+  public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException {
     Message msg = Message.createMessage(getName(), name, method, data);
     msg.sender = this.getFullName();
-    msg.status = Message.BLOCKING;
     msg.msgId = Runtime.getUniqueID();
 
     return sendBlocking(msg, timeout);
@@ -1688,28 +1686,107 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * stdin (remote) --&gt; gateway sendBlockingRemote --&gt; invoke
    *                &lt;--                            &lt;--
    * </pre>
+   * 
+   * @throws TimeoutException
+   * @throws InterruptedException
    */
-  public Object sendBlocking(Message msg, Integer timeout) {
+  public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException {
     if (Runtime.getInstance().isLocal(msg)) {
       return invoke(msg);
     } else {
-      // get gateway for remote address
-      Gateway gateway = Runtime.getInstance().getGatway(msg.getId());
-      try {
-        return gateway.sendBlockingRemote(msg, timeout);
-      } catch (Exception e) {
-        log.error("gateway.sendBlockingRemote threw");
+      return waitOn(msg.getFullName(), msg.getMethod(), timeout, msg);
+    }
+  }
+
+  /**
+   * This method waits on a remote topic by sending a subscription and waiting
+   * for a message to come back. It is used both by sendBlocking and waitFor to
+   * normalize the code - they are equivalent. The only difference between
+   * sendBlocking and waitFor is sendBlocking sends an activating msg to the
+   * remote topic. If timeout occurs before a return message, a TimeoutException
+   * is thrown. This is important to distinguish between a timeout and a valid
+   * null return.
+   * 
+   * @param fullName
+   *          - service name
+   * @param method
+   *          - method name
+   * @param timeout
+   *          - max time to wait in ms
+   * @param sendMsg
+   *          - optional message to send to the remote topic
+   * @return
+   * @throws InterruptedException
+   * @throws TimeoutException
+   */
+  protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
+
+    String subscriber = null;
+    if (sendMsg != null) {
+      // InProcCli proxies - so the subscription needs to be from the sender NOT
+      // from runtime !
+      subscriber = sendMsg.getSrcFullName();
+    } else {
+      subscriber = getFullName();
+    }
+
+    // put in-process lock in map
+    String callbackMethod = CodecUtils.getCallbackTopicName(method);
+    String blockingKey = String.format("%s.%s", subscriber, callbackMethod);
+    Object[] blockingLockContainer = null;
+    if (!inbox.blockingList.containsKey(blockingKey)) {
+      blockingLockContainer = new Object[1];
+      inbox.blockingList.put(blockingKey, blockingLockContainer);
+    } else {
+      // if it already exists - other threads are already waiting for the
+      // same callback ...
+      blockingLockContainer = inbox.blockingList.get(blockingKey);
+    }
+
+    // send subscription
+    subscribe(fullName, method, subscriber, CodecUtils.getCallbackTopicName(method));
+
+    if (sendMsg != null) {
+      // possible race condition - counting on the delay of
+      // starting a thread for the program counter to reach the
+      // wait before the msg is sent
+      new Thread("blocking-msg") {
+        public void run() {
+          Runtime.getInstance().send(sendMsg);
+        }
+      }.start();
+    }
+
+    synchronized (blockingLockContainer) {
+      if (timeout == null) {
+        blockingLockContainer.wait();
+      } else {
+        long startTs = System.currentTimeMillis();
+        blockingLockContainer.wait(timeout);
+        if (System.currentTimeMillis() - startTs >= timeout) {
+          throw new TimeoutException("timeout of %d for %s.%s exceeded", timeout, fullName, method);
+        }
       }
     }
-    return null;
+
+    // cleanup
+    unsubscribe(fullName, method, subscriber, CodecUtils.getCallbackTopicName(method));
+
+    return blockingLockContainer[0];
+
+  }
+
+  // equivalent to sendBlocking without the sending a message
+  public Object waitFor(String fullName, String method, Integer timeout) throws InterruptedException, TimeoutException {
+    return waitOn(fullName, method, timeout, null);
   }
 
   // BOXING - End --------------------------------------
-  public Object sendBlocking(String name, String method) {
+  public Object sendBlocking(String name, String method) throws InterruptedException, TimeoutException {
     return sendBlocking(name, method, (Object[]) null);
   }
 
-  public Object sendBlocking(String name, String method, Object... data) {
+  public Object sendBlocking(String name, String method, Object... data) throws InterruptedException, TimeoutException {
     // default 1 second timeout - FIXME CONFIGURABLE
     return sendBlocking(name, 1000, method, data);
   }

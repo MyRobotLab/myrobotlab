@@ -1,4 +1,4 @@
-package org.myrobotlab.framework.repo;
+package org.myrobotlab.process;
 
 public class GitHubRelease {
 

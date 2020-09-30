@@ -66,7 +66,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
 
 /**
@@ -366,11 +365,7 @@ public class FileIO {
    */
   static public final boolean extractResources() {
     try {
-      CmdOptions options = Runtime.getOptions();
-      // PROBLEM !!! FIXME !!
-      // extract(getRoot(), "resource", options.resourceDir,
-      // options.extractResources);
-      extract(getRoot(), "resource", null, options.extractResources);
+      extract(getRoot(), "resource", null, false);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -389,7 +384,7 @@ public class FileIO {
       if (Runtime.getOptions() == null) {
         baseDir = System.getProperty("user.dir");
       } else {
-        baseDir = Runtime.getOptions().dataDir;
+        baseDir = Runtime.DATA_DIR;
       }
       // TODO: is user.dir the same as MRL_HOME / install dir?
       // "always" associated with the data dir
@@ -1229,6 +1224,29 @@ public class FileIO {
     }
 
     return null;
+  }
+
+  /**
+   * Copies bytes from src to dst, src must be a file, dst may or may not exist
+   * 
+   * @param src
+   * @param dst
+   * @throws IOException
+   */
+  static public void copyBytes(String src, String dst) throws IOException {
+    FileInputStream fis = new FileInputStream(src);
+    FileOutputStream fos = new FileOutputStream(dst);
+
+    int nRead;
+    byte[] data = new byte[65536];
+
+    while ((nRead = fis.read(data, 0, data.length)) != -1) {
+      fos.write(data, 0, nRead);
+    }
+
+    fis.close();
+    fos.close();
+
   }
 
   static public void toFile(File dst, byte[] data) throws IOException {

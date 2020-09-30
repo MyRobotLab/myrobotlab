@@ -329,6 +329,14 @@
   </dependency>
 <!-- Elasticsearch end -->
 
+<!-- Git begin -->
+  <dependency>
+    <groupId>org.eclipse.jgit</groupId>
+    <artifactId>org.eclipse.jgit</artifactId>
+    <version>5.4.0.201906121030-r</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Git end -->
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -1207,12 +1215,7 @@
   <dependency>
     <groupId>info.picocli</groupId>
     <artifactId>picocli</artifactId>
-    <version>4.0.0-beta-2</version>
-  </dependency>
-  <dependency>
-    <groupId>org.eclipse.jgit</groupId>
-    <artifactId>org.eclipse.jgit</artifactId>
-    <version>5.4.0.201906121030-r</version>
+    <version>4.4.0</version>
   </dependency>
   <dependency>
     <groupId>org.slf4j</groupId>
@@ -1378,6 +1381,11 @@
 <!-- VoiceRss end -->
 
 <!-- WebGui begin -->
+  <dependency>
+    <groupId>org.jmdns</groupId>
+    <artifactId>jmdns</artifactId>
+    <version>3.5.5</version>
+  </dependency>
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
@@ -1587,6 +1595,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
+                            <!-- finalName>myrobotlab-${git.branch}-1.1.${build.number}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -1599,7 +1608,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                          <Main-Class>org.myrobotlab.service.Agent</Main-Class>
+                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
                                           <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
               
@@ -1686,6 +1695,7 @@
           <version>3.0.1</version>
           <executions>
               <execution>
+                  <phase>initialize</phase>
                   <id>get-the-git-infos</id>
                   <goals>
                       <goal>revision</goal>
@@ -1698,7 +1708,7 @@
               <verbose>false</verbose>
               <generateGitPropertiesFile>true</generateGitPropertiesFile>
               <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <format>json</format>
+              <!-- format>json</format -->
               <gitDescribe>
                   <skip>false</skip>
                   <always>false</always>

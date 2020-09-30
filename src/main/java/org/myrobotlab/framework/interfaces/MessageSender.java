@@ -1,6 +1,7 @@
 package org.myrobotlab.framework.interfaces;
 
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.TimeoutException;
 
 public interface MessageSender extends NameProvider {
 
@@ -36,12 +37,14 @@ public interface MessageSender extends NameProvider {
    */
   public void send(Message msg);
 
-  public Object sendBlocking(String name, String method);
+  public Object sendBlocking(String name, String method) throws InterruptedException, TimeoutException;
 
-  public Object sendBlocking(String name, String method, Object... data);
+  public Object sendBlocking(String name, String method, Object... data) throws InterruptedException, TimeoutException;
 
-  public Object sendBlocking(String name, Integer timeout, String method, Object... data);
+  public Object sendBlocking(String name, Integer timeout, String method, Object... data) throws InterruptedException, TimeoutException;
 
-  public Object sendBlocking(Message msg, Integer timeout);
+  public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException;
+
+  public Object waitFor(String fullName, String method, Integer timeout) throws InterruptedException, TimeoutException;
 
 }

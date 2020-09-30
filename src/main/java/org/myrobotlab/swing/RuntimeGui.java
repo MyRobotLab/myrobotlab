@@ -71,7 +71,6 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.Status;
-import org.myrobotlab.framework.SystemResources;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.Category;
 import org.myrobotlab.framework.repo.Repo;
@@ -500,22 +499,10 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
     }
   }
 
-  /*
-   * scheduled event of reporting on system resources
-   */
-  public void onSystemResources(SystemResources resources) {
-    totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
-    maxMemory.setText(String.format("%d", resources.getMaxMemory()));
-    totalMemory.setText(String.format("%d", resources.getTotalMemory()));
-    freeMemory.setText(String.format("%d", resources.getFreeMemory()));
-    usedMemory.setText(String.format("%d", resources.getTotalMemory() - resources.getFreeMemory()));
-  }
-
   @Override
   public void subscribeGui() {
     subscribe("registered");
     subscribe("released");
-    subscribe("getSystemResources");
     // subscribe("publishInstallProgress");
     // subscribe("publishStatus"); not needed one of two - auto-subscribed
   }
@@ -524,7 +511,6 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
   public void unsubscribeGui() {
     unsubscribe("registered");
     unsubscribe("released");
-    subscribe("getSystemResources");
     // unsubscribe("publishInstallProgress");
     // subscribe("publishStatus");
   }
@@ -680,11 +666,9 @@ public class RuntimeGui extends ServiceGui implements ActionListener, ListSelect
       @Override
       public void run() {
         Platform platform = myRuntime.getPlatform();
-        SystemResources resources = myRuntime.getSystemResources();
-        totalMemory.setText(String.format("%d", resources.getTotalMemory()));
-        freeMemory.setText(String.format("%d", resources.getFreeMemory()));
-        totalPhysicalMemory.setText(String.format("%d", resources.getTotalPhysicalMemory()));
-
+        totalMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().totalMemory() / 1048576));
+        freeMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().freeMemory() / 1048576));
+        totalPhysicalMemory.setText(String.format("%d", java.lang.Runtime.getRuntime().maxMemory() / 1048576));
         // FIXME - change to "all" or "" - null is sloppy - system has
         // to upcast
         swingGui.pack();

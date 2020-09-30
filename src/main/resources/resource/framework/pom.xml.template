@@ -12,6 +12,12 @@
     
     # fast build
     mvn -DskipTests -Dbuild.number=180 compile package -o
+
+    # compile only sync with raspi
+    rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
+    rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
+    # for jar in root
+    rsync -zarvh target/myrobotlab.jar pi@192.168.0.104:/opt/mrl/myrobotlab
     
     # javadoc check
     mvn -q javadoc:javadoc -o
@@ -21,6 +27,11 @@
     
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+
+    # single dep
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+
   
    -->  
   <modelVersion>4.0.0</modelVersion>
@@ -159,6 +170,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
+                            <!-- finalName>myrobotlab-${git.branch}-1.1.${build.number}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -171,7 +183,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                          <Main-Class>org.myrobotlab.service.Agent</Main-Class>
+                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
                                           <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
               
@@ -258,6 +270,7 @@
           <version>3.0.1</version>
           <executions>
               <execution>
+                  <phase>initialize</phase>
                   <id>get-the-git-infos</id>
                   <goals>
                       <goal>revision</goal>
@@ -270,7 +283,7 @@
               <verbose>false</verbose>
               <generateGitPropertiesFile>true</generateGitPropertiesFile>
               <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <format>json</format>
+              <!-- format>json</format -->
               <gitDescribe>
                   <skip>false</skip>
                   <always>false</always>

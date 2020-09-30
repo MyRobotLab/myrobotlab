@@ -359,12 +359,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoSetSpeed", sc);
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
-    controller = sc;
+    controller = sc; // <-- bad - don't set a reference (even string reference
+                     // :( )
 
+    // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
     // the servo control ackowledged this.
-    sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
+    try {
+      sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
+    } catch (Exception e) {
+      log.error("sendBlocking attachServoControl threw", e);
+    }
     // TOOD: we need to wait here for the servo controller to acknowledge that
     // it was attached.
 

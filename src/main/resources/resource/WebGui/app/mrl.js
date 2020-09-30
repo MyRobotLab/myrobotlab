@@ -42,7 +42,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
-        return 'webgui-client-' + 1234 + '-' + 5678
+        return 'webgui-client-' + new Date().getTime()
     }
 
     // The name of the gateway I am
@@ -284,8 +284,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * and type. It will wait until the foreign process sends a onRegistered
      * with details of state info
      */
-    this.getHelloResponse = function(request) {
-        console.log('--> got getHelloResponse: and set jsRuntimeMethodCallbackMap')
+    this.authenticate = function(request) {
+        console.log('--> got authenticate: and set jsRuntimeMethodCallbackMap')
         let hello = JSON.parse(request.data[1])
 
         remotePlatform = hello.platform
@@ -310,7 +310,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         _self.subscribe(fullname, 'released')
 
         // FIXME - remove the over-complicated promise
-        console.log('--> got getHelloResponse: end')
+        console.log('--> got authenticate: end')
     }
 
     /**
@@ -620,15 +620,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         // blocking in the sense it will take the return data switch sender & destination - place an 'R'
         // and effectively return to sender without a subscription
-        // _self.sendToBlocking('runtime', "getHelloResponse", "fill-uuid", hello)
+        // _self.sendToBlocking('runtime', "authenticate", "fill-uuid", hello)
         // FIXME - this is not full address - but its being sent to a remote runtime :()
 
-        // var msg = _self.createMessage('runtime', "getHelloResponse", "fill-uuid", hello)
+        // var msg = _self.createMessage('runtime', "authenticate", "fill-uuid", hello)
         // msg.msgType = 'B' // no timeout - simple 'B'locking expects a resturn msg
         // _self.sendMessage(msg)
-        console.debug('sending getHelloResponse to host runtime with hello ' + JSON.stringify(hello))
+        console.debug('sending authenticate to host runtime with hello ' + JSON.stringify(hello))
 
-        _self.sendTo('runtime', "getHelloResponse", "fill-uuid", hello)
+        _self.sendTo('runtime', "authenticate", "fill-uuid", hello)
 
         console.debug('mrl.onOpen begin')
 
@@ -910,15 +910,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         _self.addService = function(service) {
-            console.debug('mrl.addService ' + service.name)
 
             var name = _self.getFullName(service)
+            console.debug('mrl.addService ' + name)
             var type = service.simpleName
             //first load & parse the controller,    //js
             //then load and save the template       //html
-            $log.debug('lazy-loading:', service.name, type)
+            $log.debug('lazy-loading:', name, type)
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
-                $log.debug('lazy-loading successful:', service.name, type)
+                $log.debug('lazy-loading successful:', name, type)
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
@@ -965,7 +965,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //WARNING: DO NOT ABUSE THIS !!!
             //->it's needed to bring controller & template together
             //->and should otherwise only be used in VERY SPECIAL cases !!!
-            console.debug('registering controllers scope', name, scope)
+            console.info('registering controllers scope', name, scope)
             if ('scope'in panels[name]) {
                 $log.warn('replacing an existing scope for ' + name)
             }
@@ -1498,8 +1498,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // FIXME - not sure if this callback map/notify entry will have multiple recievers - but
     // it was standardized with the others to do so
-    methodCallbackMap['getHelloResponse'] = []
-    methodCallbackMap['getHelloResponse'].push(_self.getHelloResponse)
+    methodCallbackMap['authenticate'] = []
+    methodCallbackMap['authenticate'].push(_self.authenticate)
     methodCallbackMap['onHelloResponse'] = []
     methodCallbackMap['onHelloResponse'].push(_self.onHelloResponse)
 

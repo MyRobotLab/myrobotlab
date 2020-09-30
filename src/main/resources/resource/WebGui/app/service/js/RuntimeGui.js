@@ -1,4 +1,4 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', 'statusSvc', '$timeout', function($scope, $log, mrl, statusSvc, $timeout) {
+angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', '$log', 'mrl', 'statusSvc', '$timeout', '$uibModal', function($scope, $log, mrl, statusSvc, $timeout, $uibModal) {
     console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
@@ -25,19 +25,19 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.heartbeatTs = null
 
     $scope.languages = {
-        'en':{
-            'language':'en',
-            'displayLanguage':'English'
+        'en': {
+            'language': 'en',
+            'displayLanguage': 'English'
         }
     }
 
     $scope.locale = {
-        selected:null
+        selected: null
     }
 
     $scope.localeTag = {
-        'selected':{
-            'tag':'en-US'
+        'selected': {
+            'tag': 'en-US'
         }
     }
 
@@ -61,7 +61,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         // console.debug('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
 
-        if ($scope.category.selected != null && ($scope.category.selected == 'show all') ) {
+        if ($scope.category.selected != null && ($scope.category.selected == 'show all')) {
             return $scope.service.serviceData.serviceTypes
         }
 
@@ -82,29 +82,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         return result;
     }
 
-    // FIXME - should be a mrl service function ???
+    // FIXME - maintain contextPath !!!
     $scope.sendToCli = function(cmd) {
         console.log("sendToCli " + cmd)
-        // msg.sendBlocking("sendToCli", cmd)
         $scope.cmd = ""
         contextPath = null
-
-        var cliMsg = _self.cliToMsg(contextPath, "runtime@" + mrl.getId(), "runtime@" + mrl.getRemoteId(), cmd)
-
-        ret = mrl.sendBlockingMessage(cliMsg)
-
-        //    ret.then(result=>alert(result), // shows "done!" after 1 second
-        //    error=>alert(error)// doesn't run
-        //    )
-
-        ret.then(function(result) {
-            if ('data'in result) {
-                $scope.status = JSON.stringify(result.data[0], null, 2)
-            }
-            $scope.$apply()
-        }).catch(function(error) {
-            console.error(error);
-        })
+        msg.send("sendToCli", "runtime@" + mrl.getId(), cmd)
     }
 
     $scope.setServiceType = function(serviceType) {
@@ -131,81 +114,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = null;
     }
 
-    this.cliToMsg = function(contextPath, from, to, cmd) {
-        cmd = cmd.trim()
-        var msg = mrl.createMessage(to, "ls", null)
-        msg.msgType = 'B'
-        // will be a blocking msg
-
-        if (contextPath != null) {
-            cmd = contextPath + cmd
-        }
-
-        // assume runtime as 'default'
-        if (msg.name == null) {
-            msg.name = "runtime"
-        }
-
-        // two possibilities - either it begins with "/" or it does not
-        // if it does begin with "/" its an absolute path to a dir, ls, or invoke
-        // if not then its a runtime method
-
-        if (cmd.startsWith("/")) {
-            // ABSOLUTE PATH !!!
-            parts = cmd.split("/")
-
-            if (parts.length < 3) {
-                msg.method = "ls"
-                msg.data = ["\"" + cmd + "\""]
-                return msg
-            }
-
-            // fix me diff from 2 & 3 "/"
-            if (parts.length >= 3) {
-                msg.name = parts[1]
-
-                if (!msg.name.includes('@')) {
-                    msg.name += '@' + $scope.service.id
-                }
-
-                // prepare the method
-                msg.method = parts[2].trim()
-
-                // FIXME - to encode or not to encode that is the question ...
-                if (parts.length > 3) {
-                    // WTF ? 0 length array has something in it ?
-                    payload = [parts.length - 3]
-                    for (var i = 3; i < parts.length; ++i) {
-                        payload[i - 3] = parts[i]
-                    }
-                    msg.data = payload
-                }
-            }
-            return msg
-        } else {
-            // NOT ABOSLUTE PATH - SIMILAR TO EXECUTING IN THE RUNTIME /usr/bin path
-            // (ie runtime methods!)
-            // spaces for parameter delimiters ?
-            spaces = cmd.split(" ")
-            // FIXME - need to deal with double quotes e.g. func A "B and C" D - p0 =
-            // "A" p1 = "B and C" p3 = "D"
-            msg.method = spaces[0]
-            payload = []
-            for (var i = 1; i < spaces.length; ++i) {
-                // webgui will never use this section of code
-                // currently the codepath is only excercised by InProcessCli
-                // all of this methods will be "optimized" single commands to runtime (i think)
-                // so we are going to error on the side of String parameters - other data types will have problems
-                // payload[i - 1] = "\"" + spaces[i] + "\""
-                payload[i - 1] = spaces[i]
-            }
-            msg.data = payload
-
-            return msg
-        }
-
-    }
-
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
         case 'onState':
@@ -228,14 +136,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         case 'onLocales':
             {
                 ls = inMsg.data[0]
-                unique = {}// new Set()
-                for (const key in ls){
-                    if (ls[key].displayLanguage){
+                unique = {}
+                // new Set()
+                for (const key in ls) {
+                    if (ls[key].displayLanguage) {
                         // unique.add(ls[key].displayLanguage)
                         // unique.push(ls[key].language)
                         unique[ls[key].language] = {
-                            'language':ls[key].language,
-                            'displayLanguage':ls[key].displayLanguage
+                            'language': ls[key].language,
+                            'displayLanguage': ls[key].displayLanguage
                         }
                     }
                 }
@@ -256,7 +165,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 console.log("onRegistered")
                 break
             }
-        case 'onConnectionHeaders':
+        case 'onConnections':
             {
                 $scope.connections = inMsg.data[0]
                 $scope.$apply()
@@ -270,7 +179,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 }
                 break
             }
-        case 'onSendToCli':
+        case 'onCli':
             {
                 if (inMsg.data[0] != null) {
                     $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
@@ -324,7 +233,31 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         }
     }
 
-    $scope.setAllLocales = function(locale){
+    $scope.shutdown = function(type) {
+        var modalInstance = $uibModal.open({
+            //animation: true,
+            // templateUrl: 'nav/shutdown.html',
+            // template: '<div class="modal-header"> HELLO ! </div>',
+            // controller: $scope.doShutdown,
+            // controller: 'RuntimeGuiCtrl',
+            scope: $scope,
+            // controller: 'modalController',
+
+            animation: true,
+            templateUrl: 'nav/shutdown.html',
+            controller: 'shutdownCtrl2',
+
+            
+            resolve: {
+                type: function() {
+                    return type
+                }
+            }
+        })
+        console.info('shutdown ' + modalInstance)
+    }
+
+    $scope.setAllLocales = function(locale) {
         console.info(locale)
     }
 
@@ -348,13 +281,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getServiceTypes")
     msg.subscribe("getLocalServices")
     msg.subscribe("registered")
-    msg.subscribe("getConnectionHeaders")
-    msg.subscribe("sendToCli")
+    msg.subscribe("getConnections")
     msg.subscribe("getLocale")
     msg.subscribe("getLocales")
 
     //msg.send("getLocalServices")
-    msg.send("getConnectionHeaders")
+    msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
