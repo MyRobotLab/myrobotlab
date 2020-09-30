@@ -85,7 +85,7 @@ public class InProcessCli implements Runnable {
    * stdin/stdout is a pipe into and out of the instance, so just like
    * websockets, mqtt or xmpp it should behave the same
    * 
-   * @param id
+   * @param s
    * @param senderName
    * @param in
    * @param out
