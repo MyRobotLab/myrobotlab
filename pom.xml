@@ -61,6 +61,10 @@
           <name>central</name>
           <url>https://repo.maven.apache.org/maven2</url>
         </repository>
+        <repository>
+    <id>Sonatype OSS Snapshot Repository</id>
+    <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+</repository>
         <!-- the big kahuna  -->
         <repository>
           <id>bintray</id>
@@ -974,9 +978,8 @@
   </dependency>
   <dependency>
     <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture</artifactId>
-    <version>0.3.10</version>
-    <scope>provided</scope>
+    <artifactId>webcam-capture-driver-v4l4j</artifactId>
+    <version>0.3.13-SNAPSHOT</version>
   </dependency>
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
   <dependency>

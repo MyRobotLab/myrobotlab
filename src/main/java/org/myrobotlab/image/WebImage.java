@@ -57,7 +57,7 @@ public class WebImage {
       if (quality == null) {
         ImageIO.write(img, imgType, os);
         os.close();
-        data = String.format("data:image/jpeg;base64,%s", Base64.getEncoder().encodeToString(os.toByteArray()));
+        data = String.format("data:image/%s;base64,%s", type, Base64.getEncoder().encodeToString(os.toByteArray()));
       } else {
 
         // save jpeg image with specific quality. "1f" corresponds to 100% ,
@@ -66,7 +66,9 @@ public class WebImage {
         ImageWriter writer = ImageIO.getImageWritersByFormatName(imgType).next();
         ImageWriteParam writeParam = writer.getDefaultWriteParam();
         writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        writeParam.setCompressionQuality(quality.floatValue());
+        if (quality != null) {
+          writeParam.setCompressionQuality(quality.floatValue());
+        }
 
         writer.setOutput(ImageIO.createImageOutputStream(os));
         IIOImage outputImage = new IIOImage(img, null, null);

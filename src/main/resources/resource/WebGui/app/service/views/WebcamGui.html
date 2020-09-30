@@ -1,55 +1,56 @@
-<div class="row">
- <div class="col-md-6">
-   <label>port</label>
-  </div>
+<div class="col-md-6">
+    <div class="row">
+        <div ng-click="onSamplePoint($event)">
+            <img data-ng-src="{{getDisplayImage()}}"/>
+        </div>
+        <!-- /videoContainer -->
+        <div class="videoInfo">
+            <span class="glyphicon glyphicon-info-sign gray1"></span>
+            mouse x y {{samplePoint.x}}x{{samplePoint.y}} fps {{stats.fps}} latency {{stats.latency}} ms <br/>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label>cameras</label>
+                <select ng-disabled="service.capturing" class="form-control selectpicker" ng-model="service.selectedCamera">
+                    <option ng-repeat="name in service.webcams" value="{{name}}">{{name}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-2">
+                <label for="fps">type</label>
+                <input ng-disabled="true" type="text" class="form-control" id="type" ng-model="service.type">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="requestedFps">fps</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="requestedFps" ng-model="service.requestedFps">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="width">width</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="width" ng-model="service.width">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="height">height</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="height" ng-model="service.height">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="height">quality</label>
+                <input ng-disabled="service.capturing" type="text" class="form-control" id="quaility" ng-model="service.quality">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-2">
+                <button class="btn btn-default" ng-hide="service.capturing" class="btn btn-default" ng-click="capture()">
+                    <span class="glyphicon glyphicon-play text-primary"></span>
+                    &nbsp;Start Capture
+                
+                </button>
+                <button class="btn btn-default" ng-hide="!service.capturing" class="btn btn-default" ng-click="msg.stopCapture()">
+                    <span class="glyphicon glyphicon-stop"></span>
+                    &nbsp;Stop Capture
+                
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
-
-<!--
-<pre>{{service}}</pre>
--->
-    
-    <!-- <input type="text" ng-disabled="isConnected" ng-model="service.port" class="form-control"> -->
-
-<!--
-<video width="400" controls autoplay>
-  <source src="/stream" type="video/x-flv">
-  Your browser does not support HTML5 video.
-</stream>
--->
-
-
-<!--
-<video width="600" controls autoplay>
-  <source src="/stream">
-  Your browser does not support HTML5 video.
-</stream>
-
--->
-
-<!--  WORKY
-
-
-<video width="400" controls autoplay>
-  <source src="/stream" type="video/mp4">
-  Your browser does not support HTML5 video.
-</stream>
-
--->
-
-<!--
-<video width="320" controls autoplay>
-  <source src="http://localhost:20000" >
-  Your browser does not support HTML5 video.
-</stream>
--->
-
-
-<!--
-<video width="400" controls autoplay>
-
-  <source src="rtmp://localhost:1888/stream/test.flv" type="video/mp4">
-  Your browser does not support HTML5 video.
-</stream>
--->
-
-   
