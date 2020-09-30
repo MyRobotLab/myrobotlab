@@ -27,15 +27,15 @@ import org.slf4j.Logger;
 public class OpenCVFilterDL4J extends OpenCVFilter implements Runnable {
 
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4J.class.getCanonicalName());
+  transient public final static Logger log = LoggerFactory.getLogger(OpenCVFilterDL4J.class.getCanonicalName());
 
   private transient Deeplearning4j dl4j;
-  private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  private transient CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
 
   public Map<String, Double> lastResult = null;
 
   public ArrayList<YoloDetectedObject> yoloLastResult = null;
-  private volatile IplImage lastImage = null;
+  private transient volatile IplImage lastImage = null;
 
   public OpenCVFilterDL4J(String name) {
     super(name);

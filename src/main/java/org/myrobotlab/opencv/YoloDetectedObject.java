@@ -10,7 +10,7 @@ public class YoloDetectedObject {
   public String label;
   public String sublabel;
   public int frameIndex;
-  public IplImage image;
+  transient public IplImage image;
 
   public YoloDetectedObject(Rect boundingBox, float confidence, String label, int frameIndex, IplImage cropped, String sublabel) {
     super();

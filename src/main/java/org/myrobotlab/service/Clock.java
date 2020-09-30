@@ -197,9 +197,11 @@ public class Clock extends Service {
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.init(Level.INFO);
-    Runtime.main(new String[] { "--interactive", "--id", "r7" });
+    LoggingFactory.init(Level.DEBUG);
+    Runtime.main(new String[] { "--id", "r7", "--log-level", "DEBUG" });
     Clock clock = (Clock) Runtime.start("clock02", "Clock");
+    Runtime runtime = Runtime.getInstance();
+    runtime.connect("http://admin.local:8888");
     /*
      * clock.setInterval(1000); clock.restartClock(); sleep(2000);
      * clock.restartClock(); sleep(2000); clock.stopClock();

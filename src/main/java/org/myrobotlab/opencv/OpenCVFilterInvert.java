@@ -34,19 +34,19 @@ import org.bytedeco.opencv.opencv_core.IplImage;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
 
-public class OpenCVFilterNot extends OpenCVFilter {
+public class OpenCVFilterInvert extends OpenCVFilter {
 
   private static final long serialVersionUID = 1L;
 
-  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterNot.class.getCanonicalName());
+  public final static Logger log = LoggerFactory.getLogger(OpenCVFilterInvert.class.getCanonicalName());
 
   transient IplImage buffer = null;
 
-  public OpenCVFilterNot() {
+  public OpenCVFilterInvert() {
     super();
   }
 
-  public OpenCVFilterNot(String name) {
+  public OpenCVFilterInvert(String name) {
     super(name);
   }
 

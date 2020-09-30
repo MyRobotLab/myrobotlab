@@ -49,7 +49,9 @@ public class OpenCVMeta extends MetaData {
       // </dependency>
     }
     // sarxos webcam
-    addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    // addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.13-SNAPSHOT");
+
     // FaceRecognizer no worky if missing it
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer frame grabber
