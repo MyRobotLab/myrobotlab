@@ -141,6 +141,7 @@ public abstract class Repo {
       remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
       remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more big kahuna"));
       remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
+      remotes.add(new RemoteRepo("sarxos", "http://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
       // DO NOT INCLUDE - messed up repo !
       // remotes.add(new RemoteRepo("dcm4che", "http://www.dcm4che.org/maven2",
