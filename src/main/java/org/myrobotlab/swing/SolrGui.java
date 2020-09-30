@@ -110,7 +110,12 @@ public class SolrGui extends ServiceGui implements ActionListener {
   private void runSearchAndRender() {
     SolrQuery query = createSearchRequest();
     // 10 second timeout!
-    QueryResponse answer = (QueryResponse) swingGui.sendBlocking(boundServiceName, 10000, "search", query);
+    QueryResponse answer = null;
+    try {
+      answer = (QueryResponse) swingGui.sendBlocking(boundServiceName, 10000, "search", query);
+    } catch(Exception e) {
+      log.error("query took too long");
+    }
     // TODO: build up a search result page.
     renderSearchResult(answer);
   }

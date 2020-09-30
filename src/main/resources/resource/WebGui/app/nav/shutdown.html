@@ -6,5 +6,6 @@
 </div>
 <div class="modal-footer">
     <button class="btn btn-default" ng-click="close();">CANCEL</button>
-    <button class="btn btn-primary" ng-click="shutdown();" style="text-transform: uppercase">{{type}}!</button>
+    <button ng-show="type === 'restart'" class="btn btn-primary" ng-click="shutdown();" style="text-transform: uppercase">{{type}}!</button>
+    <button ng-show="type === 'shutdown'" class="btn btn-primary" ng-click="shutdown();" style="text-transform: uppercase">{{type}}!</button>
 </div>

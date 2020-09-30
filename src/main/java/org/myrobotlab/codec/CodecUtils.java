@@ -363,10 +363,6 @@ public class CodecUtils {
     return ret;
   }
 
-  static public Message cliToMsg(String from, String to, String data) {
-    return cliToMsg(null, from, to, data);
-  }
-
   /**
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
@@ -413,14 +409,11 @@ public class CodecUtils {
    *          - target service
    * @param cmd
    *          - cli encoded msg
-   * @return
+   * @return 
+   *          - a Message derived from cli
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
-
-    // because we always want a "Blocking/Return" from the cmd line - without a
-    // subscription
-    msg.setBlocking();
 
     /**
      * <pre>

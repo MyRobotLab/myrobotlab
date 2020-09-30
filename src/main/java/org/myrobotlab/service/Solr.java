@@ -909,15 +909,16 @@ public class Solr extends Service implements DocumentListener, TextListener, Mes
     doc.setField("method", message.method);
     // TODO: this is actually the timestamp of the message.. not an id.
     doc.setField("message_id", message.msgId);
-    doc.setField("message_type", message.msgType);
+    doc.setField("message_dataEncoding", message.dataEncoding);
     doc.setField("message_name", message.getName());
     doc.setField("sender_method", message.sendingMethod);
     doc.setField("message_status", message.status);
-    if (message.historyList != null) {
-      for (String history : message.historyList) {
-        doc.addField("history", message.historyList);
-      }
-    }
+    /*
+     * This makes no sense.. if (message.getHops() != null) { for (String
+     * history : message.getHops()) { doc.addField("history",
+     * message.getHops()); } }
+     */
+
     // System.out.println("Data: " + message.data);
     // TODO: now we need to introspect the array of objects and figure out how
     // to index them!! gah..

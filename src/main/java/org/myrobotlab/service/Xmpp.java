@@ -41,6 +41,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
 
@@ -287,7 +288,7 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
         try {
           // org.myrobotlab.framework.Message msg =
           // CodecUri.decodePathInfo(pathInfo);
-          org.myrobotlab.framework.Message msg = CodecUtils.cliToMsg(getName(), null, pathInfo);
+          org.myrobotlab.framework.Message msg = CodecUtils.cliToMsg(null, getName(), null, pathInfo);
 
           // FIXME - do the same as InProcessCli & WebGui
           Object ret = null;
@@ -514,15 +515,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public Map<String, Map<String, Object>> getClients() {
+  public Map<String, Connection> getClients() {
     return Runtime.getInstance().getConnections(getName());
-  }
-
-  @Override
-  public Object sendBlockingRemote(org.myrobotlab.framework.Message msg, Integer timeout) {
-    // TODO Auto-generated method stub
-    // FIXME implement !!
-    return null;
   }
 
   @Override

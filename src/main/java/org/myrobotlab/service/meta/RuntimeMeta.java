@@ -31,10 +31,7 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("org.atmosphere", "wasync", "2.1.5");
     // apache 2.0 license
-    addDependency("info.picocli", "picocli", "4.0.0-beta-2");
-
-    // EDL (new-style BSD) licensed
-    addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
+    addDependency("info.picocli", "picocli", "4.4.0");
 
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");

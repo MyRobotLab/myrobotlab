@@ -6,32 +6,43 @@
         <span class="media-body">
             <div>
                 <p>
-                Version <b>{{platform.mrlVersion}}</b><br/>
-                {{id}} <span class="glyphicon glyphicon-resize-horizontal"></span> {{remotePlatform.id}} - {{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}<br/>
-                Branch <b>{{platform.branch}}</b><br/>
-                Operating System <b>{{platform.arch}}.{{platform.bitness}}.{{platform.os}}</b><br/>
-                Java <b>{{platform.vmName}}</b><br/>
+                    {{id}} <span class="glyphicon glyphicon-resize-horizontal"></span>
+                    {{remotePlatform.id}}<br/>
+                    Version <b>{{platform.mrlVersion}}</b>
+                    <br/>
+                    Branch <b>{{remotePlatform.branch}}</b>
+                    <br/>
+                    Platform <b>{{remotePlatform.arch}}.{{remotePlatform.jvmBitness}}.{{remotePlatform.os}}</b>
+                    <br/>
+                    Java <b>{{remotePlatform.vmName}} {{remotePlatform.vmVersion}}</b>
+                    <br/>
+                    Commit <b>{{remotePlatform.shortCommit}}</b>
+                    <br/>
+                    Start Time <b>{{remotePlatform.startTime}}</b>
+                    <br/>
+                    Pid <b>{{remotePlatform.pid}}</b>
+                    <br/>
+                    Virtual <b>{{remotePlatform.isVirtual}}</b>
+                    <br/>
+                    Hostname <b>{{remotePlatform.hostname}}</b>
+                    <br/>
                 </p>
             </div>
         </span>
         <span class="media-right">
             <img src="../mrl_logo_about_128.png" alt="MyRobotLab logo"/>
         </span>
-        <br>
-        <p>MyRobotLab is a group effort, it's build & maintained by a few people in their spare time and a big community that pushes it forward.</p>
-        <center class='col-xs-5'>Join this community!</center>
-        <center class='col-xs-2'>and</center>
-        <center class='col-xs-5'>be a MRL'er!</center>
-        <br>
-        <br>
-        <center>Visit us @ <a href="http://www.myrobotlab.org" target="_blank">myrobotlab.org</a> !</center>
-          </div>
+        <p>
+            MyRobotLab is a group effort, it's build &maintained by a few people in their spare time and a big community that pushes it forward. 
+            Join this community! 
+            and be a MRL'er!
+        </p>
+        <p>
+        Visit us @ <a href="http://www.myrobotlab.org" target="_blank">myrobotlab.org</a>
+            !
+        </p>
+    </div>
 </div>
 <div class="modal-footer">
     <button class="btn btn-primary" ng-click="close();">CLOSE</button>
 </div>
-<!--
-<pre>
-{{registry}}
-</pre>
--->

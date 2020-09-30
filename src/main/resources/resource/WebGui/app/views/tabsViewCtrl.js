@@ -41,7 +41,6 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
         }
     }
 
-    
     $scope.changeTab = function(tab) {
         tab = mrl.getFullName(tab)
         $scope.view_tab = tab
@@ -51,10 +50,10 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
         })
     }
 
-
-    $scope.searchText = {
-        // displayName: ""
+    $scope.searchText = {// displayName: ""
     }
+
+    $scope.hasNewStatus = true
 
     _self.changeTab = $scope.changeTab
     panelsUpdated(mrl.getPanelList())

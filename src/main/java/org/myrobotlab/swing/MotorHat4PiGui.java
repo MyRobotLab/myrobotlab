@@ -147,7 +147,9 @@ public class MotorHat4PiGui extends ServiceGui implements ActionListener, Change
 
     } else if (source == attachButton) {
       if (attachButton.getText().equals(attach)) {
+        try {
         swingGui.sendBlocking(boundServiceName, setMotor, motorList.getSelectedItem().toString());
+        } catch(Exception ex) {}
         swingGui.send(boundServiceName, attach, controllerList.getSelectedItem());
         /*
          * myMotor.setLeftPwmPin((int)Integer.decode(leftPwmPinList.
