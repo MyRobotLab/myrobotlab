@@ -37,8 +37,13 @@ public class OculusRiftMeta extends MetaData {
     addDependency("org.saintandreas", "glamour-lwjgl", "1.0.8");
     addDependency("org.saintandreas", "math", "1.0.4");
     addDependency("org.saintandreas", "oria-resources", "1.0.4");
+    
+    // adding to pin dep at 2.9.3
+    addDependency("org.lwjgl.lwjgl", "lwjgl-platform", "2.9.3", "pom");
+
     exclude("org.slf4j", "slf4j-api");
-    exclude("org.lwjgl.lwjgl", "lwjgl");
+    
+    // exclude("org.lwjgl.lwjgl", "lwjgl");
     exclude("com.google.guava", "guava");
 
   }

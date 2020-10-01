@@ -72,10 +72,6 @@
           <name>central</name>
           <url>https://repo.maven.apache.org/maven2</url>
         </repository>
-        <repository>
-    <id>Sonatype OSS Snapshot Repository</id>
-    <url>http://oss.sonatype.org/content/repositories/snapshots</url>
-</repository>
         <!-- the big kahuna  -->
         <repository>
           <id>bintray</id>
@@ -93,6 +89,12 @@
           <id>myrobotlab</id>
           <name>myrobotlab</name>
           <url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+        </repository>
+        <!-- for sarxos webcam  -->
+        <repository>
+          <id>sarxos</id>
+          <name>sarxos</name>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <!-- null  -->
         <repository>
@@ -436,6 +438,19 @@
 
 <!-- JMonkeyEngine begin -->
   <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl-platform</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+    <type>pom</type>
+  </dependency>
+  <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-core</artifactId>
     <version>3.3.2-stable</version>
@@ -447,22 +462,6 @@
     <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
-  
-  <!-- https://mvnrepository.com/artifact/org.lwjgl.lwjgl/lwjgl-platform -->
-<dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl-platform</artifactId>
-    <version>2.9.3</version>
-    <type>pom</type>
-</dependency>
-  
-  <!-- https://mvnrepository.com/artifact/org.lwjgl.lwjgl/lwjgl -->
-<dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl</artifactId>
-    <version>2.9.3</version>
-</dependency>
-  
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-lwjgl</artifactId>
@@ -966,18 +965,8 @@
     <artifactId>oria-resources</artifactId>
     <version>1.0.4</version>
     <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
   </dependency>
+<!-- Duplicate entry for org.lwjgl.lwjgl-lwjgl-platform-2.9.3 skipping -->
 <!-- OculusRift end -->
 
 <!-- OpenCV begin -->
@@ -993,24 +982,12 @@
     <version>1.5.3</version>
     <scope>provided</scope>
   </dependency>
-  <!-- 
   <dependency>
-    <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture</artifactId>
-    <version>0.3.12</version>
-    <scope>provided</scope>
-  </dependency>
-   -->
-<dependency>
     <groupId>com.github.sarxos</groupId>
     <artifactId>webcam-capture-driver-v4l4j</artifactId>
     <version>0.3.13-SNAPSHOT</version>
-</dependency>  
-  <dependency>
-    <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture-driver-v4l4j</artifactId>
-    <version>0.3.12</version>
-</dependency>
+    <scope>provided</scope>
+  </dependency>
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
   <dependency>
     <groupId>net.sf.jipcam</groupId>
@@ -1435,6 +1412,10 @@
     <scope>provided</scope>
   </dependency>
 <!-- WebSocketConnector end -->
+
+<!-- Webcam begin -->
+<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
+<!-- Webcam end -->
 
 <!-- WebkitSpeechSynthesis begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->

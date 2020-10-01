@@ -536,6 +536,7 @@ public class ArduinoTest extends AbstractTest implements PinArrayListener, PinLi
     arduino01.enablePin(pin.getAddress());
     sleep(100);
     arduino01.disablePin(pin.getAddress());
+    sleep(100);
     assertTrue("did not receive pin data int", pinData.containsKey(analogPin));
     
     pinData.clear();
