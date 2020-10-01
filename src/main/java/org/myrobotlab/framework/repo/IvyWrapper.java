@@ -389,7 +389,16 @@ public class IvyWrapper extends Repo implements Serializable {
       Set<ServiceDependency> targetLibraries = getUnfulfilledDependencies(serviceTypes);
 
       if (targetLibraries.size() == 0) {
-        info("%s already installed", (Object[]) serviceTypes);
+        StringBuilder sb = new StringBuilder();
+        for (String type : serviceTypes) {
+          if (type.lastIndexOf(".") > 0){
+            sb.append(type.substring(type.lastIndexOf(".") + 1));
+          } else {
+            sb.append(type)
+          }
+          sb.append(" ");
+        }
+        info("%s already installed", sb.toString());
         return;
       }
 

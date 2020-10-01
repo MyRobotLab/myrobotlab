@@ -12,6 +12,12 @@
     
     # fast build
     mvn -DskipTests -Dbuild.number=180 compile package -o
+
+    # compile only sync with raspi
+    rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
+    rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
+    # for jar in root
+    rsync -zarvh target/myrobotlab.jar pi@192.168.0.104:/opt/mrl/myrobotlab
     
     # javadoc check
     mvn -q javadoc:javadoc -o
@@ -21,6 +27,11 @@
     
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+
+    # single dep
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+
   
    -->  
   <modelVersion>4.0.0</modelVersion>
@@ -78,6 +89,12 @@
           <id>myrobotlab</id>
           <name>myrobotlab</name>
           <url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
+        </repository>
+        <!-- for sarxos webcam  -->
+        <repository>
+          <id>sarxos</id>
+          <name>sarxos</name>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <!-- null  -->
         <repository>
@@ -337,6 +354,7 @@
     <scope>provided</scope>
   </dependency>
 <!-- Git end -->
+
 <!-- GoogleCloud begin -->
   <dependency>
     <groupId>com.google.cloud</groupId>
@@ -402,8 +420,6 @@
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
@@ -422,6 +438,19 @@
 
 <!-- JMonkeyEngine begin -->
   <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl-platform</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+    <type>pom</type>
+  </dependency>
+  <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-core</artifactId>
     <version>3.3.2-stable</version>
@@ -435,7 +464,7 @@
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-lwjgl3</artifactId>
+    <artifactId>jme3-lwjgl</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
@@ -549,8 +578,6 @@
 
 <!-- LocalSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.microsoft</groupId>
     <artifactId>tts</artifactId>
@@ -562,8 +589,6 @@
 
 <!-- MarySpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>marytts</artifactId>
@@ -883,8 +908,6 @@
 
 <!-- MimicSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>mycroftai.mimic</groupId>
     <artifactId>mimic_win64</artifactId>
@@ -942,21 +965,8 @@
     <artifactId>oria-resources</artifactId>
     <version>1.0.4</version>
     <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.lwjgl.lwjgl</groupId>
-          <artifactId>lwjgl</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-      </exclusions>
   </dependency>
+<!-- Duplicate entry for org.lwjgl.lwjgl-lwjgl-platform-2.9.3 skipping -->
 <!-- OculusRift end -->
 
 <!-- OpenCV begin -->
@@ -974,8 +984,8 @@
   </dependency>
   <dependency>
     <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture</artifactId>
-    <version>0.3.10</version>
+    <artifactId>webcam-capture-driver-v4l4j</artifactId>
+    <version>0.3.13-SNAPSHOT</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
@@ -1091,8 +1101,6 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
@@ -1370,8 +1378,6 @@
 
 <!-- VoiceRss begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.voicerss</groupId>
     <artifactId>tts</artifactId>
@@ -1407,10 +1413,12 @@
   </dependency>
 <!-- WebSocketConnector end -->
 
+<!-- Webcam begin -->
+<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
+<!-- Webcam end -->
+
 <!-- WebkitSpeechSynthesis begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- WebkitSpeechSynthesis end -->
 
 <!-- Wii begin -->
