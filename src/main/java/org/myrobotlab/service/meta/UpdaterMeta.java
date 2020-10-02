@@ -5,24 +5,24 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
-public class GitMeta extends MetaData {
+public class UpdaterMeta extends MetaData {
   private static final long serialVersionUID = 1L;
-  public final static Logger log = LoggerFactory.getLogger(GitMeta.class);
+  public final static Logger log = LoggerFactory.getLogger(UpdaterMeta.class);
 
   /**
    * This class is contains all the meta data details of a service. It's peers,
    * dependencies, and all other meta data related to the service.
    * 
    */
-  public GitMeta(String name) {
+  public UpdaterMeta(String name) {
 
     super(name);
     Platform platform = Platform.getLocalInstance();
-    addDescription("used to manage source code");
-    addCategory("programming");
+    addDescription("used to manage updates");
+    addCategory("system");
 
-    // EDL (new-style BSD) licensed
-    addDependency("org.eclipse.jgit", "org.eclipse.jgit", "5.4.0.201906121030-r");
+    addPeer("git", "Git", "git source control");
+    addPeer("builder", "Builder", "mvn build");
   }
 
 }

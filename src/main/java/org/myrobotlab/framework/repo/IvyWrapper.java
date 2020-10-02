@@ -394,7 +394,7 @@ public class IvyWrapper extends Repo implements Serializable {
           if (type.lastIndexOf(".") > 0){
             sb.append(type.substring(type.lastIndexOf(".") + 1));
           } else {
-            sb.append(type)
+            sb.append(type);
           }
           sb.append(" ");
         }
