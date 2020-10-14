@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.IplImage;
@@ -34,41 +36,24 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
 
   @Test
   public void testFilter() throws InterruptedException {
-
-
     OpenCVFilter filter = createFilter();
     assertNotNull("Filter was null.", filter);
-    IplImage input = createTestImage();
-
-    if (debug) {
-      sourceImage = filter.show(input, "Input Image");
-    }
-
+    List<IplImage> inputs = createTestImages();
     OpenCV opencv = (OpenCV)Runtime.start("opencv", "OpenCV");
     filter.setOpenCV(opencv);
-
-    // we need to set the CV Data object on the filter before we process. 
-    // This calls imageChanged .. (some filters initialize their stuff in that method!
-    filter.setData(new OpenCVData("testimg", 0 ,0 , OpenCV.toFrame(input)));
-
-    // call process on the filter with the input image.
-    long start = System.currentTimeMillis();
-    IplImage output = filter.process(input);
-
-    long delta = System.currentTimeMillis() - start;
-    log.info("Process method took {} ms", delta);  
-    filter.enabled = true;
-    filter.displayEnabled = true;
-    // verify that processDisplay doesn't blow up!
-    BufferedImage bi = filter.processDisplay();
-
-    if (debug) {
-      IplImage displayVal = OpenCV.toImage(bi);
-      outputImage = filter.show(displayVal, "Output Image");
+    int frameIndex = -1;
+    for (IplImage input : inputs) {
+      frameIndex++;
+      if (debug) {
+        sourceImage = filter.show(input, "Input Image " + frameIndex);
+      }
+      // we need to set the CV Data object on the filter before we process. 
+      // This calls imageChanged .. (some filters initialize their stuff in that method!
+      long now = System.currentTimeMillis();
+      IplImage output = processTestImage(filter, input, now, frameIndex);
+      // TODO: we want to verify the resulting opencv data? and methods that are invoked , we probably need to know what frame number it was.
+      verify(filter,input,output);
     }
-
-    // TODO: we want to verify the resulting opencv data? and methods that are invoked ?
-    verify(filter,input,output);
     
     // now test the sample point method
     // TODO: what happens if we pass in nulls and stuff to samplePoint?
@@ -90,6 +75,30 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
     //Runtime.releaseAll();
 
     // clean up the other runtime stuffs
+  }
+  public List<IplImage> createTestImages() {
+    // Default behavior, return a list of one default test image.
+    ArrayList<IplImage> images = new ArrayList<IplImage>();
+    images.add(createTestImage());
+    return images;
+  }
+  
+  private IplImage processTestImage(OpenCVFilter filter, IplImage input, long now, int frameIndex) throws InterruptedException {
+    filter.setData(new OpenCVData("testimg", now, frameIndex, OpenCV.toFrame(input)));
+    // call process on the filter with the input image.
+    long start = System.currentTimeMillis();
+    IplImage output = filter.process(input);
+    long delta = System.currentTimeMillis() - start;
+    log.info("Process method took {} ms", delta);  
+    filter.enabled = true;
+    filter.displayEnabled = true;
+    // verify that processDisplay doesn't blow up!
+    BufferedImage bi = filter.processDisplay();
+    if (debug) {
+      IplImage displayVal = OpenCV.toImage(bi);
+      outputImage = filter.show(displayVal, "Output Image");
+    }
+    return output;
   }
 
   public IplImage defaultImage() {
