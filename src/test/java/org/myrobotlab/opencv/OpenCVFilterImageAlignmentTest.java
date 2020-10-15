@@ -5,26 +5,27 @@ import static org.junit.Assert.assertNotNull;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.junit.Before;
 
-public class OpenCVFilterHoughLines2Test  extends AbstractOpenCVFilterTest {
+public class OpenCVFilterImageAlignmentTest  extends AbstractOpenCVFilterTest {
 
   @Before
   public void setup() {
-    debug = false;
+    debug = true;
   }
 
   @Override
   public OpenCVFilter createFilter() {
     // Just to exercise the null and the default constructor.
     // This shouldn't blow up
-    OpenCVFilter f = new OpenCVFilterHoughLines2();
+    OpenCVFilter f = new OpenCVFilterImageAlignment();
     assertNotNull(f.name);
     f.release();
     // Ok, return the named constructor one.
-    return new OpenCVFilterHoughLines2("filter");
+    return new OpenCVFilterImageAlignment("filter");
   }
 
   @Override
   public IplImage createTestImage() {
+    // TODO: load an image from else where?
     return defaultImage();
   }
 
@@ -33,7 +34,9 @@ public class OpenCVFilterHoughLines2Test  extends AbstractOpenCVFilterTest {
     // Make sure we found 5 faces.
     log.info("CVData: {}", filter.data);
     assertNotNull(output);
-    // waitOnAnyKey();
+   // Object regions = filter.data.getObject("testimg.filter.regions");
+    //assertNotNull(regions);
+    waitOnAnyKey();
   }
 
 }

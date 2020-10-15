@@ -1,10 +1,10 @@
 package org.myrobotlab.service;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Ignore;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
-import org.nd4j.linalg.io.Assert;
-
 
 @Ignore
 public class AndrewTest extends AbstractServiceTest {
@@ -61,8 +61,7 @@ public class AndrewTest extends AbstractServiceTest {
     
     andrew.attach();
     
-    Assert.notNull(andrew.captureGesture());
-    
+    assertNotNull(andrew.captureGesture());
     andrew.detach();
     
     // for some reason this isn't released. 
