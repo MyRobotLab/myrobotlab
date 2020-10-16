@@ -451,7 +451,7 @@
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-lwjgl3</artifactId>
+    <artifactId>jme3-lwjgl</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
