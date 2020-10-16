@@ -1261,6 +1261,12 @@
 
 <!-- Solr begin -->
   <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-core</artifactId>
+    <version>8.6.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
     <version>8.6.3</version>
