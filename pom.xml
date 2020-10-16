@@ -452,13 +452,25 @@
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-lwjgl</artifactId>
-    <version>2.9.3</version>
+    <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-jogg</artifactId>
     <version>3.3.2-stable</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl-platform</artifactId>
+    <version>2.9.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
