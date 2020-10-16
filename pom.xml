@@ -472,6 +472,7 @@
     <artifactId>lwjgl-platform</artifactId>
     <version>2.9.3</version>
     <scope>provided</scope>
+    <type>pom</type>
   </dependency>
   <dependency>
     <groupId>com.simsilica</groupId>
