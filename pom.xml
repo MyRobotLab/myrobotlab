@@ -244,37 +244,37 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas</artifactId>
-    <version>0.3.9-1.5.3</version>
+    <version>0.3.10-1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -287,7 +287,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -438,19 +438,6 @@
 
 <!-- JMonkeyEngine begin -->
   <dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl</artifactId>
-    <version>2.9.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl-platform</artifactId>
-    <version>2.9.3</version>
-    <scope>provided</scope>
-    <type>pom</type>
-  </dependency>
-  <dependency>
     <groupId>org.jmonkeyengine</groupId>
     <artifactId>jme3-core</artifactId>
     <version>3.3.2-stable</version>
@@ -473,6 +460,19 @@
     <artifactId>jme3-jogg</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.lwjgl.lwjgl</groupId>
+    <artifactId>lwjgl-platform</artifactId>
+    <version>2.9.3</version>
+    <scope>provided</scope>
+    <type>pom</type>
   </dependency>
   <dependency>
     <groupId>com.simsilica</groupId>
@@ -965,21 +965,34 @@
     <artifactId>oria-resources</artifactId>
     <version>1.0.4</version>
     <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.lwjgl.lwjgl</groupId>
+          <artifactId>lwjgl</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
   </dependency>
-<!-- Duplicate entry for org.lwjgl.lwjgl-lwjgl-platform-2.9.3 skipping -->
 <!-- OculusRift end -->
 
 <!-- OpenCV begin -->
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1146,13 +1159,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1248,9 +1261,15 @@
 
 <!-- Solr begin -->
   <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-core</artifactId>
+    <version>8.6.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1262,7 +1281,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1274,7 +1293,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
@@ -1331,13 +1350,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.3</version>
+    <version>4.1.1-1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.3</version>
+    <version>4.1.1-1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1353,7 +1372,7 @@
   <dependency>
     <groupId>junit</groupId>
     <artifactId>junit</artifactId>
-    <version>4.12</version>
+    <version>4.13.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- Test end -->
