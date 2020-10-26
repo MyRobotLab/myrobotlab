@@ -159,7 +159,10 @@ public abstract class Repo {
       remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
 
       remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
-
+      
+      // This one is needed because of a transient dependency of solr org.restlet.jee .. not sure where 
+      remotes.add(new RemoteRepo("maven-restlet", "https://maven.restlet.talend.com", "Public online Restlet repository"));
+      
       load();
     } catch (Exception e) {
       log.error(e.getMessage(), e);
