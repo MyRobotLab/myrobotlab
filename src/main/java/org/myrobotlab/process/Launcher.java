@@ -64,6 +64,7 @@ public class Launcher {
     if (options.services.size() % 2 != 0) {
       throw new IOException("invalid choice - services must be -s {name} {type} ...");
     }
+    
 
     // SETUP COMMAND !!!!!
     String fs = File.separator;
@@ -113,6 +114,13 @@ public class Launcher {
 
     if (!contains(cmd, "--from-launcher")) {
       cmd.add("--from-launcher");
+    }
+    
+    if (options.services != null) {
+      cmd.add("-s");
+      for (String s : options.services) {
+        cmd.add(s);
+      }
     }
 
     // FIXME - daemonize? does that mean handle stream differently?
