@@ -38,10 +38,9 @@ import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
-import org.myrobotlab.framework.AuthResponse;
 import org.myrobotlab.framework.CmdOptions;
-import org.myrobotlab.framework.Heartbeat;
-import org.myrobotlab.framework.HelloRequest;
+import org.myrobotlab.framework.DescribeQuery;
+import org.myrobotlab.framework.DescribeResults;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
@@ -64,7 +63,10 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.net.Host;
 import org.myrobotlab.net.HttpRequest;
+import org.myrobotlab.net.Pinger;
+import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.WsClient;
 import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
@@ -132,14 +134,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * </pre>
    */
   protected final Map<String, Connection> connections = new HashMap<>();
+  /**
+   * id's to Connections - although it could be multiple connections per single
+   * id, currently it will be the "last" - some of this capability/info could be
+   * implemented by a route table ...
+   */
+  protected final Map<String, Connection> connectionsIndexx = new HashMap<>();
 
   /**
-   * route Table - ids to a set of connections
-   * similar to network to interfaces
+   * corrected route table with (soon to be regex ids) mapped to
+   * gateway/interfaces
    */
-  protected final Map<String, Set<String>> routeTable = new HashMap<>();
-
-  protected String defaultRoute = null;
+  protected final RouteTable routeTable = new RouteTable();
 
   /**
    * map to hide methods we are not interested in
@@ -189,12 +195,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient private static Runtime runtime = null;
 
-  // FIXME - create only if needed
-  transient private static Security security = null;
-
   private List<String> jvmArgs;
 
   private List<String> args;
+
+  /**
+   * set of known hosts
+   */
+  private transient Map<String, Host> hosts = null;
 
   /**
    * global startingArgs - whatever came into main each runtime will have its
@@ -442,8 +450,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
           try {
-          si.onRegistered(new Registration(s));
-          } catch(Exception e){
+            si.onRegistered(new Registration(s));
+          } catch (Exception e) {
             runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
           }
         }
@@ -526,9 +534,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
-  /*
+  /**
    * Returns the amount of free memory in the Java Virtual Machine. Calling the
    * gc method may result in increasing the value returned by freeMemory.
+   * 
+   * @return
    */
   public static final long getFreeMemory() {
     return java.lang.Runtime.getRuntime().freeMemory();
@@ -547,7 +557,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           runtime = new Runtime(RUNTIME_NAME, Platform.getLocalInstance().getId());
 
           // setting the singleton security
-          security = Security.getInstance();
+          Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
         }
@@ -567,53 +577,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Heartbeat of this process - runtime starts this heartbeat, and any
-   * connections will automatically get heartbeats sent. Other services and
-   * processes can subscribe to this method, but in order to reduce logic
-   * chaining in remote processes (ie requiring them to make subscriptions) we
-   * automatically send heartbeats through all our connectsion. This logic can
-   * change in the future to be less promiscuous, but first lets get
-   * super-worky.
-   * 
-   * @return
-   */
-  public Heartbeat heartbeat() {
-    try {
-      Heartbeat heartbeat = new Heartbeat(getName(), getId(), getServiceList());
-
-      // send heartbeats out over all connections
-      Set<String> cs = connections.keySet();
-      for (String gateway : cs) {
-        Connection c = connections.get(gateway);
-        String id = (String) c.get("id");
-        if (id == null) {
-          log.error("gateway %s has null id!", gateway);
-          continue;
-        }
-        String remoteRuntime = String.format("runtime@%s", id);
-        Message msg = Message.createMessage("runtime@" + getId(), remoteRuntime, "onHeartbeat", heartbeat);
-        send(msg);
-      }
-      return heartbeat;
-
-    } catch (Exception e) {
-      error(e);
-    }
-
-    // bad heartbeat - should we go to hospital ?
-    return null;
-
-  }
-
-  /**
-   * FIXME - change name to getIpAddresses()
-   * 
    * gets all non-loopback, active, non-virtual ip addresses
-   *
+   * 
    * @return list of local ipv4 IP addresses
    */
-  static public List<String> getLocalAddresses() {
-    log.info("getLocalAddresses");
+  static public List<String> getIpAddresses() {
+    log.debug("getLocalAddresses");
     ArrayList<String> ret = new ArrayList<String>();
 
     try {
@@ -622,7 +591,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         NetworkInterface current = interfaces.nextElement();
         // log.info(current);
         if (!current.isUp() || current.isLoopback() || current.isVirtual()) {
-          log.info("skipping interface is down, a loopback or virtual");
+          log.debug("skipping interface is down, a loopback or virtual");
           continue;
         }
         Enumeration<InetAddress> addresses = current.getInetAddresses();
@@ -630,15 +599,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           InetAddress currentAddress = addresses.nextElement();
 
           if (!(currentAddress instanceof Inet4Address)) {
-            log.info("not ipv4 skipping");
+            log.debug("not ipv4 skipping");
             continue;
           }
 
           if (currentAddress.isLoopbackAddress()) {
-            log.info("skipping loopback address");
+            log.debug("skipping loopback address");
             continue;
           }
-          log.info(currentAddress.getHostAddress());
+          log.debug(currentAddress.getHostAddress());
           ret.add(currentAddress.getHostAddress());
         }
       }
@@ -655,7 +624,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public void getNetInfo() {
     try {
-      List<String> local = getLocalAddresses();
+      List<String> local = getIpAddresses();
       String gateway = getPublicGateway();
       getNetworkPeers();
     } catch (Exception e) {
@@ -668,8 +637,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static public Set<String> getNetworkPeers() throws UnknownHostException {
     networkPeers = new TreeSet<>();
     // String myip = InetAddress.getLocalHost().getHostAddress();
-    List<String> myips = getLocalAddresses(); // TODO - if nothing else -
-                                              // 127.0.0.1
+    List<String> myips = getIpAddresses(); // TODO - if nothing else -
+                                           // 127.0.0.1
     for (String myip : myips) {
       if (myip.equals("127.0.0.1")) {
         log.info("This PC is not connected to any network!");
@@ -1126,11 +1095,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     cli = new InProcessCli(this, "runtime", in, out);
     Connection c = cli.getConnection();
-    stdCliUuid = (String)c.get("uuid");
+    stdCliUuid = (String) c.get("uuid");
 
-    addConnection(stdCliUuid, c);
-
-    runtime.authenticate(stdCliUuid, new HelloRequest(cli.getId(), stdCliUuid));
+    // addRoute(".*", getName(), 100);
+    addConnection(stdCliUuid, cli.getId(), c);
 
     return cli;
   }
@@ -1279,7 +1247,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // you have to send released before removing from registry
     if (runtime != null) {
-      runtime.broadcast("released", inName);
+      runtime.broadcast("released", name); // <- DO NOT CHANGE THIS IS CORRECT
+                                           // !!
+      // it should be FULLNAME !
+      // runtime.broadcast("released", inName);
     }
 
     // last step - remove from registry
@@ -1463,13 +1434,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   // FIXME - remove - the way to 'jump' is just to change
   // context to the correct mrl id e.g. cd /runtime@remote07
   public String jump(String id) {
-    String route = getRoute(id);
-    if (route == null) {
-      // log.error("cannot attach - no routing information for {}", id);
-      return "cannot attach - no routing information for " + id;
-    }
-
-    Connection c = getConnection(stdCliUuid);
+    Connection c = getRoute(stdCliUuid);
     if (c != null && c.get("cli") != null) {
       ((InProcessCli) c.get("cli")).setRemote(id);
     } else {
@@ -1537,13 +1502,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public void connect(String url) {
     try {
 
+      // get authorization through POST - username/password etc..
+
+      // use session_id from auth & id to form upgrade GET request
+      // /messages?id=x&session_id=y
+
+      // request default describe - on describe do registrations .. zzz
+
       WsClient client = new WsClient();
       Connection c = client.connect(this, getFullName(), getId(), url);
 
-      addConnection(client.getUuid(), c);
+      // URI uri = new URI(url);
+      // adding "id" as full url :P ... because we don't know it !!!
+      addConnection(client.getUuid(), url, c);
 
-      // send authenticate - FIXME - should not be necessary to send uuid
-      client.send(CodecUtils.toJson(getDefaultMsg(client.getUuid())));
+      // direct send - may not have and "id" so it will be too runtime vs
+      // runtime@{id}
+      // subscribe to "describe"
+      MRLListener listener = new MRLListener("describe", getFullName(), "onDescribe");
+      Message msg = Message.createMessage(getFullName(), "runtime", "addListener", listener);
+      client.send(CodecUtils.toJson(msg));
+
+      // send describe
+      client.send(CodecUtils.toJson(getDescribeMsg(client.getUuid())));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
@@ -1582,34 +1563,22 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
-      // xxx debug
       log.info("==> {} --to--> {}.{}", msg.sender, msg.name, msg.method);
       msg.setProperty("uuid", uuid); // Properties ???? REMOVE ???
-
-      /**
-       * ======================================================================
-       * DYNAMIC ROUTE TABLE - Incoming messages will (must) have a identifier
-       * bound with the connection. The sender's id is put into the route table
-       * with connection information.
-       */
-      updateRoute(msg.getSrcId(), uuid);
 
       if (msg.containsHop(getId())) {
         log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{} | {}", getName(), msg.sender, msg.name, msg.method, msg.getHops());
         return;
       }
 
+      addRoute(msg.getSrcId(), uuid, 10);
+
       // add our id - we don't want to see it again
       msg.addHop(getId());
 
-      /**
-       * ======================================================================
-       */
-
-      // if were blocking -
-      Message retMsg = null;
       Object ret = null;
 
+      // FIXME - see if same code block exists in WebGui .. normalize
       if (isLocal(msg)) {
 
         log.info("--> {}.{} from {}", msg.name, msg.method, msg.sender);
@@ -1635,26 +1604,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           log.error("si null for serviceName {}", serviceName);
           return;
         }
-        // higher level protocol - ordered steps to establish routing
-        // must add meta data of connection to system
-        if ("runtime".equals(serviceName) && "authenticate".equals(msg.method)) {
-          params[0] = uuid;
-        }
+
         ret = method.invoke(si, params);
 
         // propagate return data to subscribers
         si.out(msg.method, ret);
-
-        // sender is important - this "might" be right ;)
-        String sender = String.format("%s@%s", si.getName(), getId());
-
-        // Tri-Input broadcast
-        // if it was a blocking call return a serialized message back - must
-        // switch return address original sender
-        // with name
-        // TODO - at some point we want the option of "not trusting the sender's
-        // return address"
-        retMsg = Message.createMessage(sender, msg.sender, CodecUtils.getCallbackTopicName(method.getName()), ret);
 
       } else {
         log.info("GATEWAY {} RELAY {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
@@ -1663,7 +1617,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     } catch (Exception e) {
       log.error("processing msg threw", e);
-    } // this, apiKey, uuid, endpoint, data);
+    }
+  }
+
+  public void addRoute(String remoteId, String uuid, int metric) {
+    routeTable.addRoute(remoteId, uuid, metric);
   }
 
   static public ServiceInterface start(String name, String type) {
@@ -1677,24 +1635,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (runtime == null) {
         // fist and only time....
         runtime = this;
-        // if main(argv) args did not create options we must create
-        // a new one with defaults
-        if (options == null) {
-          options = new CmdOptions();
-        }
-
         repo = (IvyWrapper) Repo.getInstance(LIBRARIES, "IvyWrapper");
-
-        // if not requested explicitly to not have a cli - default is to start
-        // cli
-        if (options.fromLauncher) {
-          // connect(options.connect);
-          startInteractiveMode(System.in, System.out);
-        }
-
-        if (options == null) {
-          options = new CmdOptions();
-        }
       }
     }
 
@@ -1849,10 +1790,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("OMG Runtime won't start GAME OVER ! :( %s", e.getMessage());
       log.error("OMG Runtime won't start GAME OVER ! :(", e);
     }
-  }
-
-  public String getDefaultRoute() {
-    return defaultRoute;
   }
 
   public String publishDefaultRoute(String defaultRoute) {
@@ -2098,7 +2035,18 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // append restart script if not there
       int size = args.size();
       if (size > 2 && !args.get(size - 1).equals("lastRestart.py")) {
+
+        // add python
+        args.add("-s");
+        args.add("python");
+        args.add("Python");
+        
+        args.add("--id");
+        args.add(getId());
+
+        // invoke the restart script
         args.add("-I");
+        args.add("python");
         args.add("execFile");
         args.add("lastRestart.py");
       }
@@ -2175,8 +2123,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     if (runtime != null) {
       runtime.stopInteractiveMode();
     }
+
     super.stopService();
+
+    // cannot close thread on this connection
+    /*
+    (new Thread() {
+      public void run() {
+        closeConnections();
+      }
+    }).start();
+    */
+
     runtime = null;
+  }
+
+  public void closeConnections() {
+    for (Connection c : connections.values()) {
+      String gateway = c.getGateway();
+      if (getFullName().equals(gateway)) {
+        WsClient client = (WsClient) c.get("c-client");
+        client.close();
+      }
+    }
   }
 
   // FYI - the way to call "all" service methods !
@@ -2379,17 +2348,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return r;
   }
 
-  public Platform login(Platform platform) {
-    info("runtime %s says \"hello\" %s", platform.getId(), platform);
-
-    // from which connection ?
-    // runtime "mqtt" --mqtt01--> --mqtt02--> runtime"watchdog"
-
-    // return to its runtime a register ..
-
-    return platform;
-  }
-
   public ServiceData getServiceData() {
     return serviceData;
   }
@@ -2463,19 +2421,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       Files.write(Paths.get("backup.py"), sb.toString().getBytes());
-
-      // Map<String, Map<String, List<MRLListener>>> routeMap =
-      // getNotifyEntries();
-      /*
-       * StringBuffer routes = new StringBuffer(); for (String name : services)
-       * { ServiceInterface si = Runtime.getService(name);
-       * si.getOutbox().notifyList; }
-       */
-
-      // TODO - notifications / subscriptions
-      // iterate through all services
-      // iterate through all notifications
-      // load subscripts - make shorthand syntax // perhaps subscribe ??
       Files.write(Paths.get("backup-routes.py"), CodecUtils.toJson(getNotifyEntries()).getBytes());
 
       log.info("finished...");
@@ -2498,69 +2443,52 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return sd;
   }
 
-  public AuthResponse authenticate(String uuid, String remoteId, String remoteUuid) {
-    HelloRequest hello = new HelloRequest(uuid, remoteUuid);
-    return authenticate(uuid, hello);
+  /**
+   * FIXME - describe will have the capability to describe many aspects of a
+   * running service. Default behavior will show a list of local names, but
+   * depending on input criteria it should be possible to show * interfaces *
+   * service data * service methods * details of a service method * help/javadoc
+   * of a service method * list of other known instances * levels of detail, or
+   * lists of fields to display * meaningful default
+   * 
+   * FIXME - input parameters will need to change - at some point, a subscribe
+   * to describe, and appropriate input parameters should replace the current
+   * onRegistered system
+   * 
+   * @param type
+   * @param id
+   * @param remoteUuid
+   * @return
+   */
+  public DescribeResults describe(String type, String id, String remoteUuid) {
+    DescribeQuery query = new DescribeQuery(type, remoteUuid);
+    return describe(type, query);
   }
 
-  // FIXME - a way to reach in a messages meta-data ?? is this a reference
-  // through the thread storage?
-  // FIXME - needs to be paired with its client which has already been added
-  // its "meta-data"
-  public AuthResponse authenticate(String uuid, HelloRequest hello) {
+  public DescribeResults describe() {
+    // default query
+    return describe("platform", null);
+  }
 
-    AuthResponse response = new AuthResponse();
-    response.status = Status.success("Ahoy!");
+  /**
+   * 
+   * @param type
+   * @param hello
+   * @return
+   */
+  public DescribeResults describe(String uuidX, DescribeQuery hello) {
+
+    DescribeResults results = new DescribeResults();
+    results.setStatus(Status.success("Ahoy!"));
 
     try {
-      Connection connection = getConnection(uuid);
-      if (uuid == null) {
-        log.error("uuid could not be found in known connections {}", uuid);
-      }
 
-      log.info("Hello {} I am {} !", hello.id, getId());
-      if (getId().equals(hello.id)) {
-        log.warn("incoming request was for my own id {} - loopback not supported - removing connection", getId());
-        removeConnection(uuid);
-        response.status = Status.error("loopback not supported");
-        return response;
-      }
-
-      response.id = getId();
-      response.request = hello;
-      response.platform = Platform.getLocalInstance();
-
-      if (connection == null) {
-        log.info("non persistant connection from {} - service based - could be session based", hello.id);
-        return response;
-      }
-
-      connection.put("request", hello);
-
-      // IMPORTANT ADDING THE ID AND UPDATING ROUTE !!
-      updateRoute(hello.id, uuid);
-      getConnection(uuid).put("id", hello.id);
-      // remoteIdUrls.put(hello.id, (String) getConnection(uuid).get("url"));
+      results.setId(getId());
+      results.setPlatform(Platform.getLocalInstance());
 
       // broadcast completed connection information
-      invoke("getConnections");
+      invoke("getConnections"); // FIXME - why isn't this done before ???
 
-      // FIXME - lame .. have to send the whole serviceData because its member
-      // is correctly a "map" .. yet getServiceTypes returns a list :(
-      // FIXME - bad design ... JS should be in charge of its own service type
-      // definitions !
-      // FIXME THE TYPE DEFINITION SHOULD BE PART OF THE REGISTRATION !!!! -
-      // making registration atomic
-      // Message msg = Message.createMessage("runtime@" + getId(), "runtime@" +
-      // hello.id, "setServiceTypes", serviceData);
-      // send(msg);
-
-      // NOW - SEND WHAT WE WANT REMOTELY REGISTERED !!! - filter as desired
-      // TODO - getRegistry(isLocal=true, excludeTypes=[], includeTypes[],
-      // excludeNames=[], includeNames=[])
-
-      // defensive copy to avoid conncurrent modifications for inprocess mrl
-      // instances
       Set<String> set = registry.keySet();
       String[] list = new String[set.size()];
       set.toArray(list);
@@ -2570,25 +2498,30 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         String fullname = list[i];
         ServiceInterface si = registry.get(fullname);
 
-        // TODO - surface configuration for security, policy, broadcasting,
-        // re-broadcasting and other filtering
-        // TODO - configuration here has to be SYNC'd with onRegistration for
-        // later callbacks
-        // TODO - inclusive / exclusive filters
-        // if (si.getType().contains("Clock") || getId().equals(si.getId())) {
-
         Registration registration = new Registration(si);
-        Message msg = Message.createMessage("runtime@" + getId(), "runtime@" + hello.id, "onRegistered", registration);
-        // sendRemote(msg); // FIXME - just "send(msg) didn't go to sendRemote
-        // from the outbox .... it should have
-        send(msg);
+
+        results.addRegistration(registration);
       }
 
     } catch (Exception e) {
-      log.error("authenticate threw", e);
+      log.error("describe threw", e);
     }
 
-    return response;
+    return results;
+  }
+
+  /**
+   * Describe results from remote query to describe
+   * 
+   * @param results
+   */
+  public void onDescribe(DescribeResults results) {
+    List<Registration> reservations = results.getReservations();
+    if (reservations != null) {
+      for (int i = 0; i < reservations.size(); ++i) {
+        register(reservations.get(i));
+      }
+    }
   }
 
   /**
@@ -2633,104 +2566,33 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     }
   }
 
-  public void onAuthenticate(AuthResponse response) {
+  public void onAuthenticate(DescribeResults response) {
     log.info("onAuthenticate {}", response);
-  }
-
-  public Map<String, Set<String>> route() {
-    return routeTable;
   }
 
   public List<MetaData> getServiceTypes() {
     return serviceData.getServiceTypes();
   }
 
-  /**
-   * When a new connection is formed we have "connectivity" but not msg routing
-   * ability - The new connection will become the "new" default route, but we
-   * don't really have any information about the details of what id it has until
-   * we get a authenticate/HelloRequest message. When we have the new
-   * information we'll move the connections to the new id and this will be
-   * maintained in the routeTable
-   * 
-   * null key in the routeTable for id is "unknown" - ie its a connection which
-   * has not sent a authenticate(request) msg
-   * 
-   * @param id
-   * @param uuid
-   */
-  public void updateRoute(String id, String uuid) {
-
-    if (id == null) {
-      id = uuid;
-    }
-
-    if (routeTable.containsKey(id)) {
-      routeTable.get(id).add(uuid);
-    } else {
-      Set<String> uuids = new HashSet<>();
-      uuids.add(uuid);
-      routeTable.put(id, uuids);
-    }
-    // is this always the case - latest always wins?
-    defaultRoute = uuid;
-
-    // FIXME !!*#&@(*&$ - defaultRoute nor routeTable SHOULD NOT BE STATIC !!!!
-    Runtime.getInstance().invoke("publishDefaultRoute", defaultRoute);
-  }
-
-  public void removeRoute(String uuid) {
-    if (routeTable.containsKey(uuid)) {
-      routeTable.remove(uuid);
-    }
-
-    Set<String> removeIds = new HashSet<String>();
-    for (String id : routeTable.keySet()) {
-      Set<String> routes = routeTable.get(id);
-      if (routes.contains(uuid)) {
-        routes.remove(uuid);
-      }
-      if (routes.size() == 0) {
-        // adding for delayed removal
-        removeIds.add(id);
-      }
-    }
-
-    for (String clean : removeIds) {
-      routeTable.remove(clean);
-    }
-
-    if (uuid.equals(defaultRoute)) {
-      if (routeTable.size() > 0) {
-        // if it was our default route - change it to next available
-        defaultRoute = routeTable.keySet().iterator().next();
-      } else {
-        defaultRoute = null;
-      }
-      invoke("publishDefaultRoute", defaultRoute);
-    }
-  }
-
-  public void deleteRoute(String id) {
-    routeTable.remove(id);
-  }
-
-  public void addConnection(String uuid, Connection attributes) {
+  public void addConnection(String uuid, String id, Connection connection) {
     Connection attr = null;
     if (!connections.containsKey(uuid)) {
-      attr = attributes;
-      invoke("publishConnect", attributes);
+      attr = connection;
+      invoke("publishConnect", connection);
     } else {
       attr = connections.get(uuid);
-      attr.putAll(attributes);
+      attr.putAll(connection);
     }
     connections.put(uuid, attr);
+    // String id = (String)attr.get("id");
+
+    addRoute(id, uuid, 10);
   }
 
   @Override
-  public Message getDefaultMsg(String connId) {
+  public Message getDescribeMsg(String connId) {
 
-    // FIXME move serviceList into authenticate ... result of introduction ...
+    // FIXME move serviceList into describe ... result of introduction ...
     // !
     // TODO - whitelist and blacklist filters
     List<Registration> serviceList = new ArrayList<>();
@@ -2739,20 +2601,32 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       serviceList.add(nt);
     }
 
-    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "authenticate",
-        new Object[] { "fill-uuid", CodecUtils.toJson(new HelloRequest(Platform.getLocalInstance().getId(), connId)) });
+    Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
+        new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
     return msg;
   }
 
   public void removeConnection(String uuid) {
-    if (connections.remove(uuid) != null) {
+
+    Connection conn = connections.remove(uuid);
+
+    if (conn != null) {
       invoke("publishDisconnect", uuid);
       invoke("getConnections");
+
+      Set<String> remoteIds = routeTable.getAllIdsFor(uuid);
+      for (String id : remoteIds) {
+        unregisterId(id);
+      }
+      routeTable.removeRoute(uuid);
     }
-    for (String id : routeTable.keySet()) {
-      Set<String> conn = routeTable.get(id);
-      if (conn != null) {
-        conn.remove(uuid);
+  }
+
+  public void unregisterId(String id) {
+    Set<String> names = new HashSet<>(registry.keySet());
+    for (String name : names) {
+      if (name.endsWith("@" + id)) {
+        unregister(name);
       }
     }
   }
@@ -2859,17 +2733,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @param id
    * @return
    */
-  public String getRoute(String id) {
-    Set<String> ret = routeTable.get(id);
-    if (ret != null && ret.iterator() != null && ret.iterator().hasNext()) {
-      String found = ret.iterator().next();
-      if (found == null) {
-        return defaultRoute;
-      } else {
-        return found;
-      }
-    }
-    return defaultRoute;
+  public Connection getRoute(String id) {
+    return connections.get(routeTable.getRoute(id));
+  }
+
+  public RouteTable getRouteTable() {
+    return routeTable;
   }
 
   /**
@@ -2879,13 +2748,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    */
   public Gateway getGatway(String remoteId) {
-    // get a route from the remote id
-    String uuid = getRoute(remoteId);
-
     // get a connection from the route
-    Connection conn = getConnection(uuid);
+    Connection conn = getRoute(remoteId);
     if (conn == null) {
-      // log.error("no connection for uuid {}", uuid);
+      log.error("no connection for id {}", remoteId);
       return null;
     }
     // find the gateway managing the connection
@@ -2914,13 +2780,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return getConnections(getName());
   }
 
-  public void startHeartbeat() {
-    // we are alive - start our process heartbeat
-    runtime.addTask(2000, "heartbeat");
-  }
-
-  public void stopHeartbeat() {
-    purgeTask("heartbeat");
+  public void pollHosts() {
+    runtime.addTask(20000, "getHosts");
   }
 
   // FIXME - remove if not using ...
@@ -2931,26 +2792,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return;
     }
 
-    // get the appropriate connection - Runtime has a r ? wasync connection
-    // get a route from the remote id WOOHOO !!!
-    String uuid = getRoute(msg.getId());
-
     // get a connection from the route
-    Connection conn = getConnection(uuid);
+    Connection conn = getRoute(msg.getId());
     if (conn == null) {
-      log.error("could not get connection {} from msg {}", uuid, msg);
+      log.error("could not get connection for {} from msg {}", msg.getId(), msg);
       return;
     }
 
     // two possible types of "remote" for this gateway cli & ws
     if ("Cli".equals(conn.get("c-type"))) {
-
-      // FIXME - remove
-      boolean filterHeartBeatsFromCli = true;
-      if (filterHeartBeatsFromCli && msg.method.equals("onHeartbeat")) {
-        return;
-      }
-
       invoke("publishCli", msg);
 
       InProcessCli cli = ((InProcessCli) conn.get("cli"));
@@ -2960,7 +2810,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // websocket Client !
       WsClient client = (WsClient) conn.get("c-client");
       if (client == null) {
-        log.error("could not get client for connection {}", uuid);
+        log.error("could not get client for connection {}", msg.getId());
         return;
       }
 
@@ -3065,7 +2915,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return
    */
   public String getAddress() {
-    List<String> addresses = getLocalAddresses();
+    List<String> addresses = getIpAddresses();
     if (addresses.size() > 0) {
 
       // class priority
@@ -3091,6 +2941,81 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       return addresses.get(0);
     }
     return null;
+  }
+
+  public List<Host> getHosts() {
+    List<String> ips = getIpAddresses();
+    String selectedIp = (ips.size() == 1) ? ips.get(0) : null;
+    if (selectedIp == null) {
+      for (String ip : ips) {
+        if ((selectedIp != null) && (ip.startsWith(("192.")))) {
+          selectedIp = ip;
+        } else if (selectedIp == null) {
+          selectedIp = ip;
+        }
+      }
+    }
+    String subnet = selectedIp.substring(0, selectedIp.lastIndexOf("."));
+    return getHosts(subnet);
+  }
+
+  public List<Host> getHosts(String subnet) {
+
+    if (hosts == null) {
+      hosts = new HashMap<String, Host>();
+      File check = new File(FileIO.gluePaths(getDataDir(), "hosts.json"));
+      if (check.exists()) {
+        try {
+          Host[] hf = CodecUtils.fromJson(FileIO.toString(check), Host[].class);
+          for (Host h : hf) {
+            hosts.put(h.ip, h);
+          }
+          info("found %d saved hosts", hosts.size());
+        } catch (Exception e) {
+          error("could not load %s - %s", check, e.getMessage());
+        }
+      }
+    }
+
+    int timeout = 1500;
+    try {
+      for (int i = 1; i < 255; i++) {
+        Thread pinger = new Thread(new Pinger(this, hosts, subnet + "." + i, timeout), "pinger-" + i);
+        pinger.start();
+      }
+    } catch (Exception e) {
+      log.error("getHosts threw", e);
+    }
+    List<Host> h = new ArrayList<>();
+    for (Host hst : hosts.values()) {
+      if (hst.lastActiveTs != null) {
+        h.add(hst);
+      }
+    }
+    return h;
+  }
+
+  public Host publishFoundHost(Host host) {
+    log.info("found host {}", host);
+    return host;
+  }
+
+  public Host publishFoundNewHost(Host host) {
+    log.info("found new host {}", host);
+    return host;
+  }
+
+  public Host publishLostHost(Host host) {
+    log.info("lost host {}", host);
+    return host;
+  }
+
+  public void saveHosts() throws IOException {
+    FileOutputStream fos = new FileOutputStream(FileIO.gluePaths(getDataDir(), "hosts.json"));
+    List<Host> h = new ArrayList(hosts.values());
+    String json = CodecUtils.toPrettyJson(h);
+    fos.write(json.getBytes());
+    fos.close();
   }
 
   public void python() {
@@ -3228,6 +3153,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // FIXME - use peer ?
           Updater.main(args);
         }
+
+        if (options.fromLauncher) {
+          Runtime.getInstance().startInteractiveMode(System.in, System.out);
+        }
+
       }
 
     } catch (Exception e) {
@@ -3235,6 +3165,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Runtime.mainHelp();
       shutdown();
       log.error("main threw", e);
+    }
+  }
+
+  public void test() {
+    for (int statusCnt = 0; statusCnt < 500; statusCnt++) {
+      statusCnt++;
+      invoke("publishStatus", Status.info("this is status %d", statusCnt));
     }
   }
 
