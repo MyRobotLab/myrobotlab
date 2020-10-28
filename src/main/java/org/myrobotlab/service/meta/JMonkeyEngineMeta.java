@@ -21,9 +21,8 @@ public class JMonkeyEngineMeta extends MetaData {
     addDescription("is a 3d game engine, used for simulators");
 
     // make sure lwjgl 2.9.3 is being used - check with OculusRift too
-    addDependency("org.lwjgl.lwjgl", "lwjgl", "2.9.3");
+    addDependency("org.lwjgl.lwjgl", "lwjgl", "2.9.3", "pom");
     addDependency("org.lwjgl.lwjgl", "lwjgl-platform", "2.9.3", "pom");
-    
      
     String jmeVersion = "3.3.2-stable";
     addDependency("org.jmonkeyengine", "jme3-core", jmeVersion);
