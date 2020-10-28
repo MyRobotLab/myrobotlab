@@ -30,8 +30,11 @@ public class JMonkeyEngineMeta extends MetaData {
     // addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     // nev version of lwjgl3 which works with java 11
     addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
-       
     addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
+    
+    
+    addDependency("org.lwjgl.lwjgl","lwjgl","2.9.3");
+    addDependency("org.lwjgl.lwjgl","lwjgl-platform","2.9.3", "pom");
     // addDependency("org.jmonkeyengine", "jme3-test-data", jmeVersion);
     addDependency("com.simsilica", "lemur", "1.11.0");
     addDependency("com.simsilica", "lemur-proto", "1.10.0");

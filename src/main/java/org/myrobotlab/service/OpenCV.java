@@ -89,6 +89,7 @@ import org.bytedeco.opencv.opencv_core.CvPoint2D32f;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_imgproc.CvFont;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.cv.CvData;
@@ -111,6 +112,7 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
+import org.myrobotlab.opencv.OpenCVFilterMotionDetect;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -269,7 +271,7 @@ public class OpenCV extends AbstractComputerVision {
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
       "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
       "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "Input", "InRange", "Invert", "KinectDepth", "KinectDepthMask",
-      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "Mouse", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
+      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
       "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose",
       "Undistort", "Yolo" };
 
@@ -407,6 +409,10 @@ public class OpenCV extends AbstractComputerVision {
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
     // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
     // cv.addFilter(td);
+
+    // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
+    // cv.addFilter(md);
+
     cv.capture();
 
     // Runtime.start("gui", "SwingGui");
@@ -1478,6 +1484,12 @@ public class OpenCV extends AbstractComputerVision {
     return value;
   }
 
+  // publish the rects where motion was detected
+  // TODO: make a better object to publish
+  public ArrayList<Rect> publishMotionDetected(ArrayList<Rect> rects) {
+    return rects;
+  }
+  
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine

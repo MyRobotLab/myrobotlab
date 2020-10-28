@@ -20,7 +20,7 @@ public class OpenCVMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    String javaCvVersion = "1.5.3";
+    String javaCvVersion = "1.5.4";
     addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
