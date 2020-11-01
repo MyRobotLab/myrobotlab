@@ -1,7 +1,10 @@
 package org.myrobotlab.framework;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import picocli.CommandLine.Command;
@@ -26,6 +29,79 @@ import picocli.CommandLine.Option;
 @Command(name = "java -jar myrobotlab.jar ")
 public class CmdOptions {
 
+  public final String DEFAULT_CONNECT = "http://localhost:8888";
+
+  static boolean contains(List<String> l, String flag) {
+    for (String f : l) {
+      if (f.equals(flag)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // FIXME - should work with a startup ...
+  @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
+      + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
+  public String addKeys[];
+
+  // launcher ??
+  @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
+  public boolean autoUpdate = false;
+
+  // launcher
+  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
+      + "All configuration of last run is saved to {data-dir}/lastjson. This file can be used as a starter config for subsequent --cfg config.json. "
+      + "If this value is set, all other configuration flags are ignored.")
+  public String config = null;
+
+  @Option(names = { "-c",
+      "--connect" }, arity = "0..*", /*
+                                      * defaultValue = DEFAULT_CONNECT,
+                                      */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is " + DEFAULT_CONNECT)
+  public String connect = null;
+
+  // TODO - daemon / fork
+  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
+  public boolean daemon = false;
+
+  // if --from-launcher knows to createAndStart service on -s
+  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
+  public boolean fromLauncher = false;
+
+  @Option(names = { "-h", "-?", "--help" }, description = "shows help")
+  public boolean help = false;
+
+  @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
+  public String id;
+
+  @Option(names = { "-i",
+      "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {serviceType} installs dependencies for a specific service, if no type is specified then all services are installed")
+  public String install[];
+
+  @Option(names = { "-I",
+      "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
+  public String invoke[];
+
+  // for launcher
+  @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
+  public String jvm;
+
+  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
+  public String logLevel = "info";
+
+  // FIXME - highlight or italics for examples !!
+  // launcher
+  @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
+  public String memory = null;
+
+  @Option(names = { "-s", "--service",
+      "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
+  public List<String> services = new ArrayList<>();
+
+  @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
+  public boolean virtual = false;
+
   public CmdOptions() {
   }
 
@@ -38,76 +114,124 @@ public class CmdOptions {
     }
   }
 
-  // launcher ??
-  @Option(names = { "-a", "--auto-update" }, description = "auto updating - this feature allows mrl instances to be automatically updated when a new version is available")
-  public boolean autoUpdate = false;
+  public static String[] toArray(List<String> list) {
+    return list.toArray(new String[list.size()]);
+  }
 
-  public final String DEFAULT_CONNECT = "http://localhost:8888";
+  public static List<String> toList(String[] array) {
+    return new ArrayList<String>(Arrays.asList(array));
+  }
 
-  // TODO - daemon / fork
-  @Option(names = { "-d", "--daemon" }, description = "daemon - fork process from current process - no inherited io no cli")
-  public boolean daemon = false;
+  public static String toString(List<String> cmdLine) {
+    return toString(cmdLine.toArray(new String[cmdLine.size()]));
+  }
 
-  // launcher
-  @Option(names = { "-c", "--connect" }, arity = "0..*", /*
-                                                          * defaultValue =
-                                                          * DEFAULT_CONNECT,
-                                                          */ fallbackValue = DEFAULT_CONNECT, description = "connects this mrl instance to another mrl instance - default is "
-      + DEFAULT_CONNECT)
-  public String connect = null;
+  public static String toString(String[] cmdLine) {
+    StringBuilder spawning = new StringBuilder();
+    for (String c : cmdLine) {
+      spawning.append(c);
+      spawning.append(" ");
+    }
+    return spawning.toString();
+  }
 
-  // launcher
-  @Option(names = { "--config" }, description = "Configuration file. If specified all configuration from the file will be used as a \"base\" of configuration. "
-      + "All configuration of last run is saved to {data-dir}/lastOptions.json. This file can be used as a starter config for subsequent --cfg config.json. "
-      + "If this value is set, all other configuration flags are ignored.")
-  public String cfg = null;
-
-  // FIXME - highlight or italics for examples !!
-  // launcher
-  @Option(names = { "-m", "--memory" }, description = "adjust memory can e.g. -m 2g \n -m 128m")
-  public String memory = null;
-
-  // launcher
-  /*
-   * @Option(names = { "--std-out" }, description =
-   * "when spawning save the results of the launch in a file \"std.out\"")
-   * public boolean stdout = false;
+  /**
+   * Command options data object will return the options in List form
+   * to be appended to the ProcessBuilder(List)
+   * 
+   * @return
+   * @throws IOException
    */
+  public List<String> getOutputCmd() throws IOException {
 
-  // if --from-launcher knows to createAndStart service on -s
-  @Option(names = { "--from-launcher" }, description = "prevents starting in interactive mode - reading from stdin")
-  public boolean fromLauncher = false;
+    List<String> cmd = new ArrayList<>();
 
-  @Option(names = { "-h", "-?", "--help" }, description = "shows help")
-  public boolean help = false;
+    if (addKeys != null) {
+      cmd.add("-k");
+      for (int i = 0; i < addKeys.length; ++i) {
+        cmd.add(addKeys[i]);
+      }
+    }
 
-  @Option(names = { "-I",
-      "--invoke" }, arity = "0..*", description = "invokes a method on a service --invoke {serviceName} {method} {param0} {param1} ... : --invoke python execFile myFile.py")
-  public String invoke[];
+    if (autoUpdate) {
+      cmd.add("-a");
+    }
 
-  // FIXME - should work with a startup ...
-  @Option(names = { "-k", "--add-key" }, arity = "2..*", description = "adds a key to the key store\n"
-      + "@bold,italic java -jar myrobotlab.jar -k amazon.polly.user.key ABCDEFGHIJKLM amazon.polly.user.secret Fidj93e9d9fd88gsakjg9d93")
-  public String addKeys[];
+    if (config != null) {
+      cmd.add("--config");
+      cmd.add(config);
+    }
 
-  @Option(names = { "-j", "--jvm" }, arity = "0..*", description = "jvm parameters for the instance of mrl")
-  public String jvm;
+    if (connect != null) {
+      cmd.add("-c");
+      cmd.add(connect);
+    }
 
-  @Option(names = { "--id" }, description = "process identifier to be mdns or network overlay name for this instance - one is created at random if not assigned")
-  public String id;
+    if (daemon) {
+      cmd.add("-d");
+    }
 
-  @Option(names = { "-l", "--log-level" }, description = "log level - helpful for troubleshooting " + " [debug info warn error]")
-  public String logLevel = "info";
+    if (invoke != null) {
+      cmd.add("-I");
+      for (int i = 0; i < invoke.length; ++i) {
+        cmd.add(invoke[i]);
+      }
+    }
 
-  @Option(names = { "-i",
-      "--install" }, arity = "0..*", description = "installs all dependencies for all services, --install {serviceType} installs dependencies for a specific service, if no type is specified then all services are installed")
-  public String install[];
+    if (fromLauncher) {
+      cmd.add("--from-launcher");
+    }
 
-  @Option(names = { "-V", "--virtual" }, description = "sets global environment as virtual - all services which support virtual hardware will create virtual hardware")
-  public boolean virtual = false;
+    if (help) {
+      cmd.add("-h");
+    }
 
-  @Option(names = { "-s", "--service",
-      "--services" }, arity = "0..*", description = "services requested on startup, the services must be {name} {Type} paired, e.g. gui SwingGui webgui WebGui servo Servo ...")
-  public List<String> services = new ArrayList<>();
+    if (id != null) {
+      cmd.add("--id");
+      cmd.add(id);
+    }
+
+    if (install != null) {
+      cmd.add("-i");
+      for (int i = 0; i < install.length; ++i) {
+        cmd.add(install[i]);
+      }
+    }
+
+    if (logLevel != null) {
+      cmd.add("--log-level");
+      cmd.add(logLevel);
+    }
+
+    if (memory != null) {
+      cmd.add("-m");
+      cmd.add(memory);
+    }
+
+    // default service if non specified
+    // more logic here when preforming some other activity like adding keys?
+    if (services.size() == 0) {
+      services.add("webgui");
+      services.add("WebGui");
+      services.add("intro");
+      services.add("Intro");
+      services.add("python");
+      services.add("Python");
+    }
+    
+    if (services.size() % 2 != 0) {
+      throw new IOException("invalid choice - services must be -s {name} {type} ...");
+    }
+    cmd.add("-s");
+    for (String s : services) {
+      cmd.add(s);
+    }
+
+    if (virtual) {
+      cmd.add("-v");
+    }
+
+    return cmd;
+  }
 
 }

@@ -197,8 +197,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   private List<String> jvmArgs;
 
-  private List<String> args;
-
   /**
    * set of known hosts
    */
@@ -1664,18 +1662,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     StringBuffer sb = new StringBuffer();
 
     jvmArgs = getJvmArgs();
-    args = new ArrayList<String>();
     if (globalArgs != null) {
       for (int i = 0; i < globalArgs.length; ++i) {
         sb.append(globalArgs[i]);
-        args.add(globalArgs[i]);
       }
     }
     if (jvmArgs != null) {
       log.info("jvmArgs {}", Arrays.toString(jvmArgs.toArray()));
     }
     log.info("file.encoding {}", System.getProperty("file.encoding"));
-    log.info("args {}", Arrays.toString(args.toArray()));
+    log.info("args {}", Arrays.toString(globalArgs));
 
     log.info("============== args end ==============");
 
@@ -2011,66 +2007,64 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * sequence to update myrobotlab.jar
    */
   public void restart() {
-    try {
-      info("restarting");
+      // to avoid deadlock of shutting down from external messages
+      // we spawn a kill thread
+      new Thread("kill-thread"){
+        public void run() {
+          try {
+            
+            info("restarting");
 
-      // export to file lastRestart.py
-      exportAll("lastRestart.py");
+            // export to file lastRestart.py
+            exportAll("lastRestart.py");
 
-      // shutdown all services process - send ready to shutdown - ask back
-      // release all services
-      for (ServiceInterface service : getServices()) {
-        service.preShutdown();
-      }
+            // shutdown all services process - send ready to shutdown - ask back
+            // release all services
+            for (ServiceInterface service : getServices()) {
+              service.preShutdown();
+            }
 
-      // check if ready ???
+            // check if ready ???
 
-      // release all local services
-      releaseAll();
+            // release all local services
+            releaseAll();
 
-      if (runtime != null) {
-        runtime.releaseService();
-      }
+            if (runtime != null) {
+              runtime.releaseService();
+            }
+            
+            options.fromLauncher = true; // ???
+            
+            // make sure python is included
+            options.services.add("python");
+            options.services.add("Python");
+            
+            // force invoke
+            options.invoke = new String[] {"python", "execFile", "lastRestart.py"};
 
-      // append restart script if not there
-      int size = args.size();
-      if (size > 2 && !args.get(size - 1).equals("lastRestart.py")) {
+            // create builder from Launcher daemonize ?
+            log.info("re launching with commands \n{}", CmdOptions.toString(options.getOutputCmd()));
+            ProcessBuilder pb = Launcher.createBuilder(options);
 
-        // add python
-        args.add("-s");
-        args.add("python");
-        args.add("Python");
-        
-        args.add("--id");
-        args.add(getId());
+            // fire it off
+            Process restarted = pb.start();
 
-        // invoke the restart script
-        args.add("-I");
-        args.add("python");
-        args.add("execFile");
-        args.add("lastRestart.py");
-      }
+            // dramatic pause
+            sleep(2000);
 
-      // create builder from Launcher
-      ProcessBuilder pb = Launcher.createBuilder(args);
-
-      // fire it off
-      Process restarted = pb.start();
-
-      // dramatic pause
-      sleep(2000);
-
-      // check if process exists
-      if (restarted.isAlive()) {
-        log.info("yay! we continue to live in future generations !");
-      } else {
-        log.error("omg! ... I killed all the services and now there is no offspring ! :(");
-      }
-      log.error("goodbye ...");
-      shutdown();
-    } catch (Exception e) {
-      log.error("shutdown threw", e);
-    }
+            // check if process exists
+            if (restarted.isAlive()) {
+              log.info("yay! we continue to live in future generations !");
+            } else {
+              log.error("omg! ... I killed all the services and now there is no offspring ! :(");
+            }
+            log.error("goodbye ...");
+            shutdown();
+          } catch (Exception e) {
+            log.error("shutdown threw", e);
+          }          
+        }
+      }.start();
   }
 
   static public Map<String, String> getManifest() {
@@ -3012,18 +3006,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public void saveHosts() throws IOException {
     FileOutputStream fos = new FileOutputStream(FileIO.gluePaths(getDataDir(), "hosts.json"));
-    List<Host> h = new ArrayList(hosts.values());
+    List<Host> h = new ArrayList<>(hosts.values());
     String json = CodecUtils.toPrettyJson(h);
     fos.write(json.getBytes());
     fos.close();
   }
 
+  /**
+   * start python interactively at the command line
+   */
   public void python() {
     if (cli == null) {
       startInteractiveMode();
     }
     start("python", "Python");
+    // since we've suscribed to pythons st
     cli.relay("python", "exec", "publishStdOut");
+    cli.relay("python", "exec", "publishStdError");
+    Logging logging = LoggingFactory.getInstance();
+    logging.removeAllAppenders();
   }
 
   /**
@@ -3040,9 +3041,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       globalArgs = args;
 
       new CommandLine(options).parseArgs(args);
-
-      LoggingFactory.init(options.logLevel);
+      
+      // initialize logging
+      initLog();
+      
       log.info("in args {}", Launcher.toString(args));
+      log.info(CodecUtils.toJson(options));
 
       log.info("\n" + Launcher.banner);
 
@@ -3054,12 +3058,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // if a you specify a config file it becomes the "base" of configuration
       // inline flags will still override values
-      if (options.cfg != null) {
+      if (options.config != null) {
         try {
-          log.info("loading options {}", options.cfg);
-          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.cfg), CmdOptions.class);
+          log.info("loading options {}", options.config);
+          options = (CmdOptions) CodecUtils.fromJson(FileIO.toString(options.config), CmdOptions.class);
         } catch (Exception e) {
-          log.error("config file {} was specified but could not be read", options.cfg);
+          log.error("config file {} was specified but could not be read", options.config);
           shutdown();
         }
       }
@@ -3129,7 +3133,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // any options need stripping ?
         // handle daemon
         // TODO handle more than one instance
-        ProcessBuilder builder = Launcher.createBuilder(args);
+        ProcessBuilder builder = Launcher.createBuilder(options);
         Process process = builder.start();
         process.waitFor();
         return;
@@ -3165,6 +3169,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       Runtime.mainHelp();
       shutdown();
       log.error("main threw", e);
+    }
+  }
+
+  public static void initLog() {
+    if (options != null) {
+      LoggingFactory.init(options.logLevel);
+    } else {
+      LoggingFactory.init("info");
     }
   }
 

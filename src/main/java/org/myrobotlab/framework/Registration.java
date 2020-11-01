@@ -44,7 +44,7 @@ public class Registration {
   }
 
   public Registration(ServiceInterface service) {
-    log.debug("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getType();

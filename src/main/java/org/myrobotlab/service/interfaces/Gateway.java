@@ -52,6 +52,6 @@ public interface Gateway extends NameProvider {
 
   public boolean isLocal(Message msg);
 
-  public Message getDefaultMsg(String connId);
+  public Message getDescribeMsg(String connId);
 
 }

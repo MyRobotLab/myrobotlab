@@ -1027,15 +1027,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
   @Override
   public void connect(String uri) throws Exception {
-    // easy single client support
-    Connection attributes = new Connection();
-    attributes.put("gateway", getName());
-    attributes.put("c-type", getSimpleName());
-    attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
-    attributes.put("uuid", uuid);
-    Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.getInstance().updateRoute(guiId, uuid);
+    String id = Runtime.getInstance().getId() + "-swing";
+    Connection connection = new Connection(uuid, id, getName());
+    connection.put("c-type", getSimpleName());
+
+    Runtime.getInstance().addConnection(uuid, id, connection);
   }
 
   @Override
@@ -1061,8 +1058,8 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   @Override
-  public Message getDefaultMsg(String connId) {
-    return Runtime.getInstance().getDefaultMsg(connId);
+  public Message getDescribeMsg(String connId) {
+    return Runtime.getInstance().getDescribeMsg(connId);
   }
 
 }

@@ -843,9 +843,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   @Override
   public void broadcastStatus(Status status) {
     long now = System.currentTimeMillis();
+    /*
     if (status.equals(lastStatus) && now - lastStatusTs < statusBroadcastLimitMs) {
       return;
     }
+    */
     if (status.name == null) {
       status.name = getName();
     }
@@ -913,27 +915,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     sr.state = "created";
 
     return si;
-  }
-
-  /**
-   * called typically from a remote system When 2 MRL instances are connected
-   * they contain serialized non running Service in a registry, which is
-   * maintained by the Runtime. The data can be stale.
-   * 
-   * Messages are sometimes sent (often in the gui) which prompt the remote
-   * service to "broadcastState" a new serialized snapshot is broadcast to all
-   * subscribed methods, but there is no guarantee that the registry is updated
-   * 
-   * This method will update the registry, additionally it will block until the
-   * refresh response comes back
-   * 
-   * @param pulse
-   *          p
-   * @return a heartbeat
-   */
-
-  public Heartbeat echoHeartbeat(Heartbeat pulse) {
-    return pulse;
   }
 
   @Override

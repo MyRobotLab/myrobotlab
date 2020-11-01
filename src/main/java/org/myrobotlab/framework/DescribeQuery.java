@@ -1,6 +1,6 @@
 package org.myrobotlab.framework;
 
-public class HelloRequest {
+public class DescribeQuery {
 
   /**
    * id of the foreign process
@@ -16,7 +16,7 @@ public class HelloRequest {
    */
   public Platform platform;
 
-  public HelloRequest(String id, String uuid) {
+  public DescribeQuery(String id, String uuid) {
     this.id = id;
     this.uuid = uuid;
     this.platform = Platform.getLocalInstance();

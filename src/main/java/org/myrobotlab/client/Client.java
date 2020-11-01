@@ -19,7 +19,7 @@ import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
 import org.atmosphere.wasync.impl.AtmosphereClient;
 import org.atmosphere.wasync.impl.AtmosphereSocket;
-import org.myrobotlab.framework.HelloRequest;
+import org.myrobotlab.framework.DescribeQuery;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Logging;
@@ -115,7 +115,7 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
 
   transient private AtmosphereSocket socket;
 
-  private HelloRequest serverHelloRequest;
+  private DescribeQuery serverHelloRequest;
 
   public void connect() {
 
@@ -239,8 +239,8 @@ public class Client implements Runnable, Decoder<String, Reader>, Encoder<String
     // System.out.println(s);
     Message msg = gson.fromJson(s, Message.class);
 
-    if ("authenticate".equals(msg.method)) {
-      serverHelloRequest = gson.fromJson(msg.data[1].toString(), HelloRequest.class);
+    if ("describe".equals(msg.method)) {
+      serverHelloRequest = gson.fromJson(msg.data[1].toString(), DescribeQuery.class);
       promptId = serverHelloRequest.id;
       System.out.println("attaching to id " + promptId);
     }
