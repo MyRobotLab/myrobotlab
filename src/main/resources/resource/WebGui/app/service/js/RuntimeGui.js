@@ -23,6 +23,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     $scope.newName = null
     $scope.newType = ""
     $scope.heartbeatTs = null
+    $scope.hosts = []
 
     $scope.languages = {
         'en': {
@@ -171,6 +172,12 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                 $scope.$apply()
                 break
             }
+        case 'onHosts':
+            {
+                $scope.hosts = inMsg.data[0]
+                $scope.$apply()
+                break
+            }
         case 'onStatus':
             {
                 $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
@@ -247,7 +254,6 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             templateUrl: 'nav/shutdown.html',
             controller: 'shutdownCtrl2',
 
-            
             resolve: {
                 type: function() {
                     return type
@@ -284,12 +290,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getConnections")
     msg.subscribe("getLocale")
     msg.subscribe("getLocales")
+    msg.subscribe("getHosts")
+    msg.subscribe("publishStatus")
 
     //msg.send("getLocalServices")
     msg.send("getConnections")
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
+    msg.send("getHosts")
     msg.subscribe(this)
 }
 ])

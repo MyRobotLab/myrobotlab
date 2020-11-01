@@ -8,6 +8,13 @@ import java.util.Map;
  */
 public class Connection {
 
+  
+  public Connection(String uuid, String id, String gateway) {
+    put("uuid", uuid);
+    put("id", id);
+    put("gateway", gateway);
+  }
+  
   /**
    * serializable references
    */
@@ -51,6 +58,28 @@ public class Connection {
   public void putAll(Connection conn) {
     this.serializable.putAll(conn.serializable);
     this.attributes.putAll(conn.attributes);
+  }
+
+  public String getId() {
+    return (String)serializable.get("id");
+  }
+
+  public String getUuid() {
+    return (String)serializable.get("uuid");
+  }
+  
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (String s : serializable.keySet()) {
+      sb.append("\n");
+      sb.append(String.format("%s=%s", s, (String)serializable.get(s)));
+    }
+    sb.append("\n");
+    return sb.toString();
+  }
+
+  public String getGateway() {
+    return (String)serializable.get("gateway");
   }
 
 }

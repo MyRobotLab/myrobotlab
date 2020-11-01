@@ -96,7 +96,53 @@ Create a new service
 </div>
 <div class="row">
     <div class="form-group col-md-6">
-        <b>default route {{service.defaultRoute}}</b>
+        <b>route table default</b> {{service.routeTable.defaultRoute.destination}}</br>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>destination</th>
+                    <th>link</th>
+                    <th>metric</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(id, entry) in service.routeTable.routes">
+                    <!-- td>{{id}}</td -->
+                    <td>{{id}}</td>
+                    <td>{{entry.uuid}}</td>
+                    <td>{{entry.metric}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="form-group col-md-6">
+    <b>connections</b></br>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>remote id</th>
+                    <th>gateway type</th>
+                    <th>gateway</th>
+                    <th>connection id</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="(id, entry) in connections">
+                    <!-- td>{{id}}</td -->
+                    <td>{{entry.serializable.id}}</td>
+                    <td>
+                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                    </td>
+                    <td>{{entry.serializable.gateway}}</td>
+                    <td>
+                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="row">
@@ -111,13 +157,15 @@ Create a new service
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="(id, entry) in connections">
+                <tr ng-repeat="host in hosts | orderBy:'-lastActiveTs'">
                     <!-- td>{{id}}</td -->
-                    <td>{{entry.serializable.id}}</td>
+                    <td>{{host.name}}</td>
+                    <td>{{host.state}}</td>
+                    <td>{{host.lastActiveTs}}</td>
                     <td>
-                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                        <!-- img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}} -->
                     </td>
-                    <td>{{entry.serializable.gateway}}</td>
+                    <td>{{host.ip}}</td>
                     <td>
                         {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
                     </td>

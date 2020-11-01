@@ -176,6 +176,8 @@ public class Python extends Service {
 
   private static final long serialVersionUID = 1L;
 
+  protected int newScriptCnt = 0;
+
   /**
    * Get a compiled version of the python call.
    * 
@@ -269,7 +271,9 @@ public class Python extends Service {
     String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-        + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
@@ -277,28 +281,12 @@ public class Python extends Service {
     StringBuffer initScript = new StringBuffer();
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
-    /*
-     * NOT NECESSARY ON CONSTRUCTION - handled on event onStarted
-     * Iterator<String> it = svcs.keySet().iterator(); while (it.hasNext()) {
-     * String fullname = it.next(); ServiceInterface sw = svcs.get(fullname);
-     * 
-     * initScript.append(String.format("from org.myrobotlab.service import %s\n"
-     * , sw.getSimpleName()));
-     * 
-     * String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n",
-     * CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
-     * 
-     * // get a handle on running service initScript.append(serviceScript); }
-     * 
-     * exec(initScript.toString(), false);
-     */
-    log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
-    log.info("started python {}", getName());
+  }
 
+  public void newScript() {
+    if (!openedScripts.containsKey("script.py")) {
+      openScript("script.py", "");
+    }
   }
 
   public void openScript(String scriptName, String code) {
@@ -330,6 +318,9 @@ public class Python extends Service {
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
+      // FIXME - this console script has hardcoded globals to
+      // reference this service that will break with more than on python service
+      // !
       String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
       pythonConsoleInitialized = true;
@@ -438,6 +429,7 @@ public class Python extends Service {
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
+      invoke("publishStdError", pe.toString());
     } catch (Exception e) {
       error(e);
     }
@@ -612,7 +604,7 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("here");
+    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
@@ -648,6 +640,10 @@ public class Python extends Service {
   }
 
   public String publishStdOut(String data) {
+    return data;
+  }
+
+  public String publishStdError(String data) {
     return data;
   }
 

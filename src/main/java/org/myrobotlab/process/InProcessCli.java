@@ -11,6 +11,7 @@ import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Registration;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Connection;
@@ -57,6 +58,10 @@ public class InProcessCli implements Runnable {
 
   private String contextPath = null;// TODO - make this stateful ?? -
                                     // "runtime/ls/";
+  /**
+   * buffer of python multi-line
+   */
+  private String pythonMultiLineBuffer = null;
 
   private Map<String, NatEntry> natTable = new HashMap<>();
 
@@ -136,14 +141,54 @@ public class InProcessCli implements Runnable {
 
         readLine += (char) c;
         if (c == '\n') {
-          if (readLine.length() > 1) {
-            try {
-              if (relayTo != null) {
-                Message msg = Message.createMessage(name + '@' + id, relayTo, relayMethod, readLine);
+          // python interpreter
+          if (relayTo != null) {
+
+            // multi line
+            if (pythonMultiLineBuffer != null) {
+              // found end of multi-line - process
+              pythonMultiLineBuffer += readLine;
+
+              if (pythonMultiLineBuffer.endsWith("\n\n")) {
+                Message msg = Message.createMessage(name + '@' + id, relayTo, relayMethod, pythonMultiLineBuffer);
                 service.out(msg);
-              } else {
-                process(null, readLine);
+                pythonMultiLineBuffer = null;
               }
+              writePrompt();
+              readLine = "";
+              continue;
+            }
+
+            // beginning of multi-line
+            if (readLine.startsWith("def") || readLine.startsWith("for") || readLine.startsWith("if")) {
+              pythonMultiLineBuffer = readLine;
+              writePrompt();
+              readLine = "";
+              continue;
+            }
+
+            // exiting python
+            if ("exit()\n".equals(readLine)) {
+              relayTo = null;
+              pythonMultiLineBuffer = null;
+              writePrompt();
+              readLine = "";
+              // re-initialize logging to previous state
+              Runtime.initLog();
+              continue;
+            }
+            // default case single line process
+            Message msg = Message.createMessage(name + '@' + id, relayTo, relayMethod, readLine);
+            service.out(msg);
+            writePrompt();
+            readLine = "";
+            continue;
+          }
+
+          // service interpreter
+          if (readLine.length() > 1 && relayTo == null) {
+            try {
+              process(null, readLine);
             } catch (Exception e) {
               log.error("cli process threw", e);
             }
@@ -326,9 +371,18 @@ public class InProcessCli implements Runnable {
 
   public void writePrompt() {
     try {
-      out.write("\n".getBytes());
-      out.write(getPrompt(id).getBytes());
-      out.write(" ".getBytes());
+      // pause a little - wait for async callbacks (stdout stderr) to process
+      Service.sleep(50);
+      if ("python".equals(relayTo)) {
+        if (pythonMultiLineBuffer != null) {
+          out.write("... ".getBytes());
+        } else
+          out.write(">>> ".getBytes());
+      } else {
+        out.write("\n".getBytes());
+        out.write(getPrompt(id).getBytes());
+        out.write(" ".getBytes());
+      }
     } catch (Exception e) {
       log.error("writePrompt threw", e);
     }
@@ -386,7 +440,16 @@ public class InProcessCli implements Runnable {
             }
           }
         } else {
-          writeToJson(o);
+          if ("onStdOut".equals(msg.getMethod()) || "onStdError".equals(msg.getMethod())) {
+            // python interpreter
+            try {
+              out.write(o.toString().getBytes());
+            } catch (Exception e) {
+              log.error("write threw", e);
+            }
+          } else {
+            writeToJson(o);
+          }
         }
       }
     }
@@ -429,18 +492,15 @@ public class InProcessCli implements Runnable {
   public Connection getConnection() {
     String cliId = getId();
     String uuid = java.util.UUID.randomUUID().toString();
-    Connection attributes = new Connection();
-    attributes.put("gateway", "runtime");
-    attributes.put("uuid", uuid);
-    attributes.put("id", cliId);
-    attributes.put("header-User-Agent", "stdin-client");
-    attributes.put("cwd", "/");
-    attributes.put("uri", "/api/cli");
-    attributes.put("user", "root");
-    attributes.put("host", "local");
-    attributes.put("c-type", "Cli");
-    attributes.put("cli", this);
-    return attributes;
+    Connection connection = new Connection(uuid, cliId, "runtime");
+    connection.put("header-User-Agent", "stdin-client");
+    connection.put("cwd", "/");
+    connection.put("uri", "/api/cli");
+    connection.put("user", "root");
+    connection.put("host", "local");
+    connection.put("c-type", "Cli");
+    connection.put("cli", this);
+    return connection;
 
   }
 

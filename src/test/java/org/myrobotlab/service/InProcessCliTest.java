@@ -66,9 +66,11 @@ public class InProcessCliTest extends AbstractTest {
     assertTrue(getResponse().contains(toJson(Runtime.getServiceNames())));
     
     
+    /*
     clear();
     write("route");
     assertTrue(getResponse().contains(toJson(Runtime.getInstance().route())));
+    */
     
     // cd to different directory with and without /
     

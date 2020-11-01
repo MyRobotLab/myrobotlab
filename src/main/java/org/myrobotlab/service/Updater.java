@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.MrlException;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.Service;
@@ -422,7 +423,9 @@ public class Updater extends Service {
             if (updated == null) {
               // FIXME check for null etc.. singleton
               // FIXME - merge original
-              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              CmdOptions options = new CmdOptions();
+              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
               // FIXME check if alive etc...
@@ -432,7 +435,9 @@ public class Updater extends Service {
               // process already exists - tear down and restart FIXME - export !
               updated.destroy();
               // FIXME - merge original
-              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              CmdOptions options = new CmdOptions();
+              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
             }
           }
@@ -515,7 +520,9 @@ public class Updater extends Service {
             if (updated == null) {
               // FIXME check for null etc.. singleton
               // FIXME - ability to merge more commands !!!
-              ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+              CmdOptions options = new CmdOptions();
+              new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+              ProcessBuilder builder = Launcher.createBuilder(options);
               updated = builder.start();
 
               // FIXME check if alive etc...
@@ -610,7 +617,9 @@ public class Updater extends Service {
 
       Updater updater = (Updater) Runtime.start("updater", "Updater");
 
-      ProcessBuilder builder = Launcher.createBuilder(new String[] { "-I", "python", "execFile", "export.py" });
+      CmdOptions options = new CmdOptions();
+      new CommandLine(options).parseArgs(new String[] {"-I", "python", "execFile", "export.py"});
+      ProcessBuilder builder = Launcher.createBuilder(options);
       updater.updated = builder.start();
 
       new CommandLine(updater).parseArgs(args);

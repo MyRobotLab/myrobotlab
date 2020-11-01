@@ -13,6 +13,7 @@ import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -137,7 +138,7 @@ public class LangUtils {
     if (includeRuntime != null && includeRuntime) {
       services.add(Runtime.getInstance());
     }
-
+    
     sb.append("##############################################################\n");
     sb.append(String.format("## creating %d services ####\n", services.size()));
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
@@ -145,6 +146,8 @@ public class LangUtils {
     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
     sb.append("# e.g. i01_left = Runtime.create('i01.left', 'Ssc32UsbServoController')\n");
 
+    sb.append("runtime = Runtime.getInstance()\n");
+    
     // the easy start (start peers auto-magically creates peers)
     for (ServiceInterface si : services) {
       if (si.isRuntime()) {
@@ -153,6 +156,19 @@ public class LangUtils {
       sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
       // do peers with comments
       // top level peers - others commented out
+    }
+    
+    Runtime runtime = Runtime.getInstance();
+    
+    sb.append("##############################################################\n");
+    sb.append(String.format("## creating client connections connections ####\n"));
+    Map<String, Connection> connections = runtime.getConnections();
+    for (Connection c : connections.values()) {
+      // we can only re-attach "clients" connections - not server/listening connections
+      String cType = (String)c.get("c-type");
+      if ("Runtime".equals(cType)) {
+        sb.append("runtime.connect(\'" +  (String)c.get("url") + "\') \n");
+      }
     }
 
     sb.append("\n");

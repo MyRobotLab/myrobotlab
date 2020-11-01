@@ -393,11 +393,11 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        in = new FileInputStream("target/classes/git.properties");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
       // log.debug("loading manifest {}", manifest);
-
       Properties p = new Properties();
       p.load(in);
 

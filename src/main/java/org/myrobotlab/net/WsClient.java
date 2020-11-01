@@ -35,6 +35,7 @@ public class WsClient implements Decoder<String, Reader> {
 
   protected String uuid = null;
   protected transient Socket socket = null;
+  protected transient AsyncHttpClient asc = null;
   protected transient Client client = null;
   protected transient Set<RemoteMessageHandler> handlers = new HashSet<>();
 
@@ -87,13 +88,15 @@ public class WsClient implements Decoder<String, Reader> {
           // System.out.println("encoding [{}]", s);
           return new StringReader(s);
         }
-      }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET) // Try
+      }).decoder(this).transport(Request.TRANSPORT.WEBSOCKET); // Try
                                                               // WebSocket
-          .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
+          // .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
                                                       // Long-Polling
 
       // client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
-      this.socket = client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
+      // this.socket = client.create(client.newOptionsBuilder().reconnect(false).runtime(getAsyncClient()).build());
+      asc = getAsyncClient();
+      this.socket = client.create(client.newOptionsBuilder().runtime(asc).build());
       socket.on(Event.CLOSE.name(), new Function<String>() {
         @Override
         public void on(String t) {
@@ -138,34 +141,27 @@ public class WsClient implements Decoder<String, Reader> {
       }).open(request.build());
 
       // put as many attribs as possible in
-      Connection attributes = new Connection();
-
-      // required data
-      // attributes.put("id", getId());
-      attributes.put("gateway", gatewayFullName);
-      attributes.put("uuid", uuid);
+      Connection connection = new Connection(uuid, srcId, gatewayFullName);
 
       // connection specific
-      attributes.put("c-type", "Runtime");
+      connection.put("c-type", "Runtime");
       // attributes.put("c-endpoint", endpoint);
-      attributes.put("c-client", this);
+      connection.put("c-client", this);
 
       // cli specific
-      attributes.put("cwd", "/");
-      attributes.put("url", url);
-      attributes.put("uri", url); // not really correct
-      attributes.put("user", "root");
-      attributes.put("host", "local");
+      connection.put("cwd", "/");
+      connection.put("url", url);
+      connection.put("uri", url); // not really correct
+      connection.put("user", "root");
+      connection.put("host", "local");
 
       // addendum
-      attributes.put("User-Agent", "runtime-client");
+      connection.put("User-Agent", "runtime-client");
 
-      Runtime.getInstance().addConnection(uuid.toString(), attributes);
-
-      // send authenticate
+      // send describe
       // clientRemote.send(uuid.toString(), CodecUtils.toJson(msg));
 
-      return attributes;
+      return connection;
 
     } catch (Exception e) {
       log.error("connect {} threw", url, e);
@@ -184,6 +180,10 @@ public class WsClient implements Decoder<String, Reader> {
       return null;
     }
     if ("OPEN".equals(data)) {
+      return null;
+    }
+
+    if ("CLOSED".equals(data)) {
       return null;
     }
 
@@ -212,6 +212,15 @@ public class WsClient implements Decoder<String, Reader> {
 
   public String getUuid() {
     return uuid;
+  }
+
+  public void close() {
+    if (socket != null) {
+      socket.close();
+    }
+    if(asc != null) {
+      asc.close();
+    }
   }
 
 }
