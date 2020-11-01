@@ -38,35 +38,18 @@ public class Launcher {
   public static File NULL_FILE = new File((System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null"));
   public static File STD_OUT = new File("std.out");
 
-  static public ProcessBuilder createBuilder(String cwd, String[] cmdLine) throws IOException {
-    return createBuilder(cwd, new ArrayList<String>(Arrays.asList(cmdLine)));
+  static public ProcessBuilder createBuilder(CmdOptions options) throws IOException {
+    return createBuilder(null, options);
   }
 
-  static public ProcessBuilder createBuilder(String cwd, List<String> cmdLine) throws IOException {
-    // FIXME - ability to merge lists
-
-    // Parse options to handle all flags relevant to the Launcher
-    CmdOptions options = new CmdOptions();
-    new CommandLine(options).parseArgs(toArray(cmdLine));
+  static public ProcessBuilder createBuilder(String cwd, CmdOptions options) throws IOException {
 
     Platform platform = Platform.getLocalInstance();
 
-    // default service if non specified
-    if (options.services.size() == 0) {
-      options.services.add("webgui");
-      options.services.add("WebGui");
-      options.services.add("intro");
-      options.services.add("Intro");
-      options.services.add("python");
-      options.services.add("Python");
-    }
+    // command line to be returned
+    List<String> cmd = new ArrayList<String>();
     
-    if (options.services.size() % 2 != 0) {
-      throw new IOException("invalid choice - services must be -s {name} {type} ...");
-    }
-    
-
-    // SETUP COMMAND !!!!!
+    // prepare exe
     String fs = File.separator;
     String ps = File.pathSeparator;
 
@@ -77,15 +60,14 @@ public class Launcher {
     if (platform.isWindows()) {
       jvmArgs = jvmArgs.replace("/", "\\");
     }
+    
+    cmd.add(javaExe);
 
     if (options.memory != null) {
       jvmArgs += String.format(" -Xms%s -Xmx%s ", options.memory, options.memory);
     }
-
-    // command line to be returned
-    List<String> cmd = new ArrayList<String>();
-
-    cmd.add(javaExe);
+    
+    cmd.add(jvmArgs);
 
     if (options.jvm != null) {
       String[] jvm = options.jvm.split(" ");
@@ -108,23 +90,12 @@ public class Launcher {
 
     // main class
     cmd.add("org.myrobotlab.service.Runtime");
-
-    // append/merge incoming arguments
-    cmd.addAll(cmdLine);
-
-    if (!contains(cmd, "--from-launcher")) {
-      cmd.add("--from-launcher");
-    }
     
-    if (options.services != null) {
-      cmd.add("-s");
-      for (String s : options.services) {
-        cmd.add(s);
-      }
-    }
+    options.fromLauncher = true;
+    
+    cmd.addAll(options.getOutputCmd());
 
     // FIXME - daemonize? does that mean handle stream differently?
-
     // FIXME - reporting from different levels .. one is stdout the other is the
     // os before this
     log.info("SPAWN {}", toString(cmd));
@@ -287,7 +258,7 @@ public class Launcher {
 
       if (!instanceAlreadyRunning || !options.connect.equals(options.DEFAULT_CONNECT)) {
         log.info("spawning new instance");
-        ProcessBuilder builder = createBuilder(args);
+        ProcessBuilder builder = createBuilder(options);
         process = builder.start();
         if (process.isAlive()) {
           log.info("process is alive");
@@ -307,13 +278,4 @@ public class Launcher {
       log.error("main threw", e);
     }
   }
-
-  public static ProcessBuilder createBuilder(String[] args) throws IOException {
-    return createBuilder(null, toList(args));
-  }
-
-  public static ProcessBuilder createBuilder(List<String> args) throws IOException {
-    return createBuilder(null, args);
-  }
-
 }

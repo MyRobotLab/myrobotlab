@@ -429,6 +429,7 @@ public class Python extends Service {
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
+      invoke("publishStdError", pe.toString());
     } catch (Exception e) {
       error(e);
     }
@@ -603,7 +604,7 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("here");
+    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
@@ -639,6 +640,10 @@ public class Python extends Service {
   }
 
   public String publishStdOut(String data) {
+    return data;
+  }
+
+  public String publishStdError(String data) {
     return data;
   }
 

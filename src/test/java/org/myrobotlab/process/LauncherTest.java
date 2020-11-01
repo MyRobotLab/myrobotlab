@@ -10,9 +10,12 @@ import java.text.ParseException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
+
+import picocli.CommandLine;
 
 public class LauncherTest extends AbstractTest {
 
@@ -43,8 +46,8 @@ public class LauncherTest extends AbstractTest {
   @Test
   public void test() throws IllegalArgumentException, IllegalAccessException, IOException, URISyntaxException, InterruptedException, ParseException {
 
-    Launcher.main(new String[] {"--from-launcherent", "-c", "-s", "runtime", "Runtime"});    
-    
+    Launcher.main(new String[] { "--from-launcher", "-c", "-s", "runtime", "Runtime" });
+
     String help = Launcher.mainHelp();
 
     assertTrue(help.contains("-s") && help.contains("--service") && help.contains("-i"));
@@ -56,22 +59,22 @@ public class LauncherTest extends AbstractTest {
 
     // default
     try {
-      pb = Launcher.createBuilder(null, new String[] {});
-    } catch(Exception e) {
+      pb = Launcher.createBuilder(new CmdOptions());
+    } catch (Exception e) {
       log.info("no valid myrobotlab.jar");
     }
-    
+
     assertNotNull(pb);
 
-    /*
     p = pb.start();
     assertTrue(p.isAlive());
     p.destroy();
-    */
-
+    
     // FIXME validate default
     try {
-      ProcessBuilder pbd = Launcher.createBuilder(new String[] { "-s x" });
+      CmdOptions options = new CmdOptions();
+      new CommandLine(options).parseArgs(new String[] { "-s x" });
+      Launcher.createBuilder(options);
     } catch (Exception e) {
       invalidArgs = true;
     }

@@ -84,12 +84,6 @@ public class Message implements Serializable {
    */
   protected HashMap<String, Object> properties;
 
-  /**
-   * status is currently used for BLOCKING message calls the current valid state
-   * it can be in is null | BLOCKING | RETURN FIXME - this should be msgType not
-   * status
-   */
-
   public String status;
 
   public String dataEncoding; // null == none |json|cli|xml|stream ...
