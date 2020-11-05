@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 
 public class LocalizeTest extends AbstractTest {
 
-  public final static Logger log = LoggerFactory.getLogger(TaskTest.class);
+  public final static Logger log = LoggerFactory.getLogger(LocalizeTest.class);
   
   static Runtime runtime = null;
   static InMoov2 i01 = null;

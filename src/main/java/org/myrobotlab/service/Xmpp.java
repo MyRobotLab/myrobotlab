@@ -525,8 +525,8 @@ public class Xmpp extends Service implements Gateway, ChatManagerListener, ChatM
   }
 
   @Override
-  public org.myrobotlab.framework.Message getDefaultMsg(String connId) {
-    return Runtime.getInstance().getDefaultMsg(connId);
+  public org.myrobotlab.framework.Message getDescribeMsg(String connId) {
+    return Runtime.getInstance().getDescribeMsg(connId);
   }
 
 }

@@ -534,15 +534,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public void connect(String uri) throws Exception {
-    // easy single client support
-    Connection attributes = new Connection();
-    attributes.put("gateway", getName());
-    attributes.put("c-type", getSimpleName());
-    attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
+    
     String uuid = java.util.UUID.randomUUID().toString();
-    attributes.put("uuid", uuid);
-    Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.getInstance().updateRoute(guiId, uuid);
+    String id = getName() + "-" + Runtime.getInstance().getId() + "-jme";
+    Connection attributes = new Connection(uuid, id, getName());
+
+    attributes.put("c-type", getSimpleName());
+    Runtime.getInstance().addConnection(uuid, id, attributes);
+    // Runtime.getInstance().updateRoute(guiId, uuid);
   }
 
   public Geometry createBoundingBox(Spatial spatial, String color) {
@@ -875,7 +874,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public Message getDefaultMsg(String connId) {
+  public Message getDescribeMsg(String connId) {
     // TODO Auto-generated method stub
     return null;
   }

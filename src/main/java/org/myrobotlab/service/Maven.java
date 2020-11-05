@@ -184,7 +184,7 @@ public class Maven extends Service {
   public static void main(String[] args) {
     try {
 
-      Maven builder = (Maven) Runtime.start("builder", "Builder");
+      Maven builder = (Maven) Runtime.start("builder", "Maven");
       builder.mvn("agent-removal", "compile");
       // builder.mvn("agent-removal", "package");
 

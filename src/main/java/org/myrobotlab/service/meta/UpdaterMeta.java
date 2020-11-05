@@ -22,7 +22,7 @@ public class UpdaterMeta extends MetaData {
     addCategory("system");
 
     addPeer("git", "Git", "git source control");
-    addPeer("builder", "Builder", "mvn build");
+    addPeer("builder", "Maven", "mvn build");
   }
 
 }

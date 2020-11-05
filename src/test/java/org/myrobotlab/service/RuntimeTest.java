@@ -39,7 +39,7 @@ public class RuntimeTest extends AbstractTest {
 
   @Test
   public void testGetLocalAddresses() {
-    List<String> addresses = Runtime.getLocalAddresses();
+    List<String> addresses = Runtime.getIpAddresses();
     Assert.assertNotNull(addresses);
   }
 
