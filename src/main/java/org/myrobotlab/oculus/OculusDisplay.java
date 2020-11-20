@@ -653,8 +653,9 @@ public class OculusDisplay implements Runnable {
     OculusDisplay display = new OculusDisplay();
     display.start();
     RiftFrame frame = new RiftFrame();
-    BufferedImage lbi = ImageIO.read(new File("mrl_logo.jpg"));
-    BufferedImage rbi = ImageIO.read(new File("mrl_logo.jpg"));
+    File imageFile = new File("src/main/resources/resource/mrl_logo.jpg");
+    BufferedImage lbi = ImageIO.read(imageFile);
+    BufferedImage rbi = ImageIO.read(imageFile);
     SerializableImage lsi = new SerializableImage(lbi,"left");
     SerializableImage rsi = new SerializableImage(rbi, "right");
     frame.left = lsi;
