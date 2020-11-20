@@ -32,11 +32,14 @@ public class OculusRiftMeta extends MetaData {
     addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
     // compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
 
-    addDependency("slick-util", "slick-util", "1.0.0");
     addDependency("org.saintandreas", "jovr", "1.8.0.0");
-    addDependency("org.saintandreas", "glamour-lwjgl", "1.0.8");
-    addDependency("org.saintandreas", "math", "1.0.4");
+    addDependency("slick-util", "slick-util", "1.0.0");
+    addDependency("org.jscience", "jscience", "4.3.1");
+    addDependency("org.saintandreas", "xres", "1.0.3");
     addDependency("org.saintandreas", "oria-resources", "1.0.4");
+    
+    // need to explicitly include lwjgl3 here.. but the dependency list is huge!
+    
     exclude("org.slf4j", "slf4j-api");
     exclude("org.lwjgl.lwjgl", "lwjgl");
     exclude("com.google.guava", "guava");
