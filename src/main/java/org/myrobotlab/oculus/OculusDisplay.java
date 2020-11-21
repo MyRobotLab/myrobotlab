@@ -29,24 +29,11 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
-//import org.lwjgl.LWJGLException;
-//import org.lwjgl.input.Keyboard;
-//import org.lwjgl.input.Mouse;
-//import org.lwjgl.opengl.ContextAttribs;
-//import org.lwjgl.opengl.Display;
-//import org.lwjgl.opengl.DisplayMode;
-//import org.lwjgl.opengl.GLContext;
-//import org.lwjgl.opengl.PixelFormat;
-import org.lwjgl.BufferUtils;
 import static org.lwjgl.glfw.GLFW.*;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -55,15 +42,10 @@ import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.myrobotlab.service.data.Orientation;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-
 import org.saintandreas.gl.FrameBuffer;
 import org.saintandreas.gl.IndexedGeometry;
 import org.saintandreas.gl.MatrixStack;
@@ -82,7 +64,7 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
-//import org.slf4j.Logger;
+import org.slf4j.Logger;
 
 import com.oculusvr.capi.EyeRenderDesc;
 import com.oculusvr.capi.FovPort;
@@ -114,6 +96,7 @@ import com.oculusvr.capi.ViewScaleDesc;
  */
 public class OculusDisplay implements Runnable {
 
+  public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
   // handle to the glfw window
   private long window = 0;  
   // lwjgl3 callback
@@ -210,37 +193,31 @@ public class OculusDisplay implements Runnable {
     height = hmdDesc.Resolution.h / 4;
     int left = 100;
     int right = 100;
-    // TODO: which one??
-    long monitor = 0;
     //    try {
     //      Display.setDisplayMode(new DisplayMode(width, height));
     //    } catch (LWJGLException e) {
     //      throw new RuntimeException(e);
     //    }
     //    Display.setTitle("MRL Oculus Rift Viewer");
+    // TODO: which one??
+    long monitor = 0;
     long window = glfwCreateWindow(width, height, "MRL Oculus Rift Viewer", monitor, 0);       
     if(window == 0) {
       throw new RuntimeException("Failed to create window");
     }
-    
     //Make this window's context the current on this thread.
     glfwMakeContextCurrent(window);
     //Let LWJGL know to use this current context.
     GL.createCapabilities();
-    
-    
     // TODO: LWJGL3 : this is where pong example was loading the textures, verticies, etc..
     // compile the shaders
     // initGL();
-    
     //Setup the framebuffer resize callback.
     glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
-
         @Override
         public void invoke(long window, int width, int height) {
             onResize(width, height);
         }
-        
     }));
     
     // TODO: set location and vsync?!
@@ -248,7 +225,7 @@ public class OculusDisplay implements Runnable {
     // TODO: vsync enabled?
     // Display.setVSyncEnabled(true);
     onResize(width, height);
-    System.out.println("Setup Oculus Diplsay with resolution " + width + "x" + height);
+    log.info("Setup Oculus Diplsay with resolution " + width + "x" + height);
     return window;
   }
 
@@ -608,9 +585,9 @@ public class OculusDisplay implements Runnable {
   }
 
   public void start() {
-    System.out.println("starting oculus display thread");
+    log.info("Starting oculus display thread.");
     if (displayThread != null) {
-      System.out.println("Oculus Display thread already started.");
+      log.info("Oculus Display thread already started.");
       return;
     }
     // create a thread to run the main render loop

@@ -25,7 +25,7 @@ public class JMonkeyEngineMeta extends MetaData {
     addDependency("org.jmonkeyengine", "jme3-desktop", jmeVersion);
     // addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
     // nev version of lwjgl3 which works with java 11
-    addDependency("org.jmonkeyengine", "jme3-lwjgl", jmeVersion);
+    addDependency("org.jmonkeyengine", "jme3-lwjgl3", jmeVersion);
     addDependency("org.jmonkeyengine", "jme3-jogg", jmeVersion);
     
     
