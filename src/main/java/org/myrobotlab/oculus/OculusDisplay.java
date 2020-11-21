@@ -191,27 +191,25 @@ public class OculusDisplay implements Runnable {
     // our size. / resolution? is this configurable? maybe not?
     width = hmdDesc.Resolution.w / 4;
     height = hmdDesc.Resolution.h / 4;
-    int left = 100;
-    int right = 100;
-    //    try {
-    //      Display.setDisplayMode(new DisplayMode(width, height));
-    //    } catch (LWJGLException e) {
-    //      throw new RuntimeException(e);
-    //    }
-    //    Display.setTitle("MRL Oculus Rift Viewer");
-    // TODO: which one??
+    // TODO: these were to specify where the glfw window would be placed on the monitor.. 
+    // int left = 100;
+    // int right = 100;
+    // try {
+    //   Display.setDisplayMode(new DisplayMode(width, height));
+    // } catch (LWJGLException e) {
+    //   throw new RuntimeException(e);
+    // }
+    // Display.setTitle("MRL Oculus Rift Viewer");
+    // TODO: which one?? 
     long monitor = 0;
     long window = glfwCreateWindow(width, height, "MRL Oculus Rift Viewer", monitor, 0);       
     if(window == 0) {
       throw new RuntimeException("Failed to create window");
     }
-    //Make this window's context the current on this thread.
+    // Make this window's context the current on this thread.
     glfwMakeContextCurrent(window);
-    //Let LWJGL know to use this current context.
+    // Let LWJGL know to use this current context.
     GL.createCapabilities();
-    // TODO: LWJGL3 : this is where pong example was loading the textures, verticies, etc..
-    // compile the shaders
-    // initGL();
     //Setup the framebuffer resize callback.
     glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
         @Override
@@ -219,8 +217,7 @@ public class OculusDisplay implements Runnable {
             onResize(width, height);
         }
     }));
-    
-    // TODO: set location and vsync?!
+    // TODO: set location and vsync?!  Do we need to update these for lwjgl3?
     // Display.setLocation(left, right);
     // TODO: vsync enabled?
     // Display.setVSyncEnabled(true);
@@ -237,7 +234,6 @@ public class OculusDisplay implements Runnable {
 
   // initialize the oculus hmd
   private void internalInit() {
-    // constructor
     // start up hmd libs
     initHmd();
     // initialize the opengl rendering context
@@ -274,8 +270,7 @@ public class OculusDisplay implements Runnable {
     }
     // TODO: maybe ipd and eyeHeight go away?
     ipd = hmd.getFloat(OvrLibrary.OVR_KEY_IPD, OVR_DEFAULT_IPD);
-    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT,
-    // OVR_DEFAULT_EYE_HEIGHT);
+    // eyeHeight = hmd.getFloat(OvrLibrary.OVR_KEY_EYE_HEIGHT, OVR_DEFAULT_EYE_HEIGHT);
     eyeHeight = 0;
   }
 
@@ -284,11 +279,11 @@ public class OculusDisplay implements Runnable {
     internalInit();
     // Load the screen in the scene i guess first.
     while (!glfwWindowShouldClose(window)) {
-    //while (!Display.isCloseRequested()) {
+      //while (!Display.isCloseRequested()) {
       // TODO: resize testing.. make sure it's handle via the other callback? or something
-//      if (Display.wasResized()) {
-//        onResize(Display.getWidth(), Display.getHeight());
-//      }
+      // if (Display.wasResized()) {
+      //   onResize(Display.getWidth(), Display.getHeight());
+      // }
       update();
       drawFrame();
       finishFrame();
@@ -340,26 +335,22 @@ public class OculusDisplay implements Runnable {
         renderScreen(leftTexture, orientationInfo);
       } else if (eye == 1 && currentFrame.right != null) {
         renderScreen(rightTexture, orientationInfo);
-      }
-      if (trackHead)
+      } 
+      if (trackHead) {
         mv.pop();
+      }
     }
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     frameBuffer.deactivate();
-
     swapChain.commit();
     hmd.submitFrame(frameCount, layer);
-
     // FIXME Copy the layer to the main window using a mirror texture
     glScissor(0, 0, width, height);
     glViewport(0, 0, width, height);
     glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // SceneHelpers.renderTexturedQuad(mirrorTexture.getTextureId());
-
-    // I think this renders the mirror window
+    // render the quad with our images/textures on it, one for the left eye, one for the right eye.
     renderTexturedQuad(mirrorTexture.getTextureId());
-
   }
 
   private void loadRiftFrameTextures() {
@@ -385,12 +376,13 @@ public class OculusDisplay implements Runnable {
     rightTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     glGenerateMipmap(GL_TEXTURE_2D);
     rightTexture.unbind();
+
   }
 
   protected void finishFrame() {
-    // // Display update combines both input processing and
-    // // buffer swapping. We want only the input processing
-    // // so we have to call processMessages.
+    // Display update combines both input processing and
+    // buffer swapping. We want only the input processing
+    // so we have to call processMessages.
     // Display.processMessages();
     // Display.update();
     glfwPollEvents();
@@ -398,11 +390,9 @@ public class OculusDisplay implements Runnable {
   }
 
   protected void initGl() {
-    
     // Upgrade via the documentation here:
     // https://github.com/LWJGL/lwjgl3-wiki/wiki/2.6.6-LWJGL3-migration
 
-    
     // ContextAttribs contextAttributes;
     // PixelFormat pixelFormat = new PixelFormat();
     // GLContext glContext = new GLContext();
@@ -483,11 +473,11 @@ public class OculusDisplay implements Runnable {
   protected void update() {
     // TODO: some sort of update logic for the game?
     // while (Keyboard.next()) {
-    // onKeyboardEvent();
+    //   onKeyboardEvent();
     // }
     //
     // while (Mouse.next()) {
-    // onMouseEvent();
+    //   onMouseEvent();
     // }
     // TODO : nothing?
     // Here we could update our projection matrix based on HMD info
@@ -625,7 +615,6 @@ public class OculusDisplay implements Runnable {
   // End methods from saintandreas
 
   public static void main(String[] args) throws IOException {
-
     System.out.println("Hello world.");
     OculusDisplay display = new OculusDisplay();
     display.start();
@@ -638,8 +627,7 @@ public class OculusDisplay implements Runnable {
     frame.left = lsi;
     frame.right = rsi;
     display.start();
-    display.setCurrentFrame(frame);
-    
+    display.setCurrentFrame(frame);    
   }
   
 }
