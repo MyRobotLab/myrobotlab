@@ -457,7 +457,7 @@
   </dependency>
   <dependency>
     <groupId>org.jmonkeyengine</groupId>
-    <artifactId>jme3-lwjgl</artifactId>
+    <artifactId>jme3-lwjgl3</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
   </dependency>
@@ -466,19 +466,6 @@
     <artifactId>jme3-jogg</artifactId>
     <version>3.3.2-stable</version>
     <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl</artifactId>
-    <version>2.9.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.lwjgl.lwjgl</groupId>
-    <artifactId>lwjgl-platform</artifactId>
-    <version>2.9.3</version>
-    <scope>provided</scope>
-    <type>pom</type>
   </dependency>
   <dependency>
     <groupId>com.simsilica</groupId>
@@ -943,27 +930,27 @@
 
 <!-- OculusRift begin -->
   <dependency>
-    <groupId>slick-util</groupId>
-    <artifactId>slick-util</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>org.saintandreas</groupId>
     <artifactId>jovr</artifactId>
     <version>1.8.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.saintandreas</groupId>
-    <artifactId>glamour-lwjgl</artifactId>
-    <version>1.0.8</version>
+    <groupId>slick-util</groupId>
+    <artifactId>slick-util</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jscience</groupId>
+    <artifactId>jscience</artifactId>
+    <version>4.3.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.saintandreas</groupId>
-    <artifactId>math</artifactId>
-    <version>1.0.4</version>
+    <artifactId>xres</artifactId>
+    <version>1.0.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
