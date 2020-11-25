@@ -37,7 +37,7 @@ import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.openni.OpenNiData;
 import org.myrobotlab.service.OpenNi;
 import org.myrobotlab.service.SwingGui;
-
+import java.awt.image.BufferedImage;
 public class OpenNiGui extends ServiceGui implements ActionListener {
 
   static final long serialVersionUID = 1L;
@@ -53,7 +53,7 @@ public class OpenNiGui extends ServiceGui implements ActionListener {
 
   JPanel eastPanel = new JPanel();
 
-  SerializableImage source = new SerializableImage(null, "kinect");
+  SerializableImage source = new SerializableImage((BufferedImage)null, "kinect");
 
   String displayType = "display"; // display (composite of skeleton or
   // anything OpenNI has written to "frame") |

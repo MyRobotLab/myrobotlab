@@ -156,7 +156,7 @@ public class OpenCV extends AbstractComputerVision {
 
         lengthInFrames = grabber.getLengthInFrames();
         lengthInTime = grabber.getLengthInTime();
-        log.info("grabber {} started - length time {} length frames {}", grabberType, lengthInTime, lengthInFrames);
+        log.info("starting capture: grabber {} source started - length time {} length frames {}", grabberType, inputSource, lengthInTime, lengthInFrames);
 
         // Wait for the Kinect to heat up.
         int loops = 0;
@@ -182,6 +182,9 @@ public class OpenCV extends AbstractComputerVision {
             error("could not get valid frame");
             stopCapture();
           }
+          
+          // TODO - should publish new dimension if changed ... 
+          // log.info("width {} height {}", newFrame.imageWidth, newFrame.imageHeight);
 
           frameStartTs = System.currentTimeMillis();
           ++frameIndex;
@@ -394,84 +397,7 @@ public class OpenCV extends AbstractComputerVision {
     return POSSIBLE_FILTERS;
   }
 
-  public static void main(String[] args) throws Exception {
-
-    // TODO - Avoidance / Navigation Service
-    // ground plane
-    // http://stackoverflow.com/questions/6641055/obstacle-avoidance-with-stereo-vision
-    // radio lab - map cells location cells yatta yatta
-    // lkoptical disparity motion Time To Contact
-    // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
-    //
-    LoggingFactory.init("info");
-
-    // Runtime.start("python", "Python");
-    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
-    // cv.addFilter(td);
-
-    // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
-    // cv.addFilter(md);
-
-    cv.capture();
-
-    // Runtime.start("gui", "SwingGui");
-
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-
-    // FFmpegFrameRecorder test = new
-
-    // FFmpegFrameRecorder recorder = new
-    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
-    // recorder.setFormat("webm");
-    // recorder.start();
-
-    /**
-     * <pre>
-     * 
-     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
-     *
-     * private void initLiveStream() throws FrameRecorder.Exception {
-     * 
-     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
-     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
-     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-     * frameRecorder.setAudioCodec(0);
-     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
-     * frameRecorder.setFrameRate(frameRate);
-     * frameRecorder.setVideoBitrate(5000);
-     * frameRecorder.setOption("content_type","video/webm");
-     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
-     *
-     *
-     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
-     * grabber.getImageWidth(), grabber.getImageHeight());
-     * recorder.setFormat(grabber.getFormat());
-     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
-     * recorder.setFrameRate(grabber.getFrameRate());
-     * recorder.setVideoBitrate(grabber.getVideoBitrate());
-     * recorder.setVideoCodec(grabber.getVideoCodec());
-     * recorder.setVideoOption("preset", "ultrafast");
-     * recorder.setVideoCodecName("libx264");
-     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
-     * 
-     */
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
-    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
-    cv.addFilter(depth);
-    cv.capture();
-    cv.addFilter("Yolo");
-
-  }
-
+  
   public void stopStreamer() {
     try {
       if (ffmpegStreamer == null) {
@@ -963,6 +889,9 @@ public class OpenCV extends AbstractComputerVision {
         error(e);
       }
     } else if (inputFile != null && (inputFile.startsWith("http"))) {
+      // FIXME do a HTTP HEAD on the static image or stream ...  HEAD does not work :(
+      // if mimetype multi-part its a stream - if mime-type an image type, its not a stream
+      // if a stream Mjpeg or IPcamera else static file
       // get and cache image file
       // FIXME - perhaps "test" stream to try to determine what "type" it is -
       // mjpeg/jpg/gif/ octet-stream :( ???
@@ -1329,7 +1258,10 @@ public class OpenCV extends AbstractComputerVision {
          */
         BufferedImage b = data.getDisplay();
         SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
-        invoke("publishDisplay", si);
+        
+        // TODO ? - configurable thread mode ? invoke buffers broadcast does not
+        // invoke("publishDisplay", si);
+        broadcast("publishDisplay", si);
 
         if (webViewer) {
           // broadcast(???)
@@ -1625,6 +1557,7 @@ public class OpenCV extends AbstractComputerVision {
 
   transient FFmpegFrameRecorder ffmpegStreamer = null;
 
+  // FIXME - change on attach type of webgui
   protected boolean webViewer = true;
 
   public void startStreamer() {
@@ -2111,6 +2044,91 @@ public class OpenCV extends AbstractComputerVision {
     } catch (Exception e) {
       error(e.getMessage());
     }
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    // TODO - Avoidance / Navigation Service
+    // ground plane
+    // http://stackoverflow.com/questions/6641055/obstacle-avoidance-with-stereo-vision
+    // radio lab - map cells location cells yatta yatta
+    // lkoptical disparity motion Time To Contact
+    // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
+    //
+    LoggingFactory.init("info");
+
+    // Runtime.start("python", "Python");
+    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    cv.setGrabberType("MJpeg");
+    // cv.setGrabberType("IPCamera");
+    cv.capture("http://192.168.0.37/videostream.cgi?user=admin&pwd=admin");
+    
+    
+    // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
+    // cv.addFilter(td);
+
+    // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
+    // cv.addFilter(md);
+
+    // cv.capture();
+
+    Runtime.start("gui", "SwingGui");
+
+    /*
+    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
+    */
+
+    // FFmpegFrameRecorder test = new
+
+    // FFmpegFrameRecorder recorder = new
+    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
+    // recorder.setFormat("webm");
+    // recorder.start();
+
+    /**
+     * <pre>
+     * 
+     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
+     *
+     * private void initLiveStream() throws FrameRecorder.Exception {
+     * 
+     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
+     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
+     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+     * frameRecorder.setAudioCodec(0);
+     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
+     * frameRecorder.setFrameRate(frameRate);
+     * frameRecorder.setVideoBitrate(5000);
+     * frameRecorder.setOption("content_type","video/webm");
+     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
+     *
+     *
+     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
+     * grabber.getImageWidth(), grabber.getImageHeight());
+     * recorder.setFormat(grabber.getFormat());
+     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
+     * recorder.setFrameRate(grabber.getFrameRate());
+     * recorder.setVideoBitrate(grabber.getVideoBitrate());
+     * recorder.setVideoCodec(grabber.getVideoCodec());
+     * recorder.setVideoOption("preset", "ultrafast");
+     * recorder.setVideoCodecName("libx264");
+     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
+     * 
+     */
+
+    boolean done = true;
+    if (done) {
+      return;
+    }
+
+    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
+    cv.addFilter(depth);
+    cv.capture();
+    cv.addFilter("Yolo");
+
   }
 
 }

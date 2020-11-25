@@ -2,6 +2,20 @@ package org.myrobotlab.oculus;
 
 import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
+import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
@@ -29,16 +43,22 @@ import static org.lwjgl.opengl.GL30.GL_COLOR_ATTACHMENT0;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glFramebufferTexture2D;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
+import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import javax.imageio.ImageIO;
-import static org.lwjgl.glfw.GLFW.*;
+
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.io.FileIO;
@@ -46,6 +66,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.OculusRift;
 import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.myrobotlab.service.data.Orientation;
+import org.python.antlr.ast.Slice.exposed___new__;
 import org.saintandreas.gl.FrameBuffer;
 import org.saintandreas.gl.IndexedGeometry;
 import org.saintandreas.gl.MatrixStack;
@@ -58,12 +79,6 @@ import org.saintandreas.math.Quaternion;
 import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
 import org.saintandreas.resources.Resource;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_XPOS_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_YPOS_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
-import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
 import org.slf4j.Logger;
 
 import com.oculusvr.capi.EyeRenderDesc;
@@ -94,7 +109,7 @@ import com.oculusvr.capi.ViewScaleDesc;
  * 
  * @author kwatters
  */
-public class OculusDisplay implements Runnable {
+public class OculusDisplay {
 
   public final static Logger log = LoggerFactory.getLogger(OculusDisplay.class);
   // handle to the glfw window
@@ -103,8 +118,7 @@ public class OculusDisplay implements Runnable {
   private GLFWErrorCallback errorCallback;
   // A reference to the framebuffer size callback.
   private GLFWFramebufferSizeCallback framebufferSizeCallback;
-  // operate the display on a thread so we don't block
-  transient Thread displayThread = null;
+
   // the oculus service
   transient public OculusRift oculus;
   private int width;
@@ -150,7 +164,7 @@ public class OculusDisplay implements Runnable {
   private volatile boolean newFrame = true;
   private float screenSize = 1.0f;
 
-  public volatile boolean trackHead = true;
+  public volatile boolean trackHead = false;
 
   static {
     UNIT_QUAD_VS = FileIO.resourceToString("OculusRift" + File.separator + "unitQuad.vs");
@@ -169,6 +183,8 @@ public class OculusDisplay implements Runnable {
   // textures for the screen one for the left eye, one for the right eye.
   private Texture leftTexture;
   private Texture rightTexture;
+  
+  Long currentThreadId = null;
 
   public OculusDisplay() {
   }
@@ -222,7 +238,7 @@ public class OculusDisplay implements Runnable {
     // TODO: vsync enabled?
     // Display.setVSyncEnabled(true);
     onResize(width, height);
-    log.info("Setup Oculus Diplsay with resolution " + width + "x" + height);
+    log.info("Setup Oculus Display with resolution " + width + "x" + height);
     return window;
   }
 
@@ -274,23 +290,107 @@ public class OculusDisplay implements Runnable {
     eyeHeight = 0;
   }
 
-  // Main rendering loop for running the oculus display.
-  public void run() {
-    internalInit();
-    // Load the screen in the scene i guess first.
-    while (!glfwWindowShouldClose(window)) {
-      //while (!Display.isCloseRequested()) {
-      // TODO: resize testing.. make sure it's handle via the other callback? or something
-      // if (Display.wasResized()) {
-      //   onResize(Display.getWidth(), Display.getHeight());
-      // }
-      update();
-      drawFrame();
-      finishFrame();
+   
+  // must be synchronized - only a single thread can have GL context at one time
+  // and provide an update
+  public synchronized void drawImage(SerializableImage si) {
+    
+    if (si == null) {
+      log.error("image null");
+      return;
     }
-    onDestroy();
-    // Display.destroy();
-    glfwDestroyWindow(window);
+        
+    // FIXME - only some things need to be initialized "once"
+    // the GL context needs to be initialized whenever a different thread is updating
+    // if thread not last thread - init context for that thread ...
+    
+     if (currentThreadId == null || currentThreadId != Thread.currentThread().getId()) {    
+      // FIXME something need to be initalized once per thread access
+      // others like GL context need to be called each time a thread switches
+       
+      //  ONLY  glfwMakeContextCurrent(window); NEEDED ?
+       
+      internalInit();
+      currentThreadId = Thread.currentThread().getId();
+    }
+     
+     // check if there was a window command to shutdown
+     /*
+     if (!glfwWindowShouldClose(window)) {
+       onDestroy();
+       glfwDestroyWindow(window);
+       return;
+     }
+     */
+
+    // FIXME - remove right !!
+    // remove the dualism - just write an image to a location .. begin    
+    // if the left & right texture are already loaded, let's delete them
+
+    if (rightTexture != null)
+      glDeleteTextures(rightTexture.id);
+
+    // here we can just update the textures that we're using
+    rightTexture = Texture.loadImage(si.getImage());
+
+
+    rightTexture.bind();
+    rightTexture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    rightTexture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    rightTexture.unbind();
+    
+    //remove the dualism - end
+
+    width = hmdDesc.Resolution.w / 4;
+    height = hmdDesc.Resolution.h / 4;
+
+    ++frameCount;
+    Posef eyePoses[] = hmd.getEyePoses(frameCount, eyeOffsets);
+    frameBuffer.activate();
+
+    MatrixStack pr = MatrixStack.PROJECTION;
+    MatrixStack mv = MatrixStack.MODELVIEW;
+    int textureId = swapChain.getTextureId(swapChain.getCurrentIndex());
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+    for (int eye = 0; eye < 2; ++eye) {
+      OvrRecti vp = layer.Viewport[eye];
+      glScissor(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
+      glViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
+      pr.set(projections[eye]);
+      Posef pose = eyePoses[eye];
+      // This doesn't work as it breaks the contiguous nature of the array
+      // FIXME there has to be a better way to do this
+      poses[eye].Orientation = pose.Orientation;
+      poses[eye].Position = pose.Position;
+      if (trackHead)
+        mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
+      // TODO: is there a way to render both of these are the same time?     
+      renderScreen(rightTexture, orientationInfo);
+      
+      if (trackHead) {
+        mv.pop();
+      }
+    }
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+    frameBuffer.deactivate();
+    swapChain.commit();
+    hmd.submitFrame(frameCount, layer);
+    // FIXME Copy the layer to the main window using a mirror texture
+    glScissor(0, 0, width, height);
+    glViewport(0, 0, width, height);
+    glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // render the quad with our images/textures on it, one for the left eye, one for the right eye.
+    renderTexturedQuad(mirrorTexture.getTextureId());
+    
+    // Display update combines both input processing and
+    // buffer swapping. We want only the input processing
+    // so we have to call processMessages.
+    // Display.processMessages();
+    // Display.update();
+    glfwPollEvents();
+    glfwSwapBuffers(window);
   }
 
   public final void drawFrame() {
@@ -470,29 +570,18 @@ public class OculusDisplay implements Runnable {
     Hmd.shutdown();
   }
 
-  protected void update() {
-    // TODO: some sort of update logic for the game?
-    // while (Keyboard.next()) {
-    //   onKeyboardEvent();
-    // }
-    //
-    // while (Mouse.next()) {
-    //   onMouseEvent();
-    // }
-    // TODO : nothing?
-    // Here we could update our projection matrix based on HMD info
-  }
 
   // TODO: synchronize access to the current frame?
   public synchronized RiftFrame getCurrentFrame() {
     return currentFrame;
   }
 
-  // TODO: do i need to synchronize this?
+  // TODO: do i need to synchronize this? (NO)
   public synchronized void setCurrentFrame(RiftFrame currentFrame) {
     this.currentFrame = currentFrame;
     newFrame = true;
   }
+  
 
   public static void renderTexturedQuad(int texture) {
     if (null == unitQuadProgram) {
@@ -574,17 +663,6 @@ public class OculusDisplay implements Runnable {
     return height;
   }
 
-  public void start() {
-    log.info("Starting oculus display thread.");
-    if (displayThread != null) {
-      log.info("Oculus Display thread already started.");
-      return;
-    }
-    // create a thread to run the main render loop
-    displayThread = new Thread(this, String.format("%s_oculusDisplayThread", "oculus"));
-    displayThread.start();
-  }
-
   public Hmd getHmd() {
     return hmd;
   }
@@ -613,21 +691,50 @@ public class OculusDisplay implements Runnable {
     return new Matrix4f(m.M).transpose();
   }
   // End methods from saintandreas
+  
+  static class ImageUpdater extends Thread{
+    
+    public SerializableImage si = null;
+    public boolean isRunning = false;
+    OculusDisplay display = null;
+    
+    public ImageUpdater(OculusDisplay display, String imageFile, String name) throws FileNotFoundException, IOException {
+      si = new SerializableImage(imageFile, name);
+      this.display = display;
+    }
+    
+    @Override
+    public void run() {
+      isRunning = true;
+      while(isRunning) {
+        
+        try {
+          display.drawImage(si);
+          Thread.sleep(20);
+        } catch (InterruptedException e) {
+          isRunning = false;
+        }
+      }
+    }
+  }
 
   public static void main(String[] args) throws IOException {
+    try {
     System.out.println("Hello world.");
     OculusDisplay display = new OculusDisplay();
-    display.start();
+    
+    ImageUpdater update = new ImageUpdater(display, "src/main/resources/resource/OpenCV/multipleFaces.jpg", "right");
+    update.start();
+    
     RiftFrame frame = new RiftFrame();
-    File imageFile = new File("src/main/resources/resource/mrl_logo.jpg");
-    BufferedImage lbi = ImageIO.read(imageFile);
-    BufferedImage rbi = ImageIO.read(imageFile);
-    SerializableImage lsi = new SerializableImage(lbi,"left");
-    SerializableImage rsi = new SerializableImage(rbi, "right");
-    frame.left = lsi;
-    frame.right = rsi;
-    display.start();
+    frame.left = new SerializableImage("src/main/resources/resource/mrl_logo.jpg","left");
+    frame.right = new SerializableImage("src/main/resources/resource/OpenCV/multipleFaces.jpg", "right");
+    
+    display.drawImage(frame.left);
     display.setCurrentFrame(frame);    
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
   }
   
 }

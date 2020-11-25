@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -27,6 +29,7 @@ public class Http {
 
   public final static Logger log = LoggerFactory.getLogger(Http.class);
 
+  // FIXME !!! ALLOW THROW !!
   public static byte[] get(String theUrl) {
     log.info("get {}", theUrl);
     ByteArrayOutputStream out = null;
@@ -134,6 +137,23 @@ public class Http {
       outFile = url.substring(url.lastIndexOf("/") + 1);
     }
     get(url, outFile);
+  }
+
+  /**
+   * Method that quickly gets the mime type of a feed.  Useful to determine if url
+   * is a videostream or a static image file
+   * @param urlstr
+   * @return
+   * @throws IOException
+   */
+  public static String getMimeType(String urlstr) throws IOException {
+    URL url = new URL(urlstr);
+    HttpURLConnection connection = (HttpURLConnection)  url.openConnection();
+    connection.setRequestMethod("HEAD");
+    connection.connect();
+    String type = connection.getContentType();
+    connection.disconnect();
+    return type;
   }
 
 }

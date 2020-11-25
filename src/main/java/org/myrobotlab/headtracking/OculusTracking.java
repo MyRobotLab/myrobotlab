@@ -22,7 +22,7 @@ import com.oculusvr.capi.TrackingState;
 public class OculusTracking implements Runnable, Serializable {
 
   public final static Logger log = LoggerFactory.getLogger(OculusTracking.class);
-  private static final long serialVersionUID = -4067064437788846187L;
+  private static final long serialVersionUID = 1L;
   transient protected final Hmd hmd;
   transient protected final HmdDesc hmdDesc;
   boolean running = false;
@@ -108,7 +108,7 @@ public class OculusTracking implements Runnable, Serializable {
           oculus.invoke("publishRightHandPosition", rightHandPoint);
         }
       }
-
+      
       try {
         // There need to be polling interval here.
         Thread.sleep(pollIntervalMS);

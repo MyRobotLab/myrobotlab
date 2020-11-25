@@ -33,7 +33,6 @@ public class TimeEncoder implements Runnable, EncoderControl {
 
   public final static Logger log = LoggerFactory.getLogger(TimeEncoder.class);
 
-  // FIXME - remove type specific references
   EncoderListener servo = null;
 
   boolean isRunning = false;

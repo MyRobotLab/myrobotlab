@@ -449,8 +449,8 @@ public class Lloyd extends Service {
 
   public void startOculus() {
     oculusRift = (OculusRift) Runtime.start("oculusRift", "OculusRift");
-    oculusRift.setLeftEyeURL(leftEyeURL);
-    oculusRift.setRightEyeURL(rightEyeURL);
+    // oculusRift.setLeftEyeURL(leftEyeURL);
+    // oculusRift.setRightEyeURL(rightEyeURL);
     oculusRift.leftCameraAngle = 0;
     oculusRift.leftCameraDy = -25;
     oculusRift.rightCameraAngle = 180;

@@ -29,6 +29,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +85,7 @@ public class SerializableImage implements Serializable {
 
       ImageIO.write(null, "png", new MemoryCacheImageOutputStream(out));
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("writing image to memory failed", e);
     }
 
   }
@@ -101,8 +103,19 @@ public class SerializableImage implements Serializable {
         ImageIO.write(img, extension, new MemoryCacheImageOutputStream(out));
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("writing image to cache failed", e);
     }
+  }
+  
+  
+  public SerializableImage(String path, String source) throws FileNotFoundException, IOException {
+    this(new File(path), source);
+  }
+  
+  public SerializableImage(File path, String source) throws FileNotFoundException, IOException {
+    this.source = source;
+    this.image = ImageIO.read(new FileInputStream(path));
+    this.timestamp = System.currentTimeMillis();
   }
 
   public SerializableImage(BufferedImage image, String source) {
@@ -154,7 +167,7 @@ public class SerializableImage implements Serializable {
         bytes = bos.toByteArray();
         return bytes;
       } catch (Exception e) {
-        Logging.logError(e);
+        log.error("writing image failed", e);
       }
     }
     // TODO image --to--> bytes
@@ -185,7 +198,7 @@ public class SerializableImage implements Serializable {
         image = ImageIO.read(inputStream);
       }
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("reading image failed", e);
     }
 
     return null;

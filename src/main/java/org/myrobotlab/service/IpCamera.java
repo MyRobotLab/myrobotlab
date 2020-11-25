@@ -1,106 +1,165 @@
 package org.myrobotlab.service;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import org.bytedeco.javacv.IPCameraFrameGrabber;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.image.SerializableImage;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Http;
+import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoController;
 import org.slf4j.Logger;
 
 /**
  * IPCamera - a service to allow streaming of video from an IP based camera.
- *
- * Android related -
- * http://stackoverflow.com/questions/8301543/android-bitmap-to-bufferedimage
- * Bitmap to BufferedImage - conversion once Bitmap class is serialized
  */
-public class IpCamera extends Service {
+public class IpCamera extends Service implements ServoController /*implements EncoderListener*/ {
 
-  public class VideoProcess implements Runnable {
-    @Override
-    public void run() {
-      try {
-        grabber.start();
-        capturing = true;
-        while (capturing) {
-          BufferedImage bi = grabber.grabBufferedImage();
-          log.debug("grabbed");
-          if (bi != null) {
-            log.debug("publishDisplay");
-            invoke("publishDisplay", new Object[] { getName(), bi });
-          }
-        }
-      } catch (Exception e) {
-      }
-    }
-  }
+  public final static Logger log = LoggerFactory.getLogger(IpCamera.class);
 
   private static final long serialVersionUID = 1L;
 
-  transient private IPCameraFrameGrabber grabber = null;
+  protected String baseUrl;
 
-  transient private Thread videoProcess = null;
+  // vertical patrol = 26 stop 27 / horizontal patrol 28 stop 29
+  // TODO - use security service to protect these fields
+  protected String user;
+  protected String pwd;
 
-  public String controlURL;
+  protected Integer x;
+  protected Integer y;
 
-  private boolean capturing = false;
+  protected String status;
+  
+  protected Map<String, Timer> moves = new HashMap<>();
+  
+  public IpCamera(String n, String id) {
+    super(n, id);
+  }
 
-  private boolean enableControls = true;
+  public String center() {
+    return processCommand("decoder_control", 25);
+  }
 
-  public final static Logger log = LoggerFactory.getLogger(IpCamera.class.getCanonicalName());
-  public final static int FOSCAM_MOVE_UP = 0;
-  public final static int FOSCAM_MOVE_STOP_UP = 1;
-  public final static int FOSCAM_MOVE_DOWN = 2;
-  public final static int FOSCAM_MOVE_STOP_DOWN = 3;
-  public final static int FOSCAM_MOVE_LEFT = 4;
-  public final static int FOSCAM_MOVE_STOP_LEFT = 5;
-  public final static int FOSCAM_MOVE_RIGHT = 6;
-  public final static int FOSCAM_MOVE_STOP_RIGHT = 7;
-  public final static int FOSCAM_MOVE_CENTER = 25;
-  public final static int FOSCAM_MOVE_VERTICLE_PATROL = 26;
-  public final static int FOSCAM_MOVE_STOP_VERTICLE_PATROL = 27;
-  public final static int FOSCAM_MOVE_HORIZONTAL_PATROL = 28;
-  public final static int FOSCAM_MOVE_STOP_HORIZONTAL_PATROL = 29;
-  public final static int FOSCAM_MOVE_IO_OUTPUT_HIGH = 94;
+  public String processCommand(String cmd) {
+    return processCommand(cmd, null);
+  }
 
-  public final static int FOSCAM_MOVE_IO_OUTPUT_LOW = 95;
-  public final static int FOSCAM_ALARM_MOTION_ARMED_DISABLED = 0;
-  public final static int FOSCAM_ALARM_MOTION_ARMED_ENABLED = 1;
-  public final static int FOSCAM_ALARM_MOTION_SENSITIVITY_HIGH = 0;
-  public final static int FOSCAM_ALARM_MOTION_SENSITIVITY_MEDIUM = 1;
-  public final static int FOSCAM_ALARM_MOTION_SENSITIVITY_LOW = 2;
-  public final static int FOSCAM_ALARM_MOTION_SENSITIVITY_ULTRALOW = 3;
-  public final static int FOSCAM_ALARM_INPUT_ARMED_DISABLED = 0;
-  public final static int FOSCAM_ALARM_INPUT_ARMED_ENABLED = 1;
-  public final static int FOSCAM_ALARM_MAIL_DISABLED = 0;
-
-  public final static int FOSCAM_ALARM_MAIL_ENABLED = 1;
-
-  public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    try {
-      IpCamera foscam = (IpCamera) Runtime.start("foscam", "IpCamera");
-      foscam.startService();
-
-      foscam.startService();
-
-      SwingGui gui = (SwingGui) Runtime.start("gui", "SwingGui");
-      gui.startService();
-
-    } catch (Exception e) {
-      Logging.logError(e);
+  public String processCommand(String cmd, Integer param) {
+    StringBuilder sb = new StringBuilder(baseUrl);
+    sb.append(String.format("/%s.cgi?", cmd));
+    if (user != null) {
+      sb.append("user=");
+      sb.append(user);
+    }
+    if (pwd != null) {
+      sb.append("&");
+      sb.append("pwd=");
+      sb.append(pwd);
+    }
+    if (param != null) {
+      sb.append("&");
+      sb.append("command=");
+      sb.append(param);
     }
 
+    // FIXME - Http.get should throw - and this should report the error
+    byte[] bytes = Http.get(sb.toString());
+    if (bytes == null) {
+      return null;
+    }
+
+    return new String(bytes);
+  }
+
+  /**
+   * Relative move from "current" position. The interface to the foscom will
+   * center the device by dead reckoning from moving to extreme - knowing that
+   * after a certain amount of time the camera would be pushed to maximum in a
+   * corner. After it "centers" all increments are dead reckoning with some
+   * constant time interval
+   * 
+   * right /decoder_control.cgi?command=4 left /decoder_control.cgi?command=6 up
+   * /decoder_control.cgi?command=0 down /decoder_control.cgi?command=2 stop
+   * /decoder_control.cgi?command=1
+   * 
+   * @param param
+   * @return
+   */
+  public String moveTo(int x, int y) {
+    // if (x < 0)
+    // return new String(Http.get(getControlUrl(x)));
+    return null;
+  }
+  
+  class StopEvent extends TimerTask {
+    Timer timer;
+    
+    public StopEvent() {
+      processCommand("decoder_control", 1);
+    }
+    
+    @Override
+    public void run() {
+      // TODO Auto-generated method stub
+      
+    }
+    
+  }
+  
+  protected synchronized void scheduleStop(String name, long ms) {
+    if (moves.containsKey(name)) {
+      // already have a stop scheduled - cancel it re-schedule
+      Timer t = moves.get(name);
+      t.cancel();
+    }
+    
+    TimerTask task = new TimerTask() {
+      public void run() {
+        
+      }
+    };
+    
+    Timer timer = new Timer("Timer");
+    timer.schedule(task, ms);
+    moves.put(name, timer);
+  }
+
+  /**
+   * relative move
+   * @param x
+   * @return
+   */
+  public String moveX(int x) {
+    scheduleStop("x", 1000);
+    // if (x < 0)
+    // return new String(Http.get(getControlUrl(x)));
+    return null;
+  }
+
+  public String setUrl(String url) {
+    baseUrl = url;
+    return url;
+  }
+
+  // FIXME Http.get should throw the error and we should report it
+  public String getStatus() {
+    return processCommand("get_status");
+  }
+
+  public void setUser(String user) {
+    this.user = user;
+  }
+
+  public void setPwd(String pwd) {
+    this.pwd = pwd;
   }
 
   public final static SerializableImage publishFrame(String source, BufferedImage img) {
@@ -108,115 +167,101 @@ public class IpCamera extends Service {
     return si;
   }
 
-  public IpCamera(String n, String id) {
-    super(n, id);
+  @Override
+  public void attach(ServoControl servo, int pinOrAddress) throws Exception {
+    log.info("attach");
+    
   }
 
-  /*
-   * method to determine connectivity of a valid host, user &amp; password to a
-   * foscam camera.
-   * 
-   * @return
-   */
-  /*
-   * public String getStatus() { StringBuffer ret = new StringBuffer(); try {
-   * 
-   * URL url = new URL("http://" + host + "/get_status.cgi?user=" + user +
-   * "&pwd=" + password); log.debug("getStatus " + url); URLConnection con =
-   * url.openConnection(); BufferedReader in = new BufferedReader(new
-   * InputStreamReader(con.getInputStream())); String inputLine;
-   * 
-   * // TODO - parse for good info
-   * 
-   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); }
-   * in.close();
-   * 
-   * log.debug(String.format("%d",ret.indexOf("var id")));
-   * 
-   * if (ret.indexOf("var id") != -1) { ret = new StringBuffer("connected"); }
-   * else { } } catch (Exception e) { ret.append(e.getMessage());
-   * logException(e); } return ret.toString(); }
-   */
-
-  public void capture() {
-    if (videoProcess != null) {
-      capturing = false;
-      videoProcess = null;
-    }
-    videoProcess = new Thread(new VideoProcess(), getName() + "_videoProcess");
-    videoProcess.start();
+  @Override
+  public void attachServoControl(ServoControl sc) {
+    log.info("attachServoControl");
+    
   }
 
-  // "http://" + host + "/videostream.cgi?user=" + user + "&pwd=" + password
-  public boolean connectVideoStream(String url) throws MalformedURLException {
-    grabber = new IPCameraFrameGrabber(url);
-    // invoke("getStatus");
-    capture();
-    return true;
+  @Override
+  public void onServoMoveTo(ServoControl servo) {
+    log.info("onServoMoveTo");    
   }
 
-  /*
-   * public String setAlarm(int armed, int sensitivity, int inputArmed, int
-   * ioLinkage, int mail, int uploadInterval) { StringBuffer ret = new
-   * StringBuffer(); try {
-   * 
-   * URL url = new URL("http://" + host + "/set_alarm.cgi?motion_armed=" + armed
-   * + "user=" + user + "&pwd=" + password); URLConnection con =
-   * url.openConnection(); BufferedReader in = new BufferedReader(new
-   * InputStreamReader(con.getInputStream())); String inputLine;
-   * 
-   * while ((inputLine = in.readLine()) != null) { ret.append(inputLine); }
-   * in.close(); } catch (Exception e) { logException(e); } return
-   * ret.toString(); }
-   */
+  @Override
+  public void onServoStop(ServoControl servo) {
+   log.info("onServoStop");
+  }
 
-  public String move(Integer param) {
-    if (!enableControls) {
-      return null;
-    }
+  @Override
+  public void onServoWriteMicroseconds(ServoControl servo, int uS) {
+    log.info("onServoWriteMicroseconds");    
+  }
 
-    log.info("move " + param);
-    StringBuffer ret = new StringBuffer();
+  @Override
+  public void onServoSetSpeed(ServoControl servo) {
+    log.info("onServoSetSpeed");    
+  }
+
+  @Override
+  public void onServoEnable(ServoControl servo) {
+    log.info("onServoEnable");        
+  }
+
+  @Override
+  public void onServoDisable(ServoControl servo) {
+    log.info("onServoDisable");        
+    
+  }
+
+  public void attachServoY(String string) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  public void attachServoX(String string) {
+    // TODO Auto-generated method stub
+    
+  }
+
+
+
+  public static void main(String[] args) {
     try {
-      // TODO - re-use connection optimization
+      LoggingFactory.init(Level.INFO);
 
-      // URL url = new URL("http://" + host +
-      // "/decoder_control.cgi?command=" + param + "&user=" + user +
-      // "&pwd=" + password);
-      URL url = new URL(controlURL + param);
-      URLConnection con = url.openConnection();
-      BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-      String inputLine;
+      // IpCamera foscam = (IpCamera) Runtime.start("foscam", "IpCamera");
+      
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+      Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
+      Servo x = (Servo) Runtime.start("x", "Servo");
+      Servo y = (Servo) Runtime.start("y", "Servo");
+      x.setPin(3);
+      y.setPin(9);
+      
+      // TODO - test - should be string based - does string base work?
+      arduino.attach(x);
+      arduino.attach(y);
+      
+      /*
+      foscam.attachServoX("x");
+      foscam.attachServoY("x");
+      
+      foscam.setUrl("http://192.168.0.37");
+      foscam.setUser("admin");
+      foscam.setPwd("admin");
+      log.info("status {}", foscam.getStatus());
+      foscam.center();
 
-      while ((inputLine = in.readLine()) != null) {
-        ret.append(inputLine);
+
+      for (int i = 0; i < 255; ++i) {
+        foscam.moveTo(-10, 0);
+        foscam.moveTo(0, 0);
+        foscam.moveTo(10, 0);
       }
-      in.close();
+      */
+
     } catch (Exception e) {
-      log.error("move threw", e);
+      Logging.logError(e);
     }
-    return ret.toString();
+
   }
 
-  public SerializableImage publishDisplay(String source, BufferedImage img) {
-    return new SerializableImage(img, source);
-  }
-
-  public void setControlURL(String url) {
-    controlURL = url;
-  }
-
-  public Boolean setEnableControls(Boolean v) {
-    enableControls = v;
-    return v;
-  }
-
-  public void stopCapture() {
-    capturing = false;
-    if (videoProcess != null) {
-      capturing = false;
-      videoProcess = null;
-    }
-  }
 
 }

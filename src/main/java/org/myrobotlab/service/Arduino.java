@@ -1858,6 +1858,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.warn("servoMoveTo servo {} does not have a corresponding device currently - did you attach?", servo.getName());
       return;
     }
+   
+   // log.error("servo {} move {}", servo.getName(), servo.getTargetOutput());
     // getTargetOutput ALWAYS ALWAYS Degrees !
     // so we convert to microseconds
     int us = degreeToMicroseconds(servo.getTargetOutput());
