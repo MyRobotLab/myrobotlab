@@ -43,7 +43,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * are these two vectors almost the same? they both have the same x and y
    * values (within epsilon).
    * 
-   * @param o
+   * @param v
    *          the object to compare for equality
    * @return true if they are equal
    */
@@ -128,7 +128,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>divide</code> divides the values of this vector by a scalar and
    * returns the result. The values of this vector remain untouched.
    *
-   * @param scalar
+   * @param v
    *            the value to divide this vectors attributes by.
    * @return the result <code>Vector</code>.
    */
@@ -243,7 +243,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>maxLocal</code> computes the maximum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
-   * @param other
+   * @param v
+   * @return
    */
   public final ResultType max(ResultType v){
     float[] a = toArray();
@@ -258,7 +259,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>minLocal</code> computes the minimum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
-   * @param other
+   * @param v
+   * @return
    */
   public final ResultType min(ResultType v){
     float[] a = toArray();
@@ -273,7 +275,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * are these two vectors almost the same? they both have the same x and y
    * values (within epsilon).
    * 
-   * @param o
+   * @param v
    *          the object to compare for equality
    * @return true if they are equal
    */

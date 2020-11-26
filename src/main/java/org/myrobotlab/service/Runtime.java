@@ -2463,13 +2463,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // default query
     return describe("platform", null);
   }
-
-  /**
-   * 
-   * @param type
-   * @param hello
-   * @return
-   */
+/**
+ * Describe results returns the information of a "describe" which can be detailed information
+ * regarding services, theire methods and input or output types.
+ * 
+ * @param uuidX
+ * @param hello
+ * @return
+ */
   public DescribeResults describe(String uuidX, DescribeQuery hello) {
 
     DescribeResults results = new DescribeResults();

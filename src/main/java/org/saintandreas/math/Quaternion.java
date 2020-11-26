@@ -206,7 +206,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
 
   /**
    * <code>toAngles</code> returns this quaternion converted to Euler rotation
-   * angles (yaw,roll,pitch).<br/>
+   * angles (yaw,roll,pitch).
    * 
    * @see <a
    *      href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm">http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm</a>
@@ -289,10 +289,6 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * matrix. The result is stored in result. 4th row and 4th column values are
    * untouched. Note: the result is created from a normalized version of this
    * quat.
-   * 
-   * @param result
-   *          The Matrix4f to store the result in.
-   * @return the rotation matrix representation of this quaternion.
    */
   public Matrix4f toRotationMatrix4f() {
     float norm = norm();
@@ -330,10 +326,6 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * 
    * @param i
    *          the column to retrieve. Must be between 0 and 2.
-   * @param store
-   *          the vector object to store the result in. if null, a new one is
-   *          created.
-   * @return the column specified by the index.
    */
   public Vector3f getRotationColumn(int i) {
     float norm = norm();

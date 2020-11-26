@@ -286,7 +286,7 @@ public class OculusRift extends Service implements PointPublisher {
     if (mirrorImage) {
       // if we're mirroring the left camera
       // log.info("Oculus Frame Source {}",frame.getSource());
-      if ("left".equals(frame.getSource())) {
+      if ("leftAffine".equals(frame.getSource())) {
         lastRiftFrame.left = frame;
         lastRiftFrame.right = frame;
       }

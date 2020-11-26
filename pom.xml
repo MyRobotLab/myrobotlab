@@ -1244,8 +1244,8 @@
 <!-- Runtime end -->
 
 <!-- Serial begin -->
-<!--   <dependency>
-    <groupId>org.scream3r</groupId>
+  <dependency>
+    <groupId>io.github.java-native</groupId>
     <artifactId>jssc</artifactId>
     <version>2.9.2</version>
     <scope>provided</scope>
