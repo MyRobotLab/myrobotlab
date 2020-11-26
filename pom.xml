@@ -12,7 +12,7 @@
     
     # fast build
     mvn -DskipTests -Dbuild.number=180 compile package -o
- 
+
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
     rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
