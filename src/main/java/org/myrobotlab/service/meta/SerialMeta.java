@@ -20,7 +20,7 @@ public class SerialMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("reads and writes data to a serial port");
     addCategory("sensors", "control");
-    addDependency("org.scream3r", "jssc", "2.8.0-1");
+    addDependency("io.github.java-native", "jssc", "2.9.2");
     setLicenseGplV3(); // via jssc
 
   }
