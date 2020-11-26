@@ -277,7 +277,8 @@ public class OculusRift extends Service implements PointPublisher {
       display.drawImage(image);
     }
   }
-
+  
+  // FIXME - implement onDisplay "full image" left & right fused together
   public void onDisplay(SerializableImage frame) {
 
     // if we're only one camera
@@ -316,7 +317,7 @@ public class OculusRift extends Service implements PointPublisher {
 
     // update the oculus display with the last rift frame
     if (display != null) {
-      display.setCurrentFrame(lastRiftFrame);
+      // display.setCurrentFrame(lastRiftFrame);
     } else {
       // TODO: wait on the display to be initialized ?
       // maybe just log something?
@@ -532,6 +533,7 @@ public class OculusRift extends Service implements PointPublisher {
       OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
       cv.setCameraIndex(1);
       cv.capture();
+      cv.addFilter("Flip");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -546,6 +548,9 @@ public class OculusRift extends Service implements PointPublisher {
       y.setPin(9);
       y.map(-30, 30, 0, 180);
       x.map(-5, 5, 0, 180);
+      
+      y.setInverted(false);
+      x.setInverted(false);
       
 
       // TODO - test - should be string based - does string base work?
@@ -572,11 +577,12 @@ public class OculusRift extends Service implements PointPublisher {
 
       // Runtime.start("python", "Python");
       
+      // TODO - jme could provide 2 stereoscopic camera projections
       rift.setMirrorImage(true);
 
       // cv.setGrabberType("IPCamera");
       // cv.capture("http://192.168.0.37/videostream.cgi?user=admin&pwd=admin");
-      
+      // rift.attachRight("rightCv"); - stereoscopic camera
       rift.attachLeft("cv");
 
       // FIXME NOT NECESSARY
