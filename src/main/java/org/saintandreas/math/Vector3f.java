@@ -123,9 +123,8 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
     }
 
     /**
-     * Promote a 2 vec to a 3 vec
+     * 
      * @param v
-     * @param z
      */
     public Vector3f(@Nonnull Vector2f v) {
       this(v, 0);
@@ -220,10 +219,6 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
     /**
      * Saves this Vector3f into the given float[] object.
      * 
-     * @param floats
-     *            The float[] to take this Vector3f. If null, a new float[3] is
-     *            created.
-     * @return The array, with X, Y, Z float values in that order
      */
     @Override
     public float[] toArray() {
