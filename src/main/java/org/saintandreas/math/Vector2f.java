@@ -209,11 +209,6 @@ public final class Vector2f extends Vector<Vector2f> implements java.io.Serializ
 
   /**
    * Saves this Vector2f into the given float[] object.
-   * 
-   * @param floats
-   *          The float[] to take this Vector2f. If null, a new float[2] is
-   *          created.
-   * @return The array, with X, Y float values in that order
    */
   @Override
   public float[] toArray() {

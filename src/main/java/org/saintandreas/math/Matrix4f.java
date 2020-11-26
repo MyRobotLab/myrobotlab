@@ -76,6 +76,23 @@ public final class Matrix4f implements java.io.Serializable {
 
   /**
    * constructs a matrix with the given values.
+   * 
+   * @param m00
+   * @param m01
+   * @param m02
+   * @param m03
+   * @param m10
+   * @param m11
+   * @param m12
+   * @param m13
+   * @param m20
+   * @param m21
+   * @param m22
+   * @param m23
+   * @param m30
+   * @param m31
+   * @param m32
+   * @param m33
    */
   public Matrix4f( //
       float m00, float m01, float m02, float m03, //
@@ -338,8 +355,6 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param matrix
    *          the matrix to set the value to.
-   * @throws JmeException
-   *           if the array is not of size 16.
    */
   public Matrix4f(float[][] matrix) {
     if (matrix.length != 4 || matrix[0].length != 4) {
@@ -375,7 +390,7 @@ public final class Matrix4f implements java.io.Serializable {
    * <code>toFloatBuffer</code> returns a FloatBuffer object that contains the
    * matrix data.
    * 
-   * @return matrix data as a FloatBuffer.
+   * @return - matrix data as a FloatBuffer.
    */
   public FloatBuffer toFloatBuffer() {
     return toFloatBuffer(false);
@@ -404,7 +419,6 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param fb
    *          the buffer to fill, must be correct size
-   * @return matrix data as a FloatBuffer.
    */
   public void fillFloatBuffer(FloatBuffer fb) {
     fillFloatBuffer(fb, false);
@@ -420,8 +434,6 @@ public final class Matrix4f implements java.io.Serializable {
    * @param columnMajor
    *          if true, this buffer should be filled with column major data,
    *          otherwise it will be filled row major.
-   * @return matrix data as a FloatBuffer. (position is advanced by 16 and any
-   *         limit set is not changed).
    */
   public void fillFloatBuffer(FloatBuffer fb, boolean columnMajor) {
     if (columnMajor) {
@@ -485,7 +497,6 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param fb
    *          the buffer to read from, must be correct size
-   * @return this data as a FloatBuffer.
    */
   public Matrix4f(FloatBuffer fb) {
     this(fb, false);
@@ -500,7 +511,6 @@ public final class Matrix4f implements java.io.Serializable {
    * @param columnMajor
    *          if true, this buffer should be filled with column major data,
    *          otherwise it will be filled row major.
-   * @return this data as a FloatBuffer.
    */
   public Matrix4f(FloatBuffer fb, boolean columnMajor) {
 
@@ -768,10 +778,8 @@ public final class Matrix4f implements java.io.Serializable {
    * <code>mult</code> multiplies a vector about a rotation matrix. The
    * resulting vector is returned.
    * 
-   * @param vec
-   *          vec to multiply against.
-   * 
-   * @return the rotated vector.
+   * @param vec to multiply against
+   * @return - the rotated vector.
    */
   public Vector4f multAcross(Vector4f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z, vw = vec.w;
@@ -786,9 +794,7 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
-   * @param store
-   *          a vector to store the result in. Created if null is passed.
-   * @return the rotated vector.
+   * @return
    */
   public Vector3f multNormal(Vector3f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z;
@@ -802,9 +808,7 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
-   * @param store
-   *          a vector to store the result in. Created if null is passed.
-   * @return the rotated vector.
+   * @return - rotated vector
    */
   public Vector3f multNormalAcross(Vector3f vec) {
 
@@ -813,133 +817,7 @@ public final class Matrix4f implements java.io.Serializable {
         + m21 * vz, m02 * vx + m12 * vy + m22 * vz);
   }
 
-  //
-  // /**
-  // * <code>mult</code> multiplies a vector about a rotation matrix and adds
-  // * translation. The w value is returned as a result of multiplying the last
-  // * column of the matrix by 1.0
-  // *
-  // * @param vec
-  // * vec to multiply against.
-  // * @param store
-  // * a vector to store the result in.
-  // * @return the W value
-  // */
-  // public float multProj(Vector3f vec, Vector3f store) {
-  // float vx = vec.x, vy = vec.y, vz = vec.z;
-  // store.x = m00 * vx + m01 * vy + m02 * vz + m03;
-  // store.y = m10 * vx + m11 * vy + m12 * vz + m13;
-  // store.z = m20 * vx + m21 * vy + m22 * vz + m23;
-  // return m30 * vx + m31 * vy + m32 * vz + m33;
-  // }
-  //
-  // /**
-  // * <code>mult</code> multiplies a vector about a rotation matrix. The
-  // * resulting vector is returned.
-  // *
-  // * @param vec
-  // * vec to multiply against.
-  // * @param store
-  // * a vector to store the result in. created if null is passed.
-  // * @return the rotated vector.
-  // */
-  // public Vector3f multAcross(Vector3f vec, Vector3f store) {
-  // if (null == vec) {
-  // logger.info("Source vector is null, null result returned.");
-  // return null;
-  // }
-  // if (store == null) {
-  // store = new Vector3f();
-  // }
-  //
-  // float vx = vec.x, vy = vec.y, vz = vec.z;
-  // store.x = m00 * vx + m10 * vy + m20 * vz + m30 * 1;
-  // store.y = m01 * vx + m11 * vy + m21 * vz + m31 * 1;
-  // store.z = m02 * vx + m12 * vy + m22 * vz + m32 * 1;
-  //
-  // return store;
-  // }
-  //
-  // /**
-  // * <code>mult</code> multiplies a quaternion about a matrix. The resulting
-  // * vector is returned.
-  // *
-  // * @param vec
-  // * vec to multiply against.
-  // * @param store
-  // * a quaternion to store the result in. created if null is passed.
-  // * @return store = this * vec
-  // */
-  // public Quaternion mult(Quaternion vec, Quaternion store) {
-  //
-  // if (null == vec) {
-  // logger.warning("Source vector is null, null result returned.");
-  // return null;
-  // }
-  // if (store == null) {
-  // store = new Quaternion();
-  // }
-  //
-  // float x = m00 * vec.x + m10 * vec.y + m20 * vec.z + m30 * vec.w;
-  // float y = m01 * vec.x + m11 * vec.y + m21 * vec.z + m31 * vec.w;
-  // float z = m02 * vec.x + m12 * vec.y + m22 * vec.z + m32 * vec.w;
-  // float w = m03 * vec.x + m13 * vec.y + m23 * vec.z + m33 * vec.w;
-  // store.x = x;
-  // store.y = y;
-  // store.z = z;
-  // store.w = w;
-  //
-  // return store;
-  // }
-  //
-  // /**
-  // * <code>mult</code> multiplies an array of 4 floats against this rotation
-  // * matrix. The results are stored directly in the array. (vec4f x mat4f)
-  // *
-  // * @param vec4f
-  // * float array (size 4) to multiply against the matrix.
-  // * @return the vec4f for chaining.
-  // */
-  // public float[] mult(float[] vec4f) {
-  // if (null == vec4f || vec4f.length != 4) {
-  // logger.warning("invalid array given, must be nonnull and length 4");
-  // return null;
-  // }
-  //
-  // float x = vec4f[0], y = vec4f[1], z = vec4f[2], w = vec4f[3];
-  //
-  // vec4f[0] = m00 * x + m01 * y + m02 * z + m03 * w;
-  // vec4f[1] = m10 * x + m11 * y + m12 * z + m13 * w;
-  // vec4f[2] = m20 * x + m21 * y + m22 * z + m23 * w;
-  // vec4f[3] = m30 * x + m31 * y + m32 * z + m33 * w;
-  //
-  // return vec4f;
-  // }
-  //
-  // /**
-  // * <code>mult</code> multiplies an array of 4 floats against this rotation
-  // * matrix. The results are stored directly in the array. (vec4f x mat4f)
-  // *
-  // * @param vec4f
-  // * float array (size 4) to multiply against the matrix.
-  // * @return the vec4f for chaining.
-  // */
-  // public float[] multAcross(float[] vec4f) {
-  // if (null == vec4f || vec4f.length != 4) {
-  // logger.warning("invalid array given, must be nonnull and length 4");
-  // return null;
-  // }
-  //
-  // float x = vec4f[0], y = vec4f[1], z = vec4f[2], w = vec4f[3];
-  //
-  // vec4f[0] = m00 * x + m10 * y + m20 * z + m30 * w;
-  // vec4f[1] = m01 * x + m11 * y + m21 * z + m31 * w;
-  // vec4f[2] = m02 * x + m12 * y + m22 * z + m32 * w;
-  // vec4f[3] = m03 * x + m13 * y + m23 * z + m33 * w;
-  //
-  // return vec4f;
-  // }
-
+ 
   /**
    * Inverts this matrix as a new Matrix4f.
    * 

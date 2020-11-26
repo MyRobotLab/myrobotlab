@@ -70,14 +70,7 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
      * Constructor instantiates a new <code>Vector4f</code> with provides
      * values.
      *
-     * @param x
-     *            the x value of the vector.
-     * @param y
-     *            the y value of the vector.
-     * @param z
-     *            the z value of the vector.
-     * @param w
-     *            the w value of the vector.
+     * @param s
      */
     public Vector4(float s) {
       x = y= z = w = s;
@@ -176,10 +169,6 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
     /**
      * Saves this Vector3f into the given float[] object.
      *
-     * @param floats
-     *            The float[] to take this Vector3f. If null, a new float[3] is
-     *            created.
-     * @return The array, with X, Y, Z float values in that order
      */
     @Override
     public final float[] toArray() {

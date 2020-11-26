@@ -123,7 +123,7 @@ public final class Matrix3f implements java.io.Serializable {
    * Copy constructor that creates a new <code>Matrix3f</code> object that is
    * the same as the provided matrix.
    * 
-   * @param mat
+   * @param m
    *          the matrix to copy.
    */
   public Matrix3f(Matrix3f m) {
@@ -142,7 +142,7 @@ public final class Matrix3f implements java.io.Serializable {
    * Copy constructor that creates a new <code>Matrix3f</code> object that is
    * the same as the provided matrix.
    * 
-   * @param mat
+   * @param m
    *          the matrix to copy.
    */
   protected Matrix3f(Matrix3fTemp m) {
@@ -429,7 +429,7 @@ public final class Matrix3f implements java.io.Serializable {
    * object. The result vector is returned. If the given vector is null, null
    * will be returned.
    * 
-   * @param vec
+   * @param v
    *          the vector to multiply this matrix by.
    * @return the result vector.
    */
