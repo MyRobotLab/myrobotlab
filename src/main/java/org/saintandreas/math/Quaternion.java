@@ -289,8 +289,6 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * matrix. The result is stored in result. 4th row and 4th column values are
    * untouched. Note: the result is created from a normalized version of this
    * quat.
-   * 
-   * @return
    */
   public Matrix4f toRotationMatrix4f() {
     float norm = norm();
