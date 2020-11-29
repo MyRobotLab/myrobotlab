@@ -1250,7 +1250,6 @@
     <version>2.9.2</version>
     <scope>provided</scope>
   </dependency>
-   -->
 <!-- Serial end -->
 
 <!-- https://mvnrepository.com/artifact/io.github.java-native/jssc -->

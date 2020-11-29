@@ -111,7 +111,8 @@ public class Servo extends AbstractServo implements ServoControl {
       return false;
     }
     targetPos = newPos;
-    log.info("pos {} output {}", targetPos, getTargetOutput());
+    
+    log.debug("pos {} output {}", targetPos, getTargetOutput());
 
     /**
      * <pre>
@@ -221,7 +222,7 @@ public class Servo extends AbstractServo implements ServoControl {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo" });
+      Runtime.main(new String[] { "--from-launcher", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
@@ -231,9 +232,23 @@ public class Servo extends AbstractServo implements ServoControl {
       webgui.startService();
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      mega.connect("COM4");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+     
+      pan.setPin(6);
+      tilt.setPin(7);
+      mega.attach(pan);
+      mega.attach(tilt);
 
+      pan.moveTo(0.0);
+      pan.moveTo(90.0);
+      // pan.moveTo(180.0);
+      
+      tilt.moveTo(0.0);
+      tilt.moveTo(90.0);
+      // tilt.moveTo(180.0);
+      
       boolean done = true;
       if (done) {
         return;

@@ -34,11 +34,11 @@ public class OpenCVFilterUndistort extends OpenCVFilter {
    */
   private static final long serialVersionUID = 1L;
 
-  private Mat camMat = new Mat(3, 3, CV_32FC1);
+  protected transient Mat camMat = new Mat(3, 3, CV_32FC1);
   // now what's the distVec?
-  private Mat distVec = new Mat(1, 5, CV_32FC1);
+  protected transient Mat distVec = new Mat(1, 5, CV_32FC1);
 
-  private transient OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+  protected transient OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
 
   public OpenCVFilterUndistort() {
     super();

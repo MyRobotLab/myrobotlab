@@ -113,6 +113,8 @@ import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
 import org.myrobotlab.opencv.OpenCVFilterMotionDetect;
+import org.myrobotlab.opencv.OpenCVFilterTranspose;
+import org.myrobotlab.opencv.OpenCVFilterUndistort;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
@@ -2045,7 +2047,104 @@ public class OpenCV extends AbstractComputerVision {
       error(e.getMessage());
     }
   }
+  /**
+   * <pre>
+  public void addStereoScopicFilters(String leftcv, String rightcv) {
+    
 
+    boolean addUndistort = true;
+    if (addUndistort) {
+      addUndistortFilter();
+    }
+
+    // if the cameras are mounted at 90 degrees rotation, transpose the
+    // image data to flip the resolution.
+    boolean addTransposeEyes = false;
+    if (addTransposeEyes) {
+      // left eye
+      addTransposeFilter();
+    }
+
+    addAffineFilter();
+    
+    public void addAffineFilter() {
+      leftAffine.setDx(leftCameraDx);
+      leftAffine.setDy(leftCameraDy);
+      leftAffine.setAngle(leftCameraAngle);
+      // the affine is always on top i guess
+      leftOpenCV.addFilter(leftAffine);
+      // leftOpenCV.setDisplayFilter("left");
+      if (!mirrorImage) {
+        rightAffine.setDx(rightCameraDx);
+        rightAffine.setDy(rightCameraDy);
+        rightAffine.setAngle(rightCameraAngle);
+        rightOpenCV.addFilter(rightAffine);
+      }
+    }
+
+
+    public void addYoloFilter() {
+      OpenCVFilterYolo yoloLeft = new OpenCVFilterYolo("left");
+      leftOpenCV.addFilter(yoloLeft);
+      leftOpenCV.setDisplayFilter("left");
+      if (!mirrorImage) {
+        OpenCVFilterYolo yoloRight = new OpenCVFilterYolo("right");
+        // TODO: consider what it means to add this to both eyes.
+        rightOpenCV.addFilter(yoloRight);
+        rightOpenCV.setDisplayFilter("right");
+      }
+    }
+
+    public void addTransposeFilter() {
+      OpenCVFilterTranspose t1 = new OpenCVFilterTranspose("t1");
+      t1.flipCode = 1;
+      leftOpenCV.addFilter(t1);
+      // right eye
+      if (!mirrorImage) {
+        OpenCVFilterTranspose t2 = new OpenCVFilterTranspose("t2");
+        t2.flipCode = 1;
+        rightOpenCV.addFilter(t2);
+      }
+    }
+
+    public void addUndistortFilter() {
+      OpenCVFilterUndistort ud1 = new OpenCVFilterUndistort("ud1");
+      leftOpenCV.addFilter(ud1);
+      if (!mirrorImage) {
+        OpenCVFilterUndistort ud2 = new OpenCVFilterUndistort("ud2");
+        rightOpenCV.addFilter(ud2);
+      }
+    }
+
+    public void updateAffine() {
+      // this method will update the angle / dx / dy settings on the affine
+      // filters.
+      log.info("Update left affine");
+      leftAffine.setDx(leftCameraDx);
+      leftAffine.setDy(leftCameraDy);
+      leftAffine.setAngle(leftCameraAngle);
+      if (!mirrorImage) {
+        log.info("Update right affine");
+        rightAffine.setDx(rightCameraDx);
+        rightAffine.setDy(rightCameraDy);
+        rightAffine.setAngle(rightCameraAngle);
+      }
+      
+      
+      
+    if (!calibrated) {
+      if (leftAffine.getLastClicked() != null && rightAffine.getLastClicked() != null) {
+        // calibrate!
+        double deltaY = (leftAffine.getLastClicked().getY() - rightAffine.getLastClicked().getY()) / 2.0;
+        leftAffine.setDy(-deltaY);
+        rightAffine.setDy(deltaY);
+        calibrated = true;
+        log.info("Calibrated images! DeltaY = {}", deltaY);
+      }
+    }
+  }
+  </pre>
+**/
   public static void main(String[] args) throws Exception {
 
     // TODO - Avoidance / Navigation Service
@@ -2058,7 +2157,9 @@ public class OpenCV extends AbstractComputerVision {
     LoggingFactory.init("info");
 
     // Runtime.start("python", "Python");
+    
     OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+    
     cv.setGrabberType("MJpeg");
     // cv.setGrabberType("IPCamera");
     cv.capture("http://192.168.0.37/videostream.cgi?user=admin&pwd=admin");

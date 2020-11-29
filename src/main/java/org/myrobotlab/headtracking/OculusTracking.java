@@ -23,8 +23,8 @@ public class OculusTracking implements Runnable, Serializable {
 
   public final static Logger log = LoggerFactory.getLogger(OculusTracking.class);
   private static final long serialVersionUID = 1L;
-  transient protected final Hmd hmd;
-  transient protected final HmdDesc hmdDesc;
+  transient protected Hmd hmd;
+  
   boolean running = false;
   transient public OculusRift oculus;
   transient Thread trackerThread = null;
@@ -33,14 +33,21 @@ public class OculusTracking implements Runnable, Serializable {
   private long frameCount = 0;
   private int downSample = 50;
 
-  public OculusTracking(Hmd hmd, HmdDesc hmdDesc) {
+  public OculusTracking(OculusRift oculus) {
     // Grab a handle to the initialized hmd.
-    this.hmd = hmd;
-    this.hmdDesc = hmdDesc;
+    this.oculus = oculus;
+  
   }
 
   @Override
   public void run() {
+    
+    hmd = oculus.getHmd();
+    if (hmd == null) {
+      oculus.error("could not start tracking hmd not ready");
+      return;
+    }
+    
     running = true;
     while (running) {
 
