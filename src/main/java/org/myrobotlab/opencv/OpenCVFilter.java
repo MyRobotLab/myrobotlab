@@ -132,18 +132,14 @@ public abstract class OpenCVFilter implements Serializable {
     File f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile); // load alpha
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // service resources - when jar extracts ?
     tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
@@ -152,18 +148,14 @@ public abstract class OpenCVFilter implements Serializable {
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // src\test\resources\OpenCV
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     log.error("could not load Mat {}", infile);
     return null;

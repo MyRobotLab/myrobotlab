@@ -142,7 +142,7 @@ public class OpenCVTest extends AbstractTest {
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
     if (hasInternet()) {
       // red pill green pill
-      ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_MP4);
+     // ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_MP4);
       ChaosMonkey.giveToMonkey(cv, "capture", TEST_REMOTE_FILE_JPG);
     }
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
