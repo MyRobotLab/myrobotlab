@@ -50,11 +50,11 @@ public class ServiceLifeCycleTest extends AbstractTest {
     
     // pull it back out
     MetaData data = ServiceData.getMetaData("i01", "InMoov");
-    log.warn("static meta data {}", data);
+    log.info("static meta data {}", data);
     assertEquals("i01.left", data.getPeer("head.arduino").actualName); 
 
     Plan plan = ServiceData.getPlan("i01", "InMoov");
-    log.warn("static plan {}", plan);
+    log.info("static plan {}", plan);
     assertNotNull(plan);
     
     ServiceInterface si = null;
@@ -125,7 +125,7 @@ public class ServiceLifeCycleTest extends AbstractTest {
     Runtime.setPeer("catcher01.subpeer", "rootTracking", "Tracking");
     // show modified plan
     masterPlan = Runtime.getPlan("catcher01","TestCatcher");
-    log.warn("current plan {}", masterPlan);
+    log.info("current plan {}", masterPlan);
         
     metaData = ServiceData.getMetaData("catcher01","TestCatcher"); 
     
