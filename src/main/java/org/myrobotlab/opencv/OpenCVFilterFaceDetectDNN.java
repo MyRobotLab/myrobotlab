@@ -127,6 +127,10 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     if (blob == null) {
       return image;
     }
+    if (net == null) {
+      log.error("net is not ready");
+      return image;
+    }
     net.setInput(blob);
     // feed forward the input to the network to get the output matrix
     Mat output = net.forward();
