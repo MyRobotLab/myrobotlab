@@ -140,6 +140,11 @@ public class OpenCVTest extends AbstractTest {
     ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_FACE_FILE_JPEG);
     ChaosMonkey.giveToMonkey(cv, "capture");
     ChaosMonkey.giveToMonkey(cv, "stopCapture");
+    
+    // clear filters from other tests
+    cv.reset();
+    cv.removeFilters();
+    
     if (hasInternet()) {
       // red pill green pill
      // ChaosMonkey.giveToMonkey(cv, "capture", TEST_LOCAL_MP4);
