@@ -80,7 +80,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
   }
 
   private void loadYolo() {
-    log.warn("loadYolo - begin");
+    log.info("loadYolo - begin");
 
     try {
       net = readNetFromDarknet(darknetHome + File.separator + modelConfig, darknetHome + File.separator + modelWeights);
@@ -96,8 +96,8 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
       log.warn("Error unable to load class names from file {}", modelNames, e);
       return;
     }
-    log.warn("Done loading model..");
-    log.warn("loadYolo - end");
+    log.info("Done loading model..");
+    log.info("loadYolo - end");
   }
 
   private ArrayList<String> loadClassNames(String filename) throws IOException {
@@ -140,7 +140,7 @@ public class OpenCVFilterYolo extends OpenCVFilter implements Runnable {
 
   @Override
   public void run() {
-    log.warn("yolo run - begin");
+    log.info("yolo run - begin");
     try {
       int count = 0;
       long start = System.currentTimeMillis();
