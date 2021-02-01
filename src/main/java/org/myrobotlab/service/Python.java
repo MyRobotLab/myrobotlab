@@ -56,7 +56,7 @@ public class Python extends Service {
    */
   public class InputQueueThread extends Thread {
     transient protected Python python;
-    protected boolean isRunning = false;
+    protected volatile boolean running = false;
 
     public InputQueueThread(Python python) {
       super(String.format("python.%s.input", python.getName()));
@@ -66,8 +66,8 @@ public class Python extends Service {
     @Override
     public void run() {
       try {
-        isRunning = true;
-        while (isRunning) {
+        running = true;
+        while (running) {
 
           Message msg = inputQueue.take();
 
@@ -733,7 +733,7 @@ public class Python extends Service {
 
     if (inputQueueThread != null) {
       // let thread exit normally
-      inputQueueThread.isRunning = false;
+      inputQueueThread.running = false;
       inputQueueThread = null;
     }
 
