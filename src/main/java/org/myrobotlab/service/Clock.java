@@ -55,7 +55,7 @@ public class Clock extends Service {
     public void run() {
 
       try {
-
+        isClockRunning = true;
         while (isClockRunning) {
           Date now = new Date();
           Iterator<ClockEvent> i = events.iterator();
@@ -65,7 +65,6 @@ public class Clock extends Service {
               // TODO repeat - don't delete set time forward
               // interval
               send(event.name, event.method, event.data);
-
               i.remove();
             }
           }
@@ -78,9 +77,9 @@ public class Clock extends Service {
           NoExecutionAtFirstClockStarted = false;
         }
       } catch (InterruptedException e) {
-        log.info("ClockThread interrupt");
-        isClockRunning = false;
+        log.info("ClockThread interrupt");        
       }
+      isClockRunning = false;
     }
   }
 
