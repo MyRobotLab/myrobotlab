@@ -25,7 +25,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
+import org.python.core.PyDictionary;
 import org.python.core.PyException;
+import org.python.core.PyFloat;
+import org.python.core.PyInteger;
+import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PySystemState;
@@ -51,17 +55,19 @@ public class Python extends Service {
    * 
    */
   public class InputQueueThread extends Thread {
-    private Python python;
+    transient protected Python python;
+    protected volatile boolean running = false;
 
     public InputQueueThread(Python python) {
-      super(String.format("%s.input", python.getName()));
+      super(String.format("python.%s.input", python.getName()));
       this.python = python;
     }
 
     @Override
     public void run() {
       try {
-        while (isRunning()) {
+        running = true;
+        while (running) {
 
           Message msg = inputQueue.take();
 
@@ -201,6 +207,48 @@ public class Python extends Service {
     objectCache.put(name, compiled);
     return compiled;
   }
+  /**
+   * Set a Python variable with a value from Java
+   * e.g.  python.set("my_var", 5)
+   */
+  public void set(String pythonRefName, Object o) {
+    interp.set(pythonRefName, o);
+  }
+
+  /**
+   * Get a Python value from Python into Java
+   * return type is PyObject wrapper around the value
+   * 
+   * @param pythonRefName - name of variable
+   * @return the PyObject wrapper
+   */
+  public PyObject get(String pythonRefName) {
+    return interp.get(pythonRefName);
+  }
+
+  /**
+   * Get the value of the Python variable
+   * e.g. Integer x = (Integer)python.getValue("my_var")
+   * 
+   * @param pythonRefName
+   * @return
+   */
+  public Object getValue(String pythonRefName) {
+    PyObject o = get(pythonRefName);
+    if (o == null) {
+      return null;
+    }
+    if (o instanceof PyString) {
+      return o.toString();
+    } else if (o instanceof PyFloat) {
+      return ((PyFloat) o).getValue();
+    } else if (o instanceof PyInteger) {
+      return ((PyInteger) o).getValue();
+    } else if (o instanceof PyList) {
+      return ((PyList) o).getArray();
+    }
+    return o;
+  }
 
   /**
    * FIXME - buildtime package in resources pyrobotlab python service urls -
@@ -281,6 +329,13 @@ public class Python extends Service {
     StringBuffer initScript = new StringBuffer();
     initScript.append("from time import sleep\n");
     initScript.append("from org.myrobotlab.service import Runtime\n");
+
+    log.info("starting python {}", getName());
+    if (inputQueueThread == null) {
+      inputQueueThread = new InputQueueThread(this);
+      inputQueueThread.start();
+    }
+    log.info("started python {}", getName());
   }
 
   public void newScript() {
@@ -677,7 +732,8 @@ public class Python extends Service {
     }
 
     if (inputQueueThread != null) {
-      inputQueueThread.interrupt();
+      // let thread exit normally
+      inputQueueThread.running = false;
       inputQueueThread = null;
     }
 
@@ -722,7 +778,40 @@ public class Python extends Service {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.start("python", "Python");
+    Python python = (Python) Runtime.start("python", "Python");
+
+    python.exec("a = 12");
+    PyObject pyobject = python.get("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyInteger) pyobject).getValue());
+
+    python.exec("a = 12.7");
+    pyobject = python.get("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyFloat) pyobject).getValue());
+
+    python.exec("a = ['foo','bar']");
+    pyobject = python.get("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyList) pyobject).getArray());
+
+    python.exec("a = {'foo':1, 'bar':2}");
+    pyobject = python.get("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyDictionary) pyobject));
+    
+    python.exec("b = 7.356");
+    Double b = (Double)python.getValue("b");
+    log.info("b = {}", b);
+
+    python.exec("c = [1,2,3]");
+    Object[] c = (Object[])python.getValue("c");
+    log.info("c = {}", c);
+
+    python.exec("d = {'foo':True, 'bar':False}");
+    Map d = (Map)python.getValue("d");
+    log.info("foo = {}", d.get("foo"));
+    
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
     boolean done = true;
@@ -762,7 +851,7 @@ public class Python extends Service {
        */
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
 
   }

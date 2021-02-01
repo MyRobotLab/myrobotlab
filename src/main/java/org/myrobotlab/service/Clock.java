@@ -44,9 +44,10 @@ import org.slf4j.Logger;
 public class Clock extends Service {
 
   public class ClockThread implements Runnable {
-    public Thread thread = null;
+    
+    private transient Thread thread = null;
 
-    ClockThread() {
+    public ClockThread() {
       thread = new Thread(this, getName() + "_ticking_thread");
       thread.start();
     }
@@ -55,8 +56,8 @@ public class Clock extends Service {
     public void run() {
 
       try {
-
-        while (isClockRunning) {
+        running = true;
+        while (running) {
           Date now = new Date();
           Iterator<ClockEvent> i = events.iterator();
           while (i.hasNext()) {
@@ -65,7 +66,6 @@ public class Clock extends Service {
               // TODO repeat - don't delete set time forward
               // interval
               send(event.name, event.method, event.data);
-
               i.remove();
             }
           }
@@ -78,23 +78,24 @@ public class Clock extends Service {
           NoExecutionAtFirstClockStarted = false;
         }
       } catch (InterruptedException e) {
-        log.info("ClockThread interrupt");
-        isClockRunning = false;
+        log.info("ClockThread interrupt");        
       }
+      running = false;
     }
   }
 
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
-  public boolean isClockRunning;
+  
+  public volatile boolean running;
 
   public int interval = 1000;
 
-  public transient ClockThread myClock = null;
+  protected transient ClockThread myClock = null;
 
   // FIXME
-  ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
+  protected ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
 
   private boolean NoExecutionAtFirstClockStarted = false;
 
@@ -112,13 +113,13 @@ public class Clock extends Service {
   // FIXME - to spec would be "publishClockStarted()"
   // clock started event
   public void publishClockStarted() {
-    isClockRunning = true;
+    running = true;
     log.info("clock started");
     broadcastState();
   }
 
   public void publishClockStopped() {
-    isClockRunning = false;
+    running = false;
     broadcastState();
     if (restartMe) {
       sleep(10);
@@ -152,7 +153,7 @@ public class Clock extends Service {
 
   public void restartClock(boolean NoExecutionAtFirstClockStarted) {
     this.NoExecutionAtFirstClockStarted = NoExecutionAtFirstClockStarted;
-    if (!isClockRunning) {
+    if (!running) {
       startClock(NoExecutionAtFirstClockStarted);
     } else {
       stopClock(true);
@@ -186,7 +187,7 @@ public class Clock extends Service {
     } else {
       log.info("clock already stopped");
     }
-    isClockRunning = false;
+    running = false;
     broadcastState();
   }
 
