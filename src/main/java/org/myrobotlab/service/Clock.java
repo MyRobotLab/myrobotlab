@@ -88,7 +88,7 @@ public class Clock extends Service {
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
   
-  public boolean running;
+  public volatile boolean running;
 
   public int interval = 1000;
 
