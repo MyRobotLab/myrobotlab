@@ -38,8 +38,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.DefaultCaret;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.service.Mqtt;
-import org.myrobotlab.service.Mqtt.MqttMsg;
 import org.myrobotlab.service.SwingGui;
 import org.slf4j.Logger;
 
@@ -97,7 +97,7 @@ public class MqttGui extends ServiceGui implements ActionListener {
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        recvData.append(String.format("%s: %s %s\n", new Timestamp(System.currentTimeMillis()).toString(), msg.topic, new String(msg.payload)));
+        recvData.append(String.format("%s: %s %s\n", new Timestamp(System.currentTimeMillis()).toString(), msg.getTopicName(), new String(msg.getPayload())));
       }
     });
   }
