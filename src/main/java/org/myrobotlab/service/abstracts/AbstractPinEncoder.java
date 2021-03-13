@@ -41,31 +41,27 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     return angle;
   }
 
-  // FIXME - remove this ...
+  // This is used to relay the data being broadcast from a controller (such as an arduino)
   public void onEncoderData(EncoderData data) {
-    // this is getting published from the arduino and updated here when it comes
-    // in..
-    // TODO: shoudl the messaging be setup differently?
-    // TODO: compare with ultrasonic sensor and see that we're following the
-    // same pattern
-    // TODO: maybe use nanoTime? how accurate is this.
+    // TODO: maybe the raw pin data from the arduino comes in here instead.. 
+    // current timestamp / delta since last update.
     long now = System.currentTimeMillis();
     long delta = now - lastUpdate;
-    Double angle = 360.0 * data.angle / resolution;
-    log.info("Angle : {}", angle);
     if (delta > 0) {
       // we can compute velocity since the last update
       // This computes the change in degrees per second that the encoder is
       // currently moving at.
-      velocity = (angle - this.lastPosition) / delta * 1000.0;
+      velocity = (data.angle - this.lastPosition) / delta * 1000.0;
     } else {
       // no position update since the last tick.
       velocity = 0.0;
     }
     // update the previous values
-    this.lastPosition = angle;
+    this.lastPosition = data.angle;
     this.lastUpdate = now;
-    log.info("Encoder Data : {} Angle : {}", data, lastPosition);
+    // log.info("Encoder Data : {} Angle : {}", data, lastPosition);
+    // now that we've updated our state.. we can publish along the data.
+    broadcast("publishEncoderData", data);
   }
 
   public void setZeroPoint() {
