@@ -1,7 +1,5 @@
 /**
  *                    
- * @author GroG &amp; Mats (at) myrobotlab.org
- *  
  * This file is part of MyRobotLab (http://myrobotlab.org).
  *
  * MyRobotLab is free software: you can redistribute it and/or modify
@@ -57,9 +55,9 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   //TODO: use the motor name.
   public String pidKey = "diy2";
 
-  private double kp = 0.020;
+  private double kp = 0.05;
   private double ki = 0.001; // 0.020;
-  private double kd = 0.0; // 0.020;
+  private double kd = 0.001; // 0.020;
   public double setPoint = 90.0; // Intial
   int sampleTime = 20;
   static final public int MODE_AUTOMATIC = 1;
@@ -67,6 +65,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   MotorUpdater motorUpdater;
   EncoderControl encoder;
   private Double rest = 90.0;
+  private long lastActivityTimeMS;
   
   public DiyServo2(String reservedKey, String inId) {
     super(reservedKey, inId);
@@ -92,10 +91,8 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   
   @Override
   public void onEncoderData(EncoderData data) {
-    System.err.println("DIY Servo Encoder Data: " + data);
+    // System.err.println("DIY Servo Encoder Data: " + data);
     this.currentAngle = data.angle;
-    // Update the pid input value.
-    pid.setInput(pidKey, data.angle);
   }
 
 
@@ -104,6 +101,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
     // for now, minimal.. only publisher.
     this.encoder = publisher;
     As5048AEncoder enc = (As5048AEncoder)publisher;
+    
     enc.addListener("publishEncoderData", getName());
   }
 
@@ -127,7 +125,9 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
 
   public boolean moveTo(Double angle) {
     // This updates the setpoint of the pid control.
+    this.setPoint = angle;
     pid.setSetpoint(pidKey, angle);
+    lastActivityTimeMS = System.currentTimeMillis();
     // Why does this return a boolean?
     return true;
   }
@@ -140,7 +140,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   public class MotorUpdater extends Thread {
 
     double lastOutput = 0.0;
-    private double lastCurrentPosInput = 0;
+    
     // goal is to not use this
     
     public MotorUpdater(String name) {
@@ -152,34 +152,35 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
 
       try {
         while (true) {
-          if (enabled) {
-            if (motorControl != null) {
-              // Calculate the new value for the motor
-              // TODO: this probably needs to be synchronized.
-              if (pid.compute(pidKey)) {
-                // double setPoint = pid.getSetpoint(pidKey);
-                double output = pid.getOutput(pidKey);
-                log.info("Pid output: {}" , output);
-                // TODO: avoid duplicating the move calls?
-                if (output != lastOutput) {
-                  log.info("move motor : {}", output);
-                  motorControl.move(output);
-                  lastOutput = output;
-                  // let's see if we've stopped.  
-                  // TODO: some debouncing logic here.
-                  // TODO: publish the servo events for started/stopped here.
-                }
-                //Test if we've arrived ? 
-                double delta = Math.abs(lastCurrentPosInput - setPoint);
-                double threshold = 0.5;
-                if (delta < threshold ) {
-                  log.info("Arrived!");
-                }
+          if (isRunning()) {
+            // Calculate the new value for the motor
+            // TODO: this probably needs to be synchronized.
+            if (pid.compute(pidKey)) {
+              // double setPoint = pid.getSetpoint(pidKey);
+              // TODO: maybe set the input here based on the current angle?  instead of the onEncoderData?
+              // Update the pid input value.
+              pid.setInput(pidKey, currentAngle);
+              double output = pid.getOutput(pidKey);
+              // log.info("Pid output: {}" , output);
+              // TODO: avoid duplicating the move calls?
+              double delta = Math.abs(currentAngle - setPoint);
+              if (output != lastOutput) {
+                log.info("move motor : Power: {}  Target: {}  Current: {}  Delta: {}", output, setPoint, currentAngle, delta);
+                motorControl.move(output);
+                lastOutput = output;
+                // let's see if we've stopped.  
+                // TODO: some debouncing logic here.
+                // TODO: publish the servo events for started/stopped here.
+              }
+              //Test if we've arrived ? 
+              double threshold = 0.5;
+              if (delta < threshold ) {
+                log.info("Arrived!");
               }
             }
-            // wait for the next update loop.
-            Thread.sleep(1000 / sampleTime);
           }
+          // wait for the next update loop.
+          Thread.sleep(1000 / sampleTime);
         }
       } catch (Exception e) {
         if (e instanceof InterruptedException) {
@@ -190,11 +191,22 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
         }
       }
     }
+
+    private boolean isRunning() {
+      // if we are enabled, have a motor connected and have received encoder data.
+      return enabled && motorControl != null && currentAngle != null;
+    }
   }
 
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init("info");
+    
+    Runtime.start("gui", "SwingGui");
+    Thread.sleep(1000);
+    Runtime.start("python", "Python");
+    Thread.sleep(1000);
+
     // Make one.. and stuff.
     // setup the encoder.
     Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
@@ -214,14 +226,14 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
     diy.attachEncoderControl(encoder);
     diy.attachMotorControl(mot);
     // Tell the servo to move somewhere.
-    diy.moveTo(89.0);
     
+    diy.moveTo(75.0);
+    Thread.sleep(2000);
+//    diy.disable();
+//    Thread.sleep(1000);
+//    diy.enable();
     Thread.sleep(1000);
-    diy.disable();
-    Thread.sleep(1000);
-    diy.enable();
-    Thread.sleep(1000);
-    diy.moveTo(90.0);
+    diy.moveTo(125.0);
     
     System.out.println("Press the any key");
     System.in.read();
@@ -247,7 +259,6 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
 
   @Override
   public double getRest() {
-    // TODO Auto-generated method stub
     // Ok.. not a bad idea.. let's have a rest position for the servo.. default to 90 deg? or something?
     return rest;
   }
@@ -288,7 +299,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   @Override
   public long getLastActivityTime() {
     // TODO Auto-generated method stub
-    return 0;
+    return lastActivityTimeMS;
   }
 
   @Override
