@@ -31,7 +31,9 @@ import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoControlPublisher;
 import org.myrobotlab.service.interfaces.ServoController;
+import org.myrobotlab.service.interfaces.ServoStatusPublisher;
 
 /**
  * Simple(ish) DiyServo2.  
@@ -45,8 +47,9 @@ import org.myrobotlab.service.interfaces.ServoController;
  * The output of the pid control is then written to the motor control
  */
 
-public class DiyServo2 extends Service implements EncoderListener, ServoControl {
+public class DiyServo2 extends Service implements EncoderListener, ServoControl, ServoControlPublisher, ServoStatusPublisher {
 
+  private static final long serialVersionUID = 1L;
   private volatile boolean enabled = true;
   private MotorControl motorControl;
   private Double currentAngle;
@@ -59,7 +62,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   private double ki = 0.001; // 0.020;
   private double kd = 0.001; // 0.020;
   public double setPoint = 90.0; // Intial
-  int sampleTime = 20;
+  public int sampleTime = 20;
   static final public int MODE_AUTOMATIC = 1;
   
   MotorUpdater motorUpdater;
@@ -74,6 +77,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   @Override
   synchronized public void startService() {
     super.startService();
+    pidKey = getFullName(); 
     initPid();
   }
 
@@ -95,14 +99,10 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
     this.currentAngle = data.angle;
   }
 
-
-  public void attachEncoderControl(EncoderControl publisher) {
-    // Should i attach just the publisher? or do i care about the whole control?  
-    // for now, minimal.. only publisher.
-    this.encoder = publisher;
-    As5048AEncoder enc = (As5048AEncoder)publisher;
-    
-    enc.addListener("publishEncoderData", getName());
+  public void attachEncoderControl(EncoderControl enc) {
+    encoder = enc;
+    // Tell the encoder to publish encoder data to this service
+    encoder.attachEncoderListener(this);
   }
 
   private void attachMotorControl(MotorControl mot) {
@@ -140,7 +140,8 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   public class MotorUpdater extends Thread {
 
     double lastOutput = 0.0;
-    
+    // degree threshold for saying that we've arrived.
+    double threshold = 0.25;
     // goal is to not use this
     
     public MotorUpdater(String name) {
@@ -156,35 +157,27 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
             // Calculate the new value for the motor
             // TODO: this probably needs to be synchronized.
             if (pid.compute(pidKey)) {
-              // double setPoint = pid.getSetpoint(pidKey);
-              // TODO: maybe set the input here based on the current angle?  instead of the onEncoderData?
               // Update the pid input value.
               pid.setInput(pidKey, currentAngle);
               double output = pid.getOutput(pidKey);
-              // log.info("Pid output: {}" , output);
-              // TODO: avoid duplicating the move calls?
               double delta = Math.abs(currentAngle - setPoint);
-              if (output != lastOutput) {
+              if (delta < threshold ) {
+                log.info("Arrived!");
+                // TODO: some debouncing logic here.
+                // TODO: publish the servo events for started/stopped here.
+                
+              } else if (output != lastOutput) {
                 log.info("move motor : Power: {}  Target: {}  Current: {}  Delta: {}", output, setPoint, currentAngle, delta);
                 motorControl.move(output);
                 lastOutput = output;
-                // let's see if we've stopped.  
-                // TODO: some debouncing logic here.
-                // TODO: publish the servo events for started/stopped here.
-              }
-              //Test if we've arrived ? 
-              double threshold = 0.5;
-              if (delta < threshold ) {
-                log.info("Arrived!");
               }
             }
           }
-          // wait for the next update loop.
+          // TODO: maybe a more accurate loop timer?
           Thread.sleep(1000 / sampleTime);
         }
       } catch (Exception e) {
         if (e instanceof InterruptedException) {
-          // info("Shutting down MotorUpdater");
           motorControl.stop();
         } else {
           log.error("motor updater threw", e);
@@ -502,6 +495,54 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl 
   public void fullSpeed() {
     // TODO: add a velocity control.
     // TODO: deprecated, remove from interface?
+  }
+
+  @Override
+  public String publishServoStarted(String name) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public String publishServoStopped(String name) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoMoveTo(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishMoveTo(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoSetSpeed(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoEnable(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoDisable(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ServoControl publishServoStop(ServoControl sc) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

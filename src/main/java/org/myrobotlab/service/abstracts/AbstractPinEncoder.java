@@ -2,6 +2,7 @@ package org.myrobotlab.service.abstracts;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
 
@@ -100,5 +101,11 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
   @Override
   public Double getPos() {
     return lastPosition;
+  }
+
+  @Override
+  public void attachEncoderListener(EncoderListener listener) {
+    // TODO: should this be full name?
+    addListener("publishEncoderData", listener.getName());
   }
 }
