@@ -191,48 +191,6 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
     }
   }
 
-  public static void main(String[] args) throws Exception {
-
-    LoggingFactory.init("info");
-    
-    Runtime.start("gui", "SwingGui");
-    Thread.sleep(1000);
-    Runtime.start("python", "Python");
-    Thread.sleep(1000);
-
-    // Make one.. and stuff.
-    // setup the encoder.
-    Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
-    ard.connect("COM4");
-    // ard.setDebug(true);
-    As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
-    encoder.setPin(10);
-    ard.attach(encoder);
-    // setup the motor.
-    // encoder.ttach
-    MotorDualPwm mot = (MotorDualPwm) Runtime.start("diyServo.motor", "MotorDualPwm");
-    mot.setPwmPins(6, 5);
-    ard.attach(mot);
-    // TODO: attach both to the diyservo and set the pin.
-    DiyServo2 diy = (DiyServo2)Runtime.createAndStart("diy", "DiyServo2");
-    // attach the encoder and motor
-    diy.attachEncoderControl(encoder);
-    diy.attachMotorControl(mot);
-    // Tell the servo to move somewhere.
-    
-    diy.moveTo(75.0);
-    Thread.sleep(2000);
-//    diy.disable();
-//    Thread.sleep(1000);
-//    diy.enable();
-    Thread.sleep(1000);
-    diy.moveTo(125.0);
-    
-    System.out.println("Press the any key");
-    System.in.read();
-
-  }
-  
   @Override
   public void disable() {
     // TODO: what do do here?
@@ -244,7 +202,6 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public void enable() {
-    // TODO Auto-generated method stub
     // TODO: what do to here?  
     // motorControl.enable();
       enabled = true;
@@ -256,12 +213,9 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
     return rest;
   }
 
-  
-  // TODO: the following methods are really cruft from the ServoControl interface 
-  // for now most all of these methods are NoOp for the DiyServo2 service.
   @Override
   public boolean isAutoDisable() {
-    // TODO: not a bad idea to support this ...
+    // TODO: impl this.. safety is good.
     return false;
   }
   
@@ -269,16 +223,19 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   public void attach(ServoController listener) {
     // TODO: remove from ServoControl interface... NoOp here.
     // NoOp : no servo controllers here..
+    log.warn("Diy Servo doesn't use a controller..  no implemented.");
   }
 
   @Override
   public void detach(ServoController listener) {
     // TODO maybe remove from interface?  this service doesn't give a crapola about servo controllers.
+    log.warn("Diy Servo doesn't use a controller..  no implemented.");    
   }
 
   @Override
   public String getController() {
-    // TODO remove from interface.. it has no function here.
+    // TODO remove from interface?. we have no controller.
+    log.warn("Diy Servo doesn't use a controller..  no implemented.");
     return null;
   }
 
@@ -291,32 +248,31 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public long getLastActivityTime() {
-    // TODO Auto-generated method stub
     return lastActivityTimeMS;
   }
 
   @Override
   public Mapper getMapper() {
-    // TODO Auto-generated method stub
-    // Really? 
+    // TODO - we have no mapper...
     return null;
   }
 
   @Override
   public double getMax() {
-    // TODO Auto-generated method stub
+    // TODO: should implement.. safety limits are important.
     // This might be useful to know what the max/min value that this encoder can get to.. but for us.. it's 360 degrees.. and can rotate as much as we like.
-    return 0;
+    return 360;
   }
 
   @Override
   public double getMin() {
-    // TODO Auto-generated method stub
+    // TODO safety limits are good..  
     return 0;
   }
 
   @Override
   public String getPin() {
+    log.warn("DiyServo doesn't have pins.  No implemented.");
     // TODO: This doesn't mean anything here. 
     // maybe this is the pin from the encoder? but why..  
     return null;
@@ -324,59 +280,57 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public double getCurrentInputPos() {
-    // TODO Auto-generated method stub
-    // TODO: a diy servo always knows where it is.. what is this asking for?
-    // TODO: return currentAngle?
-    return 0;
+    // TODO: return currentAngle? we have no mapper.
+    return currentAngle;
     
   }
 
   @Override
   public double getCurrentOutputPos() {
-    // TODO Auto-generated method stub
-    // TODO: is this the current angle? why do we havge input and output positions?! gah.. this interface has way too much stuff in it.
+    // TODO: this interface has way too much stuff in it... 
+    // return the last known encoder angle
     return currentAngle;
   }
 
   @Override
   public Double getSpeed() {
-    // TODO: ok. nice.. this might be picked up from a base class, if we go there.
+    // TODO: implement speed control
     return null;
   }
 
   @Override
   public double getTargetOutput() {
     // the setPoint for the pid control is the target output.
+    // we have no mapper..
     return setPoint;
   }
 
   @Override
   public double getTargetPos() {
-    // TODO the setPoint is the target output..  
+    // This is the setPoint for the pid control.. the target position.  
     return setPoint;
   }
 
   @Override
   public boolean isBlocking() {
-    // TODO Auto-generated method stub
+    // TODO What does this mean? should we remove this from the interface?
     return false;
   }
 
   @Override
   public Boolean isEnabled() {
-    // TODO Auto-generated method stub
     return enabled;
   }
 
   @Override
   public Boolean isInverted() {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO not sure what this means for a diyservo.
+    return false;
   }
 
   @Override
   public boolean isMoving() {
-    // TODO Auto-generated method stub
+    // TODO we should trigger this off the  power output being sent to the motor.
     return false;
   }
 
@@ -423,6 +377,8 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   @Override
   public void setMinMax(double minXY, double maxXY) {
     // TODO: implement this.. for safty limits.. dont support a move call outside the specified range.
+    // we don't even have a mapper.. we dont' need one..we might want a mapper that gives us a phase shift.
+    // but reality is. that should be handled by the encoder.
   }
 
   @Override
@@ -433,16 +389,20 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
   @Override
   public void setPin(Integer pin) {
     // TODO: There are no pins!  we have no pins!
+    log.warn("setPin not implemented in DiyServo.");
   }
 
   @Override
   public void setPin(String pin) {
-    // TODO remove from interface?  We don't have any pins.
+    // TODO: remove from interface?  We don't have any pins.
+    log.warn("setPin not implemented in DiyServo.");
   }
 
   @Override
   public void setPosition(double pos) {
     // TODO: maybe deprecate and  remove from interface ?
+    // This method had a strange functionality of setting a position
+    // even though the servo wasn't attached / enabled?
     moveTo(pos);
   }
 
@@ -459,7 +419,7 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public void stop() {
-    // Stop the motor.
+    // Stop the motor... anything else?
     motorControl.move(0.0);
   }
 
@@ -470,25 +430,27 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public void unsync(ServoControl sc) {
-    // TODO Auto-generated method stub
-    
+    // TODO Impl me    
   }
 
   @Override
   public void waitTargetPos() {
     // TODO Auto-generated method stub
     // really? ok.
+    // here we should wait until we have "arrived"  ...
     
   }
 
   @Override
   public void writeMicroseconds(int uS) {
-    // NoOp here... should be removed from ServoControl interface
+    // NoOp here... should be removed from ServoControl interface.. this is specific to a pwm controlled servo
+    log.warn("Write Microseconds not implemented for DiyServo.");
   }
 
   @Override
   public void attachServoController(String sc, Integer pin, Double pos, Double speed) {
     // NoOp here.. should be removed from ServoControl interface
+    log.warn("Attach Servo Controller not implemented for DiyServo.");
   }
 
   @Override
@@ -499,50 +461,85 @@ public class DiyServo2 extends Service implements EncoderListener, ServoControl,
 
   @Override
   public String publishServoStarted(String name) {
-    // TODO Auto-generated method stub
-    return null;
+    return name;
   }
 
   @Override
   public String publishServoStopped(String name) {
-    // TODO Auto-generated method stub
-    return null;
+    return name;
   }
 
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public ServoControl publishMoveTo(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public ServoControl publishServoSetSpeed(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public ServoControl publishServoEnable(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public ServoControl publishServoDisable(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
   }
 
   @Override
   public ServoControl publishServoStop(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
+    return sc;
+  }
+
+  
+  public static void main(String[] args) throws Exception {
+
+    LoggingFactory.init("info");
+    
+    Runtime.start("gui", "SwingGui");
+    Thread.sleep(1000);
+    Runtime.start("python", "Python");
+    Thread.sleep(1000);
+
+    // Make one.. and stuff.
+    // setup the encoder.
+    Arduino ard = (Arduino)Runtime.start("ard", "Arduino");
+    ard.connect("COM4");
+    // ard.setDebug(true);
+    As5048AEncoder encoder = (As5048AEncoder) Runtime.start("encoder", "As5048AEncoder");
+    encoder.setPin(10);
+    ard.attach(encoder);
+    // setup the motor.
+    // encoder.ttach
+    MotorDualPwm mot = (MotorDualPwm) Runtime.start("diyServo.motor", "MotorDualPwm");
+    mot.setPwmPins(6, 5);
+    ard.attach(mot);
+    // TODO: attach both to the diyservo and set the pin.
+    DiyServo2 diy = (DiyServo2)Runtime.createAndStart("diy", "DiyServo2");
+    // attach the encoder and motor
+    diy.attachEncoderControl(encoder);
+    diy.attachMotorControl(mot);
+    // Tell the servo to move somewhere.
+    
+    diy.moveTo(75.0);
+    Thread.sleep(2000);
+//    diy.disable();
+//    Thread.sleep(1000);
+//    diy.enable();
+    Thread.sleep(1000);
+    diy.moveTo(125.0);
+    
+    System.out.println("Press the any key");
+    System.in.read();
+
   }
 
 }
