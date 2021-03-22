@@ -338,7 +338,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.15</version>
+    <version>1.4.16</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
