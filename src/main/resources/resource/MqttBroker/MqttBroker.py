@@ -11,6 +11,11 @@ mqtt01 = Runtime.start("mqtt01", "Mqtt")
 python = Runtime.start("python", "Python")
 
 broker.listen()
+broker.publish('')
+
+
+
+
 
 mqtt01.connect("mqtt://localhost:1883")
 
