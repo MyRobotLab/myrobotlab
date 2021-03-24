@@ -46,9 +46,22 @@ public class PythonTest extends AbstractServiceTest {
     python.exec("test = {'foo':True, 'bar':False}");
     Map test04 = (Map)python.get("test");
     assertEquals(true, test04.get("foo"));
-    
-    python.exec("sleep(2)");
-    python.waitFor("python","finishedExecutingScript", 3000);
+    log.info("executing sleep");
+
+    // FIXME - because the scripts and "finishedExecutingScript" events are not
+    // bound to each other with unique ids, you can waitFor finishedExecutingScript
+    // which MAY NOT be the script you started - the following sleep is lame,
+    // but its intent is to clear all in-process executing scripts so that we 
+    // "waitFor" the script we are executing
+    // this should be fixed by using a unique id for each script which is returned
+    // by exec - then you can wait for the script you want to finish
+    Service.sleep(1000); // lame
+    boolean blocking = false;
+    long start = System.currentTimeMillis();
+    python.exec("import time\ntime.sleep(1)", blocking);
+    log.info("stated sleeping script - waiting for result in 1s");
+    python.waitFor("python","finishedExecutingScript", 2000);
+    log.info("done with sleep time {} ms", System.currentTimeMillis()-start);
     
     // verifying callbacks from subscriptions can call python methods
     python.exec("count = 0\ndef onPulse(clock_date):\n\tprint('successs !', clock_date)\n\tglobal count\n\tcount = count + 1");
