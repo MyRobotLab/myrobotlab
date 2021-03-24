@@ -130,8 +130,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   protected Set<String> connectedClients = new HashSet<>();
 
   /**
-   * determines if the broker will attempt to process any messages published
-   * on the api topics .. typically api/service & api/messages
+   * determines if the broker will attempt to process any messages published on
+   * the api topics .. typically api/service & api/messages
    */
   boolean processApiMessages = true;
 
@@ -146,7 +146,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   protected String messagesTopic = mrlTopicApiPrefix + "/" + CodecUtils.API_MESSAGES + "/";
 
   protected String serviceTopic = mrlTopicApiPrefix + "/" + CodecUtils.API_SERVICE + "/";
-  
+
   protected Map<String, List<MRLListener>> notifyList = new HashMap<>();
 
   protected String password = null;
@@ -309,15 +309,15 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   }
 
   /**
-   * Callback from embedded broker.
-   * Every message published from external mqtt client goes through here
+   * Callback from embedded broker. Every message published from external mqtt
+   * client goes through here
    */
   @Override
   public void onPublish(InterceptPublishMessage im) {
     // endless loop from self publish !
     // FIXME - filter out self published msgs
     log.info("topic " + im.getTopicName());
-    
+
     MqttMsg m = null;
     try {
       m = toMqttMsg(im);
@@ -325,7 +325,6 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
       log.info("publishMqtt {}", m);
       // parse topic name
       String topic = m.getTopicName();
-      
 
       // don't let broker process messages
       if (processApiMessages && topic.startsWith(serviceTopic)) {
@@ -343,11 +342,13 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
           Class<?> clazz = Runtime.getClass(serviceName);
           Object[] params = cache.getDecodedJsonParameters(clazz, msg.method, msg.data);
           msg.data = params;
-          
-          // ahh .. how nice and easy is returning data from a synchronous call ... :)
+
+          // ahh .. how nice and easy is returning data from a synchronous call
+          // ... :)
           // too bad its not as powerful as sending an asynchronous message
           // Object ret = invoke(msg);
-          // send(msg) - send is "optimized" to invoke, must have "out(msg) to get the pre-processor hook
+          // send(msg) - send is "optimized" to invoke, must have "out(msg) to
+          // get the pre-processor hook
           out(msg);
 
         } else {
@@ -518,7 +519,13 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   }
 
   public void stopListening() {
-    mqttBroker.stopServer();
+    if (mqttBroker != null) {
+      try {
+        mqttBroker.stopServer();
+      } catch(Exception e) {
+        // don't care - moquette will throw if you stop it before starting
+      }
+    }
     connectedClients = new HashSet<>();
     listening = false;
     broadcastState();
@@ -556,16 +563,15 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   }
 
   public void unsubscribe(String mqttTopic, String callbackName, String callbackMethod) {
-
+    // FIXME - implement
   }
-
 
   public static void main(String[] args) {
     try {
       LoggingFactory.init("info");
       Runtime.main(new String[] { "--id", "c2", "--from-launcher" });
-      Python python = (Python)Runtime.start("python", "Python");
-      
+      Python python = (Python) Runtime.start("python", "Python");
+
       python.exec("test_value = None\ndef test(msg):\n\tglobal test_value\n\ttest_value = msg\n\tprint(msg)");
       MqttBroker broker = (MqttBroker) Runtime.start("broker", "MqttBroker");
       broker.listen(1883);
@@ -577,15 +583,14 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
       Clock clock01 = (Clock) Runtime.start("clock01", "Clock");
       // clock01.startClock();
 
-      Mqtt mqtt = (Mqtt)Runtime.start("mqtt02", "Mqtt");
+      Mqtt mqtt = (Mqtt) Runtime.start("mqtt02", "Mqtt");
       mqtt.setAutoConnect(false);
-      mqtt.connect("mqtt://localhost:1883");      
+      mqtt.connect("mqtt://localhost:1883");
       // mqtt.connect("mqtt://test.mosquitto.org:1883");
       // mqtt.publish("mrl/");
-      
-      
-      for(int i = 0; i < 10; ++i) {
-        
+
+      for (int i = 0; i < 10; ++i) {
+
         mqtt.subscribe("topic/echo");
         mqtt.subscribe("api/service/clock01/pulse");
         mqtt.publish("api/service/clock01/startClock");
@@ -595,23 +600,23 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
         // mqtt.publish("mrl/python/onMqttMsg", "ahoy !");
         mqtt.publish("api/service/clock01/startClock");
         mqtt.publish("api/service/python/exec/test('blah')");
-        // mqtt.publish(String.format("api/service/python/exec/test('blah %d')", i));
+        // mqtt.publish(String.format("api/service/python/exec/test('blah %d')",
+        // i));
         long start = System.currentTimeMillis();
-        Object o = python.waitFor("python", "finishedExecutingScript", 3000); 
+        Object o = python.waitFor("python", "finishedExecutingScript", 3000);
         log.info("delta time for mqtt localhost execution {} ms", System.currentTimeMillis() - start);
-        String test_value = python.get("test_value").toString();        
+        String test_value = python.get("test_value").toString();
         log.info("test_value: {}", test_value);
         Service.sleep(100);
 
-        mqtt.publish("api/service/python/set/test_value/3");        
+        mqtt.publish("api/service/python/set/test_value/3");
         test_value = python.get("test_value").toString();
         log.info("test_value: {}", test_value);
       }
-      
+
       if (mqtt.isConnected()) {
         log.info("worky");
       }
-      
 
       // broker.start();
 
