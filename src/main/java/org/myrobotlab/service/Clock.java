@@ -30,9 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import org.myrobotlab.framework.Service;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.ClockEvent;
 import org.slf4j.Logger;
 
@@ -44,7 +42,7 @@ import org.slf4j.Logger;
 public class Clock extends Service {
 
   public class ClockThread implements Runnable {
-    
+
     private transient Thread thread = null;
 
     public ClockThread() {
@@ -78,7 +76,7 @@ public class Clock extends Service {
           NoExecutionAtFirstClockStarted = false;
         }
       } catch (InterruptedException e) {
-        log.info("ClockThread interrupt");        
+        log.info("ClockThread interrupt");
       }
       running = false;
     }
@@ -87,7 +85,7 @@ public class Clock extends Service {
   private static final long serialVersionUID = 1L;
 
   public final static Logger log = LoggerFactory.getLogger(Clock.class);
-  
+
   public volatile boolean running;
 
   public int interval = 1000;
@@ -172,6 +170,10 @@ public class Clock extends Service {
   public void stopClock() {
     stopClock(false);
   }
+  
+  public boolean isClockRunning() {
+    return running;
+  }
 
   public void stopClock(boolean restartMe) {
     this.restartMe = restartMe;
@@ -198,15 +200,35 @@ public class Clock extends Service {
   }
 
   public static void main(String[] args) throws Exception {
-    LoggingFactory.init(Level.DEBUG);
-    Runtime.main(new String[] { "--id", "r7", "--log-level", "DEBUG" });
-    Clock clock = (Clock) Runtime.start("clock02", "Clock");
-    Runtime runtime = Runtime.getInstance();
-    runtime.connect("http://admin.local:8888");
+    // LoggingFactory.init(Level.WARN);
+    Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
+
+    // connections
+    boolean mqtt = true;
+    boolean rconnect = false;
+
     /*
-     * clock.setInterval(1000); clock.restartClock(); sleep(2000);
-     * clock.restartClock(); sleep(2000); clock.stopClock();
+     * 
+     * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
+     * webgui.setSsl(true); webgui.autoStartBrowser(false);
+     * webgui.setPort(8887); webgui.startService();
      */
+    if (mqtt) {
+      // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
+      Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
+      /*
+      mqtt02.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+      mqtt02.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+      */
+      // mqtt02.connect("mqtt://broker.emqx.io:1883");
+      mqtt02.connect("mqtt://localhost:1883");
+    }
+
+    if (rconnect) {
+      Runtime runtime = Runtime.getInstance();
+      runtime.connect("http://localhost:8888");
+
+    }
   }
 
 }

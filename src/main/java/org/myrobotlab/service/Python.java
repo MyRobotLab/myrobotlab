@@ -109,7 +109,7 @@ public class Python extends Service {
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            log.error("InputQueueThread threw", e);
+            log.error("InputQueueThread threw", e.toString());
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
         }
@@ -207,34 +207,35 @@ public class Python extends Service {
     objectCache.put(name, compiled);
     return compiled;
   }
+
   /**
-   * Set a Python variable with a value from Java
-   * e.g.  python.set("my_var", 5)
+   * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
    */
   public void set(String pythonRefName, Object o) {
     interp.set(pythonRefName, o);
   }
 
   /**
-   * Get a Python value from Python into Java
-   * return type is PyObject wrapper around the value
+   * Get a Python value from Python into Java return type is PyObject wrapper
+   * around the value
    * 
-   * @param pythonRefName - name of variable
+   * @param pythonRefName
+   *          - name of variable
    * @return the PyObject wrapper
    */
-  public PyObject get(String pythonRefName) {
+  public PyObject getPyObject(String pythonRefName) {
     return interp.get(pythonRefName);
   }
 
   /**
-   * Get the value of the Python variable
-   * e.g. Integer x = (Integer)python.getValue("my_var")
+   * Get the value of the Python variable e.g. Integer x =
+   * (Integer)python.getValue("my_var")
    * 
    * @param pythonRefName
    * @return
    */
-  public Object getValue(String pythonRefName) {
-    PyObject o = get(pythonRefName);
+  public Object get(String pythonRefName) {
+    PyObject o = getPyObject(pythonRefName);
     if (o == null) {
       return null;
     }
@@ -474,19 +475,17 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
-
-      // FIXME - TOO MANY DIFFERENT CODE-PATHS TO interp.exec ...
-      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN
-      // INVOKE(finishedExecutingScript) !!! HERE ???
-
       return true;
-
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
       invoke("publishStdError", pe.toString());
     } catch (Exception e) {
       error(e);
+    } finally {
+      if (blocking) {
+        invoke("finishedExecutingScript");
+      }
     }
     return false;
   }
@@ -667,8 +666,8 @@ public class Python extends Service {
    * before being processed/invoked in the Service.
    * 
    * Here all messages allowed to go and effect the Python service will be let
-   * through. However, all messsages not found in this filter will go "into"
-   * they Python script. There they can be handled in the scripted users code.
+   * through. However, all messages not found in this filter will go "into" they
+   * Python script. There they can be handled in the scripted users code.
    * 
    * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
    */
@@ -781,37 +780,37 @@ public class Python extends Service {
     Python python = (Python) Runtime.start("python", "Python");
 
     python.exec("a = 12");
-    PyObject pyobject = python.get("a");
+    PyObject pyobject = python.getPyObject("a");
     pyobject.getType();
     log.info("a of type {} is {}", pyobject.getType(), ((PyInteger) pyobject).getValue());
 
     python.exec("a = 12.7");
-    pyobject = python.get("a");
+    pyobject = python.getPyObject("a");
     pyobject.getType();
     log.info("a of type {} is {}", pyobject.getType(), ((PyFloat) pyobject).getValue());
 
     python.exec("a = ['foo','bar']");
-    pyobject = python.get("a");
+    pyobject = python.getPyObject("a");
     pyobject.getType();
     log.info("a of type {} is {}", pyobject.getType(), ((PyList) pyobject).getArray());
 
     python.exec("a = {'foo':1, 'bar':2}");
-    pyobject = python.get("a");
+    pyobject = python.getPyObject("a");
     pyobject.getType();
     log.info("a of type {} is {}", pyobject.getType(), ((PyDictionary) pyobject));
-    
+
     python.exec("b = 7.356");
-    Double b = (Double)python.getValue("b");
+    Double b = (Double) python.get("b");
     log.info("b = {}", b);
 
     python.exec("c = [1,2,3]");
-    Object[] c = (Object[])python.getValue("c");
+    Object[] c = (Object[]) python.get("c");
     log.info("c = {}", c);
 
     python.exec("d = {'foo':True, 'bar':False}");
-    Map d = (Map)python.getValue("d");
+    Map d = (Map) python.get("d");
     log.info("foo = {}", d.get("foo"));
-    
+
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
     boolean done = true;

@@ -135,8 +135,8 @@ public class MqttGui extends ServiceGui implements ActionListener {
         for (String s : subs) {
           subscriptions.addItem(s);
         }
-        topic.setText(mqtt.getTopic());
-        subscriptions.setSelectedItem(mqtt.getTopic());
+        // topic.setText(mqtt.getTopic());
+        // subscriptions.setSelectedItem(mqtt.getTopic());
         // fixme JList of subscriptions ...
 
       }

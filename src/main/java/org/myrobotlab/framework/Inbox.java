@@ -166,11 +166,16 @@ public class Inbox implements Serializable {
             // correct but this works for
             // null data now
             {
-              returnContainer = null;
+              returnContainer[0] = null;
             } else {
               returnContainer[0] = msg.data[0]; // transferring
               // return data !
             }
+            /*
+            if (returnContainer == null) {
+              log.info("here");
+            }
+            */
             synchronized (returnContainer) {
               blockingList.remove(blockingKey);
               returnContainer.notifyAll(); // addListener sender

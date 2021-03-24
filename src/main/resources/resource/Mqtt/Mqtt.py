@@ -4,14 +4,14 @@
 #########################################
 
 topic = "myrobotlab/test"
-qos = 2 # At most once (0), At least once (1), Exactly once (2).
+qos = 1 # At most once (0), At least once (1), Exactly once (2).
 broker = "tcp://broker.mqttdashboard.com:1883"
 
 clientID = "MrlMqttPython1"
 mqtt = Runtime.start("mqtt", "Mqtt")
 python = Runtime.start("python", "Mqtt")
 
-print mqtt.getDescription()
+print(mqtt.getDescription())
 
 mqtt.setBroker(broker)
 mqtt.setQos(qos)

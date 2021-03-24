@@ -221,17 +221,19 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return promise
     }
 
+    /**
+     * The 'hopefully' single location where data is actually sent.  Encoding
+     * and other details related to connection could be managed here.
+     */
     this.sendMessage = function(msg) {
-        var cleanJsonData = []
+        msg.encoding = 'json'
         if (msg.data != null && msg.data.length > 0) {
             // reverse encoding - pop off undefined
             // to shrink paramter length
             // js implementation -
             var pos = msg.data.length - 1
             for (i = pos; i > -1; --i) {
-                // WTF? - why do this ? - it's a bug for overloaded method
-                // ProgramAB.getResponse(null, 'hello') --> resolves to --> ProgramAB.getResponse(null)
-                if (typeof msg.data[i] == 'undefined') {// msg.data.pop() RECENTLY CHANGED 2016-01-21 - popping changes signature !!!! - changing to NOOP
+                if (typeof msg.data[i] == 'undefined') {
                 } else {
                     msg.data[i] = JSON.stringify(msg.data[i])
                 }
@@ -247,8 +249,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     }
 
     this.onHelloResponse = function(response) {
-        console.log('onHelloResponse:')
-        console.log(response)
+        console.info('onHelloResponse:')
+        console.info(response)
     }
 
     /**
@@ -265,7 +267,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.register(describeResults.registrations[i])
             }
         } else {
-            log.error("describe did not have reservations !!!!")
+            console.error("describe did not have reservations !!!!")
         }
     }
 
@@ -349,6 +351,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         } else {
             var msg
             try {
+
+                // first parse parses header and array of encoded strings
                 msg = jQuery.parseJSON(body)
 
                 console.info('in-msg --> ' + msg.method)
@@ -357,6 +361,18 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                     console.log('msg null')
                     return
                 }
+
+                if (msg.method == 'onDescribe'){
+                    console.info('here')
+                }
+
+                // second parse decodes each parameter in the array
+                if (msg.data) {
+                    for (let x = 0; x < msg.data.length; ++x) {
+                        msg.data[x] = jQuery.parseJSON(msg.data[x])
+                    }
+                }
+
 
                 // GREAT FOR DEBUGGING INCOMING MSGS
                 // console.warn(msg.sender + '---> ' + msg.name + '.' + msg.method)
@@ -868,7 +884,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var fullname = _self.getFullName(service)
 
             if (panels.hasOwnProperty(fullname)) {
-                $log.warn(fullname + ' already has panel')
+                console.warn(fullname + ' already has panel')
                 return panels[fullname]
             }
             lastPosY += 40
@@ -928,9 +944,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             var type = service.simpleName
             //first load & parse the controller,    //js
             //then load and save the template       //html
-            $log.debug('lazy-loading:', name, type)
+            console.debug('lazy-loading:', name, type)
             $ocLazyLoad.load('service/js/' + type + 'Gui.js').then(function() {
-                $log.debug('lazy-loading successful:', name, type)
+                console.debug('lazy-loading successful:', name, type)
                 $http.get('service/views/' + type + 'Gui.html').then(function(response) {
                     $templateCache.put(type + 'Gui.html', response.data)
                     var newPanel = addPanel(service)
@@ -948,7 +964,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // http template failure
                 type = "No"
                 // becomes NoGui
-                $log.warn('lazy-loading wasnt successful:', type)
+                console.warn('lazy-loading wasnt successful:', type)
                 addPanel(name).templatestatus = 'notfound'
                 notifyAllOfUpdate()
             })
@@ -979,7 +995,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             //->and should otherwise only be used in VERY SPECIAL cases !!!
             console.info('registering controllers scope', name, scope)
             if ('scope'in panels[name]) {
-                $log.warn('replacing an existing scope for ' + name)
+                console.warn('replacing an existing scope for ' + name)
             }
 
             // hanging 'all service' related properties on the instance scope
@@ -1103,7 +1119,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
 
         this.onError = function(response) {
-            $log.error('onError, can not connect')
+            console.error('onError, can not connect')
         }
 
         _self.setSearchFunction = function(ref) {
@@ -1225,7 +1241,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                                     }
                                     msgInterfaces[msg.sender].temp.methodMap = methodMap
                                 } catch (e) {
-                                    $log.error("onMethodMap blew up - " + e)
+                                    console.error("onMethodMap blew up - " + e)
                                 }
                                 deferred.resolve(msgInterfaces[msg.sender])
                                 break
