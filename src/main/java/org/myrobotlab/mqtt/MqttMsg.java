@@ -1,5 +1,7 @@
 package org.myrobotlab.mqtt;
 
+import java.util.Objects;
+
 public class MqttMsg {
   /**
    * CONNECT(1), CONNACK(2), PUBLISH(3), PUBACK(4), PUBREC(5), PUBREL(6),
@@ -7,8 +9,8 @@ public class MqttMsg {
    * PINGREQ(12), PINGRESP(13), DISCONNECT(14);
    */
   protected String messageType;
-  
-  protected long ts = 0; 
+
+  protected long ts = 0;
 
   protected boolean dupe;
   /**
@@ -17,20 +19,20 @@ public class MqttMsg {
   protected int qosLevel;
 
   protected boolean retain;
-  
+
   protected int remainingLength;
 
   protected String clientId;
-  
+
   protected String username;
 
   protected String topicName;
-  
+
   protected int packetId;
 
   // FIXME - convert to byte[]
   String payload;
-  
+
   public MqttMsg() {
     ts = System.currentTimeMillis();
   }
@@ -117,9 +119,9 @@ public class MqttMsg {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    
+
     sb.append(String.format("packetId:%d ", packetId));
-    
+
     if (username != null) {
       sb.append(String.format("username:%s ", username));
     }
@@ -130,7 +132,7 @@ public class MqttMsg {
     if (messageType != null) {
       sb.append(String.format("type:%s ", messageType));
     }
-    
+
     if (payload != null) {
       sb.append(String.format("payload:%s ", payload));
     }
@@ -138,10 +140,18 @@ public class MqttMsg {
     if (retain) {
       sb.append("retain");
     }
-
-    
     return sb.toString();
-    
+
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return (this == obj);
+  }
+
+  @Override
+  public final int hashCode() {
+    return Objects.hash(messageType, ts, dupe, qosLevel, retain, remainingLength, clientId, username, topicName, packetId, payload);
   }
 
 }
