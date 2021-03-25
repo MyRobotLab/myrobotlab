@@ -150,7 +150,6 @@ public class Inbox implements Serializable {
       while (msg == null) { // while no messages && no messages that are
         // blocking
         if (msgBox.size() == 0) {
-          // log.debug("Inbox WAITING " + name);
           msgBox.wait(); // must own the lock
         } else {
           msg = msgBox.removeLast();
@@ -162,20 +161,14 @@ public class Inbox implements Serializable {
           String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
           if (blockingList.containsKey(blockingKey)) {
             Object[] returnContainer = blockingList.get(blockingKey);
-            if (msg.data == null) // TODO - don't know if this is
-            // correct but this works for
-            // null data now
+            if (msg.data == null)
             {
               returnContainer[0] = null;
             } else {
-              returnContainer[0] = msg.data[0]; // transferring
-              // return data !
+              // transferring data
+              returnContainer[0] = msg.data[0]; 
             }
-            /*
-            if (returnContainer == null) {
-              log.info("here");
-            }
-            */
+            
             synchronized (returnContainer) {
               blockingList.remove(blockingKey);
               returnContainer.notifyAll(); // addListener sender
