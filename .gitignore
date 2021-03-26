@@ -80,5 +80,3 @@
 /copyToRaspi.sh
 /lastRestart.py
 /.factorypath
-/certs
-src/main/resources/resource/MqttBroker/password_file.conf

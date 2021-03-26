@@ -9,7 +9,19 @@
         <div class="row">
             <label>Key Store Path : {{service.storeFileName}}</label>
         </div>
-        <div class="row">
+
+        <div class="row"> Service Keys
+            <table>
+                <theader>
+                    <td><h4>Key Name</h4></td>
+                </theader>
+                <tr ng-repeat="k in service.serviceKeyNames">
+                    <td><small>{{k}}&nbsp;&nbsp;&nbsp;&nbsp;</small></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="row"> Keys
             <table>
                 <theader>
                     <td>Key Name</td>

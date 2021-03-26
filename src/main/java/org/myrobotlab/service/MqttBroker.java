@@ -63,6 +63,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
 
   private static final long serialVersionUID = 1L;
 
+  protected static final String HASH_SHA_256 = "SHA-256";
+
   private static String bytesToHex(byte[] hash) {
     StringBuilder hexString = new StringBuilder(2 * hash.length);
     for (int i = 0; i < hash.length; i++) {
@@ -75,7 +77,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
     return hexString.toString();
   }
 
-  private static final MqttMsg toMqttMsg(InterceptMessage msg) {
+  private final MqttMsg toMqttMsg(InterceptMessage msg) {
     MqttMsg retMsg = new MqttMsg();
     if (msg instanceof InterceptPublishMessage) {
       InterceptPublishMessage m = (InterceptPublishMessage) msg;
@@ -122,8 +124,6 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   }
 
   protected String address = "0.0.0.0";
-
-  protected Boolean allow_anonymous = false;
 
   protected Boolean allow_zero_byte_client_id = false;
 
@@ -225,7 +225,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
 
   public void listen(int mqttPort) {
     this.mqttPort = mqttPort;
-    listen();
+    listen(null, mqttPort, null, null, null, null);
   }
 
   public void listen(String inAddress, Integer inMqttPort, Integer inWsPort, String inPasswordFilePath, String inUsername, Boolean inAllowZeroByteClientId) {
@@ -250,7 +250,6 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
       // true to accept client connection without credentails, validating only
       // the one that provides
       if (username != null && username.length() > 0) {
-        // props.setProperty("allow_anonymous", allow_anonymous.toString());
         saveIdentities();
         props.setProperty("allow_anonymous", "false");
       } else {
@@ -458,8 +457,10 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
     try {
       if (username != null && username.length() > 0) {
         FileOutputStream fos = new FileOutputStream(passwordFilePath);
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = MessageDigest.getInstance(HASH_SHA_256);
         byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+        // String credline = String.format(username + ":" +
+        // StringUtil.bytesToHex(encodedhash));
         String credline = String.format(username + ":" + bytesToHex(encodedhash));
         fos.write(credline.getBytes());
         fos.close();
@@ -497,11 +498,6 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
     this.address = address;
   }
 
-  public void setAllowAnonymous(boolean b) {
-    allow_anonymous = b;
-    broadcastState();
-  }
-
   public void setMqttPort(Integer mqttPort) {
     this.mqttPort = mqttPort;
   }
@@ -522,7 +518,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
     if (mqttBroker != null) {
       try {
         mqttBroker.stopServer();
-      } catch(Exception e) {
+      } catch (Exception e) {
         // don't care - moquette will throw if you stop it before starting
       }
     }

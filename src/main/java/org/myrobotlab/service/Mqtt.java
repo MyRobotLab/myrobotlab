@@ -34,6 +34,7 @@ import org.myrobotlab.net.Connection;
 import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.SslUtil;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
 
 /**
@@ -69,7 +70,7 @@ import org.slf4j.Logger;
  * &#64;author kmcgerald & GroG
  * </pre>
  */
-public class Mqtt extends Service implements MqttCallback, IMqttActionListener, Gateway {
+public class Mqtt extends Service implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
 
   public final static Logger log = LoggerFactory.getLogger(Mqtt.class);
 
@@ -217,9 +218,31 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       error(e);
     }
   }
+  
+  public void connect(String url) {
+    connect(url, null, null, null);
+  }
 
-  synchronized public void connect() {
+  public void connect() {
+    connect(null, null, null, null);
+  }
+
+  synchronized public void connect(String inUrl, String inClientId, String inUsername, String inPassword) {
     try {
+      
+      if (inUrl != null) {
+        url = inUrl;
+      }
+      if (inClientId != null) {
+        clientId = inClientId;
+      }
+      if (inUsername != null) {
+        username = inUsername;
+      }
+      if (inPassword != null) {
+        password = inPassword;
+      }
+      
       persistence = new MemoryPersistence();
 
       URI uri = new URI(url);
@@ -298,26 +321,12 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       broadcastState();
 
     } catch (Exception e) {
-      Service.sleep(1500);
       log.error("connect failed", e);
     }
 
     log.info("stopping mqtt connection to {}", url);
     connected = false;
     connecting = false;
-  }
-
-  public void connect(String url) {
-    this.url = url;
-    connect();
-  }
-
-  public void connect(String url, String clientId, String username, String password) {
-    this.url = url;
-    this.clientId = clientId;
-    this.username = username;
-    this.password = password;
-    connect();
   }
 
   /**
@@ -503,11 +512,11 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           runtime.addConnection(uuid, remoteId, connection);
 
           // add unique route channel for new "connected" service
-/*zzz          
-          String rxTopic = String.format("mrl/gw/%s/rx<-%s", getId(), remoteId);
-          subscribe(rxTopic);
-          info("subscribed to topic %s", rxTopic);
-*/
+          /*
+           * zzz String rxTopic = String.format("mrl/gw/%s/rx<-%s", getId(),
+           * remoteId); subscribe(rxTopic); info("subscribed to topic %s",
+           * rxTopic);
+           */
           // something is listening - i need to let them know I'm alive -
           // broadcast to onConnect
           broadcastConnect();
@@ -667,9 +676,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       String uuid = routeTable.getRoute(msg.getId());
       Connection conn = runtime.getConnection(uuid);
       String rxId = conn.getId();
-/*zzz      
-      remoteRxTopic = String.format("mrl/gw/%s/rx<-%s", rxId, getId());
-*/      
+      /*
+       * zzz remoteRxTopic = String.format("mrl/gw/%s/rx<-%s", rxId, getId());
+       */
       remoteRxTopic = String.format("mrl/gw/%s/rx", rxId);
     }
 
@@ -882,6 +891,24 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     } catch (Throwable e) {
       log.error("wtf", e);
     }
+  }
+
+  // FIXME - SSUtil needs a function getFactory(String root, ..) of strings inputs
+  // FIXME - and needs to update Security Store !! - this is half implemented !
+  @Override
+  public String[] getKeyNames() {
+    String caRoot = getName() + ".rootCA.pem";
+    String cert = getName() + ".cert.pem";
+    String privateKey = getName() + ".private.key";
+    String password = getName() + ".password";
+    return new String[] { caRoot, cert, privateKey, password };
+  }
+
+  @Override
+  public void setKey(String keyName, String keyValue) {
+    Security security = Security.getInstance();
+    security.setKey(keyName, keyValue);
+    broadcastState();
   }
 
 }
