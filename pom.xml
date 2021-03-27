@@ -418,6 +418,18 @@
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
 <!-- InMoov2 end -->
 
+<dependency>
+      <groupId>io.moquette</groupId>
+      <artifactId>moquette-broker</artifactId>
+      <version>0.12.1</version>
+      <exclusions>
+              <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+</dependency>
+
 <!-- IndianTts begin -->
   <dependency>
     <groupId>org.myrobotlab.audio</groupId>
@@ -918,6 +930,21 @@
     <scope>provided</scope>
   </dependency>
 <!-- Mqtt end -->
+
+<!-- MqttBroker begin -->
+  <dependency>
+    <groupId>io.moquette</groupId>
+    <artifactId>moquette-broker</artifactId>
+    <version>0.12.1</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- MqttBroker end -->
 
 <!-- MyoThalmic begin -->
   <dependency>

@@ -580,13 +580,17 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // subscribe to describe
         MRLListener listener = new MRLListener("describe", String.format("runtime@%s", getId()), "onDescribe");
         Message subscribe = Message.createMessage(getFullName(), "runtime", "addListener", listener);
-        out.write(CodecUtils.toJson(subscribe).getBytes());
+        // Default serialization to json/text is to json encode the parameter list
+        // then json encode the message
+        out.write(CodecUtils.toJsonMsg(subscribe).getBytes());
 
         // describe
         Message describe = getDescribeMsg(uuid); // SEND BACK describe(hello)
         // Service.sleep(1000);
-        log.info(String.format("new connection %s", request.getRequestURI()));
-        out.write(CodecUtils.toJson(describe).getBytes());
+        // log.info(String.format("new connection %s", request.getRequestURI()));
+        // out.write(CodecUtils.toJson(describe).getBytes());
+        // describe.setName("runtime@" + id);
+        out.write(CodecUtils.toJsonMsg(describe).getBytes());//  DOUBLE-ENCODE
         log.info(String.format("<-- %s", describe));
         return;
 
@@ -700,7 +704,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       // connection specific
       connection.putTransient("c-r", r);
-      connection.put("c-type", "WebGui");
+      connection.put("c-type", getSimpleName());
 
       // cli specific
       connection.put("cwd", "/");
@@ -942,19 +946,12 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public void sendRemote(Message msg) {
     try {
 
-      /**
-       * ======================================================================
-       * DYNAMIC ROUTE TABLE - outbound msg hop starts now
-       */
-
       // add our id - we don't want to see it again
       msg.addHop(getId());
 
-      /**
-       * ======================================================================
-       */
-
-      String json = CodecUtils.toJson(msg);
+      // Double encoding - parameters then message
+      String json = CodecUtils.toJsonMsg(msg);
+      
       if (json.length() > maxMsgSize) {
         log.warn(String.format("sendRemote default msg size (%d) exceeded 65536 for msg %s", json.length(), msg));
         /*
@@ -1167,25 +1164,38 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
 
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
+    LoggingFactory.init(Level.WARN);
 
     try {
 
       // Platform.setVirtual(true);
 
-      Runtime.main(new String[] { "--id", "webgui", "--from-launcher" });
+      Runtime.main(new String[] { "--id", "w1", "--from-launcher", "--log-level", "WARN" });
       // Runtime.start("python", "Python");
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8888);
+      webgui.setPort(8887);
       webgui.startService();
       
+      Runtime.start("python", "Python");
+            
+      MqttBroker broker = (MqttBroker)Runtime.start("broker", "MqttBroker");
+      broker.listen();
+      
+      Mqtt mqtt01 = (Mqtt)Runtime.start("mqtt01", "Mqtt");
+      /*
+      mqtt01.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+      mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+      */
+      mqtt01.connect("mqtt://localhost:1883");
+
       boolean done = true;
       if (done) {
         return;
       }
+      
 
       
       Runtime.start("neo", "NeoPixel");

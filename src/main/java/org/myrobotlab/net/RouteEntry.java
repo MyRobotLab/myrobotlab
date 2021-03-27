@@ -12,4 +12,8 @@ public class RouteEntry {
     this.uuid = gateway;
     this.metric = metric;
   }
+  
+  public String toString() {
+    return String.format("id %s uuid %s metric %d", destination, uuid, metric);
+  }
 }

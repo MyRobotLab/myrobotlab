@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -153,6 +154,22 @@ public class CodecUtils {
       return name.substring(0, name.indexOf("@"));
     } else {
       return name;
+    }
+  }
+  
+  /**
+   * Gets the instance id from a service name
+   * @param name
+   * @return
+   */
+  static public final String getId(String name) {
+    if (name == null){
+      return null;
+    }
+    if (name.contains("@")) {
+      return name.substring(name.lastIndexOf("@")+1);
+    } else {
+      return null;
     }
   }
 
@@ -530,6 +547,65 @@ public class CodecUtils {
     } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  /**
+   * Creates a properly double encoded Json msg string.
+   * Why double encode ? - because initial decode should decode router and header information.
+   * The first decode will leave the payload a array of json strings.  The header will send it to a another process
+   * or it will go to the MethodCache of some service.  The MethodCache will decode a 2nd time based on a method
+   * signature key match (key based on parameter types).
+   * 
+   * @param fullName
+   * @param dest
+   * @param Src
+   * @param params
+   */
+  final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
+    Message msg = Message.createMessage(sender, name, method, null);
+    msg.sendingMethod = sendingMethod;
+    Object[] d = null;
+    if (params != null) {
+      d = new Object[params.length];
+      for (int i = 0; i < params.length; ++i) {
+        d[i] = CodecUtils.toJson(params[i]);
+      }
+      msg.setData(d);
+    }
+    return CodecUtils.toJson(msg);
+  }
+  
+  final public static String toJsonMsg(Message inMsg) {
+    if ("json".equals(inMsg.encoding)) {
+      // msg already has json encoded data parameters
+      // just encode the msg envelope
+      return CodecUtils.toJson(inMsg);
+    }
+    Message msg = new Message(inMsg);
+    msg.encoding = "json";
+    Object[] params = inMsg.getData();
+    Object[] d = null;
+    if (params != null) {
+      d = new Object[params.length];
+      for (int i = 0; i < params.length; ++i) {
+        d[i] = CodecUtils.toJson(params[i]);
+      }
+      msg.setData(d);
+    }
+    return CodecUtils.toJson(msg);
+  }
+
+  @Deprecated
+  public static Message toJsonParameters(Message msg) {
+    Object[] data = msg.getData();
+    if (data != null) {
+      Object[] params = new Object[data.length];
+      for (int i = 0; i < params.length; ++i) {
+        params[i] = toJson(data[i]);
+      }
+      msg.setData(params);
+    }    
+    return msg;
   }
 
 }

@@ -9,11 +9,15 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.service = service
         $scope.locale.selected = service.locale.language
         $scope.localeTag.selected = service.locale
+        /*
         service.serviceData.categoryTypes["show all"] = {
             "name": "show all",
             "serviceTypes": []
         }
+        */
     }
+
+    $scope.locales = {}
 
     $scope.platform = $scope.service.platform
     $scope.status = ""
@@ -138,6 +142,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             {
                 ls = inMsg.data[0]
                 unique = {}
+                $scope.service.locales = {}
                 // new Set()
                 for (const key in ls) {
                     if (ls[key].displayLanguage) {
@@ -148,9 +153,13 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
                             'displayLanguage': ls[key].displayLanguage
                         }
                     }
+                    // $scope.service.locales[key] =ls[key] 
                 }
                 // $scope.languages = Array.from(unique)
                 $scope.languages = unique
+                $scope.locales = ls
+                // it is transient in java to reduce initial registration payload
+                // $scope.service.locales = ls
                 $scope.$apply()
                 break
             }
@@ -298,7 +307,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.send("getServiceTypes")
     msg.send("getLocale")
     msg.send("getLocales")
-    msg.send("getHosts")
+    // msg.send("getHosts")
     msg.subscribe(this)
 }
 ])

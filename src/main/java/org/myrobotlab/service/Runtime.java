@@ -168,7 +168,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient private IvyWrapper repo = null; // was transient abstract Repo
 
-  private ServiceData serviceData = ServiceData.getLocalInstance();
+  transient private ServiceData serviceData = ServiceData.getLocalInstance();
 
   /**
    * command line options
@@ -220,7 +220,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * available Locales
    */
-  Map<String, Locale> locales;
+  transient protected Map<String, Locale> locales;
 
   /**
    * Returns the number of processors available to the Java virtual machine.
@@ -1522,7 +1522,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       client.send(CodecUtils.toJson(msg));
 
       // send describe
-      client.send(CodecUtils.toJson(getDescribeMsg(client.getUuid())));
+      client.send(CodecUtils.toJson(getDescribeMsg(null)));
 
     } catch (Exception e) {
       log.error("connect to {} giving up {}", url, e.getMessage());
@@ -1561,7 +1561,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // decoding message envelope
       Message msg = CodecUtils.fromJson(data, Message.class);
-      log.info("==> {} --to--> {}.{}", msg.sender, msg.name, msg.method);
+      log.info("==> {} --> {}.{}", msg.sender, msg.name, msg.method);
       msg.setProperty("uuid", uuid); // Properties ???? REMOVE ???
 
       if (msg.containsHop(getId())) {
@@ -1579,7 +1579,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // FIXME - see if same code block exists in WebGui .. normalize
       if (isLocal(msg)) {
 
-        log.info("--> {}.{} from {}", msg.name, msg.method, msg.sender);
+        // log.info("--> {}.{} from {}", msg.name, msg.method, msg.sender);
 
         String serviceName = msg.getName();
         // to decode fully we need class name, method name, and an array of json
@@ -2468,10 +2468,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
  * regarding services, theire methods and input or output types.
  * 
  * @param uuidX
- * @param hello
+ * @param query
  * @return
  */
-  public DescribeResults describe(String uuidX, DescribeQuery hello) {
+  public DescribeResults describe(String uuidXz, DescribeQuery query) {
 
     DescribeResults results = new DescribeResults();
     results.setStatus(Status.success("Ahoy!"));
@@ -2512,6 +2512,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public void onDescribe(DescribeResults results) {
     List<Registration> reservations = results.getReservations();
+    if (getId().equals("c1"))
+    {
+      log.info("here");
+    }
     if (reservations != null) {
       for (int i = 0; i < reservations.size(); ++i) {
         register(reservations.get(i));
@@ -2586,18 +2590,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   @Override
   public Message getDescribeMsg(String connId) {
-
-    // FIXME move serviceList into describe ... result of introduction ...
-    // !
-    // TODO - whitelist and blacklist filters
-    List<Registration> serviceList = new ArrayList<>();
-
-    for (Registration nt : runtime.getServiceList()) {
-      serviceList.add(nt);
-    }
-
+    // TODO support queries    
+    // FIXME !!! - msg.name is wrong with only "runtime" it should be "runtime@id"
+    // TODO - lots of options for a default "describe" 
     Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
         new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
+        
     return msg;
   }
 
@@ -2683,7 +2681,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Globally get all connection ids
+   * Globally get all connection uuids
    * 
    * @return
    */
@@ -2817,13 +2815,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       // add our id - we don't want to see it again
       msg.addHop(getId());
 
-      log.info("<== {} --to--> {}.{}", msg.sender, msg.name, msg.method);
+      log.info("<== {}.{} <-- {}", msg.name, msg.method, msg.sender);
 
       /**
        * ======================================================================
        */
 
-      client.send(CodecUtils.toJson(msg));
+      client.send(CodecUtils.toJsonMsg(msg));
     }
   }
 
@@ -3186,6 +3184,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       statusCnt++;
       invoke("publishStatus", Status.info("this is status %d", statusCnt));
     }
+  }
+
+  public Connection getConnectionFromId(String remoteId) {
+    for (Connection c : connections.values()) {
+      if (c.getId().equals(remoteId)) {
+        return c;
+      }
+    }
+    return null;
   }
 
 }

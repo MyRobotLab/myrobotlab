@@ -5,7 +5,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.service.Runtime;
+import org.slf4j.Logger;
+
 public class RouteTable {
+  
+  public final static Logger log = LoggerFactory.getLogger(Runtime.class);
 
   protected RouteEntry defaultRoute = null;
 
@@ -22,8 +28,13 @@ public class RouteTable {
     }
     */
     // "latest" route strategy
-    defaultRoute = r;
+    log.info("adding route and setting default to {}", r);
     routes.put(destination, r);
+    defaultRoute = r;
+  }
+  
+  public boolean contains(String id) {
+    return routes.containsKey(id);
   }
 
   public String getRoute(String id) {

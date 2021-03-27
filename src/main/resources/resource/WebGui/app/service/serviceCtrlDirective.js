@@ -23,7 +23,7 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
                         scope.msgmethods = msg_.temp.msg;
                         elem.html(html).show();
                         console.info("elem.contents")
-                        console.info(elem.contents())
+                        // console.info(elem.contents())
                         
                         $compile(elem.contents())(scope);
                         
