@@ -293,6 +293,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   @Override
   public void onConnectionLost(InterceptConnectionLostMessage msg) {
     invoke("publishConnectionLost", msg);
+    connectedClients.add(msg.getClientID());
     broadcastState();
   }
 
