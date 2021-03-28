@@ -10,12 +10,13 @@ import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
 public class RouteTable {
-  
+
   public final static Logger log = LoggerFactory.getLogger(Runtime.class);
 
   protected RouteEntry defaultRoute = null;
 
   protected Map<String, RouteEntry> routes = new HashMap<>();
+  protected Map<String, String> localGatewayKeysToUuid = new HashMap<>();
 
   public void addRoute(String destination, String uuid, int metric) {
     if (routes.containsKey(destination)) {
@@ -23,16 +24,15 @@ public class RouteTable {
     }
     RouteEntry r = new RouteEntry(destination, uuid, metric);
     /*
-    if (defaultRoute == null || r.metric < defaultRoute.metric) {
-      defaultRoute = r;
-    }
-    */
+     * if (defaultRoute == null || r.metric < defaultRoute.metric) {
+     * defaultRoute = r; }
+     */
     // "latest" route strategy
     log.info("adding route and setting default to {}", r);
     routes.put(destination, r);
     defaultRoute = r;
   }
-  
+
   public boolean contains(String id) {
     return routes.containsKey(id);
   }
@@ -50,6 +50,7 @@ public class RouteTable {
 
   /**
    * Thread safe removal of routes
+   * 
    * @param uuid
    */
   public void removeRoute(String uuid) {
@@ -58,7 +59,7 @@ public class RouteTable {
       if (!uuid.equals(r.uuid)) {
         newTable.put(r.destination, r);
       }
-    }    
+    }
     routes = newTable;
   }
 
@@ -70,5 +71,18 @@ public class RouteTable {
       }
     }
     return ids;
+  }
+
+  public void addLocalGatewayKey(String localGatewayKey, String uuid) {
+    localGatewayKeysToUuid.put(localGatewayKey, uuid);
+
+  }
+
+  public String getConnectionUuid(String localGatewayKey) {
+    return localGatewayKeysToUuid.get(localGatewayKey);
+  }
+
+  public String remove(String localGatewayKey) {
+    return localGatewayKeysToUuid.remove(localGatewayKey);
   }
 }

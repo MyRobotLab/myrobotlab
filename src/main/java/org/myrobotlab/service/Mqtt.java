@@ -108,6 +108,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
   /**
    * an instance disconnecting will send a disconnect message to this topic
+   * consider leveraging LWT
    */
   protected String onDisconnectTopic = "mrl/onDisconnect";
 
@@ -218,7 +219,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       error(e);
     }
   }
-  
+
   public void connect(String url) {
     connect(url, null, null, null);
   }
@@ -229,7 +230,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
   synchronized public void connect(String inUrl, String inClientId, String inUsername, String inPassword) {
     try {
-      
+
       if (inUrl != null) {
         url = inUrl;
       }
@@ -242,7 +243,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       if (inPassword != null) {
         password = inPassword;
       }
-      
+
       persistence = new MemoryPersistence();
 
       URI uri = new URI(url);
@@ -492,9 +493,20 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       }
 
       if (msg != null) {
+        /**
+         * A "connection" is made from this topic, because the broker is a dumb
+         * "hub".. and we want to support non-mrl mqtt brokers. This means a
+         * "connection" is really establishing a channel over the broker to
+         * other mrl instances. The broker nor the connection to the broker need
+         * any "special" logic. Mrl instances establish connections and routes
+         * based on unique receive topics (rx&lt;-{service}@{id}) they subscribe
+         * to.
+         */
         if (topic.equals(onConnectTopic)) {
 
           String remoteId = msg.getSrcId();
+          // includes gateway {service}@{id}
+          String remoteFullName = msg.getSrcFullName();
 
           if (runtime.getConnectionFromId(remoteId) != null) {
             log.warn("already have channel to {} - dumping channel request", remoteId);
@@ -502,26 +514,39 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           }
 
           // dynamic routing
-          log.warn("found new sender {} - adding channel and route in route table", msg.getSrcFullName());
+          log.warn("found new sender {} - adding adding new connection and route", remoteFullName);
 
+          // FIXME combine Connection, runtime.AddTable, all the stuffs - put in routeTable
+          // FIXME combine again put in AbstractGateway !
+          
           String uuid = java.util.UUID.randomUUID().toString();
           // String id = CodecUtils.getId(msg.sender);
           Connection connection = new Connection(uuid, remoteId, getName());
           connection.put("type", getSimpleName());
           connection.put("c-type", getSimpleName());
+          connection.put("remote-gateway", remoteFullName);
+
+          // create a unique channel for the remote connecting instance
+          String rxTopic = String.format("mrl/gw/%s/rx<-%s", getFullName(), remoteFullName);
+          subscribe(rxTopic);
+          log.warn("subscribed to topic {}", rxTopic);
+
+          connection.put("recv-topic", rxTopic);
+
+          // local gateway key is a key which this gateway can use to get
+          // meta-data or connection data outside the actual message
+          // important when sending messages via egress to us it with the routingTable
+          // to select the correct "interface/connection" to begin sending the msg
+          routeTable.addLocalGatewayKey(getName() + "-" + rxTopic, uuid);
           runtime.addConnection(uuid, remoteId, connection);
 
-          // add unique route channel for new "connected" service
-          /*
-           * zzz String rxTopic = String.format("mrl/gw/%s/rx<-%s", getId(),
-           * remoteId); subscribe(rxTopic); info("subscribed to topic %s",
-           * rxTopic);
-           */
           // something is listening - i need to let them know I'm alive -
           // broadcast to onConnect
           broadcastConnect();
           // wait for them to get setup with appropriate subscription
           sleep(1500);
+
+          // The following are partially Registry/Shadow related
 
           // 1. subscribe to describe
           MRLListener listener = new MRLListener("describe", runtime.getFullName(), "onDescribe");
@@ -548,6 +573,16 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           sendRemote(describe);
 
         } else if (topic.startsWith(mrlTopicApiPrefix + "/")) {
+          
+          // check to see if route table needs updating
+          String remoteId = msg.getSrcId();
+
+          // check if the route exists
+          if (!routeTable.contains(remoteId)) {
+            // FIXME implement 1st in routing table, then in AbstractGateway
+            // add's route to the entry
+            routeTable.addRoute(remoteId, routeTable.getConnectionUuid((getName() + "-" + topic)), 10);
+          }
 
           if (isLocal(msg)) {
 
@@ -667,6 +702,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
     String remoteRxTopic = null;
 
+    // FIXME put all stuff (isLocal) in routeTable
+    // FIXME put this in AbstractGateway
+    
     if (msg.getId() == null && msg.getMethod().equals("onConnect")) {
       remoteRxTopic = onConnectTopic;
     } else {
@@ -676,10 +714,9 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       String uuid = routeTable.getRoute(msg.getId());
       Connection conn = runtime.getConnection(uuid);
       String rxId = conn.getId();
-      /*
-       * zzz remoteRxTopic = String.format("mrl/gw/%s/rx<-%s", rxId, getId());
-       */
-      remoteRxTopic = String.format("mrl/gw/%s/rx", rxId);
+      Connection connection = runtime.getConnectionFromId(rxId);
+      String remoteFullName = (String)connection.get("remote-gateway");
+      remoteRxTopic = String.format("mrl/gw/%s/rx<-%s", remoteFullName, getFullName());
     }
 
     // I never want to see a msg again which I have sent away !
@@ -893,7 +930,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     }
   }
 
-  // FIXME - SSUtil needs a function getFactory(String root, ..) of strings inputs
+  // FIXME - SSUtil needs a function getFactory(String root, ..) of strings
+  // inputs
   // FIXME - and needs to update Security Store !! - this is half implemented !
   @Override
   public String[] getKeyNames() {

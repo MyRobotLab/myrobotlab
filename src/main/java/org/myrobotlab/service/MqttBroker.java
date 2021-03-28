@@ -160,6 +160,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   public MqttBroker(String n, String id) {
     super(n, id);
+    
+    // restore keys if they exist
     Security security = Security.getInstance();
     username = security.getKey(getName() + ".username");
     password = security.getKey(getName() + ".password");
@@ -224,30 +226,31 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   }
 
   public void listen() {
-    listen(null, null, null, null, null, null);
+    listen(address, mqttPort, wsPort, username, password, allow_zero_byte_client_id);
   }
 
   public void listen(int mqttPort) {
-    this.mqttPort = mqttPort;
-    listen(null, mqttPort, null, null, null, null);
+    listen(address, mqttPort, wsPort, username, password, allow_zero_byte_client_id);
   }
 
-  public void listen(String inAddress, Integer inMqttPort, Integer inWsPort, String inPasswordFilePath, String inUsername, Boolean inAllowZeroByteClientId) {
+  public void listen(String address, int mqttPort, int wsPort, String username, String password, boolean allow_zero_byte_client_id) {
     try {
-      address = (inAddress != null) ? inAddress : address;
-      mqttPort = (inMqttPort != null) ? inMqttPort : mqttPort;
-      wsPort = (inAddress != null) ? inWsPort : wsPort;
-      username = (inUsername != null) ? inUsername : username;
-      allow_zero_byte_client_id = (inAddress != null) ? inAllowZeroByteClientId : allow_zero_byte_client_id;
-      passwordFilePath = (inPasswordFilePath != null) ? inPasswordFilePath : passwordFilePath;
-
+      
+      this.address = (address == null)?"0.0.0.0":address;
+      this.mqttPort = mqttPort;
+      this.wsPort = wsPort;
+      this.username = username;
+      this.password = password;
+      this.allow_zero_byte_client_id = allow_zero_byte_client_id;
+            
       if (listening) {
         info("broker already started - stop first to start again");
         return;
       }
+      
       Properties props = new Properties();
-      props.setProperty("port", mqttPort.toString());
-      props.setProperty("websocket_port", wsPort.toString());
+      props.setProperty("port", mqttPort + "");
+      props.setProperty("websocket_port", wsPort + "");
       props.setProperty("host", address);
       props.setProperty("password_file", passwordFilePath);
 
@@ -261,13 +264,9 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
         props.setProperty("allow_anonymous", "true");
       }
 
-      // false to prohibit clients from connecting without a clientid.
-      // true to allow clients to connect without a clientid. One will be
-      // generated for them.
-
-      props.setProperty("allow_zero_byte_client_id", allow_zero_byte_client_id.toString());
+      props.setProperty("allow_zero_byte_client_id", String.format("%b", allow_zero_byte_client_id));
       props.setProperty("netty.mqtt.message_size", "1048576");
-
+      
       MemoryConfig mc = new MemoryConfig(props);
       Collections.singletonList(this);
       mqttBroker.startServer(mc, Collections.singletonList(this));
@@ -287,6 +286,8 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   @Override
   public void onConnect(InterceptConnectMessage msg) {
     invoke("publishConnect", msg);
+    // are connections from generic devices to be handled as mrl connections ?
+    // if so, the addConnection should be here ?
     connectedClients.add(msg.getClientID());
     broadcastState();
   }
@@ -296,6 +297,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
     invoke("publishConnectionLost", msg);
     connectedClients.remove(msg.getClientID());
     
+    // are connections from generic devices to be handled as mrl connections ? 
     Runtime runtime = Runtime.getInstance();
     runtime.removeConnection(msg.getClientID());
 
@@ -306,7 +308,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
   public void onDisconnect(InterceptDisconnectMessage msg) {
     invoke("publishDisconnect", msg);
     connectedClients.remove(msg.getClientID());
-
+    // are connections from generic devices to be handled as mrl connections ? 
     Runtime runtime = Runtime.getInstance();
     runtime.removeConnection(msg.getClientID());
 

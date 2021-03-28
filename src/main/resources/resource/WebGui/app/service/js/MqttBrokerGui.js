@@ -12,12 +12,9 @@ angular.module('mrlapp.service.MqttBrokerGui', []).controller('MqttBrokerGuiCtrl
     $scope.reverse = true
 
     $scope.start = function() {
-        if ($scope.service.username) {
-            msg.send('setUsername', $scope.service.username)
-        }
-        if ($scope.service.password) {
-            msg.send('setPassword', $scope.service.password)
-        }
+
+        msg.send('setUsername', $scope.service.username)
+        msg.send('setPassword', $scope.service.password)
         msg.send('setAddress', $scope.service.address)
         msg.send('setMqttPort', $scope.service.mqttPort)
         msg.send('setWsPort', $scope.service.wsPort)

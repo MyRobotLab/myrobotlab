@@ -440,7 +440,7 @@ public class InProcessCli implements Runnable {
             }
           }
         } else {
-          if ("onStdOut".equals(msg.getMethod()) || "onStdError".equals(msg.getMethod())) {
+          if ("json".equals(msg.encoding) || "onStdOut".equals(msg.getMethod()) || "onStdError".equals(msg.getMethod())) {
             // python interpreter
             try {
               out.write(o.toString().getBytes());
@@ -448,7 +448,7 @@ public class InProcessCli implements Runnable {
               log.error("write threw", e);
             }
           } else {
-            writeToJson(o);
+              writeToJson(o);
           }
         }
       }
