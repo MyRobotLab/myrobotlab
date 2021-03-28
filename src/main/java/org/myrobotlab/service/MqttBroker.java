@@ -24,6 +24,7 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.mqtt.MqttMsg;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
+import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
 
 import io.moquette.broker.Server;
@@ -57,7 +58,7 @@ import io.netty.handler.codec.mqtt.MqttQoS;
  * whole array is decoded - then each parameter is, similar to http form values
  *
  */
-public class MqttBroker extends Service implements InterceptHandler, Gateway {
+public class MqttBroker extends Service implements InterceptHandler, Gateway, KeyConsumer {
 
   public final static Logger log = LoggerFactory.getLogger(MqttBroker.class);
 
@@ -151,7 +152,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
 
   protected String password = null;
 
-  protected String passwordFilePath = getResourceDir(MqttBroker.class, "password_file.conf");
+  protected String passwordFilePath = getDataDir(MqttBroker.class.getSimpleName()) + fs + "password_file.conf";
 
   protected String username = null;
 
@@ -159,6 +160,9 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
 
   public MqttBroker(String n, String id) {
     super(n, id);
+    Security security = Security.getInstance();
+    username = security.getKey(getName() + ".username");
+    password = security.getKey(getName() + ".password");
   }
 
   @Override
@@ -235,6 +239,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
       wsPort = (inAddress != null) ? inWsPort : wsPort;
       username = (inUsername != null) ? inUsername : username;
       allow_zero_byte_client_id = (inAddress != null) ? inAllowZeroByteClientId : allow_zero_byte_client_id;
+      passwordFilePath = (inPasswordFilePath != null) ? inPasswordFilePath : passwordFilePath;
 
       if (listening) {
         info("broker already started - stop first to start again");
@@ -282,12 +287,18 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   @Override
   public void onConnect(InterceptConnectMessage msg) {
     invoke("publishConnect", msg);
+    connectedClients.add(msg.getClientID());
     broadcastState();
   }
 
   @Override
   public void onConnectionLost(InterceptConnectionLostMessage msg) {
     invoke("publishConnectionLost", msg);
+    connectedClients.remove(msg.getClientID());
+    
+    Runtime runtime = Runtime.getInstance();
+    runtime.removeConnection(msg.getClientID());
+
     broadcastState();
   }
 
@@ -456,6 +467,11 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
   private void saveIdentities() {
     try {
       if (username != null && username.length() > 0) {
+        // the "right" way - save it to secure store
+        setKey(getName()+".username", username);
+        setKey(getName()+".password", password);
+        
+        // the "wrong" way - but moquette forces this - no way of setting username/pwd in memory programmatically :(
         FileOutputStream fos = new FileOutputStream(passwordFilePath);
         MessageDigest digest = MessageDigest.getInstance(HASH_SHA_256);
         byte[] encodedhash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -621,4 +637,19 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway {
     }
   }
 
+  @Override
+  public String[] getKeyNames() {
+    String username = getName() + ".username";
+    String password = getName() + ".password";
+    return new String[] { username, password };
+  }
+  
+  @Override
+  public void setKey(String keyName, String keyValue) {
+    Security security = Security.getInstance();
+    security.setKey(keyName, keyValue);
+    broadcastState();
+  }
+
+  
 }
