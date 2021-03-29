@@ -134,12 +134,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * </pre>
    */
   protected final Map<String, Connection> connections = new HashMap<>();
-  /**
-   * id's to Connections - although it could be multiple connections per single
-   * id, currently it will be the "last" - some of this capability/info could be
-   * implemented by a route table ...
-   */
-  protected final Map<String, Connection> connectionsIndexx = new HashMap<>();
 
   /**
    * corrected route table with (soon to be regex ids) mapped to
@@ -2007,64 +2001,64 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * sequence to update myrobotlab.jar
    */
   public void restart() {
-      // to avoid deadlock of shutting down from external messages
-      // we spawn a kill thread
-      new Thread("kill-thread"){
-        public void run() {
-          try {
-            
-            info("restarting");
+    // to avoid deadlock of shutting down from external messages
+    // we spawn a kill thread
+    new Thread("kill-thread") {
+      public void run() {
+        try {
 
-            // export to file lastRestart.py
-            exportAll("lastRestart.py");
+          info("restarting");
 
-            // shutdown all services process - send ready to shutdown - ask back
-            // release all services
-            for (ServiceInterface service : getServices()) {
-              service.preShutdown();
-            }
+          // export to file lastRestart.py
+          exportAll("lastRestart.py");
 
-            // check if ready ???
+          // shutdown all services process - send ready to shutdown - ask back
+          // release all services
+          for (ServiceInterface service : getServices()) {
+            service.preShutdown();
+          }
 
-            // release all local services
-            releaseAll();
+          // check if ready ???
 
-            if (runtime != null) {
-              runtime.releaseService();
-            }
-            
-            options.fromLauncher = true; // ???
-            
-            // make sure python is included
-            options.services.add("python");
-            options.services.add("Python");
-            
-            // force invoke
-            options.invoke = new String[] {"python", "execFile", "lastRestart.py"};
+          // release all local services
+          releaseAll();
 
-            // create builder from Launcher daemonize ?
-            log.info("re launching with commands \n{}", CmdOptions.toString(options.getOutputCmd()));
-            ProcessBuilder pb = Launcher.createBuilder(options);
+          if (runtime != null) {
+            runtime.releaseService();
+          }
 
-            // fire it off
-            Process restarted = pb.start();
+          options.fromLauncher = true; // ???
 
-            // dramatic pause
-            sleep(2000);
+          // make sure python is included
+          options.services.add("python");
+          options.services.add("Python");
 
-            // check if process exists
-            if (restarted.isAlive()) {
-              log.info("yay! we continue to live in future generations !");
-            } else {
-              log.error("omg! ... I killed all the services and now there is no offspring ! :(");
-            }
-            log.error("goodbye ...");
-            shutdown();
-          } catch (Exception e) {
-            log.error("shutdown threw", e);
-          }          
+          // force invoke
+          options.invoke = new String[] { "python", "execFile", "lastRestart.py" };
+
+          // create builder from Launcher daemonize ?
+          log.info("re launching with commands \n{}", CmdOptions.toString(options.getOutputCmd()));
+          ProcessBuilder pb = Launcher.createBuilder(options);
+
+          // fire it off
+          Process restarted = pb.start();
+
+          // dramatic pause
+          sleep(2000);
+
+          // check if process exists
+          if (restarted.isAlive()) {
+            log.info("yay! we continue to live in future generations !");
+          } else {
+            log.error("omg! ... I killed all the services and now there is no offspring ! :(");
+          }
+          log.error("goodbye ...");
+          shutdown();
+        } catch (Exception e) {
+          log.error("shutdown threw", e);
         }
-      }.start();
+      }
+    }.start();
   }
 
   static public Map<String, String> getManifest() {
@@ -2122,12 +2116,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     // cannot close thread on this connection
     /*
-    (new Thread() {
-      public void run() {
-        closeConnections();
-      }
-    }).start();
-    */
+     * (new Thread() { public void run() { closeConnections(); } }).start();
+     */
 
     runtime = null;
   }
@@ -2463,14 +2453,20 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // default query
     return describe("platform", null);
   }
-/**
- * Describe results returns the information of a "describe" which can be detailed information
- * regarding services, theire methods and input or output types.
- * 
- * @param uuidX
- * @param query
- * @return
- */
+
+  /**
+   * Describe results returns the information of a "describe" which can be
+   * detailed information regarding services, theire methods and input or output
+   * types.
+   * 
+   * FIXME - describe(String[] filters) where filter can be name, type, local,
+   * state, etc
+   * 
+   * 
+   * @param uuidX
+   * @param query
+   * @return
+   */
   public DescribeResults describe(String uuidXz, DescribeQuery query) {
 
     DescribeResults results = new DescribeResults();
@@ -2512,8 +2508,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public void onDescribe(DescribeResults results) {
     List<Registration> reservations = results.getReservations();
-    if (getId().equals("c1"))
-    {
+    if (getId().equals("c1")) {
       log.info("here");
     }
     if (reservations != null) {
@@ -2590,12 +2585,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   @Override
   public Message getDescribeMsg(String connId) {
-    // TODO support queries    
-    // FIXME !!! - msg.name is wrong with only "runtime" it should be "runtime@id"
-    // TODO - lots of options for a default "describe" 
+    // TODO support queries
+    // FIXME !!! - msg.name is wrong with only "runtime" it should be
+    // "runtime@id"
+    // TODO - lots of options for a default "describe"
     Message msg = Message.createMessage(String.format("%s@%s", getName(), getId()), "runtime", "describe",
         new Object[] { "fill-uuid", CodecUtils.toJson(new DescribeQuery(Platform.getLocalInstance().getId(), connId)) });
-        
+
     return msg;
   }
 
@@ -3040,10 +3036,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       globalArgs = args;
 
       new CommandLine(options).parseArgs(args);
-      
+
       // initialize logging
       initLog();
-      
+
       log.info("in args {}", Launcher.toString(args));
       log.info(CodecUtils.toJson(options));
 
@@ -3193,6 +3189,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
     }
     return null;
+  }
+
+  /**
+   * A gateway is responsible for creating a key to associate a unique "Connection".
+   * This key should be retrievable, when a msg arrives at the service which needs to 
+   * be sent remotely. This key is used to get the "Connection" to send the msg remotely
+   * 
+   * @param string
+   * @param uuid
+   */
+  public void addLocalGatewayKey(String string, String uuid) {
+    routeTable.addLocalGatewayKey(string, uuid);
+  }
+
+  public boolean containsRoute(String remoteId) {
+    return routeTable.contains(remoteId);
+  }
+
+  public String getConnectionUuidFromGatewayKey(String gatewayKey) {
+    return routeTable.getConnectionUuid(gatewayKey);
   }
 
 }
