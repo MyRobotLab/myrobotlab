@@ -201,11 +201,23 @@ public class Clock extends Service {
 
   public static void main(String[] args) throws Exception {
     // LoggingFactory.init(Level.WARN);
-    Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
+    
+    int i = 3;
+    
+    Runtime.main(new String[] { "--id", String.format("wc%d", i), "--from-launcher", "--log-level", "WARN" });
 
     // connections
-    boolean mqtt = true;
-    boolean rconnect = false;
+    boolean webserver = true;
+    boolean mqtt = false;
+    boolean rconnect = true;
+   
+    
+    if (webserver) {
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.setPort(8880 + i); 
+      webgui.startService();
+    }
 
     /*
      * 
@@ -221,12 +233,12 @@ public class Clock extends Service {
       mqtt02.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
       */
       // mqtt02.connect("mqtt://broker.emqx.io:1883");
-      mqtt02.connect("mqtt://localhost:1883");
+      mqtt02.connect("mqtt://localhost:1884");
     }
 
-    if (rconnect) {
+    if (rconnect && i != 0) {
       Runtime runtime = Runtime.getInstance();
-      runtime.connect("http://localhost:8888");
+      runtime.connect(String.format("http://localhost:888%d", i - 1));
 
     }
   }

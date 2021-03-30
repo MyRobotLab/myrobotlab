@@ -534,6 +534,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         return;
       }
 
+      // persistent connection
       if (apiKey.equals(CodecUtils.API_MESSAGES)) {
         // warning - r can change through the ws:// life-cycle
         // we upsert it to keep it fresh ;)
@@ -623,6 +624,8 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         try {
           msg = CodecUtils.fromJson(bodyData, Message.class);
 
+          log.warn("message {}", msg);
+          
           if (msg.containsHop(getId())) {
             log.error("{} dumping duplicate hop msg to avoid cyclical from {} --to--> {}.{}", getName(), msg.sender, msg.name, msg.method);
             return;
@@ -1176,28 +1179,27 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8887);
+      webgui.setPort(8888);
       webgui.startService();
       
       Runtime.start("python", "Python");
             
       MqttBroker broker = (MqttBroker)Runtime.start("broker", "MqttBroker");
-      broker.listen();
+      broker.listen(1884);
+      //broker.listen();
       
       Mqtt mqtt01 = (Mqtt)Runtime.start("mqtt01", "Mqtt");
       /*
       mqtt01.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
       mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
       */
-      mqtt01.connect("mqtt://localhost:1883");
+      mqtt01.connect("mqtt://localhost:1884");
 
       boolean done = true;
       if (done) {
         return;
       }
-      
-
-      
+            
       Runtime.start("neo", "NeoPixel");
       
       Arduino arduino = (Arduino) Runtime.start("arduino", "Arduino");
