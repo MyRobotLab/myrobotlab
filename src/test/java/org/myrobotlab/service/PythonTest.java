@@ -47,6 +47,11 @@ public class PythonTest extends AbstractServiceTest {
     Map test04 = (Map)python.get("test");
     assertEquals(true, test04.get("foo"));
     log.info("executing sleep");
+    
+    python.exec("sleep(1)\ntest = 7");
+    test01 = (Integer)python.get("test");
+    expected01 = 7;
+    assertEquals(expected01, test01);
 
     // FIXME - because the scripts and "finishedExecutingScript" events are not
     // bound to each other with unique ids, you can waitFor finishedExecutingScript
