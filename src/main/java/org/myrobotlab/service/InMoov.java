@@ -1563,7 +1563,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     this.attach(chatBot);
     speakBlocking(languagePack.get("CHATBOTACTIVATED"));
     chatBot.repetitionCount(10);
-    chatBot.setPath("InMoov/chatBot");
+    chatBot.setPath("InMoov/chatbot");
     chatBot.startSession("default", getLanguage());
     // reset some parameters to default...
     chatBot.setPredicate("topic", "default");
