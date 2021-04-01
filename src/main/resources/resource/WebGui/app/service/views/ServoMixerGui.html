@@ -1,42 +1,45 @@
 <!-- ServoMixerGui html-->
 <div class="container rzMixer">
     <div class="MixerTop">
-
         <div class="row">
-
             <div class="MixerDirectory">
-                <div class="labelRow">Pose: <span class="currentPose"> {{currentPose.name}}&nbsp;</span></div>
+                <div class="labelRow">
+                    Pose: <span class="currentPose">{{currentPose.name}}&nbsp;</span>
+                </div>
                 <div class="buttonsRow">
                     <span class="glyphicon glyphicon-folder-open"></span>
                     <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.posesDirectory" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="width:200px">
-                    <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getPosesDirectory(service.posesDirectory)"> Open</button>
-                    <button class="btn btn-default" ng-click="msg.setPosesDirectory(directoryName)"> Save</button>
-                </div>           
+                    <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getPosesDirectory(service.posesDirectory)">Open</button>
+                    <button class="btn btn-default" ng-click="msg.setPosesDirectory(directoryName)">Save</button>
+                </div>
                 <select ng-model="selectedPose" ng-change="msg.loadPose(selectedPose)" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
                     <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
                 </select>
                 <div class="buttonsRow">
                     <div>
                         <button class="btn btn-default" ng-click="msg.moveToPose(currentPose.name)">
-                            <span class="glyphicon glyphicon-play"></span> Move
+                            <span class="glyphicon glyphicon-play"></span>
+                            Move
+                        
                         </button>
                     </div>
                     <div>
                         <button class="btn btn-default" ng-click="msg.deletePose(poseName)">
-                            <span class="glyphicon glyphicon-remove red"></span> Delete
+                            <span class="glyphicon glyphicon-remove red"></span>
+                            Delete
+                        
                         </button>
                     </div>
                     <div>
                         <div class="input-group">
                             <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" ng-model="poseName" name="poseName" id="poseName" ng-init="" placeholder="name" style="">
                             <span class="input-group-btn">
-                                <button class="btn btn-default" ng-click="msg.savePose(poseName)"> Save</button>
+                                <button class="btn btn-default" ng-click="msg.savePose(poseName)">Save</button>
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
-
             <div class="MixerDirectory">
                 <div class="labelRow">
                     Sequence: <span class="currentPose">{{currentSequence.name}}&nbsp;</span>
@@ -44,61 +47,72 @@
                 <div class="buttonsRow">
                     <span class="glyphicon glyphicon-folder-open"></span>
                     <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.sequenceDirectory" name="sequenceDirectoryName" id="sequenceDirectoryName" ng-init="" placeholder="Sequence directory" style="width:200px">
-                    <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getSequenceDirectory(service.sequenceDirectory)"> Open</button>
-                    <button class="btn btn-default" ng-click="msg.setSequenceDirectory(sequenceDirectoryName)"> Save</button>
-                </div>           
+                    <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getSequenceDirectory(service.sequenceDirectory)">Open</button>
+                    <button class="btn btn-default" ng-click="msg.setSequenceDirectory(sequenceDirectoryName)">Save</button>
+                </div>
                 <select ng-model="selectedSequence" ng-change="msg.loadSequence(selectedSequence)" class="form-control vertical-menu poseList" size="6" title="Select a sequence to load">
                     <option ng-repeat="x in sequenceFiles" ng-value="{{x}}">{{x}}</option>
                 </select>
                 <div class="buttonsRow">
                     <div>
                         <button class="btn btn-default" ng-click="msg.playSequence(sequenceName)">
-                            <span class="glyphicon glyphicon-play"></span> Play
+                            <span class="glyphicon glyphicon-play"></span>
+                            Play
+                        
                         </button>
                     </div>
                     <div>
                         <button class="btn btn-default" ng-click="msg.deleteSequence(sequenceName)">
-                            <span class="glyphicon glyphicon-remove red"></span> Delete
+                            <span class="glyphicon glyphicon-remove red"></span>
+                            Delete
+                        
                         </button>
                     </div>
                 </div>
             </div>
-
             <div class="MixerDirectory">
-                <div class="labelRow">
-                    Sequence content
+                <div class="labelRow">Sequence content
                 </div>
                 <div class="buttonsRow">
                     <div class="input-group">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" title="Add speak to sequence"><span class="glyphicon glyphicon-plus"></span> Speak</button>
+                            <button class="btn btn-default" title="Add speak to sequence">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Speak
+                            </button>
                         </span>
                         <input class="form-control ng-pristine ng-untouched ng-valid ng-empty poseName" type="text" ng-model="addSequenceSpeak" name="addSequenceSpeak" id="addSequenceSpeak" ng-init="" placeholder="type">
-                    </div>    
+                    </div>
                     <div>
-                        Blocking <toggle class="miniBTN" title="Speak Blocking" ng-model="" ng-change="" on="" off="" size="btn-lg"/>
+                        Blocking <toggle class="miniBTN" title="Speak Blocking" ng-model="blocking" ng-change="" on="" off="" size="btn-lg"/>
                     </div>
                 </div>
                 <div class="buttonsRow">
-                    <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(currentPose.name)"><span class="glyphicon glyphicon-plus"></span>{{currentPose.name}}</button>               
+                    <button class="btn btn-default addPoseButton" title="Add current pose to sequence" ng-click="msg.addSequencePose(currentPose.name)">
+                        <span class="glyphicon glyphicon-plus"></span>
+                        {{currentPose.name}}
+                    </button>
                     <div class="input-group">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" ng-click="msg.addSequenceDelay(sequenceDelay)" title="Add Delay in seconds to sequence"><span class="glyphicon glyphicon-plus"></span> Delay</button>
+                            <button class="btn btn-default" ng-click="msg.addSequenceDelay(sequenceDelay)" title="Add Delay in seconds to sequence">
+                                <span class="glyphicon glyphicon-plus"></span>
+                                Delay
+                            </button>
                         </span>
                         <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldDelay" type="text" ng-model="addSequenceDelay" name="addSequenceDelay" id="addSequenceDelay" ng-init="" placeholder="sec">
                     </div>
-                </div>           
+                </div>
                 <select ng-model="selectedSequence" class="form-control vertical-menu sequenceContentList" title="Select a sequence to load" size="4">
-                    <option ng-repeat="" ng-value="">{{x}}</option>
+                <!-- option ng-repeat="" ng-value="">{{x}}</option -->
                 </select>
                 <div class="buttonsRow">
                     <span class="btn-group">
                         <button class="btn btn-default btn-group updownButton" title="Move Up" ng-click="">
                             <span class="glyphicon glyphicon-triangle-top"></span>
-                        </button>                    
+                        </button>
                         <button class="btn btn-default btn-group updownButton" title="Move Down" ng-click="">
                             <span class="glyphicon glyphicon-triangle-bottom"></span>
-                        </button>                   
+                        </button>
                         <button class="btn btn-default btn-group updownButton" title="Remove Pose" ng-click="msg.deleteSequence(sequenceName)">
                             <span class="glyphicon glyphicon-remove red"></span>
                         </button>
@@ -106,24 +120,20 @@
                     <div class="input-group">
                         <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldSave" type="text" ng-model="sequenceName" name="sequenceName" id="sequenceName" ng-init="" placeholder="name" style="">
                         <span class="input-group-btn">
-                            <button class="btn btn-default" ng-click="msg.saveSequence(sequenceName)"> Save</button>
+                            <button class="btn btn-default" ng-click="msg.saveSequence(sequenceName)">Save</button>
                         </span>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
     <div class="row servoFilter">
-        Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
-        <button class="btn btn-default" ng-click="searchServo.displayName=''">Show All</button>
-    </div>     
-    <div ng-repeat="servo in service.allServos | filter:searchServo.displayName">
+        Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" ng-change="searchServos(searchServo.displayName)" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
+    </div>
+    <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
         <div class="sliderMixer">
-            <div class="MixerServoName">{{servo}}</div>
-            <div service-body panel="subPanels[servo]" /></div>
+            <div class="MixerServoName">{{key}}</div>
+            <div service-body panel="mrl.getPanel(key)"/></div>
         </div>
     </div>
-
 </div>

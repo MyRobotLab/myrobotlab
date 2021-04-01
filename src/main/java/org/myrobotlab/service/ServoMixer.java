@@ -32,6 +32,7 @@ public class ServoMixer extends Service {
 
     // FIXME - make this part of framework !!!!
     // subscribe("runtime", "started");
+    // FIXME - use onStart(service) if type Servo
     subscribe("runtime", "registered");
     subscribe("runtime", "released");
 
@@ -40,6 +41,11 @@ public class ServoMixer extends Service {
     List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
     for (String sc : all) {
       allServos.add(Runtime.getFullName(sc));
+    }
+    
+    File poseDirectory = new File(posesDirectory);
+    if (!poseDirectory.exists()) {
+      poseDirectory.mkdirs();
     }
 
   }
@@ -81,13 +87,8 @@ public class ServoMixer extends Service {
   }
 
   public void savePose(String name, List<ServoControl> servos) throws IOException {
-    // TODO: save this pose somewhere!
-    // we should make a directory
     File poseDirectory = new File(posesDirectory);
-    if (!poseDirectory.exists()) {
-      poseDirectory.mkdirs();
-    }
-
+    
     log.info("Saving pose name {}", name);
     Pose p = new Pose(name, servos);
     // p.save()

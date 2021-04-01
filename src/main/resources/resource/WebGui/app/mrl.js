@@ -42,6 +42,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // FIXME - let the webgui pass up the id unless configured not to
     function generateId() {
         // one id to rule them all !
+        
+        // non unique
+        // return 'webgui-client'
+
+        // unique
         return 'webgui-client-' + new Date().getTime()
     }
 
@@ -226,6 +231,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * and other details related to connection could be managed here.
      */
     this.sendMessage = function(msg) {
+        console.info('out-msg <-- ' + msg.name + '.' + msg.method)
         msg.encoding = 'json'
         if (msg.data != null && msg.data.length > 0) {
             // reverse encoding - pop off undefined
@@ -355,7 +361,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // first parse parses header and array of encoded strings
                 msg = jQuery.parseJSON(body)
 
-                console.info('in-msg --> ' + msg.method)
+                console.info('in-msg --> ' + msg.name + '.' + msg.method)
 
                 if (msg == null) {
                     console.log('msg null')
