@@ -78,7 +78,7 @@ node ('ubuntu') {  // use labels to direct build
       junit '**/target/surefire-reports/TEST-*.xml'
    }
    stage('javadoc'){
-     if (params.environment == 'javadoc') {}
+     if (params.environment == 'javadoc') {
         if (isUnix()) {
           sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
         } else {
