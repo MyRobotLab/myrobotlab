@@ -20,6 +20,8 @@ pipeline {
 
    stages {
       stage('preparation') { // for display purposes
+        steps {
+
          // initial clean - remove afte successful build
          cleanWs() // - unless bootstrap is needed - cleanWS should be done at the end of the build
 
@@ -46,8 +48,10 @@ pipeline {
          // env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
          sh 'java -version'
          echo sh(script: 'env|sort', returnStdout: true)
+         }
       }
       stage('compile') {
+         steps {
          echo git_commit
          echo "git_commit=$git_commit"
          // Run the maven build
@@ -58,6 +62,7 @@ pipeline {
          } else {
             // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
             bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dmaven.test.failure.ignore -q clean compile  /)
+         }
          }
       }
       stage('verify') {
@@ -77,6 +82,7 @@ pipeline {
          junit '**/target/surefire-reports/TEST-*.xml'
       }
       stage('javadoc') {
+         steps {
          if (params.environment == 'javadoc') {
             if (isUnix()) {
                sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
@@ -84,15 +90,18 @@ pipeline {
                bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
             }
          }
+         }
       }
       stage('archive') {
             // archiveArtifacts 'target/myrobotlab.jar'
             archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
       }
       stage('jacoco') {
-         jacoco()
-      // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-      // jacoco(execPattern: '**/*.exec')
+         steps {
+            jacoco()
+         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+         // jacoco(execPattern: '**/*.exec')
+         }
       }
       stage('publish') {
       //        def server = Artifactory.server 'artifactory01'
@@ -108,7 +117,9 @@ pipeline {
       }
 
       stage('clean') {
-         cleanWs()
+         steps {
+            cleanWs()
+         }
       }
    }
 
