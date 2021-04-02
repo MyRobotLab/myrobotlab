@@ -14,19 +14,22 @@ pipeline {
    agent any
 
    // properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
-
+/*
     tools { 
         maven 'M3' 
         jdk 'openjdk-11' 
     }
-
+*/
    parameters {
       choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
    }
 
    stages {
-      stage('preparation') { // for display purposes
+      stage('preparation') {
+         agent {
+             docker { image 'maven:3-alpine' }
+         }         
         steps {
            script {
                // initial clean - remove afte successful build
