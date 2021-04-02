@@ -6,11 +6,18 @@
  *
  ***********************************************************************************/
 
-def mvnHome
+def mvnHome = tool 'M3'
 
 
 pipeline {
 
+    agent {
+        label "builder"
+    }
+
+    options {
+        disableConcurrentBuilds()
+    }
    // properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
    parameters {
@@ -39,7 +46,7 @@ pipeline {
       // Get the Maven tool.
       // ** NOTE: This 'M3' Maven tool must be configured
       // **       in the global configuration.
-      mvnHome = tool 'M3'
+      // mvnHome = tool 'M3'
 
       // env.JAVA_HOME="${tool 'Java8'}"
       // env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
