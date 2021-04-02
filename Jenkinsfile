@@ -5,6 +5,10 @@
  * Jenkins.instance.getItemByFullName("myrobotlab-multibranch/develop").updateNextBuildNumber(185)
  *
  ***********************************************************************************/
+
+def mvnHome
+
+
 pipeline {
 
    // properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
@@ -14,7 +18,6 @@ pipeline {
    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
    }
 
-   def mvnHome
    stage('preparation') { // for display purposes
       // initial clean - remove afte successful build
       cleanWs() // - unless bootstrap is needed - cleanWS should be done at the end of the build
