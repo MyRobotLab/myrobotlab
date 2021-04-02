@@ -16,8 +16,7 @@ pipeline {
    // properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
     tools { 
-        maven 'Maven 3.6.0' 
-        jdk 'jdk11' 
+        maven 'M3' 
     }
 
    parameters {
