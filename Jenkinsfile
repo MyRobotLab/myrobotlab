@@ -27,9 +27,11 @@ pipeline {
 
    stages {
       stage('preparation') {
+         /*
          agent {
              docker { image 'maven:3-alpine' }
-         }         
+         } 
+         */
         steps {
            script {
                // initial clean - remove afte successful build
