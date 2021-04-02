@@ -12,14 +12,12 @@ properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKe
 node ('ubuntu') {  // use labels to direct build
 
    // withEnv(javaEnv) {
-   
-   parameters {
-        choice(
-            choices: ['true' , 'false'],
-            description: 'this is the description',
-            name: 'EXTENDED_VERIFY')
+       
+    parameters {
+        choice(choices: ['standard', 'javadoc', 'full-test'], description: 'build type', name: 'buildType')
+        // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
-   
+
    
    def mvnHome
    stage('preparation') { // for display purposes
@@ -79,6 +77,15 @@ node ('ubuntu') {  // use labels to direct build
    stage('junit') {
       junit '**/target/surefire-reports/TEST-*.xml'
    }
+   stage('javadoc'){
+     if (params.environment == 'javadoc') {}
+        if (isUnix()) {
+          sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
+        } else {
+          bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
+        }
+     }
+   }
    stage('archive') {
          // archiveArtifacts 'target/myrobotlab.jar'
          archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
@@ -88,13 +95,6 @@ node ('ubuntu') {  // use labels to direct build
         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
         // jacoco(execPattern: '**/*.exec')
    } 
-   stage('javadoc'){
-	   if (isUnix()) {
-	     sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
-	   } else {
-	     bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
-	   }
-   }
    stage('publish') {
    
 //    	def server = Artifactory.server 'artifactory01' 
