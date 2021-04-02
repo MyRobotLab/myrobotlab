@@ -53,17 +53,19 @@ pipeline {
       }
       stage('compile') {
          steps {
-         echo git_commit
-         echo "git_commit=$git_commit"
-         // Run the maven build
-         if (isUnix()) {
-            // -o == offline
-            // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
-            sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dmaven.test.failure.ignore -q clean compile "
-         } else {
-            // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
-            bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dmaven.test.failure.ignore -q clean compile  /)
-         }
+            script {
+               echo git_commit
+               echo "git_commit=$git_commit"
+               // Run the maven build
+               if (isUnix()) {
+                  // -o == offline
+                  // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
+                  sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dmaven.test.failure.ignore -q clean compile "
+               } else {
+                  // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dmaven.test.failure.ignore -q clean compile  /)
+               }
+            }
          }
       }
       stage('verify') {
@@ -84,13 +86,15 @@ pipeline {
       }
       stage('javadoc') {
          steps {
-         if (params.environment == 'javadoc') {
-            if (isUnix()) {
-               sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
-         } else {
-               bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
+            script {
+                  if (params.environment == 'javadoc') {
+                     if (isUnix()) {
+                        sh "'${mvnHome}/bin/mvn' -q javadoc:javadoc"
+                  } else {
+                        bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
+                     }
+                  }
             }
-         }
          }
       }
       stage('archive') {
