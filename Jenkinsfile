@@ -17,6 +17,7 @@ pipeline {
 
     tools { 
         maven 'M3' 
+        jdk 'openjdk-11' 
     }
 
    parameters {
