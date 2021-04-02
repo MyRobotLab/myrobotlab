@@ -21,33 +21,34 @@ pipeline {
    stages {
       stage('preparation') { // for display purposes
         steps {
+           script {
+               // initial clean - remove afte successful build
+               cleanWs() // - unless bootstrap is needed - cleanWS should be done at the end of the build
 
-         // initial clean - remove afte successful build
-         cleanWs() // - unless bootstrap is needed - cleanWS should be done at the end of the build
+               // Get some code from a GitHub repository
+               checkout scm
+               // checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
+               // git 'https://github.com/MyRobotLab/myrobotlab.git'
+               // git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
 
-         // Get some code from a GitHub repository
-         checkout scm
-         // checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MyRobotLab/myrobotlab.git']]])
-         // git 'https://github.com/MyRobotLab/myrobotlab.git'
-         // git url: 'https://github.com/MyRobotLab/myrobotlab.git', branch: 'develop'
+               sh 'git rev-parse --abbrev-ref HEAD > GIT_BRANCH'
+               git_branch = readFile('GIT_BRANCH').trim()
+               echo git_branch
 
-         sh 'git rev-parse --abbrev-ref HEAD > GIT_BRANCH'
-         git_branch = readFile('GIT_BRANCH').trim()
-         echo git_branch
+               sh 'git rev-parse HEAD > GIT_COMMIT'
+               git_commit = readFile('GIT_COMMIT').trim()
+               echo git_commit
 
-         sh 'git rev-parse HEAD > GIT_COMMIT'
-         git_commit = readFile('GIT_COMMIT').trim()
-         echo git_commit
+               // Get the Maven tool.
+               // ** NOTE: This 'M3' Maven tool must be configured
+               // **       in the global configuration.
+               // mvnHome = tool 'M3'
 
-         // Get the Maven tool.
-         // ** NOTE: This 'M3' Maven tool must be configured
-         // **       in the global configuration.
-         // mvnHome = tool 'M3'
-
-         // env.JAVA_HOME="${tool 'Java8'}"
-         // env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
-         sh 'java -version'
-         echo sh(script: 'env|sort', returnStdout: true)
+               // env.JAVA_HOME="${tool 'Java8'}"
+               // env.PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+               sh 'java -version'
+               echo sh(script: 'env|sort', returnStdout: true)
+            }
          }
       }
       stage('compile') {
