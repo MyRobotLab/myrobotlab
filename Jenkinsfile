@@ -15,6 +15,11 @@ pipeline {
 
    // properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
+    tools { 
+        maven 'Maven 3.6.0' 
+        jdk 'jdk11' 
+    }
+
    parameters {
       choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
