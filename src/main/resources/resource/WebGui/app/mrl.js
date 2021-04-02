@@ -12,7 +12,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // TODO - get 'real' platform info - browser type - node version - etc
     let platform = {
-        os: "chrome",
+        os: "browser",
         lang: "javascript",
         bitness: 64,
         mrlVersion: "unknown"
