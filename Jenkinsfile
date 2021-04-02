@@ -95,8 +95,10 @@ pipeline {
          }
       }
       stage('archive') {
+         steps {
             // archiveArtifacts 'target/myrobotlab.jar'
             archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+         }
       }
       stage('jacoco') {
          steps {
@@ -105,19 +107,7 @@ pipeline {
          // jacoco(execPattern: '**/*.exec')
          }
       }
-      stage('publish') {
-      //        def server = Artifactory.server 'artifactory01'
-      //        def uploadSpec = """{
-      //                                 "files": [
-      //                                            {
-      //                                              "pattern": "target/myrobotlab.jar",
-      //                                              "target": "org/myrobotlab/"
-      //                                            }
-      //                                         ]
-      //                                        }"""
-      //        server.upload(uploadSpec)
-      }
-
+      // TODO - publish
       stage('clean') {
          steps {
             cleanWs()
