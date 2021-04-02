@@ -7,16 +7,18 @@
  ***********************************************************************************/
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '3')), [$class: 'GithubProjectProperty', displayName: '', projectUrlStr: 'https://github.com/MyRobotLab/myrobotlab/'], pipelineTriggers([[$class: 'PeriodicFolderTrigger', interval: '2m']])])
 
+parameters {
+    choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
+    // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
+}
+
+
 // node { // use any node
 
 node ('ubuntu') {  // use labels to direct build
 
    // withEnv(javaEnv) {
        
-    parameters {
-        choice(choices: ['standard', 'javadoc', 'full-test'], description: 'build type', name: 'buildType')
-        // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
-    }
 
    
    def mvnHome
