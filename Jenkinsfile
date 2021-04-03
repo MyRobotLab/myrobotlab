@@ -47,9 +47,12 @@ pipeline {
                     git rev-parse --abbrev-ref HEAD > GIT_BRANCH
                     git rev-parse HEAD > GIT_COMMIT
                 '''
+               }
+               step {
                 git_commit = readFile('GIT_COMMIT').trim()
                 echo git_commit
-
+               }
+               step {
                 git_branch = readFile('GIT_BRANCH').trim()
                 echo git_branch
                }
