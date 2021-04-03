@@ -54,28 +54,83 @@ pipeline {
                   echo sh(script: 'env|sort', returnStdout: true)
                 }
             }
-        }
+        } // stage build
 
-         stage('compile') {
-            steps {
-               script {
-                  echo git_commit
-                  echo "git_commit=$git_commit"
-                  // Run the maven build
-                  if (isUnix()) {
-                     // -o == offline
-                     // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
-                     sh '''
-                        # jenkins is messing this var up - force it to be correct here
-                        export JAVA_HOME=${JDK_HOME}
-                        mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
-                     '''
-                  } else {
-                     // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
-                     bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
-                  }
+      stage('compile') {
+         steps {
+            script {
+               echo git_commit
+               echo "git_commit=$git_commit"
+               // Run the maven build
+               if (isUnix()) {
+                  // -o == offline
+                  // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
+                  sh '''
+                     # jenkins is messing this var up - force it to be correct here
+                     export JAVA_HOME=${JDK_HOME}
+                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                  '''
+               } else {
+                  // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
                }
             }
          }
-    }
+      } // stage compile
+
+      stage('verify') {
+         steps {
+            script {
+               // TODO - integration tests !
+               if (isUnix()) {
+                  sh '''
+                     # jenkins is messing this var up - force it to be correct here
+                     export JAVA_HOME=${JDK_HOME}
+                     mvn -Dfile.encoding=UTF-8 verify
+                  '''
+               } else {
+                  bat(/"${mvnHome}\bin\mvn" -Dfile.encoding=UTF-8 verify/)
+               }
+            }
+         }
+      } // stage verify
+
+      stage('javadoc') {
+         steps {
+            script {
+                  if (params.buildType == 'javadoc') {
+                     if (isUnix()) {
+                        sh '''
+                           # jenkins is messing this var up - force it to be correct here
+                           export JAVA_HOME=${JDK_HOME}
+                           mvn -Dfile.encoding=UTF-8 verify
+                        '''
+                     } else {
+                        bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
+                     }
+                  }
+            }
+         }
+      } // stage javadoc
+
+      stage('archive') {
+         steps {
+            // archiveArtifacts 'target/myrobotlab.jar'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+         }
+      }
+      stage('jacoco') {
+         steps {
+            jacoco()
+         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+         // jacoco(execPattern: '**/*.exec')
+         }
+      }
+      // TODO - publish
+      stage('clean') {
+         steps {
+            cleanWs()
+         }
+      }
+   } // stages 
 }
