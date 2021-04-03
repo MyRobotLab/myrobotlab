@@ -34,6 +34,7 @@ pipeline {
             steps {
                script {
                   sh '''
+                     # jenkins redefines JAVA_HOME incorrectly - fix here
                      export JAVA_HOME="${JDK_HOME}"
 
                      mvn -version
@@ -58,6 +59,11 @@ pipeline {
          stage('compile') {
             steps {
                script {
+                  sh '''
+                     # jenkins redefines JAVA_HOME incorrectly - fix here
+                     export JAVA_HOME="${JDK_HOME}"
+                  '''
+                  
                   echo git_commit
                   echo "git_commit=$git_commit"
                   // Run the maven build
