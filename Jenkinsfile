@@ -68,7 +68,7 @@ pipeline {
                      sh '''
                         # jenkins is messing this var up - force it to be correct here
                         export JAVA_HOME=${JDK_HOME}
-                        echo ${MAVEN_HOME}/bin/mvn
+                        echo "${MAVEN_HOME}/bin/mvn -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile"
                         exec "${MAVEN_HOME}/bin/mvn -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile"
                      '''
                   } else {
