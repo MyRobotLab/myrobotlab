@@ -32,6 +32,7 @@ pipeline {
     stages {
         stage ('Initialize') {
             steps {
+               step {
                 sh '''
                     export JAVA_HOME="${JDK_HOME}"
 
@@ -51,7 +52,9 @@ pipeline {
 
                 git_branch = readFile('GIT_BRANCH').trim()
                 echo git_branch
+               }
             }
+             
         }
 
         stage ('Build') {
