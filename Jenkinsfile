@@ -30,37 +30,49 @@ pipeline {
     }
 
     stages {
-        stage ('Initialize') {
+        stage ('initialize') {
             steps {
-                sh '''
-                    export JAVA_HOME="${JDK_HOME}"
+               script {
+                  sh '''
+                     export JAVA_HOME="${JDK_HOME}"
 
-                    echo "===================env========================"
-                    printenv
-                    echo "===================env========================"
+                     mvn -version
+                     java -version
 
-                    mvn -version
-                    java -version
+                     # create git meta files
+                     git rev-parse --abbrev-ref HEAD > GIT_BRANCH
+                     git rev-parse HEAD > GIT_COMMIT
+                  '''
 
-                    # create git meta files
-                    git rev-parse --abbrev-ref HEAD > GIT_BRANCH
-                    git rev-parse HEAD > GIT_COMMIT
-                '''
-                script {
                   git_commit = readFile('GIT_COMMIT').trim()
                   echo git_commit
 
                   git_branch = readFile('GIT_BRANCH').trim()
                   echo git_branch
+
+                  echo sh(script: 'env|sort', returnStdout: true)
+
                 }
             }
              
         }
 
-        stage ('Build') {
+         stage('compile') {
             steps {
-                echo 'This is a minimal pipeline.'
+               script {
+                  echo git_commit
+                  echo "git_commit=$git_commit"
+                  // Run the maven build
+                  if (isUnix()) {
+                     // -o == offline
+                     // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
+                     sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile "
+                  } else {
+                     // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
+                     bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  }
+               }
             }
-        }
+         }
     }
 }
