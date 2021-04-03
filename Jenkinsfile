@@ -32,7 +32,6 @@ pipeline {
     stages {
         stage ('Initialize') {
             steps {
-               step {
                 sh '''
                     export JAVA_HOME="${JDK_HOME}"
 
@@ -47,16 +46,15 @@ pipeline {
                     git rev-parse --abbrev-ref HEAD > GIT_BRANCH
                     git rev-parse HEAD > GIT_COMMIT
                 '''
-               }
-               step {
-                  script {
-                     git_commit = readFile('GIT_COMMIT').trim()
-                     echo git_commit
-                     git_branch = readFile('GIT_BRANCH').trim()
-                     echo git_branch
-                  }
-               }
+                script {
+                  git_commit = readFile('GIT_COMMIT').trim()
+                  echo git_commit
+
+                  git_branch = readFile('GIT_BRANCH').trim()
+                  echo git_branch
+                }
             }
+             
         }
 
         stage ('Build') {
