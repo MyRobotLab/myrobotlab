@@ -59,18 +59,17 @@ pipeline {
          stage('compile') {
             steps {
                script {
-                  sh '''
-                     # jenkins redefines JAVA_HOME incorrectly - fix here
-                     export JAVA_HOME="${JDK_HOME}"
-                  '''
-                  
                   echo git_commit
                   echo "git_commit=$git_commit"
                   // Run the maven build
                   if (isUnix()) {
                      // -o == offline
                      // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
-                     sh "'${MAVEN_HOME}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile "
+                     sh '''
+                        # jenkins is messing this var up - force it to be correct here
+                        export JAVA_HOME="${JDK_HOME}"
+                        "${MAVEN_HOME}/bin/mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                     '''
                   } else {
                      // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
                      bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
