@@ -49,15 +49,14 @@ pipeline {
                 '''
                }
                step {
-                git_commit = readFile('GIT_COMMIT').trim()
-                echo git_commit
-               }
-               step {
-                git_branch = readFile('GIT_BRANCH').trim()
-                echo git_branch
+                  script {
+                     git_commit = readFile('GIT_COMMIT').trim()
+                     echo git_commit
+                     git_branch = readFile('GIT_BRANCH').trim()
+                     echo git_branch
+                  }
                }
             }
-             
         }
 
         stage ('Build') {
