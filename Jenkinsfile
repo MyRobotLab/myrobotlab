@@ -12,7 +12,7 @@ pipeline {
     agent { label params['agent-name'] } 
 
     parameters {
-      agent { label params['agent-name'] } 
+      agentParameter name:'agent-name'
       choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
