@@ -7,13 +7,18 @@
  ***********************************************************************************/
 
 pipeline {
-    agent any
+
+    // create agent string based on selections of parameters
 
     parameters {
+      choice(choices: ['any', 'media', 'grog', 'worke', 'phobos'], description: 'agent', name: 'agentName')
       choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
+    echo params.agentName
+
+    agent params.agentName
     
     tools { 
         maven 'M3' // defined in global tools
