@@ -8,18 +8,16 @@
 
 pipeline {
 
-    // create agent string based on selections of parameters
+    // https://plugins.jenkins.io/agent-server-parameter/
+    agent { label params['agent-name'] } 
 
     parameters {
-      choice(choices: ['any', 'media', 'grog', 'worke', 'phobos'], description: 'agent', name: 'agentName')
+      agent { label params['agent-name'] } 
       choice(choices: ['standard', 'javadoc', 'quick'], description: 'build type', name: 'buildType')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
-    // echo params.agentName
-
-    agent { params.agentName }  
-    
+    // echo params.agentName    
     tools { 
         maven 'M3' // defined in global tools
         jdk 'openjdk-11-linux' // defined in global tools
@@ -37,6 +35,7 @@ pipeline {
     stages {
         stage ('initialize') {
             steps {
+               print params['agent-name'] 
                script {
                   sh '''
                      # jenkins redefines JAVA_HOME incorrectly - fix here
