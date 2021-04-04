@@ -18,7 +18,7 @@ pipeline {
 
     // echo params.agentName
 
-    agent params.agentName
+    agent { params.agentName }  
     
     tools { 
         maven 'M3' // defined in global tools
