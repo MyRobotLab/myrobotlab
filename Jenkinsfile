@@ -16,7 +16,7 @@ pipeline {
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
-    echo params.agentName
+    // echo params.agentName
 
     agent params.agentName
     
