@@ -409,9 +409,9 @@ public class Python extends Service {
 
     /*
      * don't respect java accessibility, so that we can access protected members
-     * on subclasses
+     * on subclasses - NO ! - future versions of java will not allow this ! removing (GroG 20210404)
      */
-    props.put("python.security.respectJavaAccessibility", "false");
+    // props.put("python.security.respectJavaAccessibility", "false");
     props.put("python.import.site", "false");
 
     Properties preprops = System.getProperties();
