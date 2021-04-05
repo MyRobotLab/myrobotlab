@@ -27,7 +27,7 @@ pipeline {
     // JAVA_HOME="/home/jenkins/agent/tools/hudson.model.JDK/openjdk-11-linux/jdk-11.0.1"
     environment {
         DB_ENGINE    = 'sqlite'
-        JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
+        // JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
         // JAVA_HOME = "${JDK_HOME}"
         // PATH="${env.JAVA_HOME}/bin:${env.PATH}"
     }
