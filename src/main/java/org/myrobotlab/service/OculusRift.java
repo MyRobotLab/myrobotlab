@@ -1,19 +1,14 @@
 package org.myrobotlab.service;
 
-import static com.oculusvr.capi.OvrLibrary.OVR_DEFAULT_IPD;
 import static com.oculusvr.capi.OvrLibrary.ovrProjectionModifier.ovrProjection_ClipRangeOpenGL;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
 import static org.lwjgl.glfw.GLFW.glfwInit;
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
 import static org.lwjgl.glfw.GLFW.glfwSetFramebufferSizeCallback;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.opengl.GL11.GL_BACK;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
@@ -49,6 +44,7 @@ import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZNEG_PNG;
 import static org.saintandreas.ExampleResource.IMAGES_SKY_CITY_ZPOS_PNG;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +52,6 @@ import java.util.Map;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GLCapabilities;
-import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.headtracking.OculusTracking;
 import org.myrobotlab.image.SerializableImage;
@@ -65,7 +59,6 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.kinematics.Point;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.oculus.OculusDisplay;
 import org.myrobotlab.service.data.Orientation;
 import org.myrobotlab.service.interfaces.PointPublisher;
 import org.saintandreas.gl.FrameBuffer;
@@ -73,12 +66,13 @@ import org.saintandreas.gl.IndexedGeometry;
 import org.saintandreas.gl.MatrixStack;
 import org.saintandreas.gl.OpenGL;
 import org.saintandreas.gl.buffers.VertexArray;
+import org.saintandreas.gl.shaders.Attribute;
 import org.saintandreas.gl.shaders.Program;
 import org.saintandreas.gl.textures.Texture;
 import org.saintandreas.math.Matrix4f;
 import org.saintandreas.math.Quaternion;
-import org.saintandreas.math.Vector2f;
 import org.saintandreas.math.Vector3f;
+import org.saintandreas.math.Vector4f;
 import org.saintandreas.resources.Resource;
 import org.slf4j.Logger;
 
@@ -90,6 +84,7 @@ import com.oculusvr.capi.LayerEyeFov;
 import com.oculusvr.capi.MirrorTexture;
 import com.oculusvr.capi.MirrorTextureDesc;
 import com.oculusvr.capi.OvrLibrary;
+import com.oculusvr.capi.OvrLibrary.InputState;
 import com.oculusvr.capi.OvrMatrix4f;
 import com.oculusvr.capi.OvrQuaternionf;
 import com.oculusvr.capi.OvrRecti;
@@ -115,65 +110,56 @@ import com.oculusvr.capi.ViewScaleDesc;
  * @author kwatters
  *
  */
-// TODO: implement publishOculusRiftData ...
+// TODO: implement OrientationPublisher PositionPublisher
 public class OculusRift extends Service implements PointPublisher {
 
   public static final int ABS_TIME_MS = 0;
   public static final boolean LATENCY_MARKER = false;
 
-  public static final String RIGHT_OPEN_CV = "rightOpenCV";
-  public static final String LEFT_OPEN_CV = "leftOpenCV";
   private static final long serialVersionUID = 1L;
   private static final float RAD_TO_DEGREES = 57.2957795F;
   public final static Logger log = LoggerFactory.getLogger(OculusRift.class);
 
+  final transient OvrLibrary.InputState.ByReference inputStateRef = new OvrLibrary.InputState.ByReference();
+  
   // the Rift stuff.
   transient protected Hmd hmd;
 
   protected Map<String, Object> hmdProps = new HashMap<>();
 
-  @Deprecated /* not needed send left and right images or mono and mirror it */
-  transient private RiftFrame lastRiftFrame = new RiftFrame();
-
-  @Deprecated /* use pub/sub */
-  transient private OculusDisplay display;
-
   private HmdDesc hmdDesc;
 
-  transient public OculusTracking headTracker = null;
-  
- 
-  // for single camera support, mirror the images
-  private boolean mirrorImage = false;
-  protected String rightImagePublisher;
-  protected String leftImagePublisher;
+  final transient public OculusTracking headTracker;
 
-  ////////////////////////// begin display decompose /////////////////////////////////////////
+  // for single camera support, monitor the images
+  private boolean useMonitor = false;
+
   /**
    * handle to the glfw window - for a regular display window monitor
    */
-  private long window = 0;  
+  private long monitorWindow = 0;
   // lwjgl3 callback
   transient private GLFWErrorCallback errorCallback;
   transient private GLFWFramebufferSizeCallback framebufferSizeCallback;
 
   Long currentThreadId = null;
-  
+
   transient private final ViewScaleDesc viewScaleDesc = new ViewScaleDesc();
   transient private FrameBuffer frameBuffer = null;
 
   /*
-  // oculus dimensions
-  private int width = 1080 * 2;
-  private int height = 1200;
-  
-  // monitor window on primary display
-  protected int monitorWidth = width / 4;
-  protected int monitorHeight = height / 4;
-  */
-  
-  int width;
-  int height;
+   * // oculus dimensions private int width = 1080 * 2; private int height =
+   * 1200;
+   * 
+   * // monitor window on primary display protected int monitorWidth = width /
+   * 4; protected int monitorHeight = height / 4;
+   */
+
+  int width = 1080 * 2;
+  int height = 1200;
+
+  int monitorWidth = width / 4;
+  int monitorHeight = height / 4;
 
   transient private final FovPort[] fovPorts = FovPort.buildPair();
   transient protected final Posef[] poses = Posef.buildPair();
@@ -184,23 +170,21 @@ public class OculusRift extends Service implements PointPublisher {
   // keep track of how many frames we have submitted to the display.
   private int frameCount = -1;
   transient private TextureSwapChain swapChain = null;
-  // a texture to mirror what is displayed on the rift.
-  transient private MirrorTexture mirrorTexture = null;
+  // a texture to monitor what is displayed on the rift.
+  transient private MirrorTexture monitorTexture = null;
   // this is what gets submitted to the rift for display.
   transient private LayerEyeFov layer = new LayerEyeFov();
   // The last image captured from the OpenCV services (left&right)
 
   transient private static Program unitQuadProgram;
   transient private static VertexArray unitQuadVao;
-  
+
   public volatile boolean trackHead = true;
 
-  
-  transient private Texture texture;
+  // transient private Texture texture;
   transient public Orientation orientationInfo;
-  
-  transient private static IndexedGeometry screenGeometry;
-  transient private static IndexedGeometry screenGeometry2;
+
+  // transient private static IndexedGeometry screenGeometryxx;
   transient private static Program screenProgram;
 
   transient private static IndexedGeometry cubeGeometry;
@@ -217,22 +201,187 @@ public class OculusRift extends Service implements PointPublisher {
   private static final String UNIT_QUAD_FS;
 
   // panel size
-  private float size = 1.0f;
-  //private float panelWidth = 2.0f;
-  
-  class Panel {
-    public float panelHeight = 2.0f;
-    public float panelWidth = 2.0f;
-    public IndexedGeometry screenGeometry;
-    // could be static
-    public Program screenProgram;
-    public String name;
-    public String type;
-  }
-  
-  
-  transient Map<String, Panel> panels = new HashMap<>();
+  private float size = 1.35f;
+  // private float panelWidth = 2.0f;
 
+  class Panel {
+    public String name;
+
+    public float x;
+    public float y;
+    public float z;
+
+    public float width = 5.0f;
+    public float height = 4.0f;
+
+    transient public IndexedGeometry geometery;
+    // could be static
+    transient public Program program;
+
+    transient public Texture textureLeft = null;
+    transient public Texture textureRight = null;
+
+    public String type;
+
+    String leftImageSrc;
+    String rightImageSrc;
+
+    private SerializableImage imageLeft;
+    private SerializableImage imageRight;
+
+    boolean stereo = false;
+
+    public long imageLeftWrittenTs;
+    public long imageLeftReadTs;
+    public long imageRightWrittenTs;
+    public long imageRightReadTs;
+    public String eyeChannel;
+
+    // FIXME - optimize loading by checking writte/read timestamps
+    // FIXME -- DELETE texture.id if updating !!!
+    public Texture getLeftTexture() {
+      return textureLeft;
+    }
+
+    public Texture getRightTexture() {
+      return textureRight;
+    }
+
+    // FIXME - loading is one of the most intensive processes - so
+    // optimize with read and write timestamps
+    public void load() {
+
+      if (geometery == null) {
+        geometery = makeTexturedQuad(this);
+        program = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
+        program.link();
+      }
+
+      // if the left & right texture are already loaded, let's delete them
+      if (textureLeft != null) {
+        glDeleteTextures(textureLeft.id);
+      }
+
+      if (imageLeft == null) {
+        return;
+      }
+
+      textureLeft = Texture.loadImage(imageLeft.getImage());
+      textureLeft.bind();
+      textureLeft.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      textureLeft.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+      glGenerateMipmap(GL_TEXTURE_2D);
+      textureLeft.unbind();
+
+      if (stereo) {
+
+        if (textureRight != null) {
+          glDeleteTextures(textureRight.id);
+        }
+
+        textureRight = Texture.loadImage(imageRight.getImage());
+
+        textureRight.bind();
+        textureRight.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        textureRight.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        textureRight.unbind();
+
+      } else {
+        textureRight = textureLeft;
+      }
+    }
+
+    private IndexedGeometry makeTexturedQuad(Panel panel) {
+
+      List<Vector4f> vertices = new ArrayList<>();
+
+      // local texture coordinates
+      float textMaxX = 1;
+      float texMaxY = 1;
+      float textMinX = 0;
+      float textMinY = 0;
+
+      float maxX = panel.x + panel.width;
+      float maxY = panel.y + panel.height;
+
+      vertices.add(new Vector4f(maxX, maxY, panel.z, 1));
+      vertices.add(new Vector4f(textMaxX, texMaxY, 0, 0));
+      vertices.add(new Vector4f(panel.x, maxY, panel.z, 1));
+      vertices.add(new Vector4f(textMinX, texMaxY, 0, 0));
+
+      vertices.add(new Vector4f(panel.x, panel.y, panel.z, 1));
+      vertices.add(new Vector4f(textMinX, textMinY, 0, 0));
+      vertices.add(new Vector4f(maxX, panel.y, panel.z, 1));
+      vertices.add(new Vector4f(textMaxX, textMinY, 0, 0));
+      vertices.add(new Vector4f(maxX, maxY, panel.z, 1));
+      vertices.add(new Vector4f(textMaxX, texMaxY, 0, 0));
+      vertices.add(new Vector4f(panel.x, maxY, panel.z, 1));
+      vertices.add(new Vector4f(textMinX, texMaxY, 0, 0));
+
+      List<Short> indices = new ArrayList<>();
+      indices.add((short) 0); // LL
+      indices.add((short) 1); // LR
+      indices.add((short) 3); // UL
+      indices.add((short) 2); // UR
+      IndexedGeometry.Builder builder = new IndexedGeometry.Builder(indices, vertices);
+      builder.withDrawType(GL_TRIANGLE_STRIP).withAttribute(Attribute.POSITION).withAttribute(Attribute.TEX);
+      return builder.build();
+    }
+
+    public void renderLeft() {
+      if (textureLeft == null) {
+        return;
+      }
+      // glClear(GL_DEPTH_BUFFER_BIT);
+      // renderSkybox();
+      program.use();
+      OpenGL.bindAll(program);
+      textureLeft.bind();
+      geometery.bindVertexArray();
+      geometery.draw();
+      Texture.unbind(GL_TEXTURE_2D);
+      Program.clear();
+      VertexArray.unbind();
+      // screenGeometry.destroy();
+    }
+
+    public void renderRight() {
+      if (textureRight == null) {
+        return;
+      }
+      // glClear(GL_DEPTH_BUFFER_BIT);
+      // renderSkybox();
+      program.use();
+      OpenGL.bindAll(program);
+      textureRight.bind();
+      geometery.bindVertexArray();
+      geometery.draw();
+      Texture.unbind(GL_TEXTURE_2D);
+      Program.clear();
+      VertexArray.unbind();
+      // screenGeometry.destroy();
+    }
+
+    public void setImage(SerializableImage image) {
+      String src = image.getSource();
+      if (src.equals(leftImageSrc)) {
+        imageLeft = image;
+      }
+      if (src.equals(rightImageSrc)) {
+        imageRight = image;
+      }
+
+    }
+  }
+
+  protected Map<String, Panel> panels = new HashMap<>();
+  protected Map<String, List<Panel>> imgSrcToPanel = new HashMap<>();
+
+  public static final String EYE_LEFT = "left";
+  public static final String EYE_RIGHT = "right";
+
+  private transient DisplayWorker displayWorker;
 
   static {
     UNIT_QUAD_VS = FileIO.resourceToString("OculusRift" + File.separator + "unitQuad.vs");
@@ -243,80 +392,39 @@ public class OculusRift extends Service implements PointPublisher {
     SHADERS_CUBEMAP_FS = FileIO.resourceToString("OculusRift" + File.separator + "CubeMap.fs");
   }
 
-  
   private static final Resource SKYBOX[] = { IMAGES_SKY_CITY_XPOS_PNG, IMAGES_SKY_CITY_XNEG_PNG, IMAGES_SKY_CITY_YPOS_PNG, IMAGES_SKY_CITY_YNEG_PNG, IMAGES_SKY_CITY_ZPOS_PNG,
       IMAGES_SKY_CITY_ZNEG_PNG, };
-
-
-  ////////////////////////// end display decompose /////////////////////////////////////////
-
-  
-  public static class RiftFrame {
-    public SerializableImage left;
-    public SerializableImage right;
-  }
 
   public OculusRift(String n, String id) {
     super(n, id);
     ready = false;
+    headTracker = new OculusTracking(this);
   }
 
-  public void onLeftImage(SerializableImage image) {
-    if (display != null) {
-      // display.drawImage(image);
-     
-    }
-    drawImage(image);
-  }
-  
-
-  public void onRightImage(SerializableImage image) {
-    if (display != null) {
-      display.drawImage(image);
-    }
-  }
-
+  /**
+   * Handles all incoming images to be rendered. Will create a "default" panel
+   * to display the image if one has not already been created. Matches a image
+   * to a panel with the image's source to the panels name. So if a pre-existing
+   * panel exists with the appropriate name the texture of the image will be
+   * rendered to it. If eyeChannel is set to left or right, the panel will only
+   * be rendered in that channel. If its not set, it will be rendered in both
+   * channels.
+   * 
+   * @param image
+   * @param eyeChannel
+   */
   public void onImage(SerializableImage image) {
-    if (display != null) {
-      display.drawImage(image);
+    List<Panel> panelList = null;
+    if (!imgSrcToPanel.containsKey(image.getSource())) {
+      // add a default mono panel if "nothing" exists
+      addPanel(image.getSource(), 5, 4, image.getSource());
     }
-  }
+    panelList = imgSrcToPanel.get(image.getSource());
 
-  // FIXME - implement onDisplay "full image" left & right fused together
-  public void onDisplay(SerializableImage frame) {
-
-    // if we're only one camera
-    // the left frame is both frames.
-    if (mirrorImage) {
-      // if we're mirroring the left camera
-      // log.info("Oculus Frame Source {}",frame.getSource());
-      if ("leftAffine".equals(frame.getSource())) {
-        lastRiftFrame.left = frame;
-        lastRiftFrame.right = frame;
-      }
-    } else {
-      if ("left".equals(frame.getSource())) {
-        lastRiftFrame.left = frame;
-      } else if ("leftAffine".equals(frame.getSource())) {
-        lastRiftFrame.left = frame;
-      } else if ("right".equals(frame.getSource())) {
-        lastRiftFrame.right = frame;
-      } else if ("rightAffine".equals(frame.getSource())) {
-        lastRiftFrame.right = frame;
-      } else {
-        log.error("unknown source {}", frame.getSource());
-      }
+    // update the panel references
+    for (Panel panel : panelList) {
+      panel.setImage(image);
     }
-
-    // update the oculus display with the last rift frame
-    if (display != null) {
-      // display.setCurrentFrame(lastRiftFrame);
-    } else {
-      // TODO: wait on the display to be initialized ?
-      // maybe just log something?
-      // log.warn("The Oculus Display was null.");
-    }
-    invoke("publishRiftFrame", lastRiftFrame);
   }
 
   @Override
@@ -382,32 +490,10 @@ public class OculusRift extends Service implements PointPublisher {
     return x;
   }
 
-  public void addRiftFrameListener(Service service) {
-    addListener("publishRiftFrame", service.getName(), "onRiftFrame");
-  }
-
-  public RiftFrame publishRiftFrame(RiftFrame frame) {
-    return frame;
-  }
-
   public Orientation publishOrientation(Orientation data) {
-    // grab the last published data (if we need it somewhere)
-    // if (data != null) {
-    // System.out.println("Oculus Data: " + data.toString());
-    // }
-    // TODO: make this a proper callback / subscribe..
-
-    if (display != null) {
-      display.updateOrientation(data);
-    }
-
-    // TODO selection of what format(s) to publish based on config ?
-
     broadcast("publishPitch", data.pitch);
     broadcast("publishYaw", data.yaw);
     broadcast("publishRoll", data.roll);
-
-    // return the data to the mrl framework to be published.
     return data;
   }
 
@@ -441,14 +527,8 @@ public class OculusRift extends Service implements PointPublisher {
 
   // this would be the correct way to attach to a ImagePublisher
   // or some service that can generate a stream of images....
-  public void attachLeft(String leftImagePublisher) {
-    this.leftImagePublisher = leftImagePublisher;
-    subscribe(leftImagePublisher, "publishDisplay", getName(), "onLeftImage");
-  }
-
-  public void attachRight(String rightImagePublisher) {
-    this.rightImagePublisher = rightImagePublisher;
-    subscribe(rightImagePublisher, "publishDisplay", getName(), "onRightImage");
+  public void attach(String leftImagePublisher) {
+    subscribe(leftImagePublisher, "publishDisplay", getName(), "onImage");
   }
 
   public static void main(String s[]) {
@@ -460,9 +540,9 @@ public class OculusRift extends Service implements PointPublisher {
        * cv.setCameraIndex(1); cv.capture(); cv.addFilter("Flip");
        */
 
-      OpenCV left = (OpenCV) Runtime.start("left", "OpenCV");
+      // OpenCV left = (OpenCV) Runtime.start("left", "OpenCV");
       // left.addFilter("Flip");
-      OpenCV right = (OpenCV) Runtime.start("right", "OpenCV");
+      // OpenCV right = (OpenCV) Runtime.start("right", "OpenCV");
 
       boolean web = false;
 
@@ -473,8 +553,10 @@ public class OculusRift extends Service implements PointPublisher {
       }
 
       // left.capture(left.getResourcePath("stereo-1-left.jpg"));
-      left.setCameraIndex(0); // 1 is usb webcam
-      left.capture();
+      /*
+       * left.setCameraIndex(0); // 1 is usb webcam left.capture();
+       * left.setStreamName("left");
+       */
       // right.capture(right.getResourcePath("stereo-1-right.jpg"));
 
       OculusRift rift = (OculusRift) Runtime.start("rift", "OculusRift");
@@ -518,16 +600,21 @@ public class OculusRift extends Service implements PointPublisher {
       // TODO - jme could provide 2 stereoscopic camera projections
       rift.setMirrorImage(true);
 
-      rift.attachLeft("left");
+      rift.addPanel("left-0", -0.5f, 0f, -1, 3, 2, "left");
+      rift.addPanel("left-1", -5, 0, -1, 3, 2, "left");
+
+      rift.attach("left");
       // rift.attachRight("right");
 
       // rift.startTracking();
       // rift.startDisplay();
       rift.start();
 
+      rift.onImage(new SerializableImage("C:\\home\\grperry\\github\\mrl\\myrobotlab\\src\\main\\resources\\resource\\OpenCV\\stereo-1-left.jpg", "left"));
+
       // rift.startDisplay();
 
-      rift.logOrientation();
+      // rift.logOrientation();
 
     } catch (Exception e) {
       log.error("main threw", e);
@@ -536,7 +623,7 @@ public class OculusRift extends Service implements PointPublisher {
   }
 
   public void setMirrorImage(boolean b) {
-    this.mirrorImage = b;
+    this.useMonitor = b;
   }
 
   public Hmd getHmd() {
@@ -597,105 +684,138 @@ public class OculusRift extends Service implements PointPublisher {
     return true;
   }
 
-  public void startTracking() {
+  public class DisplayWorker extends Thread {
+    protected boolean isRunning = false;
+
+    public DisplayWorker(String name) {
+      super(String.format("%s-display-worker", name));
+    }
+
+    @Override
+    public void run() {
+      isRunning = true;
+      initGl();
+      long t = 0;
+      long deltams = 0;
+      double fps = 0;
+      try {
+        while (isRunning) {
+          t = System.currentTimeMillis();
+          render();
+          deltams = System.currentTimeMillis() - t;
+          fps = 1000 / deltams;
+          log.info("delta {} ms {} fps", deltams, fps);
+          // sleep(10);
+        }
+      } catch (Exception e) {
+        stopDisplay();
+        error(e);
+      }
+    }
+  }
+
+  public synchronized void startTracking() {
     log.info("starting head tracking thread");
 
     if (!createHmd()) {
       return;
     }
 
-    // now that we have the hmd. lets start up the polling thread.
-    if (headTracker != null) {
-      headTracker = new OculusTracking(this);
-      headTracker.start();
-    }
+    headTracker.start();
 
     hmd.recenterPose();
     log.info("started head tracking thread");
   }
 
-  public void startDisplay() {
+  public synchronized void stopTracking() {
+
+    headTracker.stop();
+
+  }
+
+  public synchronized void startDisplay() {
     log.info("starting display");
 
- 
-    
+    // FIXME - should be tracking ...
     if (!createHmd()) {
       return;
     }
 
-//    initGl();
-    // display = new OculusDisplay(this);
+    if (displayWorker != null) {
+      log.info("already running display");
+      return;
+    }
+
+    displayWorker = new DisplayWorker(getName());
+    displayWorker.start();
 
     log.info("started display");
   }
-  
+
+  public synchronized void stopDisplay() {
+    log.info("stopping display");
+
+    if (displayWorker == null) {
+      log.info("already stopped display");
+      return;
+    }
+    displayWorker.isRunning = false;
+    displayWorker = null;
+
+    log.info("started display");
+  }
+
   // sets up the opengl display for rendering the mirror texture.
-  protected final long setupMirroredDisplay() {
-    // our size. / resolution? is this configurable? maybe not?
-    width = hmdDesc.Resolution.w / 4;
-    height = hmdDesc.Resolution.h / 4;
-    // TODO: these were to specify where the glfw window would be placed on the monitor.. 
-    // int left = 100;
-    // int right = 100;
-    // try {
-    //   Display.setDisplayMode(new DisplayMode(width, height));
-    // } catch (LWJGLException e) {
-    //   throw new RuntimeException(e);
-    // }
-    // Display.setTitle("MRL Oculus Rift Viewer");
-    // TODO: which one?? 
+  protected long setupMonitorWindow() {
+
     long monitor = 0;
-    long window = glfwCreateWindow(width, height, "MRL Oculus Rift Viewer", monitor, 0);       
-    if(window == 0) {
+    long window = glfwCreateWindow(monitorWidth, monitorHeight, "MRL Oculus Rift Viewer", monitor, 0);
+    if (window == 0) {
       throw new RuntimeException("Failed to create window");
     }
     // Make this window's context the current on this thread.
     glfwMakeContextCurrent(window);
     // Let LWJGL know to use this current context.
     GL.createCapabilities();
-    //Setup the framebuffer resize callback.
+    // Setup the framebuffer resize callback.
     glfwSetFramebufferSizeCallback(window, (framebufferSizeCallback = new GLFWFramebufferSizeCallback() {
-        @Override
-        public void invoke(long window, int width, int height) {
-            onResize(width, height);
-        }
+      @Override
+      public void invoke(long window, int width, int height) {
+        onResize(width, height); // whats the point of this ? resizeable window
+                                 // can be an auto property of opengl
+      }
     }));
-    // TODO: set location and vsync?!  Do we need to update these for lwjgl3?
+    // TODO: set location and vsync?! Do we need to update these for lwjgl3?
     // Display.setLocation(left, right);
     // TODO: vsync enabled?
     // Display.setVSyncEnabled(true);
-    onResize(width, height);
-    log.info("Setup Oculus Display with resolution " + width + "x" + height);
+    onResize(monitorWidth, monitorHeight);
+    log.info("Setup Oculus Display with resolution " + monitorWidth + "x" + monitorHeight);
     return window;
   }
 
   // if the window is resized.
   protected void onResize(int width, int height) {
-    this.width = width;
-    this.height = height;
+    this.monitorWidth = width;
+    this.monitorHeight = height;
   }
 
-  
   protected void initGl() {
-    //Initialize GLFW.
+    // Initialize GLFW.
     if (!glfwInit()) {
       error("could not initialize glfw");
       return;
     }
- 
-    //Setup an error callback to print GLFW errors to the console.
+
+    // Setup an error callback to print GLFW errors to the console.
     glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
 
-    // contextAttributes = new ContextAttribs(4, 1).withProfileCore(true).withDebug(true);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    // TODO: what about withDebug?
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-   // try {
-    window = setupMirroredDisplay();
-    
-    
+    // set default hints
+    glfwDefaultWindowHints();
+
+    // try {
+    monitorWindow = setupMonitorWindow();
+
     // presumably this is called in setupDisplay now?
     // Display.create(pixelFormat, contextAttributes);
 
@@ -709,12 +829,12 @@ public class OculusRift extends Service implements PointPublisher {
     // TODO: maybe get rid of these?
     // Mouse.create();
     // Keyboard.create();
-    //} catch (LWJGLException e) {
-    //  throw new RuntimeException(e);
-    //}
+    // } catch (LWJGLException e) {
+    // throw new RuntimeException(e);
+    // }
     // TODO: vSyncEnabled in lwjgl3
     // Display.setVSyncEnabled(false);
-    
+
     // FIXME - currently requires hmdDesc :(
     for (int eye = 0; eye < 2; ++eye) {
       fovPorts[eye] = hmdDesc.DefaultEyeFov[eye];
@@ -722,7 +842,7 @@ public class OculusRift extends Service implements PointPublisher {
       projections[eye] = toMatrix4f(m);
       textureSizes[eye] = hmd.getFovTextureSize(eye, fovPorts[eye], 1.0f);
     }
-    
+
     TextureSwapChainDesc desc = new TextureSwapChainDesc();
     desc.Type = OvrLibrary.ovrTextureType.ovrTexture_2D;
     desc.ArraySize = 1;
@@ -735,9 +855,9 @@ public class OculusRift extends Service implements PointPublisher {
     swapChain = hmd.createSwapTextureChain(desc);
     MirrorTextureDesc mirrorDesc = new MirrorTextureDesc();
     mirrorDesc.Format = OvrLibrary.ovrTextureFormat.OVR_FORMAT_R8G8B8A8_UNORM;
-    mirrorDesc.Width = width;
-    mirrorDesc.Height = height;
-    mirrorTexture = hmd.createMirrorTexture(mirrorDesc);
+    mirrorDesc.Width = monitorWidth;
+    mirrorDesc.Height = monitorHeight;
+    monitorTexture = hmd.createMirrorTexture(mirrorDesc);
 
     layer.Header.Type = OvrLibrary.ovrLayerType.ovrLayerType_EyeFov;
     layer.ColorTexure[0] = swapChain;
@@ -758,75 +878,25 @@ public class OculusRift extends Service implements PointPublisher {
     }
     viewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
   }
-  
 
   // must be synchronized - only a single thread can have GL context at one time
   // and provide an update
-  public synchronized void drawImage(SerializableImage si) {
-    
-    if (si == null) {
-      log.error("image null");
-      return;
-    }
-        
-    // FIXME - only some things need to be initialized "once"
-    // the GL context needs to be initialized whenever a different thread is updating
-    // if thread not last thread - init context for that thread ...
-    
-     if (currentThreadId == null || currentThreadId != Thread.currentThread().getId()) {    
-      // FIXME something need to be initalized once per thread access
-      // others like GL context need to be called each time a thread switches
-       
-      //  ONLY  glfwMakeContextCurrent(window); NEEDED ?
-       
-      // internalInit(); MORE CONTEXT NEEDS TO SWITCH ???
-      // glfwMakeContextCurrent(window); ????
-       initGl();
-      currentThreadId = Thread.currentThread().getId();
-    }
-     
-     // check if there was a window command to shutdown
-     /*
-     if (!glfwWindowShouldClose(window)) {
-       onDestroy();
-       glfwDestroyWindow(window);
-       return;
-     }
-     */
-
-    // FIXME - remove right !!
-    // remove the dualism - just write an image to a location .. begin    
-    // if the left & right texture are already loaded, let's delete them
-
-    if (texture != null) {
-      glDeleteTextures(texture.id); // delete previous image ...
-    }
-
-    // here we can just update the textures that we're using
-    texture = Texture.loadImage(si.getImage());
-
-
-    texture.bind();
-    texture.parameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    texture.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    texture.unbind();
-    
-    //remove the dualism - end
-
-    width = hmdDesc.Resolution.w / 4;
-    height = hmdDesc.Resolution.h / 4;
+  public void render() {
 
     ++frameCount;
     Posef eyePoses[] = hmd.getEyePoses(frameCount, eyeOffsets);
     frameBuffer.activate();
-    
+
     // render left and right pov
 
     MatrixStack pr = MatrixStack.PROJECTION;
     MatrixStack mv = MatrixStack.MODELVIEW;
     int textureId = swapChain.getTextureId(swapChain.getCurrentIndex());
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
     for (int eye = 0; eye < 2; ++eye) {
       OvrRecti vp = layer.Viewport[eye];
       // scissors the current view port left and right
@@ -840,106 +910,128 @@ public class OculusRift extends Service implements PointPublisher {
       poses[eye].Orientation = pose.Orientation;
       poses[eye].Position = pose.Position;
       if (trackHead) {
-        log.info("{} {} {}", poses[eye].Position.x, poses[eye].Position.y, poses[eye].Position.z);
+        // log.info("{} {} {}", poses[eye].Position.x, poses[eye].Position.y,
+        // poses[eye].Position.z);
         poses[eye].Position.z = 3;
         mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
         // mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1));//.preRotate(toQuaternion(poses[eye].Orientation).inverse());
         // mv.push().preTranslate(toVector3f(poses[eye].Position));
       }
-      // TODO: is there a way to render both of these are the same time?     
-      renderScreen(texture, orientationInfo, eye);
-      
+      renderSkybox();
+      for (Panel panel : panels.values()) {
+
+        panel.load();
+        // TODO: is there a way to render both of these are the same time?
+        if (eye == 0) {
+          panel.renderLeft();
+        } else {
+          panel.renderRight();
+        }
+      } // for (Panel panel : panels.values())
+
       if (trackHead) {
         mv.pop();
       }
     }
-    
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
     frameBuffer.deactivate();
     swapChain.commit();
     hmd.submitFrame(frameCount, layer);
-    
+
     // FIXME Copy the layer to the main window using a mirror texture
-    glScissor(0, 0, width, height);
-    glViewport(0, 0, width, height);
-    
-    // MAKE NOTE ! : - visually makes no difference if glClearColor and glClear are or are not called .. why?
+    glScissor(0, 0, monitorWidth, monitorHeight);
+    glViewport(0, 0, monitorWidth, monitorHeight);
+
+    // MAKE NOTE ! : - visually makes no difference if glClearColor and
+    // glClear
+    // are or are not called .. why?
     glClearColor(0.5f, 0.5f, System.currentTimeMillis() % 1000 / 1000.0f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    // MAKE NOTE ! below is for the "viewer" on the os ...- not for the oculus screen - is this required for kwatters ?
-    // render the quad with our images/textures on it, one for the left eye, one for the right eye.
-    renderTexturedQuad(mirrorTexture.getTextureId());
-    
+
+    // MAKE NOTE ! below is for the "viewer" on the os ...- not for the oculus
+    // screen - is this required for kwatters ?
+    // render the quad with our images/textures on it, one for the left eye,
+    // one
+    // for the right eye.
+    renderTexturedQuad(monitorTexture.getTextureId());
+
     glfwPollEvents();
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(monitorWindow);
+
   }
-  
-  
-  public boolean addPanel(String name, int width, int height) {
+
+  // deffault mono panel
+  public boolean addPanel(String name, float width, float height, String source) {
+    float x = -width / 2;
+    float y = -height / 2;
+    float z = -2;
+    return addPanel(name, x, y, z, width, height, source, source);
+  }
+
+  public boolean addPanel(String name, float width, float height) {
+    float x = -width / 2;
+    float y = -height / 2;
+    float z = -2;
+    return addPanel(name, width, x, y, z, height, null, null);
+  }
+
+  // add mono panel
+  public boolean addPanel(String name, float x, float y, float z, float width, float height, String source) {
+    return addPanel(name, x, y, z, width, height, source, source);
+  }
+
+  // add stereo panel
+  public boolean addPanel(String name, float x, float y, float z, float width, float height, String leftImageSrc, String rightImageSrc) {
+    if (leftImageSrc == null && rightImageSrc == null) {
+      leftImageSrc = rightImageSrc = name;
+    }
+
     if (!panels.containsKey(name)) {
       Panel p = new Panel();
+      // p.x
+      p.leftImageSrc = leftImageSrc;
+      p.rightImageSrc = rightImageSrc;
       p.name = name;
       p.type = "simple";
-      p.panelWidth = width;
-      p.panelHeight = height;
+      p.x = x;
+      p.y = y;
+      p.z = z;
+      p.width = width;
+      p.height = height;
       // FIXME - need position & orientation ?
-      p.screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-size, -size), new Vector2f(size, size));
-      p.screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
-      p.screenProgram.link();
-      panels.put(name, p);
+
+      // thread safe replacement of new map
+      Map<String, Panel> newPanels = new HashMap<>();
+      newPanels.putAll(panels);
+      newPanels.put(name, p);
+      panels = newPanels;
+      List<Panel> pl = null;
+
+      if (!imgSrcToPanel.containsKey(leftImageSrc)) {
+        pl = new ArrayList<>();
+      } else {
+        pl = imgSrcToPanel.get(leftImageSrc);
+      }
+      pl.add(p);
+
+      imgSrcToPanel.put(leftImageSrc, pl);
+
+      if (!imgSrcToPanel.containsKey(rightImageSrc)) {
+        pl = new ArrayList<>();
+      } else {
+        pl = imgSrcToPanel.get(rightImageSrc);
+      }
+      pl.add(p);
+
+      imgSrcToPanel.put(rightImageSrc, pl);
       return true;
     }
     return false;
   }
 
   float move = 0f;
-  /**
-   * helper function to render an image on the current bound texture.
-   * 
-   * @param screenTexture
-   * @param orientation
-   */
-  public void renderScreen(Texture screenTexture, Orientation orientation, int eye) {
-    // clean up
-    glClear(GL_DEPTH_BUFFER_BIT);
-    renderSkybox();
-    // TODO: don't lazy create this.
-//    size = size + 0.01f;
-   move -= 0.00f;
-  //  if (null == screenGeometry) {
-      screenGeometry = OpenGL.makeTexturedQuad(new Vector2f(-size + move, -size  + move), new Vector2f(size + move, size + move));
-      //screenGeometry = OpenGL.makeTexturedQuad(
-      // screenGeometry2 = OpenGL.makeTexturedQuad(new Vector2f(-panelWidth/2, -panelHeight/2), new Vector2f(panelWidth/2, panelHeight/2));
-   // }
-    
-    if (null == screenProgram) {
-      screenProgram = new Program(SHADERS_TEXTURED_VS, SHADERS_TEXTURED_FS);
-      screenProgram.link();
-    }
- 
-    /*
-    MatrixStack mv = MatrixStack.MODELVIEW; // <- very interesting - bound to self adjusting model view?
-    cubeGeometry.bindVertexArray();
-    mv.push();
-    //Quaternion q = mv.getRotation();
-    //mv.identity().rotate(q);
-    mv.push().preTranslate(toVector3f(poses[eye].Position).mult(-1)).preRotate(toQuaternion(poses[eye].Orientation).inverse());
-    */
-    
-    screenProgram.use();
-    OpenGL.bindAll(screenProgram);
-    screenTexture.bind();
-    screenGeometry.bindVertexArray();
-    screenGeometry.draw();
-    Texture.unbind(GL_TEXTURE_2D);
-    Program.clear();
-    VertexArray.unbind();
-    screenGeometry.destroy();
-    
-    //mv.pop();
-  }
-  
+
   public static void renderSkybox() {
     if (null == cubeGeometry) {
       cubeGeometry = OpenGL.makeColorCube();
@@ -951,7 +1043,8 @@ public class OculusRift extends Service implements PointPublisher {
     if (null == skyboxTexture) {
       skyboxTexture = OpenGL.getCubemapTextures(SKYBOX);
     }
-    MatrixStack mv = MatrixStack.MODELVIEW; // <- very interesting - bound to self adjusting model view?
+    MatrixStack mv = MatrixStack.MODELVIEW; // <- very interesting - bound to
+                                            // self adjusting model view?
     cubeGeometry.bindVertexArray();
     mv.push();
     Quaternion q = mv.getRotation();
@@ -986,23 +1079,27 @@ public class OculusRift extends Service implements PointPublisher {
     Program.clear();
     VertexArray.unbind();
   }
-  
 
   public static Quaternion toQuaternion(OvrQuaternionf q) {
     return new Quaternion(q.x, q.y, q.z, q.w);
   }
-
 
   // The following methods are taken from the joculur-examples
   public static Vector3f toVector3f(OvrVector3f v) {
     return new Vector3f(v.x, v.y, v.z);
   }
 
-
   public static Matrix4f toMatrix4f(OvrMatrix4f m) {
     if (null == m) {
       return new Matrix4f();
     }
     return new Matrix4f(m.M).transpose();
+  }
+
+ 
+
+  public void getInputState() {
+    int success = OvrLibrary.INSTANCE.ovr_GetInputState(hmd, 3, inputStateRef);
+    log.info("input state {}", inputStateRef);
   }
 }

@@ -598,6 +598,16 @@ public class OpenCV extends AbstractComputerVision {
 
   transient private VideoWidget2 videoWidget = null;
 
+  protected String streamName;
+
+  public String getStreamName() {
+    return streamName;
+  }
+
+  public void setStreamName(String streamName) {
+    this.streamName = streamName;
+  }
+
   static String DATA_DIR;
 
   public OpenCV(String n, String id) {
@@ -1259,7 +1269,7 @@ public class OpenCV extends AbstractComputerVision {
          * </pre>
          */
         BufferedImage b = data.getDisplay();
-        SerializableImage si = new SerializableImage(b, displayFilter, frameIndex);
+        SerializableImage si = (streamName == null)?new SerializableImage(b, displayFilter, frameIndex):new SerializableImage(b, streamName, frameIndex);
         
         // TODO ? - configurable thread mode ? invoke buffers broadcast does not
         // invoke("publishDisplay", si);
@@ -1560,7 +1570,7 @@ public class OpenCV extends AbstractComputerVision {
   transient FFmpegFrameRecorder ffmpegStreamer = null;
 
   // FIXME - change on attach type of webgui
-  protected boolean webViewer = true;
+  protected boolean webViewer = false;
 
   public void startStreamer() {
     try {

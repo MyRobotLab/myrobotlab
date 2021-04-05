@@ -1,6 +1,11 @@
 package org.saintandreas.gl.textures;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameterf;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -15,11 +20,14 @@ import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Hashtable;
+
+import javax.imageio.ImageIO;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -127,6 +135,7 @@ public class Texture {
     WritableRaster raster;
     BufferedImage texImage;
 
+
     ColorModel glAlphaColorModel = new ComponentColorModel(
         ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[] { 8, 8, 8, 8 },
         true, false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
@@ -134,24 +143,43 @@ public class Texture {
         bufferedImage.getWidth(), bufferedImage.getHeight(), 4, null);
     texImage = new BufferedImage(glAlphaColorModel, raster, true,
         new Hashtable<>());
+    
+
 
     // copy the source image into the produced image
     Graphics g = texImage.getGraphics();
     g.setColor(new Color(0f, 0f, 0f, 0f));
-    g.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
+//    g.fillRect(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight());
     g.drawImage(bufferedImage, 0, 0, null);
-
+    
     // build a byte buffer from the temporary image
     // that be used by OpenGL to produce a texture.
     byte[] data = ((DataBufferByte) texImage.getRaster().getDataBuffer())
         .getData();
 
+    
     BufferUtils.createByteBuffer(data.length);
     imageBuffer = ByteBuffer.allocateDirect(data.length);
     imageBuffer.order(ByteOrder.nativeOrder());
     imageBuffer.put(data, 0, data.length);
+  
     imageBuffer.flip();
+    
     return imageBuffer;
+  }
+  
+  /**
+   * Convert the buffered image to a texture
+   */
+  public static ByteBuffer convertImageData2(BufferedImage bufferedImage) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try {
+        ImageIO.write(bufferedImage, "BMP", out);
+        return ByteBuffer.wrap(out.toByteArray());
+    } catch (IOException ex) {
+        //TODO
+    }
+    return null;
   }
 
 }

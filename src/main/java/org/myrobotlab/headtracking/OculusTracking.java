@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 
 import com.oculusvr.capi.Hmd;
 import com.oculusvr.capi.HmdDesc;
+import com.oculusvr.capi.OvrLibrary;
 import com.oculusvr.capi.PoseStatef;
 import com.oculusvr.capi.TrackingState;
 
@@ -24,110 +25,117 @@ public class OculusTracking implements Runnable, Serializable {
   public final static Logger log = LoggerFactory.getLogger(OculusTracking.class);
   private static final long serialVersionUID = 1L;
   transient protected Hmd hmd;
-  
+
   boolean running = false;
   transient public OculusRift oculus;
   transient Thread trackerThread = null;
-  private int pollIntervalMS = 20;
+  protected int pollIntervalMS = 20;
 
-  private long frameCount = 0;
-  private int downSample = 50;
+  protected long frameCount = 0;
+  protected int downSample = 50;
 
   public OculusTracking(OculusRift oculus) {
     // Grab a handle to the initialized hmd.
     this.oculus = oculus;
-  
+
   }
 
   @Override
   public void run() {
-    
+
     hmd = oculus.getHmd();
     if (hmd == null) {
       oculus.error("could not start tracking hmd not ready");
       return;
     }
-    
+
     running = true;
-    while (running) {
+    try {
 
-      frameCount++;
-      TrackingState trackingState = hmd.getTrackingState(pollIntervalMS, false);
+      while (running) {
 
-      // TODO: do we care about "w" ?
-      // double w = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.w);
-      // rotations about x axis (pitch)
-      double pitch = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.x);
-      // rotation about y axis (yaw)
-      double yaw = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.y);
-      // rotation about z axis (roll)
-      double roll = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.z);
+        frameCount++;
+        TrackingState trackingState = hmd.getTrackingState(pollIntervalMS, false);
+        int[] handFlags = trackingState.HandStatusFlags;
+        log.info("handstate {}", handFlags);
 
-      Orientation headTrackingData = new Orientation(roll, pitch, yaw);
-      oculus.invoke("publishOrientation", headTrackingData);
-
-      // positional information.
-      double x = trackingState.HeadPose.Pose.Position.x;
-      double y = trackingState.HeadPose.Pose.Position.y;
-      double z = trackingState.HeadPose.Pose.Position.z;
-
-      ArrayList<Point> points = new ArrayList<Point>();
-      points.add(new Point(x, y, z, roll, pitch, yaw));
-      oculus.invoke("publishPoints", points);
-
-      PoseStatef[] hands = trackingState.HandPoses;
-      if (hands.length > 0) {
-        // System.out.println(hands.length);
-        PoseStatef leftHand = hands[1];
-        PoseStatef rightHand = hands[0];
-
-        x = leftHand.Pose.Position.x;
-        y = leftHand.Pose.Position.y;
-        z = leftHand.Pose.Position.z;
-        pitch = Math.toDegrees(leftHand.Pose.Orientation.x);
+        // TODO: do we care about "w" ?
+        // double w = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.w);
+        // rotations about x axis (pitch)
+        double pitch = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.x);
         // rotation about y axis (yaw)
-        yaw = Math.toDegrees(leftHand.Pose.Orientation.y);
+        double yaw = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.y);
         // rotation about z axis (roll)
-        roll = Math.toDegrees(leftHand.Pose.Orientation.z);
+        double roll = Math.toDegrees(trackingState.HeadPose.Pose.Orientation.z);
 
-        x = rightHand.Pose.Position.x;
-        y = rightHand.Pose.Position.y;
-        z = rightHand.Pose.Position.z;
-        pitch = Math.toDegrees(rightHand.Pose.Orientation.x);
-        // rotation about y axis (yaw)
-        yaw = Math.toDegrees(rightHand.Pose.Orientation.y);
-        // rotation about z axis (roll)
-        roll = Math.toDegrees(rightHand.Pose.Orientation.z);
+        Orientation headTrackingData = new Orientation(roll, pitch, yaw);
+        oculus.invoke("publishOrientation", headTrackingData);
 
-        Point leftHandPoint = new Point(x, y, z, roll, pitch, yaw);
-        Point rightHandPoint = new Point(x, y, z, roll, pitch, yaw);
+        // positional information.
+        double x = trackingState.HeadPose.Pose.Position.x;
+        double y = trackingState.HeadPose.Pose.Position.y;
+        double z = trackingState.HeadPose.Pose.Position.z;
 
-        ArrayList<Point> handPoints = new ArrayList<Point>();
-        handPoints.add(leftHandPoint);
-        handPoints.add(rightHandPoint);
-        // publish left and hand positions. This is pretty much raw data
-        // we need to scale it / translate it rotate it.. etc..
-        // probably best done inside of the ik service.
+        ArrayList<Point> points = new ArrayList<Point>();
+        points.add(new Point(x, y, z, roll, pitch, yaw));
+        oculus.invoke("publishPoints", points);
 
-        // need to down sample this
-        if (frameCount % downSample == 0) {
-          oculus.invoke("publishLeftHandPosition", leftHandPoint);
-          oculus.invoke("publishRightHandPosition", rightHandPoint);
+        PoseStatef[] hands = trackingState.HandPoses;
+        if (hands.length > 0) {
+          // System.out.println(hands.length);
+          PoseStatef leftHand = hands[1];
+          PoseStatef rightHand = hands[0];
+
+          x = leftHand.Pose.Position.x;
+          y = leftHand.Pose.Position.y;
+          z = leftHand.Pose.Position.z;
+          pitch = Math.toDegrees(leftHand.Pose.Orientation.x);
+          // rotation about y axis (yaw)
+          yaw = Math.toDegrees(leftHand.Pose.Orientation.y);
+          // rotation about z axis (roll)
+          roll = Math.toDegrees(leftHand.Pose.Orientation.z);
+
+          x = rightHand.Pose.Position.x;
+          y = rightHand.Pose.Position.y;
+          z = rightHand.Pose.Position.z;
+          pitch = Math.toDegrees(rightHand.Pose.Orientation.x);
+          // rotation about y axis (yaw)
+          yaw = Math.toDegrees(rightHand.Pose.Orientation.y);
+          // rotation about z axis (roll)
+          roll = Math.toDegrees(rightHand.Pose.Orientation.z);
+
+          Point leftHandPoint = new Point(x, y, z, roll, pitch, yaw);
+          Point rightHandPoint = new Point(x, y, z, roll, pitch, yaw);
+
+          ArrayList<Point> handPoints = new ArrayList<Point>();
+          handPoints.add(leftHandPoint);
+          handPoints.add(rightHandPoint);
+          // publish left and hand positions. This is pretty much raw data
+          // we need to scale it / translate it rotate it.. etc..
+          // probably best done inside of the ik service.
+
+          // need to down sample this
+          if (frameCount % downSample == 0) {
+            oculus.invoke("publishLeftHandPosition", leftHandPoint);
+            oculus.invoke("publishRightHandPosition", rightHandPoint);
+          }
         }
-      }
-      
-      try {
-        // There need to be polling interval here.
-        Thread.sleep(pollIntervalMS);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-        // break out ...
-        break;
-      }
+        
+        oculus.getInputState();
 
-      // TODO: can I get oculus touch tracking info?
+        // There need to be polling interval here.
+
+        Thread.sleep(pollIntervalMS);
+
+        // TODO: can I get oculus touch tracking info?
+
+      } // while running
+    } catch (InterruptedException e) {
+      log.error("tracking thread terminating", e);
 
     }
+
+    trackerThread = null;
   }
 
   public boolean isRunning() {
@@ -152,7 +160,7 @@ public class OculusTracking implements Runnable, Serializable {
       log.info("Head tracker thread already started.");
       return;
     }
-    trackerThread = new Thread(this, String.format("%s_oculusHeadTracking", oculus.getName()));
+    trackerThread = new Thread(this, String.format("%s-oculustracking", oculus.getName()));
     trackerThread.start();
   }
 

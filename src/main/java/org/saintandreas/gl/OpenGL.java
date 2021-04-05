@@ -198,7 +198,7 @@ public final class OpenGL {
   }
 
   public static IndexedGeometry makeTexturedQuad(Vector2f min, Vector2f max) {
-    return makeTexturedQuad(min, max, new Vector2f(0, 0), new Vector2f(1, 1));
+    return makeTexturedQuad2(min, max, new Vector2f(0, 0), new Vector2f(1, 1));
   }
 
   public static IndexedGeometry makeTexturedQuad(Vector2f min, Vector2f max,
@@ -210,10 +210,36 @@ public final class OpenGL {
     vertices.add(new Vector4f(texMin.x, texMin.y, 0, 0));
     vertices.add(new Vector4f(max.x, min.y, 0, 1));
     vertices.add(new Vector4f(texMax.x, texMin.y, 0, 0));
+    /*
     vertices.add(new Vector4f(max.x, max.y, 0, 1));
     vertices.add(new Vector4f(texMax.x, texMax.y, 0, 0));
     vertices.add(new Vector4f(min.x, max.y, 0, 1));
     vertices.add(new Vector4f(texMin.x, texMax.y, 0, 0));
+    */
+    List<Short> indices = new ArrayList<>();
+    indices.add((short) 0); // LL
+    indices.add((short) 1); // LR
+    indices.add((short) 3); // UL 
+    indices.add((short) 2); // UR 
+    IndexedGeometry.Builder builder = new IndexedGeometry.Builder(indices, vertices);
+    builder.withDrawType(GL_TRIANGLE_STRIP).withAttribute(Attribute.POSITION).withAttribute(Attribute.TEX);
+    return builder.build();
+  }
+  
+  public static IndexedGeometry makeTexturedQuad2(Vector2f min, Vector2f max,
+      Vector2f tmin, Vector2f tmax) {
+    Vector2f texMin = tmin;
+    Vector2f texMax = tmax;
+    List<Vector4f> vertices = new ArrayList<>();
+    vertices.add(new Vector4f(min.x, min.y, -3, 1));
+    vertices.add(new Vector4f(texMin.x, texMin.y, 0, 0));
+    vertices.add(new Vector4f(max.x, min.y, -3, 1));
+    vertices.add(new Vector4f(texMax.x, texMin.y, 0, 0));
+    vertices.add(new Vector4f(max.x, max.y, -3, 1));
+    vertices.add(new Vector4f(texMax.x, texMax.y, 0, 0));
+    vertices.add(new Vector4f(min.x, max.y, -3, 1));
+    vertices.add(new Vector4f(texMin.x, texMax.y, 0, 0));
+    
     List<Short> indices = new ArrayList<>();
     indices.add((short) 0); // LL
     indices.add((short) 1); // LR

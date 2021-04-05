@@ -6,8 +6,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JPanel;
 
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.service.OculusRift;
-import org.myrobotlab.service.OculusRift.RiftFrame;
 import org.myrobotlab.service.SwingGui;
 import org.myrobotlab.service.interfaces.VideoGUISource;
 import org.slf4j.Logger;
@@ -24,10 +22,12 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
   public OculusRiftGui(String boundServiceName, SwingGui myService) {
     super(boundServiceName, myService);
 
-    // Create the 2 video widgets
-    leftEye = new VideoWidget(String.format("%s." + OculusRift.LEFT_OPEN_CV, boundServiceName), myService);
+    // use the monitor window
 
-    rightEye = new VideoWidget(String.format("%s." + OculusRift.RIGHT_OPEN_CV, boundServiceName), myService);
+    // Create the 2 video widgets
+    leftEye = new VideoWidget("left", myService);
+
+    rightEye = new VideoWidget("right", myService);
 
     JPanel leftVideoPanel = new JPanel();
     leftVideoPanel.add(leftEye.display);
@@ -50,13 +50,6 @@ public class OculusRiftGui extends ServiceGui implements VideoGUISource, ActionL
   public VideoWidget getLocalDisplay() {
     // TODO : Who calls this ever?
     return null;
-  }
-
-  public void onRiftFrame(RiftFrame frame) {
-    if (frame.left != null && frame.right != null) {
-      leftEye.displayFrame(frame.left);
-      rightEye.displayFrame(frame.right);
-    }
   }
 
   @Override
