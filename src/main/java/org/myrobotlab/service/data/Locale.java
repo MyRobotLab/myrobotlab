@@ -194,10 +194,10 @@ public class Locale {
     Properties props = new Properties();
     try {
       props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));
-      log.info("found {} properties from {}", props.size(), fullPath);
+      log.debug("found {} properties from {}", props.size(), fullPath);
     } catch (Exception e) {
       /* don't care common use case */
-      log.info("{} does not exist", fullPath);
+      log.debug("{} does not exist", fullPath);
     }
     return props;
   }

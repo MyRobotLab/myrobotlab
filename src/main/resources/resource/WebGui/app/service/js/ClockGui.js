@@ -48,27 +48,3 @@ angular.module('mrlapp.service.ClockGui', [])
                 msg.subscribe(this);
             }
         ])
-        .directive('unitMs', function () {
-            return {
-                restrict: 'A',
-                require: 'ngModel',
-                link: function (scope, element, attrs, ngModel) {
-                    var transform = function (val) {
-                        if (angular.isUndefined(val)) {
-                            var val = '0';
-                        }
-                        val = val.toString();
-                        var clean = val.replace(/[^0-9\.]/g, '').replace('.', '').replace(' ', '');
-                        if (clean == '') {
-                            clean = '0';
-                        }
-                        clean += ' ms';
-                        ngModel.$setViewValue(clean);
-                        ngModel.$render();
-                        return clean;
-                    };
-                    ngModel.$formatters.push(transform);
-                    ngModel.$parsers.push(transform);
-                }
-            };
-        });

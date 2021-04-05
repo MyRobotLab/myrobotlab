@@ -14,7 +14,7 @@ Locale
         <!-- {{locale}} -->
         <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
             <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
-            <ui-select-choices repeat="(tag, localeData) in service.locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
+            <ui-select-choices repeat="(tag, localeData) in locales | filter: $select.search">&nbsp;&nbsp;&nbsp;&nbsp;{{localeData.tag}} {{localeData.value.displayLanguage}} {{localeData.value.displayCountry}} &nbsp;&nbsp;&nbsp;&nbsp;</ui-select-choices>
         </ui-select>
     </div>
 </div>
@@ -28,6 +28,7 @@ Create a new service
 <div class="row">
     <div class="form-inline col-md-6">
         <!-- category begin -->
+        <!--
         <ui-select ng-model="category.selected" theme="bootstrap" style="width: 3.5em">
             <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;category&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="true">
                 <span>
@@ -42,6 +43,7 @@ Create a new service
                 </span>
             </ui-select-choices>
         </ui-select>
+        -->
         <!-- category end -->
         <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
         <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
@@ -50,31 +52,6 @@ Create a new service
     </div>
 </div>
 <div class="row">&nbsp;</div>
-<!-- service type selector begin -->
-<div class="row">
-    <div class="form-inline col-md-6">
-        <table class="table table-striped">
-            <tr ng-repeat="(fullTypename, metaData) in filterServices()">
-                <td nowrap>
-                    <span ng-click="setServiceType(metaData.simpleName)">
-                        <img ng-src="/{{metaData.simpleName + '.png'}}" width="18" ng-click="setServiceType(metaData.simpleName)"/>&nbsp;&nbsp;{{metaData.simpleName}}     
-                    
-                    
-                    </span>
-                </td>
-                <td>
-                    <span ng-click="setServiceType(metaData.simpleName)">{{metaData.description}}</span>
-                </td>
-                <td>
-                    <img src='/core/category/key.png' width="18" ng-show='metaData.requiresKeys' uib-tooltip='requires keys'/>
-                </td>
-                <td>
-                    <img src='/core/category/cloud.png' width="18" ng-show='metaData.isCloudService' uib-tooltip='cloud service'/>
-                </td>
-            </tr>
-        </table>
-    </div>
-</div>
 <div class="row">
     <form ng-submit="sendToCli(cmd);cmd=null">
         <div class="form-group col-md-6">
@@ -101,7 +78,7 @@ Create a new service
             <thead>
                 <tr>
                     <th>destination</th>
-                    <th>link</th>
+                    <th>channel</th>
                     <th>metric</th>
                 </tr>
             </thead>
@@ -119,7 +96,7 @@ Create a new service
 
 <div class="row">
     <div class="form-group col-md-6">
-    <b>connections</b></br>
+    <b>channels</b></br>
         <table class="table table-hover">
             <thead>
                 <tr>

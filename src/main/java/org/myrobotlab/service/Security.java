@@ -17,6 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
@@ -46,11 +48,14 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
+import org.myrobotlab.service.interfaces.KeyConsumer;
 import org.slf4j.Logger;
 
 // controlling export is "nice" but its control messages are the most important to mediate
 
 public class Security extends Service implements AuthorizationProvider {
+
+  protected Set<String> serviceKeyNames = new HashSet<>();
 
   public static class Group {
     public HashMap<String, Boolean> accessRules = new HashMap<String, Boolean>();
@@ -718,6 +723,7 @@ public class Security extends Service implements AuthorizationProvider {
     return keyName;
   }
 
+  @Deprecated /* replace with StringUtil.bytesToHex */
   private String toHexString(byte[] bytes) {
     StringBuilder sb = new StringBuilder(bytes.length * 3);
     for (int b : bytes) {
@@ -727,6 +733,34 @@ public class Security extends Service implements AuthorizationProvider {
       sb.append(' ');
     }
     return sb.toString();
+  }
+
+  public Set<String> getServiceKeyNames() {
+    List<String> servicesNeedingKeys = Runtime.getServiceNamesFromInterface(KeyConsumer.class);
+    for (String serviceName : servicesNeedingKeys) {
+      KeyConsumer s = (KeyConsumer) Runtime.getService(serviceName);
+      addServiceKeyNames(s.getKeyNames());
+    }
+    broadcastState();
+    return serviceKeyNames;
+  }
+
+  // WTH? this never gets called
+  public void onRegistered(String name) {
+    log.info("onRegistered({})", name);
+  }
+  
+  public void onStarted(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (si instanceof KeyConsumer) {
+      addServiceKeyNames(((KeyConsumer) si).getKeyNames());
+    }
+  }
+
+  public void addServiceKeyNames(String[] keyNamesIn) {
+    for (String keyName : keyNamesIn) {
+      serviceKeyNames.add(keyName);
+    }
   }
 
 }

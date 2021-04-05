@@ -92,11 +92,11 @@ public class Message implements Serializable {
 
   public String status;
 
-  public String dataEncoding; // null == none |json|cli|xml|stream ...
+  public String encoding; // null == none |json|cli|xml|stream ...
+  
   /**
    * the method which will be invoked on the destination @see Service
    */
-
   public String method;
 
   /**
@@ -134,20 +134,26 @@ public class Message implements Serializable {
       return name.substring(0, pos);
     }
   }
-
+  
   final public void set(final Message other) {
     msgId = other.msgId;
-    name = other.getName();
+    name = other.name;
     sender = other.sender;
     sendingMethod = other.sendingMethod;
-    // FIXED - not valid making a copy of a message
-    // to send and copying there history list
-    // historyList = other.historyList;
+    // FIXMED AGAIN - 20210320 - it "is valid"
+    // adding history is for sending remote - if we relay
+    // we should add - and history should be checked for
+    // loop back "from" remote
+    // deep copy
+    
     historyList = new ArrayList<String>();
+    historyList.addAll(other.historyList);
+    
     status = other.status;
-    dataEncoding = other.dataEncoding;
+    encoding = other.encoding;
     method = other.method;
     // you know the dangers of reference copy
+    // shallow data copy
     data = other.data;
   }
 
@@ -214,6 +220,9 @@ public class Message implements Serializable {
   }
 
   public String getId() {
+    if (name == null) {
+      return null;
+    }
     int p = name.indexOf("@");
     if (p > 0) {
       return name.substring(p + 1);

@@ -68,13 +68,17 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void configure() {
-    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    JoranConfigurator configurator = new JoranConfigurator();
-    configurator.setContext(context);
-    StatusPrinter.printInCaseOfErrorsOrWarnings(context);
-    removeAllAppenders();
-    addAppender(AppenderType.CONSOLE);
-    addAppender(AppenderType.FILE);
+    // why can't slf4j make a common configuration interface ! :(
+    // setting log level should be common to all :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+      JoranConfigurator configurator = new JoranConfigurator();
+      configurator.setContext(context);
+      StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+      removeAllAppenders();
+      addAppender(AppenderType.CONSOLE);
+      addAppender(AppenderType.FILE);
+    }
   }
 
   @Override
@@ -122,22 +126,23 @@ public class LoggingSLF4J extends Logging {
     if (clazz == null || clazz.length() == 0) {
       clazz = Logger.ROOT_LOGGER_NAME;
     }
+    // why can't slf4j make a common set log level interface :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      Logger logger = (Logger) LoggerFactory.getLogger(clazz);
 
-    Logger logger = (Logger) LoggerFactory.getLogger(clazz);
-
-    if ("DEBUG".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.DEBUG);
-    } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.TRACE);
-    } else if ("WARN".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.WARN);
-    } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.ERROR);
-      // } else if ("FATAL".equalsIgnoreCase(level)) {
-      // logger.setLevel(Level.FATAL);
-    } else {
-      logger.setLevel(Level.INFO);
+      if ("DEBUG".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.DEBUG);
+      } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.TRACE);
+      } else if ("WARN".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.WARN);
+      } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.ERROR);
+        // } else if ("FATAL".equalsIgnoreCase(level)) {
+        // logger.setLevel(Level.FATAL);
+      } else {
+        logger.setLevel(Level.INFO);
+      }
     }
   }
-
 }
