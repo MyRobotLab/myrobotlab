@@ -20,7 +20,7 @@ pipeline {
     // echo params.agentName    
     tools { 
         maven 'M3' // defined in global tools
-        jdk 'openjdk-11-linux' // defined in global tools
+        // jdk 'openjdk-11-linux' // defined in global tools
     }
     
     // JAVA_HOME="${tool 'openjdk-11-linux'}/jdk-11.0.1"
@@ -28,8 +28,8 @@ pipeline {
     environment {
         DB_ENGINE    = 'sqlite'
         JDK_HOME = "${tool 'openjdk-11-linux'}/jdk-11.0.1"
-        JAVA_HOME = "${JDK_HOME}"
-        PATH="${env.JAVA_HOME}/bin:${env.PATH}"
+        // JAVA_HOME = "${JDK_HOME}"
+        // PATH="${env.JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -39,7 +39,7 @@ pipeline {
                script {
                   sh '''
                      # jenkins redefines JAVA_HOME incorrectly - fix here
-                     export JAVA_HOME="${JDK_HOME}"
+                     # export JAVA_HOME="${JDK_HOME}"
 
                      mvn -version
                      java -version
@@ -71,7 +71,7 @@ pipeline {
                   // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
                   sh '''
                      # jenkins is messing this var up - force it to be correct here
-                     export JAVA_HOME=${JDK_HOME}
+                     # export JAVA_HOME=${JDK_HOME}
                      mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
                   '''
                } else {
@@ -89,7 +89,7 @@ pipeline {
                if (isUnix()) {
                   sh '''
                      # jenkins is messing this var up - force it to be correct here
-                     export JAVA_HOME=${JDK_HOME}
+                     # export JAVA_HOME=${JDK_HOME}
                      mvn -Dfile.encoding=UTF-8 verify
                   '''
                } else {
@@ -106,7 +106,7 @@ pipeline {
                      if (isUnix()) {
                         sh '''
                            # jenkins is messing this var up - force it to be correct here
-                           export JAVA_HOME=${JDK_HOME}
+                           # export JAVA_HOME=${JDK_HOME}
                            mvn -Dfile.encoding=UTF-8 verify
                         '''
                      } else {
