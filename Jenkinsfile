@@ -53,9 +53,8 @@ pipeline {
                         git --version
                         java -version
                         mvn -version
-
+                        set
                      '''
-                     printenv
                   }
                }
             }
