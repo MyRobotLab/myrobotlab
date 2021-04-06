@@ -1911,6 +1911,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   private boolean usePhysics;
 
+  private Thread mainThread;
+
   public void simpleInitApp() {
 
     stateManager = app.getStateManager();
@@ -2180,7 +2182,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
       // will generate error from jmonkey - this should "block"
-      app.start();
+      mainThread = new Thread() {
+        public void run() {
+          app.start();
+        }
+      };
+      
+      mainThread.start();
+      
       Callable<String> callable = new Callable<String>() {
         public String call() throws Exception {
           System.out.println("Asynchronous Callable");
@@ -2246,6 +2255,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         app.stop(true);
         // app.destroy(); not for "us"
         app = null;
+        // sleep()
+        // mainThread.interrupt(); // bigger hammer
       } catch (Exception e) {
         log.error("stopping jmonkey threw", e);
       }
