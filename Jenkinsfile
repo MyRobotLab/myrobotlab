@@ -80,12 +80,12 @@ pipeline {
                // TODO - integration tests !
                if (isUnix()) {
                   sh '''
-                     # jenkins is messing this var up - force it to be correct here
-                     # export JAVA_HOME=${JDK_HOME}
                      mvn -Dfile.encoding=UTF-8 verify
                   '''
                } else {
-                  bat(/"${mvnHome}\bin\mvn" -Dfile.encoding=UTF-8 verify/)
+                  bat '''
+                     mvn -Dfile.encoding=UTF-8 verify
+                  '''
                }
             }
          }
@@ -97,18 +97,17 @@ pipeline {
                   if (params.buildType == 'javadoc') {
                      if (isUnix()) {
                         sh '''
-                           # jenkins is messing this var up - force it to be correct here
-                           # export JAVA_HOME=${JDK_HOME}
-                           mvn -Dfile.encoding=UTF-8 verify
+                           mvn -q javadoc:javadoc -o
                         '''
                      } else {
-                        bat(/"${mvnHome}\bin\mvn" -q javadoc:javadoc/)
+                        bat '''
+                           mvn -q javadoc:javadoc -o
+                        '''
                      }
                   }
             }
          }
       } // stage javadoc
-
       stage('archive') {
          steps {
             // archiveArtifacts 'target/myrobotlab.jar'
@@ -117,9 +116,8 @@ pipeline {
       }
       stage('jacoco') {
          steps {
+            // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
             jacoco()
-         // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-         // jacoco(execPattern: '**/*.exec')
          }
       }
       // TODO - publish
