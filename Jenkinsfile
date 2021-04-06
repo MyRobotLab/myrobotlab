@@ -45,10 +45,8 @@ pipeline {
                         java -version
                         mvn -version
 
-                        # create git meta files
-                        git rev-parse --abbrev-ref HEAD > GIT_BRANCH
-                        git rev-parse HEAD > GIT_COMMIT
                      '''
+                     echo sh(script: 'env|sort', returnStdout: true)
                   } else {
                      bat '''
                         echo isUnix false
@@ -56,20 +54,10 @@ pipeline {
                         java -version
                         mvn -version
 
-                        # create git meta files
-                        git rev-parse --abbrev-ref HEAD > GIT_BRANCH
-                        git rev-parse HEAD > GIT_COMMIT
                      '''
+                     printenv
                   }
-
-                  git_commit = readFile('GIT_COMMIT').trim()
-                  echo git_commit
-
-                  git_branch = readFile('GIT_BRANCH').trim()
-                  echo git_branch
-
-                  echo sh(script: 'env|sort', returnStdout: true)
-                }
+               }
             }
         } // stage build
 
