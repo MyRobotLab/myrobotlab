@@ -36,11 +36,11 @@ pipeline {
         stage ('initialize') {
             steps {
                print params['agent-name']
-               print System.properties['os.name'].toLowerCase()
-
+               // print System.properties['os.name'].toLowerCase() - access to java object requires permission changes
                script {
                   if (isUnix()) {
                      sh '''
+                        echo isUnix true
                         git --version
                         java -version
                         mvn -version
@@ -51,6 +51,7 @@ pipeline {
                      '''
                   } else {
                      bat '''
+                        echo isUnix false
                         git --version
                         java -version
                         mvn -version
