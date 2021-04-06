@@ -78,10 +78,10 @@ pipeline {
       } // stage compile
 
       stage('verify') {
+         when {
+               expression { params.verify == 'true' }
+         }
          steps {
-            when {
-                  expression { params.verify == 'true' }
-            }
             script {
                // TODO - integration tests !
                if (isUnix()) {
