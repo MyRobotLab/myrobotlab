@@ -35,19 +35,31 @@ pipeline {
     stages {
         stage ('initialize') {
             steps {
-               print params['agent-name'] 
+               print params['agent-name']
+               print System.properties['os.name'].toLowerCase()
+
                script {
-                  sh '''
-                     # jenkins redefines JAVA_HOME incorrectly - fix here
-                     # export JAVA_HOME="${JDK_HOME}"
+                  if (isUnix()) {
+                     sh '''
+                        git --version
+                        java -version
+                        mvn -version
 
-                     mvn -version
-                     java -version
+                        # create git meta files
+                        git rev-parse --abbrev-ref HEAD > GIT_BRANCH
+                        git rev-parse HEAD > GIT_COMMIT
+                     '''
+                  } else {
+                     bat '''
+                        git --version
+                        java -version
+                        mvn -version
 
-                     # create git meta files
-                     git rev-parse --abbrev-ref HEAD > GIT_BRANCH
-                     git rev-parse HEAD > GIT_COMMIT
-                  '''
+                        # create git meta files
+                        git rev-parse --abbrev-ref HEAD > GIT_BRANCH
+                        git rev-parse HEAD > GIT_COMMIT
+                     '''
+                  }
 
                   git_commit = readFile('GIT_COMMIT').trim()
                   echo git_commit
@@ -63,20 +75,12 @@ pipeline {
       stage('compile') {
          steps {
             script {
-               echo git_commit
-               echo "git_commit=$git_commit"
-               // Run the maven build
                if (isUnix()) {
-                  // -o == offline
-                  // sh "'${mvnHome}/bin/mvn' -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile "
                   sh '''
-                     # jenkins is messing this var up - force it to be correct here
-                     # export JAVA_HOME=${JDK_HOME}
                      mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
                   '''
                } else {
-                  // bat(/"${mvnHome}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -Dgit_commit=$git_commit -Dgit_branch=$git_branch -Dmaven.test.failure.ignore -q clean compile  /)
-                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${env.BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
                }
             }
          }
