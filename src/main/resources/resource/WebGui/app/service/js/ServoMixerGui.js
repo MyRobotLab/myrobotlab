@@ -7,11 +7,13 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.servos = []
     $scope.sliders = []
     $scope.poseFiles = []
+    $scope.sequenceFiles = []
     $scope.loadedPose = null
+    // FIXME - this should be done in a base class or in framework
+    $scope.mrl = mrl;
+
+    // sublist object of servo panels - changes based onRegistered and onReleased events
     $scope.subPanels = {}
-
-
-    let panelNames = new Set()
 
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
@@ -21,7 +23,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             service.currentPose = {}
         } else {
             // replace with service definition
-            $scope.currentPose = service.currentPose    
+            $scope.currentPose = service.currentPose
         }
     }
 
@@ -37,9 +39,6 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
 
     $scope.setSearchServo = function(text) {
         $scope.searchServo.displayName = text
-    }
-
-    $scope.SearchServo = {// displayName: ""
     }
 
     this.updateState($scope.service)
@@ -93,7 +92,8 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
                 // these are "intermediate" subscriptions in that they
                 // don't send a subscribe down to service .. yet 
                 // that must already be in place (and is in the case of Servo.publishServoEvent)
-                msg.subscribeTo(_self, servo.name, 'publishServoEvent')
+                // FIXME .. servo.getName() == servo.getFullName() :( - needs to be done in framework
+                msg.subscribeTo(_self, servo.name + '@' + servo.id, 'publishServoEvent')
 
             }
             $scope.$apply()
@@ -104,32 +104,39 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         }
     }
 
+    $scope.searchServos = function(searchText) {
+        var result = {}
+        angular.forEach($scope.subPanels, function(value, key) {
+            if (!searchText || mrl.getShortName(key).indexOf(searchText) != -1){
+                result[key] = value;
+            }
+        })
+        return result
+    }
+
     $scope.savePose = function(pose) {
         msg.send('savePose', pose);
     }
 
-
     // this method initializes subPanels when a new service becomes available
     this.onRegistered = function(panel) {
-        if (panelNames.has(panel.displayName)) {
-            $scope.subPanels[panel.displayName] = panel
+        if (panel.simpleName == 'Servo') {
+            $scope.subPanels[panel.name] = panel
         }
     }
 
     // this method removes subPanels references from released service
     this.onReleased = function(panelName) {
-        if (panelNames.has(panelName)) {
-            delete $scope.subPanels[panelName]           
-        }
+        delete $scope.subPanels[panelName]
         console.info('here')
     }
 
-    // initialize all services which have panel references in Intro
+    // initialize all services which have panel references in Intro    
     let servicePanelList = mrl.getPanelList()
-    for (let index = 0; index < servicePanelList.length; ++index){
+    for (let index = 0; index < servicePanelList.length; ++index) {
         this.onRegistered(servicePanelList[index])
-    }    
-   
+    }
+
     msg.subscribe('getPoseFiles')
     msg.subscribe('listAllServos')
     msg.send('listAllServos')
