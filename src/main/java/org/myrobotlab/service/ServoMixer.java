@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.kinematics.Pose;
 import org.myrobotlab.logging.LoggingFactory;
@@ -29,41 +29,47 @@ public class ServoMixer extends Service {
 
   public ServoMixer(String n, String id) {
     super(n, id);
-
-    // FIXME - make this part of framework !!!!
-    // subscribe("runtime", "started");
-    // FIXME - use onStart(service) if type Servo
-    subscribe("runtime", "registered");
-    subscribe("runtime", "released");
-
-    // FIXME - incorporate into framework
-    // FIXME - this "should" be calling onStarted :(
-    List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
-    for (String sc : all) {
-      allServos.add(Runtime.getFullName(sc));
-    }
-    
-    File poseDirectory = new File(posesDirectory);
-    if (!poseDirectory.exists()) {
-      poseDirectory.mkdirs();
-    }
-
   }
 
-  // FIXME - these should be Abstract Service methods
-  // which can get meta information regarding inteface
-  public void onRegistered(Registration registration) {
-    // FIXME - wait until ServiceInterface implements hasInterface(String) !
-    // then FIX
-    List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
-    for (String sc : all) {
-      allServos.add(Runtime.getFullName(sc));
-    }
-    broadcastState();
+  /**
+   * name attach "the best"
+   */
+  public void attach(String name) {
+    allServos.add(name);
   }
 
-  // FIXME - part of the service life-cycle framework - this method should be in
-  // Abstract Service
+  /**
+   * general interface attach
+   */
+  public void attach(Attachable attachable) {
+    if (attachable instanceof Servo) {
+      attachServo((Servo) attachable);
+    }
+  }
+
+  /**
+   * typed attach
+   * 
+   * @param servo
+   */
+  public void attachServo(Servo servo) {
+    attach(servo.getName());
+  }
+
+  /**
+   * Part of service life cycle - a new servo has been started
+   */
+  public void onStarted(String name) {
+    try {
+      attach(name);
+    } catch (Exception e) {
+      log.error("onStarted threw", e);
+    }
+  }
+
+  /**
+   * Part of service life cycle - a servo has been removed from the system
+   */
   public void onReleased(String name) {
     allServos.remove(name);
   }
@@ -79,46 +85,76 @@ public class ServoMixer extends Service {
     return servos;
   }
 
+  /**
+   * Save a {name}.pose file to the current poses directory.  
+   * @param name
+   * @throws IOException
+   */
   public void savePose(String name) throws IOException {
-    // This assumes all servos will be used for the pose.
-    List<ServoControl> servos = listAllServos();
-    savePose(name, servos);
-    broadcast("getPoseFiles");
+    savePose(name, null);
   }
 
   public void savePose(String name, List<ServoControl> servos) throws IOException {
-    File poseDirectory = new File(posesDirectory);
     
+    if (servos == null) {
+      servos = listAllServos();
+    }
+    
+    File poseDirectory = new File(posesDirectory);
+    poseDirectory.mkdirs();
+
     log.info("Saving pose name {}", name);
     Pose p = new Pose(name, servos);
-    // p.save()
     String filename = poseDirectory.getAbsolutePath() + File.separator + name + ".pose";
     p.savePose(filename);
+    broadcast("getPoseFiles");
   }
 
-  public Pose loadPose(String name) throws IOException {
-    String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
-    log.info("Loading Pose name {}", filename);
-    currentPose = Pose.loadPose(filename);
-    broadcastState();
+  private boolean checkDir(String dir) {
+    try {
+      File check = new File(dir);
+      return check.exists();
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
+  }
+
+  public Pose loadPose(String name) {
+    try {
+      if (!checkDir(posesDirectory)) {
+        error("invalid poses directory %s", posesDirectory);
+        return null;
+      }
+      String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
+      log.info("Loading Pose name {}", filename);
+      currentPose = Pose.loadPose(filename);
+      broadcastState();
+    } catch (Exception e) {
+      error(e);
+    }
     return currentPose;
   }
 
-  public void moveToPose(Pose p) throws IOException {
-    // TODO: look up the pose / load it
-    // then move the servos to the positions
-    for (String sc : p.getPositions().keySet()) {
-      ServoControl servo = (ServoControl) Runtime.getService(sc);
-      Double speed = p.getSpeeds().get(sc);
-      Double position = p.getPositions().get(sc);
-      servo.setSpeed(speed);
-      servo.moveTo(position);
+  public void moveToPose(Pose p) {
+    try {
+      for (String sc : p.getPositions().keySet()) {
+        ServoControl servo = (ServoControl) Runtime.getService(sc);
+        if (servo == null) {
+          warn("servo (%s) cannot move to pose because it does not exist", sc);
+          continue;
+        }
+        Double speed = p.getSpeeds().get(sc);
+        Double position = p.getPositions().get(sc);
+        servo.setSpeed(speed);
+        servo.moveTo(position);
+      }
+    } catch (Exception e) {
+      error(e);
     }
   }
 
   public void moveToPose(String name) throws IOException {
-    // TODO: look up the pose / load it
-    // then move the servos to the positions
     Pose p = loadPose(name);
     moveToPose(p);
   }
@@ -128,12 +164,24 @@ public class ServoMixer extends Service {
   }
 
   public void setPosesDirectory(String posesDirectory) {
+    File dir = new File(posesDirectory);
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
     this.posesDirectory = posesDirectory;
+    invoke("getPoseFiles");
+    broadcastState();
   }
 
   public List<String> getPoseFiles() {
-    File dir = new File(posesDirectory);
+
     List<String> files = new ArrayList<>();
+    if (!checkDir(posesDirectory)) {
+      return files;
+    }
+
+    File dir = new File(posesDirectory);
+
     if (!dir.exists() || !dir.isDirectory()) {
       error("%s not a valid directory", posesDirectory);
       return files;
@@ -151,6 +199,23 @@ public class ServoMixer extends Service {
     return files;
   }
 
+  public void startService() {
+    try {
+      List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
+      for (String sc : all) {
+        attach(sc);
+      }
+
+      File poseDirectory = new File(posesDirectory);
+      if (!poseDirectory.exists()) {
+        poseDirectory.mkdirs();
+      }
+      super.startService();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init("INFO");
@@ -158,12 +223,19 @@ public class ServoMixer extends Service {
     webgui.autoStartBrowser(false);
     Runtime.start("python", "Python");
     webgui.startService();
+
     Servo servo1 = (Servo) Runtime.start("servo1", "Servo");
     servo1.setPin(1);
     Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
     servo2.setPin(2);
     Servo servo3 = (Servo) Runtime.start("servo3", "Servo");
     servo3.setPin(3);
+
+    for (int i = 0; i < 20; ++i) {
+      Runtime.start(String.format("servo%d", i), "Servo");
+    }
+    
+    /*
 
     VirtualArduino virt = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
     virt.connect("VRPORT");
@@ -172,6 +244,7 @@ public class ServoMixer extends Service {
     ard.attach(servo1);
     ard.attach(servo2);
     ard.attach(servo3);
+    */
 
     ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
 

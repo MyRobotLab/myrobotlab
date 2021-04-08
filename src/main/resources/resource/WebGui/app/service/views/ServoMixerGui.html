@@ -9,8 +9,7 @@
                 <div class="buttonsRow">
                     <span class="glyphicon glyphicon-folder-open"></span>
                     <input class="form-control ng-pristine ng-untouched ng-valid ng-empty directoryName" type="text" ng-model="service.posesDirectory" name="directoryName" id="directoryName" ng-init="" placeholder="Pose directory" style="width:200px">
-                    <button class="btn btn-default" title="You need first to create and save a directory for to open it" ng-click="msg.getPosesDirectory(service.posesDirectory)">Open</button>
-                    <button class="btn btn-default" ng-click="msg.setPosesDirectory(directoryName)">Save</button>
+                    <button class="btn btn-default" ng-click="msg.setPosesDirectory(service.posesDirectory)">Set</button>
                 </div>
                 <select ng-model="selectedPose" ng-change="msg.loadPose(selectedPose)" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
                     <option ng-repeat="x in poseFiles" ng-value="{{x}}">{{x}}</option>
@@ -132,7 +131,7 @@
     </div>
     <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
         <div class="sliderMixer">
-            <div class="MixerServoName">{{key}}</div>
+            <div class="MixerServoName">{{mrl.getShortName(key)}}</div>
             <div service-body panel="mrl.getPanel(key)"/></div>
         </div>
     </div>

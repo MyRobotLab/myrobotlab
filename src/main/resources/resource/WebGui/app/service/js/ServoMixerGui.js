@@ -41,9 +41,6 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
         $scope.searchServo.displayName = text
     }
 
-    $scope.SearchServo = {// displayName: ""
-    }
-
     this.updateState($scope.service)
 
     this.onMsg = function(inMsg) {
@@ -110,7 +107,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
     $scope.searchServos = function(searchText) {
         var result = {}
         angular.forEach($scope.subPanels, function(value, key) {
-            if (!searchText || value.name.indexOf(searchText) != -1){
+            if (!searchText || mrl.getShortName(key).indexOf(searchText) != -1){
                 result[key] = value;
             }
         })

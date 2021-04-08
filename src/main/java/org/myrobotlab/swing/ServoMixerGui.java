@@ -120,16 +120,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
     } else if (o == loadPoseButton) {
       //
       String name = poseName.getText();
-      try {
-        Pose p = servoMixer.loadPose(name);
-
-        servoMixer.moveToPose(p);
-        refreshPanel();
-
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      Pose p = servoMixer.loadPose(name);
+      servoMixer.moveToPose(p);
+      refreshPanel();
     }
   }
 
