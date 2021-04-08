@@ -1568,12 +1568,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       return jme;
     }
 
-    jme = (JMonkeyEngine) startPeer("simulator");
+    // jme = (JMonkeyEngine) startPeer("simulator");
+    jme = (JMonkeyEngine)Runtime.start("jme", "JMonkeyEngine");
+    
 
     isSimulatorActivated = true;
-
-    // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = /* getResourceDir() */ getResourceRoot() + fs + InMoov2.class.getSimpleName();
+    
+    // adding InMoov2 asset path to the jmonkey simulator
+    String assetPath =  getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -1585,7 +1587,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // Servo.eventsEnabledDefault(false);
     // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
     // /resource/JMonkeyEngine/assets
-
+    jme.loadModels(assetPath);
+    
     // ========== gael's calibrations begin ======================
     jme.setRotation(getName() + ".head.jaw", "x");
     jme.setRotation(getName() + ".head.neck", "x");
