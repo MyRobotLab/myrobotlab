@@ -338,7 +338,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.15</version>
+    <version>1.4.16</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
@@ -417,18 +417,6 @@
 <!-- InMoov2 begin -->
 <!-- skipping fr.inmoov inmoov2 fr.inmoov-inmoov2-null null version/latest -->
 <!-- InMoov2 end -->
-
-<dependency>
-      <groupId>io.moquette</groupId>
-      <artifactId>moquette-broker</artifactId>
-      <version>0.12.1</version>
-      <exclusions>
-              <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-      </exclusions>
-</dependency>
 
 <!-- IndianTts begin -->
   <dependency>
@@ -1143,7 +1131,7 @@
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
-    <version>2.10.1</version>
+    <version>2.10.5.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1495,7 +1483,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.10.1 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.10.1 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.10.5.1 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.10.1 skipping -->
 <!-- WikiDataFetcher end -->
 
