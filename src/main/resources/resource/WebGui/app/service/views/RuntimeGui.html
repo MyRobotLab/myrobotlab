@@ -122,32 +122,3 @@ Create a new service
         </table>
     </div>
 </div>
-<div class="row">
-    <div class="form-group col-md-6">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>remote id</th>
-                    <th>type</th>
-                    <th>gateway</th>
-                    <th>connection id</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="host in hosts | orderBy:'-lastActiveTs'">
-                    <!-- td>{{id}}</td -->
-                    <td>{{host.name}}</td>
-                    <td>{{host.state}}</td>
-                    <td>{{host.lastActiveTs}}</td>
-                    <td>
-                        <!-- img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}} -->
-                    </td>
-                    <td>{{host.ip}}</td>
-                    <td>
-                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>

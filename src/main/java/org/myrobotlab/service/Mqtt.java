@@ -134,7 +134,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   /**
    * reference to runtime route table
    */
-  protected transient RouteTable routeTable = null;
+  //protected transient RouteTable routeTable = null;
 
   protected transient Runtime runtime = null;
 
@@ -183,7 +183,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
     super(n, id);
     try {
       runtime = Runtime.getInstance();
-      routeTable = runtime.getRouteTable();
+      // routeTable = runtime.getRouteTable();
       conOpt.setCleanSession(cleanSession);
       clientId = String.format("%s@%s", getName(), getId());
     } catch (Exception e) {
@@ -494,7 +494,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
       if (msg != null) {
         /**
-         * A "connection" is made from this topic, because the broker is a dumb
+         * A new "connection" is made from this topic, because the broker is a dumb
          * "hub".. and we want to support non-mrl mqtt brokers. This means a
          * "connection" is really establishing a channel over the broker to
          * other mrl instances. The broker nor the connection to the broker need
@@ -537,7 +537,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           // meta-data or connection data outside the actual message
           // important when sending messages via egress to us it with the routingTable
           // to select the correct "interface/connection" to begin sending the msg
-          routeTable.addLocalGatewayKey(getName() + "-" + rxTopic, uuid);
+          // routeTable.addLocalGatewayKey(getName() + " " + rxTopic, uuid);
+          runtime.addLocalGatewayKey(getName() + " " + rxTopic, uuid);
           runtime.addConnection(uuid, remoteId, connection);
 
           // something is listening - i need to let them know I'm alive -
@@ -578,10 +579,12 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
           String remoteId = msg.getSrcId();
 
           // check if the route exists
-          if (!routeTable.contains(remoteId)) {
+          if (!runtime.containsRoute(remoteId)) {
             // FIXME implement 1st in routing table, then in AbstractGateway
-            // add's route to the entry
-            routeTable.addRoute(remoteId, routeTable.getConnectionUuid((getName() + "-" + topic)), 10);
+            // add new route to the routeTable - we found a new "id" - it came over interface x - we'll add
+            // a x -> id route entry, in order to do so we need to pull back the uuid of the connection/interface
+            String uuid = runtime.getConnectionUuidFromGatewayKey((getName() + " " + topic));
+            runtime.addRoute(remoteId, uuid, 10);
           }
 
           if (isLocal(msg)) {
@@ -711,8 +714,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
       // sent to specific connection on rx channel
       // remote id may use "connected" route of different remote id
       // multiplex to the appropriate channel
-      String uuid = routeTable.getRoute(msg.getId());
-      Connection conn = runtime.getConnection(uuid);
+
+      Connection conn = runtime.getRoute(msg.getId());
       String rxId = conn.getId();
       Connection connection = runtime.getConnectionFromId(rxId);
       String remoteFullName = (String)connection.get("remote-gateway");
