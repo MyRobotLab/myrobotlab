@@ -59,13 +59,13 @@ public class InMoovTorso extends Service {
 
   public void startService() {
     if (topStom == null) {
-      topStom = (ServoControl) createPeer("topStom");
+      topStom = (ServoControl) startPeer("topStom");
     }
     if (midStom == null) {
-      midStom = (ServoControl) createPeer("midStom");
+      midStom = (ServoControl) startPeer("midStom");
     }
     if (lowStom == null) {
-      lowStom = (ServoControl) createPeer("lowStom");
+      lowStom = (ServoControl) startPeer("lowStom");
     }
     /*
      * if (controller == null) { controller = (ServoController)
@@ -141,9 +141,15 @@ public class InMoovTorso extends Service {
   @Override
   public void broadcastState() {
     // notify the gui
-    topStom.broadcastState();
-    midStom.broadcastState();
-    lowStom.broadcastState();
+    if (topStom != null) {
+      topStom.broadcastState();
+    }
+    if (midStom != null) {
+      midStom.broadcastState();
+    }
+    if (lowStom != null) {
+      lowStom.broadcastState();
+    }
   }
 
   public void setController(ServoController controller) {
