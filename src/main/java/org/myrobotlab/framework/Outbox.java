@@ -111,8 +111,8 @@ public class Outbox implements Runnable, Serializable {
       // we warn if over 10 messages are in the queue - but we will still
       // process them
       if (msgBox.size() > maxQueue) {
-
-        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
+        // log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}.{}", myService.getName(), msgBox.size(), msg.name, msg.method);
+        log.warn("{} outbox BUFFER OVERRUN size {} Dropping message to {}", myService.getName(), msgBox.size(), msg);
       }
       msgBox.addFirst(msg);
 
