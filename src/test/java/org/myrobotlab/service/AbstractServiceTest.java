@@ -28,7 +28,7 @@ public abstract class AbstractServiceTest extends AbstractTest {
   public static TemporaryFolder testFolder = new TemporaryFolder();
 
   // This method should be subclassed and it should return a service object.
-  public abstract Service createService();
+  public abstract Service createService() throws Exception;
 
   // This is the internal testing method that sequences through the life cycle
   // of the service in the unit test

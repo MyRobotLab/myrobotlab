@@ -36,6 +36,10 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   }
 
   public void load() {
+    if (path == null) {
+      log.error("cannot load image from null path");
+      return;
+    }
     File target = new File(path);
     if (!target.isDirectory()) {
       imageFiles.add(target);
