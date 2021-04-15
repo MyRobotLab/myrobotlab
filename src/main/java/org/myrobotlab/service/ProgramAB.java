@@ -482,6 +482,17 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
+   * publish the contents of the mrl tag from an oob message in the aiml.  
+   * The result of this is displayed in the chatbot debug console.
+   * 
+   * @param oobText
+   * @return
+   */
+  public String publishOOBText(String oobText) {
+    return oobText;
+  }
+  
+  /**
    * This method will close the current bot, and reload it from AIML It then
    * will then re-establish only the session associated with userName.
    * 
