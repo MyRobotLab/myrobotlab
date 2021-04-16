@@ -82,11 +82,11 @@
 -->
     <tbody>
         <tr ng-repeat="e in log | orderBy:'':reverse" ng-class="{'success': e.level == 'DEBUG','text-muted': e.level == 'INFO', 'warning': e.level == 'WARN', 'danger': e.level == 'ERROR','small': true}" ng-show="showRecord(e)">
-            <td>{{e.ts}}</td>
-            <td>[{{e.level}}]</td>
-            <td>{{e.className.substring(e.className.lastIndexOf('.')+1)}}</td>
-            <td>{{e.threadName}}</td>
-            <td>{{e.body}}</td>
+            <td><small>{{e.ts}}</small></td>
+            <td><small>[{{e.level}}]</small></td>
+            <td><small>{{e.className.substring(e.className.lastIndexOf('.')+1)}}</small></td>
+            <td><small>{{e.threadName}}</small></td>
+            <td><small>{{e.body}}</small></td>
         </tr>
     </tbody>
 </table>

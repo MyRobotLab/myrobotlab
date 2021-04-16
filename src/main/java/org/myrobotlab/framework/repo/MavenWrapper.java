@@ -228,6 +228,12 @@ public class MavenWrapper extends Repo implements Serializable {
     try {
 
       LoggingFactory.init(Level.INFO);
+      
+      File cache = new File("./data/.myrobotlab/serviceData.json");
+      if (cache.exists()) {
+        log.info("removing servicData.json cache");
+        cache.delete();
+      }
 
       Repo repo = Repo.getInstance("MavenWrapper");
 

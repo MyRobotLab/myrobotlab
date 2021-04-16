@@ -250,7 +250,7 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -993,14 +993,8 @@
 <!-- OpenCV begin -->
   <dependency>
     <groupId>org.bytedeco</groupId>
-    <artifactId>javacv</artifactId>
-    <version>1.5.4</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>

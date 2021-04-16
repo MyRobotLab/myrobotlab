@@ -1,11 +1,12 @@
-<form class="form-inline">
-    <div class="container-fluid form-group">
-        <div ng-repeat="(key, value) in service.serviceType.peers">
-            <!-- {{key}} {{value.state}}<br/> -->
-            <!-- {{key}} <toggle width="70" height="28" ng-model="value.state == 'started'" ng-change="value.state?msg.startPeer(key):msg.releasePeer(key)" on="ON" off="OFF"/> -->
-            <!-- Split button -->
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col"></th>
+      <th scope="col">name</th>
+      <th scope="col">
             <div class="btn-group" uib-dropdown>
-                <button id="split-button" type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}">{{key}}</button>
+                <button id="split-button" type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}">action</button>
                 <button type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}" uib-dropdown-toggle>
                     <span class="caret"></span>
                 </button>
@@ -27,9 +28,24 @@
                     </li>
                 </ul>
             </div>
-        </div>
-    </div>
-</form>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="(key, value) in service.serviceType.peers">
+    <td>
+    
+        <input type="checkbox" value="" id="flexCheckDefault">
+    
+    </td>
+      <td><img ng-src="/{{value.type + '.png'}}" width="16"></td>
+      <td>{{value.actualName}}</td>
+      <td>{{value.comment}}</td>
+      <td>{{value.state}}</td>
+    </tr>
+  </tbody>
+</table>
+
 <!--
 <button class="btn btn-default" ng-click="msg.startPeer('mouth');">{{service.mouth}}start mouth</button>
 <button class="btn btn-default" ng-click="msg.startPeer('motorLeft');">start left motor</button>

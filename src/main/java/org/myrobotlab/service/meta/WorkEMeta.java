@@ -21,33 +21,33 @@ public class WorkEMeta extends MetaData {
     addPeer("git", "Git", "synching repos");
 
     // motor control - output
-    addPeer("joystick", "Joystick", "joystick control");
-    addPeer("controller", "Sabertooth", "motor controller");
-    addPeer("motorLeft", "MotorPort", "left motor");
-    addPeer("motorRight", "MotorPort", "right motor");
+    addPeer("joystick", "Joystick", "a way to steer the bot");
+    addPeer("controller", "Sabertooth", "power motor controller for wheels");
+    addPeer("motorLeft", "MotorPort", "left wheel motor");
+    addPeer("motorRight", "MotorPort", "right wheel motor");
 
     // global simulator
-    addPeer("simulator", "simulator", "JMonkeyEngine", "the simulator");
+    addPeer("simulator", "simulator", "JMonkeyEngine", "a simulator, when the hardware isn't worky");
 
     // global python
-    addPeer("python", "python", "Python", "the python interface");
+    addPeer("python", "python", "Python", "the python programming interface");
 
     // global webgui
     addPeer("webgui", "webgui", "WebGui", "web interface");
 
     // vision - input
     // TODO - going to have several "spouts" - and bolts (storm analogy)
-    addPeer("eye", "OpenCV", "computer vision");// webcam spout
+    addPeer("eye", "OpenCV", "an eye to see with");// webcam spout
     // addPeer("leftFoscam ", "OpenCV", "computer vision");// webcam spout
 
     // speech - output
-    addPeer("mouth", "Polly", "mouth");
+    addPeer("mouth", "Polly", "a mouth to speak with");
 
     // ear - input
-    addPeer("ear", "WebkitSpeechRecognition", "ear");
+    addPeer("ear", "WebkitSpeechRecognition", "a ear to hear with");
 
     // brain - input/output
-    addPeer("brain", "ProgramAB", "ear");
+    addPeer("brain", "ProgramAB", "a brain to think with");
 
     // emoji - output
     addPeer("emoji", "Emoji", "emotional state machine");

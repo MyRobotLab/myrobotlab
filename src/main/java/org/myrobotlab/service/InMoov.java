@@ -171,7 +171,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   // interface
   transient private Joystick joystick;
   String language;
-  transient LanguagePack languagePack = new LanguagePack();
+  public LanguagePack languagePack = new LanguagePack();
   private String lastGestureExecuted = "";
   String lastInMoovError = "";
 

@@ -2088,6 +2088,10 @@ public class OpenCV extends AbstractComputerVision {
 
   public void samplePoint(String filter, int x, int y) {
     OpenCVFilter f = getFilter(filter);
+    if (f == null) {
+      log.warn("cannot sample point on null filter");
+      return;
+    }
     f.samplePoint(x, y);
   }
 

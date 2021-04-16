@@ -968,6 +968,10 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         // uni-cast mode - all clients have their own id
         Connection c = Runtime.getInstance().getRoute(msg.getId());
         Broadcaster broadcaster = getBroadcasterFactory().lookup(c.getUuid());
+        if (broadcaster == null) {
+          log.warn("{} failed to lookup broadcaster {} client gone?", getName(), c.getUuid());
+          return;
+        }
         broadcaster.broadcast(json);
       }
     } catch (Exception e) {
@@ -1176,7 +1180,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true);
       webgui.autoStartBrowser(false);
-      webgui.setPort(8887);
+      webgui.setPort(8888);
       webgui.startService();
       
       Runtime.start("python", "Python");
