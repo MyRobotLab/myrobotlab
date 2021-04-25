@@ -191,7 +191,7 @@ public class Servo extends AbstractServo implements ServoControl {
       broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
-    broadcastState();
+//    broadcastState();
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached

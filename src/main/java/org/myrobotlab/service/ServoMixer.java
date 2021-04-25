@@ -1,26 +1,37 @@
 package org.myrobotlab.service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.kinematics.Pose;
+import org.myrobotlab.kinematics.PoseSequence;
+import org.myrobotlab.kinematics.Sequence;
+import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.slf4j.Logger;
 
 public class ServoMixer extends Service {
 
+  public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
+
   private static final long serialVersionUID = 1L;
 
-  protected String posesDirectory = getDataDir() + fs + "poses";
-
-  protected Pose currentPose = null;
+  protected String servoMixerDirectory = getDataDir() + fs + "poses";
+  
+  /**
+   * sequence player
+   */
+  protected transient Player player = new Player();
 
   /**
    * Set of name kept in sync with current registry
@@ -86,7 +97,8 @@ public class ServoMixer extends Service {
   }
 
   /**
-   * Save a {name}.pose file to the current poses directory.  
+   * Save a {name}.pose file to the current poses directory.
+   * 
    * @param name
    * @throws IOException
    */
@@ -95,12 +107,12 @@ public class ServoMixer extends Service {
   }
 
   public void savePose(String name, List<ServoControl> servos) throws IOException {
-    
+
     if (servos == null) {
       servos = listAllServos();
     }
-    
-    File poseDirectory = new File(posesDirectory);
+
+    File poseDirectory = new File(servoMixerDirectory);
     poseDirectory.mkdirs();
 
     log.info("Saving pose name {}", name);
@@ -120,24 +132,164 @@ public class ServoMixer extends Service {
     return false;
   }
 
+  @Deprecated /* use getPose(name) */
   public Pose loadPose(String name) {
+    return getPose(name);
+  }
+
+  /**
+   * Get a pose by name - name corresponds to the filename of the file in the
+   * servoMixerDirectory
+   * 
+   * @param name
+   * @return
+   */
+  public Pose getPose(String name) {
+    Pose pose = null;
     try {
-      if (!checkDir(posesDirectory)) {
-        error("invalid poses directory %s", posesDirectory);
+      if (!checkDir(servoMixerDirectory)) {
+        error("invalid poses directory %s", servoMixerDirectory);
         return null;
       }
-      String filename = new File(posesDirectory).getAbsolutePath() + File.separator + name + ".pose";
+      String filename = new File(servoMixerDirectory).getAbsolutePath() + File.separator + name + ".pose";
       log.info("Loading Pose name {}", filename);
-      currentPose = Pose.loadPose(filename);
+      pose = Pose.loadPose(filename);
+//      broadcastState();  "maybe too chatty"
+    } catch (Exception e) {
+      error(e);
+    }
+    return pose;
+  }
+
+  public void removePose(String name) {
+    try {
+      if (!checkDir(servoMixerDirectory)) {
+        error("invalid poses directory %s", servoMixerDirectory);
+        return;
+      }
+      String filename = new File(servoMixerDirectory).getAbsolutePath() + File.separator + name + ".pose";
+      File del = new File(filename);
+      if (del.exists()) {
+        del.delete();
+      }
+      invoke("getPoseFiles");
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public void removeSequence(String name) {
+    try {
+      if (!checkDir(servoMixerDirectory)) {
+        error("invalid poses directory %s", servoMixerDirectory);
+        return;
+      }
+      String filename = new File(servoMixerDirectory).getAbsolutePath() + File.separator + name + ".seq";
+      File del = new File(filename);
+      if (del.exists()) {
+        del.delete();
+      }
+      invoke("getSequenceFiles");
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
+  public Sequence getSequence(String name) {
+    Sequence pose = null;
+    try {
+      if (!checkDir(servoMixerDirectory)) {
+        error("invalid poses directory %s", servoMixerDirectory);
+        return null;
+      }
+      String filename = new File(servoMixerDirectory).getAbsolutePath() + File.separator + name + ".seq";
+      log.info("Loading Pose name {}", filename);
+      pose = Sequence.loadSequence(filename);
       broadcastState();
     } catch (Exception e) {
       error(e);
     }
-    return currentPose;
+    return pose;
+  }
+
+  /**
+   * Export Python representation of a sequence
+   * 
+   * @param name
+   * @return
+   */
+  public String exportSequence(String name) {
+    return null;
+  }
+
+  public class Player implements Runnable {
+    Thread thread = null;
+    Sequence runningSeq = null;
+    int seqCnt = 0;
+    boolean running = false;
+
+    @Override
+    public void run() {
+      try {
+        running = true;
+        if (runningSeq.cycle) {
+          while (running) {
+            play();
+          }
+        } else {
+          play();
+        }
+      } catch (Exception e) {
+      }
+      running = false;
+    }
+
+    public void stop() {
+      running = false;
+    }
+
+    private void play() {
+      if (runningSeq.poses != null) {
+        for (PoseSequence ps : runningSeq.poses) {
+          Pose pose = getPose(ps.name);
+          if (pose == null) {
+            warn("Pose %s not found", ps.name);
+            continue;
+          }
+          if (ps.waitTimeMs != null) {
+            sleep(ps.waitTimeMs);
+          }
+          // move to positions
+          Pose p = getPose(ps.name);
+          moveToPose(p);
+        } // poses
+      }
+    }
+
+    public void start(Sequence seq) {
+      runningSeq = seq;
+      seqCnt++;
+      thread = new Thread(this, String.format("%s-player-%d", getName(), seqCnt));
+      thread.start();
+    }
+  }
+  
+  public String publishPlayingPose(String name) {
+    return name;
+  }
+  
+  public String publishStopPose(String name) {
+    return name;
+  }
+
+  public void playSequence(String name) {
+    Sequence seq = (Sequence) broadcast("getSequence", name);
+    player.start(seq);
   }
 
   public void moveToPose(Pose p) {
     try {
+      invoke("publishPlayingPose", p.name);
       for (String sc : p.getPositions().keySet()) {
         ServoControl servo = (ServoControl) Runtime.getService(sc);
         if (servo == null) {
@@ -147,8 +299,11 @@ public class ServoMixer extends Service {
         Double speed = p.getSpeeds().get(sc);
         Double position = p.getPositions().get(sc);
         servo.setSpeed(speed);
+//        servo.broadcastState();  WAY TOO CHATTY
+        // servo.moveToBlocking(position); // WOAH - sequential movements :P
         servo.moveTo(position);
       }
+      invoke("publishStopPose", p.name);
     } catch (Exception e) {
       error(e);
     }
@@ -160,7 +315,7 @@ public class ServoMixer extends Service {
   }
 
   public String getPosesDirectory() {
-    return posesDirectory;
+    return servoMixerDirectory;
   }
 
   public void setPosesDirectory(String posesDirectory) {
@@ -168,7 +323,7 @@ public class ServoMixer extends Service {
     if (!dir.exists()) {
       dir.mkdirs();
     }
-    this.posesDirectory = posesDirectory;
+    this.servoMixerDirectory = posesDirectory;
     invoke("getPoseFiles");
     broadcastState();
   }
@@ -176,14 +331,14 @@ public class ServoMixer extends Service {
   public List<String> getPoseFiles() {
 
     List<String> files = new ArrayList<>();
-    if (!checkDir(posesDirectory)) {
+    if (!checkDir(servoMixerDirectory)) {
       return files;
     }
 
-    File dir = new File(posesDirectory);
+    File dir = new File(servoMixerDirectory);
 
     if (!dir.exists() || !dir.isDirectory()) {
-      error("%s not a valid directory", posesDirectory);
+      error("%s not a valid directory", servoMixerDirectory);
       return files;
     }
     File[] all = dir.listFiles();
@@ -199,6 +354,68 @@ public class ServoMixer extends Service {
     return files;
   }
 
+  public List<String> getSequenceFiles() {
+
+    List<String> files = new ArrayList<>();
+    if (!checkDir(servoMixerDirectory)) {
+      return files;
+    }
+
+    File dir = new File(servoMixerDirectory);
+
+    if (!dir.exists() || !dir.isDirectory()) {
+      error("%s not a valid directory", servoMixerDirectory);
+      return files;
+    }
+    File[] all = dir.listFiles();
+    Set<String> sorted = new TreeSet<>();
+    for (File f : all) {
+      if (f.getName().toLowerCase().endsWith(".seq")) {
+        sorted.add(f.getName().substring(0, f.getName().lastIndexOf(".")));
+      }
+    }
+    for (String s : sorted) {
+      files.add(s);
+    }
+    return files;
+  }
+
+  /**
+   * Takes name of a file and a json encoded string of a sequence, saves it to
+   * file and sets the "current" sequence to the data
+   * 
+   * @param filename
+   * @param json
+   */
+  public void saveSequence(String filename, String json) {
+    try {
+      if (filename == null) {
+        error("save sequence file name cannot be null");
+        return;
+      }
+
+      if (json == null) {
+        error("sequence json cannot be null");
+        return;
+      }
+
+      if (!filename.toLowerCase().endsWith(".seq")) {
+        filename += ".seq";
+      }
+
+      Sequence seq = (Sequence) CodecUtils.fromJson(json, Sequence.class);
+      if (seq != null) {
+        String path = servoMixerDirectory + fs + filename;
+        FileOutputStream fos = new FileOutputStream(path);
+        fos.write(CodecUtils.toPrettyJson(seq).getBytes());
+        fos.close();
+      }
+      invoke("getSequenceFiles");
+    } catch (Exception e) {
+      error(e);
+    }
+  }
+
   public void startService() {
     try {
       List<String> all = Runtime.getServiceNamesFromInterface(ServoControl.class);
@@ -206,7 +423,7 @@ public class ServoMixer extends Service {
         attach(sc);
       }
 
-      File poseDirectory = new File(posesDirectory);
+      File poseDirectory = new File(servoMixerDirectory);
       if (!poseDirectory.exists()) {
         poseDirectory.mkdirs();
       }
@@ -218,35 +435,27 @@ public class ServoMixer extends Service {
 
   public static void main(String[] args) throws Exception {
 
+    
+    Runtime.main(new String[] {"--id", "admin", "--from-launcher" });
     LoggingFactory.init("INFO");
+    
+    // Runtime.start("i01.head.rothead", "Servo");
+    // Runtime.start("i01.head.neck", "Servo");
     WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
     webgui.autoStartBrowser(false);
     Runtime.start("python", "Python");
+    Runtime.start("i01", "InMoov2");
     webgui.startService();
 
-    Servo servo1 = (Servo) Runtime.start("servo1", "Servo");
-    servo1.setPin(1);
-    Servo servo2 = (Servo) Runtime.start("servo2", "Servo");
-    servo2.setPin(2);
-    Servo servo3 = (Servo) Runtime.start("servo3", "Servo");
-    servo3.setPin(3);
-
-    for (int i = 0; i < 20; ++i) {
-      Runtime.start(String.format("servo%d", i), "Servo");
-    }
-    
     /*
+     * 
+     * VirtualArduino virt = (VirtualArduino) Runtime.start("virtual",
+     * "VirtualArduino"); virt.connect("VRPORT"); Arduino ard = (Arduino)
+     * Runtime.start("ard", "Arduino"); ard.connect("VRPORT");
+     * ard.attach(servo1); ard.attach(servo2); ard.attach(servo3);
+     */
 
-    VirtualArduino virt = (VirtualArduino) Runtime.start("virtual", "VirtualArduino");
-    virt.connect("VRPORT");
-    Arduino ard = (Arduino) Runtime.start("ard", "Arduino");
-    ard.connect("VRPORT");
-    ard.attach(servo1);
-    ard.attach(servo2);
-    ard.attach(servo3);
-    */
-
-    ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
+    // ServoMixer mixer = (ServoMixer) Runtime.start("mixer", "ServoMixer");
 
   }
 

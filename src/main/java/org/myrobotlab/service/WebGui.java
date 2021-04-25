@@ -1184,6 +1184,14 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       webgui.startService();
       
       Runtime.start("python", "Python");
+      
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+      
+
             
       MqttBroker broker = (MqttBroker)Runtime.start("broker", "MqttBroker");
       broker.listen();
@@ -1194,12 +1202,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       mqtt01.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
       */
       mqtt01.connect("mqtt://localhost:1883");
-
-      boolean done = true;
-      if (done) {
-        return;
-      }
-      
 
       
       Runtime.start("neo", "NeoPixel");

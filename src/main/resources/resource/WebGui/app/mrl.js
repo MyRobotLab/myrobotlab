@@ -107,9 +107,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         url: document.location.origin.toString() + '/api/messages?user=root&pwd=pwd&session_id=2309adf3dlkdk&id=' + this.id,
         transport: 'websocket',
         maxRequest: 100,
+        maxReconnectOnClose: 100,
         enableProtocol: true,
-        timeout: -1,
+        timeout: -1, // infinite idle timeout
         fallbackTransport: 'long-polling',
+        reconnectInterval: 1000,
+        maxReconnectOnClose: 50,
         // trackMessageLength: true,
         // maxTextMessageSize: 10000000,
         // maxBinaryMessageSize: 10000000,
@@ -231,14 +234,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
      * and other details related to connection could be managed here.
      */
     this.sendMessage = function(msg) {
-        console.info('out-msg <-- ' + msg.name + '.' + msg.method)
+        // GOOD DEBUGGING
+        // console.info('out-msg <-- ' + msg.name + '.' + msg.method)
         msg.encoding = 'json'
         if (msg.data != null && msg.data.length > 0) {
             // reverse encoding - pop off undefined
             // to shrink paramter length
             // js implementation -
             var pos = msg.data.length - 1
-            for (i = pos; i > -1; --i) {
+            for (let i = pos; i > -1; --i) {
                 if (typeof msg.data[i] == 'undefined') {
                 } else {
                     msg.data[i] = JSON.stringify(msg.data[i])
@@ -361,7 +365,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 // first parse parses header and array of encoded strings
                 msg = jQuery.parseJSON(body)
 
-                console.info('in-msg --> ' + msg.name + '.' + msg.method)
+                // GOOD DEBUGGING
+                // console.info('in-msg --> ' + msg.name + '.' + msg.method)
 
                 if (msg == null) {
                     console.log('msg null')
@@ -453,6 +458,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     this.onStatus = function(status) {
         console.log(status)
     }
+    
+
+    this.onReconnect = function(request, response){
+        console.info('onReconnect')
+    }
 
     this.onClose = function(response) {
         connected = false
@@ -494,7 +504,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             } else {
                 // is string - and is short name - check registry first
                 if (_self.remoteId != null) {
-                    console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
+                    // killer chatty - so chatty it kills browsers
+                    // console.error('name \"' + service + '\" string supplied name did not have remoteId - this will be a problem !')
                     return service + '@' + _self.remoteId
                 } else {
                     return service
@@ -534,12 +545,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         }
     }
 
-    this.getServicesFromInterface = function(interface) {
+    this.getServicesFromInterface = function(interfaceName) {
         var ret = []
         for (var name in registry) {
             var service = registry[name]
             // see if a service has the same input interface
-            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interface])) {
+            if (!angular.isUndefined(service.interfaceSet) && !angular.isUndefined(service.interfaceSet[interfaceName])) {
                 ret.push(registry[name])
             }
         }
@@ -623,7 +634,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
     // up-link open
     this.onOpen = function(response) {
-        console.debug('mrl.onOpen begin')
+        console.info('onOpen')
 
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
@@ -823,7 +834,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             let flat = _self.flatten(service)
             // console.table(flat) -  very cool logging, but to intensive
 
-            properties = []
+            let properties = []
 
             let exclude = ['serviceType', 'id', 'simpleName', 'interfaceSet', 'serviceClass', 'statusBroadcastLimitMs', 'isRunning', 'name', 'creationOrder', 'serviceType']
 
@@ -873,7 +884,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 name = 'image-' + Object.keys(displayImages).length
             }
             displayImages[name] = createPanel(name, name, 15, lastPosY, 800, 0, zIndex, imageSrc)
-            for (i = 0; i < displayCallbacks.length; ++i) {
+            for (let i = 0; i < displayCallbacks.length; ++i) {
                 displayCallbacks[i](displayImages[name])
             }
         }
@@ -905,14 +916,15 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             if (panels.hasOwnProperty(name)) {
                 return panels[name]
             } else {
-                console.error('could not find panel ' + name)
+                // TOO CHATTY - BROWSER KILLER !
+                // console.error('could not find panel ' + name)
             }
             return null
         }
 
         let createPanel = function(fullname, type, x, y, width, height, zIndex, data) {
 
-            panel = {
+            let panel = {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
                 displayName: _self.getShortName(fullname),
@@ -1198,7 +1210,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                          *   sendArgs will be called by the dynamically generated code interface
                          */
                         sendArgs: function(method, obj) {
-                            data = []
+                            let data = []
                             for (var key in obj) {
                                 if (obj.hasOwnProperty(key)) {
                                     data.push(obj[key])
@@ -1519,7 +1531,9 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // assign callbacks
     this.request.onOpen = this.onOpen
     this.request.onClose = this.onClose
+    this.request.onClose = this.onReconnect
     this.request.onTransportFailure = this.onTransportFailure
+    // this.request.onFailureToReconnect = this.onFailureToReconnect
     this.request.onMessage = this.onMessage
     this.request.onOpen = this.onOpen
     this.request.onError = this.onError

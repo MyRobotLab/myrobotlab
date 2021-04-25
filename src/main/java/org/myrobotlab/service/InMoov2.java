@@ -1162,6 +1162,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGSEQUENCE"));
   }
+  
+  /**
+   * start servos - no controllers
+   * @throws Exception 
+   */
+  public void startServos() throws Exception {
+    startServos(null, null);
+  }
 
   public ProgramAB startChatBot() {
 
@@ -1290,10 +1298,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // legacy inmoov head exposed pins
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
-
-    // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(get("STARTINGHEAD") + " " + port);
-    // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
 
     speakBlocking(get("STARTINGHEAD"));
 

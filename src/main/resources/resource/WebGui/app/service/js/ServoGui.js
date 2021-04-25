@@ -363,7 +363,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoEvent")
-    msg.subscribe("publishEncoderData")
+//    msg.subscribe("publishEncoderData")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')
