@@ -75,8 +75,7 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   // change units, sample rate, etc
   // FIXME - NOT SERVICE .. possibly name or interface but not service
   public void addRangeListener(Service service) {
-    addListener(""
-        + "ge", service.getName(), "onRange");
+    addListener("publishRange", service.getName(), "onRange");
   }
 
   public void attach(String port, int trigPin, int echoPin) throws Exception {
