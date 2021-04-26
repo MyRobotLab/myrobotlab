@@ -11,6 +11,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangePublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
@@ -74,7 +75,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
   // change units, sample rate, etc
   // FIXME - NOT SERVICE .. possibly name or interface but not service
   public void addRangeListener(Service service) {
-    addListener("publishRange", service.getName(), "onRange");
+    addListener(""
+        + "ge", service.getName(), "onRange");
   }
 
   public void attach(String port, int trigPin, int echoPin) throws Exception {
@@ -145,6 +147,11 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
 
     log.info("publishRange {}", lastRange);
     return lastRange;
+  }
+
+  public RangeData publishRangeData(Double range) {
+    RangeData ret = new RangeData(getName(), range);
+    return ret;
   }
 
   public boolean setType(String type) {
@@ -238,6 +245,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     }
 
     invoke("publishRange", range);
+    // range with source
+    invoke("publishRangeData", range);
     return range;
   }
 
