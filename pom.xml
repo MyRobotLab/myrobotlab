@@ -24,7 +24,14 @@
     
     # specific test
     mvn test -Dtest=OpenCVTest#testGetClassifications    
-    
+
+    mvn install:install-file  -Dfile=target/myrobotlab.jar \
+                          -DgroupId=myrobotlab.org \
+                          -DartifactId=myrobotlab \
+                          -Dversion=1.1.401 \
+                          -Dpackaging=jar \
+                          -DlocalRepositoryPath=test-repo
+
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
 
@@ -32,6 +39,8 @@
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
 
+    # doclets
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
   
    -->  
   <modelVersion>4.0.0</modelVersion>
@@ -72,18 +81,6 @@
           <name>central</name>
           <url>https://repo.maven.apache.org/maven2</url>
         </repository>
-        <!-- the big kahuna  -->
-        <repository>
-          <id>bintray</id>
-          <name>bintray</name>
-          <url>https://jcenter.bintray.com</url>
-        </repository>
-        <!-- more big kahuna  -->
-        <repository>
-          <id>bintray2</id>
-          <name>bintray2</name>
-          <url>https://dl.bintray.com</url>
-        </repository>
         <!-- all other mrl deps  -->
         <repository>
           <id>myrobotlab</id>
@@ -101,12 +98,6 @@
           <id>eclipse-release</id>
           <name>eclipse-release</name>
           <url>https://repo.eclipse.org/content/groups/releases</url>
-        </repository>
-        <!-- jmonkey simulator  -->
-        <repository>
-          <id>jmonkey</id>
-          <name>jmonkey</name>
-          <url>https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine</url>
         </repository>
         <!-- sphinx  -->
         <repository>
@@ -398,13 +389,7 @@
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov begin -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>inmoov</artifactId>
-    <version>1.1.22</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>jm3-model</artifactId>
@@ -429,7 +414,7 @@
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- Duplicate entry for inmoov.fr-inmoov-1.1.22 skipping -->
+<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
 <!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
 <!-- IntegratedMovement end -->
 
