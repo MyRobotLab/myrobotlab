@@ -1,3 +1,23 @@
+{{service.voice.name}}
+
+<input type="text" class="form-control" ng-model="text"/>
+
+<nav class="navbar">
+    <div class="dropdown navbar-nav">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">voices &nbsp;<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li ng-repeat="voice in service.voices">
+                <a href="#" ng-click="setVoice(voice)">{{voice.name}} {{voice.gender}} {{voice.local}}  {{voice.description}}</a>
+            </li>            
+        </ul>
+    </div>
+    <div class="dropdown navbar-nav">
+        <button class="btn btn-default" ng-click="speak(text)">Speak</button>
+    </div>
+</nav>
+
+<!--
 <div class="row">
     <span class="col-lg-6">
         <img ng-src="{{(service.ready)?'../green.png':'../red.png'}}"/>
@@ -25,7 +45,7 @@
             <a href="https://docs.aws.amazon.com/polly/latest/dg/authentication-and-access-control.html">how to get keys</a>
         </form>
     </div>
-</div>
+</div>-->
 <!--
 
 
