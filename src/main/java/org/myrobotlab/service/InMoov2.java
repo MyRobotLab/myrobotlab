@@ -950,12 +950,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
   @Deprecated
   public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
-    InMoov2Arm arm = getArm(which);
-    if (arm == null) {
-      warn("%s hand not started", which);
-      return;
-    }
-    arm.setSpeed(bicep, rotate, shoulder, omoplate);
+     setArmSpeed(which, bicep, rotate, shoulder, omoplate);
   }
 
   public void setAutoDisable(Boolean param) {
