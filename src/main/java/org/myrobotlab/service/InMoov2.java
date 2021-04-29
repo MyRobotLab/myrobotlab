@@ -938,15 +938,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.rest();
     }
   }
-
-  @Deprecated
-  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
+  
+  public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
-      warn("%s hand not started", which);
+      warn("%s arm not started", which);
       return;
     }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
+  }  
+  
+  @Deprecated
+  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
+     setArmSpeed(which, bicep, rotate, shoulder, omoplate);
   }
 
   public void setAutoDisable(Boolean param) {
