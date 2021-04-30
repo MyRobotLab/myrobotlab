@@ -576,7 +576,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void halfSpeed() {
     if (head != null) {
-      head.setSpeed(25.0, 25.0, 25.0, 25.0, -1.0, 25.0);
+      head.setSpeed(25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
     }
 
     if (rightHand != null) {
@@ -795,7 +795,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(Double neck, Double rothead, Double rollNeck) {
-    moveHead(neck, rothead, null, null, null, rollNeck);
+    moveHead(neck, rothead, rollNeck);
   }
 
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
