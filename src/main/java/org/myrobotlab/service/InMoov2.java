@@ -787,7 +787,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(double neck, double rothead) {
-    moveHead(neck, rothead, null);
+    moveHead(neck, rothead, null, null, null, null);
   }
 
   public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
@@ -795,7 +795,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(Double neck, Double rothead, Double rollNeck) {
-    moveHead(neck, rothead, rollNeck);
+    moveHead(rollNeck, rothead, null, null, null, rollNeck);
   }
 
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
@@ -1002,6 +1002,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
+  }
+  
+  public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
+    setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
