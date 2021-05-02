@@ -1600,6 +1600,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     jme.setRotation(getName() + ".head.rollNeck", "z");
     jme.setRotation(getName() + ".head.eyeY", "x");
     jme.setRotation(getName() + ".head.eyeX", "y");
+    jme.setRotation(getName() + ".head.eyelidLeft", "x");
+    jme.setRotation(getName() + ".head.eyelidRight", "x");    
     jme.setRotation(getName() + ".torso.topStom", "z");
     jme.setRotation(getName() + ".torso.midStom", "y");
     jme.setRotation(getName() + ".torso.lowStom", "x");
@@ -1622,6 +1624,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // to be
     // two eyeX (left and
     // right?)
+    jme.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
+    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);    
     jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 
