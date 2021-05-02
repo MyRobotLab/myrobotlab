@@ -101,7 +101,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
       // https://moz.com/blog/the-ultimate-guide-to-the-google-search-parameters
       // not sure if locale is supported tag probably is ....
-      String request = "https://google.com/search?lr=lang_" + locale.getTag() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
+      String request = "https://google.com/search?lr=lang_" + locale.getLanguage() + "&q=" + encodedSearch + "&aqs=chrome..69i57.5547j0j7&sourceid=chrome&ie=UTF-8";
       log.info(String.format("request to google: %s", request));
       
       // Fetch the page
@@ -205,7 +205,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
     try {
       // can only grab first 100 results
 
-      String url = "https://www.google.com/search?lr=lang_" + locale.getTag() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
+      String url = "https://www.google.com/search?lr=lang_" + locale.getLanguage() + "&site=imghp&tbm=isch&source=hp&q=" + searchText + "&gws_rd=cr";
       String filename = URLEncoder.encode(searchText, StandardCharsets.UTF_8.toString());
 
       // FIXME - check for cache ??? or useCache boolean config ?
@@ -285,6 +285,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   public static void main(String[] args) {
     try {
 
+      Runtime.main(new String[] {"--id", "admin", "--from-launcher" });
       LoggingFactory.init(Level.INFO);
 
       GoogleSearch google = (GoogleSearch) Runtime.start("google", "GoogleSearch");
@@ -294,7 +295,6 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
       // display.setAlwaysOnTop(true);
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.setPort(8887);
       webgui.autoStartBrowser(false);
       webgui.startService();
 
