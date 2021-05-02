@@ -113,7 +113,7 @@ public class InMoov2Head extends Service {
 
     eyelidLeft.setSpeed(50.0);
     eyelidRight.setSpeed(50.0);
-    setSpeed(45.0, 45.0, null, null, null, 45.0);
+    setSpeed(45.0, 45.0, null, null, 100.0, 45.0);
   }
 
   class blinkEyesTimertask extends TimerTask {
@@ -427,7 +427,7 @@ public class InMoov2Head extends Service {
     eyeX.setSpeed(eyeXSpeed);
     eyeY.setSpeed(eyeYSpeed);
     jaw.setSpeed(jawSpeed);
-    jaw.setSpeed(rollNeckSpeed);
+    rollNeck.setSpeed(rollNeckSpeed);
 
   }
 
