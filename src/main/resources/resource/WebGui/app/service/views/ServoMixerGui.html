@@ -1,7 +1,6 @@
 <!-- ServoMixerGui html-->
 selectedSequence {{state.selectedSequence}}<br/>
 selectedPose {{state.selectedPose}}<br/>
-
 <div class="container rzMixer">
     <div class="MixerTop">
         <div class="row">
@@ -54,16 +53,18 @@ selectedPose {{state.selectedPose}}<br/>
                 </select>
                 <div class="buttonsRow">
                     <div>
+                        <button class="btn btn-default" ng-click="msg.getSequence(state.selectedSequenceFile);sequenceName = state.selectedSequenceFile">
+                            <span class="glyphicon glyphicon-open"></span>
+                            Load                        
+                        </button>
                         <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
                             <span class="glyphicon glyphicon-play"></span>
                             Play
-                        
-                        
                         </button>
-                        <button class="btn btn-default" ng-click="msg.getSequence(state.selectedSequenceFile);sequenceName = state.selectedSequenceFile">
-                            <span class="glyphicon glyphicon-open"></span>
-                            Load
-                        
+                        <button class="btn btn-default" ng-click="msg.playSequence(state.selectedSequenceFile)">
+                            <img src="stop.png" />
+                            </span>
+                            Stop
                         </button>
                     </div>
                     <div>
@@ -84,12 +85,7 @@ selectedPose {{state.selectedPose}}<br/>
                         <span class="input-group-btn">
                             <button class="btn btn-default" title="Add speech to sequence">
                                 <span class="glyphicon glyphicon-plus"></span>
-                                Speak
-                            
-                            
-                            
-                            
-                            </button>
+                                Speak </button>
                         </span>
                         <input class="form-control ng-pristine ng-untouched ng-valid ng-empty poseName" type="text" ng-model="addSequenceSpeak" name="addSequenceSpeak" id="addSequenceSpeak" ng-init="" placeholder="type">
                     </div>
@@ -104,12 +100,7 @@ selectedPose {{state.selectedPose}}<br/>
                         <span class="input-group-btn">
                             <button class="btn btn-default" ng-click="addSequenceDelay(delay)" title="Add Delay in seconds to sequence">
                                 <span class="glyphicon glyphicon-plus"></span>
-                                Delay
-                            
-                            
-                            
-                            
-                            </button>
+                                Delay</button>
                         </span>
                         <input class="form-control ng-pristine ng-untouched ng-valid ng-empty fieldDelay" type="text" ng-model="delay" ng-init="3" placeholder="sec">
                     </div>
@@ -117,14 +108,6 @@ selectedPose {{state.selectedPose}}<br/>
                 <select ng-model="state.selectedSequence" ng-change="setSequence()" class="form-control vertical-menu poseList" size="6" title="Select a pose to load">
                     <option ng-repeat="pose in state.currentSequence.poses" value="{{pose}}">{{pose.name}} {{(pose.waitTimeMs/1000)}}</option>
                 </select>
-                <br/>
-                <!--
-                id {{JSON.parse(state.selectedSequence).index}}<br/>
-                id {{JSON.parse(state.selectedSequence).name}}<br/>
-                id {{state.selectedSequence.index}}
-                -->
-                <br/>
-                {{state.selectedSequence}}<br/>
                 <div class="buttonsRow">
                     <span class="btn-group">
                         <button class="btn btn-default btn-group updownButton" title="Move Up" ng-click="moveUpPoseInSequence()">
@@ -157,7 +140,7 @@ selectedPose {{state.selectedPose}}<br/>
         Filter <input id="servoFilter" class="form-control ng-pristine ng-untouched ng-valid ng-empty" ng-change="searchServos(searchServo.displayName)" type="text" ng-model="searchServo.displayName" ng-init="" placeholder="servo name">
     </div>
     <div ng-model="dummy" ng-repeat="(key, value) in searchServos(searchServo.displayName)">
-        <div class="sliderMixer">
+        <div class="sliderMixer"><!-- input type="checkbox" class="form-check-input" id="servo-checkbox-{{key}}"/ -->
             <div class="MixerServoName">{{mrl.getShortName(key)}}</div>
             <div service-body panel="mrl.getPanel(key)"/></div>
         </div>

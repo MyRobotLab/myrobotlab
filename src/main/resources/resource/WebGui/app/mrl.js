@@ -44,10 +44,10 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // one id to rule them all !
         
         // non unique
-        // return 'webgui-client'
+        return 'webgui-client'
 
         // unique
-        return 'webgui-client-' + new Date().getTime()
+        // return 'webgui-client-' + new Date().getTime()
     }
 
     // The name of the gateway I am

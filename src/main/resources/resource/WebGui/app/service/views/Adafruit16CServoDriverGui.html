@@ -1,36 +1,28 @@
 <div class="row">
-  <div class="col-lg-12">
+  Controller {{service.controllerName}}
+  <select ng-model="selectedControllerName"  class="form-control" ng-disabled="service.isAttached" title="controller">
+     <option ng-repeat="x in service.controllers" ng-value="{{x}}">{{x}}</option>
+  </select>
+</div>
+<div class="row">
+  Bus {{service.deviceBus}}
+  <select ng-model="selectedDeviceBus"  class="form-control" ng-disabled="service.isAttached" title="bus address">
+     <option ng-repeat="x in service.deviceBusList" ng-value="{{x}}">{{x}}</option>
+  </select>
+</div>
+<div class="row">
+  Address {{service.deviceAddress}}
+  <select ng-model="selectedDeviceAddress"  class="form-control" ng-disabled="service.isAttached" title="device address">
+     <option ng-repeat="x in service.deviceAddressList" ng-value="{{x}}">{{x}}</option>
+  </select>
+</div>
 
-   <!-- simple dropdown -->
+<div class="row">
   <div class="input-group">
   
    <span class="input-group-btn">
-         <button class="btn btn-default" ng-show="!isAttached"  ng-click="msg.attach(controllerName,deviceBus,deviceAddress)">attach</button>  
-         <button class="btn btn-default" ng-show="isAttached"  ng-click="msg.detach(controllerName)">detach</button>
-   </span>
-   
-  <input type="text" ng-readonly="true" class="form-control" ng-model="controllerLabel"><!-- FIXME - type-ahead -->          
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{controllerName}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibleController in controllers" ng-click="setControllerName(possibleController)">{{possibleController}}</li>
-      </ul>
-  </span>
-
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceBusLabel"><!-- FIXME - type-ahead -->        
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceBus}}<span class="caret"></span></a>
-      <ul uib-dropdown-menu>
-        <li ng-repeat="possibledeviceBus in deviceBusList" ng-click="setDeviceBus(possibledeviceBus)">{{possibledeviceBus}}</li>
-      </ul>
-  </span>
-  
-  <input type="text" ng-readonly="true" class="form-control" ng-model="deviceAddressLabel"><!-- FIXME - type-ahead -->     
-  <span class="input-group-addon" uib-dropdown on-toggle="toggled(open)">
-    <a href id="simple-dropdown" uib-dropdown-toggle ng-disabled="isAttached">{{deviceAddress}}<span class="caret"></span></a>
-    <ul uib-dropdown-menu>
-    <li ng-repeat="possibleDeviceAddress in deviceAddressList" ng-click="setDeviceAddress(possibleDeviceAddress)">{{possibleDeviceAddress}}</li>
-    </ul>
-  </span>
-         
+         <button class="btn btn-default" ng-show="!service.isAttached"  ng-click="attach()">attach</button>  
+         <button class="btn btn-default" ng-show="service.isAttached"  ng-click="detach()">detach</button>
+   </span>   
   </div>
+</div>  

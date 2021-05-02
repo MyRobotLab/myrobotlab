@@ -250,7 +250,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
    * is fixed I'm leaving it in broadcastMode
    * 
    */
-  private boolean broadcastMode = false;
+  private boolean broadcastMode = true;
 
   protected int maxMsgSize = 1048576;
 

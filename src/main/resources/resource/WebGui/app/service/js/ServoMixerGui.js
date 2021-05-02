@@ -195,7 +195,7 @@ angular.module('mrlapp.service.ServoMixerGui', []).controller('ServoMixerGuiCtrl
             if (!searchText || mrl.getShortName(key).indexOf(searchText) != -1) {
                 result[key] = value;
             }
-        })
+        }) 
         return result
     }
 

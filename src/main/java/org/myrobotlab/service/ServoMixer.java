@@ -29,6 +29,14 @@ public class ServoMixer extends Service {
   protected String servoMixerDirectory = getDataDir() + fs + "poses";
   
   /**
+   * set autoDisable on "all" servos ..
+   * true - will make all servos autoDisable
+   * false - will make all servos autoDisable false
+   * null - will make no changes
+   */
+  protected Boolean autoDisable = null;;
+  
+  /**
    * sequence player
    */
   protected transient Player player = new Player();
@@ -46,7 +54,16 @@ public class ServoMixer extends Service {
    * name attach "the best"
    */
   public void attach(String name) {
-    allServos.add(name);
+    // FIXME - check type in registry, describe, or query ... make sure Servo type..
+    // else return error - should be type checking
+    ServiceInterface si = Runtime.getService(name);
+    if (si != null & "Servo".equals(si.getSimpleName())) {
+      Servo servo = (Servo)Runtime.getService(name);
+      if (autoDisable != null) {
+        servo.setAutoDisable(autoDisable);
+      }
+      allServos.add(name);      
+    }
   }
 
   /**
@@ -432,6 +449,30 @@ public class ServoMixer extends Service {
       error(e);
     }
   }
+  
+  public void setAutoDisable(Boolean b) {
+      this.autoDisable = b;
+      if (b == null) {
+        return;
+      }
+      if (b) {
+        List<String> servos = Runtime.getServiceNamesFromInterface(Servo.class);
+        for (String name : servos) {
+          Servo servo = (Servo)Runtime.getService(name);
+          servo.setAutoDisable(true);
+        }
+      } else {
+        List<String> servos = Runtime.getServiceNamesFromInterface(Servo.class);
+        for (String name : servos) {
+          Servo servo = (Servo)Runtime.getService(name);
+          servo.setAutoDisable(false);
+        }        
+      }
+  }
+  
+  public Boolean getAudoDisable() {
+    return autoDisable;
+  }
 
   public static void main(String[] args) throws Exception {
 
@@ -441,11 +482,16 @@ public class ServoMixer extends Service {
     
     // Runtime.start("i01.head.rothead", "Servo");
     // Runtime.start("i01.head.neck", "Servo");
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    Runtime.start("python", "Python");
-    Runtime.start("i01", "InMoov2");
-    webgui.startService();
+    // WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+    // webgui.autoStartBrowser(false);
+    Python python = (Python)Runtime.start("python", "Python");
+    // Runtime.start("i01", "InMoov2");
+    // Runtime.start("cv", "OpenCV");
+    // Runtime.start("arduino", "Arduino");
+    // python.execFile("data/inmoov-ish.py");
+    python.execFile("data/raspi-adafruit16.py");
+    
+    // webgui.startService();
 
     /*
      * 
