@@ -425,7 +425,10 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * Orderly shutdown. Send a message to stop all pwm generation
    */
   public void stopPwm() {
-
+    if (controller == null) {
+      return;
+    }
+    
     byte[] buffer = { (byte) (PCA9685_ALL_LED_OFF_H), (byte) PCA9685_TURN_ALL_LED_OFF };
     log.info("Writing shutdown command to {}", this.getName());
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), buffer, buffer.length);
