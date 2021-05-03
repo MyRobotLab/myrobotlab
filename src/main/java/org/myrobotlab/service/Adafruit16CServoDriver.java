@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.junit.Ignore;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.logging.LoggerFactory;
@@ -853,18 +852,23 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public void detachI2CController(I2CController controller) {
-
-    if (!isAttached(controller))
-      return;
-
-    stopPwm(); // stop pwm generation
+    log.info("stopping pwm");
+    stopPwm(); 
+    log.info("isAttached = false");
     isAttached = false;
+    if (controllerName == null) {
+      log.info("already detached");
+      return;
+    }    
+    // should be by name - not by 'this' reference
+    log.info("removing controller name");
+    controllerName = null;
+    log.info("requesting detach from i2c controller");
     controller.detachI2CControl(this);
     broadcastState();
   }
 
   public void detachServoControl(ServoControl servo) throws Exception {
-
     if (servoMap.containsKey(servo.getName())) {
       servoMap.remove(servo.getName());
       servo.detach(this);
