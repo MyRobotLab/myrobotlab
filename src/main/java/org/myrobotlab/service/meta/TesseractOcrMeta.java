@@ -20,8 +20,8 @@ public class TesseractOcrMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("Optical character recognition - the ability to read");
     addCategory("ai", "vision");
-    addDependency("org.bytedeco", "tesseract", "4.1.1-1.5.4");
-    addDependency("org.bytedeco", "tesseract-platform", "4.1.1-1.5.4");
+    addDependency("org.bytedeco", "tesseract", "4.1.1-1.5.5");
+    addDependency("org.bytedeco", "tesseract-platform", "4.1.1-1.5.5");
     addDependency("tesseract", "tessdata", "0.0.2", "zip");
 
   }

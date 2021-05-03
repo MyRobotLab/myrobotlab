@@ -11,7 +11,7 @@
     mvn -DskipTests -Dbuild.number=71 help:system
     
     # fast build
-    mvn -DskipTests -Dbuild.number=180 compile package -o
+    mvn -DskipTests -Dbuild.number=180 compile package -o 
 
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
@@ -42,6 +42,12 @@
     # doclets
     javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
   
+    # how to mount sshfs from a raspi and maintain a single build
+    usermod -a -G i2c xxxxx
+    usermod -a -G gpio xxxxx
+    sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
+    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
+
    -->  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
@@ -1337,13 +1343,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.4</version>
+    <version>4.1.1-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.4</version>
+    <version>4.1.1-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
