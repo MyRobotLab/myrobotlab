@@ -52,7 +52,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     msg.subscribe('publishShow')
     msg.subscribe('publishSet')
     msg.subscribe('publishPanel')
-    msg.send("publishPanels")
+    // msg.send("publishPanels")
     // msg.subscribe('loadPanels')
     msg.subscribe(this)
 }

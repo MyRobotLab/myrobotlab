@@ -249,6 +249,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     currentOutputPos = mapper.calcOutput(targetPos);
   }
+  
+  /**
+   * if a new service is added to the system
+   * refresh the controllers
+   */
+  public void onStarted(String name) {
+    invoke("refreshControllers");
+  }
 
   /**
    * overloaded routing attach

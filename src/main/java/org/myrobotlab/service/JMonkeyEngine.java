@@ -2093,7 +2093,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
+    
     menu = app.getMainMenu();// new MainMenuState(this);
+    // menu.setEnabled(false);
     // menu.loadGui();
 
     if (usePhysics) {
@@ -2175,9 +2177,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
       settings.setAudioRenderer(null);
+      settings.setResizable(true);
       app.setSettings(settings);
+      
       app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
+      
 
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
@@ -2299,7 +2304,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       LoggingFactory.init("WARN");
 
       Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      // Runtime.main(new String[] { "--interactive", "--id", "admin" });
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
 
       jme.addBox("box", 1.0, 1.0, 1.0, "fc8803", true);

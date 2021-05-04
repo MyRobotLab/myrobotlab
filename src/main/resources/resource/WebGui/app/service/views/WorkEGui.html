@@ -1,9 +1,13 @@
-<table class="table">
+<span>Peers
+<toggle width="20" height="28"  ng-model="service.isChatBotActivated" ng-change="!service.isChatBotActivated?msg.stopChatBot():msg.startChatBot()" on=" " off=" "/>
+</span>
+<table class="table table-sm">
   <thead>
     <tr>
       <th scope="col"></th>
       <th scope="col"></th>
       <th scope="col">name</th>
+      <th scope="col"></th>
       <th scope="col">
             <div class="btn-group" uib-dropdown>
                 <button id="split-button" type="button" ng-class="{'btn':true, 'btn-success':value.state == 'started'}">action</button>
@@ -34,9 +38,7 @@
   <tbody>
     <tr ng-repeat="(key, value) in service.serviceType.peers">
     <td>
-    
-        <input type="checkbox" value="" id="flexCheckDefault">
-    
+        <input type="checkbox" value="" id="flexCheckDefault">    
     </td>
       <td><img ng-src="/{{value.type + '.png'}}" width="16"></td>
       <td>{{value.actualName}}</td>
