@@ -464,6 +464,11 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         console.info('onReconnect')
     }
 
+    this.onReopen = function(request, response){
+        console.info('onReopen')
+        initialize(response)
+    }
+
     this.onClose = function(response) {
         connected = false
         console.error('mrl.onClose')
@@ -632,10 +637,20 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         return context[func].apply(this, args)
     }
 
-    // up-link open
+    /**
+     * successful open of the websocket
+     */
     this.onOpen = function(response) {
         console.info('onOpen')
+        initialize(response)
+        console.debug('mrl.onOpen end')
+    }
 
+    /**
+     * initialization after a successful open or reOpen
+     */
+    var initialize = function(response){
+        console.info('initialize')
         // FIXME - does this need to be done later when ids are setup ?
         connected = true
         connecting = false
@@ -643,7 +658,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         // connected = true
         // this.connected = true mrl.isConnected means data
         // was asked and recieved from the backend
-        console.log('mrl.onOpen: ' + transport + ' connection opened')
+        console.info('initialize: ' + transport + ' connection opened')
 
         let hello = {
             id: _self.id,
@@ -651,7 +666,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             platform: platform
         }
 
-        console.log('mrl.onOpen: connectedCallbacks ' + connectedCallbacks.length)
+        console.info('initialize: connectedCallbacks ' + connectedCallbacks.length)
 
         angular.forEach(connectedCallbacks, function(value, key) {
             value(connected)
@@ -675,9 +690,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
         // send us a description
         _self.sendTo('runtime', "describe")
-
-        console.debug('mrl.onOpen end')
-
     }
 
     this.getSimpleName = function(fullname) {
@@ -1531,7 +1543,8 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
     // assign callbacks
     this.request.onOpen = this.onOpen
     this.request.onClose = this.onClose
-    this.request.onClose = this.onReconnect
+    this.request.onReconnect = this.onReconnect
+    this.request.onReopen = this.onReopen
     this.request.onTransportFailure = this.onTransportFailure
     // this.request.onFailureToReconnect = this.onFailureToReconnect
     this.request.onMessage = this.onMessage
