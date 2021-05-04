@@ -129,5 +129,4 @@ public class XMLConnector extends AbstractConnector {
     this.docIDPrefix = docIDPrefix;
   }
 
-
 }

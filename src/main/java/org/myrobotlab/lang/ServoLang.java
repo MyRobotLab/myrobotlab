@@ -4,7 +4,6 @@ import java.text.DecimalFormat;
 
 import org.myrobotlab.service.Servo;
 
-
 public class ServoLang extends LangUtils {
 
   transient static DecimalFormat f = new DecimalFormat("#.##");
@@ -19,8 +18,7 @@ public class ServoLang extends LangUtils {
     sb.append("# sets initial position of servo before moving\n");
     sb.append("# in theory this is the position of the servo when this file was created\n");
     sb.append(name + String.format(".setPosition(%s)\n", f.format(s.getCurrentInputPos())));
-    sb.append(name + ".map(" + s.getMapper().getMinX() + "," + s.getMapper().getMaxX() + "," +
-                               s.getMapper().getMinY() + "," + s.getMapper().getMaxY() + ")\n");
+    sb.append(name + ".map(" + s.getMapper().getMinX() + "," + s.getMapper().getMaxX() + "," + s.getMapper().getMinY() + "," + s.getMapper().getMaxY() + ")\n");
     // TODO: add mapper isClipped()
     sb.append(name + ".setInverted(" + toPython(s.isInverted()) + ")\n");
     sb.append(name + ".setSpeed(" + toPython(s.getSpeed()) + ")\n");
@@ -32,22 +30,23 @@ public class ServoLang extends LangUtils {
     }
 
     // if there's a controller reattach it at rest
-    // FIXME - there is the initial position vs rest - they potentially are very different
+    // FIXME - there is the initial position vs rest - they potentially are very
+    // different
     /*
-    if (s.getControllerName() != null) {
-      String controller = s.getControllerName();
-      sb.append(name + ".attach(\"" + controller + "\"," + s.getPin() + "," + s.getRest() + ")\n");
-    }*/
-    /*  the dependencies on the controller are higher - so let it attach to this servo 
-    if (s.getControllerName() != null) {
-      String controller = s.getControllerName();
-      sb.append(name + ".attach(\"" + controller + "\")\n");
-    }
-    */
+     * if (s.getControllerName() != null) { String controller =
+     * s.getControllerName(); sb.append(name + ".attach(\"" + controller + "\","
+     * + s.getPin() + "," + s.getRest() + ")\n"); }
+     */
+    /*
+     * the dependencies on the controller are higher - so let it attach to this
+     * servo if (s.getControllerName() != null) { String controller =
+     * s.getControllerName(); sb.append(name + ".attach(\"" + controller +
+     * "\")\n"); }
+     */
     if (s.isAutoDisable()) {
       sb.append(name + ".setAutoDisable(True)\n");
     } else {
-      sb.append(name + ".setAutoDisable(False)\n");      
+      sb.append(name + ".setAutoDisable(False)\n");
     }
     return sb.toString();
   }

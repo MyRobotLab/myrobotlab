@@ -3,7 +3,9 @@ package org.myrobotlab.jme3;
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.myrobotlab.framework.MethodCache;
 import org.myrobotlab.logging.LoggerFactory;
@@ -30,6 +32,9 @@ public class Jme3Util {
   public final static Logger log = LoggerFactory.getLogger(Jme3Util.class);
 
   JMonkeyEngine jme;
+
+  Set<String> nullUserData = new HashSet<>();
+
   public static String defaultColor = "00FF00"; // green
 
   public Jme3Util(JMonkeyEngine jme) {
@@ -61,7 +66,8 @@ public class Jme3Util {
   public Object invoke(Jme3Msg msg) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     MethodCache cache = MethodCache.getInstance();
     Method method = cache.getMethod(this.getClass(), msg.method, msg.data);
-    return method.invoke(this, msg.data);// jme.invokeOn(false, this, msg.method, msg.data);
+    return method.invoke(this, msg.data);// jme.invokeOn(false, this,
+                                         // msg.method, msg.data);
   }
 
   public void info(String format, Object... params) {
@@ -148,8 +154,10 @@ public class Jme3Util {
    */
   public void rotateTo(String name, String axis, double degrees) {
     UserData o = jme.getUserData(name);
-    if (o == null) {
+    if (o == null && !nullUserData.contains(name)) {
+      // error only once
       jme.error("no user data for %s", name);
+      nullUserData.add(name);
       return;
     }
 
@@ -221,7 +229,8 @@ public class Jme3Util {
 
     p.attachChild(c);
 
-    // FIXME - possibly subtract out the parents "world" transform & rotation ???
+    // FIXME - possibly subtract out the parents "world" transform & rotation
+    // ???
 
   }
 

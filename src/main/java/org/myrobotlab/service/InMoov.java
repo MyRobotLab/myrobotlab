@@ -90,7 +90,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   private static final long serialVersionUID = 1L;
   static String speechRecognizer = "WebkitSpeechRecognition";
   static String speechService = "MarySpeech";
-  
+
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
@@ -101,15 +101,14 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     Platform.setVirtual(true);
 
     Runtime.start("gui", "SwingGui");
-    
+
     Python python = (Python) Runtime.start("python", "Python");
     python.loadServiceScript("InMoov");
     /*
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.setPort(8887);
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-    */
+     * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+     * webgui.setPort(8887); webgui.autoStartBrowser(false);
+     * webgui.startService();
+     */
 
     // webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
 
@@ -117,8 +116,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       return;
     }
 
- //   String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
- //   python.exec(script);
+    // String script = FileIO.toString("../pyrobotlab/service/InMoov.py");
+    // python.exec(script);
 
     String leftPort = "COM3";
     String rightPort = "COM4";
@@ -130,11 +129,11 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startEar();
 
     /*
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-    webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
-    HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter", "HtmlFilter");
-    */
+     * webgui.autoStartBrowser(false); webgui.startService();
+     * webgui.startBrowser("http://localhost:8888/#/service/i01.ear");
+     * HtmlFilter htmlFilter = (HtmlFilter) Runtime.start("htmlFilter",
+     * "HtmlFilter");
+     */
     i01.chatBot = (ProgramAB) Runtime.start("i01.chatBot", "ProgramAB");
     // i01.chatBot.addTextListener(htmlFilter);
     // htmlFilter.addListener("publishText", "i01", "speak");
@@ -147,6 +146,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     i01.startOpenCV();
     i01.execGesture("BREAKITdaVinci()");
   }
+
   transient HashMap<String, ServoController> arduinos = new HashMap<String, ServoController>();
   transient private HashMap<String, InMoovArm> arms = new HashMap<String, InMoovArm>();
   public String CALIBRATION_FILE = "calibration.py";
@@ -171,7 +171,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   // interface
   transient private Joystick joystick;
   String language;
-  transient LanguagePack languagePack = new LanguagePack();
+  public LanguagePack languagePack = new LanguagePack();
   private String lastGestureExecuted = "";
   String lastInMoovError = "";
 
@@ -606,7 +606,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
         // REALLY NEEDS TO BE CLEANED UP - no direct references
         // "publish" scripts which should be executed :(
         // python = (Python) startPeer("python");
-        python = (Python)Runtime.start("python", "Python"); // this crud should stop
+        python = (Python) Runtime.start("python", "Python"); // this crud should
+                                                             // stop
 
       }
 
@@ -722,8 +723,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
         if (FilenameUtils.getExtension(f.getAbsolutePath()).equalsIgnoreCase(extension)) {
           if (Utils.loadFile(f.getAbsolutePath()) == true) {
             totalLoaded += 1;
-            // FIXME - what is the purpose of this ????? 
-            gesturesList.add(f.getName()); 
+            // FIXME - what is the purpose of this ?????
+            gesturesList.add(f.getName());
           } else {
             error("file %s failed", f.getName());
             totalError += 1;
@@ -841,7 +842,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     }
   }
 
-  
   public void onClassification(TreeMap<String, List<Classification>> classifications) {
     vision.yoloInventory(classifications);
   }
@@ -1162,10 +1162,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
           } else {
             calibrationWriter.write("# " + s.getName() + ".setPin(" + s.getPin() + ")\n");
           }
-          
+
           Mapper mapper = s.getMapper();
 
-          
           // save the servo map
           calibrationWriter.write(s.getName() + ".map(" + mapper.getMinX() + "," + mapper.getMaxX() + "," + mapper.getMinY() + "," + mapper.getMaxY() + ")\n");
           // if there's a controller reattach it at rest
@@ -1555,7 +1554,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
    * finish migration )
    * 
    * @return started ProgramAB service
-   * @throws IOException 
+   * @throws IOException
    */
   public ProgramAB startBrain() throws IOException {
     if (chatBot == null) {
@@ -1564,7 +1563,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     this.attach(chatBot);
     speakBlocking(languagePack.get("CHATBOTACTIVATED"));
     chatBot.repetitionCount(10);
-    chatBot.setPath("InMoov/chatBot");
+    chatBot.setPath("InMoov/chatbot");
     chatBot.startSession("default", getLanguage());
     // reset some parameters to default...
     chatBot.setPredicate("topic", "default");
@@ -1581,7 +1580,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     try {
       chatBot.savePredicates();
     } catch (IOException e) {
-     log.error("saving predicates threw", e);
+      log.error("saving predicates threw", e);
     }
     // start session based on last recognized person
     if (!chatBot.getPredicate("default", "lastUsername").isEmpty() && !chatBot.getPredicate("default", "lastUsername").equals("unknown")) {
@@ -1909,6 +1908,7 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     im.setOpenni(openni);
 
   }
+
   public InMoovArm startLeftArm(String port) throws Exception {
     return startLeftArm(port, null);
   }
@@ -1917,9 +1917,11 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     leftArm = startArm(LEFT, port, type);
     return leftArm;
   }
+
   public InMoovHand startLeftHand(String port) throws Exception {
     return startLeftHand(port, null);
   }
+
   public InMoovHand startLeftHand(String port, String type) throws Exception {
     leftHand = startHand(LEFT, port, type);
     return leftHand;
@@ -2097,10 +2099,9 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     if (jme == null) {
       jme = (JMonkeyEngine) startPeer("jme");
     }
-    
-    
+
     // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName();
+    String assetPath = /* getResourceDir() */ getResourceRoot() + fs + InMoov2.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -2111,7 +2112,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
     jme.loadModels(assetPath);
-
 
     // disable the frustrating servo events ...
     // Servo.eventsEnabledDefault(false);
@@ -2435,17 +2435,16 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
       headTracking.trackPoint();
     }
   }
-  
+
   public void releaseService() {
     try {
       disable();
       releasePeers();
-      super.releaseService(); 
+      super.releaseService();
     } catch (Exception e) {
       error(e);
     }
   }
-
 
   public void waitTargetPos() {
     if (head != null)

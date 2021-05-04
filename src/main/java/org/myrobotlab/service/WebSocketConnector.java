@@ -1,17 +1,19 @@
 package org.myrobotlab.service;
 
-import java.net.URI;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URISyntaxException;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.CloseReason;
-import javax.websocket.ContainerProvider;
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.WebSocketContainer;
-
+import org.atmosphere.wasync.Client;
+import org.atmosphere.wasync.ClientFactory;
+import org.atmosphere.wasync.Decoder;
+import org.atmosphere.wasync.Encoder;
+import org.atmosphere.wasync.Event;
+import org.atmosphere.wasync.Function;
+import org.atmosphere.wasync.Request;
+import org.atmosphere.wasync.RequestBuilder;
+import org.atmosphere.wasync.Socket;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -28,7 +30,8 @@ public class WebSocketConnector extends Service implements TextPublisher {
   static final long serialVersionUID = 1L;
   static final Logger log = LoggerFactory.getLogger(WebSocketConnector.class);
 
-  private WebsocketClientEndpoint client;
+  private Client client;
+  private Socket socket;
 
   public WebSocketConnector(String n, String id) {
     super(n, id);
@@ -50,18 +53,53 @@ public class WebSocketConnector extends Service implements TextPublisher {
    * @param url
    *          the url of the websocket
    * @throws URISyntaxException
+   * @throws IOException
    */
-  public void connect(String url) throws URISyntaxException {
-    client = new WebsocketClientEndpoint(new URI(url));
+  public void connect(String url) throws URISyntaxException, IOException {
+
+    client = ClientFactory.getDefault().newClient();
+    socket = null;
+
+    RequestBuilder request = client.newRequestBuilder().method(Request.METHOD.GET).uri(url).encoder(new Encoder<String, Reader>() { // Stream
+                                                                                                                                    // the
+                                                                                                                                    // request
+                                                                                                                                    // body
+      @Override
+      public Reader encode(String s) {
+        return new StringReader(s);
+      }
+    }).decoder(new Decoder<String, Reader>() {
+      @Override
+      public Reader decode(Event type, String s) {
+        return new StringReader(s);
+      }
+    }).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
+        .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to Long-Polling
+
+    Socket socket = client.create();
+    socket.on(new Function<Reader>() {
+      @Override
+      public void on(Reader r) {
+        // Read the response
+      }
+    }).on(new Function<IOException>() {
+
+      @Override
+      public void on(IOException ioe) {
+        // Some IOException occurred
+      }
+
+    }).open(request.build()).fire("echo").fire("bong");
   }
 
   /**
    * Send a message over the websocket
    * 
    * @param message
+   * @throws IOException
    */
-  public void send(String message) {
-    client.sendMessage(message);
+  public void send(String message) throws IOException {
+    socket.fire(message);
   }
 
   public static void main(String[] args) {
@@ -70,68 +108,6 @@ public class WebSocketConnector extends Service implements TextPublisher {
     Runtime.start("swing", "SwingGui");
     Runtime.start("python", "Python");
     WebSocketConnector wsc = (WebSocketConnector) Runtime.start("wsc", "WebSocketConnector");
-  }
-
-  @ClientEndpoint
-  public class WebsocketClientEndpoint {
-
-    Session userSession = null;
-
-    public WebsocketClientEndpoint(URI endpointURI) {
-      try {
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        container.connectToServer(this, endpointURI);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    /**
-     * Callback hook for Connection open events.
-     *
-     * @param userSession
-     *          the userSession which is opened.
-     */
-    @OnOpen
-    public void onOpen(Session userSession) {
-      log.info("opening websocket");
-      this.userSession = userSession;
-    }
-
-    /**
-     * Callback hook for Connection close events.
-     *
-     * @param userSession
-     *          the userSession which is getting closed.
-     * @param reason
-     *          the reason for connection close
-     */
-    @OnClose
-    public void onClose(Session userSession, CloseReason reason) {
-      log.info("closing websocket");
-      this.userSession = null;
-    }
-
-    /**
-     * Callback hook for Message Events. This method will be invoked when a
-     * client send a message.
-     *
-     * @param message
-     *          The text message
-     */
-    @OnMessage
-    public void onMessage(String message) {
-      invoke("publishText", message);
-    }
-
-    /**
-     * Send a message.
-     *
-     * @param message
-     */
-    public void sendMessage(String message) {
-      this.userSession.getAsyncRemote().sendText(message);
-    }
   }
 
   @Override

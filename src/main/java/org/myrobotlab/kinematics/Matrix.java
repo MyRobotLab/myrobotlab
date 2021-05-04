@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 public class Matrix implements Serializable {
 
   public final static Logger log = LoggerFactory.getLogger(Matrix.class);
-  
+
   private static final long serialVersionUID = 1L;
 
   protected int numRows;

@@ -840,7 +840,6 @@ public class OledSsd1306 extends Service implements I2CControl {
     }
   }
 
-
   @Override
   public boolean isAttached(String name) {
     return (controller != null && controller.getName().equals(name));

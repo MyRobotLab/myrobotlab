@@ -1465,9 +1465,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
    * returned as requested then the byte array is returned. Synchronized on the
    * single serial resource.
    * 
-   * @param bytesRequested - bytes requested
-   * @param sendData - parameter values
-   * @return the byte array 
+   * @param bytesRequested
+   *          - bytes requested
+   * @param sendData
+   *          - parameter values
+   * @return the byte array
    */
   synchronized public byte[] sendReadPacket(int bytesRequested, int... sendData) {
     try {

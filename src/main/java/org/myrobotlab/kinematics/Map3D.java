@@ -20,9 +20,8 @@ import org.slf4j.Logger;
  *
  */
 public class Map3D {
-  
-  transient public final static Logger log = LoggerFactory.getLogger(Map3D.class);
 
+  transient public final static Logger log = LoggerFactory.getLogger(Map3D.class);
 
   public enum CoordStateValue {
     UNDEFINED, EMPTY, FILL;

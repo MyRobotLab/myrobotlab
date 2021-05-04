@@ -1,13 +1,14 @@
 package org.myrobotlab.client;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
+import java.net.InetAddress;
+import java.util.Scanner;
+
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
 
 import org.atmosphere.wasync.ClientFactory;
 import org.atmosphere.wasync.Decoder;
@@ -16,360 +17,516 @@ import org.atmosphere.wasync.Event;
 import org.atmosphere.wasync.Function;
 import org.atmosphere.wasync.Request;
 import org.atmosphere.wasync.RequestBuilder;
-import org.atmosphere.wasync.Socket;
-import org.myrobotlab.logging.LoggerFactory;
-import org.slf4j.Logger;
+import org.atmosphere.wasync.impl.AtmosphereClient;
+import org.atmosphere.wasync.impl.AtmosphereSocket;
+import org.myrobotlab.framework.DescribeQuery;
+import org.myrobotlab.framework.Message;
+import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.logging.Logging;
+import org.myrobotlab.logging.LoggingFactory;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.providers.netty.NettyAsyncHttpProviderConfig;
 
-/**<pre>
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-</pre>
-*/
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Help.Visibility;
 import picocli.CommandLine.Option;
 
 /**
- * This class is a minimal Java websocket client which can attach to a MyRobotLab running instance.
- * From the command line it should be capable of sending any command using the Cli Api notation.
- * There are system commands such as ls, lp, cd, etc - but most invoking of service methods will be of the
+ * This class is a minimal Java websocket client which can attach to a
+ * MyRobotLab running instance. From the command line it should be capable of
+ * sending any command using the Cli Api notation. There are system commands
+ * such as ls, lp, cd, etc - but most invoking of service methods will be of the
  * form
  * 
- *  /{service}/{method}/{param0}/{param1}....
- *  
+ * /{service}/{method}/{param0}/{param1}....
+ * 
  * @author GroG
+ * 
+ *         TODO 0. up arrow with history 0.5 route 1. reconnect logic 2. ls
+ *         /runtime/ | grep -i registry 3. help 4. help /runtime/getUptime 5.
+ *         test /runtime/subscribe/onRegister 6. colorize with pico
  *
  */
-@Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", version = "0.0.1")
-public class Client {
-  
-  public final static Logger log = LoggerFactory.getLogger(Client.class);
+@Command(mixinStandardHelpOptions = true, name = "myrobotlab-client.jar", showDefaultValues = true, version = "0.0.1")
+public class Client implements Runnable, Decoder<String, Reader>, Encoder<String, Reader> {
 
-  @Option(names = "--option", description = "Some option.")
-  String option;
+  private transient static Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss.SSS").setPrettyPrinting().disableHtmlEscaping().create();
 
-  @Option(names = { "-a", "--alias" }, description = "alias of url")
-  String alias;
+  /**
+   * attached mrl process id
+   */
+  @Option(names = { "-i", "--id" }, description = "Identity of the client")
+  static protected String promptId = null;
 
-  @Option(names = { "-u", "--url" }, arity = "1..*", description = "client endpoints")
-  // String[] urls = new String[] { "http://192.168.0.73:8887/api/cli" };
-  String url = "http://127.0.0.1:8887/api/cli";
-  // String url = "http://192.168.0.73:8887/api/cli";
-  // String[] urls = new String[] { "http://127.0.0.1:8887/api/cli" };
+  /**
+   * generated id of this client
+   */
+  static protected String clientId;
+
+  /**
+   * messages api type sends json encoded messages over persistent connections
+   */
+  protected String apiType = "messages";
+
+  /**
+   * default base connection
+   */
+  @Option(names = { "-c",
+      "--connect" }, defaultValue = "http://localhost:8888", description = "Connects to myrobotlab webgui instance with a websocket connection", showDefaultValue = Visibility.ALWAYS)
+  protected String base;
+
+  @Option(names = { "-u", "--user" }, description = "user to authenticate")
+  protected static String username = null;
 
   @Option(names = { "-p", "--password" }, description = "password to authenticate")
   String password = null;
 
-  @Option(names = { "-v", "--verbose" }, description = "Be verbose.")
-  boolean verbose = false;
+  /**
+   * Atmosphere client
+   */
+  transient private AtmosphereClient client = null;
 
-  String currentUuid = null;
+  /**
+   * The underlying client runtime engine (Netty)
+   */
+  transient private AsyncHttpClient asc = null;
 
-  final transient Worker worker = new Worker();
+  /**
+   * current working directory
+   */
+  protected String cwd = "/";
 
-  // FIXME - this should be promoted to Gateway !!!
-  public static interface RemoteMessageHandler {
-    public void onRemoteMessage(String uuid, String data);
-  }
+  protected boolean done = false;
 
-  public class Endpoint implements Decoder<String, Reader> {
-    public String uuid;
-    public String uri;
-    transient public Socket socket;
+  /**
+   * std in scanner
+   */
+  protected Scanner in;
 
-    @Override
-    public Reader decode(Event e, String dataIn) {
-      //public Reader decode(Event type, String data) {
-        // System.out.println("=========== decode <----- ===========");
-        // System.out.println("decoding [{} - {}]", type, s);
-      String data = (String) dataIn;
-        if (data != null && "X".equals(data)) {
-          // System.out.println("MESSAGE - X");
-          return null;
-        }
-        if ("OPEN".equals(data)) {
-          return null;
-        }
+  /**
+   * std out
+   */
+  protected PrintStream out = null;
 
-        // main response
-        //System.out.println(data);
-        for (RemoteMessageHandler handler : handlers) {
-          handler.onRemoteMessage(uuid, data);
-        }
+  transient private AtmosphereSocket socket;
 
-        // response
-        // System.out.println("OPENED" + s);
+  private DescribeQuery serverHelloRequest;
 
-        return new StringReader(data);
-        //return null;
-      }
-  }
+  public void connect() {
 
-  Set<RemoteMessageHandler> handlers = new HashSet<>();
-  
-  public class AutoConnector implements Runnable {
-    transient Thread worker;
-    boolean isRunning = false;
-    long interval = 1000;
-    
-    public void run() {
-      isRunning = true;
-      while(isRunning) {
-        try {
-        Thread.sleep(interval);
-        } catch(Exception e) {
-          isRunning = false;
-        }
-        for (String url : endpoints.keySet()) {
-          try {
-            if (endpoints.get(url).socket == null) {
-              connect(url);
-            }
-          } catch(Exception e) {
-            log.error("could not connect to {}", url, e);
-          }
-        }
-      }
-      isRunning = false;
-      worker = null;
-    }
-    
-    synchronized public void start() {
-      if (worker == null) {
-        worker = new Thread(this, "auto-connector");
-        worker.start();
-      }
-    }
-    
-   synchronized public void stop() {
-     isRunning = false;
-    }
-  }
-  
+    RequestBuilder<?> request = null;
 
-  public void addResponseHandler(RemoteMessageHandler handler) {
-    handlers.add(handler);
-  }
-
-  // FIXME !! - 2 modes - messages non-blocking and blocking service mode !! -
-  // service mode more useful ?
-  public static void main(String[] args) {
     try {
-      // Logger logger = (Logger)
-      // LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-      // logger.setLevel(Level.INFO);
 
-      // Logger.getRootLogger().setLevel(Level.INFO);
+      if (client == null) {
+        client = ClientFactory.getDefault().newClient(AtmosphereClient.class);
 
-      Client client = CommandLine.populateCommand(new Client(), args);
+        // Netty Config ..
+        NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
+        nettyConfig.addProperty("tcpNoDelay", "true");
+        nettyConfig.addProperty("keepAlive", "true");
+        nettyConfig.addProperty("reuseAddress", true);
+        // nettyConfig.addProperty("connectTimeoutMillis",
+        // nettyConnectionTimeout);
+        nettyConfig.setWebSocketMaxFrameSize(262144);
+        nettyConfig.addProperty("child.tcpNoDelay", "true");
+        nettyConfig.addProperty("child.keepAlive", "true");
+        // nettyConfig.setWebSocketMaxFrameSize(65536);
 
-      UUID uuid = java.util.UUID.randomUUID();
-      client.connect(uuid.toString(), client.url);
+        // AsyncHttpClientConfig Config
+        AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
+        b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
+        AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
+        asc = new AsyncHttpClient(config);
+      }
 
-      // if interactive vs non-interactive which will pretty much be curl ;P BUT
-      // BLOCKING !!! (ie useful)
+      // socket =
+      // client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
+      if (socket == null) {
+        request = client.newRequestBuilder();
+        request.method(Request.METHOD.GET);
+        request.uri(getUrl());
+        request.encoder(this).decoder(this);
+        // Can request for other transports like WEBSOCKET, SSE, STREAMING,
+        // LONG_POLLING
+        request.transport(Request.TRANSPORT.WEBSOCKET);
 
-      client.startInteractiveMode();
-
-      // System.out.println("password {}", password);
+        socket = (AtmosphereSocket) client.create(client.newOptionsBuilder().runtime(asc).build());
+        socket.on(Event.CLOSE.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // System.out.println("CLOSE " + t);
+          }
+        }).on(Event.REOPENED.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // System.out.println("REOPENED " + t);
+          }
+        }).on(Event.ERROR.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            System.out.println("ERROR " + t);
+          }
+        }).on(Event.MESSAGE.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // all messages
+            // System.out.println("MESSAGE {}" + t);
+          }
+        }).on(new Function<IOException>() {
+          @Override
+          public void on(IOException ioe) {
+            System.out.println(ioe.getMessage());
+            socket = null;
+            // ioe.printStackTrace();
+          }
+        }).on(Event.STATUS.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // System.out.println("STATUS " + t);
+          }
+        }).on(Event.HEADERS.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // System.out.println("HEADERS " + t);
+          }
+        }).on(Event.MESSAGE_BYTES.name(), new Function<String>() {
+          @Override
+          public void on(String msg) {
+            // System.out.println("MESSAGE_BYTES " + t);
+            System.out.println(msg);
+          }
+        }).on(Event.OPEN.name(), new Function<String>() {
+          @Override
+          public void on(String t) {
+            // System.out.println("OPEN " + t);
+          }
+        }).open(request.build());
+      }
 
     } catch (Exception e) {
-      // log.error("main threw", e);
+      // the exception is propagated to socket event
+      // handler too - no need to double print
+      // System.out.println(e.getMessage());
+    }
+  }
+
+  public String getUrl() {
+    return String.format("%s/api/%s?id=%s", base, apiType, clientId);
+  }
+
+  @Override
+  public Reader decode(Event e, String s) {
+    // System.out.println("decode " + s);
+    if ("X".equals(s)) {
+      return null;
+    }
+    if ("OPEN".equals(s)) {
+      System.out.println("connected to " + getUrl());
+      return null;
+    }
+
+    if ("CLOSE".equals(s)) {
+      System.out.println("disconnected from " + getUrl());
+      return null;
+    }
+
+    // System.out.println(s);
+    Message msg = gson.fromJson(s, Message.class);
+
+    if ("describe".equals(msg.method)) {
+      serverHelloRequest = gson.fromJson(msg.data[1].toString(), DescribeQuery.class);
+      promptId = serverHelloRequest.id;
+      System.out.println("attaching to id " + promptId);
+    }
+
+    if (msg.data == null || msg.data[0] == null) {
+      System.out.println("null");
+    } else {
+      System.out.println(gson.toJson(msg.data[0]));
+    }
+    prompt();
+    return new StringReader(s);
+  }
+
+  @Override
+  public Reader encode(String s) {
+    // System.out.println("encode " + s);
+    return new StringReader(s);
+  }
+
+  public void process(String cmd) {
+    try {
+
+      cmd = cmd.trim();
+      String[] parts = cmd.split(" ");
+
+      switch (parts[0]) {
+        case "cd":
+          if (parts.length == 2) {
+            // cd xxx
+            if (parts[1].startsWith("/")) {
+              cwd = parts[1];
+            } else {
+              cwd += parts[1];
+            }
+          }
+          write(cwd);
+          break;
+
+        case "pwd":
+          write(cwd);
+          break;
+
+        case "help":
+          write(cwd);
+          break;
+
+        case "route":
+          processServiceCli("runtime", "route");
+          break;
+
+        case "connect":
+          if (parts.length == 2) {
+            base = parts[1];
+          }
+          connect();
+          break;
+
+        case "ls":
+          // TODO - ls ../ relative
+          // ls /
+          // with cwd ...
+          String lsPath = cwd;
+          if (parts.length == 2) {
+            if (parts[1].startsWith("/")) {
+              lsPath = parts[1];
+            } else {
+              lsPath = cwd + parts[1];
+            }
+          }
+          processServiceCli("runtime", "ls", lsPath);
+          break;
+
+        case "lp":
+          processServiceCli("agent", "lp");
+          break;
+
+        case "exit":
+          exit();
+          break;
+
+        default:
+          processServiceCli(cmd);
+      }
+
+    } catch (Exception e) {
+      System.out.println("cli threw");
       e.printStackTrace();
     }
   }
 
-  Map<String, Endpoint> endpoints = new TreeMap<>();
+  private void processServiceCli(String cmd) {
+    String service = "runtime";
+    String method = "ls";
+    Object[] params = null;
 
-  public Endpoint connect(String url) {
-    return connect(null, url);
+    // resolve path
+    if (!cmd.startsWith("/")) {
+      cmd = cwd + cmd;
+    }
+
+    String[] parts = cmd.split("/");
+
+    if (parts.length < 3) {
+      params = new Object[] { cmd };
+    }
+
+    // fix me diff from 2 & 3 "/"
+    if (parts.length >= 3) {
+      service = parts[1];
+      // prepare the method
+      method = parts[2].trim();
+
+      // FIXME - to encode or not to encode that is the question ...
+      params = new Object[parts.length - 3];
+      for (int i = 3; i < parts.length; ++i) {
+        params[i - 3] = parts[i];
+      }
+    }
+    processServiceCli(service, method, params);
   }
 
-  public Endpoint connect(String uuid, String url) {
+  private void processServiceCli(String service, String method, Object... params) {
     try {
 
-      Endpoint endpoint = new Endpoint();
-      
-      if (uuid == null) {
-        UUID u = java.util.UUID.randomUUID();
-        uuid = u.toString();
+      connect();
+
+      String[] data = null;
+
+      if (params != null) {
+        data = new String[params.length];
+        for (int i = 0; i < params.length; ++i) {
+          data[i] = gson.toJson(params[i]);
+        }
       }
 
-      endpoint.uuid = uuid;
-      endpoints.put(uuid, endpoint);
-
-      org.atmosphere.wasync.Client client = ClientFactory.getDefault().newClient();
-      // what benefits are there with the atmosphere client ?
-      // AtmosphereClient client =
-      // ClientFactory.getDefault().newClient(AtmosphereClient.class);
-
-      RequestBuilder<?> request = client.newRequestBuilder();
-      request.method(Request.METHOD.GET);
-      request.uri(url);
-      request.encoder(new Encoder<String, Reader>() { // Stream
-        @Override
-        public Reader encode(String s) {
-          // System.out.println("=========== encode -----> ===========");
-          // System.out.println("encoding [{}]", s);
-          return new StringReader(s);
-        }
-      }).decoder(endpoint
-          ).transport(Request.TRANSPORT.WEBSOCKET) // Try WebSocket
-          .transport(Request.TRANSPORT.LONG_POLLING); // Fallback to
-                                                      // Long-Polling
-
-      // Netty Config ..
-      NettyAsyncHttpProviderConfig nettyConfig = new NettyAsyncHttpProviderConfig();
-      nettyConfig.addProperty("tcpNoDelay", "true");
-      nettyConfig.addProperty("keepAlive", "true");
-      nettyConfig.addProperty("reuseAddress", true);
-      // nettyConfig.addProperty("connectTimeoutMillis",
-      // nettyConnectionTimeout);
-      nettyConfig.setWebSocketMaxFrameSize(262144);
-      nettyConfig.addProperty("child.tcpNoDelay", "true");
-      nettyConfig.addProperty("child.keepAlive", "true");
-      // nettyConfig.setWebSocketMaxFrameSize(65536);
-
-      // AsyncHttpClientConfig Config
-      AsyncHttpClientConfig.Builder b = new AsyncHttpClientConfig.Builder();
-      b.setFollowRedirect(true).setMaxRequestRetry(-1).setConnectTimeout(-1).setReadTimeout(30000);
-      AsyncHttpClientConfig config = b.setAsyncHttpClientProviderConfig(nettyConfig).build();
-      AsyncHttpClient asc = new AsyncHttpClient(config);
-      
-
-      Socket socket = client.create(client.newOptionsBuilder().reconnect(true).reconnectAttempts(999).runtime(asc).build());
-      socket.on(Event.CLOSE.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("CLOSE " + t);
-        }
-      }).on(Event.REOPENED.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("REOPENED " + t);
-        }
-      }).on(Event.MESSAGE.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          // all messages
-          // System.out.println("MESSAGE {}", t);
-        }
-      }).on(new Function<IOException>() {
-        @Override
-        public void on(IOException ioe) {
-          ioe.printStackTrace();
-        }
-      }).on(Event.STATUS.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("STATUS " + t);
-        }
-      }).on(Event.HEADERS.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("HEADERS " + t);
-        }
-      }).on(Event.MESSAGE_BYTES.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("MESSAGE_BYTES " + t);
-        }
-      }).on(Event.OPEN.name(), new Function<String>() {
-        @Override
-        public void on(String t) {
-          System.out.println("OPEN " + t);
-        }
-      }).open(request.build());
-
-  
-      endpoint.socket = socket;
-      currentUuid = uuid;
-
-      return endpoint;
+      Message msg = Message.createMessage(String.format("%s@%s", "runtime", clientId), service, method, data);
+      if (socket != null) {
+        socket.fire(gson.toJson(msg));
+      } else {
+        // System.out.println("could not send msg - no viable socket");
+      }
 
     } catch (Exception e) {
-      log.error("connect {} threw", url, e);
+      System.out.println("could not send command " + e.getMessage());
     }
-    return null;
   }
-  
 
-  public class Worker implements Runnable {
-
-    Thread myThread = null;
-
-    public Worker() {
-    }
-
-    public void start() {
-      if (myThread == null) {
-        myThread = new Thread(this, "client-stdin-worker");
-        myThread.start();
-      }
-    }
-
-    @Override
-    public void run() {
+  protected void prompt() {
+    if (out != null) {
       try {
-        int c = '\n';
-        String readLine = "";
-        while ((c = System.in.read()) != 0x04 /* ctrl-d 0x04 ctrl-c 0x03 '\n' */) {
-          System.out.print((char) c);
-          readLine += (char) c;
-          if (c == '\n') {
-            Endpoint resource = endpoints.get(currentUuid);
-            resource.socket.fire(readLine);
-            readLine = "";
-          }
-        }
+        out.write("\n".getBytes());
+        out.write(String.format("[%s@%s %s]%s", "runtime", promptId, cwd, "#").getBytes());
+        out.write(" ".getBytes());
       } catch (Exception e) {
         e.printStackTrace();
       }
-
-      myThread = null;
-    }
-
-    public void stop() {
-      if (myThread != null) {
-        myThread.interrupt();
-      }
     }
   }
 
-  public void send(String uuid, String raw) {
-    try {
-      Endpoint resource = endpoints.get(uuid);
-      resource.socket.fire(raw);
-    } catch (Exception e) {
-      e.printStackTrace();
+  public void run() {
+    prompt();
+    while (!done) {
+      process(in.nextLine());
+      prompt();
     }
   }
 
-  // FIXME - initial hello with Runtime authentication authorization - then
-  // redirection to a cli its name?
-  // default to "cli"
-  // FIXME !!! easy subscribe / unsubscribe and auto subscribe to cli ? if cli
-  // exists ???
-  public void startInteractiveMode() {
-    worker.start();
-  }
-
-  public void stopInteractiveMode() {
-    worker.stop();
-  }
-  
-  public void broadcast(String raw) {
-    for (Endpoint endpoint : endpoints.values()) {
+  protected void write(String ret) {
+    if (out != null) {
       try {
-        endpoint.socket.fire(raw);
+        out.write(ret.getBytes());
+        out.write("\n".getBytes());
+        prompt();
+        out.flush();
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
   }
 
+  protected void exit() {
+
+    if (clientId.equals(promptId)) {
+      if (asc != null) {
+        asc.close();
+      }
+
+      System.out.println("exiting " + clientId);
+      done = true;
+      System.exit(0);
+    }
+
+    if (socket != null) {
+      // socket.close();
+      socket = null;
+      System.out.println("exiting " + promptId);
+      promptId = clientId;
+    }
+  }
+
+  public static void main(String[] args) {
+
+    try {
+      // Create a JmDNS instance
+      // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+      // JmDNS jmdns = JmDNS.create(null, null);
+      // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost().getHostName());
+      // prefers Ipv6 :(
+      // JmDNS jmdns =
+      // JmDNS.create(InetAddress.getByName("192.168.0.102"),InetAddress.getLocalHost().getHostName());
+      // JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"),
+      // "shmooker01");
+      JmDNS jmdns = JmDNS.create(InetAddress.getByName("192.168.0.102"), "raspi01");
+      // JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+      // Register a service
+      // ServiceInfo serviceInfo = ServiceInfo.create("_myrobotlab._tcp.local.",
+      // "admin", 8888, "websocket connection");
+      ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "raspi01", 8888, "websocket connection");
+      jmdns.registerService(serviceInfo);
+
+      /*
+       * ServiceInfo serviceInfo = ServiceInfo.create("myrobotlab.local.",
+       * "raspi01", 8888, "path=index.html");
+       * 
+       * serviceInfo = ServiceInfo.create("myrobotlab.local.", "raspi02", 8888,
+       * "path=index.html"); jmdns.registerService(serviceInfo);
+       * 
+       * 
+       * serviceInfo = ServiceInfo.create("myrobotlab.local.", "admin", 8888,
+       * "path=index.html"); jmdns.registerService(serviceInfo);
+       */
+      // Wait a bit
+      Thread.sleep(25000);
+
+      // Unregister all services
+      jmdns.unregisterAllServices();
+
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+
+    try {
+      // Service service = Service.fromName("_tivo-mindrpc._tcp");
+      // Service service = Service.fromName("_smb._tcp.local");
+      // Service service = Service.fromName("_homekit._tcp.local");
+      // Service service = Service.fromName("_homekit._tcp.local");
+      // Service service = Service.fromName("_airplay._tcp.local");
+      // Query query = Query.createFor(service, Domain.LOCAL);
+      // Set<Instance> instances = query.runOnce();
+      // instances.stream().forEach(System.out::println);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    boolean done = true;
+    if (done) {
+      return;
+    }
+
+    Client client = null;
+    try {
+
+      Logging logging = LoggingFactory.getInstance();
+      logging.setLevel("WARN");
+
+      clientId = promptId = (username != null) ? (String.format("cli-%s-%d", username, System.currentTimeMillis())) : (String.format("cli-%s-%s",
+          InetAddress.getLocalHost().getHostName(), NameGenerator.getName()));
+      InetAddress.getLocalHost().getHostAddress();
+
+      client = new Client();
+
+      CommandLine cmdline = new CommandLine(client);
+
+      client.in = new Scanner(System.in);
+      client.out = System.out;
+
+      int exitCode = cmdline.execute(args);
+
+      System.exit(exitCode);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if (client != null) {
+      client.exit();
+    }
+  }
 }

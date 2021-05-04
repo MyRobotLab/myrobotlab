@@ -11,6 +11,7 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.data.RangeData;
 import org.myrobotlab.service.interfaces.RangeListener;
 import org.myrobotlab.service.interfaces.RangePublisher;
 import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
@@ -147,6 +148,11 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return lastRange;
   }
 
+  public RangeData publishRangeData(Double range) {
+    RangeData ret = new RangeData(getName(), range);
+    return ret;
+  }
+
   public boolean setType(String type) {
     if (types.contains(type)) {
       this.SensorType = type;
@@ -197,7 +203,6 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     return b[3] & 0xFF | (b[2] & 0xFF) << 8 | (b[1] & 0xFF) << 16 | (b[0] & 0xFF) << 24;
   }
 
-
   public int getPings() {
     return pings;
   }
@@ -239,6 +244,8 @@ public class UltrasonicSensor extends Service implements RangeListener, RangePub
     }
 
     invoke("publishRange", range);
+    // range with source
+    invoke("publishRangeData", range);
     return range;
   }
 

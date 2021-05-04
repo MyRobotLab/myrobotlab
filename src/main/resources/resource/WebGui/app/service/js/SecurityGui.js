@@ -5,9 +5,8 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
     
     // FIXME - need better way to have multiple panels, currently this is just for testing
     $scope.mrl = mrl
-    $scope.panel = mrl.getPanel('runtime')
-
     $scope.keyNames = [];
+    $scope.requiredKeyNames = [];
 
     this.updateState = function(service) {
         $scope.service = service
@@ -23,6 +22,9 @@ angular.module('mrlapp.service.SecurityGui', []).controller('SecurityGuiCtrl', [
         case 'onKeyNames':
             $scope.keyNames = inMsg.data[0]
             $scope.$apply()
+            break
+        case 'onStatus':
+            console.info(inMsg.data[0])
             break
         default:
             $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)

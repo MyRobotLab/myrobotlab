@@ -223,7 +223,8 @@ public class ArduinoMsgGenerator {
     idlToJava = idlToJava.replace("%javaArduinoClass%", MrlCommPublisher.class.getSimpleName());
     // Msg doesn't publish acks back to MrlComm
     idlToJava = idlToJava.replace("%publishAcks%", "");
-    // on startup Msg needs to see an MrlBeginMessage before it's clear to send data.
+    // on startup Msg needs to see an MrlBeginMessage before it's clear to send
+    // data.
     idlToJava = idlToJava.replace("%clearToSend%", "false");
 
     virtualJava = virtualJava.replace("%arduino%", "virtual");
@@ -232,10 +233,11 @@ public class ArduinoMsgGenerator {
     virtualJava = virtualJava.replace("%ackEnabled%", "false");
     // virtual message should publish an ack after each processCommand call.
     virtualJava = virtualJava.replace("%publishAcks%", "publishAck(method);");
-    // virtual message doesn't need to wait for a begin message to be clear to send.
+    // virtual message doesn't need to wait for a begin message to be clear to
+    // send.
     virtualJava = virtualJava.replace("%clearToSend%", "true");
 
-    fileSnr.put("%ackEnabled%", ackEnabled );
+    fileSnr.put("%ackEnabled%", ackEnabled);
     // process substitutions
     for (String searchKey : fileSnr.keySet()) {
       idlToHpp = idlToHpp.replace(searchKey, fileSnr.get(searchKey));
@@ -402,7 +404,7 @@ public class ArduinoMsgGenerator {
     StringBuilder cppCaseArduinoMethod = new StringBuilder("      " + arduinoOrMrlComm + name + "(");
 
     StringBuilder javaCaseHeader = new StringBuilder("    case " + CodecUtils.toUnderScore(name) + ": {\n");
-    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){"); 
+    StringBuilder javaCaseArduinoMethod = new StringBuilder("      if(invoke){");
     javaCaseArduinoMethod.append("\n        arduino.invoke(\"" + name + "\"");
 
     StringBuilder javaCaseRecord = new StringBuilder("      if(record != null){");
@@ -411,7 +413,8 @@ public class ArduinoMsgGenerator {
     StringBuilder javaSendRecord = new StringBuilder("      if(record != null){");
     javaSendRecord.append("\n        txBuffer.append(\"> " + name + "\");\n");
 
-    // compiler check, make sure we have a compilation error if MrlCommPublisher is missing a method.
+    // compiler check, make sure we have a compilation error if MrlCommPublisher
+    // is missing a method.
     StringBuilder javaCaseArduinoMethodComment = new StringBuilder("\n      } else { \n         arduino." + name + "(");
     if (paramaters.length > 0) {
       javaCaseArduinoMethod.append(", ");
@@ -608,7 +611,7 @@ public class ArduinoMsgGenerator {
       // javaCaseParams.append(" /*" + paramName + "*/");
 
       if (i != paramaters.length - 1) {
-        // caseParams.append("\n    ");
+        // caseParams.append("\n ");
         cppCaseParams.append(" ");
         javaCaseParams.append(" ");
       }
@@ -663,10 +666,9 @@ public class ArduinoMsgGenerator {
       methodSnr.put("cppHandleCase", "");
       methodSnr.put("cppGeneratedCallBacks", "");
 
-      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"+
-                     javaCaseRecord + "      }\n" + javaCaseFooter);
-      
-      
+      methodSnr.put("javaHandleCase", javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }\n"
+          + javaCaseRecord + "      }\n" + javaCaseFooter);
+
       methodSnr.put("javaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("javaMethod", "");
 
@@ -688,9 +690,9 @@ public class ArduinoMsgGenerator {
       methodSnr.put("javaGeneratedCallBack", "");
 
       // vJava send methods
-      methodSnr.put("vJavaHandleCase",javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
-      
-      
+      methodSnr.put("vJavaHandleCase",
+          javaCaseHeader.toString() + javaCaseArduinoMethod + javaCaseParams + javaCaseArduinoMethodComment + javaCaseParams + "\n      }" + javaCaseFooter);
+
       methodSnr.put("vJavaGeneratedCallBack", javaGeneratedCallback + javaMethodParameters.toString() + "){}\n");
       methodSnr.put("vJavaMethod", "");
 

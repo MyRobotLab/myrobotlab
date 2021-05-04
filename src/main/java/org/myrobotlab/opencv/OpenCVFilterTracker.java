@@ -42,7 +42,13 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.CvScalar;
 import org.bytedeco.opencv.opencv_core.IplImage;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Rect2d;
+import org.bytedeco.opencv.opencv_tracking.Track;
+import org.bytedeco.opencv.opencv_tracking.*;
+import org.bytedeco.opencv.opencv_video.*;
+
+/*
 import org.bytedeco.opencv.opencv_tracking.Tracker;
 import org.bytedeco.opencv.opencv_tracking.TrackerBoosting;
 import org.bytedeco.opencv.opencv_tracking.TrackerCSRT;
@@ -52,6 +58,7 @@ import org.bytedeco.opencv.opencv_tracking.TrackerMIL;
 import org.bytedeco.opencv.opencv_tracking.TrackerMOSSE;
 import org.bytedeco.opencv.opencv_tracking.TrackerMedianFlow;
 import org.bytedeco.opencv.opencv_tracking.TrackerTLD;
+*/
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.geometry.Point2df;
 import org.slf4j.Logger;
@@ -71,7 +78,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // The current tracker and it's associated boundingBox
   private Tracker tracker;
-  private Rect2d boundingBox;
+  // private Rect2d boundingBox;
+  private Rect boundingBox;
 
   // configure these to set the initial box size.
   // public int boxWidth = 224;
@@ -84,8 +92,8 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   // TODO: i'm not sure there is really a performance difference here..
   public boolean blackAndWhite = false;
-  // Boosting,CSRT,GOTURN,KCF,MedianFlow,MIL,MOSSE,TLD
-  public String trackerType = "TLD";
+  //  CSRT,GOTURN,KCF,MIL
+  public String trackerType = "CSRT";
 
   // The current mat that is being processed.
   private Mat mat = null;
@@ -145,26 +153,30 @@ public class OpenCVFilterTracker extends OpenCVFilter {
 
   private Tracker createTracker(String trackerType) {
     // TODO: add a switch for all the other types of trackers!
+    /*
     if (trackerType.equalsIgnoreCase("Boosting")) {
       return TrackerBoosting.create();
-    } else if (trackerType.equalsIgnoreCase("CSRT")) {
+    } else 
+      */
+      if (trackerType.equalsIgnoreCase("CSRT")) {
       return TrackerCSRT.create();
     } else if (trackerType.equalsIgnoreCase("GOTURN")) {
       return TrackerGOTURN.create();
     } else if (trackerType.equalsIgnoreCase("KCF")) {
       return TrackerKCF.create();
-    } else if (trackerType.equalsIgnoreCase("MedianFlow")) {
-      return TrackerMedianFlow.create();
-    } else if (trackerType.equalsIgnoreCase("MIL")) {
+    } /*else if (trackerType.equalsIgnoreCase("MedianFlow")) {
+      return TrackerMedianFlow.create(); 
+    } */ else if (trackerType.equalsIgnoreCase("MIL")) {
       return TrackerMIL.create();
-    } else if (trackerType.equalsIgnoreCase("MOSSE")) {
+    } /*else if (trackerType.equalsIgnoreCase("MOSSE")) {
       return TrackerMOSSE.create();
     } else if (trackerType.equalsIgnoreCase("TLD")) {
       return TrackerTLD.create();
-    } else {
-      log.warn("Unknown Tracker Algorithm {} defaulting to TLD", trackerType);
+    } */ else {   
+
+      log.warn("Unknown Tracker Algorithm {} defaulting to CSRT", trackerType);
       // default to TLD..
-      return TrackerTLD.create();
+      return TrackerCSRT.create();
     }
 
   }
@@ -177,7 +189,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     // TODO: implement a state machine where you select the first corner. then
     // you select the second corner
     // that would define the size of the bounding box also.
-    boundingBox = new Rect2d(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
+    boundingBox = new Rect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight);
     log.info("Create bounding box for tracking x:{} y:{} w:{} h:{}", boundingBox.x(), boundingBox.y(), boundingBox.width(), boundingBox.height());
     // TODO: start tracking multiple points ?
     // the tracker will initialize on the next frame.. (I know , I know. it'd be
@@ -189,7 +201,7 @@ public class OpenCVFilterTracker extends OpenCVFilter {
     if (mat != null) {
       synchronized (mat) {
         tracker.init(mat, boundingBox);
-      } 
+      }
     } else {
       log.warn("Sample point called on a null mat.");
     }

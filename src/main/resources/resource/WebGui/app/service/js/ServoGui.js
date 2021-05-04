@@ -264,20 +264,20 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.outputSlider.minValue = service.mapper.minY
             $scope.outputSlider.maxValue = service.mapper.maxY
 
+            // init ui components
+            if (service.speed) {
+                $scope.speedSlider.value = service.speed
+            } else {
+                $scope.speedSlider.value = 501
+                // ui max limit
+            }
+
             firstTime = false
 
             // BELOW NECESSARY?
             $timeout(function() {
                 $scope.$broadcast('rzSliderForceRender')
             })
-        }
-
-        // init ui components
-        if (service.speed) {
-            $scope.speedSlider.value = service.speed
-        } else {
-            $scope.speedSlider.value = 501
-            // ui max limit
         }
 
         // set min/max mapper slider BAD IDEA !!!! control "OR" status NEVER BOTH !!!!
@@ -363,7 +363,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoEvent")
-    msg.subscribe("publishEncoderData")
+//    msg.subscribe("publishEncoderData")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')

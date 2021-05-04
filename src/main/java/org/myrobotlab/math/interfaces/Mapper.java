@@ -25,7 +25,7 @@ public interface Mapper {
    * @return
    */
   public double getMinX();
-  
+
   /**
    * This is the maximum input value for the mapper.
    * 
@@ -34,20 +34,20 @@ public interface Mapper {
   public double getMaxX();
 
   /**
-   * This is the minimum output value that the mapper will return
-   * assuming the input falls between minX and maxX.
+   * This is the minimum output value that the mapper will return assuming the
+   * input falls between minX and maxX.
    * 
    * @return
    */
   public double getMinY();
 
   /**
-   * This is the maximum output value that the mapper will return
-   * assuming the input falls between minX and maxX
+   * This is the maximum output value that the mapper will return assuming the
+   * input falls between minX and maxX
    * 
    * @return
    */
-  
+
   public double getMaxY();
 
   /**
@@ -55,7 +55,7 @@ public interface Mapper {
    * 
    * @return
    */
-  
+
   boolean isInverted();
 
   /**
@@ -86,36 +86,41 @@ public interface Mapper {
   void setInverted(boolean invert);
 
   /**
-   * set limits on output of the mapper
-   * Deprecated, this method is ambiguous. explicitly call map(minX,maxX,minY,maxY) instead. 
+   * set limits on output of the mapper Deprecated, this method is ambiguous.
+   * explicitly call map(minX,maxX,minY,maxY) instead.
    * 
-   * @param minXY (both input and output)
-   * @param maxXY (both input and output)
+   * @param minXY
+   *          (both input and output)
+   * @param maxXY
+   *          (both input and output)
    */
   @Deprecated
   void setMinMax(double minXY, double maxXY);
 
   /**
-   * Integer form of setting limits
-   * Deprecated, this method is ambiguous. explicitly call map(minX,maxX,minY,maxY) instead.
+   * Integer form of setting limits Deprecated, this method is ambiguous.
+   * explicitly call map(minX,maxX,minY,maxY) instead.
    * 
-   * @param min (input and output max)
-   * @param max (input and output max)
+   * @param min
+   *          (input and output max)
+   * @param max
+   *          (input and output max)
    */
   @Deprecated
   void setMinMax(int min, int max);
-  
+
   /**
-   * If true this will make sure that input values are clipped to the range specified as 
-   * minX and maxX.  The resulting computed values will also be constrained to minY and maxY
-   * If false, inputs and outputs will not be clipped, but rather a normal linear mapping will apply.
+   * If true this will make sure that input values are clipped to the range
+   * specified as minX and maxX. The resulting computed values will also be
+   * constrained to minY and maxY If false, inputs and outputs will not be
+   * clipped, but rather a normal linear mapping will apply.
    */
   void setClip(boolean clip);
 
   /**
-   * Return true if the mapper is set to clip the input and output values.  otherwise false.
+   * Return true if the mapper is set to clip the input and output values.
+   * otherwise false.
    */
   boolean isClip();
 
-  
 }

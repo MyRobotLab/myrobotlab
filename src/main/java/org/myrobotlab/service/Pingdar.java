@@ -63,7 +63,8 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
     this.servo = servo;
 
     sensor.addRangeListener(this);
-    // servo.addServoEventListener(this); FIXME - this needs to be addEncoderListener !
+    // servo.addServoEventListener(this); FIXME - this needs to be
+    // addEncoderListener !
     // from the Arduino and send it back in on packet ..
     return true;
   }
@@ -86,18 +87,16 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
     invoke("publishPingdar", new Point(lastPos, range));
     lastRange = range;
   }
-  
-  /**FIXME - this needs to be onEncoderData
 
-  public Double onServoEvent(Double pos) {
-    info("pos %d", pos.intValue());
-    
-
-    invoke("publishPingdar", new Point(pos, lastRange));
-    lastPos = pos;
-    return lastPos;
-  }
-  */
+  /**
+   * FIXME - this needs to be onEncoderData
+   * 
+   * public Double onServoEvent(Double pos) { info("pos %d", pos.intValue());
+   * 
+   * 
+   * invoke("publishPingdar", new Point(pos, lastRange)); lastPos = pos; return
+   * lastPos; }
+   */
 
   public Point publishPingdar(Point point) {
     return point;
@@ -120,29 +119,28 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
 
   public void sweep(double sweepMin, double sweepMax) {
     try {
-    this.sweepMin = sweepMin;
-    this.sweepMax = sweepMax;
-    this.step = 1;
+      this.sweepMin = sweepMin;
+      this.sweepMax = sweepMax;
+      this.step = 1;
 
-    // TODO - configurable speed
-    sensor = getSensor();
-    servo = getServo();
+      // TODO - configurable speed
+      sensor = getSensor();
+      servo = getServo();
 
-    sensor.addRangeListener(this);
-    servo.attach((EncoderListener)this);
+      sensor.addRangeListener(this);
+      servo.attach((EncoderListener) this);
 
-    // servo.setSpeed(60);
-    servo.setSpeed(30.0);
-    // servo.eventsEnabled(true);
+      // servo.setSpeed(60);
+      servo.setSpeed(30.0);
+      // servo.eventsEnabled(true);
 
-    sensor.startRanging();
-    // STEP ???
-    servo.sweep(sweepMin, sweepMax, 15.0);
-    } catch(Exception e) {
+      sensor.startRanging();
+      // STEP ???
+      servo.sweep(sweepMin, sweepMax, 15.0);
+    } catch (Exception e) {
       error(e);
     }
   }
-
 
   @Override
   public void startRanging() {
@@ -201,11 +199,10 @@ public class Pingdar extends Service implements RangingControl, RangeListener, E
     sensor.setUnitInches();
   }
 
-
   @Override
   public void onEncoderData(EncoderData data) {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

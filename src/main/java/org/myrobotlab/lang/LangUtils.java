@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -12,6 +13,7 @@ import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.Runtime;
 import org.slf4j.Logger;
 
@@ -106,11 +108,11 @@ public class LangUtils {
     sb.append((Platform.isVirtual() ? "Platform.setVirtual(True)\n" : "# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
 
     // from current running system - vs something uncreated passed in ....
-    List<ServiceInterface> allServices = Runtime.getServices();
+    Map<String, ServiceInterface> allServices = Runtime.getLocalServices();
     List<ServiceInterface> services = new ArrayList<>();
     if (nameFilters != null) {
       for (String filter : nameFilters) {
-        for (ServiceInterface service : allServices) {
+        for (ServiceInterface service : allServices.values()) {
           if (service.getName().equals(filter)) {
             services.add(service);
           }
@@ -120,7 +122,7 @@ public class LangUtils {
 
     if (typeFilters != null) {
       for (String filter : typeFilters) {
-        for (ServiceInterface service : allServices) {
+        for (ServiceInterface service : allServices.values()) {
           if (service.getSimpleName().equals(filter)) {
             services.add(service);
           }
@@ -130,13 +132,13 @@ public class LangUtils {
 
     if (nameFilters == null && typeFilters == null) {
       // no filters
-      services = allServices;
+      services = new ArrayList<ServiceInterface>(allServices.values());
     }
 
     if (includeRuntime != null && includeRuntime) {
       services.add(Runtime.getInstance());
     }
-
+    
     sb.append("##############################################################\n");
     sb.append(String.format("## creating %d services ####\n", services.size()));
     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
@@ -144,6 +146,8 @@ public class LangUtils {
     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
     sb.append("# e.g. i01_left = Runtime.create('i01.left', 'Ssc32UsbServoController')\n");
 
+    sb.append("runtime = Runtime.getInstance()\n");
+    
     // the easy start (start peers auto-magically creates peers)
     for (ServiceInterface si : services) {
       if (si.isRuntime()) {
@@ -152,6 +156,19 @@ public class LangUtils {
       sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
       // do peers with comments
       // top level peers - others commented out
+    }
+    
+    Runtime runtime = Runtime.getInstance();
+    
+    sb.append("##############################################################\n");
+    sb.append(String.format("## creating client connections connections ####\n"));
+    Map<String, Connection> connections = runtime.getConnections();
+    for (Connection c : connections.values()) {
+      // we can only re-attach "clients" connections - not server/listening connections
+      String cType = (String)c.get("c-type");
+      if ("Runtime".equals(cType)) {
+        sb.append("runtime.connect(\'" +  (String)c.get("url") + "\') \n");
+      }
     }
 
     sb.append("\n");
@@ -184,19 +201,17 @@ public class LangUtils {
       // do peers with comments
       // top level peers - others commented out
     }
-/**<pre>
-    sb.append("##############################################################\n");
-    sb.append(String.format("## starting %d services ####\n", services.size()));
-
-    for (ServiceInterface si2 : services) {
-      if (si2.isRuntime()) {
-        continue;
-      }
-      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si2), si2.getName(), si2.getSimpleName()));
-      // do peers with comments
-      // top level peers - others commented out
-    }
-*/
+    /**
+     * <pre>
+     * sb.append("##############################################################\n");
+     * sb.append(String.format("## starting %d services ####\n",
+     * services.size()));
+     * 
+     * for (ServiceInterface si2 : services) { if (si2.isRuntime()) { continue;
+     * } sb.append(String.format("%s = Runtime.start('%s', '%s')\n",
+     * safeRefName(si2), si2.getName(), si2.getSimpleName())); // do peers with
+     * comments // top level peers - others commented out }
+     */
     // attach all ????
 
     // subscribe all ??? (really should be attach)
@@ -206,6 +221,8 @@ public class LangUtils {
     // run
 
     //
+
+    // connections
 
     return sb.toString();
 

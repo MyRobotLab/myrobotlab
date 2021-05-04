@@ -23,7 +23,7 @@ public class Motor extends AbstractMotor {
   public Motor(String n, String id) {
     super(n, id);
   }
-  
+
   public void setPwrDirPins(String pwrPin, String dirPin) {
     this.pwrPin = pwrPin;
     this.dirPin = dirPin;
@@ -31,7 +31,7 @@ public class Motor extends AbstractMotor {
   }
 
   public void setPwrDirPins(int pwrPin, int dirPin) {
-    this.pwrPin = pwrPin +"";
+    this.pwrPin = pwrPin + "";
     this.dirPin = dirPin + "";
     broadcastState();
   }
@@ -129,7 +129,6 @@ public class Motor extends AbstractMotor {
 
       m1.move(1.0);
       m1.move(-1.0);
-
 
       arduino.enableBoardInfo(true);
       arduino.enableBoardInfo(false);

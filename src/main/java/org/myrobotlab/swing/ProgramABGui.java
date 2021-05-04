@@ -78,7 +78,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
   ImageIcon userI = Util.getImageIcon("user.png");
   JLabel botnameP = new JLabel();
   ImageIcon botnameI = Util.getImageIcon("chatbot.png");
-  
+
   JLabel currentBotPath = new JLabel("");
 
   public ProgramABGui(String boundServiceName, SwingGui myService) throws BadLocationException, IOException {
@@ -146,7 +146,7 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
     cbp.setIcon(Util.getImageIcon("FileConnector.png"));
     botControl.add(cbp);
     botControl.add(currentBotPath);
-    
+
     buttons.add(saveAIML);
     buttons.add(reloadSession);
     buttons.add(savePredicates);
@@ -299,9 +299,9 @@ public class ProgramABGui extends ServiceGui implements ActionListener {
         } else {
           startSession.setBackground(Color.GREEN);
         }
-        
+
         BotInfo botInfo = programab.getBotInfo();
-        
+
         progABPath.setText(botInfo.path.getAbsolutePath());
         currentBotPath.setText(botInfo.path.getAbsolutePath());
         userName.setText(username);

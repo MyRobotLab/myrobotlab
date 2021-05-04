@@ -1,5 +1,7 @@
 package org.myrobotlab.framework;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -11,6 +13,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.zip.ZipFile;
 
+// Do not pull in deps to this class !
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
@@ -24,15 +28,18 @@ import org.slf4j.Logger;
  * It must NOT have references to mrl services, or Runtime, or 3rd party library
  * dependencies except perhaps for logging
  * 
- * FIXME - it's silly to have some values in variables and others in the manifest map - 
- * probably should have all in a Tree map but I didn't want to break any javascript which accessed
- * the members directly
+ * FIXME - it's silly to have some values in variables and others in the
+ * manifest map - probably should have all in a Tree map but I didn't want to
+ * break any javascript which accessed the members directly
  *
  */
 public class Platform implements Serializable {
   transient static Logger log = LoggerFactory.getLogger(Platform.class);
 
   private static final long serialVersionUID = 1L;
+
+  // Nixie
+  public static final String VERSION_PREFIX = "1.1.";
 
   // VM Names
   public final static String VM_DALVIK = "dalvik";
@@ -77,6 +84,8 @@ public class Platform implements Serializable {
   // all values of the manifest
   Map<String, String> manifest;
 
+  String shortCommit;
+
   static Platform localInstance;
 
   /**
@@ -94,7 +103,7 @@ public class Platform implements Serializable {
 
     if (localInstance == null) {
       log.debug("initializing Platform");
-      
+
       Platform platform = new Platform();
       platform.startTime = new Date();
 
@@ -186,7 +195,35 @@ public class Platform implements Serializable {
       platform.manifest = manifest;
       platform.branch = get(manifest, "GitBranch", "unknownBranch");
       platform.commit = get(manifest, "GitCommitIdAbbrev", "unknownCommit");
+      // build version or git commit timestamp
       platform.mrlVersion = get(manifest, "Implementation-Version", "unknownVersion");
+
+      // git properties - local build has precedence
+      Properties gitProps = gitProperties();
+      if (gitProps != null) {
+        String gitProp = gitProps.getProperty("git.branch");
+        platform.branch = (gitProp != null) ? gitProp : platform.branch;
+
+        gitProp = gitProps.getProperty("git.commit.id");
+        platform.commit = (gitProp != null) ? gitProp : platform.commit;
+        if (platform.commit != null) {
+          platform.shortCommit = platform.commit.substring(0, 7);
+        }
+
+        gitProp = gitProps.getProperty("git.build.time");
+        // 2020-08-23T18:36:27-0700
+        if (gitProp != null) {
+          try {
+            // String isoDatePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+            String pattern = "yyyy-MM-dd'T'HH:mm:ssZ";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            Date d = simpleDateFormat.parse(gitProp);
+            platform.mrlVersion = Platform.VERSION_PREFIX + d.getTime() / 1000;
+          } catch (Exception e) {
+            log.error("parsing date threw", e);
+          }
+        }
+      }
 
       // motd
       platform.motd = "resistance is futile, we have cookies and robots ...";
@@ -228,11 +265,38 @@ public class Platform implements Serializable {
     return localInstance;
   }
 
-  static public String get(Map<String,String> manifest, String key, String def) {
+  static public String get(Map<String, String> manifest, String key, String def) {
     if (manifest != null & manifest.containsKey(key)) {
       return manifest.get(key);
     }
     return def;
+  }
+
+  static public Properties gitProperties() {
+    try {
+      Properties properties = new Properties();
+      String rootOfClass = FileIO.getRoot();
+      if (FileIO.isJar()) {
+        // extract from jar
+        log.info("git loading properties from jar {}", rootOfClass);
+        properties.load(Platform.class.getResourceAsStream("/git.properties"));
+      } else {
+
+        // get from file system
+        String path = FileIO.gluePaths(rootOfClass, "git.properties");
+        File check = new File(path);
+        if (!check.exists()) {
+          log.info("git.properties does not exist");
+          return null;
+        }
+        log.info("git loading from file {}", path);
+        properties.load(new FileInputStream(path));
+      }
+      return properties;
+    } catch (Exception e) {
+      log.error("getProperties threw", e);
+    }
+    return null;
   }
 
   public Platform() {
@@ -329,11 +393,11 @@ public class Platform implements Serializable {
         // zf.close(); explodes on closing :(
       } else {
         // IDE - version ...
-        in = Platform.class.getResource("/MANIFEST.MF").openStream();
+        // in = new FileInputStream("target/classes/META-INF/MANIFEST.MF");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
+        in = new FileInputStream("target/classes/git.properties");// Platform.class.getResource("target/classes/META-INF/MANIFEST.MF").openStream();
       }
       // String manifest = FileIO.toString(in);
       // log.debug("loading manifest {}", manifest);
-
       Properties p = new Properties();
       p.load(in);
 

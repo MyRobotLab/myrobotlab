@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 public class Locale {
 
   public final static Logger log = LoggerFactory.getLogger(Locale.class);
-  
+
   /**
    * 2 letter iso language
    */
@@ -67,13 +67,13 @@ public class Locale {
       // first part is always the "language" descriptor
       language = parts[0].toLowerCase();
       if (parts.length > 1) {
-        
+
         // IETF - "last" part is country/region
         String p = parts[parts.length - 1].toUpperCase();
         if (p.length() > 0) {
           country = p;
         }
-       // language = code.substring(0, code.lastIndexOf("-"));
+        // language = code.substring(0, code.lastIndexOf("-"));
       }
     } else {
       language = code;
@@ -107,7 +107,7 @@ public class Locale {
     }
     return ret;
   }
-  
+
   public static Map<String, Locale> getLanguageMap(String... codes) {
     Map<String, Locale> ret = new TreeMap<>();
     for (String code : codes) {
@@ -174,30 +174,30 @@ public class Locale {
 
   public String toString() {
     return getTag();
-  } 
+  }
 
   final static public boolean hasLanguage(Map<String, Locale> locales, String language) {
-      if (language == null || locales == null) {
-        return false;
-      }
-      // let Locale parse the incoming string to be safe
-      Locale l = new Locale(language);
-      for (Locale locale : locales.values()) {
-        if (locale.getLanguage().contentEquals(l.getLanguage())) {
-          return true;
-        }
-      }
+    if (language == null || locales == null) {
       return false;
+    }
+    // let Locale parse the incoming string to be safe
+    Locale l = new Locale(language);
+    for (Locale locale : locales.values()) {
+      if (locale.getLanguage().contentEquals(l.getLanguage())) {
+        return true;
+      }
+    }
+    return false;
   }
-  
+
   final static public Properties loadLocalizations(String fullPath) {
     Properties props = new Properties();
     try {
       props.load(new InputStreamReader(new FileInputStream(fullPath), Charset.forName("UTF-8")));
-      log.info("found {} properties from {}", props.size(), fullPath);
-    } catch(Exception e) {
+      log.debug("found {} properties from {}", props.size(), fullPath);
+    } catch (Exception e) {
       /* don't care common use case */
-      log.info("{} does not exist", fullPath);
+      log.debug("{} does not exist", fullPath);
     }
     return props;
   }

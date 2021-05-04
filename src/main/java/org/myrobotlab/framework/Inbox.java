@@ -49,7 +49,8 @@ public class Inbox implements Serializable {
   int maxQueue = 1024; // will need to adjust unit test if you change this
   // value
 
-  public HashMap<Long, Object[]> blockingList = new HashMap<Long, Object[]>();
+  // support remote blocking... in-process blocking uses invoke
+  public HashMap<String, Object[]> blockingList = new HashMap<>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
@@ -61,14 +62,16 @@ public class Inbox implements Serializable {
     this.name = name;
   }
 
-  
   public void add(Message msg) {
-    if ((msg.historyList.contains(name))) {
-      log.error("* {} dumping duplicate message {}.{} msgid - {} {}", name, msg.getName(), msg.method, msg.msgId, msg.historyList);
-      return;
-    }
-
-    msg.historyList.add(name);
+    /**
+     * <pre>
+     * Trying to only make this applicable for hops dealing with remote messages
+     * - not local one ! if ((msg.historyList.contains(name))) { log.error("* {}
+     * dumping duplicate message {}.{} msgid - {} {}", name, msg.getName(),
+     * msg.method, msg.msgId, msg.historyList); return; }
+     * 
+     * msg.historyList.add(name);
+     */
 
     synchronized (msgBox) {
       while (blocking && (msgBox.size() >= maxQueue)) // queue "full"
@@ -147,7 +150,6 @@ public class Inbox implements Serializable {
       while (msg == null) { // while no messages && no messages that are
         // blocking
         if (msgBox.size() == 0) {
-          // log.debug("Inbox WAITING " + name);
           msgBox.wait(); // must own the lock
         } else {
           msg = msgBox.removeLast();
@@ -156,20 +158,20 @@ public class Inbox implements Serializable {
           // --- sendBlocking support begin --------------------
           // TODO - possible safety check msg.status == Message.RETURN
           // &&
-          if (blockingList.containsKey(msg.msgId)) {
-            Object[] returnContainer = blockingList.get(msg.msgId);
-            if (msg.data == null) // TODO - don't know if this is
-            // correct but this works for
-            // null data now
+          String blockingKey = String.format("%s.%s", msg.getFullName(), msg.getMethod());
+          if (blockingList.containsKey(blockingKey)) {
+            Object[] returnContainer = blockingList.get(blockingKey);
+            if (msg.data == null)
             {
               returnContainer[0] = null;
             } else {
-              returnContainer[0] = msg.data[0]; // transferring
-              // return data !
+              // transferring data
+              returnContainer[0] = msg.data[0]; 
             }
+            
             synchronized (returnContainer) {
-              blockingList.remove(msg.msgId);
-              returnContainer.notify(); // addListener sender
+              blockingList.remove(blockingKey);
+              returnContainer.notifyAll(); // addListener sender
             }
             msg = null; // do not invoke this msg - sendBlocking has
             // been notified data returned

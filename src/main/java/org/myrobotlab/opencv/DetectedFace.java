@@ -99,10 +99,11 @@ public class DetectedFace {
   public Rect faceWithBorder(int size, int cols, int rows) {
     int x = Math.max(0, face.x() - size / 2);
     int y = Math.max(0, face.y() - size / 2);
-    // make sure the cropped area doesn't exceed the borders of the original image.
-    int w = Math.min(cols-x, face.width() + size);
-    int h = Math.min(rows-y, face.height() + size);
-    
+    // make sure the cropped area doesn't exceed the borders of the original
+    // image.
+    int w = Math.min(cols - x, face.width() + size);
+    int h = Math.min(rows - y, face.height() + size);
+
     if (x < 0 || y < 0 || w < 0 || h < 0) {
       // return new Rect(0,0,0,0);
       return null;
@@ -142,19 +143,19 @@ public class DetectedFace {
   public boolean isComplete() {
     // helper method to tell us if everything is set.
     // now we're going to consider a complete face to have 2 eyes.
-    //  
+    //
     return !((face == null) || (leftEye == null) || (rightEye == null) || (mouth == null));
   }
 
   public boolean isGoodCandidate() {
     // helper method to tell us if everything is set.
     // now we're going to consider a complete face to have 2 eyes.
-    //  || (mouth == null)
+    // || (mouth == null)
     // got to have a face and at least one eye.
-    // our definition for this is that we have to have a face and an eye.    
-    return (face != null) && ( (leftEye != null) || (rightEye != null)  );
+    // our definition for this is that we have to have a face and an eye.
+    return (face != null) && ((leftEye != null) || (rightEye != null));
   }
-  
+
   public int getDetectedLabelId() {
     return detectedLabelId;
   }

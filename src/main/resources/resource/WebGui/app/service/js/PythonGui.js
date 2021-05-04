@@ -179,6 +179,7 @@ angular.module('mrlapp.service.PythonGui', []).controller('PythonGuiCtrl', ['$lo
     // $scope.possibleServices = Object.values(mrl.getPossibleServices())
     msg.subscribe('publishStdOut')
     msg.subscribe(this)
+    msg.send('newScript')
 }
 ]).directive('fileModel', ['$parse', function($parse) {
     return {

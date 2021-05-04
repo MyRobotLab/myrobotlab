@@ -120,16 +120,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
     } else if (o == loadPoseButton) {
       //
       String name = poseName.getText();
-      try {
-        Pose p = servoMixer.loadPose(name);
-
-        servoMixer.moveToPose(p);
-        refreshPanel();
-
-      } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
+      Pose p = servoMixer.loadPose(name);
+      servoMixer.moveToPose(p);
+      refreshPanel();
     }
   }
 
@@ -167,9 +160,9 @@ public class ServoMixerGui extends ServiceGui implements ActionListener, ChangeL
       log.info("{} moveTo {}", slider.getName(), slider.getValue());
       // At this point we need to get the servo and move it to the new value
       ServoControl s = (ServoControl) Runtime.getService(slider.getName());
-    
-        s.moveTo((double)slider.getValue());
-      
+
+      s.moveTo((double) slider.getValue());
+
     }
   }
 

@@ -9,56 +9,60 @@ import org.slf4j.Logger;
  * 
  * @author GroG
  * 
- * Registration is sent when a processes wishes some or all of its services to be registered in another
- * process.  The act of registration is dependant on the registrar process.  Potentially some processes
- * will ignore registrations, however, some will create typed based subscriptions and build UIs from the
- * registration and allow remote access to the registered services.
+ *         Registration is sent when a processes wishes some or all of its
+ *         services to be registered in another process. The act of registration
+ *         is dependant on the registrar process. Potentially some processes
+ *         will ignore registrations, however, some will create typed based
+ *         subscriptions and build UIs from the registration and allow remote
+ *         access to the registered services.
  *
  */
 public class Registration {
-  
+
   transient final static Logger log = LoggerFactory.getLogger(Registration.class);
- 
+
   protected String id;
   protected String name;
   protected String typeKey;
-  
+
   /**
-   * current serialized state of the service - default encoding is json
-   * for all remote registration
+   * current serialized state of the service - default encoding is json for all
+   * remote registration
    */
   public String state;
-  
+
   /**
-   * in process reference to a service - for internal use only - always null remote
+   * in process reference to a service - for internal use only - always null
+   * remote
    */
   transient public ServiceInterface service = null;
-  
+
   public Registration(String id, String name, String typeKey) {
     this.id = id;
     this.name = name;
     this.typeKey = typeKey;
   }
-  
+
   public Registration(ServiceInterface service) {
-    log.debug("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
+    log.info("creating registration for {}@{} - {}", service.getName(), service.getId(), service.getType());
     this.id = service.getId();
     this.name = service.getName();
     this.typeKey = service.getType();
-    // when this registration is re-broadcasted to remotes it will use this serialization to init state
+    // when this registration is re-broadcasted to remotes it will use this
+    // serialization to init state
     this.state = CodecUtils.toJson(service);
     // if this is a local registration - need reference to service
     this.service = service;
   }
 
   public String toString() {
-    return String.format("%s %s %s",  id, name, typeKey);
+    return String.format("%s %s %s", id, name, typeKey);
   }
 
   public String getName() {
     return name;
   }
-  
+
   public String getId() {
     return id;
   }

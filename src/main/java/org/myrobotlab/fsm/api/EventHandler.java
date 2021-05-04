@@ -23,7 +23,6 @@
  */
 package org.myrobotlab.fsm.api;
 
-
 /**
  * Abstraction for actions to perform when an event is triggered.
  *
@@ -31,11 +30,14 @@ package org.myrobotlab.fsm.api;
  */
 public interface EventHandler {
 
-    /**
-     * Action method to execute when an event occurs.
-     * @param event the triggered event
-     * @throws Exception thrown if a problem occurs during action performing
-     */
-    void handleEvent(Event event) throws Exception;
+  /**
+   * Action method to execute when an event occurs.
+   * 
+   * @param event
+   *          the triggered event
+   * @throws Exception
+   *           thrown if a problem occurs during action performing
+   */
+  void handleEvent(Event event) throws Exception;
 
 }

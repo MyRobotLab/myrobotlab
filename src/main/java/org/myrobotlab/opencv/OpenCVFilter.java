@@ -57,9 +57,9 @@ import org.slf4j.Logger;
 
 public abstract class OpenCVFilter implements Serializable {
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilter.class.toString());
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   protected String type = null;
 
   static public String getCacheFile(String url) {
@@ -108,7 +108,7 @@ public abstract class OpenCVFilter implements Serializable {
       log.warn("could load Mat {}", tryfile);
     }
 
-    // src\test\resources\OpenCV 
+    // src\test\resources\OpenCV
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
@@ -132,18 +132,14 @@ public abstract class OpenCVFilter implements Serializable {
     File f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile); // load alpha
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // service resources - when jar extracts ?
     tryfile = Service.getResourceDir(OpenCV.class, infile);
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // source/ide
     // e.g. src\main\resources\resource\OpenCV
@@ -152,18 +148,14 @@ public abstract class OpenCVFilter implements Serializable {
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     // src\test\resources\OpenCV
     tryfile = "src" + File.separator + "test" + File.separator + "resources" + File.separator + OpenCV.class.getSimpleName() + File.separator + infile;
     f = new File(tryfile);
     if (f.exists()) {
       return read(tryfile);
-    } else {
-      log.warn("could load Mat {}", tryfile);
-    }
+    } 
 
     log.error("could not load Mat {}", infile);
     return null;
@@ -227,7 +219,7 @@ public abstract class OpenCVFilter implements Serializable {
 
   protected Boolean running;
 
-  private  String sourceKey;
+  private String sourceKey;
 
   protected int width;
 
@@ -327,10 +319,12 @@ public abstract class OpenCVFilter implements Serializable {
 
   /**
    * put'ing all the data into output and/or display
-   * @param processed - the already processed image
+   * 
+   * @param processed
+   *          - the already processed image
    */
   public void postProcess(IplImage processed) {
-      data.put(processed);
+    data.put(processed);
   }
 
   public abstract IplImage process(IplImage image) throws InterruptedException;

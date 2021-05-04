@@ -10,12 +10,11 @@ public interface EncoderControl extends Attachable {
    */
   public void disable();
 
-
   /**
    * enable this encoder to provide a stream of encoder data
    */
   public void enable();
-  
+
   /**
    * publishes the EncoderData from the encoder
    * 
@@ -33,6 +32,7 @@ public interface EncoderControl extends Attachable {
 
   /**
    * the position of the encoder in degrees or cm for linear encoder ?
+   * 
    * @return
    */
   public Double getPos();

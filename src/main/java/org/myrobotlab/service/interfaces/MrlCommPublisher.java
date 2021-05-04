@@ -7,18 +7,19 @@ import org.myrobotlab.service.data.SerialRelayData;
 
 /**
  * defines the interface for callbacks by listening to an mrlcomm byte stream.
- * TODO: auto-generate this file from the schema. 
+ * TODO: auto-generate this file from the schema.
+ * 
  * @author kwatters
  *
  */
 public interface MrlCommPublisher {
-  
+
   public void onBytes(byte[] data);
-  
+
   public BoardInfo publishBoardInfo(Integer version/* byte */,
       Integer boardTypeId/* byte */, Integer microsPerLoop/* b16 */,
       Integer sram/* b16 */, Integer activePins, int[] deviceSummary/* [] */);
-  
+
   public void publishAck(Integer function/* byte */);
 
   public int[] publishCustomMsg(int[] msg);
@@ -40,14 +41,15 @@ public interface MrlCommPublisher {
   public String publishMRLCommError(String errorMsg);
 
   public PinData[] publishPinArray(int[] data);
-  
+
   public String getName();
 
   public Integer publishUltrasonicSensorData(Integer deviceId, Integer echoTime);
-  
+
   public void ackTimeout();
 
-  // Necessary evil so Msg.java can invoke the publish methods on the publisher service.
+  // Necessary evil so Msg.java can invoke the publish methods on the publisher
+  // service.
   public Object invoke(String method, Object... params);
-  
+
 }

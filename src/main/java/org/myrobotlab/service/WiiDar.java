@@ -123,7 +123,7 @@ public class WiiDar extends Service {
           for (int i = servoLeftMax; i > servoRightMax; --i) {
             irdata.clear();
             Point p = new Point(cnt, i, RIGHT, System.currentTimeMillis());
-            servo.moveTo((double)i);
+            servo.moveTo((double) i);
             Thread.sleep(servoPause); // wait for data "bleh" -
             // BlockingQueue?
 
@@ -148,7 +148,7 @@ public class WiiDar extends Service {
           for (int i = servoRightMax; i < servoLeftMax; ++i) {
             irdata.clear();
             Point p = new Point(cnt, i, LEFT, System.currentTimeMillis());
-            servo.moveTo((double)i);
+            servo.moveTo((double) i);
             Thread.sleep(servoPause);
             if (irdata.size() == 0) {
               // out of range - no new ir data
@@ -305,7 +305,7 @@ public class WiiDar extends Service {
     LoggingFactory.init(Level.DEBUG);
     try {
 
-      WiiDar wiidar = (WiiDar)Runtime.start("wiidar", "WiiDar");
+      WiiDar wiidar = (WiiDar) Runtime.start("wiidar", "WiiDar");
       wiidar.startService();
       Runtime.createAndStart("gui", "SwingGui");
       // wiidar.startRobot();
@@ -488,6 +488,5 @@ public class WiiDar extends Service {
 
     sweeperThread = null;
   }
-
 
 }

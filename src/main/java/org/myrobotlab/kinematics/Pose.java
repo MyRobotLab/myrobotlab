@@ -15,18 +15,16 @@ import org.myrobotlab.service.interfaces.ServoControl;
 /** represent a set of servo positions at a given point in time */
 public class Pose {
 
-  public final String name;
-  public final Date createdDate;
+  public String name;
   public HashMap<String, Double> positions = new HashMap<String, Double>();
   public HashMap<String, Double> speeds = new HashMap<String, Double>();
 
   public Pose(String name, List<ServoControl> servos) {
     this.name = name;
-    this.createdDate = new Date();
     List<String> servoNames = new ArrayList<String>();
     for (ServoControl sc : servos) {
       positions.put(sc.getName(), sc.getCurrentInputPos());
-      speeds.put(sc.getName(),  sc.getSpeed());
+      speeds.put(sc.getName(), sc.getSpeed());
       servoNames.add(sc.getName());
     }
   }
@@ -34,13 +32,13 @@ public class Pose {
   public HashMap<String, Double> getSpeeds() {
     return speeds;
   }
-  
+
   public HashMap<String, Double> getPositions() {
     return positions;
   }
 
   public void savePose(String filename) throws IOException {
-    String s = CodecUtils.toJson(this);
+    String s = CodecUtils.toPrettyJson(this);
     FileOutputStream out = new FileOutputStream(new File(filename));
     out.write(s.getBytes());
     out.close();
@@ -56,7 +54,6 @@ public class Pose {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((createdDate == null) ? 0 : createdDate.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((positions == null) ? 0 : positions.hashCode());
     return result;
@@ -71,11 +68,7 @@ public class Pose {
     if (getClass() != obj.getClass())
       return false;
     Pose other = (Pose) obj;
-    if (createdDate == null) {
-      if (other.createdDate != null)
-        return false;
-    } else if (!createdDate.equals(other.createdDate))
-      return false;
+
     if (name == null) {
       if (other.name != null)
         return false;
@@ -91,7 +84,7 @@ public class Pose {
 
   @Override
   public String toString() {
-    return "Pose [positions=" + positions + ", speeds=\" + speeds + \", name=" + name + ", createdDate=" + createdDate + "]";
+    return "Pose [positions=" + positions + ", speeds=\" + speeds + \", name=" + name + "]";
   }
 
 }

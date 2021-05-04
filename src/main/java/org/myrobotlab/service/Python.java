@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -14,7 +13,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Message;
 import org.myrobotlab.framework.Platform;
-import org.myrobotlab.framework.Registration;
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
@@ -27,7 +25,11 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
+import org.python.core.PyDictionary;
 import org.python.core.PyException;
+import org.python.core.PyFloat;
+import org.python.core.PyInteger;
+import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PySystemState;
@@ -53,17 +55,19 @@ public class Python extends Service {
    * 
    */
   public class InputQueueThread extends Thread {
-    private Python python;
+    transient protected Python python;
+    protected volatile boolean running = false;
 
     public InputQueueThread(Python python) {
-      super(String.format("%s.input", python.getName()));
+      super(String.format("python.%s.input", python.getName()));
       this.python = python;
     }
 
     @Override
     public void run() {
       try {
-        while (isRunning()) {
+        running = true;
+        while (running) {
 
           Message msg = inputQueue.take();
 
@@ -105,7 +109,7 @@ public class Python extends Service {
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            log.error("InputQueueThread threw", e);
+            log.error("InputQueueThread threw", e.toString());
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
         }
@@ -178,6 +182,8 @@ public class Python extends Service {
 
   private static final long serialVersionUID = 1L;
 
+  protected int newScriptCnt = 0;
+
   /**
    * Get a compiled version of the python call.
    * 
@@ -200,6 +206,49 @@ public class Python extends Service {
     }
     objectCache.put(name, compiled);
     return compiled;
+  }
+
+  /**
+   * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
+   */
+  public void set(String pythonRefName, Object o) {
+    interp.set(pythonRefName, o);
+  }
+
+  /**
+   * Get a Python value from Python into Java return type is PyObject wrapper
+   * around the value
+   * 
+   * @param pythonRefName
+   *          - name of variable
+   * @return the PyObject wrapper
+   */
+  public PyObject getPyObject(String pythonRefName) {
+    return interp.get(pythonRefName);
+  }
+
+  /**
+   * Get the value of the Python variable e.g. Integer x =
+   * (Integer)python.getValue("my_var")
+   * 
+   * @param pythonRefName
+   * @return
+   */
+  public Object get(String pythonRefName) {
+    PyObject o = getPyObject(pythonRefName);
+    if (o == null) {
+      return null;
+    }
+    if (o instanceof PyString) {
+      return o.toString();
+    } else if (o instanceof PyFloat) {
+      return ((PyFloat) o).getValue();
+    } else if (o instanceof PyInteger) {
+      return ((PyInteger) o).getValue();
+    } else if (o instanceof PyList) {
+      return ((PyList) o).getArray();
+    }
+    return o;
   }
 
   /**
@@ -265,46 +314,30 @@ public class Python extends Service {
 
     createPythonInterpreter();
     attachPythonConsole();
-    
-    
-    //////// was in startService
-    
 
-    String selfReferenceScript = "from org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
+    //////// was in startService
+
+    String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
         + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-        + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
-    Map<String, ServiceInterface> svcs = Runtime.getRegistry();
-    StringBuffer initScript = new StringBuffer();
-    initScript.append("from time import sleep\n");
-    initScript.append("from org.myrobotlab.service import Runtime\n");
-    /* NOT NECESSARY ON CONSTRUCTION - handled on event onStarted
-    Iterator<String> it = svcs.keySet().iterator();
-    while (it.hasNext()) {
-      String fullname = it.next();
-      ServiceInterface sw = svcs.get(fullname);
-
-      initScript.append(String.format("from org.myrobotlab.service import %s\n", sw.getSimpleName()));
-
-      String serviceScript = String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(sw.getName()), sw.getName());
-
-      // get a handle on running service
-      initScript.append(serviceScript);
-    }
-
-    exec(initScript.toString(), false);
-    */
     log.info("starting python {}", getName());
     if (inputQueueThread == null) {
       inputQueueThread = new InputQueueThread(this);
       inputQueueThread.start();
     }
     log.info("started python {}", getName());
-    
-    
+  }
+
+  public void newScript() {
+    if (!openedScripts.containsKey("script.py")) {
+      openScript("script.py", "");
+    }
   }
 
   public void openScript(String scriptName, String code) {
@@ -336,6 +369,9 @@ public class Python extends Service {
    */
   public void attachPythonConsole() {
     if (!pythonConsoleInitialized) {
+      // FIXME - this console script has hardcoded globals to
+      // reference this service that will break with more than on python service
+      // !
       String consoleScript = getResourceAsString("pythonConsole.py");
       exec(consoleScript, false);
       pythonConsoleInitialized = true;
@@ -373,9 +409,9 @@ public class Python extends Service {
 
     /*
      * don't respect java accessibility, so that we can access protected members
-     * on subclasses
+     * on subclasses - NO ! - future versions of java will not allow this ! removing (GroG 20210404)
      */
-    props.put("python.security.respectJavaAccessibility", "false");
+    // props.put("python.security.respectJavaAccessibility", "false");
     props.put("python.import.site", "false");
 
     Properties preprops = System.getProperties();
@@ -434,18 +470,17 @@ public class Python extends Service {
       } else {
         interp.exec(code);
       }
-
-      // FIXME - TOO MANY DIFFERENT CODE-PATHS TO interp.exec ...
-      // FIXME - FOR EXAMPLE - SHOULDN"T THERE BE AN
-      // INVOKE(finishedExecutingScript) !!! HERE ???
-
       return true;
-
     } catch (PyException pe) {
       // something specific with a python error
       error(pe.toString());
+      invoke("publishStdError", pe.toString());
     } catch (Exception e) {
       error(e);
+    } finally {
+      if (blocking) {
+        invoke("finishedExecutingScript");
+      }
     }
     return false;
   }
@@ -618,7 +653,7 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("here");
+    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
@@ -626,8 +661,8 @@ public class Python extends Service {
    * before being processed/invoked in the Service.
    * 
    * Here all messages allowed to go and effect the Python service will be let
-   * through. However, all messsages not found in this filter will go "into"
-   * they Python script. There they can be handled in the scripted users code.
+   * through. However, all messages not found in this filter will go "into" they
+   * Python script. There they can be handled in the scripted users code.
    * 
    * @see org.myrobotlab.framework.Service#preProcessHook(org.myrobotlab.framework.Message)
    */
@@ -657,6 +692,10 @@ public class Python extends Service {
     return data;
   }
 
+  public String publishStdError(String data) {
+    return data;
+  }
+
   public void setLocalScriptDir(String path) {
     File dir = new File(path);
     if (!dir.isDirectory()) {
@@ -670,12 +709,11 @@ public class Python extends Service {
     broadcastState();
   }
 
-  /* no longer needed
-  @Override
-  public void startService() {
-    super.startService();
-  }
-  */
+  /*
+   * no longer needed
+   * 
+   * @Override public void startService() { super.startService(); }
+   */
 
   @Override
   public void releaseService() {
@@ -688,7 +726,8 @@ public class Python extends Service {
     }
 
     if (inputQueueThread != null) {
-      inputQueueThread.interrupt();
+      // let thread exit normally
+      inputQueueThread.running = false;
       inputQueueThread = null;
     }
 
@@ -733,7 +772,40 @@ public class Python extends Service {
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
-    Runtime.start("python", "Python");
+    Python python = (Python) Runtime.start("python", "Python");
+
+    python.exec("a = 12");
+    PyObject pyobject = python.getPyObject("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyInteger) pyobject).getValue());
+
+    python.exec("a = 12.7");
+    pyobject = python.getPyObject("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyFloat) pyobject).getValue());
+
+    python.exec("a = ['foo','bar']");
+    pyobject = python.getPyObject("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyList) pyobject).getArray());
+
+    python.exec("a = {'foo':1, 'bar':2}");
+    pyobject = python.getPyObject("a");
+    pyobject.getType();
+    log.info("a of type {} is {}", pyobject.getType(), ((PyDictionary) pyobject));
+
+    python.exec("b = 7.356");
+    Double b = (Double) python.get("b");
+    log.info("b = {}", b);
+
+    python.exec("c = [1,2,3]");
+    Object[] c = (Object[]) python.get("c");
+    log.info("c = {}", c);
+
+    python.exec("d = {'foo':True, 'bar':False}");
+    Map d = (Map) python.get("d");
+    log.info("foo = {}", d.get("foo"));
+
     // Runtime.start("webgui", "WebGui");
     Runtime.start("gui", "SwingGui");
     boolean done = true;
@@ -773,7 +845,7 @@ public class Python extends Service {
        */
 
     } catch (Exception e) {
-      Logging.logError(e);
+      log.error("main threw", e);
     }
 
   }

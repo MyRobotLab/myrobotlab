@@ -23,8 +23,8 @@ public class OculusTracking implements Runnable, Serializable {
 
   public final static Logger log = LoggerFactory.getLogger(OculusTracking.class);
   private static final long serialVersionUID = -4067064437788846187L;
-  protected final Hmd hmd;
-  protected final HmdDesc hmdDesc;
+  transient protected final Hmd hmd;
+  transient protected final HmdDesc hmdDesc;
   boolean running = false;
   transient public OculusRift oculus;
   transient Thread trackerThread = null;

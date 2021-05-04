@@ -5,6 +5,7 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
     $scope.errorStatus = null
     $scope.warningStatus = null
     $scope.infoStatus = null
+    $scope.mrl = mrl
 
 
     $scope.errorCount = 0
@@ -104,7 +105,6 @@ angular.module('mrlapp.nav').controller('navCtrl', ['$scope', '$log', '$filter',
 
     //START_Search
     //panels are retrieved above (together with minlist)
-    $log.info('searchPanels', $scope.panels)
     $scope.searchOnSelect = function(item, model, label) {
         //expand panel if minified
         if (item.list == 'min') {

@@ -36,64 +36,63 @@ import org.slf4j.Logger;
 
 public class InMoov2 extends Service implements TextListener, TextPublisher, JoystickListener, LocaleProvider {
 
-	public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
+  public final static Logger log = LoggerFactory.getLogger(InMoov2.class);
 
-	public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
+  public static LinkedHashMap<String, String> lpVars = new LinkedHashMap<String, String>();
 
-	// FIXME - why
-	@Deprecated
-	static boolean RobotCanMoveRandom = true;
-	private static final long serialVersionUID = 1L;
-	
-	public Arduino neopixelArduino = null;
+  // FIXME - why
+  @Deprecated
+  static boolean RobotCanMoveRandom = true;
+  private static final long serialVersionUID = 1L;
 
-	static String speechRecognizer = "WebkitSpeechRecognition";
+  public Arduino neopixelArduino = null;
 
- 
-  
+  static String speechRecognizer = "WebkitSpeechRecognition";
+
   /**
    * execute a resource script
+   * 
    * @param someScriptName
    */
   public void execScript(String someScriptName) {
     try {
-      Python p = (Python)Runtime.start("python", "Python");
+      Python p = (Python) Runtime.start("python", "Python");
       String script = getResourceAsString(someScriptName);
       p.exec(script, true);
     } catch (Exception e) {
-      error("unable to execute script %s", someScriptName); 
+      error("unable to execute script %s", someScriptName);
     }
   }
 
-	/**
-	 * This method will load a python file into the python interpreter.
-	 */
+  /**
+   * This method will load a python file into the python interpreter.
+   */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
-	public static boolean loadFile(String file) {
-		File f = new File(file);
-		Python p = (Python) Runtime.getService("python");
-		log.info("Loading  Python file {}", f.getAbsolutePath());
-		if (p == null) {
-			log.error("Python instance not found");
-			return false;
-		}
-		String script = null;
-		try {
-			script = FileIO.toString(f.getAbsolutePath());
-		} catch (IOException e) {
-			log.error("IO Error loading file : ", e);
-			return false;
-		}
-		// evaluate the scripts in a blocking way.
-		boolean result = p.exec(script, true);
-		if (!result) {
-			log.error("Error while loading file {}", f.getAbsolutePath());
-			return false;
-		} else {
-			log.debug("Successfully loaded {}", f.getAbsolutePath());
-		}
-		return true;
-	}
+  public static boolean loadFile(String file) {
+    File f = new File(file);
+    Python p = (Python) Runtime.getService("python");
+    log.info("Loading  Python file {}", f.getAbsolutePath());
+    if (p == null) {
+      log.error("Python instance not found");
+      return false;
+    }
+    String script = null;
+    try {
+      script = FileIO.toString(f.getAbsolutePath());
+    } catch (IOException e) {
+      log.error("IO Error loading file : ", e);
+      return false;
+    }
+    // evaluate the scripts in a blocking way.
+    boolean result = p.exec(script, true);
+    if (!result) {
+      log.error("Error while loading file {}", f.getAbsolutePath());
+      return false;
+    } else {
+      log.debug("Successfully loaded {}", f.getAbsolutePath());
+    }
+    return true;
+  }
 
   public static void main(String[] args) {
     try {
@@ -265,15 +264,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super(n, id);
 
     // by default all servos will auto-disable
-    //Servo.setAutoDisableDefault(true); //until peer servo services for InMoov2 have the auto disable behavior, we should keep this
+    // Servo.setAutoDisableDefault(true); //until peer servo services for
+    // InMoov2 have the auto disable behavior, we should keep this
 
-    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT");
+    locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
     locale = Runtime.getInstance().getLocale();
 
     // REALLY NEEDS TO BE CLEANED UP - no direct references
     // "publish" scripts which should be executed :(
     // python = (Python) startPeer("python");
-    python = (Python)Runtime.start("python", "Python"); // this crud should stop
+    python = (Python) Runtime.start("python", "Python"); // this crud should
+                                                         // stop
     load(locale.getTag());
 
     // get events of new services and shutdown
@@ -287,8 +288,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // peers to start on construction
     // imageDisplay = (ImageDisplay) startPeer("imageDisplay");
   }
-  
-
 
   @Override /* local strong type - is to be avoided - use name string */
   public void addTextListener(TextListener service) {
@@ -577,7 +576,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void halfSpeed() {
     if (head != null) {
-      head.setSpeed(25.0, 25.0, 25.0, 25.0, -1.0, 25.0);
+      head.setSpeed(25.0, 25.0, 25.0, 25.0, 100.0, 25.0);
     }
 
     if (rightHand != null) {
@@ -654,9 +653,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public boolean isUltraSonicLeftActivated() {
     return isUltraSonicLeftActivated;
   }
-		// by default all servos will auto-disable
-		// TODO: KW : make peer servo services for InMoov2 have the auto disable behavior.
-		// Servo.setAutoDisableDefault(true);
+  // by default all servos will auto-disable
+  // TODO: KW : make peer servo services for InMoov2 have the auto disable
+  // behavior.
+  // Servo.setAutoDisableDefault(true);
 
   public boolean isServoMixerActivated() {
     return isServoMixerActivated;
@@ -787,7 +787,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(double neck, double rothead) {
-    moveHead(neck, rothead, null);
+    moveHead(neck, rothead, null, null, null, null);
   }
 
   public void moveHead(double neck, double rothead, double eyeX, double eyeY, double jaw) {
@@ -795,7 +795,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void moveHead(Double neck, Double rothead, Double rollNeck) {
-    moveHead(neck, rothead, null, null, null, rollNeck);
+    moveHead(rollNeck, rothead, null, null, null, rollNeck);
   }
 
   public void moveHead(Double neck, Double rothead, Double eyeX, Double eyeY, Double jaw, Double rollNeck) {
@@ -938,15 +938,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.rest();
     }
   }
-
-  @Deprecated
-  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
+  
+  public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
-      warn("%s hand not started", which);
+      warn("%s arm not started", which);
       return;
     }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
+  }  
+  
+  @Deprecated
+  public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
+     setArmSpeed(which, bicep, rotate, shoulder, omoplate);
   }
 
   public void setAutoDisable(Boolean param) {
@@ -998,6 +1002,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
+  }
+  
+  public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
+    setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
 
   public void setHeadSpeed(Double rothead, Double neck, Double eyeXSpeed, Double eyeYSpeed, Double jawSpeed) {
@@ -1162,6 +1170,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGSEQUENCE"));
   }
+  
+  /**
+   * start servos - no controllers
+   * @throws Exception 
+   */
+  public void startServos() throws Exception {
+    startServos(null, null);
+  }
 
   public ProgramAB startChatBot() {
 
@@ -1290,10 +1306,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // legacy inmoov head exposed pins
   public InMoov2Head startHead(String port, String type, Integer headYPin, Integer headXPin, Integer eyeXPin, Integer eyeYPin, Integer jawPin, Integer rollNeckPin) {
-
-    // log.warn(InMoov.buildDNA(myKey, serviceClass))
-    // speakBlocking(get("STARTINGHEAD") + " " + port);
-    // ??? SHOULD THERE BE REFERENCES AT ALL ??? ... probably not
 
     speakBlocking(get("STARTINGHEAD"));
 
@@ -1568,12 +1580,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       return jme;
     }
 
-    jme = (JMonkeyEngine) startPeer("simulator");
+    // jme = (JMonkeyEngine) startPeer("simulator");
+    jme = (JMonkeyEngine)Runtime.start("jme", "JMonkeyEngine");
+    
 
     isSimulatorActivated = true;
-
-    // adding InMoov2 asset path to the jonkey simulator
-    String assetPath = /* getResourceDir()*/ getResourceRoot() + fs + InMoov2.class.getSimpleName();
+    
+    // adding InMoov2 asset path to the jmonkey simulator
+    String assetPath =  getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -1585,7 +1599,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // Servo.eventsEnabledDefault(false);
     // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
     // /resource/JMonkeyEngine/assets
-
+    jme.loadModels(assetPath);
+    
     // ========== gael's calibrations begin ======================
     jme.setRotation(getName() + ".head.jaw", "x");
     jme.setRotation(getName() + ".head.neck", "x");
@@ -1593,6 +1608,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     jme.setRotation(getName() + ".head.rollNeck", "z");
     jme.setRotation(getName() + ".head.eyeY", "x");
     jme.setRotation(getName() + ".head.eyeX", "y");
+    jme.setRotation(getName() + ".head.eyelidLeft", "x");
+    jme.setRotation(getName() + ".head.eyelidRight", "x");    
     jme.setRotation(getName() + ".torso.topStom", "z");
     jme.setRotation(getName() + ".torso.midStom", "y");
     jme.setRotation(getName() + ".torso.lowStom", "x");
@@ -1615,6 +1632,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // to be
     // two eyeX (left and
     // right?)
+    jme.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
+    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);    
     jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 

@@ -45,10 +45,6 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
         }
     }
 
-    // $scope.panel = mrl.getPanel($scope.service.name)
-	$scope.panel = mrl.getPanel('runtime')
-
-
     //mrl.subscribe($scope.service.name, 'pulse')
     msg.subscribe('publishShowAll')
     // msg.subscribe('publishHideAll') FIXME ? not symmetric
@@ -56,7 +52,7 @@ angular.module('mrlapp.service.WebGuiGui', []).controller('WebGuiGuiCtrl', ['$sc
     msg.subscribe('publishShow')
     msg.subscribe('publishSet')
     msg.subscribe('publishPanel')
-    msg.send("publishPanels")
+    // msg.send("publishPanels")
     // msg.subscribe('loadPanels')
     msg.subscribe(this)
 }

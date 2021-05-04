@@ -65,16 +65,21 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   final Map<String, List<Classification>> classifications = new TreeMap<>();
   // if deps were checked in it would be like this
   /*
-  public String model = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel");
-  public String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),"models/facedetectdnn/deploy.prototxt.txt");
-  */
-  // but 
+   * public String model =
+   * FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
+   * "models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel"); public
+   * String protoTxt = FileIO.gluePaths(Service.getResourceDir(OpenCV.class),
+   * "models/facedetectdnn/deploy.prototxt.txt");
+   */
+  // but
   public String model = "resource/OpenCV/models/facedetectdnn/res10_300x300_ssd_iter_140000.caffemodel";
   public String protoTxt = "resource/OpenCV/models/facedetectdnn/deploy.prototxt.txt";
   double threshold = .2;
 
   transient private final OpenCVFrameConverter.ToIplImage grabberConverter = new OpenCVFrameConverter.ToIplImage();
   transient private OpenCVFrameConverter.ToIplImage converterToIpl = new OpenCVFrameConverter.ToIplImage();
+  
+  boolean netError = false;
 
   public OpenCVFilterFaceDetectDNN() {
     this(null);
@@ -88,7 +93,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
   public void loadModel() {
     // log.info("loading DNN caffee model for face recogntion..");
     if (!new File(protoTxt).exists()) {
-      log.warn("Caffe DNN Face Detector ProtoTxt not found {}", protoTxt);
+      log.warn("Caffe DNN Face Detector ProtoTxt not found {} - delete .ivy2 cache and try to install again", protoTxt);
       return;
     }
     if (!new File(model).exists()) {
@@ -106,6 +111,15 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
 
   @Override
   public IplImage process(IplImage image) {
+    
+    if (net == null) {
+      if (netError == false) {
+      log.error("DNN net is not ready !");
+      netError = true;
+      }
+      return image;
+    }
+    
     int h = image.height();
     int w = image.width();
     // TODO: cv2.resize(image, (300, 300))
@@ -124,6 +138,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
     if (blob == null) {
       return image;
     }
+
     net.setInput(blob);
     // feed forward the input to the network to get the output matrix
     Mat output = net.forward();

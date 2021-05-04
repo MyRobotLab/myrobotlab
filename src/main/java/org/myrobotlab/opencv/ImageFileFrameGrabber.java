@@ -36,6 +36,10 @@ public class ImageFileFrameGrabber extends FrameGrabber {
   }
 
   public void load() {
+    if (path == null) {
+      log.error("cannot load image from null path");
+      return;
+    }
     File target = new File(path);
     if (!target.isDirectory()) {
       imageFiles.add(target);
@@ -68,7 +72,8 @@ public class ImageFileFrameGrabber extends FrameGrabber {
     try {
       image = cvLoadImage(path);
     } catch (Throwable e) {
-      log.error("cvLoadImage threw", e);
+      // log.error("cvLoadImage threw - could not load {}", e);
+      log.error("ImageFileFrameGrabber cvLoadImage threw - could not load {}", path);
       return null;
     }
     /*

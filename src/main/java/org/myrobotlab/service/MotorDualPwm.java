@@ -26,7 +26,7 @@ public class MotorDualPwm extends AbstractMotor {
     this.leftPwmPin = leftPwmPin + "";
     broadcastState();
   }
-  
+
   public void setLeftPwmPin(String leftPwmPin) {
     // log.info("leftPwmPin set");
     this.leftPwmPin = leftPwmPin;
@@ -42,7 +42,7 @@ public class MotorDualPwm extends AbstractMotor {
     this.rightPwmPin = rightPwmPin + "";
     broadcastState();
   }
-  
+
   public void setRightPwmPin(String rightPwmPin) {
     // log.info("rightPwmPin set");
     this.rightPwmPin = rightPwmPin;

@@ -38,7 +38,7 @@ public class IntrinsicToDepthParameters {
 
   public static void main(String args[]) {
     // String baseDir = UtilIO.pathExample("kinect/basket");
-    String baseDir = Service.getResourceDir(BoofCv.class); 
+    String baseDir = Service.getResourceDir(BoofCv.class);
 
     CameraPinholeRadial intrinsic = CalibrationIO.load(new File(baseDir, "intrinsic.yaml"));
 

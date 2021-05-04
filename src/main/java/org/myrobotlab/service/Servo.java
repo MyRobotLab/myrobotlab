@@ -49,7 +49,7 @@ import org.slf4j.Logger;
  *         outputY - is the values sent to the firmware, and should not
  *         necessarily be confused with the inputX which is the input values
  *         sent to the servo
- *         
+ * 
  *         FIXME - inherit from AbstractMotor ..
  * 
  */
@@ -57,13 +57,13 @@ import org.slf4j.Logger;
 public class Servo extends AbstractServo implements ServoControl {
 
   private static final long serialVersionUID = 1L;
-  
+
   public final static Logger log = LoggerFactory.getLogger(Servo.class);
 
   public Servo(String n, String id) {
     super(n, id);
   }
-  
+
   /**
    * max complexity moveTo
    * 
@@ -87,15 +87,15 @@ public class Servo extends AbstractServo implements ServoControl {
       error("cannot move to null position - not moving");
       return false;
     }
-    
+
     // This is to allow attaching disabled
-    // then delay enabling until the first moveTo command 
+    // then delay enabling until the first moveTo command
     // is used
-    if (firstMove  && !enabled) {
+    if (firstMove && !enabled) {
       enable();
       firstMove = false;
     }
-    
+
     if (idleDisabled && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
@@ -105,14 +105,14 @@ public class Servo extends AbstractServo implements ServoControl {
     // we cancel any pre-existing timer if it exists
     purgeTask("idleDisable");
     // blocking move will be idleTime out enabled later.
-    
+
     if (!enabled) {
       log.info("cannot moveTo {} not enabled", getName());
       return false;
     }
     targetPos = newPos;
     log.info("pos {} output {}", targetPos, getTargetOutput());
-    
+
     /**
      * <pre>
      * 
@@ -128,7 +128,7 @@ public class Servo extends AbstractServo implements ServoControl {
      */
     // FIXME - poor implementation - should addListener(sync)
     // and use pub/sub :(
-    for(String syncServo: syncedServos) {
+    for (String syncServo : syncedServos) {
       send(syncServo, "moveTo", newPos);
     }
     // TODO: this block isn't tested by ServoTest
@@ -139,7 +139,8 @@ public class Servo extends AbstractServo implements ServoControl {
     }
     // TODO: this block isn't tested by ServoTest
     if (isBlocking && blocking) {
-      // if isBlocking already, and incoming request is a blocking one - we block it
+      // if isBlocking already, and incoming request is a blocking one - we
+      // block it
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       synchronized (this) {
         try {
@@ -158,8 +159,7 @@ public class Servo extends AbstractServo implements ServoControl {
       log.info("{} is currently blocking - request to moveToBlocking({}) will need to wait", getName(), newPos);
       isBlocking = true;
     }
-    
-    
+
     lastActivityTimeTs = System.currentTimeMillis();
     isMoving = true;
     // "real" encoders are electrically hooked up to the servo and get their
@@ -187,11 +187,11 @@ public class Servo extends AbstractServo implements ServoControl {
     if (controller == null) { // <-- NOT NEEDED :)
       log.info("controller is null");
       // FIXME - need to still go through the default 'move'
-    } else { 
+    } else {
       broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
-    broadcastState();
+//    broadcastState();
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached
@@ -215,23 +215,22 @@ public class Servo extends AbstractServo implements ServoControl {
   public void setMaxVelocity(Double velocity) {
     log.warn("SetMaxVelocity does nothing and is deprecated. please update your python scripts, and use fullSpeed() instead");
   }
-  
+
   public static void main(String[] args) throws InterruptedException {
     try {
-      
+
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo"});
+      Runtime.main(new String[] { "--interactive", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
-      
+
       // Runtime.start("python", "Python");
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
-      
-      
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino"); 
+
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       // Servo pan = (Servo) Runtime.start("pan", "Servo");
 
@@ -242,82 +241,72 @@ public class Servo extends AbstractServo implements ServoControl {
 
       mega.connect("/dev/ttyACM1");
       // mega.setBoardMega();
-            
-      
+
       log.info("servo pos {}", tilt.getCurrentInputPos());
-      
+
       // double pos = 170;
       // servo03.setPosition(pos);
       tilt.setPin(3);
-      
+
       double min = 3;
       double max = 170;
       double speed = 60; // degree/s
-      
+
       mega.attach(tilt);
       // mega.attach(servo03,3);
-      
-      for (int i = 0; i < 100 ; ++i) {
+
+      for (int i = 0; i < 100; ++i) {
         tilt.moveTo(20.0);
       }
-      
+
       tilt.sweep(min, max, speed);
-      
+
       /*
-      Servo servo04 = (Servo) Runtime.start("servo04", "Servo");
-      Servo servo05 = (Servo) Runtime.start("servo05", "Servo");
-      Servo servo06 = (Servo) Runtime.start("servo06", "Servo");
-      Servo servo07 = (Servo) Runtime.start("servo07", "Servo");
-      Servo servo08 = (Servo) Runtime.start("servo08", "Servo");
-      Servo servo09 = (Servo) Runtime.start("servo09", "Servo");
-      Servo servo10 = (Servo) Runtime.start("servo10", "Servo");
-      Servo servo11 = (Servo) Runtime.start("servo11", "Servo");
-      Servo servo12 = (Servo) Runtime.start("servo12", "Servo");
-      */
+       * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
+       * servo05 = (Servo) Runtime.start("servo05", "Servo"); Servo servo06 =
+       * (Servo) Runtime.start("servo06", "Servo"); Servo servo07 = (Servo)
+       * Runtime.start("servo07", "Servo"); Servo servo08 = (Servo)
+       * Runtime.start("servo08", "Servo"); Servo servo09 = (Servo)
+       * Runtime.start("servo09", "Servo"); Servo servo10 = (Servo)
+       * Runtime.start("servo10", "Servo"); Servo servo11 = (Servo)
+       * Runtime.start("servo11", "Servo"); Servo servo12 = (Servo)
+       * Runtime.start("servo12", "Servo");
+       */
       // Servo servo13 = (Servo) Runtime.start("servo13", "Servo");
 
-     // servo03.attach(mega, 8, 38.0);
+      // servo03.attach(mega, 8, 38.0);
       /*
-      servo04.attach(mega, 4, 38.0);
-      servo05.attach(mega, 5, 38.0);
-      servo06.attach(mega, 6, 38.0);
-      servo07.attach(mega, 7, 38.0);
-      servo08.attach(mega, 8, 38.0);
-      servo09.attach(mega, 9, 38.0);
-      servo10.attach(mega, 10, 38.0);
-      servo11.attach(mega, 11, 38.0);
-      servo12.attach(mega, 12, 38.0);
-      */
-      
-      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher", "TestCatcher");
+       * servo04.attach(mega, 4, 38.0); servo05.attach(mega, 5, 38.0);
+       * servo06.attach(mega, 6, 38.0); servo07.attach(mega, 7, 38.0);
+       * servo08.attach(mega, 8, 38.0); servo09.attach(mega, 9, 38.0);
+       * servo10.attach(mega, 10, 38.0); servo11.attach(mega, 11, 38.0);
+       * servo12.attach(mega, 12, 38.0);
+       */
+
+      // TestCatcher catcher = (TestCatcher)Runtime.start("catcher",
+      // "TestCatcher");
       // servo03.attach((ServoEventListener)catcher);
-      
+
       // servo.setPin(12);
-      
+
       /*
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      servo.attach(mega, 7, 38.0);
-      */
-      
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       * servo.attach(mega, 7, 38.0); servo.attach(mega, 7, 38.0);
+       */
+
       // servo.sweepDelay = 3;
       // servo.save();
       // servo.load();
       // servo.save();
       // log.info("sweepDely {}", servo.sweepDelay);
-   
+
     } catch (Exception e) {
       log.error("main threw", e);
     }
   }
- 
+
 }

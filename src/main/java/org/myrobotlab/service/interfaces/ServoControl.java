@@ -122,15 +122,17 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   String getPin();
 
   /**
-   * @return the current input position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
+   * @return the current input position of the servo. For a typical hobby servo
+   *         this is estimated based on a TimerEncoder.
    */
   double getCurrentInputPos();
 
   /**
-   * @return the current output "real" position of the servo.  For a typical hobby servo this is estimated based on a TimerEncoder.
+   * @return the current output "real" position of the servo. For a typical
+   *         hobby servo this is estimated based on a TimerEncoder.
    */
   double getCurrentOutputPos();
-  
+
   /**
    * @return the current rest position value
    */
@@ -161,7 +163,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   double getTargetOutput();
 
   /**
-   * This method returns the input target position of the servo.  This is the 
+   * This method returns the input target position of the servo. This is the
    * input position that the servo was requested to move to.
    * 
    * @return
@@ -237,7 +239,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   Double moveToBlocking(Double pos, Long timeoutMs);
 
-
   /**
    * command to move to the rest position
    */
@@ -265,10 +266,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setMapper(Mapper m);
 
   /**
-   * This specifies both the input and the output limits for the mapper.
-   * It specifies the minY and maxY
-   * This method is deprecated, as it's ambigious as to the behavior.
-   * use map(minXY,maxXY,minXY,maxXY) instead
+   * This specifies both the input and the output limits for the mapper. It
+   * specifies the minY and maxY This method is deprecated, as it's ambigious as
+   * to the behavior. use map(minXY,maxXY,minXY,maxXY) instead
    * 
    * @param minXY
    *          minXY value
@@ -278,15 +278,15 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    */
   @Deprecated
   void setMinMax(double minXY, double maxXY);
-  
+
   /**
-   *  Helper function that can be used to set the output limits on an existing mapper.
-   *  This will leave the input limits unchanged on the mapper and it will set the output
-   *  minY and maxY values on the mapper.
-   *  
-   *  @param minY
+   * Helper function that can be used to set the output limits on an existing
+   * mapper. This will leave the input limits unchanged on the mapper and it
+   * will set the output minY and maxY values on the mapper.
+   * 
+   * @param minY
    *          the output minimum value of the mapper
-   *  @param maxY
+   * @param maxY
    *          the output maxiumum value of the mapper.
    */
   void setMinMaxOutput(double minY, double maxY);
@@ -310,8 +310,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   void setPin(String pin);
 
   /**
-   * This method sets the input position without "moving" the servo. Typically, this
-   * is useful for setting the initial position of the servo during startup
+   * This method sets the input position without "moving" the servo. Typically,
+   * this is useful for setting the initial position of the servo during startup
    * 
    * @param pos
    */
@@ -349,7 +349,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param sc
    */
   void unsync(ServoControl sc);
-  
+
   /**
    * waitTargetPos is used by a global moveToBlocking command - pos usually is 0
    * - 180 a global moveToBlocking is a method that use multiple servo at same

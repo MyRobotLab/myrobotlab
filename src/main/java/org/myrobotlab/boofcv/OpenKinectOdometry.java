@@ -94,7 +94,6 @@ public class OpenKinectOdometry {
 
   static final Logger log = LoggerFactory.getLogger(OpenKinectOdometry.class);
 
-  
   private PointCloudViewer viewer;
   private PointCloudViewer viewerFixed;
 
@@ -237,7 +236,7 @@ public class OpenKinectOdometry {
 
     MediaManager media = DefaultMediaManager.INSTANCE;
     // String directory = UtilIO.pathExample("kinect/straight");
-    String directory = Service.getResourceDir(BoofCv.class)+File.separator;
+    String directory = Service.getResourceDir(BoofCv.class) + File.separator;
     log.info("Using directory ", directory);
 
     // load camera description and the video sequence
@@ -413,6 +412,8 @@ public class OpenKinectOdometry {
   /**
    * If the algorithm implements AccessPointTracks3D, then count the number of
    * inlier features and return a string.
+   * @param alg
+   * @return
    */
   public static String inlierPercent(VisualOdometry alg) {
     if (!(alg instanceof AccessPointTracks3D))

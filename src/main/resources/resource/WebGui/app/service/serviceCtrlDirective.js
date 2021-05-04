@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', '$log', 'mrl', function($compile, $log, mrl) {
+angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 'mrl', function($compile, mrl) {
     return {
         scope: {
             //"=" -> binding to items in parent-scope specified by attribute
@@ -15,15 +15,15 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
             }, function() {
                 if (scope.panel.templatestatus && scope.panel.templatestatus == 'loaded') {
                     watch();
-                    $log.info('deps loaded, start ctrl', scope.panel.name);
+                    console.info('deps loaded, start ctrl', scope.panel.name);
                     mrl.createMsgInterface(scope.panel.name).then(function(msg_) {
-                        $log.info('msgInterface received', scope.panel.name);
+                        console.info('==== msgInterface received', scope.panel.name);
                         scope.panel.msg_ = msg_;
                         scope.msginterface = msg_;
                         scope.msgmethods = msg_.temp.msg;
                         elem.html(html).show();
-                        $log.info("elem.contents")
-                        $log.info(elem.contents())
+                        console.info("elem.contents")
+                        // console.info(elem.contents())
                         
                         $compile(elem.contents())(scope);
                         
@@ -53,7 +53,7 @@ angular.module('mrlapp.service').directive('serviceCtrlDirective', ['$compile', 
         controllerAs: "guictrl",
         name: "controllerName",
         link: function(scope, elem, attr) {
-            console.log(scope.name, 'serviceCtrlNext-link');
+            console.log(scope.name, '==== serviceCtrlNext-link');
             mrl.controllerscope(scope.name, scope);
         }
     };

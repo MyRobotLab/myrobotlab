@@ -66,7 +66,6 @@ import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Python;
 import org.myrobotlab.service.Runtime;
-import org.myrobotlab.service.Runtime.CmdOptions;
 import org.slf4j.Logger;
 
 /**
@@ -117,16 +116,15 @@ public class FileIO {
 
     return true;
   }
-  
-  
+
   /**
-   * Copy the contents of dir into the path destination
-   * s
+   * Copy the contents of dir into the path destination s
+   * 
    * @param dir
    * @param path
    * @throws IOException
    */
-  
+
   final public static void copy(File[] dir, String path) throws IOException {
     for (File f : dir) {
       copy(f, new File(path));
@@ -367,11 +365,7 @@ public class FileIO {
    */
   static public final boolean extractResources() {
     try {
-      CmdOptions options = Runtime.getOptions();
-      // PROBLEM !!! FIXME !!
-      // extract(getRoot(), "resource", options.resourceDir,
-      // options.extractResources);
-      extract(getRoot(), "resource", null, options.extractResources);
+      extract(getRoot(), "resource", null, false);
     } catch (Exception e) {
       Logging.logError(e);
     }
@@ -390,7 +384,7 @@ public class FileIO {
       if (Runtime.getOptions() == null) {
         baseDir = System.getProperty("user.dir");
       } else {
-        baseDir = Runtime.getOptions().dataDir;
+        baseDir = Runtime.DATA_DIR;
       }
       // TODO: is user.dir the same as MRL_HOME / install dir?
       // "always" associated with the data dir
@@ -457,9 +451,9 @@ public class FileIO {
   }
 
   /**
-   * "Clever" function to get the list of service based on class files.
-   * It is so "clever" because dev-time may have source files, but test-time utilities
-   * might not know where the source is.  Runtime has no source.
+   * "Clever" function to get the list of service based on class files. It is so
+   * "clever" because dev-time may have source files, but test-time utilities
+   * might not know where the source is. Runtime has no source.
    * 
    * A better solution might be to maintain a list of services as a text file :(
    * 
@@ -624,7 +618,7 @@ public class FileIO {
         String urlStr = String.format("jar:file:%s!/%s", root, jarEntry.getName());
         boolean isSubDir = (src.split("/").length + 1 < jarEntry.getName().split("/").length);
 
-        if (jarEntry.isDirectory() || (isSubDir && !recurse) ||  jarEntry.getName().contains("$")) {
+        if (jarEntry.isDirectory() || (isSubDir && !recurse) || jarEntry.getName().contains("$")) {
           log.info("filtering out {}", urlStr);
         } else {
           log.info("adding url {}", urlStr);
@@ -898,7 +892,8 @@ public class FileIO {
       List<URL> urls = null;
 
       log.info("findPackageContents resource/Python/examples");
-     // urls = listContents(root, gluePaths(Service.getResourceRoot(), "/Python/examples"));
+      // urls = listContents(root, gluePaths(Service.getResourceRoot(),
+      // "/Python/examples"));
 
       log.info("findPackageContents resource/Python/examples {}", urls.size());
 
@@ -1031,7 +1026,7 @@ public class FileIO {
    *          Python/examples/someFile.py
    * @return byte array
    */
-  @Deprecated /*user Service.getResource(src)*/
+  @Deprecated /* user Service.getResource(src) */
   static public final byte[] resourceToByteArray(String src) {
 
     // this path assumes in a jar ?
@@ -1113,12 +1108,14 @@ public class FileIO {
   static public final boolean rm(String filename) {
     return rm(new File(filename));
   }
-  
+
   /**
    * recursively remove files and directories, leaving exlusions
    * 
-   * @param directory - the directory to remove
-   * @param exclude - the exceptions to save
+   * @param directory
+   *          - the directory to remove
+   * @param exclude
+   *          - the exceptions to save
    * @return true/false
    */
   static public final boolean rmDir(File directory, Set<File> exclude) {
@@ -1227,6 +1224,29 @@ public class FileIO {
     }
 
     return null;
+  }
+
+  /**
+   * Copies bytes from src to dst, src must be a file, dst may or may not exist
+   * 
+   * @param src
+   * @param dst
+   * @throws IOException
+   */
+  static public void copyBytes(String src, String dst) throws IOException {
+    FileInputStream fis = new FileInputStream(src);
+    FileOutputStream fos = new FileOutputStream(dst);
+
+    int nRead;
+    byte[] data = new byte[65536];
+
+    while ((nRead = fis.read(data, 0, data.length)) != -1) {
+      fos.write(data, 0, nRead);
+    }
+
+    fis.close();
+    fos.close();
+
   }
 
   static public void toFile(File dst, byte[] data) throws IOException {
@@ -1394,6 +1414,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @return
    */
@@ -1403,6 +1424,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @param encoding
    * @return
@@ -1413,6 +1435,7 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+   * 
    * @param input
    * @param encoding
    * @return
@@ -1491,6 +1514,5 @@ public class FileIO {
     }
     return String.format("%s%s%s", path1, FileIO.fs, path2);
   }
-
 
 }

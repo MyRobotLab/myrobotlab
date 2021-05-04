@@ -26,10 +26,10 @@
 package org.myrobotlab.framework;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 // FIXME - should 'only' have jvm imports - no other dependencies or simple interface references
 import org.myrobotlab.codec.CodecUtils;
@@ -42,13 +42,11 @@ import org.myrobotlab.codec.CodecUtils;
  * 
  */
 public class Message implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
 
-  // FIXME - change to enumeration and make it work !
-  public final static String BLOCKING = "B";
-  public final static String RETURN = "R";
-
+  // FIXME msgId should be a String encoded value of src and an atomic increment
+  // ROS comes with a seq Id, a timestamp, and a frame Id
   /**
    * unique identifier for this message
    */
@@ -77,7 +75,7 @@ public class Message implements Serializable {
    * http://www.javacodegeeks.com
    * /2010/08/java-best-practices-vector-arraylist.html
    */
-  public Set<String> historyList;
+  protected List<String> historyList;
 
   /**
    * Meta data regarding the message - security, origin, and other information
@@ -94,11 +92,11 @@ public class Message implements Serializable {
 
   public String status;
 
-  public String msgType; // Broadcast|Blocking|Blocking Return - deprecated
+  public String encoding; // null == none |json|cli|xml|stream ...
+  
   /**
    * the method which will be invoked on the destination @see Service
    */
-
   public String method;
 
   /**
@@ -113,7 +111,7 @@ public class Message implements Serializable {
     name = new String(); // FIXME - allow NULL !
     sender = new String(); // FIXME - allow NULL !
     sendingMethod = new String();
-    historyList = new HashSet<String>();
+    historyList = new ArrayList<String>();
     method = new String();
   }
 
@@ -136,20 +134,26 @@ public class Message implements Serializable {
       return name.substring(0, pos);
     }
   }
-
+  
   final public void set(final Message other) {
     msgId = other.msgId;
-    name = other.getName();
+    name = other.name;
     sender = other.sender;
     sendingMethod = other.sendingMethod;
-    // FIXED - not valid making a copy of a message
-    // to send and copying there history list
-    // historyList = other.historyList;
-    historyList = new HashSet<String>();
+    // FIXMED AGAIN - 20210320 - it "is valid"
+    // adding history is for sending remote - if we relay
+    // we should add - and history should be checked for
+    // loop back "from" remote
+    // deep copy
+    
+    historyList = new ArrayList<String>();
+    historyList.addAll(other.historyList);
+    
     status = other.status;
-    msgType = other.msgType;
+    encoding = other.encoding;
     method = other.method;
     // you know the dangers of reference copy
+    // shallow data copy
     data = other.data;
   }
 
@@ -170,23 +174,6 @@ public class Message implements Serializable {
     Message msg = new Message();
     msg.name = name; // destination instance name
     msg.sender = sender;
-    
-    /**
-     * <pre>
-     * THIS IS THE FUTURE !!!! - but both webgui and swinggui must change and maintain a "virtual" instance of
-     * all the services (which they currently do) with a "real" Runtime.getId() and be a gateway
-     *
-    if (sender == null) {
-      log.error("return address should not be null - but it is ... {}", msg);
-    } else if (!sender.contains("@")) {
-      // add our id - this pulls in Runtime (big dependency for a Message :( ) - but 
-      // its important to lay down the law and begin to write our "complete" address on our
-      // messages ..
-      msg.sender = String.format("%s@%s", sender, Runtime.getInstance().getId());
-    } else {
-      msg.sender = sender;
-    }
-    */
     msg.data = data;
     msg.method = method;
 
@@ -233,15 +220,14 @@ public class Message implements Serializable {
   }
 
   public String getId() {
+    if (name == null) {
+      return null;
+    }
     int p = name.indexOf("@");
     if (p > 0) {
       return name.substring(p + 1);
     }
     return null;
-  }
-
-  public boolean isBlocking() {
-    return BLOCKING.equals(msgType);
   }
 
   public String getSrcId() {
@@ -252,12 +238,52 @@ public class Message implements Serializable {
     return null;
   }
 
+  public String getSrcName() {
+    if (sender == null) {
+      return null;
+    }
+    int pos = sender.indexOf("@");
+    if (pos > 0) {
+      return sender.substring(0, pos);
+    }
+    return sender;
+  }
+
   public String getFullName() {
     return name;
   }
 
-  public void setBlocking() {
-    msgType = BLOCKING;
+  public void addHop(String id) {
+    historyList.add(id);
+  }
+
+  public boolean containsHop(String id) {
+    for (String travelled : historyList) {
+      if (travelled.contains(id)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void clearHops() {
+    historyList = new ArrayList<>();
+  }
+
+  public List<String> getHops() {
+    return historyList;
+  }
+
+  public String getSrcFullName() {
+    return sender;
+  }
+
+  public long getMsgId() {
+    return msgId;
+  }
+
+  public String getMethod() {
+    return method;
   }
 
 }

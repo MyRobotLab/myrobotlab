@@ -98,7 +98,7 @@ public class ClockGui extends ServiceGui implements ActionListener {
 
     interval.setText((c.interval + ""));
 
-    if (c.isClockRunning) {
+    if (c.running) {
       startClock.setText("stop clock");
       interval.setEnabled(false);
     } else {

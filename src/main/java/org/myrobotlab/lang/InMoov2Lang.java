@@ -15,13 +15,12 @@ public class InMoov2Lang extends LangUtils {
     } else {
       sb.append(name + ".setVirtual(True)\n");
     }
-    
-    sb.append(name + ".setMute("+ toPython(inmoov2.isMute())+")\n");
-    
-    
+
+    sb.append(name + ".setMute(" + toPython(inmoov2.isMute()) + ")\n");
+
     if (inmoov2.isMute())
 
-    sb.append(name + ".setLanguage(" + inmoov2.getLanguage() + ")\n");
+      sb.append(name + ".setLanguage(" + inmoov2.getLanguage() + ")\n");
 
     sb.append("# start groups of sub services\n");
 
@@ -40,7 +39,7 @@ public class InMoov2Lang extends LangUtils {
     if (inmoov2.getLeftArm() != null) {
       sb.append(name + ".startLeftArm()\n");
     }
-    
+
     if (inmoov2.getSimulator() != null) {
       sb.append(name + ".startSimulator()\n");
     }

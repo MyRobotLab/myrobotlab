@@ -151,13 +151,13 @@ public class OpenCVData extends CvData {
   transient final Map<String, Object> sources = new TreeMap<>();
 
   protected long timestamp;
-  
+
   // set by the BlurDetector
   protected Double blurriness = null;
-  
+
   // for use with text detection / ocr filters.
   protected ArrayList<DetectedText> detectedText;
-  
+
   public OpenCVData() {
   }
 
@@ -203,8 +203,8 @@ public class OpenCVData extends CvData {
   }
 
   /**
-   * Order of fetching a display try =&gt; displayFilterName try =&gt; output try =&gt;
-   * input
+   * Order of fetching a display try =&gt; displayFilterName try =&gt; output
+   * try =&gt; input
    * 
    * @return - the buffered image
    */
@@ -417,8 +417,10 @@ public class OpenCVData extends CvData {
    * This is the typical method filters will use to store their output, it has a
    * key with their filter's name and an "output" reference.
    * 
-   * @param keyPart - the key of interest
-   * @param object - the value
+   * @param keyPart
+   *          - the key of interest
+   * @param object
+   *          - the value
    */
   public void put(String keyPart, Object object) {
     sources.put(String.format("%s.output.%s", name, keyPart), object);

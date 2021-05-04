@@ -78,15 +78,15 @@ public class OculusRift extends Service implements PointPublisher {
   public String leftEyeURL = null;
   public String rightEyeURL = null;
 
-  public String frameGrabberType = "MJpeg";
+  public String frameGrabberType = "OpenCV";
   public String cvInputSource = null;
 
-  private HmdDesc hmdDesc;
+  transient private HmdDesc hmdDesc;
 
   transient public OculusTracking headTracker = null;
 
   // for single camera support, mirror the images
-  private boolean mirrorLeftCamera = false;
+  private boolean mirrorLeftCamera = true;
 
   public static class RiftFrame {
     public SerializableImage left;
@@ -188,8 +188,7 @@ public class OculusRift extends Service implements PointPublisher {
 
       // start the left camera.
       capture();
-      
-      
+
       // TODO: handle the "end of the pipeline" as the input source.
       boolean addYolo = false;
       if (addYolo) {
@@ -333,7 +332,7 @@ public class OculusRift extends Service implements PointPublisher {
     if (mirrorLeftCamera) {
       // if we're mirroring the left camera
       // log.info("Oculus Frame Source {}",frame.getSource());
-      if ("left".equals(frame.getSource())) {
+      if ("leftAffine".equals(frame.getSource())) {
         lastRiftFrame.left = frame;
         lastRiftFrame.right = frame;
       }
@@ -496,7 +495,6 @@ public class OculusRift extends Service implements PointPublisher {
     return point;
   }
 
-
   public static void main(String s[]) {
     // LoggingFactory.init("INFO");
 
@@ -505,15 +503,15 @@ public class OculusRift extends Service implements PointPublisher {
     LoggingFactory.init("INFO");
 
     Runtime.createAndStart("gui", "SwingGui");
-    Runtime.createAndStart("python", "Python");
+    //Runtime.createAndStart("python", "Python");
     OculusRift rift = (OculusRift) Runtime.createAndStart("oculus", "OculusRift");
 
     String leftEyeURL = "http://10.0.0.2:8080/?action=stream";
     String rightEyeURL = "http://10.0.0.2:8081/?action=stream";
-    
-    rift.setLeftEyeURL(leftEyeURL);
-    rift.setRightEyeURL(rightEyeURL);
-    
+
+    //rift.setLeftEyeURL(leftEyeURL);
+    //rift.setRightEyeURL(rightEyeURL);
+
     rift.leftCameraAngle = 0;
     rift.leftCameraDy = 5;
     rift.rightCameraDy = -5;
@@ -523,6 +521,8 @@ public class OculusRift extends Service implements PointPublisher {
     rift.initContext();
 
     rift.logOrientation();
+    
+    rift.leftOpenCV.capture();
     // TODO: configuration to enable left/right camera roll tracking.
     // while (true) {
     // float roll = rift.getRoll();

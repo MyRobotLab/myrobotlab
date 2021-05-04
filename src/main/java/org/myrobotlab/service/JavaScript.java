@@ -65,7 +65,6 @@ public class JavaScript extends Service {
     return engine.get(varName);
   }
 
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

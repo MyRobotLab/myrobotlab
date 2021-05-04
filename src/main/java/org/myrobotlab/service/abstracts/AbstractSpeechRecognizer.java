@@ -80,7 +80,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    */
   @Deprecated /* use wake word */
   protected boolean lockOutAllGrammar = false;
-  
+
   /**
    * phrase to unlock commands such as "power up"
    */
@@ -128,7 +128,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
 
   public AbstractSpeechRecognizer(String n, String id) {
     super(n, id);
-    locales = getLocales();    
+    locales = getLocales();
     locale = Runtime.getInstance().getLocale();
   }
 
@@ -343,7 +343,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
           purgeTask("setAwake");
           addTaskOneShot(wakeWordIdleTimeoutSeconds * 1000, "setAwake", false);
           lastWakeWordTs = System.currentTimeMillis();
-          
+
           // setting awake
           setAwake(true, originalText);
           event.isAwake = true;
@@ -482,7 +482,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
     } else {
       setAwake(false);
       this.wakeWord = word.trim();
-    }    
+    }
     broadcastState();
   }
 
@@ -508,11 +508,12 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   @Deprecated
   public void setAutoListen(Boolean value) {
     log.warn("Set Auto listen deprecated, use startListening() or stopListening() instead.");
-    if (value) 
+    if (value)
       startListening();
-    else 
+    else
       stopListening();
   }
+
   /**
    * for webkit - startRecognizer consists of setting a property and
    * broadcasting self to the webgui

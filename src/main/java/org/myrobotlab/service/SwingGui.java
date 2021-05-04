@@ -73,6 +73,7 @@ import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.swing.ServiceGui;
 import org.myrobotlab.swing.SwingGuiGui;
@@ -169,7 +170,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   transient private JMenu importMenu;
   transient private JMenu refresh;
   private String guiId;
-  private boolean firstHeadlessError =  true;
+  private boolean firstHeadlessError = true;
 
   static public void attachJavaConsole() {
     JFrame j = new JFrame("Java Console");
@@ -268,7 +269,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // subscribe("runtime", "registered", getName(), "addTab");
     subscribeToRuntime("registered");
   }
-  
+
   public void onRegistered(Registration registration) {
     addTab(registration.service);
   }
@@ -385,7 +386,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    */
   synchronized public void addTab(final ServiceInterface sw) {
 
-    if (Runtime.isHeadless() && firstHeadlessError ) {
+    if (Runtime.isHeadless() && firstHeadlessError) {
       log.warn("{} SwingGui is in headless environment", getName());
       firstHeadlessError = false;
       return;
@@ -400,13 +401,14 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run() {
-        
+
         if (isHeadless()) {
           log.info("headless - no swing gui");
           return;
         }
 
-    	// FIXME - this will be an issue of name collision in distributed mrl !!!
+        // FIXME - this will be an issue of name collision in distributed mrl
+        // !!!
         String name = sw.getFullName();// sw.getName();
 
         // change tab color based on name
@@ -711,7 +713,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     if (sgs == null) {
       log.error("attempting to update derived ServiceGui with - callback " + key + " not available in map " + getName());
     } else {
-      
+
       for (int i = 0; i < sgs.size(); ++i) {
         ServiceGui sg = sgs.get(i);
         invokeOn(false, sg, m.method, m.data);
@@ -720,7 +722,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
     return false;
   }
-  
+
   public void onReleased(String serviceName) {
     removeTab(serviceName);
   }
@@ -937,12 +939,10 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       Runtime.start("gui", "SwingGui");
       // Runtime.start("python", "Python");
       /*
-      Runtime.start("clock01", "Clock");
-      Runtime.start("clock02", "Clock");
-      Runtime.start("clock03", "Clock");
-      Runtime.start("clock04", "Clock");
-      Runtime.start("clock05", "Clock");
-      */
+       * Runtime.start("clock01", "Clock"); Runtime.start("clock02", "Clock");
+       * Runtime.start("clock03", "Clock"); Runtime.start("clock04", "Clock");
+       * Runtime.start("clock05", "Clock");
+       */
 
       boolean done = true;
       if (done) {
@@ -973,7 +973,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
     // TODO understand why we need a sleep(1000); - cuz swing is lame :(
     this.tabs.getTabs().setSelectedIndex(tabs.getTabs().indexOfTab(title));
   }
-
 
   public Component getDisplay() {
     return (Component) tabs.getTabs();
@@ -1028,15 +1027,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
   @Override
   public void connect(String uri) throws Exception {
-    // easy single client support
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("gateway", getName());
-    attributes.put("c-type", getSimpleName());
-    attributes.put("id", Runtime.getInstance().getId() + "-swing");
     String uuid = java.util.UUID.randomUUID().toString();
-    attributes.put("uuid", uuid);
-    Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.updateRoute(guiId, uuid);
+    String id = Runtime.getInstance().getId() + "-swing";
+    Connection connection = new Connection(uuid, id, getName());
+    connection.put("c-type", getSimpleName());
+
+    Runtime.getInstance().addConnection(uuid, id, connection);
   }
 
   @Override
@@ -1045,9 +1041,8 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   @Override
-  public Map<String, Map<String, Object>> getClients() {
-    // TODO Auto-generated method stub
-    return null;
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
   }
 
   @Override
@@ -1057,20 +1052,14 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   }
 
   @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
-    log.info("sendBlockingRemote");
-    return null;
-  }
-
-  @Override
   public boolean isLocal(Message msg) {
     log.info("isLocal");
     return false;
   }
 
   @Override
-  public Message getDefaultMsg(String connId) {
-    return Runtime.getInstance().getDefaultMsg(connId);
+  public Message getDescribeMsg(String connId) {
+    return Runtime.getInstance().getDescribeMsg(connId);
   }
 
 }

@@ -299,7 +299,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    */
   public void setKey(String keyName, String keyValue) {
     Security security = Security.getInstance();
-    security.addSecret(keyName, keyValue);
+    security.setKey(keyName, keyValue);
     broadcastState();
   }
 

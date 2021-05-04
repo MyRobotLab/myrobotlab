@@ -11,17 +11,43 @@
     mvn -DskipTests -Dbuild.number=71 help:system
     
     # fast build
-    mvn -DskipTests -Dbuild.number=180 compile package -o
+    mvn -DskipTests -Dbuild.number=180 compile package -o 
+
+    # compile only sync with raspi
+    rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
+    rsync -zarvh src pi@192.168.0.104:/opt/mrl/myrobotlab
+    # for jar in root
+    rsync -zarvh target/myrobotlab.jar pi@192.168.0.104:/opt/mrl/myrobotlab
     
     # javadoc check
     mvn -q javadoc:javadoc -o
     
     # specific test
     mvn test -Dtest=OpenCVTest#testGetClassifications    
-    
+
+    mvn install:install-file  -Dfile=target/myrobotlab.jar \
+                          -DgroupId=myrobotlab.org \
+                          -DartifactId=myrobotlab \
+                          -Dversion=1.1.401 \
+                          -Dpackaging=jar \
+                          -DlocalRepositoryPath=test-repo
+
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+
+    # single dep
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
+    mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+
+    # doclets
+    javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
   
+    # how to mount sshfs from a raspi and maintain a single build
+    usermod -a -G i2c xxxxx
+    usermod -a -G gpio xxxxx
+    sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
+    java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
+
    -->  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
@@ -61,35 +87,23 @@
           <name>central</name>
           <url>https://repo.maven.apache.org/maven2</url>
         </repository>
-        <!-- the big kahuna  -->
-        <repository>
-          <id>bintray</id>
-          <name>bintray</name>
-          <url>https://jcenter.bintray.com</url>
-        </repository>
-        <!-- more big kahuna  -->
-        <repository>
-          <id>bintray2</id>
-          <name>bintray2</name>
-          <url>https://dl.bintray.com</url>
-        </repository>
         <!-- all other mrl deps  -->
         <repository>
           <id>myrobotlab</id>
           <name>myrobotlab</name>
           <url>http://repo.myrobotlab.org/artifactory/myrobotlab</url>
         </repository>
+        <!-- for sarxos webcam  -->
+        <repository>
+          <id>sarxos</id>
+          <name>sarxos</name>
+          <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
         <!-- null  -->
         <repository>
           <id>eclipse-release</id>
           <name>eclipse-release</name>
           <url>https://repo.eclipse.org/content/groups/releases</url>
-        </repository>
-        <!-- jmonkey simulator  -->
-        <repository>
-          <id>jmonkey</id>
-          <name>jmonkey</name>
-          <url>https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine</url>
         </repository>
         <!-- sphinx  -->
         <repository>
@@ -114,6 +128,12 @@
           <id>marytts</id>
           <name>marytts</name>
           <url>http://mary.dfki.de/repo</url>
+        </repository>
+        <!-- Public online Restlet repository  -->
+        <repository>
+          <id>maven-restlet</id>
+          <name>maven-restlet</name>
+          <url>https://maven.restlet.talend.com</url>
         </repository>
      </repositories>
   
@@ -227,37 +247,37 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>javacpp</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas</artifactId>
-    <version>0.3.9-1.5.3</version>
+    <version>0.3.10-1.5.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -270,7 +290,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta6</version>
+    <version>1.0.0-beta7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -315,7 +335,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.10-java7</version>
+    <version>1.4.16</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
@@ -328,6 +348,15 @@
     <scope>provided</scope>
   </dependency>
 <!-- Elasticsearch end -->
+
+<!-- Git begin -->
+  <dependency>
+    <groupId>org.eclipse.jgit</groupId>
+    <artifactId>org.eclipse.jgit</artifactId>
+    <version>5.4.0.201906121030-r</version>
+    <scope>provided</scope>
+  </dependency>
+<!-- Git end -->
 
 <!-- GoogleCloud begin -->
   <dependency>
@@ -366,13 +395,7 @@
 <!-- ImapEmailConnector end -->
 
 <!-- InMoov begin -->
-  <dependency>
-    <groupId>inmoov.fr</groupId>
-    <artifactId>inmoov</artifactId>
-    <version>1.1.22</version>
-    <scope>provided</scope>
-    <type>zip</type>
-  </dependency>
+<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
   <dependency>
     <groupId>inmoov.fr</groupId>
     <artifactId>jm3-model</artifactId>
@@ -394,12 +417,10 @@
     <scope>provided</scope>
     <type>zip</type>
   </dependency>
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- IndianTts end -->
 
 <!-- IntegratedMovement begin -->
-<!-- Duplicate entry for inmoov.fr-inmoov-1.1.22 skipping -->
+<!-- skipping inmoov.fr inmoov inmoov.fr-inmoov-null null version/latest -->
 <!-- Duplicate entry for inmoov.fr-jm3-model-1.0.0 skipping -->
 <!-- IntegratedMovement end -->
 
@@ -541,8 +562,6 @@
 
 <!-- LocalSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.microsoft</groupId>
     <artifactId>tts</artifactId>
@@ -554,8 +573,6 @@
 
 <!-- MarySpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>de.dfki.mary</groupId>
     <artifactId>marytts</artifactId>
@@ -875,8 +892,6 @@
 
 <!-- MimicSpeech begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>mycroftai.mimic</groupId>
     <artifactId>mimic_win64</artifactId>
@@ -895,6 +910,21 @@
   </dependency>
 <!-- Mqtt end -->
 
+<!-- MqttBroker begin -->
+  <dependency>
+    <groupId>io.moquette</groupId>
+    <artifactId>moquette-broker</artifactId>
+    <version>0.12.1</version>
+    <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+      </exclusions>
+  </dependency>
+<!-- MqttBroker end -->
+
 <!-- MyoThalmic begin -->
   <dependency>
     <groupId>com.github.nicholasastuart</groupId>
@@ -906,27 +936,27 @@
 
 <!-- OculusRift begin -->
   <dependency>
-    <groupId>slick-util</groupId>
-    <artifactId>slick-util</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
     <groupId>org.saintandreas</groupId>
     <artifactId>jovr</artifactId>
     <version>1.8.0.0</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
-    <groupId>org.saintandreas</groupId>
-    <artifactId>glamour-lwjgl</artifactId>
-    <version>1.0.8</version>
+    <groupId>slick-util</groupId>
+    <artifactId>slick-util</artifactId>
+    <version>1.0.0</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.jscience</groupId>
+    <artifactId>jscience</artifactId>
+    <version>4.3.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.saintandreas</groupId>
-    <artifactId>math</artifactId>
-    <version>1.0.4</version>
+    <artifactId>xres</artifactId>
+    <version>1.0.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -954,20 +984,14 @@
 <!-- OpenCV begin -->
   <dependency>
     <groupId>org.bytedeco</groupId>
-    <artifactId>javacv</artifactId>
-    <version>1.5.3</version>
-    <scope>provided</scope>
-  </dependency>
-  <dependency>
-    <groupId>org.bytedeco</groupId>
     <artifactId>javacv-platform</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>com.github.sarxos</groupId>
-    <artifactId>webcam-capture</artifactId>
-    <version>0.3.10</version>
+    <artifactId>webcam-capture-driver-v4l4j</artifactId>
+    <version>0.3.13-SNAPSHOT</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for org.apache.commons-commons-lang3-3.3.2 skipping -->
@@ -1083,8 +1107,6 @@
 
 <!-- Polly begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
@@ -1094,7 +1116,7 @@
   <dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
-    <version>2.10.1</version>
+    <version>2.10.5.1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1124,19 +1146,19 @@
   <dependency>
     <groupId>commons-io</groupId>
     <artifactId>commons-io</artifactId>
-    <version>2.5</version>
+    <version>2.7</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1207,12 +1229,7 @@
   <dependency>
     <groupId>info.picocli</groupId>
     <artifactId>picocli</artifactId>
-    <version>4.0.0-beta-2</version>
-  </dependency>
-  <dependency>
-    <groupId>org.eclipse.jgit</groupId>
-    <artifactId>org.eclipse.jgit</artifactId>
-    <version>5.4.0.201906121030-r</version>
+    <version>4.4.0</version>
   </dependency>
   <dependency>
     <groupId>org.slf4j</groupId>
@@ -1228,18 +1245,24 @@
 
 <!-- Serial begin -->
   <dependency>
-    <groupId>org.scream3r</groupId>
+    <groupId>io.github.java-native</groupId>
     <artifactId>jssc</artifactId>
-    <version>2.8.0-1</version>
+    <version>2.9.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- Serial end -->
 
 <!-- Solr begin -->
   <dependency>
+    <groupId>org.apache.lucene</groupId>
+    <artifactId>lucene-core</artifactId>
+    <version>8.6.3</version>
+    <scope>provided</scope>
+  </dependency>
+  <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1251,7 +1274,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1263,7 +1286,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.4.1</version>
+    <version>8.6.3</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
@@ -1320,13 +1343,13 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract</artifactId>
-    <version>4.1.1-1.5.3</version>
+    <version>4.1.1-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>tesseract-platform</artifactId>
-    <version>4.1.1-1.5.3</version>
+    <version>4.1.1-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1342,7 +1365,7 @@
   <dependency>
     <groupId>junit</groupId>
     <artifactId>junit</artifactId>
-    <version>4.12</version>
+    <version>4.13.1</version>
     <scope>provided</scope>
   </dependency>
 <!-- Test end -->
@@ -1367,8 +1390,6 @@
 
 <!-- VoiceRss begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
   <dependency>
     <groupId>com.voicerss</groupId>
     <artifactId>tts</artifactId>
@@ -1378,6 +1399,11 @@
 <!-- VoiceRss end -->
 
 <!-- WebGui begin -->
+  <dependency>
+    <groupId>org.jmdns</groupId>
+    <artifactId>jmdns</artifactId>
+    <version>3.5.5</version>
+  </dependency>
   <dependency>
     <groupId>org.atmosphere</groupId>
     <artifactId>nettosphere</artifactId>
@@ -1399,10 +1425,12 @@
   </dependency>
 <!-- WebSocketConnector end -->
 
+<!-- Webcam begin -->
+<!-- Duplicate entry for com.github.sarxos-webcam-capture-driver-v4l4j-0.3.13-SNAPSHOT skipping -->
+<!-- Webcam end -->
+
 <!-- WebkitSpeechSynthesis begin -->
 <!-- Duplicate entry for org.myrobotlab.audio-voice-effects-1.0 skipping -->
-<!-- Duplicate entry for javazoom-jlayer-1.0.1 skipping -->
-<!-- Duplicate entry for com.googlecode.soundlibs-mp3spi-1.9.5.4 skipping -->
 <!-- WebkitSpeechSynthesis end -->
 
 <!-- Wii begin -->
@@ -1440,7 +1468,7 @@
       </exclusions>
   </dependency>
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-core-2.10.1 skipping -->
-<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.10.1 skipping -->
+<!-- Duplicate entry for com.fasterxml.jackson.core-jackson-databind-2.10.5.1 skipping -->
 <!-- Duplicate entry for com.fasterxml.jackson.core-jackson-annotations-2.10.1 skipping -->
 <!-- WikiDataFetcher end -->
 
@@ -1587,6 +1615,7 @@
                         </goals>
                         <configuration>
                             <finalName>myrobotlab</finalName>
+                            <!-- finalName>myrobotlab-${git.branch}-1.1.${build.number}</finalName -->
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>myrobotlab-full</shadedClassifierName>
                             <minimizeJar>false</minimizeJar>
@@ -1599,7 +1628,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
-                                          <Main-Class>org.myrobotlab.service.Agent</Main-Class>
+                                          <Main-Class>org.myrobotlab.service.Runtime</Main-Class>
                                           <Major-Version>1.1.${build.number}</Major-Version>
                                           <Implementation-Version>1.1.${build.number}</Implementation-Version>                               
               
@@ -1686,6 +1715,7 @@
           <version>3.0.1</version>
           <executions>
               <execution>
+                  <phase>initialize</phase>
                   <id>get-the-git-infos</id>
                   <goals>
                       <goal>revision</goal>
@@ -1698,7 +1728,7 @@
               <verbose>false</verbose>
               <generateGitPropertiesFile>true</generateGitPropertiesFile>
               <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-              <format>json</format>
+              <!-- format>json</format -->
               <gitDescribe>
                   <skip>false</skip>
                   <always>false</always>

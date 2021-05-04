@@ -44,12 +44,13 @@ public class TcpSerialHub implements Runnable {
         }
         log.info("closed: " + socket);
       }
-      
+
       clients.remove(this);
     }
   }
 
   public final static Logger log = LoggerFactory.getLogger(TcpSerialHub.class);
+
   public static void main(String[] args) {
     try {
       TcpSerialHub hub = new TcpSerialHub();
@@ -58,6 +59,7 @@ public class TcpSerialHub implements Runnable {
       log.error("main threw", e);
     }
   }
+
   ServerSocket listener;
   boolean listening;
   int nThreads = 2; // 20
@@ -67,7 +69,7 @@ public class TcpSerialHub implements Runnable {
   transient Serial serial;
 
   transient private Thread serverThread;
-  
+
   Set<TcpThread> clients = new HashSet<TcpThread>();
 
   // Map<String, Socket> socketsx = new HashMap<>();
@@ -83,7 +85,7 @@ public class TcpSerialHub implements Runnable {
 
   public void attach(Serial serial) {
     this.serial = serial;
-    //serial.addByteListener(this);
+    // serial.addByteListener(this);
   }
 
   synchronized public void run() {
@@ -125,16 +127,16 @@ public class TcpSerialHub implements Runnable {
    * @throws IOException
    */
   synchronized public void start(Integer inPort, Integer inThreads) throws IOException {
-    
+
     if (inThreads != null) {
       nThreads = inThreads;
     }
-    
+
     if (inPort != null && port != inPort) {
       stop();
       port = inPort;
     }
-    
+
     if (serverThread == null) {
       serverThread = new Thread(this, "tcpserialhub-");
       serverThread.start();
@@ -155,6 +157,5 @@ public class TcpSerialHub implements Runnable {
       out.write(newByte);
     }
   }
-
 
 }

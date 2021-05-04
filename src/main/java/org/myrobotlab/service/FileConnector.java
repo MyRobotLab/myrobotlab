@@ -101,6 +101,4 @@ public class FileConnector extends AbstractConnector implements DocumentPublishe
     this.directory = directory;
   }
 
-
-
 }

@@ -20,22 +20,13 @@ public class OculusRiftMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("The Oculus Rift Head Tracking Service");
     addCategory("video", "control", "sensors", "telerobotics");
-    // make sure the open cv instance share each others streamer..
-    // sharePeer("leftOpenCV.streamer", "streamer", "VideoStreamer",
-    // "shared left streamer");
-    // sharePeer("rightOpenCV.streamer", "streamer", "VideoStreamer",
-    // "shared right streamer");
-
     addPeer("leftOpenCV", "OpenCV", "Left Eye Camera");
-    // sharePeer("rightOpenCV", "leftOpenCV", "OpenCV", "Right Eye sharing
-    // left eye camera");
     addPeer("rightOpenCV", "OpenCV", "Right Eye Camera");
-    // compile(group: 'org.saintandreas', name: 'jovr', version: '0.7.0.0')
-
-    addDependency("slick-util", "slick-util", "1.0.0");
+    // dependencies.  we also need lwjgl3 added here. currently it's pulled in from jme3-lwjgl3
     addDependency("org.saintandreas", "jovr", "1.8.0.0");
-    addDependency("org.saintandreas", "glamour-lwjgl", "1.0.8");
-    addDependency("org.saintandreas", "math", "1.0.4");
+    addDependency("slick-util", "slick-util", "1.0.0");
+    addDependency("org.jscience", "jscience", "4.3.1");
+    addDependency("org.saintandreas", "xres", "1.0.3");
     addDependency("org.saintandreas", "oria-resources", "1.0.4");
     exclude("org.slf4j", "slf4j-api");
     exclude("org.lwjgl.lwjgl", "lwjgl");

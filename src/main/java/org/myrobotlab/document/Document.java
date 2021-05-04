@@ -56,7 +56,7 @@ public class Document {
   /**
    * helper for expected single value fields
    * 
-   * @param fieldName
+   * @param fieldName - incoming filename
    * @return
    */
   public Object getValue(String fieldName) {

@@ -352,7 +352,6 @@ public class MobilePlatform extends Service {
     return headingCurrent;
   }
 
-
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 

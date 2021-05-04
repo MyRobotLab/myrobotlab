@@ -39,7 +39,7 @@ public class OpenCVTest extends AbstractTest {
   // static final String TEST_REMOTE_FILE_JPG = TEST_LOCAL_FACE_FILE_JPEG;
   // static final String TEST_REMOTE_FILE_JPG = "https://en.wikipedia.org/wiki/Isaac_Asimov#/media/File:Isaac.Asimov01.jpg";
   static final String TEST_REMOTE_FILE_JPG = "https://upload.wikimedia.org/wikipedia/commons/c/c0/Douglas_adams_portrait_cropped.jpg";
-  private static final int MAX_TIMEOUT = 999999999;//120000;
+  private static final int MAX_TIMEOUT = 1000 * 300; // 5 minutes
 
   // TODO - getClassifictions publishClassifications
   // TODO - getFaces publishFaces

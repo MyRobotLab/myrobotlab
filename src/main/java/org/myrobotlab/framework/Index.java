@@ -195,8 +195,10 @@ public class Index<T> {
    * find a node key, by browsing the whole tree.. ( wanted to use
    * crawlForDataStartingWith but seem nok )
    * 
-   * @param parent - parent node key
-   * @param key - this key
+   * @param parent
+   *          - parent node key
+   * @param key
+   *          - this key
    * @return - result node found
    */
   public String findNode(String parent, String key) {
@@ -254,7 +256,9 @@ public class Index<T> {
 
   /**
    * check if selected node have leafs and return them as key list
-   * @param node - node to get leafs from
+   * 
+   * @param node
+   *          - node to get leafs from
    * @return all leaves
    */
   public ArrayList<String> getLeafs(String node) {

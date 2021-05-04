@@ -19,6 +19,7 @@ import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
+import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
@@ -44,7 +45,7 @@ import com.google.gson.internal.LinkedTreeMap;
 public class CodecUtils {
 
   public final static Logger log = LoggerFactory.getLogger(CodecUtils.class);
-  
+
   public static class ApiDescription {
     String key;
     String path; // {scheme}://{host}:{port}/api/messages
@@ -58,7 +59,7 @@ public class CodecUtils {
       this.description = description;
     }
   }
-  
+
   public final static String PARAMETER_API = "/api/";
   public final static String PREFIX_API = "api";
 
@@ -114,8 +115,8 @@ public class CodecUtils {
   public final static <T extends Object> T fromJson(String json, Type type) {
     return gson.fromJson(json, type);
   }
-  
-  public final static LinkedTreeMap<String,Object> toTree(String json) {
+
+  public final static LinkedTreeMap<String, Object> toTree(String json) {
     return gson.fromJson(json, LinkedTreeMap.class);
   }
 
@@ -147,12 +148,28 @@ public class CodecUtils {
     os.flush();
     return byteStream.toByteArray();
   }
-  
+
   static public final String shortName(String name) {
     if (name.contains("@")) {
-      return name.substring(0,name.indexOf("@"));
+      return name.substring(0, name.indexOf("@"));
     } else {
       return name;
+    }
+  }
+  
+  /**
+   * Gets the instance id from a service name
+   * @param name
+   * @return
+   */
+  static public final String getId(String name) {
+    if (name == null){
+      return null;
+    }
+    if (name.contains("@")) {
+      return name.substring(name.lastIndexOf("@")+1);
+    } else {
+      return null;
     }
   }
 
@@ -245,7 +262,7 @@ public class CodecUtils {
   public static boolean isWrapper(String className) {
     return WRAPPER_TYPES_CANONICAL.contains(className);
   }
-  
+
   static public String toCamelCase(String s) {
     String[] parts = s.split("_");
     String camelCaseString = "";
@@ -363,10 +380,6 @@ public class CodecUtils {
     return ret;
   }
 
-  static public Message cliToMsg(String from, String to, String data) {
-    return cliToMsg(null, from, to, data);
-  }
-
   /**
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
@@ -413,14 +426,11 @@ public class CodecUtils {
    *          - target service
    * @param cmd
    *          - cli encoded msg
-   * @return
+   * @return 
+   *          - a Message derived from cli
    */
   static public Message cliToMsg(String contextPath, String from, String to, String cmd) {
     Message msg = Message.createMessage(from, to, "ls", null);
-
-    // because we always want a "Blocking/Return" from the cmd line - without a
-    // subscription
-    msg.setBlocking();
 
     /**
      * <pre>
@@ -501,8 +511,10 @@ public class CodecUtils {
       for (int i = 1; i < spaces.length; ++i) {
         // webgui will never use this section of code
         // currently the codepath is only excercised by InProcessCli
-        // all of this methods will be "optimized" single commands to runtime (i think)
-        // so we are going to error on the side of String parameters - other data types will have problems
+        // all of this methods will be "optimized" single commands to runtime (i
+        // think)
+        // so we are going to error on the side of String parameters - other
+        // data types will have problems
         payload[i - 1] = "\"" + spaces[i] + "\"";
       }
       msg.data = payload;
@@ -510,7 +522,7 @@ public class CodecUtils {
       return msg;
     }
   }
-  
+
   static public List<ApiDescription> getApis() {
     List<ApiDescription> ret = new ArrayList<>();
     ret.add(new ApiDescription("message", "{scheme}://{host}:{port}/api/messages", "ws://localhost:8888/api/messages",
@@ -519,7 +531,7 @@ public class CodecUtils {
         "An synchronous api useful for simple REST responses"));
     return ret;
   }
-  
+
   public static void main(String[] args) {
     LoggingFactory.init(Level.INFO);
 
@@ -531,10 +543,69 @@ public class CodecUtils {
       json = CodecUtils.fromJson("\"a/test\"", String.class);
       log.info("json {}", json);
       CodecUtils.fromJson("a/test", String.class);
-      
-    } catch(Exception e) {
+
+    } catch (Exception e) {
       log.error("main threw", e);
     }
+  }
+
+  /**
+   * Creates a properly double encoded Json msg string.
+   * Why double encode ? - because initial decode should decode router and header information.
+   * The first decode will leave the payload a array of json strings.  The header will send it to a another process
+   * or it will go to the MethodCache of some service.  The MethodCache will decode a 2nd time based on a method
+   * signature key match (key based on parameter types).
+   * 
+   * @param fullName
+   * @param dest
+   * @param Src
+   * @param params
+   */
+  final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
+    Message msg = Message.createMessage(sender, name, method, null);
+    msg.sendingMethod = sendingMethod;
+    Object[] d = null;
+    if (params != null) {
+      d = new Object[params.length];
+      for (int i = 0; i < params.length; ++i) {
+        d[i] = CodecUtils.toJson(params[i]);
+      }
+      msg.setData(d);
+    }
+    return CodecUtils.toJson(msg);
+  }
+  
+  final public static String toJsonMsg(Message inMsg) {
+    if ("json".equals(inMsg.encoding)) {
+      // msg already has json encoded data parameters
+      // just encode the msg envelope
+      return CodecUtils.toJson(inMsg);
+    }
+    Message msg = new Message(inMsg);
+    msg.encoding = "json";
+    Object[] params = inMsg.getData();
+    Object[] d = null;
+    if (params != null) {
+      d = new Object[params.length];
+      for (int i = 0; i < params.length; ++i) {
+        d[i] = CodecUtils.toJson(params[i]);
+      }
+      msg.setData(d);
+    }
+    return CodecUtils.toJson(msg);
+  }
+
+  @Deprecated
+  public static Message toJsonParameters(Message msg) {
+    Object[] data = msg.getData();
+    if (data != null) {
+      Object[] params = new Object[data.length];
+      for (int i = 0; i < params.length; ++i) {
+        params[i] = toJson(data[i]);
+      }
+      msg.setData(params);
+    }    
+    return msg;
   }
 
 }

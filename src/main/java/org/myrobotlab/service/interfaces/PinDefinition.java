@@ -3,11 +3,11 @@ package org.myrobotlab.service.interfaces;
 import java.io.Serializable;
 
 public class PinDefinition extends SensorDefinition implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
-  
+
   String pin;
-  
+
   Integer address;
 
   /**
@@ -59,7 +59,7 @@ public class PinDefinition extends SensorDefinition implements Serializable {
   public Integer getValue() {
     return value.intValue();
   }
-  
+
   public void setValue(Double value) {
     this.value = value;
   }

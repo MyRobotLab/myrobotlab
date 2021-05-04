@@ -1,89 +1,85 @@
 package org.myrobotlab.net;
 
-import java.io.Serializable;
-import java.net.URI;
 import java.util.HashMap;
-
-import org.myrobotlab.framework.Platform;
+import java.util.Map;
 
 /**
- * @author GroG
- * 
- *         class to store connection information for Gateways this will be the
- *         data component of a MRL_URI_KEY since there are so many connection
- *         types and connection protocols on top of those types we will make a
- *         data class which has members which are common to all - then a HashMap
- *         of properties for specific elements
- * 
- *         future data might include session info, session time outs, heartbeat
- *         details, etc
- * 
- *         this will contain all serializable contextual data regarding the
- *         connection without containing the connection itself
- *
+ * Class to describe all the necessary connection details of an mrl instance
  */
-public class Connection implements Serializable {
+public class Connection {
 
-  private static final long serialVersionUID = 1L;
-
-  long lastStateChange = 0;
-
-  // states
-  public final static String DISCOVERED = "DISCOVERED";
-  public final static String CONNECTED = "CONNECTED";
-  public final static String UNKNOWN = "UNKNOWN";
-  public final static String DISCONNECTED = "DISCONNECTED";
-  public final static String CONNECTING = "CONNECTING";
-
-  // types - connection / connection-less
+  
+  public Connection(String uuid, String id, String gateway) {
+    put("uuid", uuid);
+    put("id", id);
+    put("gateway", gateway);
+  }
+  
+  /**
+   * serializable references
+   */
+  protected Map<String, Object> serializable = new HashMap<>();
 
   /**
-   * proto key - mrlkey is mrl://gatewayName/protocolKey
-   * 
+   * all references to connection information
    */
-  private String service;
-  public URI protocolKey;
-  public String prefix;
-  public Platform platform;
+  transient protected Map<String, Object> attributes = new HashMap<>();
 
-  // String mode; // adaptive ?
-  public String state = UNKNOWN; // adaptive ?
-
-  // statistics and info
-  public int rx = 0;
-  public int tx = 0;
-
-  public String rxSender;
-  public String rxSendingMethod;
-  public String rxName;
-  public String rxMethod;
-
-  public String txSender;
-  public String txSendingMethod;
-  public String txName;
-  public String txMethod;
-
-  public boolean authenticated = false;
-
-  public HashMap<String, String> addInfo = new HashMap<String, String>();
-
-  public Connection() {
+  public boolean containsKey(String key) {
+    return attributes.containsKey(key);
   }
 
-  public Connection(String gatewayName, URI protocolKey) {
-    this.service = gatewayName;
-    this.protocolKey = protocolKey;
-    /*
-     * try { this.protocolKey = new URI(String.format("mrl://%s/%s",
-     * gatewayName, uri)); } catch (URISyntaxException e) {
-     * Logging.logException(e); }
-     */
+  public Object get(String key) {
+    return attributes.get(key);
   }
 
-  @Override
+  public Object put(String key, Object o) {
+    serializable.put(key, o);
+    return attributes.put(key, o);
+  }
+
+  /**
+   * put in objects which should be transient - e.g. sockets all config and
+   * other attributes should use put(key, object)
+   * 
+   * @param key
+   * @param o
+   * @return
+   */
+  public Object putTransient(String key, Object o) {
+    return attributes.put(key, o);
+  }
+
+  public Object remove(String key) {
+    serializable.remove(key);
+    return attributes.remove(key);
+  }
+
+  public void putAll(Connection conn) {
+    this.serializable.putAll(conn.serializable);
+    this.attributes.putAll(conn.attributes);
+  }
+
+  public String getId() {
+    return (String)serializable.get("id");
+  }
+
+  public String getUuid() {
+    return (String)serializable.get("uuid");
+  }
+  
   public String toString() {
-    return String.format("%s %s rx %d %s.%s --> %s.%s tx %d %s.%s --> %s.%s", protocolKey, state, rx, rxSender, rxSendingMethod, rxName, rxMethod, tx, txSender, txSendingMethod,
-        txName, txMethod);
+    StringBuilder sb = new StringBuilder();
+    for (String s : serializable.keySet()) {
+      sb.append("\n");
+      sb.append(String.format("%s=%s", s, (String)serializable.get(s)));
+    }
+    sb.append("\n");
+    return sb.toString();
+  }
+
+  public String getGateway() {
+    return (String)serializable.get("gateway");
   }
 
 }

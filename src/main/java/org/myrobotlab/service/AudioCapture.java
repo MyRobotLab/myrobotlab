@@ -297,5 +297,4 @@ public class AudioCapture extends Service {
     broadcastState();
   }
 
-
 }

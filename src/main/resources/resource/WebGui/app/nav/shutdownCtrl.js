@@ -1,20 +1,20 @@
-angular.module('mrlapp.nav')
-        .controller('shutdownCtrl', ['$scope', '$uibModalInstance', '$log', 'type', 'mrl', function ($scope, $uibModalInstance, $log, type, mrl) {
-                $scope.close = $uibModalInstance.close;
-                $scope.type = type;
-        
-                $scope.shutdown = function () {
-                    switch (type) {
-                        case 'shutdown':
-                            $log.info('attempt to SHUTDOWN');
-                            mrl.sendTo(mrl.getRuntime().name, 'shutdown');
-                            break;
-                        case 'restart':
-                            $log.info('attempt to RESTART');
-                            mrl.sendTo(mrl.getRuntime().name, 'restart');
-                            break;
-                        default:
-                            break;
-                    }
-                };
-            }]);
+angular.module('mrlapp.nav').controller('shutdownCtrl', ['$scope', '$uibModalInstance', 'type', 'mrl', function($scope, $uibModalInstance, type, mrl) {
+    $scope.type = type
+    $scope.shutdown = function() {
+        switch (type) {
+        case 'shutdown':
+            console.info('attempt to SHUTDOWN')
+            mrl.sendTo(mrl.getRuntime().name, 'shutdown')
+            $uibModalInstance.close()
+            break
+        case 'restart':
+            console.info('attempt to RESTART')
+            mrl.sendTo(mrl.getRuntime().name, 'restart')
+            $uibModalInstance.close()
+            break
+        default:
+            break
+        }
+    }
+}
+])

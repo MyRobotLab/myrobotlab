@@ -20,8 +20,8 @@ public class OpenCVMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("OpenCV (computer vision) service wrapping many of the functions and filters of OpenCV");
     addCategory("video", "vision", "sensors");
-    String javaCvVersion = "1.5.3";
-    addDependency("org.bytedeco", "javacv", javaCvVersion);
+    String javaCvVersion = "1.5.5";
+    // addDependency("org.bytedeco", "javacv", javaCvVersion);
     addDependency("org.bytedeco", "javacv-platform", javaCvVersion);
     // FIXME - finish with cmdLine flag -gpu vs cudaEnabled for DL4J ?
     boolean gpu = false;
@@ -49,7 +49,9 @@ public class OpenCVMeta extends MetaData {
       // </dependency>
     }
     // sarxos webcam
-    addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    // addDependency("com.github.sarxos", "webcam-capture", "0.3.10");
+    addDependency("com.github.sarxos", "webcam-capture-driver-v4l4j", "0.3.13-SNAPSHOT");
+
     // FaceRecognizer no worky if missing it
     addDependency("org.apache.commons", "commons-lang3", "3.3.2");
     // for the mjpeg streamer frame grabber

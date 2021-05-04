@@ -23,47 +23,51 @@
  */
 package org.myrobotlab.fsm.api;
 
-
 /**
- * Abstraction for a FSM transition.
- * <strong>Transitions are unique according to source state and triggering event type.</strong>
+ * Abstraction for a FSM transition. <strong>Transitions are unique according to
+ * source state and triggering event type.</strong>
  *
  * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
  */
-public interface Transition  {
+public interface Transition {
 
-    /**
-     * Return transition name.
-     * @return transition name
-     */
-    String getName();
+  /**
+   * Return transition name.
+   * 
+   * @return transition name
+   */
+  String getName();
 
-    /**
-     * Return transition source state.
-     * @return transition source state
-     */
-    State getSourceState();
+  /**
+   * Return transition source state.
+   * 
+   * @return transition source state
+   */
+  State getSourceState();
 
-    /**
-     * Return transition target state.
-     * @return transition target state
-     */
-    State getTargetState();
+  /**
+   * Return transition target state.
+   * 
+   * @return transition target state
+   */
+  State getTargetState();
 
-    /**
-     * Return fired event type upon which the transition should be made.
-     * @return Event type class
-     */
-  //   Class getEventType();
+  /**
+   * Return fired event type upon which the transition should be made.
+   * 
+   * @return Event type class
+   */
+  // Class getEventType();
 
-    /**
-     * Return event handler to execute when an event is fired.
-     * @return transition event handler
-     */
-    EventHandler getEventHandler();
-    
-    StateHandler getNewStateHandler();
+  /**
+   * Return event handler to execute when an event is fired.
+   * 
+   * @return transition event handler
+   */
+  EventHandler getEventHandler();
 
-    String getId();
+  StateHandler getNewStateHandler();
+
+  String getId();
 
 }

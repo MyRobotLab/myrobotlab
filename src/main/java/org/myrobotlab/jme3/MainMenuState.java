@@ -43,9 +43,10 @@ public class MainMenuState extends BaseAppState {
   transient Label breadCrumbsx;
   transient Node guiNode;
 
-  // TODO - perhaps 1 tab is "movement/selection" - another tab is after being selected "moving" the object
+  // TODO - perhaps 1 tab is "movement/selection" - another tab is after being
+  // selected "moving" the object
   // e.g. 1 is navigation the other is modification (with save)
-  
+
   VersionedReference<TabbedPanel.Tab> selectionRef;
   private Label statusLabel;
 
@@ -75,7 +76,7 @@ public class MainMenuState extends BaseAppState {
 
   Container childrenContainer;
   Container parentContainer;
-  
+
   boolean ikToggle = false;
 
   final static Logger log = LoggerFactory.getLogger(JMonkeyEngine.class);
@@ -203,7 +204,7 @@ public class MainMenuState extends BaseAppState {
       }
     });
     buttons.addChild(button);
-    
+
     // ik
     button = new Button("ik");
     button.addClickCommands(new Command<Button>() {
@@ -243,9 +244,10 @@ public class MainMenuState extends BaseAppState {
     buttons.addChild(new Button("bind"));
 
     // --------children--------------
-    // Container searchBar = contents.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y)));
+    // Container searchBar = contents.addChild(new Container(new
+    // SpringGridLayout(Axis.X, Axis.Y)));
     Container searchBar = new Container();
-   //  searchBar.addChild(search, 0, 0);
+    // searchBar.addChild(search, 0, 0);
     contents.addChild(search);
     searchBar.addChild(searchButton, 0, 5);
 
@@ -269,7 +271,7 @@ public class MainMenuState extends BaseAppState {
 
     contents.addChild(new Label("Rotate"), 2, 1);
     contents.addChild(new Label("ALT + LMB"), 2, 2);
-    
+
     contents.addChild(new Label("Pan"), 3, 1);
     contents.addChild(new Label("ALT + SHIFT + LMB"), 3, 2);
 
@@ -321,7 +323,7 @@ public class MainMenuState extends BaseAppState {
         return spatial.getParent();
       }
     });
-    
+
     parentContainer = new Container();
     north.addChild(parentContainer);
 
@@ -402,7 +404,7 @@ public class MainMenuState extends BaseAppState {
       // geometries don't have children
       childrenContainer.clearChildren();
     }
-    
+
   }
 
   @SuppressWarnings("unchecked")

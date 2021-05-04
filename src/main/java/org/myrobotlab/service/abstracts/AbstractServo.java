@@ -69,10 +69,10 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * this to Servo.java , DiyServo doesn't care about this detail.
    */
   protected String controller;
-  
+
   /**
-   * This allows the servo to attach disabled, and only energize after
-   * the first moveTo command is processed
+   * This allows the servo to attach disabled, and only energize after the first
+   * moveTo command is processed
    */
   protected boolean firstMove = true;
 
@@ -88,7 +88,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * and movements are possible
    */
   protected boolean enabled = false;
-  
+
   /**
    * The servos encoder - by "default" this will be a TimerEncoder - where a
    * timer calculates the expected time the servo will make and complete
@@ -185,7 +185,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * min sweep value
    */
   protected Double sweepMin = null;
-  
+
   transient protected ServoController sc;
 
   /**
@@ -248,6 +248,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       }
     }
     currentOutputPos = mapper.calcOutput(targetPos);
+  }
+  
+  /**
+   * if a new service is added to the system
+   * refresh the controllers
+   */
+  public void onStarted(String name) {
+    invoke("refreshControllers");
   }
 
   /**
@@ -359,12 +367,18 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     addListener("publishServoSetSpeed", sc);
     addListener("publishServoEnable", sc);
     addListener("publishServoDisable", sc);
-    controller = sc;
+    controller = sc; // <-- bad - don't set a reference (even string reference
+                     // :( )
 
+    // FIXME - remove !!!
     // FIXME change to broadcast ?
     // TODO: there is a race condition here.. we need to know that
     // the servo control ackowledged this.
-    sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
+    try {
+      sendBlocking(sc, "attachServoControl", this); // <-- change to broadcast ?
+    } catch (Exception e) {
+      log.error("sendBlocking attachServoControl threw", e);
+    }
     // TOOD: we need to wait here for the servo controller to acknowledge that
     // it was attached.
 
@@ -419,7 +433,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   @Override
   public void enable() {
-    
+
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -427,7 +441,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
         addTaskOneShot(idleTimeout, "idleDisable");
       }
     }
-    
+
     enabled = true;
     broadcast("publishServoEnable", this);
     broadcastState();
@@ -606,19 +620,20 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // assuming this came from TimeEncoder - we re-calculate input and then
     // publish it
     data.value = currentInputPos;
-    broadcast("publishEncoderData", data); 
-    // invoke("publishEncoderData", data); 
+    broadcast("publishEncoderData", data);
+    // invoke("publishEncoderData", data);
     // log.error("bpublishEncoderData {}", data.value);
 
     boolean equal = Math.abs(targetPos - currentInputPos) < actualAngleDeltaError;
 
-    // FIXME - fix blocking - determine when publishJointAngle should be published
+    // FIXME - fix blocking - determine when publishJointAngle should be
+    // published
     if (equal) {
       broadcast("publishJointAngle", new AngleData(getName(), data.angle));
       // broadcast("publishServoEvent", ServoStatus.SERVO_STOPPED,
       // currentInputPos);
 
-    } 
+    }
   }
 
   public void onRegistered(Registration s) {
@@ -836,14 +851,14 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     isSweeping = false;
     // moveTo(getCurrentInputPos());
     targetPos = getCurrentInputPos();
-    
+
     if (encoder != null && encoder instanceof TimeEncoder) {
       TimeEncoder timeEncoder = (TimeEncoder) encoder;
       // calculate trajectory calculates and processes this move
       timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
-    
-    //purgeTask("idleDisable");    
+
+    // purgeTask("idleDisable");
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -927,19 +942,19 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   }
 
   /**
-   * Proxied servo event "stopped" from either TimeEncoder
-   * or a Controller that supports it
+   * Proxied servo event "stopped" from either TimeEncoder or a Controller that
+   * supports it
    */
   @Override
-  public String publishServoStarted(String name) {   
+  public String publishServoStarted(String name) {
     log.info("TIME-ENCODER SERVO_STARTED - {}", name);
     isMoving = true;
     return name;
   }
 
   /**
-   * Proxied servo event "stopped" from either TimeEncoder
-   * or a Controller that supports it
+   * Proxied servo event "stopped" from either TimeEncoder or a Controller that
+   * supports it
    */
   @Override
   public String publishServoStopped(String name) {
@@ -952,12 +967,12 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
       // and start our countdown
       addTaskOneShot(idleTimeout, "idleDisable");
     }
-    
+
     // notify all blocking moves - we have stopped
     synchronized (this) {
       this.notifyAll();
     }
-    
+
     // we've received a stop event from the TimeEncoder or real encoder
     isMoving = false;
 
@@ -981,6 +996,5 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     }
     return name;
   }
-  
 
 }

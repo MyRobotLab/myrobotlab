@@ -44,6 +44,7 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.geometry.Point3df;
 import org.myrobotlab.math.geometry.PointCloud;
 import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
@@ -533,15 +534,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public void connect(String uri) throws Exception {
-    // easy single client support
-    Map<String, Object> attributes = new HashMap<>();
-    attributes.put("gateway", getName());
-    attributes.put("c-type", getSimpleName());
-    attributes.put("id", getName() + "-" + Runtime.getInstance().getId() + "-jme");
+    
     String uuid = java.util.UUID.randomUUID().toString();
-    attributes.put("uuid", uuid);
-    Runtime.getInstance().addConnection(uuid, attributes);
-    Runtime.updateRoute(guiId, uuid);
+    String id = getName() + "-" + Runtime.getInstance().getId() + "-jme";
+    Connection attributes = new Connection(uuid, id, getName());
+
+    attributes.put("c-type", getSimpleName());
+    Runtime.getInstance().addConnection(uuid, id, attributes);
+    // Runtime.getInstance().updateRoute(guiId, uuid);
   }
 
   public Geometry createBoundingBox(Spatial spatial, String color) {
@@ -861,9 +861,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public Map<String, Map<String, Object>> getClients() {
-    // TODO Auto-generated method stub
-    return null;
+  public Map<String, Connection> getClients() {
+    return Runtime.getInstance().getConnections(getName());
   }
 
   public String getCoorAxesName(Spatial spatial) {
@@ -875,7 +874,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public Message getDefaultMsg(String connId) {
+  public Message getDescribeMsg(String connId) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -1774,12 +1773,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public Object sendBlockingRemote(Message msg, Integer timeout) throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
   public void sendRemote(Message msg) throws Exception {
     // TODO Auto-generated method stub
 
@@ -1917,6 +1910,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   BulletAppState bulletAppState;
 
   private boolean usePhysics;
+
+  private Thread mainThread;
 
   public void simpleInitApp() {
 
@@ -2098,7 +2093,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
+    
     menu = app.getMainMenu();// new MainMenuState(this);
+    // menu.setEnabled(false);
     // menu.loadGui();
 
     if (usePhysics) {
@@ -2180,14 +2177,24 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       // settings.setUseJoysticks(false);
       settings.setUseInput(true);
       settings.setAudioRenderer(null);
+      settings.setResizable(true);
       app.setSettings(settings);
+      
       app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
+      
 
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
       // will generate error from jmonkey - this should "block"
-      app.start();
+      mainThread = new Thread() {
+        public void run() {
+          app.start();
+        }
+      };
+      
+      mainThread.start();
+      
       Callable<String> callable = new Callable<String>() {
         public String call() throws Exception {
           System.out.println("Asynchronous Callable");
@@ -2253,6 +2260,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
         app.stop(true);
         // app.destroy(); not for "us"
         app = null;
+        // sleep()
+        // mainThread.interrupt(); // bigger hammer
       } catch (Exception e) {
         log.error("stopping jmonkey threw", e);
       }
@@ -2295,7 +2304,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       LoggingFactory.init("WARN");
 
       Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "admin" });
+      // Runtime.main(new String[] { "--interactive", "--id", "admin" });
       JMonkeyEngine jme = (JMonkeyEngine) Runtime.start("simulator", "JMonkeyEngine");
 
       jme.addBox("box", 1.0, 1.0, 1.0, "fc8803", true);

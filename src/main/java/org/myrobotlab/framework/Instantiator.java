@@ -54,13 +54,14 @@ public class Instantiator {
       return mc.newInstance(params); // Dynamically instantiate it
     }
   }
-  
-  static public Object invoke(Object obj, String method, Object ...params) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+  static public Object invoke(Object obj, String method, Object... params)
+      throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     if (obj == null) {
       return null;
     }
     Class<?>[] paramTypes = null;
-    
+
     if (params != null) {
       paramTypes = new Class[params.length];
       for (int i = 0; i < params.length; ++i) {
@@ -71,11 +72,12 @@ public class Instantiator {
         }
       }
     }
-    
+
     Method meth = null;
-    meth = obj.getClass().getMethod(method, paramTypes); // getDeclaredMethod zod !!!
+    meth = obj.getClass().getMethod(method, paramTypes); // getDeclaredMethod
+                                                         // zod !!!
     Object retobj = meth.invoke(obj, params);
     return retobj;
-    
+
   }
 }

@@ -34,7 +34,7 @@ package org.myrobotlab.fsm.api;
 public class State {
 
   private String id;
-  transient private Transition lastTransition = null; 
+  transient private Transition lastTransition = null;
 
   /**
    * Create a new {@link State}.
@@ -77,11 +77,11 @@ public class State {
   public String toString() {
     return id;
   }
-  
+
   public void setLastTransition(Transition transition) {
-    lastTransition = transition; 
+    lastTransition = transition;
   }
-  
+
   public Transition getLastTransition() {
     return lastTransition;
   }

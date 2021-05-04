@@ -20,13 +20,15 @@ public class SolrMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "8.4.1";
+    String solrVersion = "8.6.3";
+    String luceneVersion = solrVersion;
+    addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
-    addDependency("commons-io", "commons-io", "2.5");
+    addDependency("commons-io", "commons-io", "2.7");
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)

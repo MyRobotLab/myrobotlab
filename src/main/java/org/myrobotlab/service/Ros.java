@@ -16,7 +16,7 @@ public class Ros extends Service {
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
     try {
-      Ros ros = (Ros) Runtime.start("ros","Ros");
+      Ros ros = (Ros) Runtime.start("ros", "Ros");
       ros.startService();
       /*
        * SwingGui gui = new SwingGui("gui"); gui.startService();

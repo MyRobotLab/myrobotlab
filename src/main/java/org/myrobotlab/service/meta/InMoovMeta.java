@@ -23,7 +23,7 @@ public class InMoovMeta extends MetaData {
     addCategory("robot");
     // addDependency("inmoov.fr", "1.0.0");
     // addDependency("org.myrobotlab.inmoov", "1.0.0");
-    addDependency("inmoov.fr", "inmoov", "1.1.22", "zip");
+    addDependency("inmoov.fr", "inmoov", null, "zip");// was "1.1.22" - now unpinned GroG
     addDependency("inmoov.fr", "jm3-model", "1.0.0", "zip");
 
     // SHARING !!! - modified key / actual name begin -------

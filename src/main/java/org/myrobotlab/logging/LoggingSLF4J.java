@@ -26,15 +26,8 @@ public class LoggingSLF4J extends Logging {
     addAppender(type, null);
   }
 
-  // http://stackoverflow.com/questions/7824620/logback-set-log-file-name-programmatically
-
   @Override
   public void addAppender(String type, String filename) {
-
-    // OutputStreamAppender<E>
-    // ConsoleAppender, FileAppender
-
-    // OutputStreamAppender<ILoggingEvent> appender = null;
 
     LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
     PatternLayoutEncoder ple = new PatternLayoutEncoder();
@@ -49,8 +42,6 @@ public class LoggingSLF4J extends Logging {
     Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     logger.setAdditive(false);
 
-    // TODO - do layout ???
-
     if (AppenderType.CONSOLE.equalsIgnoreCase(type)) {
       ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
       console.setName(type);
@@ -60,6 +51,7 @@ public class LoggingSLF4J extends Logging {
       console.start();
       logger.addAppender(console);
     } else if (AppenderType.FILE.equalsIgnoreCase(type)) {
+      // FIXME - replace with RollingFileAppender ???
       FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
       fileAppender.setName(type);
       fileAppender.setFile(LoggingFactory.getLogFileName());
@@ -68,74 +60,25 @@ public class LoggingSLF4J extends Logging {
       fileAppender.setAppend(false);
       fileAppender.start();
       logger.addAppender(fileAppender);
-    } else if (AppenderType.IS_AGENT.equalsIgnoreCase(type)) {
-      // FROM_AGENT has only console - Agent has both console & file
-      // appender
-      /*
-       * appender = new ConsoleAppender(layout); appender = new
-       * RollingFileAppender(layout, String.format("%s%smyrobotlab.log",
-       * System.getProperty("user.dir"), File.separator), false);
-       * appender.setName(type); appenders.add(Appender.IS_AGENT);
-       */
-
-      // console
-      ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
-      console.setName(String.format("%s.%s", AppenderType.IS_AGENT, AppenderType.CONSOLE));
-      // console.setLayout(layout); ???
-      console.setEncoder(ple);
-      console.setContext(lc);
-      logger.addAppender(console);
-
-      // grr DailyRollingFileAppender f = new DailyRollingFileAppender();
-
-      FileAppender<ILoggingEvent> fileAppender = new FileAppender<ILoggingEvent>();
-      fileAppender.setName(String.format("%s.%s", AppenderType.IS_AGENT, AppenderType.FILE));
-      // fileAppender.setFile(String.format("%s%smyrobotlabz.log",
-      // System.getProperty("user.dir"), File.separator));
-      fileAppender.setFile(LoggingFactory.getLogFileName());
-      fileAppender.setEncoder(ple);
-      fileAppender.setAppend(false);
-      fileAppender.setContext(lc);
-      fileAppender.start();
-
-      // logger.addAppender(console); // THIS IS NEW ! PREVIOUSLY A BUG
-      // PREVENTED THIS ..
-      // going to keep it shutdown - so as not to not do too much logging
-      logger.addAppender(fileAppender);
-
-    } else if (AppenderType.FROM_AGENT.equalsIgnoreCase(type)) {
-      // only has console because the console is relayed to the Agent
-      // shorter layout than Agent - since everything will be
-      // prepended to Agent's log prefix
-      // layout = new PatternLayout("[%t] %-5p %c %x - %m%n");
-      // TODO - add Pid or runtime Name ! process index ?
-      // layout = new PatternLayout("[%t] %-5p %c %x - %m%n"); SHORT
-      // PATTERN ???
-      // appender = new RollingFileAppender(layout,
-      // String.format("%s%agent.log", System.getProperty("user.dir"),
-      // File.separator), false);
-
-      // console
-      ConsoleAppender<ILoggingEvent> console = new ConsoleAppender<ILoggingEvent>();
-      console.setName(String.format("%s.%s", AppenderType.FROM_AGENT, AppenderType.CONSOLE));
-      // console.setLayout(layout); ???
-      console.setEncoder(ple);
-      console.setContext(lc);
-      logger.addAppender(console);
-
     } else {
       log.error("attempting to add unkown type of Appender {}", type);
       return;
     }
-
   }
 
   @Override
   public void configure() {
-    LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    JoranConfigurator configurator = new JoranConfigurator();
-    configurator.setContext(context);
-    StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+    // why can't slf4j make a common configuration interface ! :(
+    // setting log level should be common to all :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+      JoranConfigurator configurator = new JoranConfigurator();
+      configurator.setContext(context);
+      StatusPrinter.printInCaseOfErrorsOrWarnings(context);
+      removeAllAppenders();
+      addAppender(AppenderType.CONSOLE);
+      addAppender(AppenderType.FILE);
+    }
   }
 
   @Override
@@ -183,22 +126,23 @@ public class LoggingSLF4J extends Logging {
     if (clazz == null || clazz.length() == 0) {
       clazz = Logger.ROOT_LOGGER_NAME;
     }
+    // why can't slf4j make a common set log level interface :(
+    if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
+      Logger logger = (Logger) LoggerFactory.getLogger(clazz);
 
-    Logger logger = (Logger) LoggerFactory.getLogger(clazz);
-
-    if ("DEBUG".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.DEBUG);
-    } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.TRACE);
-    } else if ("WARN".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.WARN);
-    } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
-      logger.setLevel(Level.ERROR);
-      // } else if ("FATAL".equalsIgnoreCase(level)) {
-      // logger.setLevel(Level.FATAL);
-    } else {
-      logger.setLevel(Level.INFO);
+      if ("DEBUG".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.DEBUG);
+      } else if ("TRACE".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.TRACE);
+      } else if ("WARN".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.WARN);
+      } else if ("ERROR".equalsIgnoreCase(targetLevel)) {
+        logger.setLevel(Level.ERROR);
+        // } else if ("FATAL".equalsIgnoreCase(level)) {
+        // logger.setLevel(Level.FATAL);
+      } else {
+        logger.setLevel(Level.INFO);
+      }
     }
   }
-
 }

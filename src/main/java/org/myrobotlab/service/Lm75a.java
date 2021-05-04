@@ -181,7 +181,6 @@ public class Lm75a extends Service implements I2CControl {
     controller.i2cWrite(this, Integer.parseInt(deviceBus), Integer.decode(deviceAddress), writebuffer, writebuffer.length);
   }
 
-
   /**
    * valid for a control or controller which can only have a single other
    * service attached

@@ -4,7 +4,6 @@ import org.myrobotlab.framework.Service;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.interfaces.EncoderControl;
 import org.myrobotlab.service.interfaces.EncoderController;
-import org.myrobotlab.service.meta.abstracts.MetaData;
 
 public class AbstractPinEncoder extends Service implements EncoderControl {
 
@@ -53,7 +52,7 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     long now = System.currentTimeMillis();
     long delta = now - lastUpdate;
     Double angle = 360.0 * data.angle / resolution;
-    log.info("Angle : {}", angle );
+    log.info("Angle : {}", angle);
     if (delta > 0) {
       // we can compute velocity since the last update
       // This computes the change in degrees per second that the encoder is
@@ -73,7 +72,7 @@ public class AbstractPinEncoder extends Service implements EncoderControl {
     // pass the set zero point command to the controller
     controller.setZeroPoint(this);
   }
-  
+
   public void setPin(String pin) {
     this.pin = pin;
   }

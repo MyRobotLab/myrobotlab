@@ -204,7 +204,7 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
    */
   public void moveTo(String name, Point p) {
 
-    log.info("Raw Input : {} - {}", name,  p);
+    log.info("Raw Input : {} - {}", name, p);
     if (scale != null) {
       // scale the x,y,z by the factors stored in the scale point. (really
       // vector i guess?)
@@ -219,17 +219,18 @@ public class InverseKinematics3D extends Service implements IKJointAnglePublishe
       log.info("Rot/Translated input {}", p);
     }
     boolean success = arms.get(name).moveToGoal(p);
-success = true; // FIXME change object to send error tolerance - let the robot determine if it was success or not
+    success = true; // FIXME change object to send error tolerance - let the
+                    // robot determine if it was success or not
     if (success) {
       publishTelemetry(name);
     } else {
       log.info("Unsuccessful to solve IK!");
     }
   }
-  
+
   // public void publishTelemetry()
 
-  // TODO - publishTelemetry() which iterates through all parts 
+  // TODO - publishTelemetry() which iterates through all parts
   public void publishTelemetry(String name) {
     Map<String, Double> angleMap = new HashMap<String, Double>();
     for (DHLink l : arms.get(name).getLinks()) {
@@ -275,7 +276,7 @@ success = true; // FIXME change object to send error tolerance - let the robot d
     arm.setIk3D(this);
     this.arms.put(name, arm);
   }
-  
+
   public void attach(Attachable attachable) {
     if (attachable instanceof IKJointAngleListener) {
       addListener("publishJointAngle", attachable.getName(), "onJointAngle");
@@ -373,7 +374,6 @@ success = true; // FIXME change object to send error tolerance - let the robot d
   public Point publishTracking(Point tracking) {
     return tracking;
   }
-  
 
   // input data from point publisher
   public void onPoint(Point point) {
@@ -454,6 +454,5 @@ success = true; // FIXME change object to send error tolerance - let the robot d
     // we will allow translation, x,y,z
     // for the input point.
   }
-
 
 }
