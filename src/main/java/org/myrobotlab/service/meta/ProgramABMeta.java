@@ -37,7 +37,7 @@ public class ProgramABMeta extends MetaData {
 
     addDependency("org.json", "json", "20090211");
     // used by FileIO
-    addDependency("commons-io", "commons-io", "2.5");
+    addDependency("commons-io", "commons-io", "2.7");
     // TODO: This is for CJK support in ProgramAB move this into the published
     // POM for ProgramAB so they are pulled in transiently.
     addDependency("org.apache.lucene", "lucene-analyzers-common", "8.6.3");

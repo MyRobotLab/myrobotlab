@@ -28,7 +28,7 @@ public class SolrMeta extends MetaData {
     addDependency("org.apache.solr", "solr-test-framework", solrVersion);
     exclude("org.apache.logging.log4j", "log4j-slf4j-impl");
     addDependency("org.apache.solr", "solr-solrj", solrVersion);
-    addDependency("commons-io", "commons-io", "2.5");
+    addDependency("commons-io", "commons-io", "2.7");
     // TODO: update this with the latest schema!
     // addDependency("mrl-solr", "mrl-solr-data", "1.0", "zip");
     // log4j-slf4j conflicts with logback in solr 7.4.0+ (maybe earlier)
