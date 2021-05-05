@@ -1854,9 +1854,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       isRunning = true;
       Runtime runtime = Runtime.getInstance();
       if (runtime != null) {
-        runtime.broadcast("started", name);
+        runtime.broadcast("started", getFullName());
       }
-
+      
     } else {
       log.debug("startService request: service {} is already running", name);
     }
@@ -2652,22 +2652,22 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   @Override
-  public void onCreated(String serviceName) {
+  public void onCreated(String fullname) {
     // service life-cycle callback - override if interested in these events
   }
 
   @Override
-  public void onStarted(String serviceName) {
+  public void onStarted(String fullname) {
     // service life-cycle callback - override if interested in these events
   }
 
   @Override
-  public void onStopped(String serviceName) {
+  public void onStopped(String fullname) {
     // service life-cycle callback - override if interested in these events
   }
 
   @Override
-  public void onReleased(String serviceName) {
+  public void onReleased(String fullname) {
     // service life-cycle callback - override if interested in these events
   }
 

@@ -59,6 +59,8 @@ public class InMoov2Meta extends MetaData {
     // Arduino"); NO !!!!
     addPeer("headTracking.x", "head.rothead", "Servo", "shared servo");
     addPeer("headTracking.y", "head.neck", "Servo", "shared servo");
+    
+    addPeer("neopixel", "NeoPixel", "neopixel animation");
 
     // Global - undecorated by self name
     // currently InMoov manually calls releasePeers - when it does
