@@ -45,8 +45,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static boolean RobotCanMoveRandom = true;
   private static final long serialVersionUID = 1L;
 
-  public Arduino neopixelArduinox = null;
-
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
