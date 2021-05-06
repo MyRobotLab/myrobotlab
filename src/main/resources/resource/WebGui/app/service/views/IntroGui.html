@@ -218,8 +218,8 @@
                 <tr ng-show="!service.isVirtual">
                     <td>
                         <p>
-                            Now select the controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
-                            Note in this demo, it sets back to "disable" automatically to prevent burning servo. But it automatically Enables if you move the slider or send a python "moveTo()" code.
+                            Now select the controller in the dropdown menu, select your controller and clik "attach".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
+                            Note in this demo, it sets back to "disable" automatically to prevent burning servo. But it automaticaly Enables if you move the slider or send a python "moveTo()" code.
                         
                         </p>
                     </td>
@@ -228,7 +228,7 @@
                 <tr ng-show="service.isVirtual">
                     <td>
                         <p>
-                            Now select the varduino controller in the dropdown menu, by selecting it will get "attached".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
+                            Now select the varduino controller in the dropdown menu, select your controller and clik "attach".<br>Select the correct signal pin the servo is attached to.  Then click "Enable" and the servo should be controllable with the slider bar in Basic Tab.
                         
                         </p>
                     </td>
@@ -254,11 +254,11 @@
                 <tr>
                     <td>
                         <p>
-                            By selecting the Limits tab, you can set the limits of your servo.<br>
+                            By selecting the Limits Tab, you can set the limits of your servo.<br>
                             There is two types of limits, the input and the output.<br>
                             Input limits are the max and min values you expect to measure, after any scaling. Output limits are the min and max angle that the microcontroller will tell the servo to move to.<br>
-                            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be set when initialized.
-                            In the Advanced tab you can set your servo to autoDisable, this prevents your servo from burning out and magic smoke.
+                            Moving the slider to a position and clicking on MIN or MAX will set the limits. <br>The REST position is where the servo will be set when initialized.<br>
+                            In the Advanced Tab you can set your servo to autoDisable, this prevents your servo from burning out and magic smoke.<br>
                             In this demo, it is set by default.
                         </p>
                     </td>
