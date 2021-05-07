@@ -52,8 +52,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
+import javax.swing.WindowConstants;
 
 import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -112,13 +114,12 @@ import org.myrobotlab.opencv.OpenCVData;
 import org.myrobotlab.opencv.OpenCVFilter;
 import org.myrobotlab.opencv.OpenCVFilterFaceDetectDNN;
 import org.myrobotlab.opencv.OpenCVFilterKinectDepth;
-import org.myrobotlab.opencv.OpenCVFilterMotionDetect;
 import org.myrobotlab.opencv.OpenCVFilterYolo;
 import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
-import org.myrobotlab.swing.VideoWidget2;
+// import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
 import com.github.axet.vget.VGet;
@@ -413,7 +414,10 @@ public class OpenCV extends AbstractComputerVision {
     // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
     // cv.addFilter(md);
 
-    cv.capture();
+//     cv.capture(4);
+    FFmpegFrameGrabber grabber = new FFmpegFrameGrabber("tcp://worke-pi:2222");
+    grabber.start();
+    cv.capture(grabber);;
 
     // Runtime.start("gui", "SwingGui");
 
@@ -651,7 +655,7 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * for native canvas frame view of output
    */
-  public boolean nativeViewer = false;
+  public boolean nativeViewer = true;
 
   /**
    * local reference of global frame grabber types
@@ -668,7 +672,7 @@ public class OpenCV extends AbstractComputerVision {
    */
   protected Set<String> imageFileExt;
 
-  transient private VideoWidget2 videoWidget = null;
+  // transient private VideoWidget2 videoWidget = null;
 
   static String DATA_DIR;
 
@@ -1356,19 +1360,34 @@ public class OpenCV extends AbstractComputerVision {
            * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
            * canvasFrame.showImage(b);
            */
-
+          
+          if (canvasFrame == null) {
+            canvasFrame = new CanvasFrame(String.format("%s - %s",  getName(), displayFilter));
+            // canvasFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+          }
+          
+          if (b != null) {
+            canvasFrame.showImage(b);
+          } else {
+            Frame frame = data.getFrame();
+            if (frame != null) {
+              canvasFrame.showImage(frame);
+            }
+          }
+          /*
           if (videoWidget == null) {
             videoWidget = new VideoWidget2(getName());
           }
-
+          
           videoWidget.setVisible(true);
           videoWidget.displayFrame(si);
+          */
 
-        } else if (videoWidget != null && !nativeViewer) {
-          // canvasFrame.dispose();
-          // canvasFrame = null;
-          videoWidget.dispose();
-          videoWidget = null;
+        } else if (canvasFrame != null && !nativeViewer) {
+          canvasFrame.dispose();
+          canvasFrame = null;
+          // videoWidget.dispose();
+          // videoWidget = null;
         }
 
       }
@@ -1625,7 +1644,10 @@ public class OpenCV extends AbstractComputerVision {
 
   transient FFmpegFrameRecorder ffmpegStreamer = null;
 
-  protected boolean webViewer = true;
+  /**
+   * try native first - this requires base64 frame encoding
+   */
+  protected boolean webViewer = false;
 
   public void startStreamer() {
     try {

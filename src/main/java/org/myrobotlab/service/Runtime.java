@@ -426,7 +426,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       if (runtime != null) {
 
-        runtime.broadcast("created", name);
+        runtime.broadcast("created", getFullName(name));
 
         // add all the service life cycle subscriptions
         runtime.addListener("registered", name);
@@ -443,6 +443,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         if (runtime != null && runtime.serviceData != null) {
           try {
             si.onRegistered(new Registration(s));
+            runtime.send(s.getName(), "onCreated", si.getFullName());
           } catch (Exception e) {
             runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
           }
@@ -450,11 +451,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // don't register or create or start event self
         if (s.getName().equals(si.getName())) {
           continue;
-        }
-        si.onCreated(s.getName());
-        if (si.isRunning()) {
-          si.onStarted(s.getName());
-        }
+        }        
       }
 
       return (Service) newService;
@@ -1345,20 +1342,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static void shutdown() {
     try {
-      log.debug("mrl shutdown");
+      log.info("myrobotlab shutting down");
 
       if (runtime != null) {
+        log.info("stopping interactive mode");
         runtime.stopInteractiveMode();
       }
 
+      log.info("pre shutdown on all services");
       for (ServiceInterface service : getServices()) {
         service.preShutdown();
       }
 
+      /* - huge amount of json that is not used
       for (ServiceInterface service : getServices()) {
         service.save();
       }
+      */
 
+      log.info("releasing all");
       releaseAll();
     } catch (Exception e) {
       log.error("something threw - continuing to shutdown", e);

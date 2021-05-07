@@ -9,14 +9,14 @@ import org.myrobotlab.framework.Registration;
  */
 public interface ServiceLifeCycleListener {
 
-  public void onCreated(String serviceName);
+  public void onCreated(String fullname);
 
   public void onRegistered(Registration registration);
 
-  public void onStarted(String serviceName);
+  public void onStarted(String fullname);
 
-  public void onStopped(String serviceName);
+  public void onStopped(String fullname);
 
-  public void onReleased(String serviceName);
+  public void onReleased(String fullname);
 
 }
