@@ -971,7 +971,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       torso.rest();
     }
   }
-  
+
   public void setArmSpeed(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
     InMoov2Arm arm = getArm(which);
     if (arm == null) {
@@ -979,11 +979,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       return;
     }
     arm.setSpeed(bicep, rotate, shoulder, omoplate);
-  }  
-  
+  }
+
   @Deprecated
   public void setArmVelocity(String which, Double bicep, Double rotate, Double shoulder, Double omoplate) {
-     setArmSpeed(which, bicep, rotate, shoulder, omoplate);
+    setArmSpeed(which, bicep, rotate, shoulder, omoplate);
   }
 
   public void setAutoDisable(Boolean param) {
@@ -1036,7 +1036,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void setHeadSpeed(Double rothead, Double neck) {
     setHeadSpeed(rothead, neck, null, null, null);
   }
-  
+
   public void setHeadSpeed(Double rothead, Double neck, Double rollNeck) {
     setHeadSpeed(rothead, neck, null, null, null, rollNeck);
   }
@@ -1203,10 +1203,11 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGSEQUENCE"));
   }
-  
+
   /**
    * start servos - no controllers
-   * @throws Exception 
+   * 
+   * @throws Exception
    */
   public void startServos() throws Exception {
     startServos(null, null);
@@ -1614,13 +1615,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
 
     // jme = (JMonkeyEngine) startPeer("simulator");
-    jme = (JMonkeyEngine)Runtime.start("jme", "JMonkeyEngine");
-    
+    jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
 
     isSimulatorActivated = true;
-    
+
     // adding InMoov2 asset path to the jmonkey simulator
-    String assetPath =  getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
+    String assetPath = getResourceDir() + fs + JMonkeyEngine.class.getSimpleName();
 
     File check = new File(assetPath);
     log.info("loading assets from {}", assetPath);
@@ -1633,7 +1633,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
     // /resource/JMonkeyEngine/assets
     jme.loadModels(assetPath);
-    
+
     // ========== gael's calibrations begin ======================
     jme.setRotation(getName() + ".head.jaw", "x");
     jme.setRotation(getName() + ".head.neck", "x");
@@ -1642,7 +1642,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     jme.setRotation(getName() + ".head.eyeY", "x");
     jme.setRotation(getName() + ".head.eyeX", "y");
     jme.setRotation(getName() + ".head.eyelidLeft", "x");
-    jme.setRotation(getName() + ".head.eyelidRight", "x");    
+    jme.setRotation(getName() + ".head.eyelidRight", "x");
     jme.setRotation(getName() + ".torso.topStom", "z");
     jme.setRotation(getName() + ".torso.midStom", "y");
     jme.setRotation(getName() + ".torso.lowStom", "x");
@@ -1666,7 +1666,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // two eyeX (left and
     // right?)
     jme.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);    
+    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);
     jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
     jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 
