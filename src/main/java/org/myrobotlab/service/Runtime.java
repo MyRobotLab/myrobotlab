@@ -437,7 +437,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // initialization of the new service - it gets local registery events
-      // for pre-existing registered? created/started
+      // for pre-existing registered? created/started - NO !!!
+      // The new service is responsible for asking the registry for existing services on its creation
+      // this should not be done automatically
+      /*
       List<ServiceInterface> services = getServices();// getLocalServices();
       for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
@@ -453,6 +456,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           continue;
         }        
       }
+      */
 
       return (Service) newService;
     } catch (Exception e) {

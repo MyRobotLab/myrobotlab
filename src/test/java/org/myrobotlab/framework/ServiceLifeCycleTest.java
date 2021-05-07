@@ -15,6 +15,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.TestCatcher;
 import org.myrobotlab.service.TestThrower;
+import org.myrobotlab.service.WebGui;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
@@ -180,38 +181,50 @@ public class ServiceLifeCycleTest extends AbstractTest {
     catcher01 = (TestCatcher)Runtime.create("catcher01","TestCatcher");
     
     TestThrower subPeer = (TestThrower)catcher01.startPeer("subpeer");
-    assertNotNull(subPeer);    
-    assertTrue(catcher01.onCreated.contains("runtime")); 
+    assertNotNull(subPeer);
+    // runtime was created before - is responsibility of service to 
+    // iterate through services for previously created services they
+    // are interested in
+    assertFalse(catcher01.onCreated.contains("runtime")); 
     
     TestCatcher catcher02 = (TestCatcher)Runtime.create("catcher02","TestCatcher");
-    assertTrue(catcher02.onCreated.contains("runtime")); 
+    assertFalse(catcher02.onCreated.contains("runtime")); 
+    
+    String catcher01FullName = catcher01.getFullName();
+    String catcher02FullName = catcher02.getFullName();
 
     // verify registered cross-pollination
-    assertNotNull(catcher01.onRegistered.get("catcher02")); 
-    assertNotNull(catcher02.onRegistered.get("catcher01")); 
+    assertNotNull(catcher01.onRegistered.get(catcher02FullName)); 
+    // catcher01 was created before catcher02
+    assertNull(catcher02.onRegistered.get(catcher01FullName)); 
 
-    // verify created cross-pollination
-    assertTrue(catcher01.onCreated.contains("catcher02")); 
-    assertTrue(catcher02.onCreated.contains("catcher01")); 
+    // no created cross-pollination
+    assertTrue(catcher01.onCreated.contains(catcher02FullName)); 
+    assertFalse(catcher02.onCreated.contains(catcher01FullName)); 
     
     // verify not started
-    assertFalse(catcher01.onStarted.contains("catcher02")); 
-    assertFalse(catcher02.onStarted.contains("catcher01"));
+    assertFalse(catcher01.onStarted.contains(catcher02FullName)); 
+    assertFalse(catcher02.onStarted.contains(catcher01FullName));
+    
+    WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+    webgui.autoStartBrowser(false);
+    webgui.startService();
     
     catcher02.startService();
-    assertTrue(catcher01.onStarted.contains("catcher02")); 
-    assertTrue(catcher02.onStarted.contains("catcher02")); 
-    assertFalse(catcher02.onStarted.contains("catcher01")); 
+    assertTrue(catcher01.onStarted.contains(catcher02FullName)); 
+    assertTrue(catcher02.onStarted.contains(catcher02FullName)); 
+    
     
       // stopped
-    assertFalse(catcher01.onStopped.contains("catcher02"));
+    assertFalse(catcher01.onStopped.contains(catcher02FullName));
     catcher02.stopService();
-    assertTrue(catcher01.onStopped.contains("catcher02"));
+    assertTrue(catcher01.onStopped.contains(catcher02FullName));
     
     // released
-    assertFalse(catcher01.onReleased.contains("catcher02"));
+    
+    assertFalse(catcher01.onReleased.contains(catcher02FullName));
     catcher02.releaseService();
-    assertTrue(catcher01.onStopped.contains("catcher02"));
+    assertTrue(catcher01.onStopped.contains(catcher02FullName));
     
 
     

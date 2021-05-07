@@ -1946,7 +1946,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     thisThread = null;
 
     Runtime runtime = Runtime.getInstance();
-    runtime.broadcast("stopped", getName());
+    runtime.broadcast("stopped", getFullName());
     // save(); removed by GroG
   }
 

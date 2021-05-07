@@ -31,7 +31,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
     console.log('app.js - starting');
-    $urlRouterProvider.otherwise("/service");
+    $urlRouterProvider.otherwise("/service/runtime");
     $stateProvider.state('loading', {
         url: "/loading",
         templateUrl: "main/loading.html",
@@ -73,7 +73,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
             }
         }
     }).state('tabs2', {
-        url: "/service",
+        url: "/service/:servicename",
         template: "<div ui-view></div>",
         controller: 'mainCtrl',
         resolve: {
@@ -102,64 +102,6 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
                 return mrl.init();
             }
         }
-    }).state('tabs', {
-        url: "/service/:servicename",
-        template: "<div ui-view></div>",
-        controller: 'mainCtrl',
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('tabs calling mrl.init() from router')
-                // mrl.setViewType('min')
-                return mrl.init();
-            }
-        }
-    }).state('tabs.main', {
-        views: {
-            '': {
-                templateUrl: 'main/main.html'
-            },
-            'navbar@tabs.main': {
-                templateUrl: 'nav/nav.html',
-                controller: 'navCtrl'
-            },
-            'content@tabs.main': {
-                templateUrl: 'views/tabsView.html',
-                controller: 'tabsViewCtrl'
-            }
-        },
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('tabs.main calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('serviceView', {
-        url: '/old/:servicename',
-        template: "<div ui-view></div>",
-        controller: 'mainCtrl',
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('serviceView calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('serviceView.main', {
-        views: {
-            '': {
-                templateUrl: 'main/main.html'
-            },
-            'navbar@serviceView.main': {},
-            'content@serviceView.main': {
-                templateUrl: 'views/serviceView.html',
-                controller: 'serviceViewCtrl',
-                resolve: {
-                    test: function($stateParams, mrl) {
-                        console.log('serviceView.main calling mrl.init() from router')
-                        return mrl.init();
-                    }
-                }
-            }
-        }
-    });
+    })
 }
-]);
+])
