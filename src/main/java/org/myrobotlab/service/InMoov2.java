@@ -45,8 +45,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static boolean RobotCanMoveRandom = true;
   private static final long serialVersionUID = 1L;
 
-  public Arduino neopixelArduinox = null;
-
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
@@ -63,6 +61,29 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       error("unable to execute script %s", someScriptName);
     }
   }
+  
+  
+  /**
+   * Part of service life cycle - a new servo has been started
+   */
+  public void onStarted(String fullname) {
+    log.info("{} started");
+    try {
+      ServiceInterface si = Runtime.getService(fullname);
+      if ("Servo".equals(si.getSimpleName())){
+        log.info("sending setAutoDisable true to {}", fullname);
+        send(fullname, "setAutoDisable", true);
+        // ServoControl sc = (ServoControl)Runtime.getService(name);
+      }
+    } catch (Exception e) {
+      log.error("onStarted threw", e);
+    }
+  }
+  
+  public void onCreated(String fullname) {
+    log.info("{} created", fullname);
+  }
+
 
   /**
    * This method will load a python file into the python interpreter.
@@ -99,9 +120,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
-      Runtime.main(new String[] { "--interactive", "--id", "inmoov" });
-
+      Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
+      Runtime.start("s01", "Servo");
       InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
+      Runtime.start("s02", "Servo");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
@@ -266,6 +288,17 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // by default all servos will auto-disable
     // Servo.setAutoDisableDefault(true); //until peer servo services for
     // InMoov2 have the auto disable behavior, we should keep this
+    
+    // same as created in runtime - send asyc message to all
+    // registered services, this service has started
+    // find all servos - set them all to autoDisable(true)
+    // onStarted(name) will handle all future created servos
+    List<ServiceInterface> services = Runtime.getServices();
+    for (ServiceInterface si : services) {
+      if ("Servo".equals(si.getSimpleName())) {
+        send(si.getFullName(), "setAutoDisable", true);
+      }
+    } 
 
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
     locale = Runtime.getInstance().getLocale();
@@ -1070,7 +1103,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public void setNeopixelAnimation(String animation, Integer red, Integer green, Integer blue, Integer speed) {
-    if (neopixel != null /* && neopixelArduino != null */) {
+    if (neopixel != null) {
       neopixel.setAnimation(animation, red, green, blue, speed);
     } else {
       warn("No Neopixel attached");

@@ -426,7 +426,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       if (runtime != null) {
 
-        runtime.broadcast("created", name);
+        runtime.broadcast("created", getFullName(name));
 
         // add all the service life cycle subscriptions
         runtime.addListener("registered", name);
@@ -437,12 +437,16 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
       // initialization of the new service - it gets local registery events
-      // for pre-existing registered? created/started
+      // for pre-existing registered? created/started - NO !!!
+      // The new service is responsible for asking the registry for existing services on its creation
+      // this should not be done automatically
+      /*
       List<ServiceInterface> services = getServices();// getLocalServices();
       for (ServiceInterface s : services) {
         if (runtime != null && runtime.serviceData != null) {
           try {
             si.onRegistered(new Registration(s));
+            runtime.send(s.getName(), "onCreated", si.getFullName());
           } catch (Exception e) {
             runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
           }
@@ -450,12 +454,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // don't register or create or start event self
         if (s.getName().equals(si.getName())) {
           continue;
-        }
-        si.onCreated(s.getName());
-        if (si.isRunning()) {
-          si.onStarted(s.getName());
-        }
+        }        
       }
+      */
 
       return (Service) newService;
     } catch (Exception e) {

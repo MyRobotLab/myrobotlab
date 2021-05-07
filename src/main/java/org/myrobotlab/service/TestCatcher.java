@@ -457,11 +457,13 @@ public class TestCatcher extends Service implements SerialDataListener, HttpData
 
   public void onRegistered(Registration registration) {
     if (onRegistered != null) {
-      onRegistered.put(registration.getName(), registration);
+      onRegistered.put(registration.getFullName(), registration);
     }
   }
 
   public void onStarted(String serviceName) {
+    String info = String.format("notified --> %s  %s has started", getName(), serviceName);
+    log.info(info);
     onStarted.add(serviceName);
   }
 
