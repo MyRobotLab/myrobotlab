@@ -1346,20 +1346,25 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static void shutdown() {
     try {
-      log.debug("mrl shutdown");
+      log.info("myrobotlab shutting down");
 
       if (runtime != null) {
+        log.info("stopping interactive mode");
         runtime.stopInteractiveMode();
       }
 
+      log.info("pre shutdown on all services");
       for (ServiceInterface service : getServices()) {
         service.preShutdown();
       }
 
+      /* - huge amount of json that is not used
       for (ServiceInterface service : getServices()) {
         service.save();
       }
+      */
 
+      log.info("releasing all");
       releaseAll();
     } catch (Exception e) {
       log.error("something threw - continuing to shutdown", e);

@@ -138,8 +138,8 @@ public abstract class Repo {
       // FIXME reduce down to maven central bintray & repo.myrobotlab.org
       remotes = new ArrayList<RemoteRepo>();
       remotes.add(new RemoteRepo("central", "https://repo.maven.apache.org/maven2", "the mother load"));
-      remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
-      remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more big kahuna"));
+      // remotes.add(new RemoteRepo("bintray", "https://jcenter.bintray.com", "the big kahuna"));
+      // remotes.add(new RemoteRepo("bintray2", "https://dl.bintray.com", "more big kahuna"));
       remotes.add(new RemoteRepo("myrobotlab", "http://repo.myrobotlab.org/artifactory/myrobotlab", "all other mrl deps"));
       remotes.add(new RemoteRepo("sarxos", "http://oss.sonatype.org/content/repositories/snapshots", "for sarxos webcam"));
 
@@ -149,7 +149,7 @@ public abstract class Repo {
       // jai_imageio")); - do not use
       remotes.add(new RemoteRepo("eclipse-release", "https://repo.eclipse.org/content/groups/releases"));
 
-      remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey simulator"));
+      // remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey simulator"));
 
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
       remotes.add(new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));

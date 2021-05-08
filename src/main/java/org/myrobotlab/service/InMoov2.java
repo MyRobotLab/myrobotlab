@@ -61,8 +61,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       error("unable to execute script %s", someScriptName);
     }
   }
-  
-  
+
   /**
    * Part of service life cycle - a new servo has been started
    */
@@ -70,7 +69,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     log.info("{} started");
     try {
       ServiceInterface si = Runtime.getService(fullname);
-      if ("Servo".equals(si.getSimpleName())){
+      if ("Servo".equals(si.getSimpleName())) {
         log.info("sending setAutoDisable true to {}", fullname);
         send(fullname, "setAutoDisable", true);
         // ServoControl sc = (ServoControl)Runtime.getService(name);
@@ -79,11 +78,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.error("onStarted threw", e);
     }
   }
-  
+
   public void onCreated(String fullname) {
     log.info("{} created", fullname);
   }
-
 
   /**
    * This method will load a python file into the python interpreter.
@@ -288,7 +286,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // by default all servos will auto-disable
     // Servo.setAutoDisableDefault(true); //until peer servo services for
     // InMoov2 have the auto disable behavior, we should keep this
-    
+
     // same as created in runtime - send asyc message to all
     // registered services, this service has started
     // find all servos - set them all to autoDisable(true)
@@ -298,7 +296,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       if ("Servo".equals(si.getSimpleName())) {
         send(si.getFullName(), "setAutoDisable", true);
       }
-    } 
+    }
 
     locales = Locale.getLocaleMap("en-US", "fr-FR", "es-ES", "de-DE", "nl-NL", "ru-RU", "hi-IN", "it-IT", "fi-FI", "pt-PT", "tr-TR");
     locale = Runtime.getInstance().getLocale();
