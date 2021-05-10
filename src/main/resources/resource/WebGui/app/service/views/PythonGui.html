@@ -1,9 +1,8 @@
 <!-- file menu button bar begin -->
 <div class="row">
-    <div class="form-inline col-md-6">
+    <div class="form-inline col-md-12">
         <button ng-click="newFile = !newFile" class="btn btn-default">
-            <span class="glyphicon glyphicon-file">new
-        
+            <span class="glyphicon glyphicon-file">new        
         </button>
         <div class="btn-group" uib-dropdown is-open="status.isopen">
             <button class="btn btn-default uib-dropdown-toggle" type="button" data-toggle="dropdown">examples</button>
@@ -22,20 +21,15 @@
         </div>
         <button class="btn btn-default" ng-click="exec()">
             <span class="glyphicon glyphicon-play"></span>
-            execute        
-        
-        
+            execute       
         </button>
         <button class="btn btn-default" ng-click="msg.stop()">
             <span class="glyphicon glyphicon-stop"></span>
             stop
-        
-        
         </button>
         <button class="btn btn-default" ng-click="loadFile=!loadFile">
             <span class="glyphicon glyphicon-open-file"></span>
             open
-        
         </button>
         <button class="btn btn-default" ng-click="export()">
             <span class="glyphicon glyphicon-export">export
@@ -70,7 +64,7 @@
                     </button>
                 </span>
             </uib-tab-heading>
-            <div ng-model="scripts[key].code" style="height: 500px;width: 50%;" id="$index" ui-ace="{
+            <div ng-model="scripts[key].code" style="height: 500px;width: 100%;" id="$index" ui-ace="{
 		                                       useWrapMode : false,
 		                                       showGutter: true,		                                       
                                                theme:'chrome',
@@ -82,5 +76,7 @@
     </uib-tabset>
 </div>
 <div class="row">
-    <pre>{{log}}</pre>
+ <uib-tabset active="activePill">
+    <uib-tab index="0" heading="console"><pre>{{log}}</pre></uib-tab>
+  </uib-tabset>
 </div>

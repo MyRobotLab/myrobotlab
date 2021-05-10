@@ -185,6 +185,13 @@ public class Python extends Service {
   protected int newScriptCnt = 0;
 
   /**
+   * Any script executed is put in a openedScripts map... Helpful in IDE
+   * displays
+   */
+  protected boolean openOnExecute = true;
+
+
+  /**
    * Get a compiled version of the python call.
    * 
    * @param name
@@ -409,7 +416,8 @@ public class Python extends Service {
 
     /*
      * don't respect java accessibility, so that we can access protected members
-     * on subclasses - NO ! - future versions of java will not allow this ! removing (GroG 20210404)
+     * on subclasses - NO ! - future versions of java will not allow this !
+     * removing (GroG 20210404)
      */
     // props.put("python.security.respectJavaAccessibility", "false");
     props.put("python.import.site", "false");
@@ -439,8 +447,8 @@ public class Python extends Service {
   /**
    * execute code
    */
-  public void exec(String code) {
-    exec(code, true);
+  public boolean exec(String code) {
+    return exec(code, true);
   }
 
   /**
@@ -519,15 +527,30 @@ public class Python extends Service {
   public void execAndWait(String code) {
     exec(code, true);
   }
-
-  /*
+  
+  /**
    * executes an external Python file
    * 
-   * @param filename the full path name of the python file to execute
+   * @param filename
+   *          the full path name of the python file to execute
    */
-  public void execFile(String filename) throws IOException {
+  public boolean execFile(String filename) throws IOException {
+    return execFile(filename, true);
+  }
+
+
+  /**
+   * executes an external Python file
+   * @param filename
+   * @param block
+   * @throws IOException
+   */
+  public boolean execFile(String filename, boolean block) throws IOException {
     String script = FileIO.toString(filename);
-    exec(script);
+    if (openOnExecute) {
+      openScript(filename, script);
+    }
+    return exec(script);
   }
 
   /**
@@ -769,80 +792,28 @@ public class Python extends Service {
     return script;
   }
 
+  public boolean isOpenOnExecute() {
+    return openOnExecute;
+  }
+
+  public void setOpenOnExecute(boolean openOnExecute) {
+    this.openOnExecute = openOnExecute;
+  }
+
   public static void main(String[] args) {
-    LoggingFactory.init(Level.INFO);
-
-    Python python = (Python) Runtime.start("python", "Python");
-
-    python.exec("a = 12");
-    PyObject pyobject = python.getPyObject("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyInteger) pyobject).getValue());
-
-    python.exec("a = 12.7");
-    pyobject = python.getPyObject("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyFloat) pyobject).getValue());
-
-    python.exec("a = ['foo','bar']");
-    pyobject = python.getPyObject("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyList) pyobject).getArray());
-
-    python.exec("a = {'foo':1, 'bar':2}");
-    pyobject = python.getPyObject("a");
-    pyobject.getType();
-    log.info("a of type {} is {}", pyobject.getType(), ((PyDictionary) pyobject));
-
-    python.exec("b = 7.356");
-    Double b = (Double) python.get("b");
-    log.info("b = {}", b);
-
-    python.exec("c = [1,2,3]");
-    Object[] c = (Object[]) python.get("c");
-    log.info("c = {}", c);
-
-    python.exec("d = {'foo':True, 'bar':False}");
-    Map d = (Map) python.get("d");
-    log.info("foo = {}", d.get("foo"));
-
-    // Runtime.start("webgui", "WebGui");
-    Runtime.start("gui", "SwingGui");
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
     try {
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init("INFO");
 
-      File test = new File("file:/D:/local");
-      File example = new File("https://raw.githubusercontent.com/MyRobotLab/pyrobotlab/develop/service/Clock.py");
-
-      log.info("{}", test.toURI().toURL());
-      log.info("{}", example.toURI().toURL());
-
-      // Runtime.start("gui", "SwingGui");
-      // String f = "C:\\Program Files\\blah.1.py";
-      // log.info(getName(f));
-
-      // python.error("this is an error");
-      // python.loadScriptFromResource("VirtualDevice/Arduino.py");
-      // python.execAndWait();
-      // python.releaseService();
-
-      /*
-       * python.load(); python.save();
-       * 
-       * FileOutputStream fos = new FileOutputStream("python.dat");
-       * ObjectOutputStream out = new ObjectOutputStream(fos);
-       * out.writeObject(python); out.close();
-       * 
-       * FileInputStream fis = new FileInputStream("python.dat");
-       * ObjectInputStream in = new ObjectInputStream(fis); Object x =
-       * in.readObject(); in.close();
-       * 
-       * Runtime.createAndStart("gui", "SwingGui");
-       */
+      // Runtime.start("i01.head.rothead", "Servo");
+      // Runtime.start("i01.head.neck", "Servo");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+      Python python = (Python) Runtime.start("python", "Python");
+      python.execFile("data/adafruit.py");
+      
+      Runtime.start("i01", "InMoov2");
 
     } catch (Exception e) {
       log.error("main threw", e);

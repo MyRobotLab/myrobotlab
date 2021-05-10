@@ -75,19 +75,34 @@ public class Joystick extends Service {
 
   Map<String, Set<MRLListener>> idAndServiceSubscription = new HashMap<String, Set<MRLListener>>();
 
-  List<Component> hardwareComponents; // holds the
+  protected List<Component> hardwareComponents;
 
+  /**
+   * non serializable hardware rumblers
+   */
   transient Rumbler[] hardwareRumblers;
 
-  transient InputPollingThread pollingThread = null;
+  final protected Poller poller = new Poller();
 
+  /**
+   * polling state
+   */
   boolean isPolling = false;
 
+  /**
+   * name to index map of controllers
+   */
   TreeMap<String, Integer> controllerNames = new TreeMap<String, Integer>();
 
-  // FIXME - lame not just last index :P
-  int rumblerIdx; // index for the rumbler being used
-  boolean rumblerOn = false; // whether rumbler is on or off
+  /**
+   * index for the rumbler being used
+   */
+  int rumblerIdx;
+  
+  /**
+   * is rumbler on or off
+   */
+  boolean rumblerOn = false;
 
   /**
    * non-transient serializable definition
@@ -97,25 +112,36 @@ public class Joystick extends Service {
 
   String controller;
 
-  public class InputPollingThread extends Thread {
-
-    public InputPollingThread(String name) {
-      super(name);
+  public class Poller implements Runnable {
+    
+    transient Thread myThread = null;
+    
+    public void run() {      
+      poll();
     }
 
-    public void run() {
-      poll();
+    public synchronized void start() {
+      if (isPolling) {
+        log.warn("already polling");
+        return;
+      }
+      myThread = new Thread(this, String.format("%s_polling", getName()));
+      myThread.start();
+    }
+
+    public synchronized void stop() {
+      isPolling = false;
     }
   }
 
+  /**
+   * main polling loop - data read and published
+   */
   public void poll() {
-
-    // v net.java.games.input.Controller pollingController = null;
-    // v net.java.games.input.Component[] hwComponents = null;
 
     Controller pollingController = null;
     Component[] hwComponents = null;
-
+    isPolling = true;
     while (isPolling) {
       try {
 
@@ -142,14 +168,9 @@ public class Joystick extends Service {
         // iterate through each component and compare last values
         for (int i = 0; i < hwComponents.length; i++) {
 
-          // v net.java.games.input.Component hwComp = hwComponents[i];
           Component hwComp = hwComponents[i];
 
           String id = hwComp.getIdentifier().toString();
-          /*
-           * if (id.equals("3")) { log.info("here"); }
-           */
-
           float input = hwComp.getPollData();
 
           // log.info("", input);
@@ -188,9 +209,9 @@ public class Joystick extends Service {
         Thread.sleep(20);
       } catch (Exception e) {
         log.info("leaving {} polling thread leaving", getName());
-        pollingThread = null;
       }
-    }
+    } // while
+    isPolling = false;
   }
 
   public Joystick(String n, String id) {
@@ -214,21 +235,7 @@ public class Joystick extends Service {
       info("getComponents no controller set");
       return components;
     }
-
     components = hardwareController.getComponentMap();
-
-    /*
-     * hardwareComponents = hardwareController.getComponents(); if
-     * (hardwareComponents.length == 0) {
-     * error("getComponents no Components found"); return components; }
-     * 
-     * info("number of components: " + hardwareComponents.length); for (int i =
-     * 0; i < hardwareComponents.length; i++) { // v
-     * net.java.games.input.Component c = hardwareComponents[i]; Component c =
-     * hardwareComponents[i]; String id = c.getIdentifier().toString(); // v
-     * Component component = new Component(getName(), i, c); // v
-     * log.info("found {}", component); // v components.put(id, component); }
-     */
     return components;
   }
 
@@ -365,20 +372,13 @@ public class Joystick extends Service {
     }
   } // end of setRumbler()
 
-  synchronized public void startPolling() {
+  public void startPolling() {
     log.info("startPolling - starting new polling thread {}_polling", getName());
-    if (pollingThread != null && isPolling == true) {
-      log.warn("already polling, stop polling first");
-      return;
-    }
-    isPolling = true;
-    pollingThread = new InputPollingThread(String.format("%s_polling", getName()));
-    pollingThread.start();
+    poller.start();
   }
 
-  synchronized public void stopPolling() {
-    isPolling = false;
-    pollingThread = null;
+  public void stopPolling() {
+    poller.stop();
   }
 
   public void startService() {
@@ -389,29 +389,12 @@ public class Joystick extends Service {
   public String getController() {
     return controller;
   }
-
-  public void releaseService() {
-    super.releaseService();
-    if (pollingThread != null) {
-      pollingThread.interrupt();
-      isPolling = false;
-    }
+  
+  public void stopService() {
+    super.stopService();
+    stopPolling();
   }
 
-  /*
-   * Map<String, Set<RelativePositionControl>> axisConsumers = new
-   * HashMap<String, Set<RelativePositionControl>>();
-   * 
-   * @Override public void subscribeToAxis(RelativePositionControl
-   * serviceToControl, String axisName) throws Exception {
-   * 
-   * if (serviceToControl.isLocal()){ Set<RelativePositionControl> callbacks =
-   * null; if (axisConsumers.containsKey(axisName)){ callbacks =
-   * axisConsumers.get(axisName); } else { callbacks = new
-   * HashSet<RelativePositionControl>(); } callbacks.add(serviceToControl);
-   * axisConsumers.put(axisName, callbacks); } else { // FIXME - FINISH !! // i
-   * want motor to subscribe to my filtered x axis // subscribe() } }
-   */
   public Component getAxis(String name) {
     if (components == null) {
       error("%s components null - cannot get axis %s", getName(), name);
@@ -509,18 +492,18 @@ public class Joystick extends Service {
   }
 
   public static void main(String args[]) {
-    LoggingFactory.init();
-    LoggingFactory.setLevel("INFO");
     try {
 
+      Runtime.main(new String[] {"--id", "admin", "--from-launcher" });
+      LoggingFactory.init("INFO");
+
       Joystick joy = (Joystick) Runtime.start("joy", "Joystick");
+      Runtime.start("webgui", "WebGui");
 
       boolean done = true;
       if (done) {
         return;
       }
-
-      Runtime.start("gui", "SwingGui");
 
       joy.setController(2);
 
