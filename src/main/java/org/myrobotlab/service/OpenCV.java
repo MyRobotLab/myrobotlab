@@ -395,6 +395,7 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   public static void main(String[] args) throws Exception {
+    try {
 
     // TODO - Avoidance / Navigation Service
     // ground plane
@@ -431,47 +432,18 @@ public class OpenCV extends AbstractComputerVision {
     // recorder.setFormat("webm");
     // recorder.start();
 
-    /**
-     * <pre>
-     * 
-     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
-     *
-     * private void initLiveStream() throws FrameRecorder.Exception {
-     * 
-     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
-     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
-     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-     * frameRecorder.setAudioCodec(0);
-     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
-     * frameRecorder.setFrameRate(frameRate);
-     * frameRecorder.setVideoBitrate(5000);
-     * frameRecorder.setOption("content_type","video/webm");
-     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
-     *
-     *
-     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
-     * grabber.getImageWidth(), grabber.getImageHeight());
-     * recorder.setFormat(grabber.getFormat());
-     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
-     * recorder.setFrameRate(grabber.getFrameRate());
-     * recorder.setVideoBitrate(grabber.getVideoBitrate());
-     * recorder.setVideoCodec(grabber.getVideoCodec());
-     * recorder.setVideoOption("preset", "ultrafast");
-     * recorder.setVideoCodecName("libx264");
-     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
-     * 
-     */
+      boolean done = true;
+      if (done) {
+        return;
+      }
 
-    boolean done = true;
-    if (done) {
-      return;
+      OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
+      cv.addFilter(depth);
+      cv.capture();
+      cv.addFilter("Yolo");
+    } catch (Exception e) {
+      log.error("main threw", e);
     }
-
-    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
-    cv.addFilter(depth);
-    cv.capture();
-    cv.addFilter("Yolo");
 
   }
 
@@ -1507,7 +1479,7 @@ public class OpenCV extends AbstractComputerVision {
   public ArrayList<Rect> publishMotionDetected(ArrayList<Rect> rects) {
     return rects;
   }
-  
+
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine
