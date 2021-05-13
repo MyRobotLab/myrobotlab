@@ -159,6 +159,21 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         nameMethodCallbackMap[key].push(callback)
     }
 
+    this.subscribeTo = function(toServiceName, method, callbackFunctionRef) {
+        // if not fullname make it so...
+        // local subscription
+        let fullname = _self.getFullName(toServiceName)
+        var key = fullname + "." + getCallBackName(method)
+        if (!(key in nameMethodCallbackMap)) {
+            nameMethodCallbackMap[key] = []
+        }
+        nameMethodCallbackMap[key].push(callbackFunctionRef)
+
+        // remote subscription - runtime@id handles all callback for this js client
+        _self.sendTo(fullname, "addListener", method, 'runtime@' + _self.id)
+
+    }
+
     this.subscribeToMethod = function(callback, methodName) {
         if (!(methodName in methodCallbackMap)) {
             methodCallbackMap[methodName] = []
@@ -173,7 +188,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
         status["detail"] = errorstr
         var d = []
         d.push(status)
-        msg = this.createMessage("mrl", "onStatus", d)
+        let msg = this.createMessage("mrl", "onStatus", d)
         let cbs = methodCallbackMap[msg.method]
         for (var i = 0; i < cbs.length; i++) {
             cbs[i](msg)
@@ -366,7 +381,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 msg = jQuery.parseJSON(body)
 
                 // GOOD DEBUGGING
-                // console.info('in-msg --> ' + msg.name + '.' + msg.method)
+                console.info('in-msg --> ' + msg.name + '.' + msg.method)
 
                 if (msg == null) {
                     console.log('msg null')
@@ -1271,6 +1286,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                             }
                             // end switch
                         },
+                        // FIXME - future refactor - just build a key and set desired callback method (or construct it) 
                         subscribeToMethod: function(callback, methodName) {
                             _self.subscribeToMethod(callback, methodName)
                         },
@@ -1425,6 +1441,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             subscribeConnected: _self.subscribeConnected,
             subscribeToMethod: _self.subscribeToMethod,
             subscribeToServiceMethod: _self.subscribeToServiceMethod,
+            subscribeTo: _self.subscribeTo, // better name
             getProperties: _self.getProperties,
             sendMessage: _self.sendMessage // setViewType: _self.setViewType,
             // getViewType: _self.getViewType

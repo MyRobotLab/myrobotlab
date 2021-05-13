@@ -28,7 +28,10 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void addAppender(String type, String filename) {
-
+    if (!(LoggerFactory.getILoggerFactory() instanceof LoggerContext)) {
+      log.warn("addAppender not possible - wrong type of logger {}", LoggerFactory.getILoggerFactory().getClass().getCanonicalName());
+      return;
+    }
     LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
     PatternLayoutEncoder ple = new PatternLayoutEncoder();
 
@@ -83,6 +86,9 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public String getLevel() {
+    if (!(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger)) {
+      return "UNKNOWN";
+    }
     Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     Level level = logger.getLevel();
     if (level.equals(Level.DEBUG)) {
@@ -99,8 +105,10 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAllAppenders() {
-    Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    logger.detachAndStopAllAppenders();
+    if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger) {
+      Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+      logger.detachAndStopAllAppenders();
+    }
   }
 
   @Override
@@ -111,9 +119,11 @@ public class LoggingSLF4J extends Logging {
 
   @Override
   public void removeAppender(String name) {
+    if (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) instanceof Logger) {
 
     Logger logger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     logger.detachAppender(name); // does this stop it too ?
+    }
   }
 
   @Override
