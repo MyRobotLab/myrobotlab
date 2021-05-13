@@ -21,7 +21,8 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'nvd3ChartDirectives', 'ui.ace', //funky editor
 'timer', 'luegg.directives', // scrollglue
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
-'mrlapp.main.mainCtrl', 'mrlapp.main.statusSvc', //very basic service for storing "statuses"
+//'mrlapp.main.mainCtrl', 
+'mrlapp.main.statusSvc', //very basic service for storing "statuses"
 'mrlapp.main.noWorkySvc', //send a noWorky !
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)
@@ -30,76 +31,26 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'ui.select', // select option with images
 'mrlapp.utils'//general, helful tools, directives, services, ...
 ]).config(['$provide', '$stateProvider', '$urlRouterProvider', 'mrlProvider', function($provide, $stateProvider, $urlRouterProvider, mrlProvider) {
-    console.log('app.js - starting');
+    console.info('app.js - starting');
     $urlRouterProvider.otherwise("/service/runtime");
-    $stateProvider.state('loading', {
-        url: "/loading",
-        templateUrl: "main/loading.html",
-        controller: 'loadingCtrl',
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('state loading calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('main', {
-        url: "/main",
-        template: "<div ui-view></div>",
-        controller: 'mainCtrl',
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('state main calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('main.main', {
-        views: {
-            '': {
-                templateUrl: 'main/main.html'
-            },
-            'navbar@main.main': {
-                templateUrl: 'nav/nav.html',
-                controller: 'navCtrl'
-            },
-            'content@main.main': {
-                templateUrl: 'views/mainView.html',
-                controller: 'mainViewCtrl'
-            }
-        },
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('main.main calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('tabs2', {
+    $stateProvider.state('tabs2', {
         url: "/service/:servicename",
-        template: "<div ui-view></div>",
-        controller: 'mainCtrl',
-        resolve: {
-            test: function($stateParams, mrl) {
-                console.log('tabs2 calling mrl.init() from router')
-                return mrl.init();
-            }
-        }
-    }).state('tabs2.main', {
         views: {
             '': {
                 templateUrl: 'main/main.html'
             },
-            'navbar@tabs2.main': {
+            'navbar@tabs2': {
                 templateUrl: 'nav/nav.html',
                 controller: 'navCtrl'
             },
-            'content@tabs2.main': {
+            'content@tabs2': {
                 templateUrl: 'views/tabsView.html',
                 controller: 'tabsViewCtrl'
             }
         },
         resolve: {
             test: function($stateParams, mrl) {
-                console.log('tabs2.main calling mrl.init() from router')
-                return mrl.init();
+                console.info('tabs2.main state in router')
             }
         }
     })
