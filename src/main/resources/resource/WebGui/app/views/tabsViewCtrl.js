@@ -38,7 +38,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '
 
         // if /#/service/{servicename} - change the tab
         if ($scope.servicename) {
-            $scope.changeTab($scope.servicename)
+//            $scope.changeTab($scope.servicename)
         }
     }
 
