@@ -36,18 +36,18 @@
                     <a href="" ng-click="noWorky()">
                         <i class="glyphicon glyphicon-alert"></i>
                         &nbsp;&nbsp;No Worky !
-                    
                     </a>
                 </li>
             </ul>
         </div>
         <div uib-dropdown>
             <span uib-dropdown-toggle class="glyphicon glyphicon-bell nav-icon">
-                <span class="badge badge-danger notification-badge" style="background-color:red;" ng-hide="errorCount + warningCount + infoCount == 0">{{errorCount + warningCount + infoCount}}</span>
+                <span class="badge badge-danger notification-badge" style="background:red" ng-hide="errorCount == 0">{{errorCount}}</span>
+                <span class="badge badge-danger notification-badge" style="background:#f0ad4e" ng-hide="warningCount == 0">{{warningCount}}</span>
+                <span class="badge badge-danger notification-badge" style="background:#31708f" ng-hide="infoCount == 0">{{infoCount}}</span>
             </span>
             <ul id="notification-entries" class="dropdown-menu-right" uib-dropdown-menu>
             <li>
-                Notifications
             </i>
                 <li>
 

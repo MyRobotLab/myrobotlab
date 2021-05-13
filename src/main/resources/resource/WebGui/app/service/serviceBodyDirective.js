@@ -50,7 +50,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     }
 
                     newscope.export = function() {
-                        mrl.sendTo(scope.panel.name, 'exportAll')
+                        mrl.sendTo(scope.panel.name, 'export')
                     }
 
                     var header = $templateCache.get('service/tab-header.html')
