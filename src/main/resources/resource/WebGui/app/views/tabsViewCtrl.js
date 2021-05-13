@@ -1,4 +1,4 @@
-angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
+angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$location','$scope', '$log', '$filter', '$timeout', 'mrl', '$state', '$stateParams', function($location, $scope, $log, $filter, $timeout, mrl, $state, $stateParams) {
     $log.info('tabsViewCtrl $scope.$id - ' + $scope.$id)
     _self = this
 
@@ -36,6 +36,7 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
             $scope.changeTab($scope.panels[0].name)
         }
 
+        // if /#/service/{servicename} - change the tab
         if ($scope.servicename) {
             $scope.changeTab($scope.servicename)
         }
@@ -48,6 +49,28 @@ angular.module('mrlapp.mrl').controller('tabsViewCtrl', ['$scope', '$log', '$fil
             // lame hack rzSlider recommened
             $scope.$broadcast('rzSliderForceRender')
         })
+        var newId = "s1"
+        // $location.path('service/' + tab, false)
+        // $state.go('tabs2','/service/' + tab)
+
+        $state.transitionTo('tabs2', {id: tab}, {
+            location: true,
+            inherit: true,
+            relative: $state.$current,
+            notify: false
+        })
+
+        $state.go('tabs2', { servicename: tab }, {notify:false, reload:true})
+        // $state.go($state.current, {}, {reload: true})
+        /*
+        $state.transitionTo('tabs2', {
+            id: newId
+        }, {
+            location: true,
+            inherit: true,
+            relative: $state.$current,
+            notify: false
+        })*/
     }
 
     $scope.searchText = {// displayName: ""

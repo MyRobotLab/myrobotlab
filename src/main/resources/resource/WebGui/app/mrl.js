@@ -843,16 +843,6 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
             mrl.sendTo(_self.gateway.name, "savePanel", _self.getPanelData(name))
         }
 
-        /*
-        _self.setViewType = function(viewType) {
-            _self.viewType = viewType
-        }
-
-        _self.getViewType = function() {
-            return _self.viewType
-        }
-        */
-
         /**
          * return a flattened sorted array of properties for input service
          * TODO - add exclude replacement and info parameters
@@ -1401,23 +1391,12 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 _self.addService(service)
             },
             init: function() {
-                console.debug('mrl.init')
-                if (connected) {
-                    console.debug('connected')
-                    return true
-                }
-                if (connecting) {
-                    console.debug('connecting')
-                    return false
-                }
-
+                console.debug('mrl.init connected ' + connected + ' connecting ' +  connecting)
                 _self.connect()
-                // return deferred.promise
             },
             isConnected: function() {
                 return connected
             },
-
             noWorky: function(userId) {
                 console.debug('mrl-noWorky', userId)
                 _self.sendTo(runtime.name + '@' + _self.remoteId, "noWorky", userId)
