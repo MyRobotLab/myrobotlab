@@ -2373,14 +2373,28 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String export() throws IOException {
-    // FIXME - interaction with user if file exists ?
-    String filename = getRootDataDir() + fs + getName() + ".py";
+    File check = new File(getDataDir() + fs + getName() + ".py");
+    if (check.exists()) {
+      error("file %s already exists", check);
+      return null;
+    }    
     return export(getDataDir() + fs + getName() + ".py", getName());
   }
 
+  
   public String exportAll() throws IOException {
     // FIXME - interaction with user if file exists ?
     return exportAll(getRootDataDir() + fs + "export.py");
+  }
+  
+  /**
+   * Export the current service to file named given
+   * @param filename
+   * @return
+   * @throws IOException
+   */
+  public String export(String filename) throws IOException {
+    return export(filename, getName());
   }
 
   public String export(String filename, String names) throws IOException {

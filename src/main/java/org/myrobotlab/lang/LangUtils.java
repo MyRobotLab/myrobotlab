@@ -11,10 +11,12 @@ import java.util.TreeSet;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
 
 // service life-cycle
@@ -153,7 +155,12 @@ public class LangUtils {
       if (si.isRuntime()) {
         continue;
       }
-      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safeRefName(si), si.getName(), si.getSimpleName()));
+      String safename = safeRefName(si);
+      sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
+      String localeTag =((Service)si).getLocaleTag();
+      if (localeTag != null) {
+        sb.append(String.format("%s.setLocale('%s')\n", safename, localeTag));
+      }
       // do peers with comments
       // top level peers - others commented out
     }

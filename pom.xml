@@ -8,10 +8,10 @@
     export PATH=$JAVA_HOME/bin:$PATH
 
     # shows system vars and env vars
-    mvn -DskipTests -Dbuild.number=71 help:system
+    mvn -DskipTests -DBUILD_NUMBER=71 help:system
     
     # fast build
-    mvn -DskipTests -Dbuild.number=180 compile package -o 
+    mvn -DskipTests -DBUILD_NUMBER=180 compile package -o 
 
     # compile only sync with raspi
     rsync -zarvh target/classes pi@192.168.0.104:/opt/mrl/myrobotlab/target
