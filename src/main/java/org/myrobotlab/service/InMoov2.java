@@ -52,13 +52,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * 
    * @param someScriptName
    */
-  public void execScript(String someScriptName) {
+  public boolean execScript(String someScriptName) {
     try {
       Python p = (Python) Runtime.start("python", "Python");
       String script = getResourceAsString(someScriptName);
-      p.exec(script, true);
+      return p.exec(script, true);
     } catch (Exception e) {
       error("unable to execute script %s", someScriptName);
+      return false;
     }
   }
 
@@ -95,15 +96,20 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.error("Python instance not found");
       return false;
     }
-    String script = null;
+
+    boolean result = false;
     try {
-      script = FileIO.toString(f.getAbsolutePath());
+      // This will open a gazillion tabs in InMoov
+      // result = p.execFile(f.getAbsolutePath(), true);
+
+      // old way - not using execFile :(
+      String script = FileIO.toString(f.getAbsolutePath());
+      result = p.exec(script, true);
     } catch (IOException e) {
       log.error("IO Error loading file : ", e);
       return false;
     }
-    // evaluate the scripts in a blocking way.
-    boolean result = p.exec(script, true);
+
     if (!result) {
       log.error("Error while loading file {}", f.getAbsolutePath());
       return false;
@@ -260,11 +266,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   transient InMoov2Arm rightArm;
 
   transient InMoov2Hand rightHand;
-
-  /**
-   * used to remember/serialize configuration the user's desired speech type
-   */
-  String speechService = "MarySpeech";
 
   transient InMoov2Torso torso;
 
@@ -729,7 +730,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     setLocale(locale);
   }
 
-  // FIXME - what is this for ???
   public void loadGestures() {
     loadGestures(getResourceDir() + fs + "gestures");
   }
@@ -1109,8 +1109,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public String setSpeechType(String speechType) {
-    speechService = speechType;
-    // setPeer("mouth", speechType); needs to be done a better way
+    // speechService = speechType;
+    serviceType.setPeer("mouth", speechType);
+    broadcastState();
     return speechType;
   }
 
@@ -1145,7 +1146,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     if (mouth != null) {
       mouth.setVoice(name);
       voiceSelected = name;
-      speakBlocking(get("SETLANG"), "%s", name);
+      speakBlocking(String.format("%s %s", get("SETLANG"), name));
     }
   }
 
@@ -1472,10 +1473,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // TODO - general objective "might" be to reduce peers down to something
   // that does not need a reference - where type can be switched before creation
-  // and the onnly thing needed is pubs/subs that are not handled in abstracts
+  // and the only thing needed is pubs/subs that are not handled in abstracts
   public SpeechSynthesis startMouth() {
 
+    // FIXME - bad to have a reference, shuld only need the "name" of the
+    // service !!!
     mouth = (SpeechSynthesis) startPeer("mouth");
+
     voices = mouth.getVoices();
     Voice voice = mouth.getVoice();
     if (voice != null) {

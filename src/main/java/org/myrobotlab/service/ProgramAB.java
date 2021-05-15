@@ -1055,7 +1055,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
     try {
       FileIO.toFile(f, data.getBytes("UTF8"));
-      info("saved %s", filename);
+      info("saved %s", f);
     } catch (IOException e) {
       log.error("getAimlFile threw", e);
     }

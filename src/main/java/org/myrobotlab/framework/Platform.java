@@ -209,20 +209,6 @@ public class Platform implements Serializable {
         if (platform.commit != null) {
           platform.shortCommit = platform.commit.substring(0, 7);
         }
-
-        gitProp = gitProps.getProperty("git.build.time");
-        // 2020-08-23T18:36:27-0700
-        if (gitProp != null) {
-          try {
-            // String isoDatePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-            String pattern = "yyyy-MM-dd'T'HH:mm:ssZ";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
-            Date d = simpleDateFormat.parse(gitProp);
-            platform.mrlVersion = Platform.VERSION_PREFIX + d.getTime() / 1000;
-          } catch (Exception e) {
-            log.error("parsing date threw", e);
-          }
-        }
       }
 
       // motd
