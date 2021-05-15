@@ -1152,13 +1152,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-kuromoji</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- ProgramAB end -->
@@ -1256,13 +1256,13 @@
   <dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-core</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-core</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1274,7 +1274,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-test-framework</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -1286,7 +1286,7 @@
   <dependency>
     <groupId>org.apache.solr</groupId>
     <artifactId>solr-solrj</artifactId>
-    <version>8.6.3</version>
+    <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
 <!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
