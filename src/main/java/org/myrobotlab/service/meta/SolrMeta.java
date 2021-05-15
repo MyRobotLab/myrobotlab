@@ -20,7 +20,7 @@ public class SolrMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("Solr Service - Open source search engine");
     addCategory("search");
-    String solrVersion = "8.6.3";
+    String solrVersion = "8.8.2";
     String luceneVersion = solrVersion;
     addDependency("org.apache.lucene", "lucene-core", luceneVersion);
     addDependency("org.apache.solr", "solr-core", solrVersion);
