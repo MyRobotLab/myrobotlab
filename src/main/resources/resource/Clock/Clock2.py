@@ -45,13 +45,10 @@ def onPulse(timedata):
 
 # Finally, we need to start the clock.
 clock.startClock(1)
-sleep(5)
 
 # If the clock is used as part of a watchdog service or a sleep timer,
 # we may need to restart the clock
-clock.restartClock(1)
-sleep(5)
+# clock.restartClock(1)
 
 # When we don't need the clock running, then we can stop it.
-clock.stopClock()
-sleep(5)
+# clock.stopClock()
