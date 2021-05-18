@@ -1,0 +1,1 @@
+clock.setInterval(1000)
