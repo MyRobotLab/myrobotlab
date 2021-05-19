@@ -455,4 +455,9 @@ public class TimeEncoder implements Runnable, EncoderControl {
     // TODO Auto-generated method stub
 
   }
+
+  @Override
+  public void attachEncoderListener(EncoderListener listener) {
+    // TODO: Probably not supported unless the TimerEncoder is actually a full blown service.
+  }
 }

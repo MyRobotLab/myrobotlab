@@ -12,6 +12,7 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.sensor.EncoderData;
+import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.sensor.EncoderPublisher;
 import org.myrobotlab.serial.CRC;
 import org.myrobotlab.service.Pid.PidData;
@@ -2363,6 +2364,11 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
     }
   }
 
+  public void attachEncoderListener(EncoderListener enc) {
+    // subscribe the onEncoderData of the listener.
+    addListener("publishEncoderData", enc.getName(), "onEncoderData");
+  }
+  
   @Override
   public EncoderData publishEncoderData(EncoderData data) {
     return data;

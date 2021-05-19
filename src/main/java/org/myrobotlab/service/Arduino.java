@@ -349,6 +349,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     // send the attach method with our device id.
     msg.encoderAttach(m.getId(), type, address);
 
+    addListener("publishEncoderData", encoder.getName());
     encoder.attach(this);
 
   }
@@ -1602,27 +1603,26 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   // callback for generated method from arduinoMsg.schema
   public EncoderData publishEncoderData(Integer deviceId, Integer position) {
-    // Also need to log this
-
+    // This is the raw data coming back from the arduino
     EncoderControl ec = (EncoderControl) getDevice(deviceId);
     String pin = null;
     Double angle = null;
     if (ec instanceof Amt203Encoder) {
       // type = 0;
       pin = ((Amt203Encoder) ec).getPin();
+      angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
     } else if (ec instanceof As5048AEncoder) {
       // type = 1;
       pin = ((As5048AEncoder) ec).getPin();
       angle = 360.0 * position / ((As5048AEncoder) ec).resolution;
-      log.info("Angle : {}", angle);
+      //log.info("Angle : {}", angle);
     } else {
       error("unknown encoder type {}", ec.getClass().getName());
     }
-
+    // TODO: consolidate some of this logic .. some of it is assmebled here..
+    // other data is also computed in the AbstractPinEncoder
     EncoderData data = new EncoderData(ec.getName(), pin, position, angle);
-    // log.info("Publish Encoder Data Raw {}", data);
-
-    // TODO: all this code needs to move out of here!
+    //log.info("Publish encoder data {}", data);
     return data;
   }
 
