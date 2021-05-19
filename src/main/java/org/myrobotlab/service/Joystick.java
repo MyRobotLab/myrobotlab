@@ -160,7 +160,7 @@ public class Joystick extends Service {
         }
 
         // get the data
-        if (!pollingController.poll()) {
+        if (isPolling && !pollingController.poll()) {
           error("failed to poll controller");
           stopPolling();
         }
@@ -216,16 +216,6 @@ public class Joystick extends Service {
 
   public Joystick(String n, String id) {
     super(n, id);
-    // we will force a system property here to specify the native location for
-    // the
-    // jinput libraries
-    // TODO: this is a hacky work around because for some reason, the jinput
-    // natives
-    // aren't found from the jinput-platform jar files!!
-    String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
-    System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
-    String[] controllers = getControllerNames();
-    info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
   }
 
   // FIXME - simply set components e.g. getComponents
@@ -383,6 +373,17 @@ public class Joystick extends Service {
 
   public void startService() {
     super.startService();
+    // we will force a system property here to specify the native location for
+    // the
+    // jinput libraries
+    // TODO: this is a hacky work around because for some reason, the jinput
+    // natives
+    // aren't found from the jinput-platform jar files!!
+    String jinputNativePath = new java.io.File(".").getAbsolutePath() + File.separatorChar + "jinput-natives";
+    System.getProperties().setProperty("net.java.games.input.librarypath", jinputNativePath);
+    String[] controllers = getControllerNames();
+    info("found %d controllers %s", controllers.length, Arrays.toString(controllers));
+    
     invoke("getControllers");
   }
 
