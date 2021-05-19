@@ -68,10 +68,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -Dbuild.number=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
                }
             }
          }
