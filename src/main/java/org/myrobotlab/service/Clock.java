@@ -69,8 +69,9 @@ public class Clock extends Service {
           }
 
           if (!NoExecutionAtFirstClockStarted) {
-            invoke("pulse", new Date());
-            invoke("publishTime", new Date());
+            invoke("pulse", now);
+            invoke("publishTime", now);
+            invoke("publishEpoch", now);
           }
           Thread.sleep(interval);
           NoExecutionAtFirstClockStarted = false;
@@ -116,6 +117,9 @@ public class Clock extends Service {
     broadcastState();
   }
 
+  /**
+   * The clock was stopped event
+   */
   public void publishClockStopped() {
     running = false;
     broadcastState();
@@ -125,12 +129,22 @@ public class Clock extends Service {
     }
   }
 
+  /**
+   * Date is published at an interval here
+   * 
+   * @param time
+   * @return
+   */
   public Date pulse(Date time) {
     return time;
   }
 
   public Date publishTime(Date time) {
     return time;
+  }
+  
+  public long publishEpoch(Date time) {
+    return time.getTime();
   }
 
   public void setInterval(Integer milliseconds) {
@@ -170,7 +184,7 @@ public class Clock extends Service {
   public void stopClock() {
     stopClock(false);
   }
-  
+
   public boolean isClockRunning() {
     return running;
   }
@@ -200,34 +214,41 @@ public class Clock extends Service {
   }
 
   public static void main(String[] args) throws Exception {
-    // LoggingFactory.init(Level.WARN);
-    Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
+    try {
+      // LoggingFactory.init(Level.WARN);
+      Runtime.main(new String[] { "--id", "c3", "--from-launcher", "--log-level", "WARN" });
 
-    // connections
-    boolean mqtt = true;
-    boolean rconnect = false;
+      // connections
+      boolean mqtt = true;
+      boolean rconnect = false;
 
-    /*
-     * 
-     * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
-     * webgui.setSsl(true); webgui.autoStartBrowser(false);
-     * webgui.setPort(8887); webgui.startService();
-     */
-    if (mqtt) {
-      // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
-      Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
       /*
-      mqtt02.setCert("certs/home-client/rootCA.pem", "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
-      mqtt02.connect("mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
-      */
-      // mqtt02.connect("mqtt://broker.emqx.io:1883");
-      mqtt02.connect("mqtt://localhost:1883");
-    }
+       * 
+       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui"); //
+       * webgui.setSsl(true); webgui.autoStartBrowser(false);
+       * webgui.setPort(8887); webgui.startService();
+       */
+      if (mqtt) {
+        // Mqtt mqtt02 = (Mqtt)Runtime.create("broker", "MqttBroker");
+        Mqtt mqtt02 = (Mqtt) Runtime.start("mqtt02", "Mqtt");
+        /*
+         * mqtt02.setCert("certs/home-client/rootCA.pem",
+         * "certs/home-client/cert.pem.crt", "certs/home-client/private.key");
+         * mqtt02.connect(
+         * "mqtts://a22mowsnlyfeb6-ats.iot.us-west-2.amazonaws.com:8883");
+         */
+        // mqtt02.connect("mqtt://broker.emqx.io:1883");
+        mqtt02.connect("mqtt://localhost:1883");
+      }
 
-    if (rconnect) {
-      Runtime runtime = Runtime.getInstance();
-      runtime.connect("http://localhost:8888");
+      if (rconnect) {
+        Runtime runtime = Runtime.getInstance();
+        runtime.connect("http://localhost:8888");
 
+      }
+
+    } catch (Exception e) {
+      log.error("main threw", e);
     }
   }
 
