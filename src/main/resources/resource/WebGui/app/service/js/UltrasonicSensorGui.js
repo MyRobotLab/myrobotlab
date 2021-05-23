@@ -1,40 +1,38 @@
 angular.module('mrlapp.service.UltrasonicSensorGui', [])
 .controller('UltrasonicSensorGuiCtrl', ['$scope', '$log', 'mrl', function($scope, $log, mrl) {
-    $log.info('UltrasonicSensorGuiCtrl');
-    var _self = this;
-    var msg = this.msg;
+    $log.info('UltrasonicSensorGuiCtrl')
+    var _self = this
+    var msg = this.msg
     
     // GOOD TEMPLATE TO FOLLOW
     this.updateState = function(service) {
-        $scope.service = service;
+        $scope.service = service
     }
-    ;
-   
     
     // init scope variables
-    $scope.pulseData = '';
+    $scope.pulseData = ''
     
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
         case 'onState':
-                _self.updateState(inMsg.data[0]);
-            break;
+                _self.updateState(inMsg.data[0])
+            break
         case 'onPulse':
-                $scope.pulseData = inMsg.data[0];
-            break;
+                $scope.pulseData = inMsg.data[0]
+            break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method);
-            break;
+            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            break
         }
     }
-    ;
+    
 
     $scope.options = {
             chart: {
                 type: 'multiBarHorizontalChart',
                 height: 450,
-                x: function(d){return d.label;},
-                y: function(d){return d.value;},
+                x: function(d){return d.label},
+                y: function(d){return d.value},
                 showControls: true,
                 showValues: true,
                 duration: 500,
@@ -44,11 +42,11 @@ angular.module('mrlapp.service.UltrasonicSensorGui', [])
                 yAxis: {
                     axisLabel: 'Values',
                     tickFormat: function(d){
-                        return d3.format(',.2f')(d);
+                        return d3.format(',.2f')(d)
                     }
                 }
             }
-        };
+        }
 
         $scope.data = [
             {
@@ -135,9 +133,9 @@ angular.module('mrlapp.service.UltrasonicSensorGui', [])
                     }
                 ]
             }
-        ];
+        ]
     
-    msg.subscribe('range');
-    msg.subscribe(this);
+    msg.subscribe('range')
+    msg.subscribe(this)
 }
-]);
+])

@@ -1,7 +1,8 @@
-angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scope', '$log', 'mrl', '$uibModal', function($scope, $log, mrl, $uibModal) {
+angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer','$scope', '$log', 'mrl', '$uibModal', function(peer, $scope, $log, mrl, $uibModal) {
     $log.info('PollyGuiCtrl')
     var _self = this
     var msg = this.msg
+
 
 	// new selected voice "container" - since it comes from a map next leaves are
 	// key & value ... value contains the entire voice selected
@@ -14,10 +15,10 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
 		if (service.voice){
 			$scope.newVoice.selected = { 'key':service.voice.name, 'value':service.voice }			
 		}
+		let p = peer.getPeerType(service,'audioFile')
+		let a = peer.isPeerActive(service,'audioFile')
 		$scope.$apply()
 	}
-
-    // console.log('mary', $scope.service)
 
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
@@ -35,6 +36,7 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['$scop
     // theml e.g. msg.speak - so got to figure that out or temporarily create a $scope.speak kludge
     $scope.speak = function(text){
         msg.send("speak", text)
+
         //console.log($scope.service.voice.name)
     }
 
