@@ -957,10 +957,13 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
 
                 posX: x,
                 posY: y,
+
                 width: width,
                 height: height,
                 zIndex: zIndex,
                 hide: false,
+
+                showPeers: false,
 
                 // FIXME  - remove this use mrl panel methods
                 svc: _self,

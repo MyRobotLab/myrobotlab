@@ -14,6 +14,11 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
             })
             */
 
+            if (!scope.panel){
+                    console.error('service directive panel is null')
+                    return
+            }
+
             scope.panel.notifySizeYChanged = function(height) {
                 elem.css({
                     height: height + 'px'
@@ -35,8 +40,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
             }, function() {
                 if (!isUndefinedOrNull(scope.panel.scope)) {
                     watch()
-                    console.info('================ got scope! using it', scope.panel.name)
+                    console.info('=== creating new scope for service ', scope.panel.name)
                     var newscope = scope.panel.scope
+                    newscope.parentPanel = scope.panel
+                    
                     newscope.updateServiceData = function() {
                         //get an updated / fresh servicedata & convert it to json
                         var servicedata = mrl.getService(scope.panel.name)
@@ -47,6 +54,10 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         var service = mrl.getService(scope.panel.name)
                         //service.isVirtual = !service.isVirtual
                         mrl.sendTo(scope.panel.name, 'setVirtual', virtual)
+                    }
+
+                    newscope.showPeers = function(show) {
+                        scope.panel.showPeers = show
                     }
 
                     newscope.export = function() {
