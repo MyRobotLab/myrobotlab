@@ -90,5 +90,11 @@ public class WebkitSpeechRecognition extends AbstractSpeechRecognizer {
         "zh-cmn-Hant-TW", "zh-yue-Hant-HK", "zh-cmn-Hans-CN");
     return ret;
   }
+  
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 
 }

@@ -811,7 +811,7 @@ public class Python extends Service {
       webgui.autoStartBrowser(false);
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
-      python.execFile("data/adafruit.py");
+      //python.execFile("data/adafruit.py");
       
       Runtime.start("i01", "InMoov2");
 

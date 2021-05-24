@@ -267,8 +267,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   @Override
   @Deprecated /* use standard attachTextListener */
   public void addTextListener(TextListener service) {
-    addListener("publishText", service.getName());
-
+    attachTextListener(service.getName());
   }
 
   @Override
@@ -279,7 +278,7 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
 
   @Override
   public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
 
   public static void main(String[] args) {
@@ -359,6 +358,11 @@ public class GoogleSearch extends Service implements TextPublisher, SearchPublis
   @Override
   public Map<String, Locale> getLocales() {
     return Locale.getAvailableLanguages();
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

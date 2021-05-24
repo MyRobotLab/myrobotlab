@@ -631,4 +631,9 @@ public class Sphinx extends AbstractSpeechRecognizer {
     return Locale.getLocaleMap("en-US");
   }
 
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 }
