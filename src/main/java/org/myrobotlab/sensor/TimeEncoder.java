@@ -455,4 +455,10 @@ public class TimeEncoder implements Runnable, EncoderControl {
     // TODO Auto-generated method stub
 
   }
+
+  @Override
+  public Set<String> getAttached(String publishingPoint) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

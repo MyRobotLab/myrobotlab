@@ -167,10 +167,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     attachTextListener(service);
   }
 
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(SpeechSynthesis service) {
     addListener("publishText", service.getName(), "onText");
   }
 
+  @Deprecated /* use standard attachTextPublisher */
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
   }
@@ -948,8 +950,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.warn("{}.attachTextListener(null)");
       return;
     }
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
+  
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 
   @Override
   public void attachTextPublisher(TextPublisher service) {

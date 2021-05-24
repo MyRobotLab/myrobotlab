@@ -125,7 +125,8 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       log.warn("{}.attachTextListener(null)");
       return;
     }
-    addListener("publishText", service.getName());
+    
+    attachTextListener(service.getName());
   }
 
   @Override
@@ -135,6 +136,11 @@ public class HtmlFilter extends Service implements TextListener, TextPublisher {
       return;
     }
     subscribe(service.getName(), "publishText");
+  }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
   }
 
 }

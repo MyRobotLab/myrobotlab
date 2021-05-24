@@ -190,7 +190,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * order which this service was created
    */
-  Integer creationOrder;
+  int creationOrder = 0;
 
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
@@ -2224,8 +2224,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public Set<String> getAttached() {
-    return outbox.getAttached();
+    // return all attached
+    return outbox.getAttached(null);
   }
+  
+  /**
+   * returns all currently attached services to a specific publishing point
+   */
+  @Override
+  public Set<String> getAttached(String publishPoint) {
+    return outbox.getAttached(publishPoint);
+  }
+
 
   /**
    * This attach when overriden "routes" to the appropriately typed
@@ -2691,6 +2701,21 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return false;
     }
     return true;
+  }
+
+  @Override
+  public int compareTo(ServiceInterface o) {
+    if (this.creationOrder == o.getCreationOrder()) {
+      return 0;
+    }
+    if (this.creationOrder < o.getCreationOrder()) {
+      return -1;
+    }
+    return 1;
+  }
+
+  public int getCreationOrder() {
+    return creationOrder;
   }
 
 }

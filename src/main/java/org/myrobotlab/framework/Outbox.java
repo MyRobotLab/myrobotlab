@@ -80,11 +80,15 @@ public class Outbox implements Runnable, Serializable {
     this.myService = myService;
   }
 
-  public Set<String> getAttached() {
+  public Set<String> getAttached(String publishingPoint) {    
     Set<String> unique = new TreeSet<>();
-    for (List<MRLListener> subcribers : notifyList.values()) {
+    for (List<MRLListener> subcribers : notifyList.values()) {      
       for (MRLListener listener : subcribers) {
-        unique.add(listener.callbackName);
+        if (publishingPoint == null) {
+            unique.add(listener.callbackName);
+        } else if (listener.topicMethod.equals(publishingPoint)) {
+            unique.add(listener.callbackName);
+        }
       }
     }
     return unique;
@@ -269,11 +273,12 @@ public class Outbox implements Runnable, Serializable {
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
         if (sw == null) {
-          log.info("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+          log.debug("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+          /*
           ServiceInterface sender = Runtime.getService(msg.sender);
           if (sender != null) {
             sender.removeListener(msg.sendingMethod, msg.getName(), msg.method);
-          }
+          } */ // removed by GroG 20210523
           return;
         }
 

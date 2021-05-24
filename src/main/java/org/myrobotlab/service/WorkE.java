@@ -811,8 +811,10 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       log.error("worke no worky !", e);
     }
   }
-  /**
-   * </pre>
-   */
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
 
 }

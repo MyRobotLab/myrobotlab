@@ -195,4 +195,9 @@ public class I2CBus implements Attachable, I2CBusControl {
 
   }
 
+  @Override
+  public Set<String> getAttached(String publishingPoint) {
+    return getAttached();
+  }
+
 }
