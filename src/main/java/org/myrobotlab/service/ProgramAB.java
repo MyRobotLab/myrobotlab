@@ -482,8 +482,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * publish the contents of the mrl tag from an oob message in the aiml.  
-   * The result of this is displayed in the chatbot debug console.
+   * publish the contents of the mrl tag from an oob message in the aiml. The
+   * result of this is displayed in the chatbot debug console.
    * 
    * @param oobText
    * @return
@@ -491,7 +491,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   public String publishOOBText(String oobText) {
     return oobText;
   }
-  
+
   /**
    * This method will close the current bot, and reload it from AIML It then
    * will then re-establish only the session associated with userName.
@@ -948,8 +948,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.warn("{}.attachTextListener(null)");
       return;
     }
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
+  
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 
   @Override
   public void attachTextPublisher(TextPublisher service) {
@@ -1062,35 +1068,41 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   public static void main(String args[]) {
-    LoggingFactory.init("INFO");
-    // Runtime.start("gui", "SwingGui");
+    try {
+      LoggingFactory.init("INFO");
+      // Runtime.start("gui", "SwingGui");
 
-    Runtime runtime = Runtime.getInstance();
-    runtime.setLocale("it");
-    /*
-     * InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2"); String startLeft
-     * = i01.localize("STARTINGLEFTONLY"); log.info(startLeft);
-     */
+      Runtime runtime = Runtime.getInstance();
+      // runtime.setLocale("it");
+      /*
+       * InMoov2 i01 = (InMoov2)Runtime.start("i01", "InMoov2"); String
+       * startLeft = i01.localize("STARTINGLEFTONLY"); log.info(startLeft);
+       */
 
-    ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
-    Runtime.start("polly", "Polly");
+      ProgramAB brain = (ProgramAB) Runtime.start("brain", "ProgramAB");
+      Polly polly = (Polly) Runtime.start("polly", "Polly");
 
-    // brain.localize(key);
+      brain.attach("polly");
 
-    String x = brain.getResourceImage("human.png");
-    log.info(x);
+      // brain.localize(key);
 
-    /*
-     * String x = brain.getBotImage("Alice"); log.info(x); Response response =
-     * brain.getResponse("Hi, How are you?"); log.info(response.toString());
-     * response = brain.getResponse("what's new?");
-     * log.info(response.toString());
-     */
+      // String x = brain.getResourceImage("human.png");
+      // log.info(x);
 
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
+      /*
+       * String x = brain.getBotImage("Alice"); log.info(x); Response response =
+       * brain.getResponse("Hi, How are you?"); log.info(response.toString());
+       * response = brain.getResponse("what's new?");
+       * log.info(response.toString());
+       */
 
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
   }
+
 
 }

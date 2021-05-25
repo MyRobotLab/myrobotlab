@@ -58,6 +58,7 @@ import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.lang.NameGenerator;
+import org.myrobotlab.lang.py.LangPyUtils;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -1999,6 +2000,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String released(String serviceName) {
     return serviceName;
   }
+  
+  public String export(String folder, String names) throws IOException {
+    try {
+      // String yml = LangYmlUtils.toYml(null, folder, names, null, null);
+      LangPyUtils generator = new LangPyUtils();
+      String python = generator.toPython(null, null, folder, names, null, null, null, null);
+      info("saved to %s", folder);
+      return python;
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
+  }
 
   /**
    * restart occurs after applying updates - user or config data needs to be
@@ -2016,7 +2030,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           info("restarting");
 
           // export to file lastRestart.py
-          exportAll("lastRestart.py");
+          // exportAll("lastRestart.py");
+          export("last-restart");
 
           // shutdown all services process - send ready to shutdown - ask back
           // release all services

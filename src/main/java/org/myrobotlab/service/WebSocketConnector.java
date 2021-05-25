@@ -114,4 +114,10 @@ public class WebSocketConnector extends Service implements TextPublisher {
   public void attachTextListener(TextListener service) {
     addListener("publishText", service.getName());
   }
+
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 }

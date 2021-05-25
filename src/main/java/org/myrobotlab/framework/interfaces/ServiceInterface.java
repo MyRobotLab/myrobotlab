@@ -4,15 +4,17 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
 public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
-    StatePublisher, StatusPublisher, ServiceStatus, Attachable {
+    StatePublisher, StatusPublisher, ServiceStatus, Attachable, Comparable<ServiceInterface> {
 
   /**
    * this is a local method which adds a request from some foreign service with
@@ -137,4 +139,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
 
   public void setLocale(String code);
 
+  public int getCreationOrder();
+  
 }

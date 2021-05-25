@@ -63,7 +63,7 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.LangUtils;
+import org.myrobotlab.lang.py.LangPyUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
@@ -190,7 +190,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * order which this service was created
    */
-  Integer creationOrder;
+  int creationOrder = 0;
 
   // FIXME SecurityProvider
   protected AuthorizationProvider authProvider = null;
@@ -844,10 +844,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void broadcastStatus(Status status) {
     long now = System.currentTimeMillis();
     /*
-    if (status.equals(lastStatus) && now - lastStatusTs < statusBroadcastLimitMs) {
-      return;
-    }
-    */
+     * if (status.equals(lastStatus) && now - lastStatusTs <
+     * statusBroadcastLimitMs) { return; }
+     */
     if (status.name == null) {
       status.name = getName();
     }
@@ -1856,7 +1855,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       if (runtime != null) {
         runtime.broadcast("started", getFullName());
       }
-      
+
     } else {
       log.debug("startService request: service {} is already running", name);
     }
@@ -1947,7 +1946,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     Runtime runtime = Runtime.getInstance();
     runtime.broadcast("stopped", getFullName());
-    // save(); removed by GroG
   }
 
   // -------------- Messaging Begins -----------------------
@@ -2224,8 +2222,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public Set<String> getAttached() {
-    return outbox.getAttached();
+    // return all attached
+    return outbox.getAttached(null);
   }
+  
+  /**
+   * returns all currently attached services to a specific publishing point
+   */
+  @Override
+  public Set<String> getAttached(String publishPoint) {
+    return outbox.getAttached(publishPoint);
+  }
+
 
   /**
    * This attach when overriden "routes" to the appropriately typed
@@ -2278,6 +2286,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   public boolean setVirtual(boolean b) {
     this.isVirtual = b;
+    broadcastState();
     return isVirtual;
   }
 
@@ -2373,22 +2382,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String export() throws IOException {
-    File check = new File(getDataDir() + fs + getName() + ".py");
-    if (check.exists()) {
-      error("file %s already exists", check);
-      return null;
-    }    
-    return export(getDataDir() + fs + getName() + ".py", getName());
+    return export("data" + fs + "config" + fs + getName(), getName());
   }
 
-  
-  public String exportAll() throws IOException {
-    // FIXME - interaction with user if file exists ?
-    return exportAll(getRootDataDir() + fs + "export.py");
-  }
-  
   /**
    * Export the current service to file named given
+   * 
    * @param filename
    * @return
    * @throws IOException
@@ -2398,18 +2397,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String export(String filename, String names) throws IOException {
-    String python = LangUtils.toPython(names);
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    info("saved %s to %s", getName(), filename);
-    return python;
-  }
-
-  public String exportAll(String filename) throws IOException {
-    // currently only support python - maybe in future we'll support js too
-    String python = LangUtils.toPython();
-    Files.write(Paths.get(filename), python.toString().getBytes());
-    info("saved %s to %s", getName(), filename);
-    return python;
+    try {
+      String export = Runtime.getInstance().export(filename, names);
+      // String python = LangPyUtils.toPython(filename, names);
+      info("saved to %s", filename);
+      return export;
+    } catch (Exception e) {
+      error(e);
+    }
+    return null;
   }
 
   /**
@@ -2691,6 +2687,21 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       return false;
     }
     return true;
+  }
+
+  @Override
+  public int compareTo(ServiceInterface o) {
+    if (this.creationOrder == o.getCreationOrder()) {
+      return 0;
+    }
+    if (this.creationOrder < o.getCreationOrder()) {
+      return -1;
+    }
+    return 1;
+  }
+
+  public int getCreationOrder() {
+    return creationOrder;
   }
 
 }

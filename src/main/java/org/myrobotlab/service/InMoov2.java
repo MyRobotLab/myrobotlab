@@ -329,7 +329,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   @Override
   public void attachTextListener(TextListener service) {
-    addListener("publishText", service.getName());
+    attachTextListener(service.getName());
   }
 
   public void attachTextPublisher(String name) {
@@ -2104,4 +2104,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return neopixel;
   }
+  
+  @Override
+  public void attachTextListener(String name) {
+    addListener("publishText", name);
+  }
+
 }

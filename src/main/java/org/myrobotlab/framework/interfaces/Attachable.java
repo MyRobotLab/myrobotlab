@@ -86,6 +86,14 @@ public interface Attachable extends NameProvider {
    * @return the set of attached service names to this service
    */
   public Set<String> getAttached();
+  
+  /**
+   * get all attached to a specific publishing point/method
+   * 
+   * @param publishingPoint
+   * @return
+   */
+  public Set<String> getAttached(String publishingPoint);
 
   /**
    * @param instance
