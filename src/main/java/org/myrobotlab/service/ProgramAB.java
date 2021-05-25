@@ -167,10 +167,12 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     attachTextListener(service);
   }
 
+  @Deprecated /* use standard attachTextListener */
   public void addTextListener(SpeechSynthesis service) {
     addListener("publishText", service.getName(), "onText");
   }
 
+  @Deprecated /* use standard attachTextPublisher */
   public void addTextPublisher(TextPublisher service) {
     subscribe(service.getName(), "publishText");
   }

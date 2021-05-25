@@ -188,7 +188,7 @@ public class AbstractTest {
     for (Thread thread : threadSetEnd) {
       if (!threadSetStart.contains(thread) && !"runtime_outbox_0".equals(thread.getName()) && !"runtime".equals(thread.getName())) {
         if (releaseRemainingThreads) {
-          log.info("interrupting thread {}", thread.getName());
+          log.warn("interrupting thread {}", thread.getName());
           thread.interrupt();
           /*
            * if (useDeprecatedThreadStop) { thread.stop(); }
@@ -201,9 +201,9 @@ public class AbstractTest {
       }
     }
     if (threadsRemaining.size() > 0) {
-      log.info("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
+      log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
-    log.info("finished the killing ...");
+    log.warn("finished the killing ...");
   }
 
   public AbstractTest() {

@@ -825,6 +825,7 @@ public class Python extends Service {
       webgui.autoStartBrowser(false);
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
+      //python.execFile("data/adafruit.py");
       
       boolean done = true;
       if (done) {
