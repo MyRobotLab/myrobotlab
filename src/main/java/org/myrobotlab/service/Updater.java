@@ -505,7 +505,7 @@ public class Updater extends Service {
 
             // export current state
             if (Runtime.exists()) {
-              Runtime.getInstance().exportAll("export.py");
+              Runtime.getInstance().export("last-restart");
             }
 
             // replace our current jar (classes ? build?)

@@ -5,14 +5,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
 import org.myrobotlab.framework.Service;
+import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.interfaces.ServiceInterface;
+import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.data.Locale;
+import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.slf4j.Logger;
 
 // service life-cycle
@@ -21,7 +25,6 @@ import org.slf4j.Logger;
 public class LangPyUtils implements PythonGenerator {
 
   transient public final static Logger log = LoggerFactory.getLogger(LangPyUtils.class);
-
 
   static public String escape(String v) {
     if (v == null) {
@@ -39,10 +42,19 @@ public class LangPyUtils implements PythonGenerator {
     }
     return "False";
   }
-  
-  public String toDefaultPython(ServiceInterface si) {
+
+  public String toDefaultPython(ServiceInterface si, boolean includeHeader) {
     StringBuilder content = new StringBuilder();
+
+    if (includeHeader) {
+      content.append("import time\n");
+      content.append("import org.myrobotlab.framework.Platform as Platform\n");
+      content.append("import org.myrobotlab.service.Runtime as Runtime\n");
+      content.append("\n");
+    }
+
     String safename = LangPyUtils.safeRefName(si);
+
     content.append(String.format("%s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
     String localeTag = ((Service) si).getLocaleTag();
     Locale defaultLocale = Locale.getDefault();
@@ -51,7 +63,6 @@ public class LangPyUtils implements PythonGenerator {
     }
     return content.toString();
   }
-
 
   // FIXME !! - no "." dots should be allowed in names - dots should always be a
   // network delinator
@@ -66,11 +77,11 @@ public class LangPyUtils implements PythonGenerator {
   }
 
   public String toPython(String filename, String names) throws IOException {
-    return toPython(null, filename, names, null, null);
+    return toPython(null, null, filename, names, null, null, null, null);
   }
 
   public String toPython() throws IOException {
-    return toPython(null, null, null, null, null);
+    return toPython(null, null, null, null, null, null, null, null);
   }
 
   static public String toPython(Double value) {
@@ -348,9 +359,21 @@ public class LangPyUtils implements PythonGenerator {
   // force overwrite - default do not overwrite
   // "launch.yml" is the interface - it only saves launch.yml
 
-  public String toPython(StringBuilder content, String folder, String names, Boolean overwrite, Boolean groupByPeer) throws IOException {
+  public String toPython(StringBuilder content, Boolean includeHeader, String folder, String names, Integer currentLevel, Integer splitLevel, Boolean overwrite,
+      Boolean writeAsFilex) throws IOException {
 
     // defaults
+    if (currentLevel == null) {
+      currentLevel = 0;
+    }
+
+    if (splitLevel == null) {
+      splitLevel = 1;
+    }
+
+    if (includeHeader == null) {
+      includeHeader = true;
+    }
 
     if (content == null) {
       content = new StringBuilder();
@@ -368,15 +391,16 @@ public class LangPyUtils implements PythonGenerator {
     if (overwrite == null) {
       overwrite = true;
     }
-
-    if (groupByPeer == null) {
-      groupByPeer = true;
-    }
-
+    
     String[] includes = null;
     if (names != null) {
       includes = names.split(",");
     }
+    
+    if (names.equals("i01.head.eyeX")) {
+      log.info("here");
+    }
+      
 
     // preconditions -
     // needs a directory path data/config/{name}/launch.yml
@@ -408,14 +432,6 @@ public class LangPyUtils implements PythonGenerator {
         continue;
       }
 
-      // if groupByPeers and a running service matches a defined peer of a match
-      // - then export
-
-      // split at peer level == x
-      if (groupByPeer) {
-        // if running peers - append and exclude ...
-      }
-
       // write module file
       File init = new File(folder + File.separator + "__init__.py");
       if (!init.exists()) {
@@ -423,17 +439,45 @@ public class LangPyUtils implements PythonGenerator {
       }
 
       // check for custom exporter ...
-      String newPythonContent = null;
+      StringBuilder newPythonContent = new StringBuilder();
       PythonGenerator generator = getExporter(String.format("org.myrobotlab.lang.py.%sPy", si.getSimpleName()));
       if (generator != null) {
-        newPythonContent = generator.toPython(si);
+        newPythonContent.append(toDefaultPython(si, includeHeader));
+        newPythonContent.append(generator.toPython(si));
       } else {
-        newPythonContent = toDefaultPython(si);
+        newPythonContent.append(toDefaultPython(si, includeHeader));
       }
 
       content.append(newPythonContent);
+
+      MetaData serviceType = ServiceData.getMetaData(si.getName(), si.getSimpleName());
+      Map<String, ServiceReservation> peers = serviceType.getPeers();
+
+      // FIXME - do "indent"
+      boolean firstTime = true;
+      for (String peer : peers.keySet()) {
+        ServiceReservation sr = peers.get(peer);
+        ServiceInterface peerSi = Runtime.getService(sr.actualName);
+        if (peerSi != null) {
+          if (currentLevel >= splitLevel) {
+            // concatenate content
+            if (firstTime) {
+              content.append(String.format("\n# %s peers\n", si.getSimpleName()));
+            }
+            toPython(content, false, folder, sr.actualName, currentLevel + 1, splitLevel, overwrite, false);
+            content.append("\n");
+          } else {
+            // don't concatenate
+            toPython(null, true, folder, sr.actualName, currentLevel + 1, splitLevel, overwrite, true);
+          }
+        }
+        firstTime = false;
+      }
+
       // if multiFile
-      Files.write(new File(folder + File.separator + si.getName() + ".py").toPath(), content.toString().getBytes());
+      if (currentLevel <= splitLevel) {
+        Files.write(new File(folder + File.separator + safeRefName(si) + ".py").toPath(), content.toString().getBytes());
+      }
 
       log.info("{}", si.getName());
     }
@@ -445,7 +489,7 @@ public class LangPyUtils implements PythonGenerator {
 
   @Override
   public String toPython(ServiceInterface si) {
-   return toDefaultPython(si);
+    return toDefaultPython(si, true);
   }
 
 }

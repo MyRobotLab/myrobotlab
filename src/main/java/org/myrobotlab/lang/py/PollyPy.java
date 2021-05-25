@@ -11,7 +11,6 @@ public class PollyPy extends LangPyUtils implements PythonGenerator {
     // common stuff
     Polly polly = (Polly) si;   
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(polly);
 
     content.append("# Polly config for " + name + "\n");

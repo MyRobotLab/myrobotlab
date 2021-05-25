@@ -14,7 +14,6 @@ public class ServoPy extends LangPyUtils implements PythonGenerator {
     // common stuff
     Servo servo = (Servo) si;
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(si);
 
     content.append("# Servo Config : " + name + "\n");

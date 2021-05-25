@@ -9,7 +9,6 @@ public class WebGuiPy extends LangPyUtils implements PythonGenerator {
     // common stuff
     WebGui webgui = (WebGui) si;
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(si);
 
     content.append("# WebGui Config : " + name + "\n");

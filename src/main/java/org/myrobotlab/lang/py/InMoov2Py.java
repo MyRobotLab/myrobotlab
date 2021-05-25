@@ -11,7 +11,6 @@ public class InMoov2Py extends LangPyUtils {
     // common stuff
     InMoov2 inmoov2 = (InMoov2) si;   
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(si);
 
     content.append("# InMoov2 Config : " + name + "\n");
@@ -30,6 +29,8 @@ public class InMoov2Py extends LangPyUtils {
 
     content.append("# start groups of sub services\n");
 
+    // FIXME - WRONG WRONG WRONG - NO DIRECT REFERENCE !!!!
+    // IF THERE IS COMPLEX SETUP NECESSARY - TEST BY serviceType/peer/state
     if (inmoov2.getHead() != null) {
       content.append(name + ".startHead()\n");
     }

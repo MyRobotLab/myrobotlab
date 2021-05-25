@@ -18,7 +18,6 @@ public class ArduinoPy extends LangPyUtils {
     // common stuff
     Arduino arduino = (Arduino) si;   
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(si);
 
     content.append("# Arduino Config : " + name + "\n");

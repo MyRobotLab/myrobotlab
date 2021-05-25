@@ -16,7 +16,6 @@ public class MarySpeechPy extends LangPyUtils implements PythonGenerator {
     // common stuff
     MarySpeech mary = (MarySpeech) si;   
     StringBuilder content = new StringBuilder();
-    content.append(toDefaultPython(si));
     String name = safeRefName(mary);
 
     content.append("# MarySpeech Config : " + name + "\n");
