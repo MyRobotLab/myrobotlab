@@ -15,6 +15,7 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'oc.lazyLoad', //lazyload
 'sticky', //sticky elements
 'checklist-model', // checklists
+'peer',
 'angular-intro', // intro
 'angularScreenfull', // screenfull
 'angular-clipboard', 'rzModule', 'ngFlash', //'charts',
