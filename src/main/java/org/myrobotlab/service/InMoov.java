@@ -209,7 +209,8 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
   boolean speakErrors = false;
   Long startSleep = null;
   transient public InMoovTorso torso;
-  transient public UltrasonicSensor ultrasonicSensor;
+  transient public UltrasonicSensor ultrasonicRight;
+  transient public UltrasonicSensor ultrasonicLeft;
 
   // ---------------------------------------------------------------
   // end services reservations
@@ -624,11 +625,20 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
     return jme;
   }
 
-  public Double getUltrasonicSensorDistance() {
-    if (ultrasonicSensor != null) {
-      return ultrasonicSensor.range();
+  public Double getUltrasonicRightDistance() {
+    if (ultrasonicRight != null) {
+      return ultrasonicRight.range();
     } else {
-      warn("No UltrasonicSensor attached");
+      warn("No UltrasonicRight attached");
+      return 0.0;
+    }
+  }
+
+  public Double getUltrasonicLeftDistance() {
+    if (ultrasonicLeft != null) {
+      return ultrasonicLeft.range();
+    } else {
+      warn("No UltrasonicLeft attached");
       return 0.0;
     }
   }
