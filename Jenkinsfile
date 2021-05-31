@@ -76,10 +76,10 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package  /)
                }
             }
          }
@@ -104,6 +104,7 @@ pipeline {
             }
          }
       } // stage verify
+      
 
       stage('javadoc') {
          when {
