@@ -121,24 +121,12 @@ pipeline {
                      mvn -q javadoc:javadoc -o
                   '''
                }
-
-               // s3Upload consoleLogLevel: 'INFO', 
-               //    dontSetBuildResultOnFailure: false, 
-               //    dontWaitForConcurrentBuildCompletion: false, 
-               //    entries: [[bucket: 'master-repo/javadoc/$BRANCH/', excludedFile: '',
-               //              flatten: false, gzipFiles: true, keepForever: false, managedArtifacts: false, 
-               //              noUploadOnFailure: true, selectedRegion: 'us-east-1', showDirectlyInBrowser: false, 
-               //              sourceFile: 'target/site/', storageClass: 'STANDARD', uploadFromSlave: true, 
-               //              useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', 
-               //              profileName: 'master-repo-bucket', userMetadata: []
-
-
             }
          }
       } // stage javadoc
       stage('archive') {
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/**'
          }
       }
       stage('jacoco') {
