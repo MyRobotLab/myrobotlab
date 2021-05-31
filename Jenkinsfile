@@ -15,7 +15,7 @@ pipeline {
     parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
-      choice(name: 'javadoc', choices: ['false', 'true'], description: 'build javadocs')
+      choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
