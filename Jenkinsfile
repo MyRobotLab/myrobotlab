@@ -126,7 +126,7 @@ pipeline {
       } // stage javadoc
       stage('archive') {
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/**'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
       }
       stage('jacoco') {
