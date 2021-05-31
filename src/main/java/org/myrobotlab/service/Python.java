@@ -733,7 +733,7 @@ public class Python extends Service {
   }
 
   @Override
-  public void startService() {
+  synchronized public void startService() {
     super.startService();
     Map<String, ServiceInterface> services = Runtime.getLocalServices();
     for (ServiceInterface s : services.values()) {
