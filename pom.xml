@@ -112,11 +112,13 @@
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
         <!-- for j3d core, utils and vector  -->
+        <!--
         <repository>
           <id>tudelft</id>
           <name>tudelft</name>
           <url>http://simulation.tudelft.nl/maven</url>
         </repository>
+        -->
         <!-- swinggui mxgraph  -->
         <repository>
           <id>alfresco</id>
