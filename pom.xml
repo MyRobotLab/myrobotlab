@@ -23,14 +23,15 @@
     mvn -q javadoc:javadoc -o
     
     # specific test
-    mvn test -Dtest=OpenCVTest#testGetClassifications    
+    mvn test -Dtest=OpenCVTest#testGetClassifications
 
+    # installing in a local repo
     mvn install:install-file  -Dfile=target/myrobotlab.jar \
-                          -DgroupId=myrobotlab.org \
-                          -DartifactId=myrobotlab \
-                          -Dversion=1.1.401 \
-                          -Dpackaging=jar \
-                          -DlocalRepositoryPath=test-repo
+                      -DgroupId=myrobotlab.org \
+                      -DartifactId=myrobotlab \
+                      -Dversion=1.1.401 \
+                      -Dpackaging=jar \
+                      -DlocalRepositoryPath=test-repo
 
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
@@ -48,6 +49,8 @@
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
+
+  
    -->  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
@@ -111,14 +114,6 @@
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
         </repository>
-        <!-- for j3d core, utils and vector  -->
-        <!--
-        <repository>
-          <id>tudelft</id>
-          <name>tudelft</name>
-          <url>http://simulation.tudelft.nl/maven</url>
-        </repository>
-        -->
         <!-- swinggui mxgraph  -->
         <repository>
           <id>alfresco</id>
@@ -337,7 +332,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.16</version>
+    <version>1.4.17</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
@@ -1186,13 +1181,13 @@
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-core</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-native</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
     <type>pom</type>
   </dependency>
@@ -1291,7 +1286,7 @@
     <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
+<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
 <!-- Solr end -->
 
 <!-- Sphinx begin -->
