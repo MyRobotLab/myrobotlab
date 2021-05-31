@@ -527,7 +527,7 @@ public class Python extends Service {
   public void execAndWait(String code) {
     exec(code, true);
   }
-  
+
   /**
    * executes an external Python file
    * 
@@ -732,11 +732,14 @@ public class Python extends Service {
     broadcastState();
   }
 
-  /*
-   * no longer needed
-   * 
-   * @Override public void startService() { super.startService(); }
-   */
+  @Override
+  public void startService() {
+    super.startService();
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface s : services.values()) {
+      onStarted(s.getName());
+    }
+  }
 
   @Override
   public void releaseService() {
@@ -812,7 +815,7 @@ public class Python extends Service {
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
       //python.execFile("data/adafruit.py");
-      
+
       Runtime.start("i01", "InMoov2");
 
     } catch (Exception e) {
