@@ -20,7 +20,7 @@ pipeline {
     }
 
     // echo params.agentName    
-    tools { 
+    tools {
         maven 'M3' // defined in global tools - maven is one of the only installers that works well for global tool
         // jdk 'openjdk-11-linux' // defined in global tools
         // git 
@@ -36,6 +36,13 @@ pipeline {
     }
 
     stages {
+
+         stage('clean') {
+            steps {
+               cleanWs()
+            }
+         }
+
         stage ('initialize') {
             steps {
                print params['agent-name']
@@ -124,12 +131,6 @@ pipeline {
          steps {
             // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
             jacoco()
-         }
-      }
-      // TODO - publish
-      stage('clean') {
-         steps {
-            cleanWs()
          }
       }
    } // stages 
