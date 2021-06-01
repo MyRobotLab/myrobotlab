@@ -132,7 +132,7 @@ public class MqttBroker extends Service implements InterceptHandler, Gateway, Ke
 
   /**
    * determines if the broker will attempt to process any messages published on
-   * the api topics .. typically api/service & api/messages
+   * the api topics .. typically api/service and api/messages
    */
   boolean processApiMessages = true;
 

@@ -2469,11 +2469,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * state, etc
    * 
    * 
-   * @param uuidX
+   * @param uuid
    * @param query
    * @return
    */
-  public DescribeResults describe(String uuidXz, DescribeQuery query) {
+  public DescribeResults describe(String uuid, DescribeQuery query) {
 
     DescribeResults results = new DescribeResults();
     results.setStatus(Status.success("Ahoy!"));

@@ -33,16 +33,11 @@ public interface NeoPixel2Control extends NameProvider {
    * high level "attach" which internally will call attachDevice(Device device,
    * int[] config)
    * 
-   * @param controller
-   *          c
-   * 
-   * @param numPixel
-   *          - All of the config needed for the device -numPixel=number of
-   *          pixel of the neopixel hardware
+   * @param control
    * @param pin
-   *          p -
+   * @param numPixel
+   * @param depth
    * @throws Exception
-   *           e
    */
   public void attach(String control, int pin, int numPixel, int depth) throws Exception;
 
@@ -57,13 +52,9 @@ public interface NeoPixel2Control extends NameProvider {
    * method
    * 
    * @param address
-   *          - value 1 to numPixel
    * @param red
-   *          - value 0-255
    * @param green
-   *          - value 0-255
    * @param blue
-   *          - value 0-255
    */
   public void setPixel(int address, int red, int green, int blue);
 
