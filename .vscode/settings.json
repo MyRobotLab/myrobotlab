@@ -5,5 +5,8 @@
 		"**/.settings": true,
 		"**/.factorypath": true,
 		"**/target": true
+	},
+	"files.associations": {
+		"cstddef": "cpp"
 	}
 }

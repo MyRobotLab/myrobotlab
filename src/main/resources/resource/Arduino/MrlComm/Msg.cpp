@@ -138,6 +138,12 @@ Msg* Msg::getInstance() {
   void setZeroPoint( byte deviceId);
   // > servoStop/deviceId
   void servoStop( byte deviceId);
+  // > neoPixel2Attach/deviceId/pin/b32 numPixels/depth
+  void neoPixel2Attach( byte deviceId,  byte pin,  long numPixels,  byte depth);
+  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
+  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  int speed);
+  // > neoPixel2WriteMatrix/deviceId/[] buffer
+  void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
 
  */
 
@@ -630,6 +636,45 @@ void Msg::processCommand() {
       byte deviceId = ioCmd[startPos+1]; // bu8
       startPos += 1;
       mrlComm->servoStop( deviceId);
+      break;
+	}
+  case NEO_PIXEL2_ATTACH: { // neoPixel2Attach
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte pin = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      long numPixels = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
+      byte depth = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      mrlComm->neoPixel2Attach( deviceId,  pin,  numPixels,  depth);
+      break;
+	}
+  case NEO_PIXEL2_SET_ANIMATION: { // neoPixel2SetAnimation
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte animation = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte red = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte green = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte blue = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      byte white = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      int speed = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
+      mrlComm->neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  speed);
+      break;
+	}
+  case NEO_PIXEL2_WRITE_MATRIX: { // neoPixel2WriteMatrix
+      byte deviceId = ioCmd[startPos+1]; // bu8
+      startPos += 1;
+      const byte* buffer = ioCmd+startPos+2;
+      byte bufferSize = ioCmd[startPos+1];
+      startPos += 1 + ioCmd[startPos+1];
+      mrlComm->neoPixel2WriteMatrix( deviceId,  bufferSize, buffer);
       break;
 	}
 

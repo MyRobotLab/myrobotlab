@@ -130,11 +130,13 @@ pipeline {
             archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
       }
+      /*
       stage('jacoco') {
          steps {
             // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
             // jacoco()
          }
       }
+      */
    } // stages 
 }

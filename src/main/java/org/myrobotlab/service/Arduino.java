@@ -27,6 +27,7 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -50,6 +51,7 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
+import org.myrobotlab.service.interfaces.NeoPixel2Controller;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -67,7 +69,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixel2Controller, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
@@ -2375,6 +2377,23 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public String publishServoStopped(String name) {
     log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
+  }
+
+  @Override
+  public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
+    ServiceInterface neopixel = Runtime.getService(name);
+    msg.neoPixel2Attach(getDeviceId(neopixel)/* byte */, pin/* byte */,
+        numberOfPixels/* b32 */, depth);
+  }
+
+  @Override
+  public void neoPixel2WriteMatrix(String neopixel, int[] buffer) {
+    msg.neoPixel2WriteMatrix(getDeviceId(neopixel), buffer);
+  }
+
+  @Override
+  public void neoPixel2SetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
+    msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
   }
 
 }
