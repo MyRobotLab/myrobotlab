@@ -115,11 +115,11 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -q javadoc:javadoc
                   '''
                } else {
                   bat '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -q javadoc:javadoc
                   '''
                }
             }
