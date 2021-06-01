@@ -75,11 +75,12 @@ pipeline {
          steps {
             script {
                if (isUnix()) {
+                     // mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package
                   sh '''
-                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package
+                     mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean package
                   '''
                } else {
-                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package  /)
+                  bat(/"${MAVEN_HOME}\bin\mvn" -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -q clean package  /)
                }
             }
          }
@@ -132,7 +133,7 @@ pipeline {
       stage('jacoco') {
          steps {
             // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-            jacoco()
+            // jacoco()
          }
       }
    } // stages 
