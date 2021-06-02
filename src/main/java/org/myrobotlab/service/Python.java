@@ -18,14 +18,12 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.FindFile;
-import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.data.Script;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.python.core.Py;
-import org.python.core.PyDictionary;
 import org.python.core.PyException;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -54,12 +52,12 @@ public class Python extends Service {
    * handles
    * 
    */
-  public class InputQueueThread extends Thread {
+  public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
+    transient protected Thread myThread = null; 
 
-    public InputQueueThread(Python python) {
-      super(String.format("python.%s.input", python.getName()));
+    public InputQueue(Python python) {      
       this.python = python;
     }
 
@@ -120,6 +118,24 @@ public class Python extends Service {
           log.error("InputQueueThread while loop threw", e);
         }
       }
+      log.info("shutting down python queue");
+    }
+    
+    synchronized public void stop() {
+      if (myThread != null) {
+        running = false;
+        myThread.interrupt();
+        myThread = null;
+      } 
+    }
+
+    synchronized public void start() {
+      if (myThread == null) {
+        myThread = new Thread(this, String.format("python.%s.input", python.getName()));
+        myThread.start();
+      } else {
+        log.warn("python input queue already running");
+      }      
     }
   }
 
@@ -265,7 +281,7 @@ public class Python extends Service {
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  transient InputQueueThread inputQueueThread;
+  final transient InputQueue inputQueueThread;
   transient PythonInterpreter interp = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
@@ -303,6 +319,8 @@ public class Python extends Service {
 
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
+    
+    inputQueueThread = new InputQueue(this);
 
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
@@ -334,10 +352,7 @@ public class Python extends Service {
     interp.exec(compiled);
 
     log.info("starting python {}", getName());
-    if (inputQueueThread == null) {
-      inputQueueThread = new InputQueueThread(this);
-      inputQueueThread.start();
-    }
+    inputQueueThread.start();    
     log.info("started python {}", getName());
   }
 
@@ -750,13 +765,8 @@ public class Python extends Service {
       interp.cleanup();
       interp = null;
     }
-
-    if (inputQueueThread != null) {
-      // let thread exit normally
-      inputQueueThread.running = false;
-      inputQueueThread = null;
-    }
-
+    
+    inputQueueThread.stop();
     thread.interruptAllThreads();
     Py.getSystemState()._systemRestart = true;
   }
