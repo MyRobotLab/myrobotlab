@@ -20,7 +20,7 @@ public class JoystickMeta extends MetaData {
     Platform platform = Platform.getLocalInstance();
     addDescription("service allows interfacing with a keyboard, joystick or gamepad");
     addCategory("control", "telerobotics");
-    addDependency("net.java.jinput", "jinput", "2.0.7");
+    addDependency("net.java.jinput", "jinput", "2.0.9");
 
     log.info("Joystick.getMetaData {}  isArm() {}", platform, platform.isArm());
     if (platform.isArm()) {

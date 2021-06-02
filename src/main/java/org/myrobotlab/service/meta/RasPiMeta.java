@@ -22,8 +22,8 @@ public class RasPiMeta extends MetaData {
     addDescription("Raspberry Pi service used for accessing specific RasPi hardware like th GPIO pins and i2c");
     addCategory("i2c", "control");
     setSponsor("Mats");
-    addDependency("com.pi4j", "pi4j-core", "1.2");
-    addDependency("com.pi4j", "pi4j-native", "1.2", "pom");
+    addDependency("com.pi4j", "pi4j-core", "1.4");
+    addDependency("com.pi4j", "pi4j-native", "1.4", "pom");
 
   }
 
