@@ -15,12 +15,12 @@ pipeline {
     parameters {
       // agentParameter name:'agent-name'
       choice(name: 'verify', choices: ['true', 'false'], description: 'verify')
-      choice(name: 'javadoc', choices: ['false', 'true'], description: 'build javadocs')
+      choice(name: 'javadoc', choices: ['true', 'false'], description: 'build javadocs')
       // choice(choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'terraform command for master branch', name: 'terraform_cmd')
     }
 
     // echo params.agentName    
-    tools { 
+    tools {
         maven 'M3' // defined in global tools - maven is one of the only installers that works well for global tool
         // jdk 'openjdk-11-linux' // defined in global tools
         // git 
@@ -36,6 +36,14 @@ pipeline {
     }
 
     stages {
+
+         // using CleanBeforeCheckout - in configuration
+         // stage('clean') {
+         //    steps {
+         //       cleanWs()
+         //    }
+         // }
+
         stage ('initialize') {
             steps {
                print params['agent-name']
@@ -67,6 +75,7 @@ pipeline {
          steps {
             script {
                if (isUnix()) {
+                     // mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean package
                   sh '''
                      mvn -DBUILD_NUMBER=${BUILD_NUMBER} -DskipTests -Dmaven.test.failure.ignore -q clean compile
                   '''
@@ -96,7 +105,7 @@ pipeline {
             }
          }
       } // stage verify
-
+      
       stage('javadoc') {
          when {
                  expression { params.javadoc == 'true' }
@@ -105,11 +114,11 @@ pipeline {
             script {
                if (isUnix()) {
                   sh '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -q javadoc:javadoc
                   '''
                } else {
                   bat '''
-                     mvn -q javadoc:javadoc -o
+                     mvn -q javadoc:javadoc
                   '''
                }
             }
@@ -117,20 +126,16 @@ pipeline {
       } // stage javadoc
       stage('archive') {
          steps {
-            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, site/*'
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
       }
+      
       stage('jacoco') {
          steps {
             // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-            jacoco()
+            // jacoco()
          }
       }
-      // TODO - publish
-      stage('clean') {
-         steps {
-            cleanWs()
-         }
-      }
+      
    } // stages 
 }

@@ -556,10 +556,12 @@ public class CodecUtils {
    * or it will go to the MethodCache of some service.  The MethodCache will decode a 2nd time based on a method
    * signature key match (key based on parameter types).
    * 
-   * @param fullName
-   * @param dest
-   * @param Src
+   * @param sender
+   * @param sendingMethod
+   * @param name
+   * @param method
    * @param params
+   * @return
    */
   final public static String createJsonMsg(String sender, String sendingMethod, String name, String method, Object... params) {
     Message msg = Message.createMessage(sender, name, method, null);

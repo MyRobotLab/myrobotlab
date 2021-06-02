@@ -67,7 +67,7 @@ import org.slf4j.Logger;
  *  mrl/gw/c1/rx for c1
  *  mrl/gw/c2/rx for c2
  *  
- * &#64;author kmcgerald & GroG
+ * &#64;author kmcgerald and GroG
  * </pre>
  */
 public class Mqtt extends Service implements MqttCallback, IMqttActionListener, Gateway, KeyConsumer {
@@ -97,7 +97,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   /**
    * Prefix under which the mrl pub/sub tree will be published If null there
    * will be defaulted and the topic structure will be
-   * mrl/{serviceName}/{method} <-- data array json parameters [ p0, p1, p2,
+   * mrl/{serviceName}/{method} &lt;-- data array json parameters [ p0, p1, p2,
    * ...]
    */
   protected String mrlTopicApiPrefix = "mrl";
@@ -115,7 +115,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   protected String password = null;
 
   /**
-   * for persistence of message if not sent immediately types include memory &
+   * for persistence of message if not sent immediately types include memory and
    * file persistence
    */
   protected transient MemoryPersistence persistence;
