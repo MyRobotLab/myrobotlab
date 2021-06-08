@@ -1352,7 +1352,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // lame assumption - port is specified - it must be an Arduino :(
     if (port != null) {
       try {
-        speakBlocking(get(port));
+        speakBlocking(port);
         Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 
