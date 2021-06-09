@@ -227,6 +227,18 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isUltraSonicLeftActivated = false;
 
   boolean isServoMixerActivated = false;
+  
+  boolean RobotCanMoveBodyRandom = true;
+  
+  boolean RobotCanMoveEyesRandom = true;
+  
+  boolean RobotCanMoveHeadRandom = true;
+  
+  boolean RobotCanMoveRandom = true;
+  
+  boolean RobotIsSleeping = false;
+  
+  boolean RobotIsStarted = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
   transient JMonkeyEngine jme;
