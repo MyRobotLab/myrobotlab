@@ -691,7 +691,6 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
