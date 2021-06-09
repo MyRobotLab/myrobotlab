@@ -57,6 +57,7 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -438,25 +439,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // initialization of the new service - it gets local registery events
       // for pre-existing registered? created/started - NO !!!
-      // The new service is responsible for asking the registry for existing services on its creation
+      // The new service is responsible for asking the registry for existing
+      // services on its creation
       // this should not be done automatically
       /*
-      List<ServiceInterface> services = getServices();// getLocalServices();
-      for (ServiceInterface s : services) {
-        if (runtime != null && runtime.serviceData != null) {
-          try {
-            si.onRegistered(new Registration(s));
-            runtime.send(s.getName(), "onCreated", si.getFullName());
-          } catch (Exception e) {
-            runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
-          }
-        }
-        // don't register or create or start event self
-        if (s.getName().equals(si.getName())) {
-          continue;
-        }        
-      }
-      */
+       * List<ServiceInterface> services = getServices();// getLocalServices();
+       * for (ServiceInterface s : services) { if (runtime != null &&
+       * runtime.serviceData != null) { try { si.onRegistered(new
+       * Registration(s)); runtime.send(s.getName(), "onCreated",
+       * si.getFullName()); } catch (Exception e) { runtime.error(String.
+       * format("onRegistered threw processing %s.onRegistered(%s)",
+       * s.getName(), name)); } } // don't register or create or start event
+       * self if (s.getName().equals(si.getName())) { continue; } }
+       */
 
       return (Service) newService;
     } catch (Exception e) {
@@ -1358,11 +1353,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         service.preShutdown();
       }
 
-      /* - huge amount of json that is not used
-      for (ServiceInterface service : getServices()) {
-        service.save();
-      }
-      */
+      /*
+       * - huge amount of json that is not used for (ServiceInterface service :
+       * getServices()) { service.save(); }
+       */
 
       log.info("releasing all");
       releaseAll();
@@ -2048,6 +2042,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // fire it off
           Process restarted = pb.start();
+          // it "better" not be a requirement that a process must consume its std streams
+          // "hopefully" - if the OS realizes the process is dead it moves the streams to /dev/null ?
+          // StreamGobbler gobbler = new StreamGobbler(String.format("%s-gobbler", getName()), restarted.getInputStream());
+          // gobbler.start();
 
           // dramatic pause
           sleep(2000);
@@ -3134,9 +3132,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // any options need stripping ?
         // handle daemon
         // TODO handle more than one instance
-        ProcessBuilder builder = Launcher.createBuilder(options);
-        Process process = builder.start();
-        process.waitFor();
+        Process process = null;
+        try {
+          ProcessBuilder builder = Launcher.createBuilder(options);
+          process = builder.start();
+          
+          // omg ... crossing the streams !
+          StreamGobbler stdOut = new StreamGobbler(String.format("runtime-main-gobbler-output"), process.getInputStream(), System.out);
+          stdOut.start();
+
+          StreamGobbler stdIn = new StreamGobbler(String.format("runtime-main-gobbler-input"), System.in, process.getOutputStream());
+          stdIn.start();
+          
+          process.waitFor();
+        } catch (Exception e) {
+          log.error("runtime main threw", e);
+        }
+        if (process != null) {
+          // kill child ... "clean up"
+          process.destroy();
+        }
+        
+        // big hammer
+        shutdown();
         return;
 
       } else {
@@ -3198,9 +3216,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * A gateway is responsible for creating a key to associate a unique "Connection".
-   * This key should be retrievable, when a msg arrives at the service which needs to 
-   * be sent remotely. This key is used to get the "Connection" to send the msg remotely
+   * A gateway is responsible for creating a key to associate a unique
+   * "Connection". This key should be retrievable, when a msg arrives at the
+   * service which needs to be sent remotely. This key is used to get the
+   * "Connection" to send the msg remotely
    * 
    * @param string
    * @param uuid
