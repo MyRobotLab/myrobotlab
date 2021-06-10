@@ -778,6 +778,21 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
+  
+  public void cameraOff() {
+    if (opencv != null) {
+      opencv.stopCapture();
+      opencv.disableAll();
+    }
+  }
+
+  public void cameraOn() {
+    if (opencv == null) {
+      startOpenCV();
+    }
+    opencv.capture();
+    // vision.enablePreFilters(); FIXME vision is deprecated?
+  }
 
   public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     InMoov2Arm arm = getArm(which);
