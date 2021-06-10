@@ -42,7 +42,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // FIXME - why
   @Deprecated
-  static boolean RobotCanMoveRandom = true;
+  public static boolean RobotCanMoveRandom = true;
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
