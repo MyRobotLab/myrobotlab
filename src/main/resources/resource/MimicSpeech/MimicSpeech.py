@@ -17,5 +17,6 @@ mouth.speakBlocking('I am a speech synthesis program')
 mouth.speakBlocking('How was that ?')
 mouth.speakBlocking('can someone fix my list voices, i think its broke. Oh thanks, fixed now')
 
+#mouth.setVoice('Henry')
 mouth.setVolume(0.7)
 mouth.speakBlocking("Silent please")
