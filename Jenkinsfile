@@ -106,10 +106,10 @@ pipeline {
          }
       } // stage verify
       
-
       stage('javadoc') {
          when {
-                 expression { params.javadoc == 'true' }
+                 // expression { params.javadoc == 'true' }
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
          }
          steps {
             script {
@@ -125,18 +125,31 @@ pipeline {
             }
          }
       } // stage javadoc
-      stage('archive') {
+
+      stage('archive-min') {
+         when {
+                 expression { env.BRANCH_NAME != 'master' && env.BRANCH_NAME != 'develop' }
+         }
+         steps {
+            archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec'
+         }
+      }
+
+      stage('archive-javadocs') {
+         when {
+                 expression { env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' }
+         }
          steps {
             archiveArtifacts 'target/myrobotlab.jar, target/surefire-reports/*, target/*.exec, target/site/**'
          }
       }
-      /*
+
       stage('jacoco') {
          steps {
-            // jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
-            // jacoco()
+            jacoco(execPattern: 'target/*.exec', classPattern: 'target/classes', sourcePattern: 'src/main/java', exclusionPattern: 'src/test*')
+            jacoco()
          }
       }
-      */
+      
    } // stages 
 }
