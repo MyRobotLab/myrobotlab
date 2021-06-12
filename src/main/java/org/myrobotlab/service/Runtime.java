@@ -57,6 +57,7 @@ import org.myrobotlab.framework.repo.IvyWrapper;
 import org.myrobotlab.framework.repo.Repo;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.io.FileIO;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.lang.NameGenerator;
 import org.myrobotlab.logging.AppenderType;
 import org.myrobotlab.logging.LoggerFactory;
@@ -117,6 +118,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * each must have a unique name
    */
   static private final Map<String, ServiceInterface> registry = new TreeMap<>();
+
+  /**
+   * thread for non-blocking install of services
+   */
+  static private transient Thread installerThread = null;
 
   /**
    * <pre>
@@ -353,7 +359,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return b;
   }
 
-  static public synchronized ServiceInterface createService(String name, String type, String inId) {
+  /**
+   * Framework owned method - core of creating a new service
+   * @param name
+   * @param type
+   * @param inId
+   * @return
+   */
+  static private synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
 
     if (name == null) {
@@ -408,7 +421,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!repo.isServiceTypeInstalled(fullTypeName)) {
         log.error("{} is not installed", fullTypeName);
         if (autoAcceptLicense) {
-          repo.install(fullTypeName);
+          Runtime.getInstance().info("installing %s", type);
+          // repo.install(fullTypeName);
+          install(fullTypeName);
         }
       }
 
@@ -438,25 +453,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       // initialization of the new service - it gets local registery events
       // for pre-existing registered? created/started - NO !!!
-      // The new service is responsible for asking the registry for existing services on its creation
+      // The new service is responsible for asking the registry for existing
+      // services on its creation
       // this should not be done automatically
       /*
-      List<ServiceInterface> services = getServices();// getLocalServices();
-      for (ServiceInterface s : services) {
-        if (runtime != null && runtime.serviceData != null) {
-          try {
-            si.onRegistered(new Registration(s));
-            runtime.send(s.getName(), "onCreated", si.getFullName());
-          } catch (Exception e) {
-            runtime.error(String.format("onRegistered threw processing %s.onRegistered(%s)", s.getName(), name));
-          }
-        }
-        // don't register or create or start event self
-        if (s.getName().equals(si.getName())) {
-          continue;
-        }        
-      }
-      */
+       * List<ServiceInterface> services = getServices();// getLocalServices();
+       * for (ServiceInterface s : services) { if (runtime != null &&
+       * runtime.serviceData != null) { try { si.onRegistered(new
+       * Registration(s)); runtime.send(s.getName(), "onCreated",
+       * si.getFullName()); } catch (Exception e) { runtime.error(String.
+       * format("onRegistered threw processing %s.onRegistered(%s)",
+       * s.getName(), name)); } } // don't register or create or start event
+       * self if (s.getName().equals(si.getName())) { continue; } }
+       */
 
       return (Service) newService;
     } catch (Exception e) {
@@ -1017,18 +1026,54 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public void install() throws ParseException, IOException {
-    getInstance().getRepo().install();
+    install(null, null);
+  }
+
+  static public void install(String serviceType) {
+    install(serviceType, null);
   }
 
   /**
-   * Installs a single Service type. This "should" work even if there is no
-   * Runtime. It can be invoked on the command line without starting a MRL
-   * instance. If a runtime exits it will broadcast events of installation
-   * progress
+   * Maximum complexity install - allows for blocking and non-blocking install.
+   * During typically runtime install of services - non blocking is desired,
+   * otherwise status info from the install is blocked until installation is
+   * completed. For command line installation "blocking" mode would be desired
+   * 
+   * FIXME - problematic in that Runtime.create calls this directly, and this should be
+   * stepped through, because:
+   *   If we need to install new components, a restart is likely needed ... we don't do
+   *   custom dynamic classloaders .... yet
+   *   
+   *   License - should be appropriately accepted or rejected by user 
    *
    */
-  static public void install(String serviceType) throws ParseException, IOException {
-    getInstance().getRepo().install(serviceType);
+  synchronized static public void install(String serviceType, Boolean blocking) {
+    Runtime r = getInstance();
+
+    if (blocking == null) {
+      blocking = false;
+    }
+
+    installerThread = new Thread() {
+      public void run() {
+        try {
+          if (serviceType == null) {
+            r.getRepo().install();
+          } else {
+            r.getRepo().install(serviceType);
+          }
+        } catch (Exception e) {
+          r.error(e);
+        }
+      }
+    };
+    
+    if (blocking) {
+      installerThread.run();
+    } else {
+      installerThread.start();
+    }
+
   }
 
   static public void invokeCommands(String[] invoke) {
@@ -1358,11 +1403,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         service.preShutdown();
       }
 
-      /* - huge amount of json that is not used
-      for (ServiceInterface service : getServices()) {
-        service.save();
-      }
-      */
+      /*
+       * - huge amount of json that is not used for (ServiceInterface service :
+       * getServices()) { service.save(); }
+       */
 
       log.info("releasing all");
       releaseAll();
@@ -2048,6 +2092,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // fire it off
           Process restarted = pb.start();
+          // it "better" not be a requirement that a process must consume its std streams
+          // "hopefully" - if the OS realizes the process is dead it moves the streams to /dev/null ?
+          // StreamGobbler gobbler = new StreamGobbler(String.format("%s-gobbler", getName()), restarted.getInputStream());
+          // gobbler.start();
 
           // dramatic pause
           sleep(2000);
@@ -3134,9 +3182,29 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         // any options need stripping ?
         // handle daemon
         // TODO handle more than one instance
-        ProcessBuilder builder = Launcher.createBuilder(options);
-        Process process = builder.start();
-        process.waitFor();
+        Process process = null;
+        try {
+          ProcessBuilder builder = Launcher.createBuilder(options);
+          process = builder.start();
+
+          // omg ... crossing the streams !
+          StreamGobbler stdOut = new StreamGobbler(String.format("runtime-main-gobbler-output"), process.getInputStream(), System.out);
+          stdOut.start();
+
+          StreamGobbler stdIn = new StreamGobbler(String.format("runtime-main-gobbler-input"), System.in, process.getOutputStream());
+          stdIn.start();
+
+          process.waitFor();
+        } catch (Exception e) {
+          log.error("runtime main threw", e);
+        }
+        if (process != null) {
+          // kill child ... "clean up"
+          process.destroy();
+        }
+
+        // big hammer
+        shutdown();
         return;
 
       } else {
@@ -3198,9 +3266,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * A gateway is responsible for creating a key to associate a unique "Connection".
-   * This key should be retrievable, when a msg arrives at the service which needs to 
-   * be sent remotely. This key is used to get the "Connection" to send the msg remotely
+   * A gateway is responsible for creating a key to associate a unique
+   * "Connection". This key should be retrievable, when a msg arrives at the
+   * service which needs to be sent remotely. This key is used to get the
+   * "Connection" to send the msg remotely
    * 
    * @param string
    * @param uuid

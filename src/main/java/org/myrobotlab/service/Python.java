@@ -52,12 +52,12 @@ public class Python extends Service {
    * handles
    * 
    */
-  public class InputQueueThread implements Runnable {
+  public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
     transient protected Thread myThread = null; 
 
-    public InputQueueThread(Python python) {      
+    public InputQueue(Python python) {      
       this.python = python;
     }
 
@@ -281,7 +281,7 @@ public class Python extends Service {
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  final transient InputQueueThread inputQueueThread;
+  final transient InputQueue inputQueueThread;
   transient PythonInterpreter interp = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
@@ -320,7 +320,7 @@ public class Python extends Service {
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
     
-    inputQueueThread = new InputQueueThread(this);
+    inputQueueThread = new InputQueue(this);
 
     // I love ServiceData !
     ServiceData sd = ServiceData.getLocalInstance();
@@ -691,7 +691,6 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
