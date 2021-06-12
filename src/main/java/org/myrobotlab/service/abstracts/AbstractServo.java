@@ -201,6 +201,8 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
 
   protected double actualAngleDeltaError = 0.1;
 
+private Double maxSpeed;
+
   /**
    * if true - a single moveTo command will be published for servo controllers
    * or other services which implement their own speed contrl
@@ -821,13 +823,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
   @Override
   @Config
   public void setSpeed(Double degreesPerSecond) {
-    if (degreesPerSecond == null) {
-      log.info("disabling speed control");
-      speed = null;
-      broadcast("publishServoSetSpeed", this);
-      broadcastState();
-      return;
-    }
     // KW: TODO: technically the Arduino will read this speed as a 16 bit int..
     // so max Speed is 32,767 ...
     // if (maxSpeed != -1 && degreesPerSecond != null && degreesPerSecond >
@@ -835,10 +830,29 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
     // speed = maxSpeed;
     // log.info("Trying to set speed to a value greater than max speed");
     // }
-    speed = degreesPerSecond;
+    if (maxSpeed != null && (degreesPerSecond == null || degreesPerSecond > maxSpeed)) {
+    	speed = maxSpeed;
+    	return;
+    } else {
+    	speed = degreesPerSecond;
+    }
+    
+    if (degreesPerSecond == null) {
+      log.info("disabling speed control");
+    }    
     broadcast("publishServoSetSpeed", this);
     broadcastState();
   }
+  
+  @Override
+  public void setMaxSpeed(Double degreesPerSecond) {
+	 if (degreesPerSecond != null && (speed == null || speed > degreesPerSecond)){
+		 speed = degreesPerSecond;
+	 }
+	 this.maxSpeed = degreesPerSecond;
+	 broadcastState();
+  }
+
 
   @Deprecated /* this is really speed not velocity, velocity is a vector */
   public void setVelocity(Double degreesPerSecond) {

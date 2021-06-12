@@ -212,8 +212,9 @@ public class Servo extends AbstractServo implements ServoControl {
   }
 
   @Deprecated
-  public void setMaxVelocity(Double velocity) {
-    log.warn("SetMaxVelocity does nothing and is deprecated. please update your python scripts, and use fullSpeed() instead");
+  public void setMaxVelocity(Double speed) {
+    log.warn("setMaxVelocity is deprecated - use setMaxSpeed");
+    setMaxSpeed(speed);
   }
 
   public static void main(String[] args) throws InterruptedException {
@@ -308,5 +309,6 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
+
 
 }
