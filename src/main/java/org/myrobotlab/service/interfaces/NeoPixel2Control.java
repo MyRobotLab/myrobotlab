@@ -79,11 +79,9 @@ public interface NeoPixel2Control extends NameProvider {
    * the animation 1 = fastest (update every ~30ms), 100 = 100 times slower than
    * 1 value </pre>
    */
-  public void setAnimation(int animation, int red, int green, int blue, int speed);
+  public void setAnimation(int animation, int red, int green, int blue, int wait_ms);
 
-  public void setAnimation(String animation, int red, int green, int blue, int speed);
-
-  public void setAnimation(String animation, String red, String green, String blue, String speed);
+  public void setAnimation(String animation, int red, int green, int blue, int wait_ms);
 
   public void setAnimationSetting(String animation);
 

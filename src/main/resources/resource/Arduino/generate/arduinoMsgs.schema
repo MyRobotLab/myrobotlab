@@ -151,7 +151,7 @@
 > servoStop/deviceId
 
 # NeoPixel2
-> neoPixel2Attach/deviceId/pin/b32 numPixels/depth
-> neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
+> neoPixel2Attach/deviceId/pin/b16 numPixels/depth
+> neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
 > neoPixel2WriteMatrix/deviceId/[] buffer
 

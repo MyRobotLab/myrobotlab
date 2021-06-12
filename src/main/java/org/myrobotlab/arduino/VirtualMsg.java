@@ -109,6 +109,7 @@ public class VirtualMsg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
+  public static final int DEVICE_TYPE_NEOPIXEL2   =     10;
     
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
@@ -222,9 +223,9 @@ public class VirtualMsg {
   public final static int PUBLISH_MRL_COMM_BEGIN = 55;
   // > servoStop/deviceId
   public final static int SERVO_STOP = 56;
-  // > neoPixel2Attach/deviceId/pin/b32 numPixels/depth
+  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
   public final static int NEO_PIXEL2_ATTACH = 57;
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
+  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
   public final static int NEO_PIXEL2_SET_ANIMATION = 58;
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
@@ -277,8 +278,8 @@ public class VirtualMsg {
   // public void encoderAttach(Integer deviceId/*byte*/, Integer type/*byte*/, Integer pin/*byte*/){}
   // public void setZeroPoint(Integer deviceId/*byte*/){}
   // public void servoStop(Integer deviceId/*byte*/){}
-  // public void neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/){}
-  // public void neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer speed/*b16*/){}
+  // public void neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/){}
+  // public void neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/){}
   // public void neoPixel2WriteMatrix(Integer deviceId/*byte*/, int[] buffer/*[]*/){}
   
   
@@ -849,8 +850,8 @@ public class VirtualMsg {
       startPos += 1;
       Integer pin = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      Integer numPixels = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
+      Integer numPixels = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
       Integer depth = ioCmd[startPos+1]; // bu8
       startPos += 1;
       if(invoke){
@@ -873,12 +874,12 @@ public class VirtualMsg {
       startPos += 1;
       Integer white = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      Integer speed = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
+      Integer wait_ms = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
       if(invoke){
-        arduino.invoke("neoPixel2SetAnimation",  deviceId,  animation,  red,  green,  blue,  white,  speed);
+        arduino.invoke("neoPixel2SetAnimation",  deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       } else { 
-         arduino.neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  speed);
+         arduino.neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       }
       break;
     }
@@ -1859,6 +1860,10 @@ public class VirtualMsg {
     }
     case 9 :  {
       return "Encoder";
+
+    }
+    case 10 :  {
+      return "NeoPixel2";
 
     }
     

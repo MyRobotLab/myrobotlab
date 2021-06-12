@@ -63,6 +63,7 @@ public class ArduinoMsgGenerator {
     deviceList.add("I2c");
     deviceList.add("NeoPixel");
     deviceList.add("Encoder");
+    deviceList.add("NeoPixel2");
   }
 
   static public final String toString(String filename) throws IOException {

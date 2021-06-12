@@ -35,14 +35,23 @@ public:
 
   bool attach(byte pin, int numPixels, byte depth);
 
+  int x;
+  int y;
+  int z;
+  int numPixels;
+  int pixelIndex;
+  long previousWaitMs;
+  bool doneWaiting();
+
   // animations
   void colorWipe();
   void theaterChase();
-  void rainbow();
+  void rainbow(); 
+  void scanner(); 
   void theaterChaseRainbow();
 
   void writeMatrix(byte bufferSize, const byte *buffer);
-  void setAnimation(byte animation, byte red, byte green, byte blue, int speed);
+  void setAnimation(byte animation, byte red, byte green, byte blue, byte white, long wait_ms);
 
   void update();
 

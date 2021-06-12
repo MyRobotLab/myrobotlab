@@ -23,6 +23,7 @@
 #define DEVICE_TYPE_I2C    7
 #define DEVICE_TYPE_NEOPIXEL    8
 #define DEVICE_TYPE_ENCODER    9
+#define DEVICE_TYPE_NEOPIXEL2    10
 
 
 // < publishMRLCommError/str errorMsg
@@ -137,9 +138,9 @@
 #define PUBLISH_MRL_COMM_BEGIN 55
 // > servoStop/deviceId
 #define SERVO_STOP 56
-// > neoPixel2Attach/deviceId/pin/b32 numPixels/depth
+// > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
 #define NEO_PIXEL2_ATTACH 57
-// > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
+// > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
 #define NEO_PIXEL2_SET_ANIMATION 58
 // > neoPixel2WriteMatrix/deviceId/[] buffer
 #define NEO_PIXEL2_WRITE_MATRIX 59

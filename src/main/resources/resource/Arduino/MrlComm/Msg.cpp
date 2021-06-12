@@ -138,10 +138,10 @@ Msg* Msg::getInstance() {
   void setZeroPoint( byte deviceId);
   // > servoStop/deviceId
   void servoStop( byte deviceId);
-  // > neoPixel2Attach/deviceId/pin/b32 numPixels/depth
-  void neoPixel2Attach( byte deviceId,  byte pin,  long numPixels,  byte depth);
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
-  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  int speed);
+  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
+  void neoPixel2Attach( byte deviceId,  byte pin,  int numPixels,  byte depth);
+  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
 
@@ -643,8 +643,8 @@ void Msg::processCommand() {
       startPos += 1;
       byte pin = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      long numPixels = b32(ioCmd, startPos+1);
-      startPos += 4; //b32
+      int numPixels = b16(ioCmd, startPos+1);
+      startPos += 2; //b16
       byte depth = ioCmd[startPos+1]; // bu8
       startPos += 1;
       mrlComm->neoPixel2Attach( deviceId,  pin,  numPixels,  depth);
@@ -663,9 +663,9 @@ void Msg::processCommand() {
       startPos += 1;
       byte white = ioCmd[startPos+1]; // bu8
       startPos += 1;
-      int speed = b16(ioCmd, startPos+1);
-      startPos += 2; //b16
-      mrlComm->neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  speed);
+      long wait_ms = b32(ioCmd, startPos+1);
+      startPos += 4; //b32
+      mrlComm->neoPixel2SetAnimation( deviceId,  animation,  red,  green,  blue,  white,  wait_ms);
       break;
 	}
   case NEO_PIXEL2_WRITE_MATRIX: { // neoPixel2WriteMatrix

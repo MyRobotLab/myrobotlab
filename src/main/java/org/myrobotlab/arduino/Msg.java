@@ -109,6 +109,7 @@ public class Msg {
   public static final int DEVICE_TYPE_I2C   =     7;
   public static final int DEVICE_TYPE_NEOPIXEL   =     8;
   public static final int DEVICE_TYPE_ENCODER   =     9;
+  public static final int DEVICE_TYPE_NEOPIXEL2   =     10;
     
   // < publishMRLCommError/str errorMsg
   public final static int PUBLISH_MRLCOMM_ERROR = 1;
@@ -222,9 +223,9 @@ public class Msg {
   public final static int PUBLISH_MRL_COMM_BEGIN = 55;
   // > servoStop/deviceId
   public final static int SERVO_STOP = 56;
-  // > neoPixel2Attach/deviceId/pin/b32 numPixels/depth
+  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
   public final static int NEO_PIXEL2_ATTACH = 57;
-  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b16 speed
+  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
   public final static int NEO_PIXEL2_SET_ANIMATION = 58;
   // > neoPixel2WriteMatrix/deviceId/[] buffer
   public final static int NEO_PIXEL2_WRITE_MATRIX = 59;
@@ -2120,18 +2121,18 @@ public class Msg {
     }
   }
 
-  public synchronized byte[] neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b32*/, Integer depth/*byte*/) {
+  public synchronized byte[] neoPixel2Attach(Integer deviceId/*byte*/, Integer pin/*byte*/, Integer numPixels/*b16*/, Integer depth/*byte*/) {
     if (debug) {
       log.info("Sending Message: neoPixel2Attach to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 4 + 1); // size
+      appendMessage(baos, 1 + 1 + 1 + 2 + 1); // size
       appendMessage(baos, NEO_PIXEL2_ATTACH); // msgType = 57
       appendMessage(baos, deviceId);
       appendMessage(baos, pin);
-      appendMessageb32(baos, numPixels);
+      appendMessageb16(baos, numPixels);
       appendMessage(baos, depth);
  
       byte[] message = sendMessage(baos);
@@ -2160,14 +2161,14 @@ public class Msg {
     }
   }
 
-  public synchronized byte[] neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer speed/*b16*/) {
+  public synchronized byte[] neoPixel2SetAnimation(Integer deviceId/*byte*/, Integer animation/*byte*/, Integer red/*byte*/, Integer green/*byte*/, Integer blue/*byte*/, Integer white/*byte*/, Integer wait_ms/*b32*/) {
     if (debug) {
       log.info("Sending Message: neoPixel2SetAnimation to {}", serial.getName());
     }
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     try {
       appendMessage(baos, MAGIC_NUMBER);
-      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 1 + 2); // size
+      appendMessage(baos, 1 + 1 + 1 + 1 + 1 + 1 + 1 + 4); // size
       appendMessage(baos, NEO_PIXEL2_SET_ANIMATION); // msgType = 58
       appendMessage(baos, deviceId);
       appendMessage(baos, animation);
@@ -2175,7 +2176,7 @@ public class Msg {
       appendMessage(baos, green);
       appendMessage(baos, blue);
       appendMessage(baos, white);
-      appendMessageb16(baos, speed);
+      appendMessageb32(baos, wait_ms);
  
       byte[] message = sendMessage(baos);
       if (ackEnabled){
@@ -2196,7 +2197,7 @@ public class Msg {
         txBuffer.append("/");
         txBuffer.append(white);
         txBuffer.append("/");
-        txBuffer.append(speed);
+        txBuffer.append(wait_ms);
         txBuffer.append("\n");
         record.write(txBuffer.toString().getBytes());
         txBuffer.setLength(0);
@@ -2756,6 +2757,10 @@ public class Msg {
     }
     case 9 :  {
       return "Encoder";
+
+    }
+    case 10 :  {
+      return "NeoPixel2";
 
     }
     
