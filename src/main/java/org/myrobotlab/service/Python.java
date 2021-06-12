@@ -55,9 +55,9 @@ public class Python extends Service {
   public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
-    transient protected Thread myThread = null; 
+    transient protected Thread myThread = null;
 
-    public InputQueue(Python python) {      
+    public InputQueue(Python python) {
       this.python = python;
     }
 
@@ -120,13 +120,13 @@ public class Python extends Service {
       }
       log.info("shutting down python queue");
     }
-    
+
     synchronized public void stop() {
       if (myThread != null) {
         running = false;
         myThread.interrupt();
         myThread = null;
-      } 
+      }
     }
 
     synchronized public void start() {
@@ -135,7 +135,7 @@ public class Python extends Service {
         myThread.start();
       } else {
         log.warn("python input queue already running");
-      }      
+      }
     }
   }
 
@@ -315,13 +315,12 @@ public class Python extends Service {
 
   public Python(String n, String id) {
     super(n, id);
-  }
 
     log.info("created python {}", getName());
 
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
-    
+
     inputQueueThread = new InputQueue(this);
 
     // I love ServiceData !
@@ -337,60 +336,35 @@ public class Python extends Service {
       exampleFiles.put(st.getSimpleName(), file);
     }
 
-      log.info("created python {}", getName());
+    localPythonFiles = getFileListing();
 
-      log.info("creating module directory pythonModules");
-      new File("pythonModules").mkdir();
+    log.info("creating module directory pythonModules");
+    new File("pythonModules").mkdir();
 
-      // I love ServiceData !
-      ServiceData sd = ServiceData.getLocalInstance();
-      // I love Platform !
-      Platform p = Platform.getLocalInstance();
-      List<MetaData> sdt = sd.getAvailableServiceTypes();
-      for (int i = 0; i < sdt.size(); ++i) {
-        MetaData st = sdt.get(i);
-        // FIXME - cache in "data" dir Or perhaps it should be pulled into
-        // resource directory during build time and packaged with jar
-        String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
-        exampleFiles.put(st.getSimpleName(), file);
+    //////// was in startService
+
+    createPythonInterpreter();
+    attachPythonConsole();
+
+    String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
+        + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
+        + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
+        + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
+    // FIXME !!! myService is SO WRONG it will collide on more than 1 python
+    // service :(
+    PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
+    interp.exec(compiled);
+
+    // initialize all the pre-existing service before python was created
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface service : services.values()) {
+      if (service.isRunning()) {
+        onStarted(service.getName());
       }
-
-      localPythonFiles = getFileListing();
-
-      createPythonInterpreter();
-      attachPythonConsole();
-
-      String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
-          + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
-          + String.format("%s = Runtime.getService(\"%s\")\n\n", CodecUtils.getSafeReferenceName(getName()), getName()) + "Runtime = Runtime.getInstance()\n\n"
-          + String.format("runtime = Runtime.getInstance()\n") + String.format("myService = Runtime.getService(\"%s\")\n", getName());
-      // FIXME !!! myService is SO WRONG it will collide on more than 1 python
-      // service :(
-      PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
-      interp.exec(compiled);
-
-      log.info("starting python {}", getName());
-      if (inputQueueThread == null) {
-        inputQueueThread = new InputQueueThread(this);
-        inputQueueThread.start();
-      }
-      
-      // initialize all the pre-existing service before python was created
-      Map<String, ServiceInterface> services = Runtime.getLocalServices();
-      for (ServiceInterface service : services.values()) {
-        if (service.isRunning()) {
-          onStarted(service.getName());
-        }
-      }
-      
-      log.info("started python {}", getName());
-
-      // do not start the inbox until all
-      // the other necessary parts have been initialized
-      super.startService();
+    }
 
     log.info("starting python {}", getName());
-    inputQueueThread.start();    
+    inputQueueThread.start();
     log.info("started python {}", getName());
   }
 
@@ -486,6 +460,7 @@ public class Python extends Service {
     if (modulesDir != null) {
       sys.path.append(new PyString(modulesDir));
     }
+
     if (configDir != null) {
       sys.path.append(new PyString(configDir));
     }
@@ -806,7 +781,7 @@ public class Python extends Service {
       interp.cleanup();
       interp = null;
     }
-    
+
     inputQueueThread.stop();
     thread.interruptAllThreads();
     Py.getSystemState()._systemRestart = true;
@@ -857,7 +832,7 @@ public class Python extends Service {
       webgui.autoStartBrowser(false);
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
-      //python.execFile("data/adafruit.py");
+      // python.execFile("data/adafruit.py");
 
       Runtime.start("i01", "InMoov2");
 
