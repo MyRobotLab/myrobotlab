@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.IplImage;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.myrobotlab.service.OpenCV;
@@ -29,10 +28,6 @@ public abstract class AbstractOpenCVFilterTest extends AbstractTest {
   private CanvasFrame sourceImage = null;
   private CanvasFrame outputImage = null;
   
-  @Before
-  public void setup() {
-    // Loader.load();    
-  }
 
   @Test
   public void testFilter() throws InterruptedException {

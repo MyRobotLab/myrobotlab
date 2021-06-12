@@ -1,9 +1,5 @@
 package org.myrobotlab.test;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,9 +27,7 @@ public class AbstractTest {
   /** cached network test value for tests */
   static Boolean hasInternet = null;
 
-  static boolean install = true;
-
-  protected static boolean installed = true;
+  protected static boolean installed = false;
 
   public final static Logger log = LoggerFactory.getLogger(AbstractTest.class);
 
@@ -42,11 +36,11 @@ public class AbstractTest {
   private static boolean releaseRemainingServices = true;
 
   private static boolean releaseRemainingThreads = false;
-  
+
   protected transient Queue<Object> queue = new LinkedBlockingQueue<>();
 
   static transient Set<Thread> threadSetStart = null;
-  
+
   protected Set<Attachable> attached = new HashSet<>();
 
   protected boolean printMethods = true;
@@ -92,12 +86,11 @@ public class AbstractTest {
     }
   }
 
-  // super globals - probably better not to use the mixin - but just initialize
-  // statics in the
-  // constructor of the AbstractTest
   @BeforeClass
   public static void setUpAbstractTest() throws Exception {
-
+    
+    Platform.setVirtual(true);
+    
     String junitLogLevel = System.getProperty("junit.logLevel");
     if (junitLogLevel != null) {
       Runtime.setLogLevel(junitLogLevel);
@@ -109,12 +102,15 @@ public class AbstractTest {
     if (threadSetStart == null) {
       threadSetStart = Thread.getAllStackTraces().keySet();
     }
+
+    installAll();
+
   }
-  
-  static public List<String> getThreadNames(){
-    List <String> ret = new ArrayList<>();
+
+  static public List<String> getThreadNames() {
+    List<String> ret = new ArrayList<>();
     Set<Thread> tds = Thread.getAllStackTraces().keySet();
-    for (Thread t : tds ) {
+    for (Thread t : tds) {
       ret.add(t.getName());
     }
     return ret;
@@ -153,9 +149,9 @@ public class AbstractTest {
     }
   }
 
-  protected void installAll() throws ParseException, IOException {
+  static protected void installAll() {
     if (!installed) {
-      log.warn("installing all services");
+      log.warn("=====================installing all services=====================");
       Runtime.install(null, true);
       installed = true;
     }
@@ -203,46 +199,22 @@ public class AbstractTest {
     if (threadsRemaining.size() > 0) {
       log.warn("{} straggling threads remain [{}]", threadsRemaining.size(), String.join(",", threadsRemaining));
     }
-    log.warn("finished the killing ...");
+    // log.warn("finished the killing ...");
   }
 
   public AbstractTest() {
-    
-    // default : make testing environment "virtual"
-    Platform.setVirtual(true);
-    
     simpleName = this.getClass().getSimpleName();
     if (logWarnTestHeader) {
       log.warn("=========== starting test {} ===========", this.getClass().getSimpleName());
-    }
-    if (install) {
-      try {
-        installAll();
-      } catch (Exception e) {
-        log.error("installing services failed");
-        fail("installing service failed");
-      }
-    }
-    
-    // log.warn("=====java.library.path===== [{}]", System.getProperty("java.library.path"));
-    // log.warn("=====jna.library.path===== [{}]", System.getProperty("jna.library.path"));
-    
+    }    
   }
-  
+
   public void setVirtual() {
     Platform.setVirtual(true);
   }
-  
+
   public boolean isVirtual() {
     return Platform.isVirtual();
-  }
-
-  @Before
-  public void setUp() throws Exception {
-  }
-
-  @After
-  public void tearDown() throws Exception {
   }
 
   public void testFunction() {
