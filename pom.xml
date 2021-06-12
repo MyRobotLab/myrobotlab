@@ -19,9 +19,6 @@
     # for jar in root
     rsync -zarvh target/myrobotlab.jar pi@192.168.0.104:/opt/mrl/myrobotlab
     
-    # specific test
-    mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
-
     # javadoc check
     mvn -q javadoc:javadoc -o
     
@@ -42,6 +39,9 @@
     # single dep
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+
+    # specific test
+    mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
 
     # doclets
     javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
@@ -253,31 +253,31 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas</artifactId>
-    <version>0.3.10-1.5.4</version>
+    <version>0.3.13-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -290,7 +290,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
