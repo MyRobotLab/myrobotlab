@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
@@ -319,7 +320,16 @@ public abstract class Repo {
 
   static public void publishStatus(Status status) {
     for (StatusPublisher service : installStatusPublishers) {
-      service.broadcastStatus(status);
+      // service.broadcastStatus(status);
+      // service.publishStatus(status);
+      
+      if (service instanceof Service) {
+        Service s = (Service) service;
+        status.name = s.getName();
+        status.source = "repo";
+        s.invoke("publishStatus", status);
+      }
+      
     }
   }
 

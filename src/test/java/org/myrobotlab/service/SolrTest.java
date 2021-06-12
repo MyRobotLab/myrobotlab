@@ -63,7 +63,7 @@ public class SolrTest extends AbstractServiceTest {
 
   @Override
   public Service createService() {
-    Repo.getInstance().install("Solr");
+    Runtime.install("Solr", true);
     Solr solr = (Solr)Runtime.start("solr", "Solr");
     return solr;
   }

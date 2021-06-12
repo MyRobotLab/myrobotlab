@@ -120,6 +120,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private final Map<String, ServiceInterface> registry = new TreeMap<>();
 
   /**
+   * thread for non-blocking install of services
+   */
+  static private transient Thread installerThread = null;
+
+  /**
    * <pre>
    * The set of client connections to this mrl instance Some of the connections
    * are outbound to other webguis, others may be inbound if a webgui is
@@ -354,7 +359,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return b;
   }
 
-  static public synchronized ServiceInterface createService(String name, String type, String inId) {
+  /**
+   * Framework owned method - core of creating a new service
+   * @param name
+   * @param type
+   * @param inId
+   * @return
+   */
+  static private synchronized ServiceInterface createService(String name, String type, String inId) {
     log.info("Runtime.createService {}", name);
 
     if (name == null) {
@@ -409,7 +421,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       if (!repo.isServiceTypeInstalled(fullTypeName)) {
         log.error("{} is not installed", fullTypeName);
         if (autoAcceptLicense) {
-          repo.install(fullTypeName);
+          Runtime.getInstance().info("installing %s", type);
+          // repo.install(fullTypeName);
+          install(fullTypeName);
         }
       }
 
@@ -1012,18 +1026,54 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   static public void install() throws ParseException, IOException {
-    getInstance().getRepo().install();
+    install(null, null);
+  }
+
+  static public void install(String serviceType) {
+    install(serviceType, null);
   }
 
   /**
-   * Installs a single Service type. This "should" work even if there is no
-   * Runtime. It can be invoked on the command line without starting a MRL
-   * instance. If a runtime exits it will broadcast events of installation
-   * progress
+   * Maximum complexity install - allows for blocking and non-blocking install.
+   * During typically runtime install of services - non blocking is desired,
+   * otherwise status info from the install is blocked until installation is
+   * completed. For command line installation "blocking" mode would be desired
+   * 
+   * FIXME - problematic in that Runtime.create calls this directly, and this should be
+   * stepped through, because:
+   *   If we need to install new components, a restart is likely needed ... we don't do
+   *   custom dynamic classloaders .... yet
+   *   
+   *   License - should be appropriately accepted or rejected by user 
    *
    */
-  static public void install(String serviceType) throws ParseException, IOException {
-    getInstance().getRepo().install(serviceType);
+  synchronized static public void install(String serviceType, Boolean blocking) {
+    Runtime r = getInstance();
+
+    if (blocking == null) {
+      blocking = false;
+    }
+
+    installerThread = new Thread() {
+      public void run() {
+        try {
+          if (serviceType == null) {
+            r.getRepo().install();
+          } else {
+            r.getRepo().install(serviceType);
+          }
+        } catch (Exception e) {
+          r.error(e);
+        }
+      }
+    };
+    
+    if (blocking) {
+      installerThread.run();
+    } else {
+      installerThread.start();
+    }
+
   }
 
   static public void invokeCommands(String[] invoke) {
@@ -3136,14 +3186,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         try {
           ProcessBuilder builder = Launcher.createBuilder(options);
           process = builder.start();
-          
+
           // omg ... crossing the streams !
           StreamGobbler stdOut = new StreamGobbler(String.format("runtime-main-gobbler-output"), process.getInputStream(), System.out);
           stdOut.start();
 
           StreamGobbler stdIn = new StreamGobbler(String.format("runtime-main-gobbler-input"), System.in, process.getOutputStream());
           stdIn.start();
-          
+
           process.waitFor();
         } catch (Exception e) {
           log.error("runtime main threw", e);
@@ -3152,7 +3202,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           // kill child ... "clean up"
           process.destroy();
         }
-        
+
         // big hammer
         shutdown();
         return;

@@ -100,14 +100,6 @@ public class MethodCacheTest extends AbstractTest {
     ret = method.invoke(tester, new Object[] { "hello world", null, 3 });
     assertEquals(ret, "hello world");
     
-    /*
-    method = cache.getMethod(TestCatcher.class, "testMultipleParamTypes", new Object[] {"hello world 2", 1.1, 3});
-    ret = method.invoke(tester, new Object[] { "hello world 2", null, 3 });
-    assertEquals(ret, "hello world 2");
-    */
-    
-    log.info("here");
-
   }
 
   @Test
@@ -115,15 +107,6 @@ public class MethodCacheTest extends AbstractTest {
 
     Object ret = null;
     Method method = null;
-
-    // method = cache.getMethod(TestCatcher.class, "getPin", new Integer(3);
-
-    // log.info("Clock - {}",
-    // CodecUtils.toJson(cache.getRemoteMethods("Clock")));
-    /* FIXME
-    log.info("TestCatcher - {}", CodecUtils.toJson(cache.getRemoteMethods("org.myrobotlab.framework.TestCatcher")));
-    cache.getRemoteMethods();
-    */
 
     method = cache.getMethod(TestCatcher.class, "getPin", 3);
     ret = method.invoke(tester, 3);
@@ -146,11 +129,6 @@ public class MethodCacheTest extends AbstractTest {
     Object ret = null;
     Method method = null;
 
-    /* FIXME
-    log.info("TestCatcher - {}", CodecUtils.toJson(cache.getRemoteMethods("org.myrobotlab.framework.TestCatcher")));
-    cache.getRemoteMethods();
-    */
-    
     // service super type test
     method = cache.getMethod(TestCatcher.class, "stopService");
     ret = method.invoke(tester);
