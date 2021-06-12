@@ -42,6 +42,7 @@ public class ServiceSmokeTest extends AbstractTest {
     blacklist.add("org.myrobotlab.service.WorkE");
     blacklist.add("org.myrobotlab.service.PythonProxy");
     blacklist.add("org.myrobotlab.service.Sweety");
+    blacklist.add("org.myrobotlab.service.Sphinx");
     blacklist.add("org.myrobotlab.service.LeapMotion");
     blacklist.add("org.myrobotlab.service.Runtime");
     blacklist.add("org.myrobotlab.service.JMonkeyEngine");

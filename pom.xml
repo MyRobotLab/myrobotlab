@@ -23,14 +23,15 @@
     mvn -q javadoc:javadoc -o
     
     # specific test
-    mvn test -Dtest=OpenCVTest#testGetClassifications    
+    mvn test -Dtest=OpenCVTest#testGetClassifications
 
+    # installing in a local repo
     mvn install:install-file  -Dfile=target/myrobotlab.jar \
-                          -DgroupId=myrobotlab.org \
-                          -DartifactId=myrobotlab \
-                          -Dversion=1.1.401 \
-                          -Dpackaging=jar \
-                          -DlocalRepositoryPath=test-repo
+                      -DgroupId=myrobotlab.org \
+                      -DartifactId=myrobotlab \
+                      -Dversion=1.1.401 \
+                      -Dpackaging=jar \
+                      -DlocalRepositoryPath=test-repo
 
     # proxy
     -Dhttp.proxyHost=webproxy -Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
@@ -38,6 +39,9 @@
     # single dep
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:jar:sources -Ddest=.
     mvn org.apache.maven.plugins:maven-dependency-plugin:2.8:get -Dartifact=org.myrobotlab:worke:0.0.2:zip -Ddest=.
+
+    # specific test
+    mvn -Dtest=org.myrobotlab.opencv.OpenCVFilterFaceDetectTest test
 
     # doclets
     javadoc -classpath target/myrobotlab.jar:libraries/jar/* -docletpath target/myrobotlab.jar -doclet org.myrobotlab.doclet.ScannerDoclet  src/main/java/org/myrobotlab/service/Clock.java minus-show-comments/show-elements
@@ -48,6 +52,8 @@
     sshfs xxxxx@yyyyy.myrobotlab.org:/home/xxxxx /home/xxxxx/sshfs/blade2
     java -classpath target/classes:libraries/jar/* org.myrobotlab.service.Runtime &#45;&#45;from-launcher -s webgui WebGui python Python
 
+
+  
    -->  
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.myrobotlab</groupId>
@@ -110,12 +116,6 @@
           <id>oss-snapshots-repo</id>
           <name>oss-snapshots-repo</name>
           <url>https://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        <!-- for j3d core, utils and vector  -->
-        <repository>
-          <id>tudelft</id>
-          <name>tudelft</name>
-          <url>http://simulation.tudelft.nl/maven</url>
         </repository>
         <!-- swinggui mxgraph  -->
         <repository>
@@ -253,31 +253,31 @@
   <dependency>
     <groupId>org.bytedeco</groupId>
     <artifactId>openblas</artifactId>
-    <version>0.3.10-1.5.4</version>
+    <version>0.3.13-1.5.5</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-core</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-zoo</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-nn</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>org.deeplearning4j</groupId>
     <artifactId>deeplearning4j-modelimport</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -290,7 +290,7 @@
   <dependency>
     <groupId>org.nd4j</groupId>
     <artifactId>nd4j-native-platform</artifactId>
-    <version>1.0.0-beta7</version>
+    <version>1.0.0-M1</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -335,7 +335,7 @@
   <dependency>
     <groupId>com.thoughtworks.xstream</groupId>
     <artifactId>xstream</artifactId>
-    <version>1.4.16</version>
+    <version>1.4.17</version>
     <scope>provided</scope>
   </dependency>
 <!-- DocumentPipeline end -->
@@ -500,7 +500,7 @@
   <dependency>
     <groupId>net.java.jinput</groupId>
     <artifactId>jinput</artifactId>
-    <version>2.0.7</version>
+    <version>2.0.9</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
@@ -1184,13 +1184,13 @@
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-core</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
   </dependency>
   <dependency>
     <groupId>com.pi4j</groupId>
     <artifactId>pi4j-native</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
     <scope>provided</scope>
     <type>pom</type>
   </dependency>
@@ -1289,7 +1289,7 @@
     <version>8.8.2</version>
     <scope>provided</scope>
   </dependency>
-<!-- Duplicate entry for commons-io-commons-io-2.5 skipping -->
+<!-- Duplicate entry for commons-io-commons-io-2.7 skipping -->
 <!-- Solr end -->
 
 <!-- Sphinx begin -->

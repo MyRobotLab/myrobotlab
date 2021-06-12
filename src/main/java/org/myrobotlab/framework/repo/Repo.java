@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.myrobotlab.codec.CodecUtils;
+import org.myrobotlab.framework.Service;
 import org.myrobotlab.framework.ServiceReservation;
 import org.myrobotlab.framework.Status;
 import org.myrobotlab.framework.interfaces.StatusPublisher;
@@ -152,10 +153,6 @@ public abstract class Repo {
       // remotes.add(new RemoteRepo("jmonkey", "https://dl.bintray.com/jmonkeyengine/org.jmonkeyengine", "jmonkey simulator"));
 
       remotes.add(new RemoteRepo("oss-snapshots-repo", "https://oss.sonatype.org/content/groups/public", "sphinx"));
-      remotes.add(new RemoteRepo("tudelft", "http://simulation.tudelft.nl/maven", "for j3d core, utils and vector"));
-      // remotes.add(new RemoteRepo("jitpack", "https://jitpack.io", "microsoft
-      // azure
-      // translate"));
       remotes.add(new RemoteRepo("alfresco", "https://artifacts.alfresco.com/nexus/content/repositories/public", "swinggui mxgraph"));
 
       remotes.add(new RemoteRepo("marytts", "http://mary.dfki.de/repo", "some marytts voices"));
@@ -323,7 +320,16 @@ public abstract class Repo {
 
   static public void publishStatus(Status status) {
     for (StatusPublisher service : installStatusPublishers) {
-      service.broadcastStatus(status);
+      // service.broadcastStatus(status);
+      // service.publishStatus(status);
+      
+      if (service instanceof Service) {
+        Service s = (Service) service;
+        status.name = s.getName();
+        status.source = "repo";
+        s.invoke("publishStatus", status);
+      }
+      
     }
   }
 

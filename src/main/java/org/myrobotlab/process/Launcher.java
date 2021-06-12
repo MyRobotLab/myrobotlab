@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.myrobotlab.framework.CmdOptions;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.io.StreamGobbler;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.Runtime;
@@ -103,8 +104,8 @@ public class Launcher {
     System.out.println(toString(cmd));
     ProcessBuilder builder = new ProcessBuilder(cmd);
     builder.redirectErrorStream(true);
-    builder.inheritIO();
-
+    // builder.inheritIO(); # LAME - JDK BUG FIXED THEN NOT FIXED ...
+    
     // one of the nastiest bugs had to do with std out, or std err not
     // being consumed ... now we don't bother with it - instead
     // we have to use this clever redirect to /dev/null (os dependent) :(
@@ -124,7 +125,8 @@ public class Launcher {
     }
 
     builder.directory(spawnDir);
-    log.info("SPAWNING ! -->{}$ \n{}", spawnDir.getAbsolutePath(), toString(cmd));
+    log.info("WORKING DIR {}", spawnDir.getAbsolutePath());
+    log.info("SPAWNING ! -->{}", toString(cmd));
 
     // environment variables setup
     setEnv(builder.environment());

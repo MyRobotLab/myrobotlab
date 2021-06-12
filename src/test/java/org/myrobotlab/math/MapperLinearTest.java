@@ -8,9 +8,10 @@ import org.junit.runner.Result;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.math.interfaces.Mapper;
+import org.myrobotlab.test.AbstractTest;
 import org.slf4j.Logger;
 
-public class MapperLinearTest {
+public class MapperLinearTest extends AbstractTest {
 
   public final static Logger log = LoggerFactory.getLogger(MapperLinearTest.class);
 

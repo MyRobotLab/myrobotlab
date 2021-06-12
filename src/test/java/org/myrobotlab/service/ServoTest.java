@@ -227,6 +227,48 @@ public class ServoTest extends AbstractTest {
     assertEquals(2.0, servo01.getCurrentInputPos(), 0.0001);
 
   }
+  
+
+
+  @Test
+  public void setMaxSpeed() throws Exception {
+    Servo servo01 = (Servo) Runtime.start("servo01", "Servo");
+    Arduino arduino01 = (Arduino) Runtime.start("arduino01", "Arduino");
+    arduino01.connect(port01);
+    
+    // set restriction before set speed
+    servo01.setMaxSpeed(22.0);
+    servo01.setSpeed(60.0);    
+    assertEquals(22.0, servo01.getSpeed(), 0.0001);
+    
+    // remove restriction
+    servo01.setMaxSpeed(null);
+    servo01.setSpeed(85.3);
+    assertEquals(85.3, servo01.getSpeed(), 0.0001);
+
+    // set restriction after set speed
+    servo01.setSpeed(99.0);    
+    servo01.setMaxSpeed(67.0);
+    assertEquals(67.0, servo01.getSpeed(), 0.0001);
+
+    // attempt to remove speed control before restriction
+    servo01.setMaxSpeed(null);
+    servo01.setSpeed(null);    
+    servo01.setMaxSpeed(86.0);
+    assertEquals(86.0, servo01.getSpeed(), 0.0001);
+
+    // attempt to remove speed control after restriction
+    servo01.setMaxSpeed(25.0);
+    servo01.setSpeed(null);    
+    assertEquals(25.0, servo01.getSpeed(), 0.0001);
+
+    // remove all speed control
+    servo01.setMaxSpeed(null);
+    servo01.setSpeed(null);    
+    assertEquals(null, servo01.getSpeed());
+    
+  }
+  
 
   @Test
   public void moveToBlockingTest() throws Exception {

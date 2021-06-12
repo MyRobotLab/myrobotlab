@@ -42,7 +42,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   // FIXME - why
   @Deprecated
-  static boolean RobotCanMoveRandom = true;
+  public static boolean RobotCanMoveBodyRandom = true;
+  
+  @Deprecated
+  public static boolean RobotCanMoveHeadRandom = true;
+  
+  @Deprecated
+  public static boolean RobotCanMoveEyesRandom = true;
+  
+  @Deprecated
+  public static boolean RobotCanMoveRandom = true;
+  
+  @Deprecated
+  public static boolean RobotIsSleeping = false;
+  
+  @Deprecated
+  public static boolean RobotIsStarted = false;  
+  
   private static final long serialVersionUID = 1L;
 
   static String speechRecognizer = "WebkitSpeechRecognition";
@@ -778,6 +794,24 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     }
     return true;
   }
+  
+  public void cameraOff() {
+    if (opencv != null) {
+      opencv.stopCapture();
+      opencv.disableAll();
+    }
+  }
+
+  public void cameraOn() {
+    try {
+      if (opencv == null) {
+        startOpenCV();
+      }
+      opencv.capture();
+    } catch (Exception e) {
+      error(e);
+    }
+  }
 
   public void moveArm(String which, double bicep, double rotate, double shoulder, double omoplate) {
     InMoov2Arm arm = getArm(which);
@@ -1352,7 +1386,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // lame assumption - port is specified - it must be an Arduino :(
     if (port != null) {
       try {
-        speakBlocking(get(port));
+        speakBlocking(port);
         Arduino arduino = (Arduino) startPeer("left");
         arduino.connect(port);
 

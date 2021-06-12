@@ -52,12 +52,12 @@ public class Python extends Service {
    * handles
    * 
    */
-  public class InputQueueThread extends Thread {
+  public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
+    transient protected Thread myThread = null; 
 
-    public InputQueueThread(Python python) {
-      super(String.format("python.%s.input", python.getName()));
+    public InputQueue(Python python) {      
       this.python = python;
     }
 
@@ -118,6 +118,24 @@ public class Python extends Service {
           log.error("InputQueueThread while loop threw", e);
         }
       }
+      log.info("shutting down python queue");
+    }
+    
+    synchronized public void stop() {
+      if (myThread != null) {
+        running = false;
+        myThread.interrupt();
+        myThread = null;
+      } 
+    }
+
+    synchronized public void start() {
+      if (myThread == null) {
+        myThread = new Thread(this, String.format("python.%s.input", python.getName()));
+        myThread.start();
+      } else {
+        log.warn("python input queue already running");
+      }      
     }
   }
 
@@ -262,7 +280,7 @@ public class Python extends Service {
   Map<String, String> exampleFiles = new TreeMap<String, String>();
 
   transient LinkedBlockingQueue<Message> inputQueue = new LinkedBlockingQueue<Message>();
-  transient InputQueueThread inputQueueThread;
+  final transient InputQueue inputQueueThread;
   transient PythonInterpreter interp = null;
   transient Map<String, PIThread> interpThreads = new HashMap<String, PIThread>();
 
@@ -299,8 +317,25 @@ public class Python extends Service {
     super(n, id);
   }
 
-  public void startService() {
-    try {
+    log.info("created python {}", getName());
+
+    log.info("creating module directory pythonModules");
+    new File("pythonModules").mkdir();
+    
+    inputQueueThread = new InputQueue(this);
+
+    // I love ServiceData !
+    ServiceData sd = ServiceData.getLocalInstance();
+    // I love Platform !
+    Platform p = Platform.getLocalInstance();
+    List<MetaData> sdt = sd.getAvailableServiceTypes();
+    for (int i = 0; i < sdt.size(); ++i) {
+      MetaData st = sdt.get(i);
+      // FIXME - cache in "data" dir Or perhaps it should be pulled into
+      // resource directory during build time and packaged with jar
+      String file = String.format("%s/%s.py", st.getSimpleName(), st.getSimpleName());
+      exampleFiles.put(st.getSimpleName(), file);
+    }
 
       log.info("created python {}", getName());
 
@@ -354,9 +389,9 @@ public class Python extends Service {
       // the other necessary parts have been initialized
       super.startService();
 
-    } catch (Exception e) {
-      error(e);
-    }
+    log.info("starting python {}", getName());
+    inputQueueThread.start();    
+    log.info("started python {}", getName());
   }
 
   public void newScript() {
@@ -698,7 +733,6 @@ public class Python extends Service {
 
     registerScript += String.format("%s = Runtime.getService(\"%s\")\n", CodecUtils.getSafeReferenceName(s.getName()), s.getName());
     exec(registerScript, false);
-    log.info("\n ========= interactive python shell started - use exit() to leave  ========= \n");
   }
 
   /**
@@ -754,11 +788,14 @@ public class Python extends Service {
     broadcastState();
   }
 
-  /*
-   * no longer needed
-   * 
-   * @Override public void startService() { super.startService(); }
-   */
+  @Override
+  synchronized public void startService() {
+    super.startService();
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface s : services.values()) {
+      onStarted(s.getName());
+    }
+  }
 
   @Override
   public void releaseService() {
@@ -769,13 +806,8 @@ public class Python extends Service {
       interp.cleanup();
       interp = null;
     }
-
-    if (inputQueueThread != null) {
-      // let thread exit normally
-      inputQueueThread.running = false;
-      inputQueueThread = null;
-    }
-
+    
+    inputQueueThread.stop();
     thread.interruptAllThreads();
     Py.getSystemState()._systemRestart = true;
   }
@@ -826,13 +858,6 @@ public class Python extends Service {
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
       //python.execFile("data/adafruit.py");
-      
-      boolean done = true;
-      if (done) {
-        return;
-      }
-      
-      python.execFile("data/adafruit.py");
 
       Runtime.start("i01", "InMoov2");
 

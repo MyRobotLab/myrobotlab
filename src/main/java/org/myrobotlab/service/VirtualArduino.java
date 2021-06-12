@@ -204,8 +204,12 @@ public class VirtualArduino extends Service implements PortPublisher, PortListen
   }
 
   public void stop() {
-    if (runner != null)
+    if (runner != null) {
       runner.stop();
+    }
+    if (uart != null) {
+    	uart.disconnect();
+    }
   }
 
   /*
