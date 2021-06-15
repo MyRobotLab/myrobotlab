@@ -3,9 +3,12 @@ package org.myrobotlab.lang.py;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Instantiator;
@@ -51,6 +54,8 @@ public class LangPyUtils implements PythonGenerator {
       content.append("import org.myrobotlab.framework.Platform as Platform\n");
       content.append("import org.myrobotlab.service.Runtime as Runtime\n");
       content.append("\n");
+      content.append(String.format("print('loading %s of type %s')", si.getName(), si.getSimpleName()));
+      content.append("\n");
     }
 
     String safename = LangPyUtils.safeRefName(si);
@@ -77,11 +82,11 @@ public class LangPyUtils implements PythonGenerator {
   }
 
   public String toPython(String filename, String names) throws IOException {
-    return toPython(null, null, filename, names, null, null, null, null);
+    return toPython(null, null, null, filename, names, null, null, null, null);
   }
 
   public String toPython() throws IOException {
-    return toPython(null, null, null, null, null, null, null, null);
+    return toPython(null, null, null, null, null, null, null, null, null);
   }
 
   static public String toPython(Double value) {
@@ -108,267 +113,25 @@ public class LangPyUtils implements PythonGenerator {
     return null;
   }
 
-  /**
-   * <pre>
-   * static public String toPython(StringBuilder sb, Boolean asDef, String filename, Integer splitFileDepth, Integer level, Boolean traversePeers, Boolean includeDate,
-   *     Boolean includeVersion, String[] includeNames, String[] includeTypes, Boolean includeRuntime, Boolean includeHeader) throws IOException {
-   * 
-   *   // defaults
-   *   if (asDef == null) {
-   *     asDef = true;
-   *   }
-   * 
-   *   if (level == null) {
-   *     level = 0;
-   *   }
-   * 
-   *   if (splitFileDepth == null) {
-   *     splitFileDepth = 1;
-   *   }
-   * 
-   *   // if (splitFileDepth > level) {
-   *   // // find parent of file specified
-   *   // File parentDir = new File(filename).getParentFile();
-   *   // parentDir.mkdirs();
-   *   // String ret = exportServices(filename, splitFileDepth, level,
-   *   // traversePeers, includeDate, includeVersion, includeNames,
-   *   // includeTypes, includeRuntime, includeHeader);
-   *   // Files.write(Paths.get(filename), ret.getBytes());
-   *   // return ret;
-   *   // } else {
-   *   // return exportServices(filename, splitFileDepth, level, traversePeers,
-   *   // includeDate, includeVersion, includeNames, includeTypes,
-   *   // includeRuntime, includeHeader);
-   *   // }
-   * 
-   *   if (sb == null) {
-   *     sb = new StringBuilder();
-   *   }
-   * 
-   *   if (traversePeers == null) {
-   *     traversePeers = true;
-   *   }
-   * 
-   *   if (includeDate == null) {
-   *     includeDate = true;
-   *   }
-   * 
-   *   if (includeVersion == null) {
-   *     includeVersion = true;
-   *   }
-   * 
-   *   if (includeHeader == null) {
-   *     includeHeader = false;
-   *   }
-   * 
-   *   int indentLevel = 0;
-   *   String indent = "";
-   * 
-   *   // TODO - filename
-   *   if (includeHeader) {
-   *     sb.append("##############################################################\n");
-   *     sb.append("# MyRobotLab configuration file\n");
-   *     sb.append("# This file is generated from a running instance of MyRobotLab.\n");
-   *     sb.append("# It is meant to get MyRobotLab as close to that instance's state a possible.\n");
-   *     sb.append("# This file can be generated at any time using Runtime.save(filename)\n");
-   *     sb.append("# More information @ http://myrobotlab.org and https://github.com/myrobotlab\n");
-   *     if (includeVersion) {
-   *       sb.append(String.format("# version %s\n", Runtime.getVersion()));
-   *     }
-   *     // sb.append(String.format("# file %s\n", filename));
-   *     if (includeDate) {
-   *       sb.append(String.format("# generated %s\n\n", (new Date()).toString()));
-   *     }
-   * 
-   *     sb.append("##############################################################\n");
-   *     sb.append("## imports ####\n");
-   *   }
-   *   sb.append("import time\n");
-   *   sb.append("import org.myrobotlab.framework.Platform as Platform\n");
-   *   sb.append("import org.myrobotlab.service.Runtime as Runtime\n");
-   *   sb.append("\n");
-   *   sb.append((Platform.isVirtual() ? "Platform.setVirtual(True)\n" : "# Uncomment to use virtual hardware \n# Platform.setVirtual(True)\n"));
-   * 
-   *   // from current running system - vs something uncreated passed in ....
-   *   Map<String, ServiceInterface> allServices = Runtime.getLocalServices();
-   *   List<ServiceInterface> services = new ArrayList<>();
-   *   if (includeNames != null) {
-   *     for (String filter : includeNames) {
-   *       for (ServiceInterface service : allServices.values()) {
-   *         if (service.getName().equals(filter)) {
-   *           services.add(service);
-   *         }
-   *       }
-   *     }
-   *   }
-   * 
-   *   // FIXME - includePeers !!!
-   * 
-   *   if (includeTypes != null) {
-   *     for (String filter : includeTypes) {
-   *       for (ServiceInterface service : allServices.values()) {
-   *         if (service.getSimpleName().equals(filter)) {
-   *           services.add(service);
-   *         }
-   *       }
-   *     }
-   *   }
-   * 
-   *   if (includeNames == null && includeTypes == null) {
-   *     // no filters
-   *     services = new ArrayList<ServiceInterface>(allServices.values());
-   *   }
-   * 
-   *   if (includeRuntime != null && includeRuntime) {
-   *     services.add(Runtime.getInstance());
-   *   }
-   * 
-   *   if (includeHeader) {
-   *     sb.append("##############################################################\n");
-   *     sb.append(String.format("## creating %d services ####\n", services.size()));
-   *     sb.append("# Although Runtime.start(name,type) both creates and starts services it might be desirable on creation to\n");
-   *     sb.append("# substitute peers, types or references of other sub services before the service is \"started\"\n");
-   *     sb.append("# e.g. i01 = Runtime.create('i01', 'InMoov') # this will \"create\" the service and config could be manipulated before starting \n");
-   *     sb.append("# e.g. i01_left = Runtime.create('i01.left', 'Ssc32UsbServoController')\n");
-   *   }
-   *   // sb.append("runtime = Runtime.getInstance()\n");
-   * 
-   *   // FIXME create and start vs start option !
-   *   // FIXME - order service based on creation order
-   * 
-   *   if (asDef) {
-   *     indentLevel = 2;
-   *     indent = "  ";
-   *   }
-   * 
-   *   // the easy start (start peers auto-magically creates peers)
-   *   for (ServiceInterface si : services) {
-   *     if (si.isRuntime()) {
-   *       continue;
-   *     }
-   *     String safename = safeRefName(si);
-   *     sb.append(String.format("%s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
-   *     String localeTag = ((Service) si).getLocaleTag();
-   *     Locale defaultLocale = Locale.getDefault();
-   *     if (localeTag != null && !localeTag.equals(defaultLocale.getTag())) {
-   *       sb.append(String.format("%s.setLocale('%s')\n", safename, localeTag));
-   *     }
-   *     // do peers with comments
-   *     // top level peers - others commented out
-   *   }
-   * 
-   *   Runtime runtime = Runtime.getInstance();
-   *   boolean firstTime = true;
-   * 
-   *   Map<String, Connection> connections = runtime.getConnections();
-   *   for (Connection c : connections.values()) {
-   *     if (firstTime && includeHeader) {
-   *       sb.append("##############################################################\n");
-   *       sb.append(String.format("## creating client connections connections ####\n"));
-   *     }
-   *     // we can only re-attach "clients" connections - not server/listening
-   *     // connections
-   *     String cType = (String) c.get("c-type");
-   *     if ("Runtime".equals(cType)) {
-   *       sb.append("runtime.connect(\'" + (String) c.get("url") + "\') \n");
-   *     }
-   *   }
-   * 
-   *   sb.append("\n");
-   * 
-   *   if (includeHeader) {
-   *     sb.append("##############################################################\n");
-   *     sb.append("## configuring services ####\n");
-   *   }
-   *   // set config of each
-   *   for (ServiceInterface si : services) {
-   *     if (si.isRuntime()) {
-   *       continue;
-   *     }
-   * 
-   *     // FIXME - use the interface as a template for set/get/call etc..
-   *     // check to see if a matching org.myrobotlab.lang has a generatePython
-   *     String classname = String.format("org.myrobotlab.lang.py." + si.getSimpleName() + "Py");
-   * 
-   *     try {
-   *       Object o = Instantiator.getThrowableNewInstance(null, classname);
-   *       String custom = null;
-   *       custom = (String) Instantiator.invoke(o, "toPython", new Object[] { si });
-   *       sb.append(custom);
-   *       sb.append("\n");
-   *     } catch (Exception e) {
-   *       if (e instanceof ClassNotFoundException || e instanceof InvocationTargetException) {
-   *         log.info("custom {} not defined", classname);
-   *       } else {
-   *         log.error("{}.toPython threw", classname, e);
-   *       }
-   *     }
-   * 
-   *     firstTime = false;
-   *     MetaData serviceType = ServiceData.getMetaData(si.getName(), si.getSimpleName());
-   *     Map<String, ServiceReservation> peers = serviceType.getPeers();
-   *     if (peers.size() > 0 && includeHeader) {
-   *       sb.append("## peers ####\n");
-   *     }
-   * 
-   *     // FIXME - do "indent"
-   *     for (String peer : peers.keySet()) {
-   *       ServiceReservation sr = peers.get(peer);
-   *       String safename = safeRefName(sr.actualName);
-   *       ServiceInterface peerSi = Runtime.getService(sr.actualName);
-   * 
-   *       if (asDef) {
-   *         sb.append(String.format("def start%s()", capitalize(sr.key)));
-   *       }
-   * 
-   *       // TODO - check state of peer created/started
-   *       // peer is not currently running
-   *       if (peerSi == null) {
-   *         sb.append(String.format(indent + "%s = Runtime.start('%s', '%s')\n", safename, sr.actualName, sr.type));
-   *       } else {
-   *         // peer is currently running
-   *         sb.append(String.format(indent + "%s = Runtime.start('%s', '%s')\n", safename, sr.actualName, sr.type));
-   * 
-   *         String peerFile = new File(filename).getParent() + File.separator + sr.actualName + ".py";
-   * 
-   *         if (splitFileDepth > level) {
-   *           // write individual py files at this level
-   *           // find parent of file specified
-   *           File parentDir = new File(filename).getParentFile();
-   *           parentDir.mkdirs();
-   *           // FIXME - is splitFileDepth or level a different depth because
-   *           // they are roots of their own files ?
-   *           String ret = toPython(null, true, peerFile, splitFileDepth, level + 1, traversePeers, includeDate, includeVersion, new String[] { sr.actualName }, includeTypes,
-   *               includeRuntime, includeHeader);
-   *           Files.write(Paths.get(filename), ret.getBytes());
-   *           return ret;
-   *         } else {
-   *           // concatenate the file contents with sub peers
-   *           return sb.append(toPython(sb, true, filename, splitFileDepth, level + 1, traversePeers, includeDate, includeVersion, new String[] { sr.actualName }, includeTypes,
-   *               includeRuntime, includeHeader)).toString();
-   *         }
-   *       }
-   *     } // for all peers
-   *   }
-   *   return sb.toString();
-   * }
-   * </pre>
-   */
 
   // options :
   // force overwrite - default do not overwrite
   // "launch.yml" is the interface - it only saves launch.yml
 
-  public String toPython(StringBuilder content, Boolean includeHeader, String folder, String names, Integer currentLevel, Integer splitLevel, Boolean overwrite,
-      Boolean writeAsFilex) throws IOException {
+  public String toPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth)
+      throws IOException {
 
     // defaults
-    if (currentLevel == null) {
-      currentLevel = 0;
+    if (currentDepth == null) {
+      currentDepth = 0;
+    }
+    
+    if (numericPrefix == null) {
+      numericPrefix = false;
     }
 
     if (splitLevel == null) {
-      splitLevel = 1;
+      splitLevel = 1; // this is desired by inmoov InMoovHead, Torso etc...
     }
 
     if (includeHeader == null) {
@@ -382,6 +145,15 @@ public class LangPyUtils implements PythonGenerator {
     if (folder == null) {
       folder = "data" + File.separator + "config" + File.separator + "default";
     }
+    
+    String check = folder.replace("\\", "/");    
+    String[] chkdir = check.split("/");
+    for (int i = 0; i < chkdir.length; ++i) {
+      String chk = CodecUtils.getSafeReferenceName(chkdir[i]);
+      if (!chk.equals(chkdir[i])) {
+        throw new IOException(String.format("%s not valid name, consider %s", chkdir[i], chk));
+      }
+    }
 
     File dir = new File(folder);
     dir.mkdirs();
@@ -391,16 +163,23 @@ public class LangPyUtils implements PythonGenerator {
     if (overwrite == null) {
       overwrite = true;
     }
-    
-    String[] includes = null;
+
+    Map<String, ServiceInterface> all = Runtime.getLocalServices();
+
+    Set<String> includes = new HashSet<>();
     if (names != null) {
-      includes = names.split(",");
+      String[] n = names.split(",");
+      for (int i = 0; i < n.length; ++i) {
+        String name = n[i];
+        if (name.indexOf("@") < 0) {
+          includes.add(name + "@" + Runtime.getInstance().getId());
+        } else {
+          includes.add(name);
+        }
+      }
+    } else {
+      includes.addAll(all.keySet());
     }
-    
-    if (names.equals("i01.head.eyeX")) {
-      log.info("here");
-    }
-      
 
     // preconditions -
     // needs a directory path data/config/{name}/launch.yml
@@ -409,26 +188,19 @@ public class LangPyUtils implements PythonGenerator {
       throw new IOException("file %s already exists");
     }
 
-    List<ServiceInterface> all = Runtime.getServices();
-    Collections.sort(all);
-
-    for (ServiceInterface si : all) {
+    // If a single service and its peers, this doesnt make much difference
+    // but for random services it may. if we process breadth first, and
+    // have more than one service, then process them in the order they were
+    // created
+    List<ServiceInterface> list = new ArrayList<>();
+    list.addAll(all.values());    
+    Collections.sort(list);
+    
+    // for (ServiceInterface si : all.values()) {
+    for (ServiceInterface si : list) {
 
       // filtration of services based on includes, excludes, types, peers
-      boolean match = false;
-      if (includes != null) {
-
-        for (int i = 0; i < includes.length; ++i) {
-          if (si.getName().equals(includes[i])) {
-            match = true;
-            break;
-          }
-        }
-      } else {
-        match = true;
-      }
-
-      if (!match) {
+      if (!includes.contains(si.getFullName())) {
         continue;
       }
 
@@ -455,32 +227,41 @@ public class LangPyUtils implements PythonGenerator {
 
       // FIXME - do "indent"
       boolean firstTime = true;
-      for (String peer : peers.keySet()) {
-        ServiceReservation sr = peers.get(peer);
-        ServiceInterface peerSi = Runtime.getService(sr.actualName);
-        if (peerSi != null) {
-          if (currentLevel >= splitLevel) {
-            // concatenate content
-            if (firstTime) {
-              content.append(String.format("\n# %s peers\n", si.getSimpleName()));
+      if (maxDepth == null || maxDepth < currentDepth) {
+        for (String peer : peers.keySet()) {
+          ServiceReservation sr = peers.get(peer);
+          ServiceInterface peerSi = Runtime.getService(sr.actualName);
+          if (peerSi != null) {
+            if (currentDepth >= splitLevel) {
+              // concatenate content
+              if (firstTime) {
+                content.append(String.format("\n# %s peers\n", si.getSimpleName()));
+              }
+              toPython(content, false, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth);
+              content.append("\n");
+            } else {
+              // don't concatenate - split files
+              toPython(null, true, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth);
             }
-            toPython(content, false, folder, sr.actualName, currentLevel + 1, splitLevel, overwrite, false);
-            content.append("\n");
-          } else {
-            // don't concatenate
-            toPython(null, true, folder, sr.actualName, currentLevel + 1, splitLevel, overwrite, true);
           }
-        }
-        firstTime = false;
-      }
+          firstTime = false;
+        } // for (String peer : peers.keySet())
 
+      } // if (maxDepth == null || maxDepth < currentDepth)
+
+      String prefix = "";
+      if (numericPrefix) {
+        prefix = String.format("%02d_", si.getCreationOrder());
+      }
+      
       // if multiFile
-      if (currentLevel <= splitLevel) {
-        Files.write(new File(folder + File.separator + safeRefName(si) + ".py").toPath(), content.toString().getBytes());
+      if (currentDepth <= splitLevel) {
+        Files.write(new File(folder + File.separator + prefix + safeRefName(si) + ".py").toPath(), content.toString().getBytes());
       }
 
       log.info("{}", si.getName());
-    }
+      content = new StringBuilder();
+    } // for each service
 
     // conditional write launch file ...
 

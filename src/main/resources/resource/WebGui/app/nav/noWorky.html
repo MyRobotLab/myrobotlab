@@ -8,16 +8,17 @@
                 Don't panic, our team of crack engineers will evaluate your log file...
             </span>
             <span class="media-right">
-                <img src="../expert.jpg" alt="an expert developer"/>
+                <img src="../expert.jpg" alt="an expert developer" />
             </span>
             <br>
         </div>
         <div class="form-inline">
-        <div class="form-group">
-            <input type="text" class="form-control" ng-model="userId" placeholder="user id">
-            <button type="button" class="btn btn-primary" ng-click='noWorky(userId);' tooltip="send log file" tooltip-placement="bottom">send no worky</button>
+            <div class="form-group">
+                <input type="text" class="form-control" ng-model="userId" placeholder="user id">
+                <button type="button" class="btn btn-primary" ng-click='noWorky(userId);' tooltip="send log file"
+                    tooltip-placement="bottom">send no worky</button>
+            </div>
         </div>
-    </div>
     </div>
     <div ng-if="status == 'sendingnoworky'">
         sending ...

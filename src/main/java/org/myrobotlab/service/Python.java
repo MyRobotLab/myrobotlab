@@ -834,7 +834,7 @@ public class Python extends Service {
       Python python = (Python) Runtime.start("python", "Python");
       // python.execFile("data/adafruit.py");
 
-      Runtime.start("i01", "InMoov2");
+      // Runtime.start("i01", "InMoov2");
 
     } catch (Exception e) {
       log.error("main threw", e);

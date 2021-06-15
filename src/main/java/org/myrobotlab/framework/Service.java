@@ -63,7 +63,6 @@ import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.framework.repo.ServiceData;
 import org.myrobotlab.image.Util;
 import org.myrobotlab.io.FileIO;
-import org.myrobotlab.lang.py.LangPyUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
@@ -2394,7 +2393,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @throws IOException
    */
   public String export(String filename) throws IOException {
-    return export(filename, getName());
+    return export(filename, null);
   }
 
   public String export(String filename, String names) throws IOException {

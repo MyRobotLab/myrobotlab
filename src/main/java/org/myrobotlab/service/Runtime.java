@@ -2044,16 +2044,21 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String released(String serviceName) {
     return serviceName;
   }
-  
+
+
   public String export(String folder, String names) throws IOException {
+    return export(null, null, folder, names, null, null, null, null);
+  }
+
+  public String export(Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth){
     try {
       // String yml = LangYmlUtils.toYml(null, folder, names, null, null);
       LangPyUtils generator = new LangPyUtils();
-      String python = generator.toPython(null, null, folder, names, null, null, null, null);
+      String python = generator.toPython(null, null, numericPrefix, folder, names, currentDepth, splitLevel, overwrite, maxDepth);
       info("saved to %s", folder);
       return python;
     } catch (Exception e) {
-      error(e);
+      error(e.getMessage());
     }
     return null;
   }
