@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class LangPyUtils implements PythonGenerator {
     return "False";
   }
 
-  public String toDefaultPython(ServiceInterface si, boolean includeHeader) {
+  public String toDefaultStartPython(ServiceInterface si, boolean includeHeader) {
     StringBuilder content = new StringBuilder();
 
     if (includeHeader) {
@@ -54,17 +55,36 @@ public class LangPyUtils implements PythonGenerator {
       content.append("import org.myrobotlab.framework.Platform as Platform\n");
       content.append("import org.myrobotlab.service.Runtime as Runtime\n");
       content.append("\n");
-      content.append(String.format("print('loading %s of type %s')", si.getName(), si.getSimpleName()));
-      content.append("\n");
+      
+      // we make start methods now
+      content.append("def start():\n");
+
+      content.append(String.format("  " + "print('loading %s of type %s')", si.getName(), si.getSimpleName()));
+      content.append("\n");      
     }
 
     String safename = LangPyUtils.safeRefName(si);
+    
 
-    content.append(String.format("%s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
+    content.append(String.format("  %s = Runtime.start('%s', '%s')\n", safename, si.getName(), si.getSimpleName()));
     String localeTag = ((Service) si).getLocaleTag();
     Locale defaultLocale = Locale.getDefault();
     if (localeTag != null && !localeTag.equals(defaultLocale.getTag())) {
-      content.append(String.format("%s.setLocale('%s')\n", safename, localeTag));
+      content.append(String.format("  %s.setLocale('%s')\n", safename, localeTag));
+    }
+
+    return content.toString();
+  }
+  
+  public String toDefaultReleasePython(ServiceInterface si, boolean includeHeader) {
+    StringBuilder content = new StringBuilder();
+    
+    String safename = LangPyUtils.safeRefName(si);
+    
+    if (includeHeader) {
+      content.append("\n");
+      content.append("def release():\n");
+      content.append(String.format("  %s = Runtime.release('%s')\n", safename, si.getName()));
     }
     return content.toString();
   }
@@ -113,12 +133,50 @@ public class LangPyUtils implements PythonGenerator {
     return null;
   }
 
+  // this method is used as an entry point for generating python - everything done it is done only once
+  // recursive calls are confined to buildPython
+  public String toPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth) throws IOException {
+    
+    Map<Integer,String> serviceFileWritten = buildPython(content, includeHeader, numericPrefix, folder, names, currentDepth, splitLevel, overwrite, maxDepth);
+    
+    // determine order of creation for the services written to file - sort 
+    
+    List<Integer> order = new ArrayList<>();
+    for(Integer o: serviceFileWritten.keySet()) {
+      order.add(o);
+    }
+    
+    Collections.sort(order);
+    
+    // write module file
+    StringBuilder initContent = new StringBuilder();
+    File init = new File(folder + File.separator + "__init__.py");
+    for (Integer n : order) {
+      initContent.append("from . import " + CodecUtils.getSafeReferenceName(serviceFileWritten.get(n)) + "_config\n");
+    }
+    initContent.append("\n");
+    initContent.append("def start():\n");
+    for (Integer n : order) {
+      initContent.append("  " + CodecUtils.getSafeReferenceName(serviceFileWritten.get(n)) + "_config.start()\n");
+    }
+    Files.write(init.toPath(), initContent.toString().getBytes());
+
+    initContent.append("\n");
+    initContent.append("def release():\n");
+    for (Integer n : order) {
+      initContent.append("  " + CodecUtils.getSafeReferenceName(serviceFileWritten.get(n)) + "_config.release()\n");
+    }
+    Files.write(init.toPath(), initContent.toString().getBytes());
+    
+    return null;
+  }
+  
 
   // options :
   // force overwrite - default do not overwrite
   // "launch.yml" is the interface - it only saves launch.yml
 
-  public String toPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth)
+  public Map<Integer,String> buildPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth)
       throws IOException {
 
     // defaults
@@ -126,6 +184,7 @@ public class LangPyUtils implements PythonGenerator {
       currentDepth = 0;
     }
     
+    // FIXME - remove
     if (numericPrefix == null) {
       numericPrefix = false;
     }
@@ -145,6 +204,8 @@ public class LangPyUtils implements PythonGenerator {
     if (folder == null) {
       folder = "data" + File.separator + "config" + File.separator + "default";
     }
+    
+    Map<Integer,String> serviceFileWritten = new HashMap<>();
     
     String check = folder.replace("\\", "/");    
     String[] chkdir = check.split("/");
@@ -204,20 +265,14 @@ public class LangPyUtils implements PythonGenerator {
         continue;
       }
 
-      // write module file
-      File init = new File(folder + File.separator + "__init__.py");
-      if (!init.exists()) {
-        Files.write(init.toPath(), "".getBytes());
-      }
-
       // check for custom exporter ...
       StringBuilder newPythonContent = new StringBuilder();
       PythonGenerator generator = getExporter(String.format("org.myrobotlab.lang.py.%sPy", si.getSimpleName()));
       if (generator != null) {
-        newPythonContent.append(toDefaultPython(si, includeHeader));
+        newPythonContent.append(toDefaultStartPython(si, includeHeader));
         newPythonContent.append(generator.toPython(si));
       } else {
-        newPythonContent.append(toDefaultPython(si, includeHeader));
+        newPythonContent.append(toDefaultStartPython(si, includeHeader));
       }
 
       content.append(newPythonContent);
@@ -235,13 +290,13 @@ public class LangPyUtils implements PythonGenerator {
             if (currentDepth >= splitLevel) {
               // concatenate content
               if (firstTime) {
-                content.append(String.format("\n# %s peers\n", si.getSimpleName()));
+                content.append(String.format("\n  # %s peers\n", si.getSimpleName()));
               }
-              toPython(content, false, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth);
+              serviceFileWritten.putAll(buildPython(content, false, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth));
               content.append("\n");
             } else {
               // don't concatenate - split files
-              toPython(null, true, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth);
+              serviceFileWritten.putAll(buildPython(null, true, numericPrefix, folder, sr.actualName, currentDepth + 1, splitLevel, overwrite, maxDepth));
             }
           }
           firstTime = false;
@@ -253,24 +308,36 @@ public class LangPyUtils implements PythonGenerator {
       if (numericPrefix) {
         prefix = String.format("%02d_", si.getCreationOrder());
       }
+
+      if (si.getName().equals("i01")) {
+        log.info("here");
+      }
       
+      // need to group the def release
+      content.append(toDefaultReleasePython(si, currentDepth <= splitLevel));
+
       // if multiFile
       if (currentDepth <= splitLevel) {
-        Files.write(new File(folder + File.separator + prefix + safeRefName(si) + ".py").toPath(), content.toString().getBytes());
+        Files.write(new File(folder + File.separator + prefix + safeRefName(si) + "_config.py").toPath(), content.toString().getBytes());
+        serviceFileWritten.put(si.getCreationOrder(), si.getName());
       }
-
+      
       log.info("{}", si.getName());
       content = new StringBuilder();
     } // for each service
 
-    // conditional write launch file ...
+    // release
+    
 
-    return null;
+    
+    // FIXME - should be void ? 
+    // conditional write launch file ...
+    return serviceFileWritten;
   }
 
   @Override
   public String toPython(ServiceInterface si) {
-    return toDefaultPython(si, true);
+    return toDefaultStartPython(si, true);
   }
 
 }

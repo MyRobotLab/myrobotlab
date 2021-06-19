@@ -13,7 +13,7 @@ public class PollyPy extends LangPyUtils implements PythonGenerator {
     StringBuilder content = new StringBuilder();
     String name = safeRefName(polly);
 
-    content.append("# Polly config for " + name + "\n");
+    content.append("  " + "# Polly config for " + name + "\n");
 
 //    Too many    
 //    List<Voice> voices = polly.getVoices();
@@ -23,10 +23,10 @@ public class PollyPy extends LangPyUtils implements PythonGenerator {
 //    }
 
     if (polly.getVoice() != null) {
-      content.append(name + ".setVoice(\"" + polly.getVoice().getName() + "\")\n");
+      content.append("  " + name + ".setVoice(\"" + polly.getVoice().getName() + "\")\n");
     }
     
-    content.append(name + ".setMute(" + toPython(polly.isMute()) + ")\n");
+    content.append("  " + name + ".setMute(" + toPython(polly.isMute()) + ")\n");
 
     return content.toString();
   }

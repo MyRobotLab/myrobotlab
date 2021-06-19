@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
@@ -223,6 +225,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient protected Map<String, Locale> locales;
 
+  protected List<String> configList;
+
   /**
    * Returns the number of processors available to the Java virtual machine.
    * 
@@ -362,6 +366,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Framework owned method - core of creating a new service
+   * 
    * @param name
    * @param type
    * @param inId
@@ -1040,12 +1045,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * otherwise status info from the install is blocked until installation is
    * completed. For command line installation "blocking" mode would be desired
    * 
-   * FIXME - problematic in that Runtime.create calls this directly, and this should be
-   * stepped through, because:
-   *   If we need to install new components, a restart is likely needed ... we don't do
-   *   custom dynamic classloaders .... yet
-   *   
-   *   License - should be appropriately accepted or rejected by user 
+   * FIXME - problematic in that Runtime.create calls this directly, and this
+   * should be stepped through, because: If we need to install new components, a
+   * restart is likely needed ... we don't do custom dynamic classloaders ....
+   * yet
+   * 
+   * License - should be appropriately accepted or rejected by user
    *
    */
   synchronized static public void install(String serviceType, Boolean blocking) {
@@ -1068,7 +1073,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       }
     };
-    
+
     if (blocking) {
       installerThread.run();
     } else {
@@ -1422,6 +1427,40 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return seconds;
   }
 
+  public List<String> publishConfigList() {
+    configList = new ArrayList<>();
+    File configDir = new File("data/config");
+    if (!configDir.exists()) {
+      configDir.mkdirs();
+    }
+
+    File[] files = configDir.listFiles();
+    for (File file : files) {
+      String n = file.getName();
+
+      Pattern p = Pattern.compile("[^a-z0-9_]", Pattern.CASE_INSENSITIVE);
+      Matcher m = p.matcher(n);
+
+      if (!file.isDirectory()) {
+        warn("ignoring %s expecting directory not file", n);
+        continue;
+      }
+
+      if (Character.isDigit(n.charAt(0))) {
+        warn("ignoring %s config dir cannot start with digit", n);
+        continue;
+      }
+
+      if (m.find()) {
+        warn("ignoring %s special character in name not allowed", n);
+        continue;
+      }
+
+      configList.add(file.getName());
+    }
+    return configList;
+  }
+
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
@@ -1695,6 +1734,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     String libararyPath = System.getProperty("java.library.path");
     String userDir = System.getProperty("user.dir");
     String userHome = System.getProperty("user.home");
+
+    // initialize the config list
+    publishConfigList();
 
     // TODO this should be a single log statement
     // http://developer.android.com/reference/java/lang/System.html
@@ -2045,22 +2087,35 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return serviceName;
   }
 
-
   public String export(String folder, String names) throws IOException {
-    return export(null, null, folder, names, null, null, null, null);
+    return export(null, null, folder, names, null, 1, null, null);
   }
 
-  public String export(Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth){
+  // FIXME rename saveConfig
+  public String export(Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth) {
     try {
       // String yml = LangYmlUtils.toYml(null, folder, names, null, null);
       LangPyUtils generator = new LangPyUtils();
       String python = generator.toPython(null, null, numericPrefix, folder, names, currentDepth, splitLevel, overwrite, maxDepth);
-      info("saved to %s", folder);
+      info("saved config module to %s", folder);
+      invoke("publishConfigList");
       return python;
     } catch (Exception e) {
       error(e.getMessage());
     }
     return null;
+  }
+
+  public void startConfig(String[] names) {
+    for (int i = 0; i < names.length; ++i) {
+      send("python", "exec", String.format("import %s\n%s.start()", names[i], names[i]));
+    }
+  }
+
+  public void releaseConfig(String[] names) {
+    for (int i = 0; i < names.length; ++i) {
+      send("python", "exec", String.format("import %s\n%s.release()", names[i], names[i]));
+    }
   }
 
   /**
@@ -2112,9 +2167,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // fire it off
           Process restarted = pb.start();
-          // it "better" not be a requirement that a process must consume its std streams
-          // "hopefully" - if the OS realizes the process is dead it moves the streams to /dev/null ?
-          // StreamGobbler gobbler = new StreamGobbler(String.format("%s-gobbler", getName()), restarted.getInputStream());
+          // it "better" not be a requirement that a process must consume its
+          // std streams
+          // "hopefully" - if the OS realizes the process is dead it moves the
+          // streams to /dev/null ?
+          // StreamGobbler gobbler = new
+          // StreamGobbler(String.format("%s-gobbler", getName()),
+          // restarted.getInputStream());
           // gobbler.start();
 
           // dramatic pause

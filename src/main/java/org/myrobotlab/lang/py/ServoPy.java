@@ -16,22 +16,22 @@ public class ServoPy extends LangPyUtils implements PythonGenerator {
     StringBuilder content = new StringBuilder();
     String name = safeRefName(si);
 
-    content.append("# Servo Config : " + name + "\n");
+    content.append("  " + "# Servo Config : " + name + "\n");
     // why ?? sb.append(name + ".detach()\n");
     // sb.append(name + ".detach()\n");
-    content.append("# sets initial position of servo before moving\n");
-    content.append("# in theory this is the position of the servo when this file was created\n");
-    content.append(name + String.format(".setPosition(%s)\n", f.format(servo.getCurrentInputPos())));
+    content.append("  " + "# sets initial position of servo before moving\n");
+    content.append("  " + "# in theory this is the position of the servo when this file was created\n");
+    content.append("  " + name + String.format(".setPosition(%s)\n", f.format(servo.getCurrentInputPos())));
     content
-        .append(name + ".map(" + servo.getMapper().getMinX() + "," + servo.getMapper().getMaxX() + "," + servo.getMapper().getMinY() + "," + servo.getMapper().getMaxY() + ")\n");
+        .append("  " + name + ".map(" + servo.getMapper().getMinX() + "," + servo.getMapper().getMaxX() + "," + servo.getMapper().getMinY() + "," + servo.getMapper().getMaxY() + ")\n");
     // TODO: add mapper isClipped()
-    content.append(name + ".setInverted(" + toPython(servo.isInverted()) + ")\n");
-    content.append(name + ".setSpeed(" + toPython(servo.getSpeed()) + ")\n");
-    content.append(name + ".setRest(" + servo.getRest() + ")\n");
+    content.append("  " + name + ".setInverted(" + toPython(servo.isInverted()) + ")\n");
+    content.append("  " + name + ".setSpeed(" + toPython(servo.getSpeed()) + ")\n");
+    content.append("  " + name + ".setRest(" + servo.getRest() + ")\n");
     if (servo.getPin() != null) {
-      content.append(name + ".setPin(" + servo.getPin() + ")\n");
+      content.append("  " + name + ".setPin(" + servo.getPin() + ")\n");
     } else {
-      content.append("# " + name + ".setPin(" + servo.getPin() + ")\n");
+      content.append("  " + "# " + name + ".setPin(" + servo.getPin() + ")\n");
     }
 
     // if there's a controller reattach it at rest
@@ -49,9 +49,9 @@ public class ServoPy extends LangPyUtils implements PythonGenerator {
      * "\")\n"); }
      */
     if (servo.isAutoDisable()) {
-      content.append(name + ".setAutoDisable(True)\n");
+      content.append("  " + name + ".setAutoDisable(True)\n");
     } else {
-      content.append(name + ".setAutoDisable(False)\n");
+      content.append("  " + name + ".setAutoDisable(False)\n");
     }
     return content.toString();
   }

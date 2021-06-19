@@ -179,8 +179,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient ProgramAB chatBot;
 
-  Set<String> configs = null;
-
   String currentConfigurationName = "default";
   transient SpeechRecognizer ear;
 
@@ -297,6 +295,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   transient WebGui webgui;
 
+  protected List<String> configList;
+
   public InMoov2(String n, String id) {
     super(n, id);
 
@@ -328,9 +328,9 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // get events of new services and shutdown
     Runtime r = Runtime.getInstance();
     subscribe(r.getName(), "shutdown");
+    subscribe(r.getName(), "publishConfigList");
 
-    listConfigFiles();
-
+    
     // FIXME - Framework should auto-magically auto-start peers AFTER
     // construction - unless explicitly told not to
     // peers to start on construction
@@ -346,6 +346,23 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   @Override
   public void attachTextListener(TextListener service) {
     attachTextListener(service.getName());
+  }
+  
+  /**
+   * comes in from runtime which owns the config list
+   */
+  public void onConfigList(List<String> configList){
+    this.configList = configList;
+    invoke("publishConfigList");
+  }
+  
+  /**
+   * "re"-publishing runtime config list, because
+   * I don't want to fix the js subscribeTo :P
+   * @return
+   */
+  public List<String> publishConfigList(){
+    return configList;
   }
 
   public void attachTextPublisher(String name) {
@@ -710,34 +727,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return isServoMixerActivated;
   }
 
-  public Set<String> listConfigFiles() {
-
-    configs = new HashSet<>();
-
-    // data list
-    String configDir = getResourceDir() + fs + "config";
-    File f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    String[] files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-
-    // data list
-    configDir = getDataDir() + fs + "config";
-    f = new File(configDir);
-    if (!f.exists()) {
-      f.mkdirs();
-    }
-    files = f.list();
-    for (String config : files) {
-      configs.add(config);
-    }
-
-    return configs;
-  }
 
   /*
    * iterate over each txt files in the directory

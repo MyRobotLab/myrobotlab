@@ -13,50 +13,50 @@ public class InMoov2Py extends LangPyUtils {
     StringBuilder content = new StringBuilder();
     String name = safeRefName(si);
 
-    content.append("# InMoov2 Config : " + name + "\n");
+    content.append("  " +"# InMoov2 Config : " + name + "\n");
 
     if (!inmoov2.isVirtual()) {
-      content.append("# " + name + ".setVirtual(True)\n");
+      content.append("  " + "# " + name + ".setVirtual(True)\n");
     } else {
-      content.append(name + ".setVirtual(True)\n");
+      content.append("  " + name + ".setVirtual(True)\n");
     }
 
-    content.append(name + ".setMute(" + toPython(inmoov2.isMute()) + ")\n");
+    content.append("  " + name + ".setMute(" + toPython(inmoov2.isMute()) + ")\n");
 
     if (inmoov2.isMute())
 
-      content.append(name + ".setLanguage(" + inmoov2.getLanguage() + ")\n");
+      content.append("  " + name + ".setLanguage(" + inmoov2.getLanguage() + ")\n");
 
-    content.append("# start groups of sub services\n");
+    content.append("  " + "# start groups of sub services\n");
 
     // FIXME - WRONG WRONG WRONG - NO DIRECT REFERENCE !!!!
     // IF THERE IS COMPLEX SETUP NECESSARY - TEST BY serviceType/peer/state
     if (inmoov2.getHead() != null) {
-      content.append(name + ".startHead()\n");
+      content.append("  " + name + ".startHead()\n");
     }
 
     if (inmoov2.getLeftHand() != null) {
-      content.append(name + ".startLeftHand()\n");
+      content.append("  " + name + ".startLeftHand()\n");
     }
 
     if (inmoov2.getRightHand() != null) {
-      content.append(name + ".getRightHand()\n");
+      content.append("  " + name + ".getRightHand()\n");
     }
 
     if (inmoov2.getLeftArm() != null) {
-      content.append(name + ".startLeftArm()\n");
+      content.append("  " + name + ".startLeftArm()\n");
     }
 
     if (inmoov2.getSimulator() != null) {
-      content.append(name + ".startSimulator()\n");
+      content.append("  " + name + ".startSimulator()\n");
     }
 
     if (inmoov2.getRightArm() != null) {
-      content.append(name + ".getRightArm()\n");
+      content.append("  " + name + ".getRightArm()\n");
     }
 
     if (inmoov2.getTorso() != null) {
-      content.append(name + ".startTorso()\n");
+      content.append("  " + name + ".startTorso()\n");
     }
 
     return content.toString();

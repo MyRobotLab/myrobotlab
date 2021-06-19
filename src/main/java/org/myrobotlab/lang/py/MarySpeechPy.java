@@ -18,7 +18,7 @@ public class MarySpeechPy extends LangPyUtils implements PythonGenerator {
     StringBuilder content = new StringBuilder();
     String name = safeRefName(mary);
 
-    content.append("# MarySpeech Config : " + name + "\n");
+    content.append("  " + "# MarySpeech Config : " + name + "\n");
 
     /*
      * if (!mary.isVirtual()) { sb.append("# " + name + ".setVirtual(True)\n");
@@ -28,14 +28,14 @@ public class MarySpeechPy extends LangPyUtils implements PythonGenerator {
     List<Voice> voices = mary.getVoices();
 
     for (Voice voice : voices) {
-      content.append("# " + name + ".setVoice(\"" + voice.getName() + "\")" + " # " + voice.getLanguage() + "\n");
+      content.append("  " + "# " + name + ".setVoice(\"" + voice.getName() + "\")" + " # " + voice.getLanguage() + "\n");
     }
 
     if (mary.getVoice() != null) {
-      content.append(name + ".setVoice(\"" + mary.getVoice().getName() + "\")\n");
+      content.append("  " + name + ".setVoice(\"" + mary.getVoice().getName() + "\")\n");
     }
 
-    content.append(name + ".setMute(" + toPython(mary.isMute()) + ")\n");
+    content.append("  " + name + ".setMute(" + toPython(mary.isMute()) + ")\n");
 
     return content.toString();
   }

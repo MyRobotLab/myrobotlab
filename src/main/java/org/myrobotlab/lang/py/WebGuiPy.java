@@ -11,10 +11,10 @@ public class WebGuiPy extends LangPyUtils implements PythonGenerator {
     StringBuilder content = new StringBuilder();
     String name = safeRefName(si);
 
-    content.append("# WebGui Config : " + name + "\n");
-    content.append(name + ".autoStartBrowser(" + toPython(webgui.getAutoStartBrowser()) + ")\n");
-    content.append(name + ".setPort(" + webgui.getPort() + ")\n");
-    content.append(name + ".setAddress(" + escape(webgui.getAddress()) + ")\n");
+    content.append("  " + "# WebGui Config : " + name + "\n");
+    content.append("  " + name + ".autoStartBrowser(" + toPython(webgui.getAutoStartBrowser()) + ")\n");
+    content.append("  " + name + ".setPort(" + webgui.getPort() + ")\n");
+    content.append("  " + name + ".setAddress(" + escape(webgui.getAddress()) + ")\n");
 
     return content.toString();
   }

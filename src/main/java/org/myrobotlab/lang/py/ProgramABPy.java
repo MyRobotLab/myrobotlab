@@ -19,15 +19,15 @@ public class ProgramABPy extends LangPyUtils implements PythonGenerator {
     String safename = safeRefName(brain);
     
     // lang 
-    content.append(String.format("%s.setCurrentBotName('" + si.getCurrentBotName() + "')\n", safename));
-    content.append(String.format("%s.setCurrentUserName('" + si.getCurrentUserName() + "')\n", safename));
+    content.append(String.format("  " + "%s.setCurrentBotName('" + si.getCurrentBotName() + "')\n", safename));
+    content.append(String.format("  " + "%s.setCurrentUserName('" + si.getCurrentUserName() + "')\n", safename));
     
     brain.getAttached();
     
     Set<String> attached = si.getAttached("publishText");
     for (String n : attached) {
       if (!n.contains("@")) {
-        content.append(String.format("%s.attachTextListener('" + n + "')\n", safename));
+        content.append(String.format("  " + "%s.attachTextListener('" + n + "')\n", safename));
       }
     }
 

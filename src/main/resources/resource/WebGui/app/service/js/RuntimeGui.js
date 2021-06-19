@@ -6,7 +6,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     var statusMaxSize = 2500
 
     $scope.state = {
-        configDir:"data/config/myconfig"
+        configDir:"data/config/full"
     }
 
     this.updateState = function (service) {
@@ -291,7 +291,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             console.info('save config cancelled')
         }
 
-        let ret = modalService.openOkCancel('Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
+        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
         console.info('ret ' + ret);
     }
 

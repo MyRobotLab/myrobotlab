@@ -2393,7 +2393,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @throws IOException
    */
   public String export(String filename) throws IOException {
-    return export(filename, null);
+    return export(filename, getName());
   }
 
   public String export(String filename, String names) throws IOException {
@@ -2407,7 +2407,24 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return null;
   }
+  
+  public void startConfig(String[] names) {
+    try {
+      Runtime.getInstance().startConfig(names);
+    } catch(Exception e) {
+      error(e);
+    }
+  }
 
+  public void releaseConfig(String[] names) {
+    try {
+      Runtime.getInstance().releaseConfig(names);
+    } catch(Exception e) {
+      error(e);
+    }
+  }
+  
+  
   /**
    * non parameter version for use within a Service
    * 

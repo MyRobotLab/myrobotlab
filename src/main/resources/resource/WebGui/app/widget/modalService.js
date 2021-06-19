@@ -1,6 +1,7 @@
 angular.module('ModalController', [])
     .controller('ModalController', ['$scope', '$uibModal', '$uibModalInstance', 'titleValue', 'textValue', 'buttons',
         function ($scope, $uibModal, $uibModalInstance, titleValue, textValue, buttons) {
+            $scope.template = 
             $scope.title = titleValue
             $scope.text = textValue
             $scope.buttons = buttons
@@ -23,7 +24,7 @@ angular.module('modalService', [])
     .service('modalService', ['$uibModal', '$templateCache',
         function ($uibModal, $templateCache) {
 
-            this.open = function (title, text, buttons, scope) {
+            this.open = function (template, title, text, buttons, scope) {
                 if (!buttons) {
                     buttons = {
                         buttonSet: [{
@@ -38,7 +39,7 @@ angular.module('modalService', [])
 
                 $uibModal.open({
                     // template: $templateCache.get('modal-dialog.view.html'),
-                    templateUrl: 'widget/modal-dialog.view.html',
+                    templateUrl: template, //'widget/modal-dialog.view.html',
                     controller: 'ModalController',
                     scope: scope,
                     resolve: {
@@ -57,7 +58,7 @@ angular.module('modalService', [])
                 })
             }
 
-            this.openOkCancel = function (title, text, onOK, onCancel, scope) {
+            this.openOkCancel = function (template, title, text, onOK, onCancel, scope) {
                 var modalWindow = {
                     buttonSet: [{
                         buttonText: "OK",
@@ -70,6 +71,6 @@ angular.module('modalService', [])
                         buttonStyle: "modal-contect-appealInterface submit-button"
                     }
                 }
-                this.open(title, text, modalWindow, scope)
+                this.open(template, title, text, modalWindow, scope)
             }
         }])
