@@ -178,6 +178,14 @@ public class LangPyUtils implements PythonGenerator {
 
   public Map<Integer,String> buildPython(StringBuilder content, Boolean includeHeader, Boolean numericPrefix, String folder, String names, Integer currentDepth, Integer splitLevel, Boolean overwrite, Integer maxDepth)
       throws IOException {
+    
+    // FIXME - switch to use the default excludes
+    Set<String> excludes = new HashSet<>();
+    excludes.add("runtime");
+    excludes.add("python");
+    excludes.add("security");
+    excludes.add("webgui");
+    excludes.add("intro");
 
     // defaults
     if (currentDepth == null) {
@@ -262,6 +270,10 @@ public class LangPyUtils implements PythonGenerator {
 
       // filtration of services based on includes, excludes, types, peers
       if (!includes.contains(si.getFullName())) {
+        continue;
+      }
+      
+      if (excludes.contains(si.getName())) {
         continue;
       }
 

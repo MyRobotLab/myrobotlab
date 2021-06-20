@@ -72,7 +72,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                             console.info('save config cancelled')
                         }
                 
-                        let ret = modalService.openOkCancel('widget/modal-save-config-menu.html', 'Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, scope);
+                        let ret = modalService.openOkCancel('widget/modal-save-config-menu.html', 'Save Configuration', 'Save your current configuration for this service in a directory named', onOK, onCancel, scope);
                         console.info('ret ' + ret);                
 
                     }
