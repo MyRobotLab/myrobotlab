@@ -3375,4 +3375,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return routeTable.getConnectionUuid(gatewayKey);
   }
 
+  public static String getConfigDir() {
+    return CONFIG_DIR;
+  }
+
 }
