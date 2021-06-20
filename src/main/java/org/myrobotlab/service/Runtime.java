@@ -128,6 +128,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private transient Thread installerThread = null;
 
   /**
+   * The one config directory where all config is managed
+   */
+  protected static String CONFIG_DIR = "data/config";
+
+
+  /**
    * <pre>
    * The set of client connections to this mrl instance Some of the connections
    * are outbound to other webguis, others may be inbound if a webgui is
@@ -1427,9 +1433,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return seconds;
   }
 
+  /**
+   * Publishing config changes from the config directory
+   * @return
+   */
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
-    File configDir = new File("data/config");
+    File configDir = new File(CONFIG_DIR);
     if (!configDir.exists()) {
       configDir.mkdirs();
     }
