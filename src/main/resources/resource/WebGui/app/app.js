@@ -24,6 +24,8 @@ angular.module('mrlapp', ['ng', 'ngAnimate', //Angular Animate
 'mrlapp.mrl', //mrl.js (/mrl.js) - core communication and service registry
 //'mrlapp.main.mainCtrl', 
 'mrlapp.main.statusSvc', //very basic service for storing "statuses"
+'ModalController',
+'modalService',
 'mrlapp.main.noWorkySvc', //send a noWorky !
 'mrlapp.widget.startCtrl', 'mrlapp.nav', //Navbar & Co. (/nav)
 'mrlapp.service', //Service & Co. (/service)

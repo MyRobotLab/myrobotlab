@@ -203,6 +203,15 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   public static void main(String[] args) {
+    try {
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init("INFO");
+      
+      Runtime.start("python", "Python");
+      
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
     // iterate through all speech services
     // all will "load" voices and adhere to the AbtractSpeechSynthesis
@@ -223,18 +232,17 @@ public class Polly extends AbstractSpeechSynthesis {
 
     Runtime.getInstance(args); // <-- nice in that you can process command line
                                // args this way
-
     // set language universally
     // Runtime.setLanguage("pt");
-
-    Runtime.start("gui", "SwingGui");
+    // Runtime.start("gui", "SwingGui");
+    
     Polly polly = (Polly) Runtime.start("polly", "Polly");
     // polly.setKey(keyName, keyValue);
     // polly.setKeys("XXXXXXXX", "XXXXXXXXXXXXXXXXXXXXXXXXXX");
 
     // polly.setLanguage("de");
     log.info("polly voice is {}", polly.getVoice());
-    polly.speak(String.format("allo there my name is %s", polly.getVoice().getName()));
+    // polly.speak(String.format("allo there my name is %s", polly.getVoice().getName()));
 
     boolean b = true;
     if (b) {
@@ -332,6 +340,11 @@ public class Polly extends AbstractSpeechSynthesis {
     polly.speak("or to take arms against a see of troubles");
 
     log.info("finished");
+    
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+
   }
 
   @Override

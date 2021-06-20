@@ -361,7 +361,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       String newFile = FileUtil.saveAsFileName(getFrame(), "export.py");
       try {
         if (newFile != null) {
-          exportAll(newFile);
+          export("swing");
         }
       } catch (IOException e1) {
         log.error("could not export all to {}", newFile);

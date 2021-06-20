@@ -30,7 +30,6 @@ public class PollyMeta extends AbstractSpeechSynthesisMeta {
     // force using httpClient service httpcomponents version
     exclude("org.apache.httpcomponents", "httpcore");
     exclude("org.apache.httpcomponents", "httpclient");
-    addPeer("httpClient", "HttpClient", "httpClient");
 
     // <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-polly
     // -->

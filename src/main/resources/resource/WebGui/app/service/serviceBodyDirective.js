@@ -1,4 +1,4 @@
-angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', function($compile, $templateCache, mrl) {
+angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templateCache', 'mrl', 'modalService', function($compile, $templateCache, mrl, modalService) {
     return {
         scope: {
             panel: '='
@@ -61,7 +61,20 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     }
 
                     newscope.export = function() {
-                        mrl.sendTo(scope.panel.name, 'export')
+
+                        console.info('promptConfigDir')
+        
+                        let onOK = function () {
+                            mrl.sendTo('runtime', 'export', null, false, scope.panel.configDir, scope.panel.displayName, null, null, null, null)
+                        }
+                
+                        let onCancel = function () {
+                            console.info('save config cancelled')
+                        }
+                
+                        let ret = modalService.openOkCancel('widget/modal-save-config-menu.html', 'Save Configuration', 'Save your current configuration for this service in a directory named', onOK, onCancel, scope);
+                        console.info('ret ' + ret);                
+
                     }
 
                     var header = $templateCache.get('service/tab-header.html')

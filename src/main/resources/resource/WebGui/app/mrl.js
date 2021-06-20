@@ -945,6 +945,7 @@ angular.module('mrlapp.mrl', []).provider('mrl', [function() {
                 simpleName: _self.getSimpleName(type),
                 name: fullname,
                 displayName: _self.getShortName(fullname),
+                configDir: 'data/config/' + _self.getShortName(fullname).replaceAll('\.','_') + '_config',
 
                 //the state the loading of the template is in (loading, loaded, notfound) - probably can be removed
                 templatestatus: null,

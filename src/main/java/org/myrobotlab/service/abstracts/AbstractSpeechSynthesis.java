@@ -276,7 +276,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (genderIndex == null) {
       genderIndex = new HashMap<String, List<Voice>>();
     }
-    audioFile = (AudioFile) createPeer("audioFile");
+    // FIXED - below is wrong ... 
+    // should hold off creating or starting peers until the service has started
+    // audioFile = (AudioFile) createPeer("audioFile"); 
 
     getVoices();
 
@@ -494,6 +496,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void startService() {
     super.startService();
+    // FIXME - assigning a Peer to a reference is a no no
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
