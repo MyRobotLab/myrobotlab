@@ -25,11 +25,22 @@
 
 package org.myrobotlab.service;
 
+import java.io.File;
+
+import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.config.Config;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.nd4j.shade.protobuf.common.io.Files;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
  * @author GroG
@@ -191,7 +202,7 @@ public class Servo extends AbstractServo implements ServoControl {
       broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
-//    broadcastState();
+    // broadcastState();
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached
@@ -217,12 +228,148 @@ public class Servo extends AbstractServo implements ServoControl {
     setMaxSpeed(speed);
   }
 
+  public ServiceConfig getConfig() {
+
+    ServoConfig config = new ServoConfig();
+
+    // common
+    // config.name = getName();
+    // config.type = getSimpleName();
+
+    config.autoDisable = autoDisable;
+
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxX = mapper.getMaxX();
+      config.maxY = mapper.getMaxY();
+      config.minX = mapper.getMinX();
+      config.minY = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    config.controller = controller;
+    config.currentOutputPos = currentOutputPos;
+    config.enabled = enabled;
+    config.idleDisabled = idleDisabled;
+    config.idleTimeout = idleTimeout;
+    config.isBlocking = isBlocking;
+    config.pin = pin;
+    config.rest = rest;
+    config.speed = speed;
+    config.sweepMax = sweepMax;
+    config.sweepMin = sweepMin;
+    config.targetPos = targetPos;
+    
+    ServiceConfig sc = new ServiceConfig(getName(), getSimpleName(), config);
+
+    return sc;
+  }
+
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE  
+  public boolean save() {
+    return save(null, null, null);
+  }
+
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  public boolean save(ServiceConfig config, String filename, String format) {
+    try {
+      if (format == null) {
+        format = "yml";
+      }
+
+      if (filename == null) {
+        filename = "data" + fs + "config" + fs + getName() + "." + format;
+      }
+
+      if (config == null) {
+        config = getConfig();
+      }
+
+      DumperOptions options = new DumperOptions();
+      options.setIndent(2);
+      options.setPrettyFlow(true);
+      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+      Yaml yaml = new Yaml(options);
+      String c = yaml.dump(config);
+      Files.write(c.getBytes(), new File(filename));
+      
+      info("saved %s config to %s", getName(), filename);
+      return true;
+      
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
+  }
+
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  public ServiceConfig mergeConfig(ServiceConfig c) {
+    ServoConfig config = (ServoConfig)c.config;
+    
+    // common
+    // higher level :P
+    // config.name = getName();
+    // config.type = getSimpleName();
+
+    autoDisable = config.autoDisable;
+    mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);
+
+    // FIXME - more logic around this ?
+    controller = config.controller;
+    
+    currentOutputPos = config.currentOutputPos;
+    enabled = config.enabled;
+    idleDisabled = config.idleDisabled;
+    idleTimeout = config.idleTimeout;
+    isBlocking = config.isBlocking;
+    pin = config.pin;
+    rest = config.rest;
+    speed = config.speed;
+    sweepMax = config.sweepMax;
+    sweepMin = config.sweepMin;
+    targetPos = config.targetPos;
+
+    return c;
+  }
+  
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  public boolean load() {
+    return load(null);
+  }
+  
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  public boolean load(String filename) {
+    try {
+
+      // TODO - determin format based on file ext
+      if (filename == null) {
+        filename = "data" + fs + "config" + fs + getName() + "." + "yml";
+      }
+
+      Yaml yaml = new Yaml(new Constructor(ServiceConfig.class));
+      String y = FileIO.toString(new File(filename));
+      ServiceConfig config = (ServiceConfig)yaml.load(y);
+      
+      mergeConfig(config);      
+      
+      return true;
+      
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
+  }
+  
+
   public static void main(String[] args) throws InterruptedException {
     try {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo" });
+      Runtime.main(new String[] { "--from-launcher", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
@@ -233,8 +380,24 @@ public class Servo extends AbstractServo implements ServoControl {
 
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
 
+      
+      tilt.setPin(7);
+      pan.setPin(5);
+      tilt.setMinMax(10, 100);
+      pan.setMinMax(5, 105);
+      tilt.setInverted(true);
+      
+
+      tilt.save();
+      pan.save();
+      
+      tilt.load();
+      pan.load();
+      
+      
+      
       boolean done = true;
       if (done) {
         return;
@@ -247,7 +410,6 @@ public class Servo extends AbstractServo implements ServoControl {
 
       // double pos = 170;
       // servo03.setPosition(pos);
-      tilt.setPin(3);
 
       double min = 3;
       double max = 170;
@@ -309,6 +471,5 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
-
 
 }

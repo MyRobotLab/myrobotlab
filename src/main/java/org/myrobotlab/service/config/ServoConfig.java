@@ -6,14 +6,14 @@ public class ServoConfig extends Config {
   public String controller;
   public Double currentOutputPos;
   public Boolean enabled;
-  public Boolean idleDisabled;  
+  public Boolean idleDisabled;
   public Integer idleTimeout;
   public Boolean isBlocking;
-  
+
   public String pin;
   public Double rest;
   public Double speed;
-  
+
   // mapper values
   public Boolean inverted;
   public Boolean clip;
@@ -24,7 +24,7 @@ public class ServoConfig extends Config {
 
   public Double sweepMax;
   public Double sweepMin;
-  
+
   public Double targetPos;
-  
+
 }
