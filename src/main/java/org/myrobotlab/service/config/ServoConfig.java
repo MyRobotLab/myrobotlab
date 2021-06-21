@@ -4,7 +4,6 @@ public class ServoConfig extends Config {
 
   public Boolean autoDisable;
   public String controller;
-  public Double currentOutputPos;
   public Boolean enabled;
   public Boolean idleDisabled;
   public Integer idleTimeout;

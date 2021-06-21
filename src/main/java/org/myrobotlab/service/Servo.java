@@ -248,7 +248,6 @@ public class Servo extends AbstractServo implements ServoControl {
     }
 
     config.controller = controller;
-    config.currentOutputPos = currentOutputPos;
     config.enabled = enabled;
     config.idleDisabled = idleDisabled;
     config.idleTimeout = idleTimeout;
@@ -320,7 +319,6 @@ public class Servo extends AbstractServo implements ServoControl {
     // FIXME - more logic around this ?
     controller = config.controller;
     
-    currentOutputPos = config.currentOutputPos;
     enabled = config.enabled;
     idleDisabled = config.idleDisabled;
     idleTimeout = config.idleTimeout;
