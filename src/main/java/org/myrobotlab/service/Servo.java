@@ -256,7 +256,6 @@ public class Servo extends AbstractServo implements ServoControl {
     config.speed = speed;
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
-    config.targetPos = targetPos;
     
     ServiceConfig sc = new ServiceConfig(getName(), getSimpleName(), config);
 
@@ -326,7 +325,6 @@ public class Servo extends AbstractServo implements ServoControl {
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
-    targetPos = config.targetPos;
 
     return c;
   }

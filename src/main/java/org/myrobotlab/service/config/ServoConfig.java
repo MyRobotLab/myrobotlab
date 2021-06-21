@@ -23,6 +23,4 @@ public class ServoConfig extends Config {
   public Double sweepMax;
   public Double sweepMin;
 
-  public Double targetPos;
-
 }
