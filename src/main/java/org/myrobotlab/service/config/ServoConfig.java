@@ -7,8 +7,7 @@ public class ServoConfig extends Config {
   public Boolean enabled;
   public Boolean idleDisabled;
   public Integer idleTimeout;
-  public Boolean isBlocking;
-
+  
   public String pin;
   public Double rest;
   public Double speed;

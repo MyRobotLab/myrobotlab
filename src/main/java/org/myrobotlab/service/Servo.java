@@ -251,7 +251,6 @@ public class Servo extends AbstractServo implements ServoControl {
     config.enabled = enabled;
     config.idleDisabled = idleDisabled;
     config.idleTimeout = idleTimeout;
-    config.isBlocking = isBlocking;
     config.pin = pin;
     config.rest = rest;
     config.speed = speed;
@@ -322,7 +321,6 @@ public class Servo extends AbstractServo implements ServoControl {
     enabled = config.enabled;
     idleDisabled = config.idleDisabled;
     idleTimeout = config.idleTimeout;
-    isBlocking = config.isBlocking;
     pin = config.pin;
     rest = config.rest;
     speed = config.speed;
