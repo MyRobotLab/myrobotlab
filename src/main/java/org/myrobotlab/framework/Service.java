@@ -26,7 +26,6 @@
 package org.myrobotlab.framework;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -66,6 +65,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -1281,35 +1281,73 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
+   * Default mergeConfig method, override if implemented
+   * 
+   * @param c
+   * @return
+   */
+  public ServiceConfig mergeConfig(ServiceConfig c) {
+    return c;
+  }
+
+  /**
+   * Default getConfig returns name and type with null service specific config
+   * 
+   * @return
+   */
+  public ServiceConfig getConfig() {
+    ServiceConfig sc = new ServiceConfig(name, getSimpleName(), null);
+    return sc;
+  }
+
+  /**
    * method of de-serializing default will to load simple xml from name file
    */
   @Override
   public boolean load() {
-    return load(null, null);
+    return load(null);
   }
 
-  public boolean load(Object o, String inCfgFileName) {
-    String filename = null;
-    if (inCfgFileName == null) {
-      filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
-    } else {
-      filename = inCfgFileName;
-    }
+  /**
+   * loads a yaml configuration file from the file system default location will
+   * be data/config/{name}.yml
+   * 
+   * @param filename
+   * @return
+   */
+  public boolean load(String filename) {
 
-    File cfg = new File(filename);
-    if (cfg.exists()) {
-      try {
-        String json = FileIO.toString(filename);
-        if (!loadFromJson(o, json)) {
-          log.info("could not load file {}", filename);
-        } else {
-          return true;
-        }
-      } catch (Exception e) {
-        log.error("load threw", e);
+    try {
+
+      // TODO - determine format based on file ext yml or json
+      if (filename == null) {
+        filename = "data" + fs + "config" + fs + getName() + "." + "yml";
       }
-    } else {
-      log.info("cfg file {} does not exist", filename);
+
+      File f = new File(filename);
+      
+      String data = null;
+      
+      if (f.exists()) {
+        data = FileIO.toString(f);
+      } else {
+        error("could not load %s - file does not exist", f.getAbsoluteFile());
+      }
+      
+      String format = filename.substring(filename.lastIndexOf(".") + 1);
+
+      if (format.toLowerCase().equals("json")) {
+        ServiceConfig config = CodecUtils.fromJson(data, ServiceConfig.class);
+        mergeConfig(config);  
+      } else {
+        ServiceConfig config = CodecUtils.fromYaml(data, ServiceConfig.class);
+        mergeConfig(config);  
+      }
+      
+      return true;
+
+    } catch (Exception e) {
+      error(e);
     }
     return false;
   }
@@ -1557,58 +1595,39 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean save() {
-
-    try {
-      File cfg = new File(String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName())));
-      // serializer.write(this, cfg);
-      // this is a spammy log message
-      // info("saving %s", cfg.getName());
-      if (this instanceof Runtime) {
-        // info("we cant serialize runtime yet");
-        return false;
-      }
-
-      String s = CodecUtils.toPrettyJson(this);
-      FileOutputStream out = new FileOutputStream(cfg);
-      out.write(s.getBytes());
-      out.close();
-    } catch (Exception e) {
-      log.error("save threw", e);
-      return false;
-    }
-    return true;
+    return save(null);
   }
 
-  public boolean save(Object o, String cfgFileName) {
-
+  public boolean save(String filename) {
     try {
-      File cfg = new File(String.format("%s%s%s", FileIO.getCfgDir(), fs, cfgFileName));
-      String s = CodecUtils.toJson(o);
-      FileOutputStream out = new FileOutputStream(cfg);
-      out.write(s.getBytes());
-      out.close();
+
+      if (filename == null) {
+        filename = "data" + fs + "config" + fs + getName() + ".yml";
+      }
+
+      String format = filename.substring(filename.lastIndexOf(".") + 1);
+      ServiceConfig config = getConfig();
+      String data = null;
+
+      if ("json".equals(format.toLowerCase())) {
+        data = CodecUtils.toJson(config);
+      } else {
+        data = CodecUtils.toYaml(config);
+      }
+      FileIO.toFile(filename, data.getBytes());
+
+      info("saved %s config to %s", getName(), filename);
+      return true;
+
     } catch (Exception e) {
-      log.error("save threw", e);
-      return false;
+      error(e);
     }
-    return true;
+    return false;
   }
 
   public ServiceInterface getPeer(String peerKey) {
     String peerName = serviceType.getPeerActualName(peerKey);
     return Runtime.getService(peerName);
-  }
-
-  public boolean save(String cfgFileName, String data) {
-    // saves user data in the .myrobotlab directory
-    // with the file naming convention of name.<cfgFileName>
-    try {
-      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), fs, this.getName(), cfgFileName), data);
-    } catch (Exception e) {
-      Logging.logError(e);
-      return false;
-    }
-    return true;
   }
 
   public void send(String name, String method) {
@@ -2224,7 +2243,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // return all attached
     return outbox.getAttached(null);
   }
-  
+
   /**
    * returns all currently attached services to a specific publishing point
    */
@@ -2407,11 +2426,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     }
     return null;
   }
-  
+
   public void startConfig(String[] names) {
     try {
       Runtime.getInstance().startConfig(names);
-    } catch(Exception e) {
+    } catch (Exception e) {
       error(e);
     }
   }
@@ -2419,12 +2438,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void releaseConfig(String[] names) {
     try {
       Runtime.getInstance().releaseConfig(names);
-    } catch(Exception e) {
+    } catch (Exception e) {
       error(e);
     }
   }
-  
-  
+
+
   /**
    * non parameter version for use within a Service
    * 

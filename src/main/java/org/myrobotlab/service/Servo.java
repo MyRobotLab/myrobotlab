@@ -228,8 +228,10 @@ public class Servo extends AbstractServo implements ServoControl {
     setMaxSpeed(speed);
   }
 
+// BEGIN - CONFIGURATION =======================
+ 
   public ServiceConfig getConfig() {
-
+    ServiceConfig sc = super.getConfig();
     ServoConfig config = new ServoConfig();
 
     // common
@@ -257,47 +259,8 @@ public class Servo extends AbstractServo implements ServoControl {
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
     
-    ServiceConfig sc = new ServiceConfig(getName(), getSimpleName(), config);
-
+    sc.config = config;
     return sc;
-  }
-
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE  
-  public boolean save() {
-    return save(null, null, null);
-  }
-
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE
-  public boolean save(ServiceConfig config, String filename, String format) {
-    try {
-      if (format == null) {
-        format = "yml";
-      }
-
-      if (filename == null) {
-        filename = "data" + fs + "config" + fs + getName() + "." + format;
-      }
-
-      if (config == null) {
-        config = getConfig();
-      }
-
-      DumperOptions options = new DumperOptions();
-      options.setIndent(2);
-      options.setPrettyFlow(true);
-      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-
-      Yaml yaml = new Yaml(options);
-      String c = yaml.dump(config);
-      Files.write(c.getBytes(), new File(filename));
-      
-      info("saved %s config to %s", getName(), filename);
-      return true;
-      
-    } catch (Exception e) {
-      error(e);
-    }
-    return false;
   }
 
   // THIS MUST BE PUSHED HIGHER INTO SERVICE
@@ -312,11 +275,7 @@ public class Servo extends AbstractServo implements ServoControl {
     autoDisable = config.autoDisable;
     mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
     mapper.setInverted(config.inverted);
-    mapper.setClip(config.clip);
-
-    // FIXME - more logic around this ?
-    controller = config.controller;
-    
+    mapper.setClip(config.clip);    
     enabled = config.enabled;
     idleDisabled = config.idleDisabled;
     idleTimeout = config.idleTimeout;
@@ -325,39 +284,18 @@ public class Servo extends AbstractServo implements ServoControl {
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }    
 
     return c;
   }
   
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE
-  public boolean load() {
-    return load(null);
-  }
-  
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE
-  public boolean load(String filename) {
-    try {
-
-      // TODO - determin format based on file ext
-      if (filename == null) {
-        filename = "data" + fs + "config" + fs + getName() + "." + "yml";
-      }
-
-      Yaml yaml = new Yaml(new Constructor(ServiceConfig.class));
-      String y = FileIO.toString(new File(filename));
-      ServiceConfig config = (ServiceConfig)yaml.load(y);
-      
-      mergeConfig(config);      
-      
-      return true;
-      
-    } catch (Exception e) {
-      error(e);
-    }
-    return false;
-  }
-  
-
   public static void main(String[] args) throws InterruptedException {
     try {
 
@@ -376,28 +314,37 @@ public class Servo extends AbstractServo implements ServoControl {
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       Servo pan = (Servo) Runtime.start("pan", "Servo");
 
-      
-      tilt.setPin(7);
+      /*
+      tilt.setPin(4);
       pan.setPin(5);
       tilt.setMinMax(10, 100);
       pan.setMinMax(5, 105);
       tilt.setInverted(true);
-      
 
+      mega.connect("/dev/ttyACM0");
+            
+      mega.attach(tilt);
+      mega.attach(pan);
+      
+      mega.save();
       tilt.save();
       pan.save();
-      
+      */
+
       tilt.load();
       pan.load();
+      mega.load();
+
       
-      
+      // TODO - attach before and after connect..
+
+
       
       boolean done = true;
       if (done) {
         return;
       }
 
-      mega.connect("/dev/ttyACM1");
       // mega.setBoardMega();
 
       log.info("servo pos {}", tilt.getCurrentInputPos());

@@ -27,6 +27,7 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -38,6 +39,8 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -2222,142 +2225,197 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       log.info("no devices to sync, clear to resume.");
     }
   }
+  
+ public ServiceConfig getConfig() {
+   ServiceConfig sc = super.getConfig();
+   ArduinoConfig config = new ArduinoConfig();
 
-  /**
-   * DO NOT FORGET INSTALL AND VMARGS !!!
-   * 
-   * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
-   * -Dfile.encoding=UTF-8
-   * 
-   * @param args
-   */
-  public static void main(String[] args) {
-    try {
+   if (serial != null ) {
+     if (serial.getPortName() != null) {
+       config.port = serial.getPortName();
+     } else {
+       config.port = serial.lastPortName;
+     }
+   }
+   
+   if (deviceList.keySet().size() > 1) {
+     
+     List<String> tmp = new ArrayList<>();
+     for (String n : deviceList.keySet()) {
+       if (!n.equals(getName())) {
+         tmp.add(n);
+       }
+     }
+     
+     config.deviceList = new String[tmp.size()];
+     tmp.toArray(config.deviceList);
+     
+   }
+   
+   sc.config = config;
+   return sc;
+ }
 
-      // Platform.setVirtual(true);
 
-      Runtime.main(new String[] { "--interactive", "--id", "id" });
+ // THIS MUST BE PUSHED HIGHER INTO SERVICE
+ public ServiceConfig mergeConfig(ServiceConfig c) {
+   ArduinoConfig config = (ArduinoConfig)c.config;
+   
+   if (config.port != null) {
+     connect(config.port);
+   }
+   
+   if (config.deviceList != null) {
+     for (String name : config.deviceList) {
+       ServiceInterface si = Runtime.getService(name);
+       if (si != null) {
+         try {
+           attach(si);
+         } catch(Exception e) {
+           error(e);
+         }
+       }
+     }
+   }
+   
+   return c;
+ }
+ 
+ /**
+  * DO NOT FORGET INSTALL AND VMARGS !!!
+  * 
+  * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
+  * -Dfile.encoding=UTF-8
+  * 
+  * @param args
+  */
+ public static void main(String[] args) {
+   try {
 
-      LoggingFactory.init(Level.INFO);
-      // Platform.setVirtual(true);
+     // Platform.setVirtual(true);
 
-      /*
-       * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-       * webgui.autoStartBrowser(false); webgui.setPort(8887);
-       * webgui.startService();
-       */
+     Runtime.main(new String[] { "--interactive", "--id", "id" });
 
-      // Runtime.start("gui", "SwingGui");
-      Serial.listPorts();
+     LoggingFactory.init(Level.INFO);
+     // Platform.setVirtual(true);
 
-      Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
+     /*
+      * WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      * webgui.autoStartBrowser(false); webgui.setPort(8887);
+      * webgui.startService();
+      */
 
-      hub.connect("/dev/ttyACM0");
+     // Runtime.start("gui", "SwingGui");
+     Serial.listPorts();
 
-      // hub.enableAck(false);
+     Arduino hub = (Arduino) Runtime.start("hub", "Arduino");
 
-      ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
-      sc.setPin(3);
-      hub.attach(sc);
-      sc = (ServoControl) Runtime.start("s2", "Servo");
-      sc.setPin(9);
-      hub.attach(sc);
+     hub.connect("/dev/ttyACM0");
 
-      // hub.enableAck(true);
-      /*
-       * sc = (ServoControl) Runtime.start("s3", "Servo"); sc.setPin(12);
-       * hub.attach(sc);
-       */
+     // hub.enableAck(false);
 
-      log.info("here");
-      // hub.connect("COM6"); // uno
+     ServoControl sc = (ServoControl) Runtime.start("s1", "Servo");
+     sc.setPin(3);
+     hub.attach(sc);
+     sc = (ServoControl) Runtime.start("s2", "Servo");
+     sc.setPin(9);
+     hub.attach(sc);
 
-      // hub.startTcpServer();
+     // hub.enableAck(true);
+     /*
+      * sc = (ServoControl) Runtime.start("s3", "Servo"); sc.setPin(12);
+      * hub.attach(sc);
+      */
 
-      boolean isDone = true;
+     log.info("here");
+     // hub.connect("COM6"); // uno
 
-      if (isDone) {
-        return;
-      }
+     // hub.startTcpServer();
 
-      VirtualArduino vmega = null;
+     boolean isDone = true;
 
-      vmega = (VirtualArduino) Runtime.start("vmega", "VirtualArduino");
-      vmega.connect("COM7");
-      Serial sd = (Serial) vmega.getSerial();
-      sd.startTcpServer();
+     if (isDone) {
+       return;
+     }
 
-      // Runtime.start("webgui", "WebGui");
+     VirtualArduino vmega = null;
 
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+     vmega = (VirtualArduino) Runtime.start("vmega", "VirtualArduino");
+     vmega.connect("COM7");
+     Serial sd = (Serial) vmega.getSerial();
+     sd.startTcpServer();
 
-      if (mega.isVirtual()) {
-        vmega = mega.getVirtual();
-        vmega.setBoardMega();
-      }
+     // Runtime.start("webgui", "WebGui");
 
-      // mega.getBoardTypes();
-      // mega.setBoardMega();
-      // mega.setBoardUno();
-      mega.connect("COM7");
+     Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
 
-      /*
-       * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
-       * uno.connect("COM6");
-       */
+     if (mega.isVirtual()) {
+       vmega = mega.getVirtual();
+       vmega.setBoardMega();
+     }
 
-      // log.info("port names {}", mega.getPortNames());
+     // mega.getBoardTypes();
+     // mega.setBoardMega();
+     // mega.setBoardUno();
+     mega.connect("COM7");
 
-      Servo servo = (Servo) Runtime.start("servo", "Servo");
-      // servo.load();
-      log.info("rest is {}", servo.getRest());
-      servo.save();
-      // servo.setPin(8);
-      servo.attach(mega, 13);
+     /*
+      * Arduino uno = (Arduino) Runtime.start("uno", "Arduino");
+      * uno.connect("COM6");
+      */
 
-      servo.moveTo(90.0);
+     // log.info("port names {}", mega.getPortNames());
 
-      /*
-       * servo.moveTo(3); sleep(300); servo.moveTo(130); sleep(300);
-       * servo.moveTo(90); sleep(300);
-       * 
-       * 
-       * // minmax checking
-       * 
-       * servo.invoke("moveTo", 120);
-       */
+     Servo servo = (Servo) Runtime.start("servo", "Servo");
+     // servo.load();
+     log.info("rest is {}", servo.getRest());
+     servo.save();
+     // servo.setPin(8);
+     servo.attach(mega, 13);
 
-      /*
-       * mega.attach(servo);
-       * 
-       * servo.moveTo(3);
-       * 
-       * servo.moveTo(30);
-       * 
-       * mega.enablePin("A4");
-       * 
-       * // arduino.setBoardMega();
-       * 
-       * Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)
-       * Runtime.start("adafruit", "Adafruit16CServoDriver");
-       * adafruit.attach(mega); mega.attach(adafruit);
-       */
+     servo.moveTo(90.0);
 
-      // servo.attach(arduino, 8, 90);
+     /*
+      * servo.moveTo(3); sleep(300); servo.moveTo(130); sleep(300);
+      * servo.moveTo(90); sleep(300);
+      * 
+      * 
+      * // minmax checking
+      * 
+      * servo.invoke("moveTo", 120);
+      */
 
-      // Runtime.start("webgui", "WebGui");
-      // Service.sleep(3000);
+     /*
+      * mega.attach(servo);
+      * 
+      * servo.moveTo(3);
+      * 
+      * servo.moveTo(30);
+      * 
+      * mega.enablePin("A4");
+      * 
+      * // arduino.setBoardMega();
+      * 
+      * Adafruit16CServoDriver adafruit = (Adafruit16CServoDriver)
+      * Runtime.start("adafruit", "Adafruit16CServoDriver");
+      * adafruit.attach(mega); mega.attach(adafruit);
+      */
 
-      // remote.startListening();
+     // servo.attach(arduino, 8, 90);
 
-      // Runtime.start("webgui", "WebGui");
+     // Runtime.start("webgui", "WebGui");
+     // Service.sleep(3000);
 
-    } catch (Exception e) {
-      log.error("main threw", e);
-    }
-  }
+     // remote.startListening();
 
-  /**
+     // Runtime.start("webgui", "WebGui");
+
+   } catch (Exception e) {
+     log.error("main threw", e);
+   }
+ }
+
+/**
    * stops the servo sweeping or moving with speed control
    */
   @Override
@@ -2376,5 +2434,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
   }
-
+  
 }

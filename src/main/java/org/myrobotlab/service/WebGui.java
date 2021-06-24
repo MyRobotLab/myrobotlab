@@ -351,7 +351,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return Runtime.getInstance().getConnections(getName());
   }
 
-  public Config.Builder getConfig() {
+  public Config.Builder getNettosphereConfig() {
 
     Config.Builder configBuilder = new Config.Builder();
     try {
@@ -1032,7 +1032,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
         return;
       }
 
-      nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
+      nettosphere = new Nettosphere.Builder().config(getNettosphereConfig().build()).build();
       sleep(1000); // needed ?
 
       try {

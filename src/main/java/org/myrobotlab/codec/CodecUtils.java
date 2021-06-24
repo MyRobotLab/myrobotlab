@@ -23,7 +23,11 @@ import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -608,6 +612,23 @@ public class CodecUtils {
       msg.setData(params);
     }    
     return msg;
+  }
+
+  final public static String toYaml(Object o) {
+    // not thread safe - so we new here
+    DumperOptions options = new DumperOptions();
+    options.setIndent(2);
+    options.setPrettyFlow(true);
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+    Yaml yaml = new Yaml(options);
+    String c = yaml.dump(o);
+    return c;
+  }
+  
+  public final static <T extends Object> T fromYaml(String data, Class<T> clazz) {
+    Yaml yaml = new Yaml(new Constructor(clazz));
+    return (T)yaml.load(data);    
   }
 
 }

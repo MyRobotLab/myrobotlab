@@ -727,14 +727,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     return isServoMixerActivated;
   }
 
-
-  /*
-   * iterate over each txt files in the directory
-   */
-  public void load(String locale) {
-    setLocale(locale);
-  }
-
   public void loadGestures() {
     loadGestures(getResourceDir() + fs + "gestures");
   }

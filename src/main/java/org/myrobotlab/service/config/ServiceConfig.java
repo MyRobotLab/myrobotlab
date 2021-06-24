@@ -9,7 +9,7 @@ public class ServiceConfig {
   public ServiceConfig() {    
   }
   
-  public ServiceConfig(String name, String type, ServoConfig config) {
+  public ServiceConfig(String name, String type, Config config) {
     this.name = name;
     this.type = type;
     this.config = config;

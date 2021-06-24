@@ -25,6 +25,8 @@ public class RuntimeMeta extends MetaData {
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
     // apache 2.0 license
+    addDependency("org.yaml", "snakeyaml", "1.17");
+    // apache 2.0 license
     addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     // apache 2.0 license
     addDependency("org.apache.httpcomponents", "httpclient", "4.5.2");
