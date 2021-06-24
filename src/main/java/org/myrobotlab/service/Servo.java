@@ -25,22 +25,14 @@
 
 package org.myrobotlab.service;
 
-import java.io.File;
-
-import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
-import org.myrobotlab.service.config.Config;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
-import org.nd4j.shade.protobuf.common.io.Files;
 import org.slf4j.Logger;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
  * @author GroG
@@ -231,12 +223,9 @@ public class Servo extends AbstractServo implements ServoControl {
 // BEGIN - CONFIGURATION =======================
  
   public ServiceConfig getConfig() {
-    ServiceConfig sc = super.getConfig();
     ServoConfig config = new ServoConfig();
-
-    // common
-    // config.name = getName();
-    // config.type = getSimpleName();
+    config.name = getName();
+    config.type = getSimpleName();
 
     config.autoDisable = autoDisable;
 
@@ -259,13 +248,12 @@ public class Servo extends AbstractServo implements ServoControl {
     config.sweepMax = sweepMax;
     config.sweepMin = sweepMin;
     
-    sc.config = config;
-    return sc;
+    return config;
   }
 
   // THIS MUST BE PUSHED HIGHER INTO SERVICE
   public ServiceConfig mergeConfig(ServiceConfig c) {
-    ServoConfig config = (ServoConfig)c.config;
+    ServoConfig config = (ServoConfig)c;
     
     // common
     // higher level :P

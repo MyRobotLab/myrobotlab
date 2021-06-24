@@ -1296,7 +1296,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public ServiceConfig getConfig() {
-    ServiceConfig sc = new ServiceConfig(name, getSimpleName(), null);
+    // FIXME - possibly static method - so the class does not need to be instantiated
+    // and needs to NOT create ServiceConfig - but attempt to load {SeriviceType}Config.java 
+    ServiceConfig sc = new ServiceConfig();    
+    sc.name = getName();
+    sc.type = getSimpleName();
     return sc;
   }
 

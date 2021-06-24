@@ -1,6 +1,6 @@
 package org.myrobotlab.service.config;
 
-public class ServoConfig extends Config {
+public class ServoConfig extends ServiceConfig {
 
   public Boolean autoDisable;
   public String controller;

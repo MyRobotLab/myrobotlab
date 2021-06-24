@@ -2227,8 +2227,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
   
  public ServiceConfig getConfig() {
-   ServiceConfig sc = super.getConfig();
    ArduinoConfig config = new ArduinoConfig();
+   config.name = getName();
+   config.type = getSimpleName();
+
 
    if (serial != null ) {
      if (serial.getPortName() != null) {
@@ -2250,16 +2252,14 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
      config.deviceList = new String[tmp.size()];
      tmp.toArray(config.deviceList);
      
-   }
-   
-   sc.config = config;
-   return sc;
+   }      
+   return config;
  }
 
 
  // THIS MUST BE PUSHED HIGHER INTO SERVICE
  public ServiceConfig mergeConfig(ServiceConfig c) {
-   ArduinoConfig config = (ArduinoConfig)c.config;
+   ArduinoConfig config = (ArduinoConfig)c;
    
    if (config.port != null) {
      connect(config.port);
