@@ -1323,7 +1323,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     try {
 
-      // TODO - determine format based on file ext yml or json
       if (filename == null) {
         filename = "data" + fs + "config" + fs + getName() + "." + "yml";
       }
@@ -1339,12 +1338,18 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       }
       
       String format = filename.substring(filename.lastIndexOf(".") + 1);
+      
+      Object o = Instantiator.getNewInstance(String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
+      if (o == null) {
+        error("%sConfig does not exist - cannot load class", getSimpleName());
+        return false;
+      }
 
       if (format.toLowerCase().equals("json")) {
-        ServiceConfig config = CodecUtils.fromJson(data, ServiceConfig.class);
+        ServiceConfig config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
         mergeConfig(config);  
       } else {
-        ServiceConfig config = CodecUtils.fromYaml(data, ServiceConfig.class);
+        ServiceConfig config = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
         mergeConfig(config);  
       }
       
