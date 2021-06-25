@@ -219,8 +219,6 @@ public class Servo extends AbstractServo implements ServoControl {
     log.warn("setMaxVelocity is deprecated - use setMaxSpeed");
     setMaxSpeed(speed);
   }
-
-// BEGIN - CONFIGURATION =======================
  
   public ServiceConfig getConfig() {
     ServoConfig config = new ServoConfig();
@@ -251,8 +249,7 @@ public class Servo extends AbstractServo implements ServoControl {
     return config;
   }
 
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE
-  public ServiceConfig mergeConfig(ServiceConfig c) {
+  public ServiceConfig load(ServiceConfig c) {
     ServoConfig config = (ServoConfig)c;
     
     // common
@@ -294,15 +291,20 @@ public class Servo extends AbstractServo implements ServoControl {
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
+      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       Servo pan = (Servo) Runtime.start("pan", "Servo");
+      
+      Runtime runtime = Runtime.getInstance();
 
       /*
+      
       tilt.setPin(4);
       pan.setPin(5);
       tilt.setMinMax(10, 100);
@@ -313,20 +315,24 @@ public class Servo extends AbstractServo implements ServoControl {
             
       mega.attach(tilt);
       mega.attach(pan);
-      
+      */
+      /*
       mega.save();
       tilt.save();
       pan.save();
       */
-
+      
+      
+      mega.load();
       tilt.load();
       pan.load();
-      mega.load();
-
+      
+      
+      // runtime.getConfigs();
+      
+      // runtime.mergeConfigs();
       
       // TODO - attach before and after connect..
-
-
       
       boolean done = true;
       if (done) {
@@ -335,23 +341,23 @@ public class Servo extends AbstractServo implements ServoControl {
 
       // mega.setBoardMega();
 
-      log.info("servo pos {}", tilt.getCurrentInputPos());
-
-      // double pos = 170;
-      // servo03.setPosition(pos);
-
-      double min = 3;
-      double max = 170;
-      double speed = 60; // degree/s
-
-      mega.attach(tilt);
-      // mega.attach(servo03,3);
-
-      for (int i = 0; i < 100; ++i) {
-        tilt.moveTo(20.0);
-      }
-
-      tilt.sweep(min, max, speed);
+//      log.info("servo pos {}", tilt.getCurrentInputPos());
+//
+//      // double pos = 170;
+//      // servo03.setPosition(pos);
+//
+//      double min = 3;
+//      double max = 170;
+//      double speed = 60; // degree/s
+//
+//      mega.attach(tilt);
+//      // mega.attach(servo03,3);
+//
+//      for (int i = 0; i < 100; ++i) {
+//        tilt.moveTo(20.0);
+//      }
+//
+//      tilt.sweep(min, max, speed);
 
       /*
        * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo

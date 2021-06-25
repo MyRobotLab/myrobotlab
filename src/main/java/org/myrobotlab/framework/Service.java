@@ -1286,7 +1286,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @param c
    * @return
    */
-  public ServiceConfig mergeConfig(ServiceConfig c) {
+  public ServiceConfig load(ServiceConfig c) {
     return c;
   }
 
@@ -1309,7 +1309,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean load() {
-    return load(null);
+    return load((String)null);
   }
 
   /**
@@ -1347,10 +1347,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
       if (format.toLowerCase().equals("json")) {
         ServiceConfig config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
-        mergeConfig(config);  
+        load(config);  
       } else {
         ServiceConfig config = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
-        mergeConfig(config);  
+        load(config);  
       }
       
       return true;

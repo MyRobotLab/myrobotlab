@@ -2,6 +2,8 @@ package org.myrobotlab.service;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -74,6 +77,7 @@ import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.WsClient;
 import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -131,7 +135,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * The one config directory where all config is managed
    */
   protected static String CONFIG_DIR = "data/config";
-
 
   /**
    * <pre>
@@ -1122,20 +1125,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return newService.getClass().equals(Runtime.class);
   }
 
-  /**
-   * load all configuration from all local services
-   * 
-   * @return true / false
-   */
-  static public boolean loadAll() {
-    boolean ret = true;
-    Map<String, ServiceInterface> local = getLocalServices();
-    for (ServiceInterface si : local.values()) {
-      ret &= si.load();
-    }
-    return ret;
-  }
-
   public void startInteractiveMode() {
     startInteractiveMode(System.in, System.out);
   }
@@ -1435,6 +1424,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Publishing config changes from the config directory
+   * 
    * @return
    */
   public List<String> publishConfigList() {
@@ -3377,6 +3367,104 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public static String getConfigDir() {
     return CONFIG_DIR;
+  }
+
+  public List<ServiceConfig> getConfigs() {
+    return getConfigs(null, null, new String[] { "runtime", "security" });
+  }
+
+  public List<ServiceConfig> getConfigs(String filename, String[] includeFilter, String[] excludeFilter) {
+
+    if (filename == null) {
+      filename = "data" + fs + "config" + fs + "runtime.yml";
+    }
+
+    Set<String> includes = null;
+    Set<String> excludes = null;
+
+    if (includeFilter != null) {
+      includes = new HashSet<>();
+      for (String s : includeFilter) {
+        includes.add(s);
+      }
+    }
+
+    if (excludeFilter != null) {
+      excludes = new HashSet<>();
+      for (String s : excludeFilter) {
+        excludes.add(s);
+      }
+    }
+
+    List<ServiceConfig> sc = new ArrayList<>();
+
+    try {
+      Map<String, ServiceInterface> services = getLocalServices();
+      List<ServiceInterface> s = new ArrayList<>();
+      for (ServiceInterface si : services.values()) {
+        if (includes != null && includes.contains(si.getName())) {
+          s.add(si);
+        } else if (excludes != null) {
+          if (excludes.contains(si.getName())) {
+            continue;
+          } else {
+            s.add(si);
+          }
+        } else if (includes == null && excludes == null) {
+          s.add(si);
+        }
+      }
+
+      Collections.sort(s);
+      for (ServiceInterface si : s) {
+        sc.add(si.getConfig());
+      }
+
+      String yaml = CodecUtils.allToYaml(sc.iterator());
+      FileIO.toFile(filename, yaml.getBytes());
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    return sc;
+  }
+  
+  /**
+   * load all configuration from all local services
+   * 
+   * FIXME - hmmm ... each service looks for its file
+   * 
+   * @return true / false
+   * 
+   */
+  static public boolean loadAll() {
+    boolean ret = true;
+    Map<String, ServiceInterface> local = getLocalServices();
+    for (ServiceInterface si : local.values()) {
+      ret &= si.load();
+    }
+    return ret;
+  }
+
+  // FIXME - vs loading a single file - or all files from a directory
+  public void loadAllYaml() throws FileNotFoundException {
+    loadAllYaml(null);
+  }
+
+  public void loadAllYaml(String filename) throws FileNotFoundException {
+
+    if (filename == null) {
+      filename = "data" + fs + "config" + fs + "runtime.yml";
+    }
+    FileInputStream fis = new FileInputStream(filename);
+    Iterable<Object> services = CodecUtils.allFromYaml(fis);
+    for (Object s : services) {
+      ServiceConfig sc = (ServiceConfig) s;
+      // ServiceInterface si = create(sc.name, sc.type);
+      ServiceInterface si = start(sc.name, sc.type);
+      si.load(sc);
+    }
   }
 
 }

@@ -110,7 +110,7 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    * @param c
    * @return
    */
-  public ServiceConfig mergeConfig(ServiceConfig c);
+  public ServiceConfig load(ServiceConfig c);
 
   /**
    * loads json config and starts the service

@@ -2276,7 +2276,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   // THIS MUST BE PUSHED HIGHER INTO SERVICE
-  public ServiceConfig mergeConfig(ServiceConfig c) {
+  public ServiceConfig load(ServiceConfig c) {
     ArduinoConfig config = (ArduinoConfig) c;
 
     if (config.port != null) {
