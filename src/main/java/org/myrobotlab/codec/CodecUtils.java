@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
@@ -14,16 +15,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.Message;
-import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.Level;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
-import org.myrobotlab.service.config.ServiceConfig;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -625,6 +625,25 @@ public class CodecUtils {
     String c = yaml.dump(o);
     return c;
   }
+
+  final public static String allToYaml(Iterator<? extends Object> o) {
+    // not thread safe - so we new here
+    DumperOptions options = new DumperOptions();
+    options.setIndent(2);
+    options.setPrettyFlow(true);
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+
+    Yaml yaml = new Yaml(options);
+    String c = yaml.dumpAll(o);
+    return c;
+  }
+  
+  public final static Iterable<Object> allFromYaml(InputStream is) {
+    // Yaml yaml = new Yaml(new Constructor(clazz));
+    Yaml yaml = new Yaml();
+    return yaml.loadAll(is);
+  }
+
   
   public final static <T extends Object> T fromYaml(String data, Class<T> clazz) {
     Yaml yaml = new Yaml(new Constructor(clazz));

@@ -4,13 +4,12 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.myrobotlab.framework.Inbox;
 import org.myrobotlab.framework.MRLListener;
 import org.myrobotlab.framework.MethodEntry;
 import org.myrobotlab.framework.Outbox;
-import org.myrobotlab.framework.Service;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.ServiceLifeCycleListener;
 
 public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue, LoggingSink, NameTypeProvider, MessageSubscriber, MessageSender, StateSaver, Invoker,
@@ -99,6 +98,19 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void setName(String prefix);
 
   public void startService();
+  
+  /**
+   * get a services current config
+   * @return
+   */
+  public ServiceConfig getConfig();
+  
+  /**
+   * Configure a service by merging in configuration
+   * @param c
+   * @return
+   */
+  public ServiceConfig mergeConfig(ServiceConfig c);
 
   /**
    * loads json config and starts the service
