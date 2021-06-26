@@ -34,7 +34,7 @@ public class LangYmlUtils {
     }
 
     if (folder == null) {
-      folder = "data" + File.separator + "config" + File.separator + "default";
+      folder = Runtime.getInstance().getConfigDir() + File.separator + "default";
     }
 
     File dir = new File(folder);

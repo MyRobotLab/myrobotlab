@@ -1324,7 +1324,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     try {
 
       if (filename == null) {
-        filename = "data" + fs + "config" + fs + getName() + "." + "yml";
+        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
       }
 
       File f = new File(filename);
@@ -1339,7 +1339,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       
-      Object o = Instantiator.getNewInstance(String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
+      Object o = null;
+      try {
+        o = Instantiator.getThrowableNewInstance(null, String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
+      } catch(ClassNotFoundException e) {
+        log.info("no specific config available for {} of type {}", getName(), getSimpleName());
+        return true;
+      } catch(Exception e) {
+        error(e);
+      }
       if (o == null) {
         error("%sConfig does not exist - cannot load class", getSimpleName());
         return false;
@@ -1611,7 +1619,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     try {
 
       if (filename == null) {
-        filename = "data" + fs + "config" + fs + getName() + ".yml";
+        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
@@ -2410,7 +2418,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   public String export() throws IOException {
-    return export("data" + fs + "config" + fs + getName(), getName());
+    return export(Runtime.getInstance().getConfigDir() + fs + getName(), getName());
   }
 
   /**

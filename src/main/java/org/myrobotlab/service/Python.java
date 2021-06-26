@@ -302,8 +302,6 @@ public class Python extends Service {
    */
   String modulesDir = "pythonModules";
 
-  // String configDir = "data" + fs + "config";
-
   boolean pythonConsoleInitialized = false;
 
   /**
@@ -462,7 +460,7 @@ public class Python extends Service {
     }
 
     
-    sys.path.append(new PyString(Runtime.getConfigDir()));
+    sys.path.append(new PyString(Runtime.getInstance().getConfigDir()));
     
 
     log.info("Python System Path: {}", sys.path);

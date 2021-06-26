@@ -4,5 +4,6 @@ public class ServiceConfig {
   
   public String name;
   public String type;   
+  public String locale;
   
 }

@@ -77,6 +77,7 @@ import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.WsClient;
 import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
+import org.myrobotlab.service.config.RuntimeConfig;
 import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
@@ -88,6 +89,8 @@ import org.myrobotlab.service.interfaces.ServiceLifeCycle;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import picocli.CommandLine;
 
@@ -131,10 +134,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static private transient Thread installerThread = null;
 
+  protected String configSet = "default";
+
   /**
-   * The one config directory where all config is managed
+   * The one config directory where all config is managed the {default} is the
+   * current configuration set
    */
-  protected static String CONFIG_DIR = "data/config";
+  protected String CONFIG_DIR = "data" + fs + "config";
 
   /**
    * <pre>
@@ -271,22 +277,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public synchronized ServiceInterface create(String name, String type) {
     return createService(name, type, null);
-  }
-
-  /**
-   * This helper method will create, load then start a service
-   * 
-   * @param name
-   *          - name of instance
-   * @param type
-   *          - type
-   * @return returns the service in the form of a ServiceInterface
-   */
-  static public ServiceInterface loadAndStart(String name, String type) {
-    ServiceInterface s = create(name, type);
-    s.load();
-    s.startService();
-    return s;
   }
 
   static public ServiceInterface createAndStart(String name, String type) {
@@ -2502,51 +2492,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return p;
   }
 
-  // FIXME - parameters String filname, String lang (python|java) - default with
-  // timestamp ?
-  // TODO - auto-restore (on startup)/ auto-backup
-  public static void backup() {
-
-    try {
-
-      StringBuilder sb = new StringBuilder();
-      sb.append("import json\n");
-
-      String[] services = getServiceNames();
-
-      for (String name : services) {
-        ServiceInterface si = Runtime.getService(name);
-        String safeName = CodecUtils.getSafeReferenceName(name);
-        sb.append(String.format("%s = Runtime.start(\"%s\",\"%s\")\n", safeName, name, si.getType()));
-      }
-
-      sb.append("\n############ loading ############\n");
-      sb.append("print(\"loading ...\")\n");
-
-      for (String name : services) {
-        ServiceInterface si = Runtime.getService(name);
-        if (si.getName().equals("runtime")) {
-          continue;
-        }
-        String json = CodecUtils.toJson(si);
-
-        // data load in "json" form vs python dictionary - it could be in json
-        // dictionary
-        sb.append(String.format("%sJson = \"\"\"%s\n\"\"\"\n", name, json));
-
-        sb.append(String.format("%s.load(%s)\n", name + "Json", si.getType()));
-      }
-
-      Files.write(Paths.get("backup.py"), sb.toString().getBytes());
-      Files.write(Paths.get("backup-routes.py"), CodecUtils.toJson(getNotifyEntries()).getBytes());
-
-      log.info("finished...");
-
-    } catch (Exception e) {
-      log.error("backup threw", e);
-    }
-  }
-
   public static Runtime getInstance(String[] args2) {
     Runtime.main(args2);
     return Runtime.getInstance();
@@ -3365,8 +3310,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return routeTable.getConnectionUuid(gatewayKey);
   }
 
-  public static String getConfigDir() {
-    return CONFIG_DIR;
+  //////////// BEGIN CONFIG LOAD SAVE RELATED ////////////////
+
+  public String getConfigDir() {
+    return CONFIG_DIR + fs + configSet;
   }
 
   public List<ServiceConfig> getConfigs() {
@@ -3376,7 +3323,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public List<ServiceConfig> getConfigs(String filename, String[] includeFilter, String[] excludeFilter) {
 
     if (filename == null) {
-      filename = "data" + fs + "config" + fs + "runtime.yml";
+      filename = Runtime.getInstance().getConfigDir() + fs + "runtime.yml";
     }
 
     Set<String> includes = null;
@@ -3429,7 +3376,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
     return sc;
   }
-  
+
   /**
    * load all configuration from all local services
    * 
@@ -3455,7 +3402,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public void loadAllYaml(String filename) throws FileNotFoundException {
 
     if (filename == null) {
-      filename = "data" + fs + "config" + fs + "runtime.yml";
+      filename = Runtime.getInstance().getConfigDir() + fs + "runtime.yml";
     }
     FileInputStream fis = new FileInputStream(filename);
     Iterable<Object> services = CodecUtils.allFromYaml(fis);
@@ -3465,6 +3412,171 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       ServiceInterface si = start(sc.name, sc.type);
       si.load(sc);
     }
+  }
+
+  /**
+   * This helper method will create, load then start a service
+   * 
+   * @param name
+   *          - name of instance
+   * @param type
+   *          - type
+   * @return returns the service in the form of a ServiceInterface
+   */
+  static public ServiceInterface loadAndStart(String name, String type) {
+    ServiceInterface s = create(name, type);
+    s.load();
+    s.startService();
+    return s;
+  }
+
+  // FIXME - parameters String filename, String lang (python|java) - default
+  // with
+  // timestamp ?
+  // TODO - auto-restore (on startup)/ auto-backup
+  public static void backup() {
+
+    try {
+
+      StringBuilder sb = new StringBuilder();
+      sb.append("import json\n");
+
+      String[] services = getServiceNames();
+
+      for (String name : services) {
+        ServiceInterface si = Runtime.getService(name);
+        String safeName = CodecUtils.getSafeReferenceName(name);
+        sb.append(String.format("%s = Runtime.start(\"%s\",\"%s\")\n", safeName, name, si.getType()));
+      }
+
+      sb.append("\n############ loading ############\n");
+      sb.append("print(\"loading ...\")\n");
+
+      for (String name : services) {
+        ServiceInterface si = Runtime.getService(name);
+        if (si.getName().equals("runtime")) {
+          continue;
+        }
+        String json = CodecUtils.toJson(si);
+
+        // data load in "json" form vs python dictionary - it could be in json
+        // dictionary
+        sb.append(String.format("%sJson = \"\"\"%s\n\"\"\"\n", name, json));
+
+        sb.append(String.format("%s.load(%s)\n", name + "Json", si.getType()));
+      }
+
+      Files.write(Paths.get("backup.py"), sb.toString().getBytes());
+      Files.write(Paths.get("backup-routes.py"), CodecUtils.toJson(getNotifyEntries()).getBytes());
+
+      log.info("finished...");
+
+    } catch (Exception e) {
+      log.error("backup threw", e);
+    }
+  }
+
+  public ServiceConfig getConfig() {
+
+    RuntimeConfig config = new RuntimeConfig();
+
+    config.id = getId();
+    config.name = getName();
+    config.type = getSimpleName();
+
+    Map<String, ServiceInterface> services = getLocalServices();
+    List<ServiceInterface> s = new ArrayList<>();
+    for (ServiceInterface si : services.values()) {
+      s.add(si);
+    }
+
+    // sort in creation order
+    Collections.sort(s);
+    config.registry = new String[s.size()];
+
+    for (int i = 0; i < s.size(); ++i) {
+      config.registry[i] = s.get(i).getName();
+    }
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    RuntimeConfig config = (RuntimeConfig) c;
+    setId(config.id);
+    if (config.registry != null) {
+      for (String name : config.registry) {
+        if (name.equals("runtime")) {
+          continue;
+        }
+        try {
+          File scFile = new File(getConfigDir() + fs + name + ".yml");
+          if (!scFile.exists()) {
+            warn("could not find service config file %s", scFile.getAbsolutePath());
+            continue;
+          }
+          String data = FileIO.toString(scFile);
+          Yaml yaml = new Yaml();
+          Object o = yaml.load(data);
+          
+          ServiceConfig sc = null;
+          if (o.getClass().equals(ServiceConfig.class)) {
+            sc = CodecUtils.fromYaml(data, ServiceConfig.class);
+          } else {
+            // we have a derived type
+            sc = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
+          }
+          // start vs create ??? should we start with create go through all life
+          // cycles ?
+          ServiceInterface si = create(sc.name, sc.type);
+          si.load(); // wonder how many problems will occur of applying config before starting ?
+          si.startService();
+          
+        } catch (Exception e) {
+          error(e);
+        }
+      }
+    }
+    return c;
+  }
+
+  /**
+   * Save runtime yml as well as all services - TODO - probably need more
+   * parameter switches for special cases
+   */
+  public boolean save(String filename) {
+    try {
+
+      if (filename == null) {
+        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
+      }
+
+      String format = filename.substring(filename.lastIndexOf(".") + 1);
+      ServiceConfig config = getConfig();
+      String data = null;
+
+      if ("json".equals(format.toLowerCase())) {
+        data = CodecUtils.toJson(config);
+      } else {
+        data = CodecUtils.toYaml(config);
+      }
+      FileIO.toFile(filename, data.getBytes());
+
+      info("saved %s config to %s", getName(), filename);
+      boolean ret = true;
+
+      for (ServiceInterface si : getLocalServices().values()) {
+        if (si.getName().equals("runtime")) {
+          continue;
+        }
+        File f = new File(filename);        
+        ret &= si.save(f.getParent() + fs + si.getName() + ".yml");
+      }
+      return ret;
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
   }
 
 }
