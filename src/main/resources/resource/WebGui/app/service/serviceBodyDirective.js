@@ -65,7 +65,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                         console.info('promptConfigDir')
         
                         let onOK = function () {
-                            mrl.sendTo('runtime', 'export', null, false, scope.panel.configDir, scope.panel.displayName, null, null, null, null)
+                            mrl.sendTo('runtime', 'export', scope.panel.displayName)
                         }
                 
                         let onCancel = function () {

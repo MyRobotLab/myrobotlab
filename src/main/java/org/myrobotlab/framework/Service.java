@@ -1323,8 +1323,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     try {
 
-      if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
+      Runtime runtime = Runtime.getInstance();
+      
+      if (filename == null) {        
+        filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
       }
 
       File f = new File(filename);
@@ -1352,6 +1354,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         error("%sConfig does not exist - cannot load class", getSimpleName());
         return false;
       }
+      
+      // setting config name based on runtime.yml parent 
+      runtime.setConfigName(f.getParentFile().getName());
 
       if (format.toLowerCase().equals("json")) {
         ServiceConfig config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
@@ -1619,7 +1624,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     try {
 
       if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
+        filename = Runtime.getInstance().getConfigDir() + fs  + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
@@ -2416,50 +2421,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public void setId(String id) {
     this.id = id;
   }
-
-  public String export() throws IOException {
-    return export(Runtime.getInstance().getConfigDir() + fs + getName(), getName());
-  }
-
-  /**
-   * Export the current service to file named given
-   * 
-   * @param filename
-   * @return
-   * @throws IOException
-   */
-  public String export(String filename) throws IOException {
-    return export(filename, getName());
-  }
-
-  public String export(String filename, String names) throws IOException {
-    try {
-      String export = Runtime.getInstance().export(filename, names);
-      // String python = LangPyUtils.toPython(filename, names);
-      info("saved to %s", filename);
-      return export;
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
-  }
-
-  public void startConfig(String[] names) {
-    try {
-      Runtime.getInstance().startConfig(names);
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
-  public void releaseConfig(String[] names) {
-    try {
-      Runtime.getInstance().releaseConfig(names);
-    } catch (Exception e) {
-      error(e);
-    }
-  }
-
 
   /**
    * non parameter version for use within a Service

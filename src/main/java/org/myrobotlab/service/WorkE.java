@@ -801,7 +801,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // polly.setKeys("XXXX", "XXXXXXX");
       // polly.speak("hello, i can talk !");
 
-      worke.export("worke");
+      // worke.save("worke.yml");
+      runtime.save();
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);

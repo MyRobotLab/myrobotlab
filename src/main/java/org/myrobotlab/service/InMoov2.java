@@ -141,13 +141,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
-      Runtime.start("s01", "Servo");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      Runtime.start("s02", "Servo");
-
+      // Runtime.start("s01", "Servo");
+      Runtime.start("intro", "Intro");
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+      
+      InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");
+      i01.setVirtual(false);
+      i01.startService();
+      // Runtime.start("s02", "Servo");
+
 
       boolean done = true;
       if (done) {
@@ -323,7 +329,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // python = (Python) startPeer("python");
     python = (Python) Runtime.start("python", "Python"); // this crud should
                                                          // stop
-    load(locale.getTag());
+    // load(locale.getTag()); WTH ?
 
     // get events of new services and shutdown
     Runtime r = Runtime.getInstance();
