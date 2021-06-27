@@ -1,15 +1,11 @@
-angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', 'mrl', 'statusSvc', '$timeout', '$uibModal', 'modalService', function ($scope, mrl, statusSvc, $timeout, $uibModal, modalService) {
+angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$scope', 'mrl', 'statusSvc', '$timeout', '$uibModal', 'modalService', function($scope, mrl, statusSvc, $timeout, $uibModal, modalService) {
     console.info('RuntimeGuiCtrl')
     var _self = this
     var msg = this.msg
 
     var statusMaxSize = 2500
 
-    $scope.state = {
-        configDir:"data/config/full"
-    }
-
-    this.updateState = function (service) {
+    this.updateState = function(service) {
         $scope.service = service
         $scope.locale.selected = service.locale.language
         $scope.localeTag.selected = service.locale
@@ -65,7 +61,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
 
     // $scope.categoryServiceTypes = $scope.service.serviceData.categoryTypes[$scope.category.selected].serviceTypes
 
-    $scope.filterServices = function () {
+    $scope.filterServices = function() {
         var result = {};
         // console.debug('$scope.category.selected is ' + $scope.category.selected)
         const entries = Object.entries($scope.service.serviceData.serviceTypes)
@@ -74,7 +70,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             return $scope.service.serviceData.serviceTypes
         }
 
-        for (const [fullTypeName, metaData] of entries) {
+        for (const [fullTypeName,metaData] of entries) {
             // if (metaData.simpleName.toLowerCase().includes($scope.newType)) {
 
             if ($scope.category.selected != null) {
@@ -84,7 +80,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             }
 
             if (/*metaData.simpleName.toLowerCase().includes($scope.newType) && */
-                categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
+            categoryServiceTypes != null && categoryServiceTypes.includes(metaData.name)) {
                 result[fullTypeName] = metaData;
             }
         }
@@ -92,18 +88,18 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     }
 
     // FIXME - maintain contextPath !!!
-    $scope.sendToCli = function (cmd) {
+    $scope.sendToCli = function(cmd) {
         console.log("sendToCli " + cmd)
         $scope.cmd = ""
         contextPath = null
         msg.send("sendToCli", "runtime@" + mrl.getId(), cmd)
     }
 
-    $scope.setServiceType = function (serviceType) {
+    $scope.setServiceType = function(serviceType) {
         $scope.newType = serviceType
     }
 
-    $scope.start = function () {
+    $scope.start = function() {
 
         if ($scope.newName == null) {
             mrl.error("name of service is required")
@@ -123,137 +119,142 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = null;
     }
 
-    this.onMsg = function (inMsg) {
+    this.onMsg = function(inMsg) {
         switch (inMsg.method) {
-            case 'onState':
-                $timeout(function () {
-                    _self.updateState(inMsg.data[0])
-                })
+        case 'onState':
+            $timeout(function() {
+                _self.updateState(inMsg.data[0])
+            })
+            break
+        case 'onLocalServices':
+            {
+                $scope.registry = inMsg.data[0]
+                //  $scope.$apply()
                 break
-            case 'onLocalServices':
-                {
-                    $scope.registry = inMsg.data[0]
-                    //  $scope.$apply()
-                    break
-                }
-            case 'onLocale':
-                {
-                    $scope.locale.selected = inMsg.data[0].language
-                    $scope.$apply()
-                    break
-                }
-            case 'onLocales':
-                {
-                    ls = inMsg.data[0]
-                    unique = {}
-                    $scope.service.locales = {}
-                    // new Set()
-                    for (const key in ls) {
-                        if (ls[key].displayLanguage) {
-                            // unique.add(ls[key].displayLanguage)
-                            // unique.push(ls[key].language)
-                            unique[ls[key].language] = {
-                                'language': ls[key].language,
-                                'displayLanguage': ls[key].displayLanguage
-                            }
+            }
+        case 'onLocale':
+            {
+                $scope.locale.selected = inMsg.data[0].language
+                $scope.$apply()
+                break
+            }
+        case 'onLocales':
+            {
+                ls = inMsg.data[0]
+                unique = {}
+                $scope.service.locales = {}
+                // new Set()
+                for (const key in ls) {
+                    if (ls[key].displayLanguage) {
+                        // unique.add(ls[key].displayLanguage)
+                        // unique.push(ls[key].language)
+                        unique[ls[key].language] = {
+                            'language': ls[key].language,
+                            'displayLanguage': ls[key].displayLanguage
                         }
-                        // $scope.service.locales[key] =ls[key] 
                     }
-                    // $scope.languages = Array.from(unique)
-                    $scope.languages = unique
-                    $scope.locales = ls
-                    // it is transient in java to reduce initial registration payload
-                    // $scope.service.locales = ls
-                    $scope.$apply()
-                    break
+                    // $scope.service.locales[key] =ls[key] 
                 }
-            case 'onServiceTypes':
-                {
-                    $scope.possibleServices = inMsg.data[0]
-                    mrl.setPossibleServices($scope.possibleServices)
-                    break
+                // $scope.languages = Array.from(unique)
+                $scope.languages = unique
+                $scope.locales = ls
+                // it is transient in java to reduce initial registration payload
+                // $scope.service.locales = ls
+                $scope.$apply()
+                break
+            }
+        case 'onConfigList':
+            $scope.service.configList = inMsg.data[0]
+            $scope.$apply()
+            break
+            
+        case 'onServiceTypes':
+            {
+                $scope.possibleServices = inMsg.data[0]
+                mrl.setPossibleServices($scope.possibleServices)
+                break
+            }
+        case 'onRegistered':
+            {
+                // inMsg.data[0]
+                console.log("onRegistered")
+                break
+            }
+        case 'onConnections':
+            {
+                $scope.connections = inMsg.data[0]
+                $scope.$apply()
+                break
+            }
+        case 'onHosts':
+            {
+                $scope.hosts = inMsg.data[0]
+                $scope.$apply()
+                break
+            }
+        case 'onStatus':
+            {
+                $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+                if ($scope.status.length > 300) {
+                    $scope.status = $scope.status.substring(0, statusMaxSize)
                 }
-            case 'onRegistered':
-                {
-                    // inMsg.data[0]
-                    console.log("onRegistered")
-                    break
-                }
-            case 'onConnections':
-                {
-                    $scope.connections = inMsg.data[0]
-                    $scope.$apply()
-                    break
-                }
-            case 'onHosts':
-                {
-                    $scope.hosts = inMsg.data[0]
-                    $scope.$apply()
-                    break
-                }
-            case 'onStatus':
-                {
-                    $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+                break
+            }
+        case 'onCli':
+            {
+                if (inMsg.data[0] != null) {
+                    $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
                     if ($scope.status.length > 300) {
                         $scope.status = $scope.status.substring(0, statusMaxSize)
                     }
-                    break
-                }
-            case 'onCli':
-                {
-                    if (inMsg.data[0] != null) {
-                        $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
-                        if ($scope.status.length > 300) {
-                            $scope.status = $scope.status.substring(0, statusMaxSize)
-                        }
-                        $scope.$apply()
-                    } else {
-                        $scope.status += "null\n"
-                    }
-                    break
-                }
-            case 'onReleased':
-                {
-                    console.info("runtime - onRelease" + inMsg.data[0])
-                    break
-                }
-            case 'onHeartbeat':
-                {
-                    let heartbeat = inMsg.data[0]
-                    let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
-                    $scope.heartbeatTs = heartbeat.ts
                     $scope.$apply()
-
-                    for (let i in heartbeat.serviceList) {
-                        let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
-                        hb += serviceName + ' '
-
-                        // FIXME - 'merge' ie remove missing services
-
-                        // FIXME - want to maintain "local" registry ???
-                        // currently maintaining JS process registry - should the RuntimeGui also maintain
-                        // its 'own' sub-registry ???
-                        if (!serviceName in mrl.getRegistry()) {
-                            // 
-                            console.warn(serviceName + ' not defined in registry - sending registration request');
-                        }
-                        // else already registered
-                    }
-
-                    console.info(hb)
-
-                    // CHECK REGISTRY
-                    // SYNC SERVICES
-                    // REQUEST REGISTRATIONS !!!!
-                    break
+                } else {
+                    $scope.status += "null\n"
                 }
-            default:
-                console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
                 break
+            }
+        case 'onReleased':
+            {
+                console.info("runtime - onRelease" + inMsg.data[0])
+                break
+            }
+        case 'onHeartbeat':
+            {
+                let heartbeat = inMsg.data[0]
+                let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
+                $scope.heartbeatTs = heartbeat.ts
+                $scope.$apply()
+
+                for (let i in heartbeat.serviceList) {
+                    let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
+                    hb += serviceName + ' '
+
+                    // FIXME - 'merge' ie remove missing services
+
+                    // FIXME - want to maintain "local" registry ???
+                    // currently maintaining JS process registry - should the RuntimeGui also maintain
+                    // its 'own' sub-registry ???
+                    if (!serviceName in mrl.getRegistry()) {
+                        // 
+                        console.warn(serviceName + ' not defined in registry - sending registration request');
+                    }
+                    // else already registered
+                }
+
+                console.info(hb)
+
+                // CHECK REGISTRY
+                // SYNC SERVICES
+                // REQUEST REGISTRATIONS !!!!
+                break
+            }
+        default:
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            break
         }
     }
 
-    $scope.shutdown = function (type) {
+    $scope.shutdown = function(type) {
         var modalInstance = $uibModal.open({
             //animation: true,
             // templateUrl: 'nav/shutdown.html',
@@ -268,7 +269,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             controller: 'shutdownCtrl2',
 
             resolve: {
-                type: function () {
+                type: function() {
                     return type
                 }
             }
@@ -276,22 +277,41 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         console.info('shutdown ' + modalInstance)
     }
 
-    $scope.setAllLocales = function (locale) {
+    $scope.setAllLocales = function(locale) {
         console.info(locale)
     }
-    
-    $scope.saveConfig = function (){
-        console.info('promptConfigDir')
-        
-        let onOK = function () {
-            msg.send('export', null, false, $scope.state.configDir, null, null, null, null, 0)
+
+    $scope.startConfig = function() {
+        console.info('startConfig')
+        if ($scope.selectedConfig.length) {
+            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+                msg.sendTo('runtime', 'load', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+            }
+        }
+    }
+
+    $scope.releaseConfig = function() {
+        console.info('releaseConfig')
+        if ($scope.selectedConfig && $scope.selectedConfig.length) {
+            for (let i = 0; i < $scope.selectedConfig.length; ++i) {
+                msg.sendTo('runtime', 'releaseConfig', 'data/config/' + $scope.selectedConfig[i] + '/runtime.yml')
+            }
+        }
+    }
+
+    $scope.saveConfig = function() {
+        console.info('saveConfig')
+
+        let onOK = function() {
+            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
+            msg.sendTo('runtime', 'save', $scope.service.configDir + '/' + $scope.service.configName + "/runtime.yml")
         }
 
-        let onCancel = function () {
+        let onCancel = function() {
             console.info('save config cancelled')
         }
 
-        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Configuration', 'Save your current configuration for all services in a directory named', onOK, onCancel, $scope);
+        let ret = modalService.openOkCancel('widget/modal-dialog.view.html', 'Save Configuration', 'Save your current configuration in a directory named', onOK, onCancel, $scope);
         console.info('ret ' + ret);
     }
 
@@ -304,6 +324,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     msg.subscribe("getLocales")
     msg.subscribe("getHosts")
     msg.subscribe("publishStatus")
+    msg.subscribe('publishConfigList')
 
     //msg.send("getLocalServices")
     msg.send("getConnections")

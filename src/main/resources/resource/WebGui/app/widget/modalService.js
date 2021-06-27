@@ -21,8 +21,8 @@ angular.module('ModalController', [])
         }])
 
 angular.module('modalService', [])
-    .service('modalService', ['$uibModal', '$templateCache',
-        function ($uibModal, $templateCache) {
+    .service('modalService', ['$uibModal', '$templateCache', 'mrl',
+        function ($uibModal, $templateCache, mrl) {
 
             this.open = function (template, title, text, buttons, scope) {
                 if (!buttons) {

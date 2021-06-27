@@ -6,9 +6,9 @@
         </h3>
     </div>
 </div>
-Locale
 <div class="row">
     <div class="form-inline col-md-6">
+    <b>locale</b><br/>
         <!-- {{locale}} -->
         <ui-select ng-model="localeTag.selected" ng-change="msg.setAllLocales($select.selected.tag)" theme="bootstrap" style="width: 25em">
             <ui-select-match placeholder="&nbsp;&nbsp;&nbsp;&nbsp;locale&nbsp;&nbsp;&nbsp;&nbsp;." allow-clear="false">{{$select.selected.tag}}</ui-select-match>
@@ -17,17 +17,34 @@ Locale
     </div>
 </div>
 <div class="row">
-    <div class="form-inline col-md-6">Language {{service.locale.displayLanguage}} {{service.locale.displayCountry}}
+    <div class="form-inline col-md-6">{{service.locale.displayLanguage}} {{service.locale.displayCountry}}
 </div>
-</div>
-Create a new service
 <div class="row">
     <div class="form-inline col-md-6">
+<b>create a new service</b><br/>
         <input class="form-control" type="text" ng-model="newName" placeholder="name" title="name of new service to be created" press-enter="start(newName, newType)">
         <input class="form-control" type="text" ng-model="newType" placeholder="Service Type" press-enter="start(newName, newType)" title="service type of the new instance to be created" uib-typeahead="service as service.name.substring(23) for service in possibleServices | filter:{name:$viewValue}" typeahead-min-length="0" typeahead-template-url="nav/templates/serviceSearchTemplate.html"/>
         <button class="btn btn-default" title="press to create a new service, you must give the new service a name and type" ng-click="start(newName, newType)">start service</button>
         <button class="btn btn-default" ng-click="msg.install()">install all services</button>
-        <button class="btn btn-default" ng-click="saveConfig()">save config</button>
+    </div>
+</div>
+<br/>
+<div class="row">
+    <div class="form-inline col-md-6">
+        <b>configurations</b><br/>
+        
+        <div class="form-group">
+            <select multiple class="form-control vertical-menu" ng-model="selectedConfig" id="selectedConfig" title="configurations">
+                <option ng-repeat="config in service.configList" ng-value="{{config}}">{{config}}</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="form-inline col-md-6">
+        <button class="btn btn-default" title="This will save a config module to data/config" ng-click="saveConfig()">save config</button>
+        <button class="btn btn-default" title="This will start a config module" ng-click="startConfig()">start</button>
+        <button class="btn btn-default" title="This will release a config module" ng-click="releaseConfig()">release</button>
     </div>
 </div>
 <div class="row">&nbsp;</div>
@@ -52,52 +69,63 @@ Create a new service
 </div>
 <div class="row">
     <div class="form-group col-md-6">
-        <b>route table default</b> {{service.routeTable.defaultRoute.destination}}</br>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>destination</th>
-                    <th>channel</th>
-                    <th>metric</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="(id, entry) in service.routeTable.routes">
-                    <!-- td>{{id}}</td -->
-                    <td>{{id}}</td>
-                    <td>{{entry.uuid}}</td>
-                    <td>{{entry.metric}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+        <b>route table default</b>
+        {{service.routeTable.defaultRoute.destination}}
 
+
+
+
+
+</br>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>destination</th>
+            <th>channel</th>
+            <th>metric</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(id, entry) in service.routeTable.routes">
+            <!-- td>{{id}}</td -->
+            <td>{{id}}</td>
+            <td>{{entry.uuid}}</td>
+            <td>{{entry.metric}}</td>
+        </tr>
+    </tbody>
+</table>
+</div></div>
 <div class="row">
     <div class="form-group col-md-6">
-    <b>channels</b></br>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>remote id</th>
-                    <th>gateway type</th>
-                    <th>gateway</th>
-                    <th>connection id</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="(id, entry) in connections">
-                    <!-- td>{{id}}</td -->
-                    <td>{{entry.serializable.id}}</td>
-                    <td>
-                        <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
-                    </td>
-                    <td>{{entry.serializable.gateway}}</td>
-                    <td>
-                        {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+        <b>channels</b>
+</br>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>remote id</th>
+            <th>gateway type</th>
+            <th>gateway</th>
+            <th>connection id</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="(id, entry) in connections">
+            <!-- td>{{id}}</td -->
+            <td>{{entry.serializable.id}}</td>
+            <td>
+                <img ng-src="{{'/' + entry.serializable['c-type'] + '.png'}}" width="18"/>{{entry.serializable['c-type']}}
+                    
+            
+            
+            
+            
+            
+            </td>
+            <td>{{entry.serializable.gateway}}</td>
+            <td>
+                {{id}} 	<span ng-click="msg.removeConnection(id)" class="glyphicon glyphicon-remove"/>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div></div>
