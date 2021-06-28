@@ -2247,9 +2247,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public ServiceConfig getConfig() {
-    ArduinoConfig config = new ArduinoConfig();
-    config.name = getName();
-    config.type = getSimpleName();
+    ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
 
     if (serial != null) {
       if (serial.getPortName() != null) {

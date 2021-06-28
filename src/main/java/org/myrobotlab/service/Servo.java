@@ -221,10 +221,8 @@ public class Servo extends AbstractServo implements ServoControl {
   }
  
   public ServiceConfig getConfig() {
-    ServoConfig config = new ServoConfig();
-    config.name = getName();
-    config.type = getSimpleName();
-
+    
+    ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
     config.autoDisable = autoDisable;
 
     if (mapper != null) {
@@ -291,19 +289,20 @@ public class Servo extends AbstractServo implements ServoControl {
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
+      Runtime runtime = Runtime.getInstance();      
+      runtime.load();
       
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      
+      webgui.startService();      
       Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
       Servo tilt = (Servo) Runtime.start("tilt", "Servo");
       Servo pan = (Servo) Runtime.start("pan", "Servo");
-      
-      Runtime runtime = Runtime.getInstance();
-
-      /*
       
       tilt.setPin(4);
       pan.setPin(5);
@@ -315,29 +314,22 @@ public class Servo extends AbstractServo implements ServoControl {
             
       mega.attach(tilt);
       mega.attach(pan);
-      */
+      
+      runtime.save();
+
       /*
       mega.save();
       tilt.save();
       pan.save();
-      */
-      
       
       mega.load();
       tilt.load();
       pan.load();
+      */
       
-      
-      // runtime.getConfigs();
-      
-      // runtime.mergeConfigs();
-      
+            
       // TODO - attach before and after connect..
       
-      boolean done = true;
-      if (done) {
-        return;
-      }
 
       // mega.setBoardMega();
 

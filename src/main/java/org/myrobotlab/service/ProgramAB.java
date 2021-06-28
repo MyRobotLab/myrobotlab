@@ -24,6 +24,8 @@ import org.myrobotlab.logging.SimpleLogPublisher;
 import org.myrobotlab.programab.BotInfo;
 import org.myrobotlab.programab.Response;
 import org.myrobotlab.programab.Session;
+import org.myrobotlab.service.config.ProgramABConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.LocaleProvider;
 import org.myrobotlab.service.interfaces.LogPublisher;
@@ -952,12 +954,11 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
     attachTextListener(service.getName());
   }
-  
+
   @Override
   public void attachTextListener(String name) {
     addListener("publishText", name);
   }
-
 
   @Override
   public void attachTextPublisher(TextPublisher service) {
@@ -1069,6 +1070,31 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
+  public ServiceConfig getConfig() {
+    ProgramABConfig config = (ProgramABConfig) initConfig(new ProgramABConfig());
+
+    config.currentBotName = currentBotName;
+    config.currentUserName = currentUserName;
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    ProgramABConfig config = (ProgramABConfig) c;
+
+    if (config.currentBotName != null) {
+      setCurrentBotName(config.currentBotName);
+    }
+
+    if (config.currentUserName != null) {
+      setCurrentUserName(config.currentUserName);
+    }
+
+    setCurrentSession(currentUserName, currentBotName);
+
+    return config;
+  }
+
   public static void main(String args[]) {
     try {
       LoggingFactory.init("INFO");
@@ -1105,6 +1131,5 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
       log.error("main threw", e);
     }
   }
-
 
 }

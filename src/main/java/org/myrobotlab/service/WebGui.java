@@ -1171,10 +1171,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   }
   
   public ServiceConfig getConfig() {
-    WebGuiConfig config = new WebGuiConfig();
-    config.name = getName();
-    config.type = getSimpleName();
-    
+    WebGuiConfig config = (WebGuiConfig) initConfig(new WebGuiConfig());
     config.port = port;
     config.autoStartBrowser = autoStartBrowser;
     

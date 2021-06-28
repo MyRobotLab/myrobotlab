@@ -1296,12 +1296,31 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public ServiceConfig getConfig() {
-    // FIXME - possibly static method - so the class does not need to be instantiated
-    // and needs to NOT create ServiceConfig - but attempt to load {SeriviceType}Config.java 
     ServiceConfig sc = new ServiceConfig();    
-    sc.name = getName();
-    sc.type = getSimpleName();
+    initConfig(sc);
     return sc;
+  }
+  
+  protected ServiceConfig initConfig(ServiceConfig config) {
+    config.name = getName();
+    config.type = getSimpleName();
+    config.locale = getLocaleTag();
+
+    ArrayList<String> nks = getNotifyListKeySet();
+    for (String n: nks) {
+      List<MRLListener> nl = getNotifyList(n);
+      for (MRLListener listener: nl) {
+        if (CodecUtils.isLocal(listener.callbackName, getId())) {
+          if (config.listeners == null) {
+            config.listeners = new HashMap<>();
+          }
+          config.listeners.put(n, listener);
+        }
+        log.info(listener.toString());
+      }
+    }    
+    
+    return config;
   }
 
   /**
@@ -1358,14 +1377,23 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       // setting config name based on runtime.yml parent 
       runtime.setConfigName(f.getParentFile().getName());
 
+      ServiceConfig config = null;
+      
       if (format.toLowerCase().equals("json")) {
-        ServiceConfig config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
-        load(config);  
+        config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
       } else {
-        ServiceConfig config = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
-        load(config);  
+        config = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
       }
       
+      load(config);  
+      
+      // loading listeners / routes
+      if (config.listeners != null) {
+        for (MRLListener l : config.listeners.values()) {
+          addListener(l);
+        }
+      }
+
       return true;
 
     } catch (Exception e) {

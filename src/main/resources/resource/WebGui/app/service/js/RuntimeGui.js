@@ -122,132 +122,111 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
     this.onMsg = function(inMsg) {
         switch (inMsg.method) {
         case 'onState':
-            $timeout(function() {
-                _self.updateState(inMsg.data[0])
-            })
+            _self.updateState(inMsg.data[0])
             break
         case 'onLocalServices':
-            {
-                $scope.registry = inMsg.data[0]
-                //  $scope.$apply()
-                break
-            }
+            $scope.registry = inMsg.data[0]
+            //  $scope.$apply()
+            break
         case 'onLocale':
-            {
-                $scope.locale.selected = inMsg.data[0].language
-                $scope.$apply()
-                break
-            }
+            $scope.locale.selected = inMsg.data[0].language
+            $scope.$apply()
+            break
         case 'onLocales':
-            {
-                ls = inMsg.data[0]
-                unique = {}
-                $scope.service.locales = {}
-                // new Set()
-                for (const key in ls) {
-                    if (ls[key].displayLanguage) {
-                        // unique.add(ls[key].displayLanguage)
-                        // unique.push(ls[key].language)
-                        unique[ls[key].language] = {
-                            'language': ls[key].language,
-                            'displayLanguage': ls[key].displayLanguage
-                        }
+            ls = inMsg.data[0]
+            unique = {}
+            $scope.service.locales = {}
+            // new Set()
+            for (const key in ls) {
+                if (ls[key].displayLanguage) {
+                    // unique.add(ls[key].displayLanguage)
+                    // unique.push(ls[key].language)
+                    unique[ls[key].language] = {
+                        'language': ls[key].language,
+                        'displayLanguage': ls[key].displayLanguage
                     }
-                    // $scope.service.locales[key] =ls[key] 
                 }
-                // $scope.languages = Array.from(unique)
-                $scope.languages = unique
-                $scope.locales = ls
-                // it is transient in java to reduce initial registration payload
-                // $scope.service.locales = ls
-                $scope.$apply()
-                break
+                // $scope.service.locales[key] =ls[key] 
             }
+            // $scope.languages = Array.from(unique)
+            $scope.languages = unique
+            $scope.locales = ls
+            // it is transient in java to reduce initial registration payload
+            // $scope.service.locales = ls
+            $scope.$apply()
+            break
+
         case 'onConfigList':
             $scope.service.configList = inMsg.data[0]
             $scope.$apply()
             break
-            
+
         case 'onServiceTypes':
-            {
-                $scope.possibleServices = inMsg.data[0]
-                mrl.setPossibleServices($scope.possibleServices)
-                break
-            }
+
+            $scope.possibleServices = inMsg.data[0]
+            mrl.setPossibleServices($scope.possibleServices)
+            break
+
         case 'onRegistered':
-            {
-                // inMsg.data[0]
-                console.log("onRegistered")
-                break
-            }
+            console.log("onRegistered")
+            break
+
         case 'onConnections':
-            {
-                $scope.connections = inMsg.data[0]
-                $scope.$apply()
-                break
-            }
+            $scope.connections = inMsg.data[0]
+            $scope.$apply()
+            break
         case 'onHosts':
-            {
-                $scope.hosts = inMsg.data[0]
-                $scope.$apply()
-                break
-            }
+            $scope.hosts = inMsg.data[0]
+            $scope.$apply()
+            break
         case 'onStatus':
-            {
-                $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+            $scope.status = inMsg.data[0].name + ' ' + inMsg.data[0].level + ' ' + inMsg.data[0].detail + "\n" + $scope.status
+            if ($scope.status.length > 300) {
+                $scope.status = $scope.status.substring(0, statusMaxSize)
+            }
+            break
+        case 'onCli':
+            if (inMsg.data[0] != null) {
+                $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
                 if ($scope.status.length > 300) {
                     $scope.status = $scope.status.substring(0, statusMaxSize)
                 }
-                break
-            }
-        case 'onCli':
-            {
-                if (inMsg.data[0] != null) {
-                    $scope.status = JSON.stringify(inMsg.data[0], null, 2) + "\n" + $scope.status
-                    if ($scope.status.length > 300) {
-                        $scope.status = $scope.status.substring(0, statusMaxSize)
-                    }
-                    $scope.$apply()
-                } else {
-                    $scope.status += "null\n"
-                }
-                break
-            }
-        case 'onReleased':
-            {
-                console.info("runtime - onRelease" + inMsg.data[0])
-                break
-            }
-        case 'onHeartbeat':
-            {
-                let heartbeat = inMsg.data[0]
-                let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
-                $scope.heartbeatTs = heartbeat.ts
                 $scope.$apply()
-
-                for (let i in heartbeat.serviceList) {
-                    let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
-                    hb += serviceName + ' '
-
-                    // FIXME - 'merge' ie remove missing services
-
-                    // FIXME - want to maintain "local" registry ???
-                    // currently maintaining JS process registry - should the RuntimeGui also maintain
-                    // its 'own' sub-registry ???
-                    if (!serviceName in mrl.getRegistry()) {
-                        // 
-                        console.warn(serviceName + ' not defined in registry - sending registration request');
-                    }
-                    // else already registered
-                }
-
-                console.info(hb)
-
-                // CHECK REGISTRY
-                // SYNC SERVICES
-                // REQUEST REGISTRATIONS !!!!
-                break
+            } else {
+                $scope.status += "null\n"
             }
+            break
+        case 'onReleased':
+            console.info("runtime - onRelease" + inMsg.data[0])
+            break
+        case 'onHeartbeat':
+            let heartbeat = inMsg.data[0]
+            let hb = heartbeat.name + '@' + heartbeat.id + ' sent onHeartbeat - ';
+            $scope.heartbeatTs = heartbeat.ts
+            $scope.$apply()
+
+            for (let i in heartbeat.serviceList) {
+                let serviceName = heartbeat.serviceList[i].name + '@' + heartbeat.serviceList[i].id
+                hb += serviceName + ' '
+
+                // FIXME - 'merge' ie remove missing services
+
+                // FIXME - want to maintain "local" registry ???
+                // currently maintaining JS process registry - should the RuntimeGui also maintain
+                // its 'own' sub-registry ???
+                if (!serviceName in mrl.getRegistry()) {
+                    // 
+                    console.warn(serviceName + ' not defined in registry - sending registration request');
+                }
+                // else already registered
+            }
+
+            console.info(hb)
+
+            // CHECK REGISTRY
+            // SYNC SERVICES
+            // REQUEST REGISTRATIONS !!!!
+            break
         default:
             console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break

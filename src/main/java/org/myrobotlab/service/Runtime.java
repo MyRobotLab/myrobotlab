@@ -3413,11 +3413,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public ServiceConfig getConfig() {
 
-    RuntimeConfig config = new RuntimeConfig();
-
+    RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
     config.id = getId();
-    config.name = getName();
-    config.type = getSimpleName();
 
     Map<String, ServiceInterface> services = getLocalServices();
     List<ServiceInterface> s = new ArrayList<>();
@@ -3481,6 +3478,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           continue;
         }
         ServiceInterface si = getService(name);
+        if (si == null) {
+          error("service not found %s", name);
+          continue;
+        }
         si.load(); // wonder how many problems will occur of applying config  
       }
       

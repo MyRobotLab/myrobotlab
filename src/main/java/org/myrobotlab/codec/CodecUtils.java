@@ -668,4 +668,14 @@ public class CodecUtils {
     return (T) yaml.load(data);
   }
 
+  public static boolean isLocal(String name, String id) {
+    if (!name.contains("@")) {
+      return true;
+    }
+    if (name.substring(name.indexOf("@") + 1).equals(id)) {
+      return true;
+    }
+    return false;
+  }
+
 }
