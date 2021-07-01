@@ -1241,7 +1241,12 @@
     <artifactId>logback-classic</artifactId>
     <version>1.0.13</version>
   </dependency>
-<!-- Runtime end -->
+  <dependency>
+    <groupId>org.yaml</groupId>
+    <artifactId>snakeyaml</artifactId>
+    <version>1.29</version>
+  </dependency>
+  <!-- Runtime end -->
 
 <!-- Serial begin -->
   <dependency>

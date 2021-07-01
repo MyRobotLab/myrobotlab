@@ -38,6 +38,7 @@ public class RuntimeMeta extends MetaData {
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");
     addDependency("ch.qos.logback", "logback-classic", "1.0.13");
+    addDependency("org.yaml", "snakeyaml", "1.29");
 
     // addDependency("org.apache.maven", "maven-embedder", "3.1.1");
     // addDependency("ch.qos.logback", "logback-classic", "1.2.3");
