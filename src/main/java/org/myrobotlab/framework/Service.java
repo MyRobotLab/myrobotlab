@@ -1324,7 +1324,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * method of de-serializing default will to load simple xml from name file
    */
-  @Override
   public boolean load() {
     return load((String)null);
   }
@@ -1344,7 +1343,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       
       if (filename == null) {        
         filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
-      }
+      } 
 
       File f = new File(filename);
       
@@ -1372,9 +1371,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return false;
       }
       
-      // setting config name based on runtime.yml parent 
-      runtime.setConfigName(f.getParentFile().getName());
-
       ServiceConfig config = null;
       
       if (format.toLowerCase().equals("json")) {
@@ -1656,7 +1652,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       ServiceConfig config = getConfig();
       String data = null;
-
       if ("json".equals(format.toLowerCase())) {
         data = CodecUtils.toJson(config);
       } else {

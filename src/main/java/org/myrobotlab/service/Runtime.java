@@ -130,7 +130,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static private transient Thread installerThread = null;
 
-  protected String configName = "default";
+  private String configName = "default";
   
   /**
    * The one config directory where all config is managed the {default} is the
@@ -1485,23 +1485,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void releaseService(String name) {
     Runtime.release(name);
-  }
-
-  /**
-   * save all configuration from all local services
-   */
-  static public boolean saveAll() {
-    boolean ret = true;
-    Map<String, ServiceInterface> local = getLocalServices();
-    for (ServiceInterface sw : local.values()) {
-//      if ("Runtime".equals(sw.getType())) {
-//        // skipping runtime.
-//        continue;
-//      }
-      log.info("Saving config for {}", sw.getName());
-      ret &= sw.save();
-    }
-    return ret;
   }
 
   public void connect() throws IOException {
@@ -3439,6 +3422,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return config;
   }
 
+  
+  @Override
+  public boolean load(String filename) {
+    // When runtime calls load, we expect the full path to the runtime.yml file.
+    // based on the directory structure, we need to set the current config name
+    // so we can find the other services to load.
+    File f = new File(filename);
+    setConfigName(f.getParentFile().getName());
+    return super.load(filename);
+  }
+
   public ServiceConfig load(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) c;
     setId(config.id);
@@ -3531,14 +3525,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Save runtime yml as well as all services - TODO - probably need more
-   * parameter switches for special cases
+   * Save runtime yml as well as all services
+   * configuration is saved in the configDir
    */
   public boolean save(String filename) {
     try {
 
       if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs + getName() + ".yml";
+        filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + getName() + ".yml";
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
@@ -3554,12 +3548,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       info("saved %s config to %s", getName(), filename);
       boolean ret = true;
-      
-      // we will need to dump all the service config files too
-      // it "should" be in the same directory as the runtime.yml
-      // we just saved so - setConfigSet
-      File configSet = new File(filename);
-      setConfigName(configSet.getParentFile().getName());
 
       for (ServiceInterface si : getLocalServices().values()) {
         if (si.getName().equals("runtime")) {
