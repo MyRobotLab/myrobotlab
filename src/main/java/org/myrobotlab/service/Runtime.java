@@ -1494,6 +1494,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     boolean ret = true;
     Map<String, ServiceInterface> local = getLocalServices();
     for (ServiceInterface sw : local.values()) {
+//      if ("Runtime".equals(sw.getType())) {
+//        // skipping runtime.
+//        continue;
+//      }
+      log.info("Saving config for {}", sw.getName());
       ret &= sw.save();
     }
     return ret;
@@ -3462,15 +3467,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             // we have a derived type
             sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
           }
-          if (sc.load) {
-            configs.put(name, config);
-            // start vs create ??? should we start with create go through all life
-            // cycles ?
-            log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
-            create(sc.name, sc.type);
-          } else {
-            log.info("Service {} is not enabled, skipping starting it.", config.name);
-          }
+          configs.put(name, config);
+          // start vs create ??? should we start with create go through all life
+          // cycles ?
+          log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
+          create(sc.name, sc.type);
         } catch (Exception e) {
           error(e);
         }

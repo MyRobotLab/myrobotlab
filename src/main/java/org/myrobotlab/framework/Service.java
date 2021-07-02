@@ -349,10 +349,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public static void sleep(int millis) {
-    try {
-      Thread.sleep(millis);
-    } catch (InterruptedException e) {
-    }
+    sleep((long)millis);
   }
 
   public static void sleep(long millis) {
@@ -1306,8 +1303,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     config.name = getName();
     config.type = getSimpleName();
     config.locale = getLocaleTag();
-    // if we are being asked to genereate a config, we should assume that we are enabled.
-    config.load = true;
     
     ArrayList<String> nks = getNotifyListKeySet();
     for (String n: nks) {

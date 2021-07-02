@@ -107,7 +107,7 @@ public class Python extends Service {
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            log.error("InputQueueThread threw", e.toString());
+            log.error("InputQueueThread threw msg: {}", msg, e);
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
         }
