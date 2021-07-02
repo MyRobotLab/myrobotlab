@@ -3462,7 +3462,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             // we have a derived type
             sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
           }
-          if (config.load) {
+          if (sc.load) {
             configs.put(name, config);
             // start vs create ??? should we start with create go through all life
             // cycles ?
