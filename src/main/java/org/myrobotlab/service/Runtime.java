@@ -3492,7 +3492,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       
       log.info("starting start life-cycle");
       // batch service life-cycle start      
-      for (String name : config.registry) {
+      for (String name : configs.keySet()) {
         if (name.equals("runtime")) {
           continue;
         }
