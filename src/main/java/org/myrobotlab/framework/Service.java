@@ -1287,6 +1287,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public ServiceConfig load(ServiceConfig c) {
+    log.info("Default service config loading for service: {} type: {}", getName(), getType());
     return c;
   }
 
@@ -1305,7 +1306,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     config.name = getName();
     config.type = getSimpleName();
     config.locale = getLocaleTag();
-
+    // if we are being asked to genereate a config, we should assume that we are enabled.
+    config.load = true;
+    
     ArrayList<String> nks = getNotifyListKeySet();
     for (String n: nks) {
       List<MRLListener> nl = getNotifyList(n);

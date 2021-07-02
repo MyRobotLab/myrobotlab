@@ -3411,6 +3411,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return s;
   }
 
+  @Override
   public ServiceConfig getConfig() {
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
@@ -3461,11 +3462,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             // we have a derived type
             sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
           }
-          configs.put(name, config);
-          // start vs create ??? should we start with create go through all life
-          // cycles ?
-          log.info("starting create life-cycle");
-          create(sc.name, sc.type);
+          if (config.load) {
+            configs.put(name, config);
+            // start vs create ??? should we start with create go through all life
+            // cycles ?
+            log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
+            create(sc.name, sc.type);
+          } else {
+            log.info("Service {} is not enabled, skipping starting it.", config.name);
+          }
         } catch (Exception e) {
           error(e);
         }
@@ -3473,7 +3478,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       
       // batch service life-cycle load
       log.info("starting load life-cycle");
-      for (String name : config.registry) {
+      for (String name : configs.keySet()) {
         if (name.equals("runtime")) {
           continue;
         }

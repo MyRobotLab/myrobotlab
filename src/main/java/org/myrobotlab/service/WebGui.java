@@ -1170,6 +1170,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     }
   }
   
+  @Override
   public ServiceConfig getConfig() {
     WebGuiConfig config = (WebGuiConfig) initConfig(new WebGuiConfig());
     config.port = port;

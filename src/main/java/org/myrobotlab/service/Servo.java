@@ -220,6 +220,7 @@ public class Servo extends AbstractServo implements ServoControl {
     setMaxSpeed(speed);
   }
  
+  @Override
   public ServiceConfig getConfig() {
     
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());

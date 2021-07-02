@@ -582,8 +582,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * after the service is created.
    * 
    * @param path
-   *          - he path to the ProgramAB directory where the bots aiml resides
-   *          FIXME - path is not needed
+   *          - the path to the ProgramAB directory where the bots aiml and config reside
    * @param userName
    *          - The new user name
    * @param botName
@@ -606,8 +605,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          unles its pulled from Runtime
    */
 
-  @Deprecated /* use startSession(String userName, String botName) */
-  public Session startSession(@Deprecated String path, String userName, String botName, @Deprecated java.util.Locale locale) {
+  public Session startSession(String path, String userName, String botName, java.util.Locale locale) {
 
     /*
      * not wanted or needed if (path != null) { addBotPath(path); }
@@ -1070,6 +1068,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     }
   }
 
+  @Override
   public ServiceConfig getConfig() {
     ProgramABConfig config = (ProgramABConfig) initConfig(new ProgramABConfig());
 
@@ -1079,6 +1078,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
     return config;
   }
 
+  @Override
   public ServiceConfig load(ServiceConfig c) {
     ProgramABConfig config = (ProgramABConfig) c;
 
