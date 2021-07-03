@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 /**
  * Local OS speech service
  * 
- * windows and macos compatible
+ * Linux, Windows and OSx compatible
  *
  * @author moz4r
  *
@@ -39,7 +39,6 @@ import org.slf4j.Logger;
  *         mb-en1 -w out.wav espeak -v mb-us1 "Hello world, how are you doing
  *         today?"
  * 
- * 
  *         MBROLA voices -
  *         https://github.com/espeak-ng/espeak-ng/blob/master/docs/mbrola.md#linux-installation
  * 
@@ -51,66 +50,151 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
   private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
   protected String ttsCommand = null;
+  protected String filterChars = "\"\'";
 
   public LocalSpeech(String n, String id) {
     super(n, id);
+    // setup the default tts per os
+    Platform platform = Runtime.getPlatform();
+    if (platform.isWindows()) {
+      setTts();
+    } else if (platform.isMac()) {
+      setSay();
+    } else if (platform.isLinux()) {
+      setFestival();
+    } else {
+      error("%s unknown platform %s", getName(), platform.getOS());
+    }
   }
-  
+
+  /**
+   * set the tts command template
+   * 
+   * @param ttsCommand
+   */
   public void setTtsCommand(String ttsCommand) {
+    info("LocalSpeech template is now: %s", ttsCommand);
     this.ttsCommand = ttsCommand;
   }
 
+  /**
+   * get the tts command template
+   * 
+   * @return
+   */
   public String getTtsCommand() {
     return ttsCommand;
   }
+
+  /**
+   * setFestival sets the Windows tts template
+   * 
+   * @return
+   */
+  public boolean setTts() {
+    setTtsCommand("\"" + ttsPath + "\" -f 9 -v {voice} -t -o {filename} \"{text}\"");
+    if (!Runtime.getPlatform().isWindows()) {
+      error("tts only supported on Windows");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * setSay sets the Mac say template
+   * 
+   * @return
+   */
+  public boolean setSay() {
+    setTtsCommand("say \"{text}\"" + "-o {filename}");
+    if (!Runtime.getPlatform().isMac()) {
+      error("say only supported on Mac");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * setFestival sets the Linux tts to festival template
+   * 
+   * @return
+   */
+  public boolean setFestival() {
+    setTtsCommand("echo \"{text}\" | text2wave -o {filename}");
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+    return true;
+  }
   
+  /**
+   * setEspeak sets the Linux tts to espeak template
+   * 
+   * @return
+   */
+  public boolean setEspeak() {
+    setTtsCommand("espeak \"{text}\" -w {filename}");
+    if (!Runtime.getPlatform().isLinux()) {
+      error("festival only supported on Linux");
+      return false;
+    }
+    return true;
+  }
+
+
+  /**
+   * String of characters to filter out of text to create the tts command.
+   * Typically double quotes should be filtered out of the command as creating
+   * the text to speech process command can be broken by double quotes
+   * 
+   * @param filter
+   */
+  public void setFilter(String filter) {
+    filterChars = filter;
+  }
+
+  public String getFilter() {
+    return filterChars;
+  }
+
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
     String localFileName = getLocalFileName(toSpeak);
 
-    Platform platform = Runtime.getPlatform();
+    // get the audio filename we are going to create
     String filename = getLocalFileName(toSpeak);
     if (filename == null) {
       return null;
     }
 
-    if (platform.isWindows()) {
-      // GAH ! .. tts.exe isn't like a Linux app where -o means output file to
-      // "exact" name ...
-      // unfortunately it appends .mp3 :P
-      // so here we have to trim it off
+    // filter out breaking chars
+    if (filterChars != null) {
+      for (int i = 0; i < filterChars.length(); ++i) {
+        toSpeak = toSpeak.replace(filterChars.charAt(i), ' ');
+      }
+    }
 
+    Platform platform = Runtime.getPlatform();
+    String cmd = ttsCommand.replace("{text}", toSpeak);
+
+    if (platform.isWindows()) {
+      // lame tts.exe on windows appends mp3 to whatever filename was supplied
       filename = filename.substring(0, filename.length() - 5);
-      String cmd = "\"" + ttsPath + "\" -f 9 -v " + getVoice().getVoiceProvider().toString() + " -t -o " + "\"" + filename + "\" \"" + toSpeak + "\"";
+    }
+    cmd = cmd.replace("{filename}", localFileName);
+
+    if (getVoice() != null) {
+      cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
+    }
+
+    if (platform.isWindows()) {
       Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
     } else if (platform.isMac()) {
-      // cmd = Runtime.execute(macOsTtsExecutable, toSpeak, "-o",
-      // ttsExeOutputFilePath + uuid + "0.AIFF");
-      String cmd = "say \"" + toSpeak + "\"" + "-o " + filename;
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
-      // ProcessBuilder pb = new ProcessBuilder()
-      // cmd = getOsTtsApp(); // FIXME IMPLEMENT !!!
-      String furtherFiltered = toSpeak.replace("\"", "");// .replace("\'",
-      // "").replace("|",
-      // "");
-      // Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | festival
-      // --tts");
-
-      // apt install espeak
-      // sudo apt-get install mbrola mbrola-en1
-      // espeak -f speak.txt -w out.wav
-      // espeak -ven-sc -f speak.txt -w out.wav
-      if (ttsCommand == null) {
-        ttsCommand = "echo \"{text}\" | text2wave -o {filename}";
-      }
-      
-      String cmd = ttsCommand.replace("{text}", furtherFiltered);
-      cmd = cmd.replace("{filename}", localFileName);
-            
-      Process p = Runtime.exec("bash", "-c", cmd);
-      p.waitFor();
+      Runtime.execute("bash", "-c", cmd);
     }
 
     File fileTest = new File(localFileName);
@@ -260,10 +344,11 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     // Runtime.start("gui", "SwingGui");
 
     LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
-    speech.speakBlocking("hello my name is sam, sam i am");
-    speech.setTtsCommand("espeak \"{text}\" -w {filename}");
+    speech.speakBlocking("hello my name is sam, sam i am yet again");
+    // speech.setTtsCommand("espeak \"{text}\" -w {filename}");
+    speech.setEspeak();
     log.info("tts command template is {}", speech.getTtsCommand());
-    speech.speakBlocking("i can speak");
+    speech.speakBlocking("i can speak some more");
     speech.speakBlocking("my name is bob");
     speech.speakBlocking("i have a job");
     speech.speakBlocking("and i can dance in a mob");
