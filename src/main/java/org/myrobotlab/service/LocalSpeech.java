@@ -169,10 +169,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     removeExt(false);
     setTtsHack(false);
     setTtsCommand("espeak \"{text}\" -w {filename}");
-    if (!Runtime.getPlatform().isLinux()) {
-      error("festival only supported on Linux");
-      return false;
-    }
     return true;
   }
 
