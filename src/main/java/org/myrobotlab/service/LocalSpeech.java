@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
-import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
@@ -120,10 +119,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public boolean setMimic() {
     removeExt(false);
     setTtsHack(false);
-    setTtsCommand(mimicPath + " -voice " + getVoice() + " -o {filename} -t \"{text}\"");
-    if (!Runtime.getPlatform().isWindows()) {
-      error("mimic only supported on Windows");
-      return false;
+    if (Runtime.getPlatform().isWindows()) {
+      setTtsCommand(mimicPath + " -voice " + getVoice() + " -o {filename} -t \"{text}\"");
+    } else {
+      setTtsCommand("mimic -voice " + getVoice() + " -o {filename} -t \"{text}\"");
     }
     return true;
   }
@@ -221,7 +220,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (getVoice() != null) {
       cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
     }
-
+    
     if (platform.isWindows()) {
       Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
     } else if (platform.isMac()) {
@@ -235,9 +234,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       return new AudioData(localFileName);
     } else {
       if (platform.isLinux()) {
-        error("0 byte file - is festival installed?  apt install festival");
+        error("0 byte file - please install a speech program: sudo apt-get install -y festival espeak speech-dispatcher gnustep-gui-runtime");
       } else {
-        error("%s returned 0 byte file !!! - it may block you", getName());
+        error("%s returned 0 byte file !!! - error with speech generation");
       }
       return null;
     }
@@ -370,16 +369,20 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
   }
-
+  
   public static void main(String[] args) {
     try {
 
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
-      LoggingFactory.init("WARN");
+      // LoggingFactory.init("WARN");
 
-      // Runtime.start("gui", "SwingGui");
+      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
 
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
+      mouth.setMimic();
+      mouth.speakBlocking("hello there mimic works");
 
       boolean done = true;
       if (done) {
