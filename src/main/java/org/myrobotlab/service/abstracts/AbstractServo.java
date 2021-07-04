@@ -421,7 +421,8 @@ private Double maxSpeed;
     disable();
     send(sc, "detach", getName());
     // 20210703 - grog I don't know why a sleep was put here
-    // sleep(500);
+    // junit ServoTest will fail without this :P
+    sleep(500);
     firstMove = true;
     broadcastState();
   }
