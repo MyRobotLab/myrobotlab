@@ -2246,6 +2246,25 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
   }
+  
+  @Override
+  public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
+    ServiceInterface neopixel = Runtime.getService(name);
+    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
+    msg.neoPixel2Attach(dm.getId(), pin, numberOfPixels, depth);
+  }
+
+  @Override
+  public void neoPixel2WriteMatrix(String neopixel, int[] buffer) {
+    log.info("writing {} pixels : {}", buffer.length/5, buffer);
+    msg.neoPixel2WriteMatrix(getDeviceId(neopixel), buffer);
+  }
+
+  @Override
+  public void neoPixel2SetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
+    msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
+  }
+
 
   @Override
   public ServiceConfig getConfig() {
@@ -2433,4 +2452,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
   }
 
+  
 }
