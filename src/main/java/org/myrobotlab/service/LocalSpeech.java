@@ -55,6 +55,10 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   public LocalSpeech(String n, String id) {
     super(n, id);
+  }
+
+  public void startService() {
+    super.startService();
     // setup the default tts per os
     Platform platform = Runtime.getPlatform();
     if (platform.isWindows()) {
@@ -220,7 +224,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     if (getVoice() != null) {
       cmd = cmd.replace("{voice}", getVoice().getVoiceProvider().toString());
     }
-    
+
     if (platform.isWindows()) {
       Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
     } else if (platform.isMac()) {
@@ -369,14 +373,14 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public Map<String, Locale> getLocales() {
     return Locale.getLocaleMap("en-US");
   }
-  
+
   public static void main(String[] args) {
     try {
 
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       // LoggingFactory.init("WARN");
 
-      WebGui webgui = (WebGui)Runtime.create("webgui", "WebGui");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
@@ -388,7 +392,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       if (done) {
         return;
       }
-      
+
       mouth.speakBlocking("hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
       mouth.setMimic();
       mouth.speakBlocking("bork bork bork, hello my name is sam, sam i am yet again, how \"are you? do you 'live in a zoo too? ");
