@@ -50,11 +50,20 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   public final static Logger log = LoggerFactory.getLogger(LocalSpeech.class);
   private String ttsPath = System.getProperty("user.dir") + File.separator + "tts" + File.separator + "tts.exe";
+  protected String ttsCommand = null;
 
   public LocalSpeech(String n, String id) {
     super(n, id);
   }
+  
+  public void setTtsCommand(String ttsCommand) {
+    this.ttsCommand = ttsCommand;
+  }
 
+  public String getTtsCommand() {
+    return ttsCommand;
+  }
+  
   @Override
   public AudioData generateAudioData(AudioData audioData, String toSpeak) throws IOException, InterruptedException {
 
@@ -93,17 +102,17 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       // sudo apt-get install mbrola mbrola-en1
       // espeak -f speak.txt -w out.wav
       // espeak -ven-sc -f speak.txt -w out.wav
-      Process p = Runtime.exec("bash", "-c", "echo \"" + furtherFiltered + "\" | text2wave -o " + localFileName);
-      // TODO : use (!p.waitFor(10, TimeUnit.SECONDS)) for security ?
+      if (ttsCommand == null) {
+        ttsCommand = "echo \"{text}\" | text2wave -o {filename}";
+      }
+      
+      String cmd = ttsCommand.replace("{text}", furtherFiltered);
+      cmd = cmd.replace("{filename}", localFileName);
+            
+      Process p = Runtime.exec("bash", "-c", cmd);
       p.waitFor();
-      // audioFile.play(audioData);
     }
 
-    /*
-     * String cmd = getTtsCmdLine(toSpeak);
-     * 
-     * 
-     */
     File fileTest = new File(localFileName);
     if (fileTest.exists() && fileTest.length() > 0) {
       return new AudioData(localFileName);
@@ -248,10 +257,16 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public static void main(String[] args) throws Exception {
 
     LoggingFactory.init(Level.INFO);
-    Runtime.start("gui", "SwingGui");
+    // Runtime.start("gui", "SwingGui");
 
     LocalSpeech speech = (LocalSpeech) Runtime.start("speech", "LocalSpeech");
     speech.speakBlocking("hello my name is sam, sam i am");
+    speech.setTtsCommand("espeak \"{text}\" -w {filename}");
+    log.info("tts command template is {}", speech.getTtsCommand());
+    speech.speakBlocking("i can speak");
+    speech.speakBlocking("my name is bob");
+    speech.speakBlocking("i have a job");
+    speech.speakBlocking("and i can dance in a mob");
     // speech.parseEffects("#OINK##OINK# hey I thought #DOH# that was funny
     // #LAUGH01_F# very funny");
     // speech.getVoices();

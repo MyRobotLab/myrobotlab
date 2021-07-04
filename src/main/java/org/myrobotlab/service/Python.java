@@ -55,9 +55,9 @@ public class Python extends Service {
   public class InputQueue implements Runnable {
     transient protected Python python;
     protected volatile boolean running = false;
-    transient protected Thread myThread = null; 
+    transient protected Thread myThread = null;
 
-    public InputQueue(Python python) {      
+    public InputQueue(Python python) {
       this.python = python;
     }
 
@@ -107,7 +107,7 @@ public class Python extends Service {
             interp.exec(compiledObject);
 
           } catch (Exception e) {
-            log.error("InputQueueThread threw", e.toString());
+            log.error("InputQueueThread threw msg: {}", msg, e);
             python.error(String.format("%s %s", e.getClass().getSimpleName(), e.getMessage()));
           }
         }
@@ -120,13 +120,13 @@ public class Python extends Service {
       }
       log.info("shutting down python queue");
     }
-    
+
     synchronized public void stop() {
       if (myThread != null) {
         running = false;
         myThread.interrupt();
         myThread = null;
-      } 
+      }
     }
 
     synchronized public void start() {
@@ -135,7 +135,7 @@ public class Python extends Service {
         myThread.start();
       } else {
         log.warn("python input queue already running");
-      }      
+      }
     }
   }
 
@@ -205,7 +205,6 @@ public class Python extends Service {
    * displays
    */
   protected boolean openOnExecute = true;
-
 
   /**
    * Get a compiled version of the python call.
@@ -319,7 +318,7 @@ public class Python extends Service {
 
     log.info("creating module directory pythonModules");
     new File("pythonModules").mkdir();
-    
+
     inputQueueThread = new InputQueue(this);
 
     // I love ServiceData !
@@ -337,10 +336,13 @@ public class Python extends Service {
 
     localPythonFiles = getFileListing();
 
-    createPythonInterpreter();
-    attachPythonConsole();
+    log.info("creating module directory pythonModules");
+    new File("pythonModules").mkdir();
 
     //////// was in startService
+
+    createPythonInterpreter();
+    attachPythonConsole();
 
     String selfReferenceScript = "from time import sleep\nfrom org.myrobotlab.framework import Platform\n" + "from org.myrobotlab.service import Runtime\n"
         + "from org.myrobotlab.framework import Service\n" + "from org.myrobotlab.service import Python\n"
@@ -351,8 +353,16 @@ public class Python extends Service {
     PyObject compiled = getCompiledMethod("initializePython", selfReferenceScript, interp);
     interp.exec(compiled);
 
+    // initialize all the pre-existing service before python was created
+    Map<String, ServiceInterface> services = Runtime.getLocalServices();
+    for (ServiceInterface service : services.values()) {
+      if (service.isRunning()) {
+        onStarted(service.getName());
+      }
+    }
+
     log.info("starting python {}", getName());
-    inputQueueThread.start();    
+    inputQueueThread.start();
     log.info("started python {}", getName());
   }
 
@@ -448,6 +458,11 @@ public class Python extends Service {
     if (modulesDir != null) {
       sys.path.append(new PyString(modulesDir));
     }
+
+    
+    sys.path.append(new PyString(Runtime.getInstance().getConfigDir()));
+    
+
     log.info("Python System Path: {}", sys.path);
 
   }
@@ -553,9 +568,9 @@ public class Python extends Service {
     return execFile(filename, true);
   }
 
-
   /**
    * executes an external Python file
+   * 
    * @param filename
    * @param block
    * @throws IOException
@@ -764,7 +779,7 @@ public class Python extends Service {
       interp.cleanup();
       interp = null;
     }
-    
+
     inputQueueThread.stop();
     thread.interruptAllThreads();
     Py.getSystemState()._systemRestart = true;
@@ -796,14 +811,6 @@ public class Python extends Service {
     stop();// release the interpeter
   }
 
-  @Override
-  public String exportAll() throws IOException {
-    String filename = getRootDataDir() + fs + getId() + ".py";
-    String script = super.exportAll(filename);
-    openScript(filename, script);
-    return script;
-  }
-
   public boolean isOpenOnExecute() {
     return openOnExecute;
   }
@@ -823,9 +830,9 @@ public class Python extends Service {
       webgui.autoStartBrowser(false);
       webgui.startService();
       Python python = (Python) Runtime.start("python", "Python");
-      //python.execFile("data/adafruit.py");
+      // python.execFile("data/adafruit.py");
 
-      Runtime.start("i01", "InMoov2");
+      // Runtime.start("i01", "InMoov2");
 
     } catch (Exception e) {
       log.error("main threw", e);

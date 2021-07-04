@@ -288,50 +288,101 @@ public class Platform implements Serializable {
   public Platform() {
   }
 
+  /**
+   * The process id of the currently running Java process
+   * @return
+   */
   public String getPid() {
     return pid;
   }
 
+  /**
+   * The message of the day.
+   * "resistance is futile, we have cookies and robots ..."
+   * @return
+   */
   public String getMotd() {
     return motd;
   }
 
+  /**
+   * The branch this software was built from.
+   * @return
+   */
   public String getBranch() {
     return branch;
   }
 
+  
   public String getBuild() {
     return build;
   }
 
+  /**
+   * This is the full commit of the source.
+   * @return
+   */
   public String getCommit() {
     return commit;
   }
 
+  /**
+   * CPU Architecture
+   * x86, armv6, armv7, armv8
+   * @return
+   */
   public String getArch() {
     return arch;
   }
 
+  /**
+   * Os bitness - should be
+   * 64 or 32
+   * @return
+   */
   public int getOsBitness() {
     return osBitness;
   }
 
+  /**
+   * Java virtual machine bitness
+   * either 64 or 32 bit
+   * @return
+   */
   public int getJvmBitness() {
     return jvmBitness;
   }
 
+  /**
+   * Operating system type
+   * linux, windows, mac
+   * @return
+   */
   public String getOS() {
     return os;
   }
 
+  /**
+   * arc bitness and os together
+   * x86.64.linux, armv7.32.linux, x86.32.windows etc..
+   * @return
+   */
   public String getPlatformId() {
     return String.format("%s.%s.%s", getArch(), getJvmBitness(), getOS());
   }
 
+  /**
+   * version or myrobotlab
+   * @return
+   */
   public String getVersion() {
     return mrlVersion;
   }
 
+  /**
+   * Name of the Jvm Hotspot or OpenJDK typically
+   * @return
+   */
   public String getVMName() {
     return vmName;
   }
@@ -415,6 +466,11 @@ public class Platform implements Serializable {
     return String.format("%s.%d.%s", arch, jvmBitness, os);
   }
 
+  /**
+   * The instance identifier of the current running myrobotlab.
+   * Used for connecting multiple myrobotlabs together
+   * @return
+   */
   public String getId() {
     // null ids are not allowed
     if (id == null) {
@@ -423,18 +479,34 @@ public class Platform implements Serializable {
     return id;
   }
 
+  /**
+   * The Computer's hostname
+   * @return
+   */
   public String getHostname() {
     return hostname;
   }
 
+  /**
+   * Set your own instance identifier 
+   * @param newId
+   */
   public void setId(String newId) {
     id = newId;
   }
 
+  /**
+   * Return the time when this instance was started
+   * @return
+   */
   public Date getStartTime() {
     return startTime;
   }
 
+  /**
+   * Returns true if running in virtual mode
+   * @return
+   */
   public static boolean isVirtual() {
     Platform p = getLocalInstance();
     return p.isVirtual;

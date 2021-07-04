@@ -160,10 +160,9 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     // needs this service to still be availabe
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
     if (i2cDevices.containsKey(key)) {
-      control.detachI2CController(this);
       i2cDevices.remove(key);
+      control.detachI2CController(this);
     }
-
   }
 
   public void digitalWrite(int pin, int value) {

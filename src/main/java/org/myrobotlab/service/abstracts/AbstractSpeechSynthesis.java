@@ -18,6 +18,8 @@ import org.myrobotlab.math.MathUtils;
 import org.myrobotlab.service.AudioFile;
 import org.myrobotlab.service.Runtime;
 import org.myrobotlab.service.Security;
+import org.myrobotlab.service.config.AbstractSpeechSynthesisConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AudioListener;
@@ -246,7 +248,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   private List<Voice> voiceList = new ArrayList<>();
 
-  boolean blocking = false;
+  protected boolean blocking = false;
 
   // FIXME - deprecate - begin using SSML
   // specific effects and effect notation needs to be isolated to the
@@ -276,7 +278,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
     if (genderIndex == null) {
       genderIndex = new HashMap<String, List<Voice>>();
     }
-    audioFile = (AudioFile) createPeer("audioFile");
+    // FIXED - below is wrong ...
+    // should hold off creating or starting peers until the service has started
+    // audioFile = (AudioFile) createPeer("audioFile");
 
     getVoices();
 
@@ -494,6 +498,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public void startService() {
     super.startService();
+    // FIXME - assigning a Peer to a reference is a no no
     audioFile = (AudioFile) startPeer("audioFile");
     subscribe(audioFile.getName(), "publishAudioStart");
     subscribe(audioFile.getName(), "publishAudioEnd");
@@ -607,7 +612,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   @Deprecated /* use replaceWord */
   public void addSubstitution(String key, String replacement) {
-    substitutions.put(key.toLowerCase(), replacement.toLowerCase());
+    replaceWord(key, replacement);
   }
 
   /**
@@ -860,7 +865,6 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   /**
    * default cache file type
    */
-  // @Deprecated
   public String getAudioCacheExtension() {
     return ".mp3";
   }
@@ -1068,6 +1072,45 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
 
   public boolean isMute() {
     return mute;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) initConfig(new AbstractSpeechSynthesisConfig());
+    config.mute = mute;
+    config.blocking = blocking;
+    if (substitutions != null && substitutions.size() > 0) {
+      config.substitutions = new HashMap<>();
+      config.substitutions.putAll(substitutions);
+    }
+    if (voice != null) {
+      config.voice = voice.name;
+    }
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
+
+    if (config.mute != null) {
+      setMute(config.mute);
+    }
+
+    if (config.blocking != null) {
+      setBlocking(config.blocking);
+    }
+
+    if (config.substitutions != null) {
+      for (String n : config.substitutions.keySet()) {
+        replaceWord(n, config.substitutions.get(n));
+      }
+    }
+
+    if (config.voice != null) {
+      setVoice(config.voice);
+    }
+
+    return c;
   }
 
   @Override

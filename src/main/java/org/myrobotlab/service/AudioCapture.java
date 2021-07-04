@@ -159,13 +159,13 @@ public class AudioCapture extends Service {
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
       audioIn.playAudio();
-      audioIn.save("me5.wav");
+      audioIn.saveAudioFile("me5.wav");
 
       audioIn.captureAudio();
       Thread.sleep(3000);
       audioIn.stopAudioCapture();
       audioIn.playAudio();
-      audioIn.save("me1.wav");
+      audioIn.saveAudioFile("me1.wav");
 
     } catch (Exception e) {
       Logging.logError(e);
@@ -284,7 +284,7 @@ public class AudioCapture extends Service {
     return byteArrayOutputStream;
   }
 
-  public void save(String filename) throws IOException {
+  public void saveAudioFile(String filename) throws IOException {
     byte[] data = byteArrayOutputStream.toByteArray();
     AudioInputStream ais = new AudioInputStream(new ByteArrayInputStream(data), audioFormat, data.length);
     AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File(filename));

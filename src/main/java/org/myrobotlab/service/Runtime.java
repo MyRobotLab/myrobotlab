@@ -23,6 +23,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.codec.CodecUtils.ApiDescription;
@@ -71,6 +74,8 @@ import org.myrobotlab.net.RouteTable;
 import org.myrobotlab.net.WsClient;
 import org.myrobotlab.process.InProcessCli;
 import org.myrobotlab.process.Launcher;
+import org.myrobotlab.service.config.RuntimeConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.data.ServiceTypeNameResults;
 import org.myrobotlab.service.interfaces.ConnectionManager;
@@ -81,6 +86,7 @@ import org.myrobotlab.service.interfaces.ServiceLifeCycle;
 import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
+import org.yaml.snakeyaml.Yaml;
 
 import picocli.CommandLine;
 
@@ -123,6 +129,15 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * thread for non-blocking install of services
    */
   static private transient Thread installerThread = null;
+
+  private String configName = "default";
+  
+  /**
+   * The one config directory where all config is managed the {default} is the
+   * current configuration set
+   */
+  protected String configDir = "data" + fs + "config";
+  
 
   /**
    * <pre>
@@ -222,6 +237,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   transient protected Map<String, Locale> locales;
 
+  protected List<String> configList;
+
+  /***
+   * runtime, security, webgui, perhaps python - we don't want to remove when
+   * releasing config
+   */
+  protected Set<String> startingServices = new HashSet<>();
+
   /**
    * Returns the number of processors available to the Java virtual machine.
    * 
@@ -257,22 +280,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   static public synchronized ServiceInterface create(String name, String type) {
     return createService(name, type, null);
-  }
-
-  /**
-   * This helper method will create, load then start a service
-   * 
-   * @param name
-   *          - name of instance
-   * @param type
-   *          - type
-   * @return returns the service in the form of a ServiceInterface
-   */
-  static public ServiceInterface loadAndStart(String name, String type) {
-    ServiceInterface s = create(name, type);
-    s.load();
-    s.startService();
-    return s;
   }
 
   static public ServiceInterface createAndStart(String name, String type) {
@@ -361,6 +368,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Framework owned method - core of creating a new service
+   * 
    * @param name
    * @param type
    * @param inId
@@ -562,6 +570,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           Security.getInstance();
           runtime.getRepo().addStatusPublisher(runtime);
           FileIO.extractResources();
+          // protected services we don't want to remove when releasing a config
+          runtime.startingServices.add("runtime");
+          runtime.startingServices.add("security");
+          runtime.startingServices.add("webgui");
+          runtime.startingServices.add("python");
         }
       }
     }
@@ -1039,12 +1052,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * otherwise status info from the install is blocked until installation is
    * completed. For command line installation "blocking" mode would be desired
    * 
-   * FIXME - problematic in that Runtime.create calls this directly, and this should be
-   * stepped through, because:
-   *   If we need to install new components, a restart is likely needed ... we don't do
-   *   custom dynamic classloaders .... yet
-   *   
-   *   License - should be appropriately accepted or rejected by user 
+   * FIXME - problematic in that Runtime.create calls this directly, and this
+   * should be stepped through, because: If we need to install new components, a
+   * restart is likely needed ... we don't do custom dynamic classloaders ....
+   * yet
+   * 
+   * License - should be appropriately accepted or rejected by user
    *
    */
   synchronized static public void install(String serviceType, Boolean blocking) {
@@ -1067,7 +1080,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         }
       }
     };
-    
+
     if (blocking) {
       installerThread.run();
     } else {
@@ -1108,20 +1121,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   public static boolean isRuntime(Service newService) {
     return newService.getClass().equals(Runtime.class);
-  }
-
-  /**
-   * load all configuration from all local services
-   * 
-   * @return true / false
-   */
-  static public boolean loadAll() {
-    boolean ret = true;
-    Map<String, ServiceInterface> local = getLocalServices();
-    for (ServiceInterface si : local.values()) {
-      ret &= si.load();
-    }
-    return ret;
   }
 
   public void startInteractiveMode() {
@@ -1421,6 +1420,50 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return seconds;
   }
 
+  /**
+   * Publishing adding of new configuration sets (directories)
+   * to the config parent directory  typically data/config
+   * 
+   * @return
+   */
+  public List<String> publishConfigList() {
+    configList = new ArrayList<>();
+    
+    // config dir is technically the parent directory of
+    // config sets
+    
+    File configDir = new File(this.configDir);
+    if (!configDir.exists()) {
+      configDir.mkdirs();
+    }
+
+    File[] files = configDir.listFiles();
+    for (File file : files) {
+      String n = file.getName();
+
+      Pattern p = Pattern.compile("[^a-z0-9_]", Pattern.CASE_INSENSITIVE);
+      Matcher m = p.matcher(n);
+
+      if (!file.isDirectory()) {
+        warn("ignoring %s expecting directory not file", n);
+        continue;
+      }
+
+      if (Character.isDigit(n.charAt(0))) {
+        warn("ignoring %s config dir cannot start with digit", n);
+        continue;
+      }
+
+      if (m.find()) {
+        warn("ignoring %s special character in name not allowed", n);
+        continue;
+      }
+
+      configList.add(file.getName());
+    }
+    return configList;
+  }
+
   public static void releaseAllServicesExcept(HashSet<String> saveMe) {
     log.info("releaseAllServicesExcept");
     List<ServiceInterface> list = Runtime.getServices();
@@ -1442,18 +1485,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    */
   static public void releaseService(String name) {
     Runtime.release(name);
-  }
-
-  /**
-   * save all configuration from all local services
-   */
-  static public boolean saveAll() {
-    boolean ret = true;
-    Map<String, ServiceInterface> local = getLocalServices();
-    for (ServiceInterface sw : local.values()) {
-      ret &= sw.save();
-    }
-    return ret;
   }
 
   public void connect() throws IOException {
@@ -1694,6 +1725,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     String libararyPath = System.getProperty("java.library.path");
     String userDir = System.getProperty("user.dir");
     String userHome = System.getProperty("user.home");
+
+    // initialize the config list
+    publishConfigList();
 
     // TODO this should be a single log statement
     // http://developer.android.com/reference/java/lang/System.html
@@ -2045,6 +2079,26 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * A function for runtime to "save" a service - or if the service does not exists
+   * save the "default" config of that type of service
+   * @param name
+   * @return
+   * @throws IOException
+   */
+  public boolean export(String name /*, String type*/) throws IOException {
+      ServiceInterface si = getService(name);
+      if (si != null) {
+        si.save();
+      }
+      
+      // TODO - save default config for that service
+      // or default config
+      
+      return false;
+  }
+
+
+  /**
    * restart occurs after applying updates - user or config data needs to be
    * examined and see if its an appropriate time to restart - if it is the
    * spawnBootstrap method will be called and bootstrap.jar will go through its
@@ -2059,8 +2113,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           info("restarting");
 
-          // export to file lastRestart.py
-          exportAll("lastRestart.py");
+          // FIXME - should we save() load() ???
+          // export("last-restart");
 
           // shutdown all services process - send ready to shutdown - ask back
           // release all services
@@ -2080,11 +2134,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           options.fromLauncher = true; // ???
 
           // make sure python is included
-          options.services.add("python");
-          options.services.add("Python");
+          // options.services.add("python");
+          // options.services.add("Python");
 
           // force invoke
-          options.invoke = new String[] { "python", "execFile", "lastRestart.py" };
+          // options.invoke = new String[] { "python", "execFile",
+          // "lastRestart.py" };
 
           // create builder from Launcher daemonize ?
           log.info("re launching with commands \n{}", CmdOptions.toString(options.getOutputCmd()));
@@ -2092,9 +2147,13 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
           // fire it off
           Process restarted = pb.start();
-          // it "better" not be a requirement that a process must consume its std streams
-          // "hopefully" - if the OS realizes the process is dead it moves the streams to /dev/null ?
-          // StreamGobbler gobbler = new StreamGobbler(String.format("%s-gobbler", getName()), restarted.getInputStream());
+          // it "better" not be a requirement that a process must consume its
+          // std streams
+          // "hopefully" - if the OS realizes the process is dead it moves the
+          // streams to /dev/null ?
+          // StreamGobbler gobbler = new
+          // StreamGobbler(String.format("%s-gobbler", getName()),
+          // restarted.getInputStream());
           // gobbler.start();
 
           // dramatic pause
@@ -2421,51 +2480,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     log.info("Runtime exec {}", Arrays.toString(cmd));
     Process p = java.lang.Runtime.getRuntime().exec(cmd);
     return p;
-  }
-
-  // FIXME - parameters String filname, String lang (python|java) - default with
-  // timestamp ?
-  // TODO - auto-restore (on startup)/ auto-backup
-  public static void backup() {
-
-    try {
-
-      StringBuilder sb = new StringBuilder();
-      sb.append("import json\n");
-
-      String[] services = getServiceNames();
-
-      for (String name : services) {
-        ServiceInterface si = Runtime.getService(name);
-        String safeName = CodecUtils.getSafeReferenceName(name);
-        sb.append(String.format("%s = Runtime.start(\"%s\",\"%s\")\n", safeName, name, si.getType()));
-      }
-
-      sb.append("\n############ loading ############\n");
-      sb.append("print(\"loading ...\")\n");
-
-      for (String name : services) {
-        ServiceInterface si = Runtime.getService(name);
-        if (si.getName().equals("runtime")) {
-          continue;
-        }
-        String json = CodecUtils.toJson(si);
-
-        // data load in "json" form vs python dictionary - it could be in json
-        // dictionary
-        sb.append(String.format("%sJson = \"\"\"%s\n\"\"\"\n", name, json));
-
-        sb.append(String.format("%s.load(%s)\n", name + "Json", si.getType()));
-      }
-
-      Files.write(Paths.get("backup.py"), sb.toString().getBytes());
-      Files.write(Paths.get("backup-routes.py"), CodecUtils.toJson(getNotifyEntries()).getBytes());
-
-      log.info("finished...");
-
-    } catch (Exception e) {
-      log.error("backup threw", e);
-    }
   }
 
   public static Runtime getInstance(String[] args2) {
@@ -3284,6 +3298,277 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public String getConnectionUuidFromGatewayKey(String gatewayKey) {
     return routeTable.getConnectionUuid(gatewayKey);
+  }
+
+  //////////// BEGIN CONFIG LOAD SAVE RELATED ////////////////
+
+  public String getConfigDir() {
+    return configDir;
+  }
+  
+  public String setConfigDir(String dir) {
+    if (dir == null) {
+      error("config directory cannot be null");
+      return dir;
+    }
+    File file = new File(dir);
+    if (file.exists() && !file.isDirectory()) {
+      error("config directory must be a directory");
+    }    
+    configDir = dir;    
+    return configDir;
+  }
+
+
+  public List<ServiceConfig> getConfigs() {
+    return getConfigs(null, null, new String[] { "runtime", "security" });
+  }
+
+  public List<ServiceConfig> getConfigs(String filename, String[] includeFilter, String[] excludeFilter) {
+
+    if (filename == null) {
+      filename = Runtime.getInstance().getConfigDir() + fs + "runtime.yml";
+    }
+
+    Set<String> includes = null;
+    Set<String> excludes = null;
+
+    if (includeFilter != null) {
+      includes = new HashSet<>();
+      for (String s : includeFilter) {
+        includes.add(s);
+      }
+    }
+
+    if (excludeFilter != null) {
+      excludes = new HashSet<>();
+      for (String s : excludeFilter) {
+        excludes.add(s);
+      }
+    }
+
+    List<ServiceConfig> sc = new ArrayList<>();
+
+    try {
+      Map<String, ServiceInterface> services = getLocalServices();
+      List<ServiceInterface> s = new ArrayList<>();
+      for (ServiceInterface si : services.values()) {
+        if (includes != null && includes.contains(si.getName())) {
+          s.add(si);
+        } else if (excludes != null) {
+          if (excludes.contains(si.getName())) {
+            continue;
+          } else {
+            s.add(si);
+          }
+        } else if (includes == null && excludes == null) {
+          s.add(si);
+        }
+      }
+
+      Collections.sort(s);
+      for (ServiceInterface si : s) {
+        sc.add(si.getConfig());
+      }
+
+      String yaml = CodecUtils.allToYaml(sc.iterator());
+      FileIO.toFile(filename, yaml.getBytes());
+
+    } catch (Exception e) {
+      error(e);
+    }
+
+    return sc;
+  }
+
+  
+
+  /**
+   * This helper method will create, load then start a service
+   * 
+   * @param name
+   *          - name of instance
+   * @param type
+   *          - type
+   * @return returns the service in the form of a ServiceInterface
+   */
+  static public ServiceInterface loadAndStart(String name, String type) {
+    ServiceInterface s = create(name, type);
+    s.load();
+    s.startService();
+    return s;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+
+    RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
+    config.id = getId();
+
+    Map<String, ServiceInterface> services = getLocalServices();
+    List<ServiceInterface> s = new ArrayList<>();
+    for (ServiceInterface si : services.values()) {
+      s.add(si);
+    }
+
+    // sort in creation order
+    Collections.sort(s);
+    config.registry = new String[s.size()];
+
+    for (int i = 0; i < s.size(); ++i) {
+      config.registry[i] = s.get(i).getName();
+    }
+
+    return config;
+  }
+
+  
+  @Override
+  public boolean load(String filename) {
+    // When runtime calls load, we expect the full path to the runtime.yml file.
+    // based on the directory structure, we need to set the current config name
+    // so we can find the other services to load.
+    File f = new File(filename);
+    setConfigName(f.getParentFile().getName());
+    return super.load(filename);
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    RuntimeConfig config = (RuntimeConfig) c;
+    setId(config.id);
+    if (config.registry != null) {
+      
+      Map<String, ServiceConfig> configs = new HashMap<>();
+      
+      for (String name : config.registry) {
+        if (name.equals("runtime")) {
+          continue;
+        }
+        try {
+          File scFile = new File(getConfigDir() + fs  + getConfigName() + fs + name + ".yml");
+          if (!scFile.exists()) {
+            warn("could not find service config file %s", scFile.getAbsolutePath());
+            continue;
+          }
+          String data = FileIO.toString(scFile);
+          Yaml yaml = new Yaml();
+          Object o = yaml.load(data);
+
+          ServiceConfig sc = null;
+          if (o.getClass().equals(ServiceConfig.class)) {
+            sc = CodecUtils.fromYaml(data, ServiceConfig.class);
+          } else {
+            // we have a derived type
+            sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
+          }
+          configs.put(name, config);
+          // start vs create ??? should we start with create go through all life
+          // cycles ?
+          log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
+          create(sc.name, sc.type);
+        } catch (Exception e) {
+          error(e);
+        }
+      } // for each service
+      
+      // batch service life-cycle load
+      log.info("starting load life-cycle");
+      for (String name : configs.keySet()) {
+        if (name.equals("runtime")) {
+          continue;
+        }
+        ServiceInterface si = getService(name);
+        if (si == null) {
+          error("service not found %s", name);
+          continue;
+        }
+        si.load(); // wonder how many problems will occur of applying config  
+      }
+      
+      log.info("starting start life-cycle");
+      // batch service life-cycle start      
+      for (String name : configs.keySet()) {
+        if (name.equals("runtime")) {
+          continue;
+        }
+        ServiceInterface si = getService(name);
+        si.startService();
+      }
+    } // if registry
+    return c;
+  }
+
+  /**
+   * Release a configuration set - this depends on a runtime file - and it will
+   * release all the services defined in it, with the exception of the
+   * originally started services
+   * 
+   * @param filename
+   */
+  public void releaseConfig(String filename) {
+    try {
+      String releaseData = FileIO.toString(new File(filename));
+      RuntimeConfig config = CodecUtils.fromYaml(releaseData, RuntimeConfig.class);
+
+      if (config.registry != null) {
+        for (String name : config.registry) {
+          if (startingServices.contains(name)) {
+            continue;
+          }
+          release(name);
+        }
+      }
+
+    } catch (Exception e) {
+      error("could not release %s", filename);
+    }
+  }
+
+  /**
+   * Save runtime yml as well as all services
+   * configuration is saved in the configDir
+   */
+  public boolean save(String filename) {
+    try {
+
+      if (filename == null) {
+        filename = Runtime.getInstance().getConfigDir() + fs + getConfigName() + fs + getName() + ".yml";
+      }
+
+      String format = filename.substring(filename.lastIndexOf(".") + 1);
+      ServiceConfig config = getConfig();
+      String data = null;
+
+      if ("json".equals(format.toLowerCase())) {
+        data = CodecUtils.toJson(config);
+      } else {
+        data = CodecUtils.toYaml(config);
+      }
+      FileIO.toFile(filename, data.getBytes());
+
+      info("saved %s config to %s", getName(), filename);
+      boolean ret = true;
+
+      for (ServiceInterface si : getLocalServices().values()) {
+        if (si.getName().equals("runtime")) {
+          continue;
+        }
+        ret &= si.save(getConfigDir() + fs + getConfigName() + fs + si.getName() + ".yml");
+      }
+      invoke("publishConfigList");
+      return ret;
+    } catch (Exception e) {
+      error(e);
+    }
+    return false;
+  }
+
+  public void setConfigName(String configName) {
+    this.configName = configName;    
+  }
+  
+  public String getConfigName() {
+    return configName;
   }
 
 }

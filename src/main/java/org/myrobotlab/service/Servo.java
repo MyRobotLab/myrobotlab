@@ -26,8 +26,11 @@
 package org.myrobotlab.service;
 
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.sensor.TimeEncoder;
 import org.myrobotlab.service.abstracts.AbstractServo;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.ServoControl;
 import org.slf4j.Logger;
 
@@ -191,7 +194,7 @@ public class Servo extends AbstractServo implements ServoControl {
       broadcast("publishServoMoveTo", this);
     }
     // invoke("publishServoMoveTo", this);
-//    broadcastState();
+    // broadcastState();
     if (isBlocking) {
       // our thread did a blocking call - we will wait until encoder notifies us
       // to continue or timeout (if supplied) has been reached
@@ -216,51 +219,138 @@ public class Servo extends AbstractServo implements ServoControl {
     log.warn("setMaxVelocity is deprecated - use setMaxSpeed");
     setMaxSpeed(speed);
   }
+ 
+  @Override
+  public ServiceConfig getConfig() {
+    
+    ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
+    config.autoDisable = autoDisable;
 
+    if (mapper != null) {
+      config.clip = mapper.isClip();
+      config.maxX = mapper.getMaxX();
+      config.maxY = mapper.getMaxY();
+      config.minX = mapper.getMinX();
+      config.minY = mapper.getMinY();
+      config.inverted = mapper.isInverted();
+    }
+
+    config.controller = controller;
+    config.enabled = enabled;
+    config.idleDisabled = idleDisabled;
+    config.idleTimeout = idleTimeout;
+    config.pin = pin;
+    config.rest = rest;
+    config.speed = speed;
+    config.sweepMax = sweepMax;
+    config.sweepMin = sweepMin;
+    
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    ServoConfig config = (ServoConfig)c;
+    
+    // common
+    // higher level :P
+    // config.name = getName();
+    // config.type = getSimpleName();
+
+    autoDisable = config.autoDisable;
+    mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
+    mapper.setInverted(config.inverted);
+    mapper.setClip(config.clip);    
+    enabled = config.enabled;
+    idleDisabled = config.idleDisabled;
+    idleTimeout = config.idleTimeout;
+    pin = config.pin;
+    rest = config.rest;
+    speed = config.speed;
+    sweepMax = config.sweepMax;
+    sweepMin = config.sweepMin;
+    
+    if (config.controller != null) {
+      try {
+        attach(config.controller);
+      } catch (Exception e) {
+        error(e);
+      }
+    }    
+
+    return c;
+  }
+  
   public static void main(String[] args) throws InterruptedException {
     try {
 
       // log.info("{}","blah$Blah".contains("$"));
 
-      Runtime.main(new String[] { "--interactive", "--id", "servo" });
+      Runtime.main(new String[] { "--from-launcher", "--id", "servo" });
       // LoggingFactory.init(Level.INFO);
       // Platform.setVirtual(true);
 
       // Runtime.start("python", "Python");
-      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      webgui.autoStartBrowser(false);
-      webgui.startService();
-
-      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
-      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
-      // Servo pan = (Servo) Runtime.start("pan", "Servo");
-
+      Runtime runtime = Runtime.getInstance();      
+      runtime.load();
+      
       boolean done = true;
       if (done) {
         return;
       }
 
-      mega.connect("/dev/ttyACM1");
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();      
+      Arduino mega = (Arduino) Runtime.start("mega", "Arduino");
+      Servo tilt = (Servo) Runtime.start("tilt", "Servo");
+      Servo pan = (Servo) Runtime.start("pan", "Servo");
+      
+      tilt.setPin(4);
+      pan.setPin(5);
+      tilt.setMinMax(10, 100);
+      pan.setMinMax(5, 105);
+      tilt.setInverted(true);
+
+      mega.connect("/dev/ttyACM0");
+            
+      mega.attach(tilt);
+      mega.attach(pan);
+      
+      runtime.save();
+
+      /*
+      mega.save();
+      tilt.save();
+      pan.save();
+      
+      mega.load();
+      tilt.load();
+      pan.load();
+      */
+      
+            
+      // TODO - attach before and after connect..
+      
+
       // mega.setBoardMega();
 
-      log.info("servo pos {}", tilt.getCurrentInputPos());
-
-      // double pos = 170;
-      // servo03.setPosition(pos);
-      tilt.setPin(3);
-
-      double min = 3;
-      double max = 170;
-      double speed = 60; // degree/s
-
-      mega.attach(tilt);
-      // mega.attach(servo03,3);
-
-      for (int i = 0; i < 100; ++i) {
-        tilt.moveTo(20.0);
-      }
-
-      tilt.sweep(min, max, speed);
+//      log.info("servo pos {}", tilt.getCurrentInputPos());
+//
+//      // double pos = 170;
+//      // servo03.setPosition(pos);
+//
+//      double min = 3;
+//      double max = 170;
+//      double speed = 60; // degree/s
+//
+//      mega.attach(tilt);
+//      // mega.attach(servo03,3);
+//
+//      for (int i = 0; i < 100; ++i) {
+//        tilt.moveTo(20.0);
+//      }
+//
+//      tilt.sweep(min, max, speed);
 
       /*
        * Servo servo04 = (Servo) Runtime.start("servo04", "Servo"); Servo
@@ -309,6 +399,5 @@ public class Servo extends AbstractServo implements ServoControl {
       log.error("main threw", e);
     }
   }
-
 
 }

@@ -39,6 +39,8 @@ import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.service.abstracts.AbstractMicrocontroller;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.DeviceMapping;
 import org.myrobotlab.service.data.PinData;
 import org.myrobotlab.service.data.SerialRelayData;
@@ -433,7 +435,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
 
-    int pin = getAddress(servo.getPin());
+    int pin = (servo.getPin() == null)?-1:getAddress(servo.getPin());
     // targetOutput is never null and is the input requested angle in degrees
     // for the servo.
     // defaulting to the rest angle.
@@ -2226,6 +2228,78 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   /**
+   * stops the servo sweeping or moving with speed control
+   */
+  @Override
+  public void onServoStop(ServoControl servo) {
+    msg.servoStop(getDeviceId(servo));
+  }
+
+  @Override
+  public String publishServoStarted(String name) {
+    log.debug("CONTROLLER SERVO_STARTED {}", name);
+    return name;
+  }
+
+  @Override
+  public String publishServoStopped(String name) {
+    log.debug("CONTROLLER SERVO_STOPPED {}", name);
+    return name;
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
+
+    if (serial != null) {
+      if (serial.getPortName() != null) {
+        config.port = serial.getPortName();
+      } else {
+        config.port = serial.lastPortName;
+      }
+    }
+
+    if (deviceList.keySet().size() > 1) {
+
+      List<String> tmp = new ArrayList<>();
+      for (String n : deviceList.keySet()) {
+        if (!n.equals(getName())) {
+          tmp.add(n);
+        }
+      }
+
+      config.deviceList = new String[tmp.size()];
+      tmp.toArray(config.deviceList);
+
+    }
+    return config;
+  }
+
+  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  public ServiceConfig load(ServiceConfig c) {
+    ArduinoConfig config = (ArduinoConfig) c;
+
+    if (config.port != null) {
+      connect(config.port);
+    }
+
+    if (config.deviceList != null) {
+      for (String name : config.deviceList) {
+        ServiceInterface si = Runtime.getService(name);
+        if (si != null) {
+          try {
+            attach(si);
+          } catch (Exception e) {
+            error(e);
+          }
+        }
+      }
+    }
+
+    return c;
+  }
+
+  /**
    * DO NOT FORGET INSTALL AND VMARGS !!!
    * 
    * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
@@ -2357,44 +2431,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     } catch (Exception e) {
       log.error("main threw", e);
     }
-  }
-
-  /**
-   * stops the servo sweeping or moving with speed control
-   */
-  @Override
-  public void onServoStop(ServoControl servo) {
-    msg.servoStop(getDeviceId(servo));
-  }
-
-  @Override
-  public String publishServoStarted(String name) {
-    log.debug("CONTROLLER SERVO_STARTED {}", name);
-    return name;
-  }
-
-  @Override
-  public String publishServoStopped(String name) {
-    log.debug("CONTROLLER SERVO_STOPPED {}", name);
-    return name;
-  }
-
-  @Override
-  public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
-    ServiceInterface neopixel = Runtime.getService(name);
-    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
-    msg.neoPixel2Attach(dm.getId(), pin, numberOfPixels, depth);
-  }
-
-  @Override
-  public void neoPixel2WriteMatrix(String neopixel, int[] buffer) {
-    log.info("writing {} pixels : {}", buffer.length/5, buffer);
-    msg.neoPixel2WriteMatrix(getDeviceId(neopixel), buffer);
-  }
-
-  @Override
-  public void neoPixel2SetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
-    msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
   }
 
 }

@@ -273,7 +273,7 @@ public class Outbox implements Runnable, Serializable {
         // ?
         ServiceInterface sw = Runtime.getService(msg.getName());
         if (sw == null) {
-          log.debug("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
+          log.warn("could not find service {} to process {} from sender {} - tearing down route", msg.getName(), msg.method, msg.sender);
           /*
           ServiceInterface sender = Runtime.getService(msg.sender);
           if (sender != null) {

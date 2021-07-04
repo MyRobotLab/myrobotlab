@@ -1108,7 +1108,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   // translate
   // TODO - must be re-entrant - perhaps even on a schedule ?
   // TODO - removeNode
-  public void load(String inFileName) {
+  public void loadResource(String inFileName) {
     log.info("load({})", inFileName);
 
     try {
@@ -1199,7 +1199,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // initially set them invisible ...
     for (File f : files) {
       if (!f.isDirectory()) { // && !"json".equals(getExt(f.getName()))) {
-        load(f.getAbsolutePath());
+        loadResource(f.getAbsolutePath());
       }
     }
 

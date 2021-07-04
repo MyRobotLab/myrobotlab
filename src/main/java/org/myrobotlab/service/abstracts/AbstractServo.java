@@ -420,7 +420,8 @@ private Double maxSpeed;
     controller = null;
     disable();
     send(sc, "detach", getName());
-    sleep(500);
+    // 20210703 - grog I don't know why a sleep was put here
+    // sleep(500);
     firstMove = true;
     broadcastState();
   }

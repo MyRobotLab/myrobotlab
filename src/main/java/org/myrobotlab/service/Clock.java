@@ -28,6 +28,7 @@ package org.myrobotlab.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.myrobotlab.framework.Service;
 import org.myrobotlab.logging.LoggerFactory;
@@ -93,8 +94,7 @@ public class Clock extends Service {
 
   protected transient ClockThread myClock = null;
 
-  // FIXME
-  protected ArrayList<ClockEvent> events = new ArrayList<ClockEvent>();
+  protected List<ClockEvent> events = new ArrayList<ClockEvent>();
 
   private boolean NoExecutionAtFirstClockStarted = false;
 
@@ -213,6 +213,10 @@ public class Clock extends Service {
     stopClock();
   }
 
+  public Integer getInterval() {
+    return interval;
+  }
+
   public static void main(String[] args) throws Exception {
     try {
       // LoggingFactory.init(Level.WARN);
@@ -251,5 +255,6 @@ public class Clock extends Service {
       log.error("main threw", e);
     }
   }
+
 
 }
