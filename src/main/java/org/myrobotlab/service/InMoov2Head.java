@@ -59,6 +59,7 @@ public class InMoov2Head extends Service {
     // FIXME - future will just be pub/sub attach/detach subscriptions
     // and there will be no need this service.
     // Config will be managed by LangUtils
+    // Test
     startPeers();
 
     jaw.map(10.0, 25.0, 10.0, 25.0);
