@@ -27,7 +27,7 @@ echo ------------------------------------------------------
 REM start chrome --new-tab "http://localhost:8888/#/service"
 REM This is the command to start up the agent jar, specify the memory and run the default InMoov script
 
-SET script=%cd%\dexarm\scripts\launchdexarm.py
+SET script=%cd%\resource\Dexarm\scripts\launchdexarm.py
 timeout 2 > NUL
 echo Executing file %script%
 java -Dfile.encoding=UTF-8 -jar myrobotlab.jar -m 1024m --service python Python webgui WebGui --invoke python execFile %script%
