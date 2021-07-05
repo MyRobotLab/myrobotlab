@@ -4,8 +4,8 @@ from java.lang import String
 import os, sys
 
 log = Runtime.start("log","Log")
-RuningFolder="dexarm"
+RuningFolder="Dexarm"
 RuningFolder=os.getcwd().replace("\\", "/")+"/"+RuningFolder+"/"
-execfile(RuningFolder+'/resource/Dexarm/scripts/pydexarm.py')
-#execfile(RuningFolder+'/resource/Dexarm//scripts/example.py')
-execfile(RuningFolder+'/resource/Dexarm//scripts/letter1.py')
+execfile(RuningFolder+'/scripts/pydexarm.py')
+#execfile(RuningFolder+'/scripts/example.py')
+execfile(RuningFolder+'/scripts/letter1.py')
