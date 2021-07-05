@@ -11,4 +11,4 @@ dexarm = Dexarm(port="COM3")
 # device = Dexarm(port="/dev/tty.usbmodem3086337A34381")
 
 dexarm.go_home()
-serial.writeFile('dexarm/gcode/letter1.gcode')
+serial.writeFile('resource/Dexarm/gcode/letter1.gcode')
