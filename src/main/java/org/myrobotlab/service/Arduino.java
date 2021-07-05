@@ -2258,6 +2258,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       }
     }
 
+    /* now handled by attach list
     if (deviceList.keySet().size() > 1) {
 
       List<String> tmp = new ArrayList<>();
@@ -2271,6 +2272,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       tmp.toArray(config.deviceList);
 
     }
+    */
     return config;
   }
 
@@ -2282,6 +2284,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       connect(config.port);
     }
 
+    /*
     if (config.deviceList != null) {
       for (String name : config.deviceList) {
         ServiceInterface si = Runtime.getService(name);
@@ -2294,6 +2297,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         }
       }
     }
+    */
 
     return c;
   }

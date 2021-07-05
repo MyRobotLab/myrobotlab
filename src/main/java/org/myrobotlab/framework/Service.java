@@ -349,7 +349,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public static void sleep(int millis) {
-    sleep((long)millis);
+    sleep((long) millis);
   }
 
   public static void sleep(long millis) {
@@ -1294,38 +1294,36 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * @return
    */
   public ServiceConfig getConfig() {
-    ServiceConfig sc = new ServiceConfig();    
+    ServiceConfig sc = new ServiceConfig();
     initConfig(sc);
     return sc;
   }
-  
+
   protected ServiceConfig initConfig(ServiceConfig config) {
     config.name = getName();
     config.type = getSimpleName();
     config.locale = getLocaleTag();
-    
-    ArrayList<String> nks = getNotifyListKeySet();
-    for (String n: nks) {
-      List<MRLListener> nl = getNotifyList(n);
-      for (MRLListener listener: nl) {
-        if (CodecUtils.isLocal(listener.callbackName, getId())) {
-          if (config.listeners == null) {
-            config.listeners = new HashMap<>();
-          }
-          config.listeners.put(n, listener);
+    Set<String> attached = getAttached();
+    // get locals
+    for (String n : attached) {
+      if (CodecUtils.isLocal(n, getId())) {
+        if (config.attach == null) {
+          config.attach = new ArrayList<>();
         }
-        log.info(listener.toString());
+        config.attach.add(n);
       }
-    }    
-    
+    }
+
     return config;
   }
 
   /**
    * method of de-serializing default will to load simple xml from name file
+   * 
+   * @throws IOException
    */
-  public boolean load() {
-    return load((String)null);
+  public ServiceConfig load() throws IOException {
+    return load((String) null);
   }
 
   /**
@@ -1334,66 +1332,49 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    * @param filename
    * @return
+   * @throws IOException
    */
-  public boolean load(String filename) {
+  public ServiceConfig load(String filename) throws IOException {
 
+    Runtime runtime = Runtime.getInstance();
+
+    if (filename == null) {
+      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
+    }
+
+    String data = FileIO.toString(filename);
+    String format = filename.substring(filename.lastIndexOf(".") + 1);
+
+    Object o = null;
     try {
-
-      Runtime runtime = Runtime.getInstance();
-      
-      if (filename == null) {        
-        filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
-      } 
-
-      File f = new File(filename);
-      
-      String data = null;
-      
-      if (f.exists()) {
-        data = FileIO.toString(f);
-      } else {
-        error("could not load %s - file does not exist", f.getAbsoluteFile());
-      }
-      
-      String format = filename.substring(filename.lastIndexOf(".") + 1);
-      
-      Object o = null;
-      try {
-        o = Instantiator.getThrowableNewInstance(null, String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
-      } catch(ClassNotFoundException e) {
-        log.info("no specific config available for {} of type {}", getName(), getSimpleName());
-        return true;
-      } catch(Exception e) {
-        error(e);
-      }
-      if (o == null) {
-        error("%sConfig does not exist - cannot load class", getSimpleName());
-        return false;
-      }
-      
-      ServiceConfig config = null;
-      
-      if (format.toLowerCase().equals("json")) {
-        config = (ServiceConfig)CodecUtils.fromJson(data, o.getClass());
-      } else {
-        config = (ServiceConfig)CodecUtils.fromYaml(data, o.getClass());
-      }
-      
-      load(config);  
-      
-      // loading listeners / routes
-      if (config.listeners != null) {
-        for (MRLListener l : config.listeners.values()) {
-          addListener(l);
-        }
-      }
-
-      return true;
-
+      o = Instantiator.getThrowableNewInstance(null, String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
+    } catch (ClassNotFoundException e) {
+      log.info("no specific config available for {} of type {}", getName(), getSimpleName());
     } catch (Exception e) {
       error(e);
     }
-    return false;
+    if (o == null) {
+      log.info("{}Config does not exist - using default ServiceConfig", getSimpleName());
+    }
+
+    Class<?> clazz = (o == null)?ServiceConfig.class:o.getClass();    
+    ServiceConfig config = null;
+
+    if (format.toLowerCase().equals("json")) {
+      config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
+    } else {
+      config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
+    }
+
+    // be aware - the service may or may not be started
+    load(config);
+    
+    // previously used to attempt to process attaches here
+    // attaches do not work well before starting - attaching
+    // has now been moved out to runtime
+
+    return config;
+
   }
 
   @Override
@@ -1639,24 +1620,48 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean save() {
-    return save(null);
+    return save(null, null, null);
   }
 
   public boolean save(String filename) {
+    return save(filename, null, null);
+  }
+
+  public boolean save(String filename, Boolean allowNullFields, Boolean saveNonConfigServices) {
     try {
 
+      if (allowNullFields == null) {
+        allowNullFields = true;
+      }
+
+      if (saveNonConfigServices == null) {
+        saveNonConfigServices = false;
+      }
+
       if (filename == null) {
-        filename = Runtime.getInstance().getConfigDir() + fs  + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
+        filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
       }
 
       String format = filename.substring(filename.lastIndexOf(".") + 1);
       ServiceConfig config = getConfig();
+
+      // bad idea of an optimizaton
+      /**
+       * <pre>
+       * if (config.getClass().equals(ServiceConfig.class) && !saveNonConfigServices && config.listeners == null) {
+       *   log.info("service {} without config - will not save file", getName());
+       *   return true;
+       * }
+       * </pre>
+       */
+
       String data = null;
       if ("json".equals(format.toLowerCase())) {
         data = CodecUtils.toJson(config);
       } else {
         data = CodecUtils.toYaml(config);
       }
+
       FileIO.toFile(filename, data.getBytes());
 
       info("saved %s config to %s", getName(), filename);
@@ -1887,8 +1892,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void loadAndStart() {
-    load();
-    startService();
+    try {
+      load();
+      startService();
+    } catch (Exception e) {
+    }
   }
 
   @Override
@@ -2294,8 +2302,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public Set<String> getAttached(String publishPoint) {
     return outbox.getAttached(publishPoint);
   }
-
-
 
   /**
    * This attach when overriden "routes" to the appropriately typed
