@@ -87,7 +87,6 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.BeanAccess;
 
 import picocli.CommandLine;
 
@@ -3405,7 +3404,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public ServiceConfig getConfig() {
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
-    config.id = getId();
+    // config.id = getId(); Not ready yet
 
     Map<String, ServiceInterface> services = getLocalServices();
     List<ServiceInterface> s = new ArrayList<>();
@@ -3439,7 +3438,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public ServiceConfig load(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) c;
-    setId(config.id);
+    // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
       ServiceConfig sc = null;
       for (String name : config.registry) {
@@ -3456,7 +3455,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           try {
             String data = FileIO.toString(scFile);
             Yaml yaml = new Yaml();
-            yaml.setBeanAccess(BeanAccess.FIELD);
+            // yaml.setBeanAccess(BeanAccess.FIELD);
             Object o = yaml.load(data);
 
             if (o.getClass().equals(ServiceConfig.class)) {

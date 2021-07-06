@@ -99,7 +99,7 @@ public class LangYmlUtils {
 
      
       Yaml yaml = new Yaml(dumperOptions);
-      yaml.setBeanAccess(BeanAccess.FIELD);
+      // yaml.setBeanAccess(BeanAccess.FIELD);
       String yml = yaml.dump(si);
       content.append(yml);
 
