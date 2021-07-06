@@ -34,6 +34,7 @@ import static org.bytedeco.opencv.helper.opencv_imgcodecs.cvLoadImage;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.beans.Transient;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -424,6 +425,7 @@ public abstract class OpenCVFilter implements Serializable {
     return image;
   }
 
+  @Transient /*annotation to remove from yml dump*/
   public void setOpenCV(OpenCV opencv) {
     if (displayColor == null) {
       displayColor = opencv.getColor();
