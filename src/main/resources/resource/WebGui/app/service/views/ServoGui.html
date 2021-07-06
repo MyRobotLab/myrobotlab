@@ -31,7 +31,7 @@
                                     </td>
                                     <td>Pin</td>
                                     <td>
-                                        <select class="form-control" ng-model="service.pin" ng-options="item for item in pinList">
+                                        <select class="form-control" ng-model="service.pin" ng-change="setPin()" ng-options="item for item in pinList">
                                             <option>{{item}}</option>
                                         </select>
                                     </td>

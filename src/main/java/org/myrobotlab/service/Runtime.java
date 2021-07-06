@@ -87,6 +87,7 @@ import org.myrobotlab.service.meta.abstracts.MetaData;
 import org.myrobotlab.string.StringUtil;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.introspector.BeanAccess;
 
 import picocli.CommandLine;
 
@@ -3428,6 +3429,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     // When runtime calls load, we expect the full path to the runtime.yml file.
     // based on the directory structure, we need to set the current config name
     // so we can find the other services to load.
+    if (filename == null) {
+      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
+    }
     File f = new File(filename);
     setConfigName(f.getParentFile().getName());
     return super.load(filename);
@@ -3452,6 +3456,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           try {
             String data = FileIO.toString(scFile);
             Yaml yaml = new Yaml();
+            yaml.setBeanAccess(BeanAccess.FIELD);
             Object o = yaml.load(data);
 
             if (o.getClass().equals(ServiceConfig.class)) {
@@ -3561,6 +3566,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     } catch (Exception e) {
       error("could not release %s", filename);
     }
+  }
+  
+  public boolean save() {
+    return save(null);
   }
 
   /**

@@ -37,9 +37,8 @@ angular.module('modalService', [])
                     }
                 }
 
-                $uibModal.open({
-                    // template: $templateCache.get('modal-dialog.view.html'),
-                    templateUrl: template, //'widget/modal-dialog.view.html',
+                $uibModal.open({                    
+                    templateUrl: template,
                     controller: 'ModalController',
                     scope: scope,
                     resolve: {

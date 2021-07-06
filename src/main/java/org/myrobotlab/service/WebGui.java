@@ -921,10 +921,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     start();
   }
 
-  public boolean save() {
-    return super.save();
-  }
-
   /**
    * From UI events --to--&gt; MRL request to save panel data typically done
    * after user has changed or updated the UI in position, height, width, zIndex
@@ -1031,7 +1027,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       if (nettosphere != null && nettosphere.isStarted()) {
         // is running
-        info("currently running on port %s - stop first, then start", port);
+        log.info("webgui already started on port {}", port);
         return;
       }
 
@@ -1182,7 +1178,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   public ServiceConfig load(ServiceConfig c) {
     WebGuiConfig config = (WebGuiConfig)c;
 
-    if (config.port != null) {
+    if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
     }
 

@@ -56,7 +56,7 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
 
   public final static Logger log = LoggerFactory.getLogger(OpenCVFilterFaceDetect.class);
 
-  public CascadeClassifier cascade = null; // TODO - was static
+  transient public CascadeClassifier cascade = null;
 
   /**
    * our default classifier - pre-trained
@@ -72,7 +72,8 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   /**
    * bounding boxes of faces
    */
-  ArrayList<Rectangle> bb = null;
+  private ArrayList<Rectangle> bb = null;
+  
   int i;
   double scaleFactor = 1.1;
   int minNeighbors = 1;
@@ -290,6 +291,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
       }
     }
     return image;
+  }
+
+  public ArrayList<Rectangle> getFaces() {
+    return bb;
   }
 
 }

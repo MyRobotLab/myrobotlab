@@ -186,8 +186,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   protected Double sweepMin = null;
 
-  transient protected ServoController sc;
-
   /**
    * synchronized servos - when this one moves, it sends move commands to these
    * servos

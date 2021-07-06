@@ -3,6 +3,8 @@ package org.myrobotlab.service.config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.myrobotlab.opencv.OpenCVFilter;
+
 public class OpenCVConfig extends ServiceConfig {
 
   public Integer cameraIndex;
@@ -11,6 +13,7 @@ public class OpenCVConfig extends ServiceConfig {
   public String inputFile;
   public Boolean nativeViewer;
   public Boolean webViewer;  
-  public Map<String, OpenCVFilterConfig> filters = new LinkedHashMap<>();
+  public Boolean capturing;
+  public Map<String, OpenCVFilter> filters = new LinkedHashMap<>();
 
 }

@@ -188,7 +188,7 @@ public abstract class OpenCVFilter implements Serializable {
    * reference to the last OpenCVData processed and the one this filter will
    * modify
    */
-  protected OpenCVData data;
+  transient protected OpenCVData data;
 
   /**
    * color of display if any overlay
@@ -216,8 +216,6 @@ public abstract class OpenCVFilter implements Serializable {
   final public String name;
 
   transient protected OpenCV opencv;
-
-  protected Boolean running;
 
   private String sourceKey;
 
