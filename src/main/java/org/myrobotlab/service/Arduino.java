@@ -208,6 +208,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   private volatile boolean syncInProgress = false;
 
+  /**
+   * the port the user attempted to connect to
+   */
+  protected String port;
+
   public Arduino(String n, String id) {
     super(n, id);
 
@@ -492,6 +497,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
     // test to see if we've been started. the serial might be null
+    this.port = port;
 
     try {
 
@@ -2249,7 +2255,10 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
-
+    config.port = port;    
+    config.connect = isConnected();
+    
+    /*
     if (serial != null) {
       if (serial.getPortName() != null) {
         config.port = serial.getPortName();
@@ -2257,6 +2266,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
         config.port = serial.lastPortName;
       }
     }
+    */
 
     /* now handled by attach list
     if (deviceList.keySet().size() > 1) {
