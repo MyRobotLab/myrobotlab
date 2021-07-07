@@ -3,9 +3,8 @@ package org.myrobotlab.service.config;
 public class ServoConfig extends ServiceConfig {
 
   public Boolean autoDisable;
-  public String controller;
+  // public String controller;
   public Boolean enabled;
-  public Boolean idleDisabled;
   public Integer idleTimeout;
   
   public String pin;

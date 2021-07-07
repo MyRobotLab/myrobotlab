@@ -235,9 +235,8 @@ public class Servo extends AbstractServo implements ServoControl {
       config.inverted = mapper.isInverted();
     }
 
-    config.controller = controller;
+    // config.controller = controller;
     config.enabled = enabled;
-    config.idleDisabled = idleDisabled;
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
@@ -251,31 +250,17 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig load(ServiceConfig c) {
     ServoConfig config = (ServoConfig)c;
     
-    // common
-    // higher level :P
-    // config.name = getName();
-    // config.type = getSimpleName();
-
     autoDisable = config.autoDisable;
     mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);    
     enabled = config.enabled;
-    idleDisabled = config.idleDisabled;
     idleTimeout = config.idleTimeout;
     pin = config.pin;
     rest = config.rest;
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
-    
-    if (config.controller != null) {
-      try {
-        attach(config.controller);
-      } catch (Exception e) {
-        error(e);
-      }
-    }    
 
     return c;
   }
