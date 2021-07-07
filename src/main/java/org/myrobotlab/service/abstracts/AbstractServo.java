@@ -1010,5 +1010,10 @@ private Double maxSpeed;
     }
     return name;
   }
+  
+  public void startService() {
+    super.startService();
+    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+  }
 
 }
