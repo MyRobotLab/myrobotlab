@@ -3618,4 +3618,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return configName;
   }
 
+  public void subscribeToLifeCycleEvents(String name) {
+    addListener("registered", name);
+    addListener("created", name);
+    addListener("started", name);
+    addListener("stopped", name);
+    addListener("released", name);
+  }
+
 }

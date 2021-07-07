@@ -113,7 +113,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * the servo SHOULD NOT be enabled next move - this is an internal field
    */
   // TODO: KW: simplify this logic to avoid the need of this additional boolean
-  // here.
+  // here.￼
   // grog: I doubt it can be simplified - the javadoc was clear in the
   // requirements - non-trivial
   protected boolean idleDisabled = false;

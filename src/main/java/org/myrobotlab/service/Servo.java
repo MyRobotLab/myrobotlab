@@ -224,7 +224,13 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig getConfig() {
     
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
+        
     config.autoDisable = autoDisable;
+    if (autoDisable) {
+      config.enabled = true;
+    } else {
+      config.enabled = enabled;
+    }
 
     if (mapper != null) {
       config.clip = mapper.isClip();
@@ -236,7 +242,7 @@ public class Servo extends AbstractServo implements ServoControl {
     }
 
     // config.controller = controller;
-    config.enabled = enabled;
+    
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
