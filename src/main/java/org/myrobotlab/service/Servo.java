@@ -234,10 +234,10 @@ public class Servo extends AbstractServo implements ServoControl {
 
     if (mapper != null) {
       config.clip = mapper.isClip();
-      config.maxX = mapper.getMaxX();
-      config.maxY = mapper.getMaxY();
-      config.minX = mapper.getMinX();
-      config.minY = mapper.getMinY();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
       config.inverted = mapper.isInverted();
     }
 
@@ -257,7 +257,7 @@ public class Servo extends AbstractServo implements ServoControl {
     ServoConfig config = (ServoConfig)c;
     
     autoDisable = config.autoDisable;
-    mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
+    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);    
     enabled = config.enabled;

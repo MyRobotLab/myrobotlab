@@ -14,10 +14,10 @@ public class ServoConfig extends ServiceConfig {
   // mapper values
   public Boolean inverted;
   public Boolean clip;
-  public Double minX;
-  public Double maxX;
-  public Double minY;
-  public Double maxY;
+  public Double minIn;
+  public Double maxIn;
+  public Double minOut;
+  public Double maxOut;
 
   public Double sweepMax;
   public Double sweepMin;
