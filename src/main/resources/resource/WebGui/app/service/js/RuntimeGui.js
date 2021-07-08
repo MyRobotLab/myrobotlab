@@ -157,7 +157,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = inMsg.data[0]
+            $scope.service.configList = inMsg.data[0].sort()
             $scope.$apply()
             break
 

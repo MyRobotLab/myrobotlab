@@ -427,7 +427,7 @@ public class OpenCVData extends CvData {
     sources.put(String.format("%s.%s.%s", name, selectedFilter, keyPart), object);
   }
 
-  public void putBoundingBoxArray(ArrayList<Rectangle> bb) {
+  public void putBoundingBoxArray(List<Rectangle> bb) {
     sources.put(String.format("%s.output.BoundingBoxArray", name), bb);
   }
 

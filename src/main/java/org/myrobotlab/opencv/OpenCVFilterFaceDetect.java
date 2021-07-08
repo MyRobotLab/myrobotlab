@@ -99,6 +99,10 @@ public class OpenCVFilterFaceDetect extends OpenCVFilter {
   int option = CASCADE_DO_CANNY_PRUNING | CASCADE_FIND_BIGGEST_OBJECT; // default
   // int option = 0; // default
 
+  public OpenCVFilterFaceDetect() {
+    super(null);
+  }
+  
   public OpenCVFilterFaceDetect(String name) {
     super(name);
   }

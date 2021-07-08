@@ -1302,7 +1302,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   protected ServiceConfig initConfig(ServiceConfig config) {
     config.name = getName();
     config.type = getSimpleName();
-    if (locale != null) {
+    if (Runtime.isRuntime(this)) {
+      config.locale = getLocaleTag();
+    } else if (locale != null && !locale.equals(Runtime.getInstance().getLocale())) {
       config.locale = getLocaleTag();
     }
     Set<String> attached = getAttached();

@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.myrobotlab.arduino.BoardInfo;
 import org.myrobotlab.arduino.BoardType;
 import org.myrobotlab.framework.Platform;
+import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CFactory;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
@@ -82,6 +84,12 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
 
   transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
+  /**
+   * "quick fix" - no subscriptions nor listeners are made with other services,
+   * so I created this to show the references to i2c device services
+   */
+  protected Set<String> attachedServices = new HashSet<>();
+
   protected SystemInfo systemInfo = null;
 
   private boolean wiringPi = true; // Defined to be able to switch between
@@ -106,12 +114,30 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   @Override
+  public void attach(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (I2CControl.class.isAssignableFrom(si.getClass())) {
+      attachI2CControl((I2CControl) si);
+      return;
+    }
+  }
+
+  @Override
+  public void detach(String name) {
+    ServiceInterface si = Runtime.getService(name);
+    if (I2CControl.class.isAssignableFrom(si.getClass())) {
+      detachI2CControl((I2CControl) si);
+      return;
+    }
+  }
+
+  @Override
   public void attachI2CControl(I2CControl control) {
 
+    attachedServices.add(control.getName());
     // This part adds the service to the mapping between
     // busAddress||DeviceAddress
     // and the service name to be able to send data back to the invoker
-
     String key = String.format("%d.%d", Integer.parseInt(control.getDeviceBus()), Integer.decode(control.getDeviceAddress()));
 
     if (i2cDevices.containsKey(key)) {
@@ -123,32 +149,32 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   void createI2cDevice(int bus, int address, String serviceName) {
-
-    String key = String.format("%d.%d", bus, address);
-    I2CDeviceMap devicedata = new I2CDeviceMap();
-    if (!i2cDevices.containsKey(key)) {
-      try {
-        if (wiringPi) {
-          int deviceHandle = I2C.wiringPiI2CSetup(address);
-          devicedata.serviceName = serviceName;
-          devicedata.bus = null;
-          devicedata.device = null;
-          devicedata.deviceHandle = deviceHandle;
-        } else {
-          I2CBus i2cBus = I2CFactory.getInstance(bus);
-          I2CDevice device = i2cBus.getDevice(address);
-          devicedata.serviceName = serviceName;
-          devicedata.bus = i2cBus;
-          devicedata.device = device;
-          devicedata.deviceHandle = -1;
+      String key = String.format("%d.%d", bus, address);
+      I2CDeviceMap devicedata = new I2CDeviceMap();
+      if (!i2cDevices.containsKey(key)) {
+        try {
+          if (wiringPi) {
+            int deviceHandle = I2C.wiringPiI2CSetup(address);
+            devicedata.serviceName = serviceName;
+            devicedata.bus = null;
+            devicedata.device = null;
+            devicedata.deviceHandle = deviceHandle;
+          } else {
+            I2CBus i2cBus = I2CFactory.getInstance(bus);
+            I2CDevice device = i2cBus.getDevice(address);
+            devicedata.serviceName = serviceName;
+            devicedata.bus = i2cBus;
+            devicedata.device = device;
+            devicedata.deviceHandle = -1;
+          }
+          i2cDevices.put(key, devicedata);
+          broadcastState();
+          log.info("Created device for {} key {}", serviceName, key);
+        } catch (Exception e) {
+          log.error("createI2cDevice failed", e);
+          error(e.getMessage());
         }
-        i2cDevices.put(key, devicedata);
-        log.info("Created device for {} key {}", serviceName, key);
-      } catch (Exception e) {
-        log.error("createI2cDevice failed", e);
-        error(e.getMessage());
       }
-    }
   }
 
   @Override
@@ -163,6 +189,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
       i2cDevices.remove(key);
       control.detachI2CController(this);
     }
+    attachedServices.remove(control.getName());
   }
 
   public void digitalWrite(int pin, int value) {
@@ -201,9 +228,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     invoke("publishPinDefinition", pinDef); // broadcast pin change
   }
 
-  @Override
+  @Override /* services attached - not i2c devices */
   public Set<String> getAttached() {
-    return i2cDevices.keySet();
+    // return i2cDevices.keySet();
+    return attachedServices;
   }
 
   @Override

@@ -1906,6 +1906,10 @@ public class OpenCV extends AbstractComputerVision {
   public void stopService() {
     super.stopService();
     stopCapture();
+    if (canvasFrame != null) {
+      canvasFrame.dispose();
+      canvasFrame = null;
+    }
   }
 
   public void setFormat(String format) {
