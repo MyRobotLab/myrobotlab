@@ -690,6 +690,11 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   @Override
   public boolean isAttached(Attachable instance) {
+    // FIXME - this is messy !
+    if (controller == null) {
+      return false;
+    }
+    
     // attached controller
     if (controller != null && controller == instance) {
       return isAttached;
