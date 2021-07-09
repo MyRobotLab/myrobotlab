@@ -938,7 +938,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
     } catch (Exception e) {
-      error("could not find interfaces for %s", interfaze);
+      error("could not find interfaces for %s - %s %s", interfaze, e.getClass().getSimpleName(), e.getMessage());
+      log.error("getting class", e);
     }
 
     return results;
