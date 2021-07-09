@@ -3438,6 +3438,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public ServiceConfig load(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) c;
+    setLocale(c.locale);
     // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
       ServiceConfig sc = null;
@@ -3538,6 +3539,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       } // attach-life-cycle
 
     } // if registry
+    broadcastState();
     return c;
   }
 
