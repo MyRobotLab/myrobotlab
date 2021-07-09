@@ -11,9 +11,9 @@ public class OpenCVConfig extends ServiceConfig {
   public String grabberType;
   public String inputSource;
   public String inputFile;
-  public Boolean nativeViewer;
-  public Boolean webViewer;  
-  public Boolean capturing;
+  public boolean nativeViewer;
+  public boolean webViewer;  
+  public boolean capturing;
   public Map<String, OpenCVFilter> filters = new LinkedHashMap<>();
 
 }

@@ -62,7 +62,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * the servo. By default this is disabled.
    * 
    */
-  protected Boolean autoDisable = false;
+  protected boolean autoDisable = false;
 
   /**
    * The current servo controller that this servo is attached to. TODO: move
@@ -555,12 +555,12 @@ private Double maxSpeed;
   }
 
   @Override
-  public Boolean isEnabled() {
+  public boolean isEnabled() {
     return enabled;
   }
 
   @Override
-  public Boolean isInverted() {
+  public boolean isInverted() {
     return mapper.isInverted();
   }
 
@@ -724,7 +724,7 @@ private Double maxSpeed;
    * begin at the "end" of the movement.
    */
   @Override
-  public void setAutoDisable(Boolean autoDisable) {
+  public void setAutoDisable(boolean autoDisable) {
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
@@ -733,7 +733,7 @@ private Double maxSpeed;
     } else {
       purgeTask("idleDisable");
     }
-    boolean valueChanged = !this.autoDisable.equals(autoDisable);
+    boolean valueChanged = this.autoDisable != autoDisable;
     this.autoDisable = autoDisable;
     if (valueChanged) {
       broadcastState();
@@ -755,7 +755,7 @@ private Double maxSpeed;
   }
 
   @Override
-  public void setInverted(Boolean invert) {
+  public void setInverted(boolean invert) {
     mapper.setInverted(invert);
     broadcastState();
   }

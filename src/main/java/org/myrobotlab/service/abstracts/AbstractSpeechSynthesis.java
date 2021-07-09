@@ -1092,13 +1092,9 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   public ServiceConfig load(ServiceConfig c) {
     AbstractSpeechSynthesisConfig config = (AbstractSpeechSynthesisConfig) c;
 
-    if (config.mute != null) {
-      setMute(config.mute);
-    }
+    setMute(config.mute);
 
-    if (config.blocking != null) {
-      setBlocking(config.blocking);
-    }
+    setBlocking(config.blocking);
 
     if (config.substitutions != null) {
       for (String n : config.substitutions.keySet()) {

@@ -1181,10 +1181,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
       setPort(config.port);
     }
-
-    if (config.autoStartBrowser != null) {
-      autoStartBrowser(config.autoStartBrowser);
-    }
+    autoStartBrowser(config.autoStartBrowser);
     return config;
   }
   

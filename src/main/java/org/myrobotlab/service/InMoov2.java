@@ -98,7 +98,13 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
   public void startService() {
     super.startService();
-    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+    Runtime runtime = Runtime.getInstance();
+    runtime.subscribeToLifeCycleEvents(getName());
+    /*
+    if (runtime.getConfigDir().equals("default")) {
+      runtime.setConfigDir("InMoov2");  
+    } 
+    */   
   }
 
   public void onCreated(String fullname) {

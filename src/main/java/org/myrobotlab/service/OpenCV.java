@@ -2082,13 +2082,9 @@ public class OpenCV extends AbstractComputerVision {
     setInputFileName(config.inputFile);
     setInputSource(config.inputSource);
     
-    if (config.nativeViewer != null) {
-      setNativeViewer(config.nativeViewer);
-    }
+    setNativeViewer(config.nativeViewer);
     
-    if (config.webViewer != null) {
-      setWebViewer(config.webViewer);
-    }
+    setWebViewer(config.webViewer);
     
     filters.clear();
     if (config.filters != null) {
@@ -2097,7 +2093,7 @@ public class OpenCV extends AbstractComputerVision {
       }
     }
     
-    if (config.capturing != null && config.capturing) {
+    if (config.capturing) {
       capture();
     }
 
