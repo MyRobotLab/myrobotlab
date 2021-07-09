@@ -1,5 +1,5 @@
-angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer','$scope', '$log', 'mrl', '$uibModal', function(peer, $scope, $log, mrl, $uibModal) {
-    $log.info('PollyGuiCtrl')
+angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer','$scope', 'mrl', '$uibModal', function(peer, $scope, mrl, $uibModal) {
+    console.info('PollyGuiCtrl')
     var _self = this
     var msg = this.msg
 
@@ -15,8 +15,8 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer'
 		if (service.voice){
 			$scope.newVoice.selected = { 'key':service.voice.name, 'value':service.voice }			
 		}
-		let p = peer.getPeerType(service,'audioFile')
-		let a = peer.isPeerActive(service,'audioFile')
+		// let p = peer.getPeerType(service,'audioFile')
+		// let a = peer.isPeerActive(service,'audioFile')
 		$scope.$apply()
 	}
 
@@ -26,7 +26,7 @@ angular.module('mrlapp.service.PollyGui', []).controller('PollyGuiCtrl', ['peer'
             _self.updateState(inMsg.data[0])
             break
         default:
-            $log.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
+            console.error("ERROR - unhandled method " + $scope.name + " " + inMsg.method)
             break
         }
     }
