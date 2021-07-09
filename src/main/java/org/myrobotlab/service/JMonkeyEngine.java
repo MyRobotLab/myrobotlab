@@ -9,9 +9,11 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -48,6 +50,9 @@ import org.myrobotlab.net.Connection;
 import org.myrobotlab.sensor.EncoderData;
 import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.config.JMonkeyEngineConfig;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -233,6 +238,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   transient ViewPort viewPort;
 
   int width = 1024;
+
+  protected Set<String> assets = new HashSet<>();
+
+  protected Map<String, UserData> nodes = new HashMap<>();
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -534,7 +543,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   @Override
   public void connect(String uri) throws Exception {
-    
+
     String uuid = java.util.UUID.randomUUID().toString();
     String id = getName() + "-" + Runtime.getInstance().getId() + "-jme";
     Connection attributes = new Connection(uuid, id, getName());
@@ -1016,7 +1025,13 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public UserData getUserData(Node node) {
     UserData data = node.getUserData("data");
     if (data == null) {
+      // not sure if this is right - using the nodeName as "path"
       data = new UserData(this, node);
+      String nodeName = node.getName();
+      if (nodes.containsKey(nodeName)) {
+        error("collision on node name %s", nodeName);
+      }
+      nodes.put(nodeName, data);
       // FIXME - add map/index
       // getAncestorKey(x) + rootKey if its not root = key
     }
@@ -1025,7 +1040,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * The workhorse - where everyone "searches" for the user data they need. It
-   * works agains a flat or depth key'd tree. If the node is found but the user
+   * works against a flat or depth key'd tree. If the node is found but the user
    * data has not been created, it creates it and assigns the references... if
    * the node cannot be found, it returns null
    * 
@@ -1050,6 +1065,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     UserData userData = spatial.getUserData("data");
     if (userData == null) {
       userData = new UserData(this, spatial);
+
+      if (this.nodes.containsKey(path)) {
+        error("collision on node name %s", path);
+      }
+      this.nodes.put(path, userData);
     }
     return userData;
   }
@@ -1130,7 +1150,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       String simpleName = getNameNoExt(filename);
 
       if (!ext.equals("json")) {
-
         Spatial spatial = assetManager.loadModel(filename);
         spatial.setName(simpleName);
 
@@ -1147,6 +1166,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
       } else {
 
+        // FIXME - put msgs into yml form
         String json = FileIO.toString(filename);
         Jme3Msg[] msgs = CodecUtils.fromJson(json, Jme3Msg[].class);
         log.info("adding {} msgs", msgs.length);
@@ -1154,6 +1174,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           jme3MsgQueue.add(msg);
         }
       }
+
+      assets.add(filename);
+
     } catch (Exception e) {
       error(e);
     }
@@ -2093,7 +2116,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // rootNode.setLocalTranslation(0, -200, 0);
     rootNode.setLocalTranslation(0, 0, 0);
 
-    
     menu = app.getMainMenu();// new MainMenuState(this);
     // menu.setEnabled(false);
     // menu.loadGui();
@@ -2179,10 +2201,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       settings.setAudioRenderer(null);
       settings.setResizable(true);
       app.setSettings(settings);
-      
+
       app.setShowSettings(false); // resolution bps etc dialog
       app.setPauseOnLostFocus(false);
-      
 
       // the all important "start" - anyone goofing around with the engine
       // before this is done will
@@ -2192,9 +2213,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           app.start();
         }
       };
-      
+
       mainThread.start();
-      
+
       Callable<String> callable = new Callable<String>() {
         public String call() throws Exception {
           System.out.println("Asynchronous Callable");
@@ -2486,6 +2507,31 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     } else {
       rotateOnAxis(name, null, servo.getTargetPos(), velocity);
     }
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig) initConfig(new JMonkeyEngineConfig());
+    config.assets = assets;
+    config.nodes = nodes;
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
+    if (config.assets != null) {
+      for (String f : config.assets) {
+        loadResource(f);
+      }
+    }
+
+    if (config.nodes != null) {
+      for (String f : config.nodes.keySet()) {
+        // loadResource(f);
+      }
+    }
+    
+    return c;
   }
 
 }
