@@ -99,14 +99,14 @@ public class Servo extends AbstractServo implements ServoControl {
       firstMove = false;
     }
 
-    if (idleDisabled && !enabled) {
+    if (autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
     // purge any timers currently in process
     // if currently configured to autoDisable - the timer starts now
     // we cancel any pre-existing timer if it exists
-    purgeTask("idleDisable");
+    purgeTask("disable");
     // blocking move will be idleTime out enabled later.
 
     if (!enabled) {
@@ -203,7 +203,7 @@ public class Servo extends AbstractServo implements ServoControl {
       isMoving = false;
       if (autoDisable) {
         // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
     return true;
@@ -226,11 +226,7 @@ public class Servo extends AbstractServo implements ServoControl {
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
         
     config.autoDisable = autoDisable;
-    if (autoDisable) {
-      config.enabled = true;
-    } else {
-      config.enabled = enabled;
-    }
+    config.enabled = enabled;
 
     if (mapper != null) {
       config.clip = mapper.isClip();

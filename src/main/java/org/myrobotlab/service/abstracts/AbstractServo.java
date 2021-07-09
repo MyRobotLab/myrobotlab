@@ -107,18 +107,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
                                               // transient in the future
 
   /**
-   * If the servo was disabled through an idle-timeout. If the servo is disabled
-   * through an idle-timeout, it can be re-enabled on next move. If the servo
-   * was disabled through a human or event which "manually" disabled the servo,
-   * the servo SHOULD NOT be enabled next move - this is an internal field
-   */
-  // TODO: KW: simplify this logic to avoid the need of this additional boolean
-  // here.￼
-  // grog: I doubt it can be simplified - the javadoc was clear in the
-  // requirements - non-trivial
-  protected boolean idleDisabled = false;
-
-  /**
    * if autoDisable is true - then after any move a timer is set to disable the
    * servo. if the servo is idle for any length of time after Default timeout is
    * 3000 milliseconds
@@ -439,8 +427,8 @@ private Double maxSpeed;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
-        purgeTask("idleDisable");
-        addTaskOneShot(idleTimeout, "idleDisable");
+        purgeTask("disable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
 
@@ -530,15 +518,6 @@ private Double maxSpeed;
   @Deprecated /* use getSpeed() */
   public Double getVelocity() {
     return speed;
-  }
-
-  /**
-   * a method called by the idle timer - we will know that this disable is
-   * allowed to re-enable
-   */
-  public void idleDisable() {
-    idleDisabled = true;
-    disable();
   }
 
   public boolean isAttached(Attachable attachable) {
@@ -728,10 +707,10 @@ private Double maxSpeed;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     } else {
-      purgeTask("idleDisable");
+      purgeTask("disable");
     }
     boolean valueChanged = this.autoDisable != autoDisable;
     this.autoDisable = autoDisable;
@@ -872,7 +851,6 @@ private Double maxSpeed;
       timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
 
-    // purgeTask("idleDisable");
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -977,9 +955,9 @@ private Double maxSpeed;
     // if we are "stopping" going from moving to not moving
     if (autoDisable && isMoving) {
       // we cancel any pre-existing timer if it exists
-      purgeTask("idleDisable");
+      purgeTask("disable");
       // and start our countdown
-      addTaskOneShot(idleTimeout, "idleDisable");
+      addTaskOneShot(idleTimeout, "disable");
     }
 
     // notify all blocking moves - we have stopped
