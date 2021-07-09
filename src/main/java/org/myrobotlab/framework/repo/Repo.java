@@ -319,6 +319,7 @@ public abstract class Repo {
   }
 
   static public void publishStatus(Status status) {
+    log.info(status.toString());
     for (StatusPublisher service : installStatusPublishers) {
       // service.broadcastStatus(status);
       // service.publishStatus(status);
