@@ -3532,6 +3532,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
             try {
               // log.warn("attaching {} to {}", si.getName(), n);
               si.attach(n);
+              si.broadcastState();
             } catch (Exception e) {
               error(e);
             }
