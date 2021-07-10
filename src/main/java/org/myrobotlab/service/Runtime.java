@@ -1461,6 +1461,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       configList.add(file.getName());
     }
+    Collections.sort(configList);
     return configList;
   }
 
