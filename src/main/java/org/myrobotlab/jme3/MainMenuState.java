@@ -369,6 +369,11 @@ public class MainMenuState extends BaseAppState {
       log.error("putText spatial is null");
       return;
     }
+    
+    if (parentButton == null) {
+      log.info("parentButton null - menu not visible?");
+      return;
+    }
 
     if (spatial != null) {
       Spatial p = spatial.getParent();

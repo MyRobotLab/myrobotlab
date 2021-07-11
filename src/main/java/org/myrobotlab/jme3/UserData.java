@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -35,9 +34,11 @@ public class UserData implements Savable {
   public MapperLinear mapper;
 
   /**
-   * rotation to be applied to a node
+   * Rotation axis mask to be applied to a node
+   * Can be x, y, z - 
    */
-  public Vector3f rotationMask;
+  // public Vector3f rotationMaskx;
+  public String rotationMask;
 
   transient Node meta;
 
@@ -92,5 +93,8 @@ public class UserData implements Savable {
    * spatial.scale(scale); spatial.updateGeometricState();
    * spatial.updateModelBound(); }
    */
+  
+  public UserData() {
+  }
 
 }

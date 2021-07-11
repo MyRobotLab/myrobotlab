@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,11 +99,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     super.startService();
     Runtime runtime = Runtime.getInstance();
     runtime.subscribeToLifeCycleEvents(getName());
-    /*
-    if (runtime.getConfigDir().equals("default")) {
-      runtime.setConfigDir("InMoov2");  
-    } 
-    */   
   }
 
   public void onCreated(String fullname) {
@@ -1141,7 +1135,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public String setSpeechType(String speechType) {
-    // speechService = speechType;
     serviceType.setPeer("mouth", speechType);
     broadcastState();
     return speechType;
@@ -1650,6 +1643,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     simulator = (JMonkeyEngine) startPeer("simulator");
 
+    // DEPRECATED - should just user peer info
     isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jmonkey simulator
@@ -1723,27 +1717,27 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // ========== Requires VinMoov5.j3o ========================
 
-    simulator.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
+    simulator.multiMap(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
     simulator.setRotation(getName() + ".leftHand.thumb1", "y");
     simulator.setRotation(getName() + ".leftHand.thumb2", "x");
     simulator.setRotation(getName() + ".leftHand.thumb3", "x");
 
-    simulator.attach(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
+    simulator.multiMap(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
     simulator.setRotation(getName() + ".leftHand.index", "x");
     simulator.setRotation(getName() + ".leftHand.index2", "x");
     simulator.setRotation(getName() + ".leftHand.index3", "x");
 
-    simulator.attach(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
+    simulator.multiMap(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
     simulator.setRotation(getName() + ".leftHand.majeure", "x");
     simulator.setRotation(getName() + ".leftHand.majeure2", "x");
     simulator.setRotation(getName() + ".leftHand.majeure3", "x");
 
-    simulator.attach(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
+    simulator.multiMap(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
     simulator.setRotation(getName() + ".leftHand.ringFinger", "x");
     simulator.setRotation(getName() + ".leftHand.ringFinger2", "x");
     simulator.setRotation(getName() + ".leftHand.ringFinger3", "x");
 
-    simulator.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
+    simulator.multiMap(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
     simulator.setRotation(getName() + ".leftHand.pinky", "x");
     simulator.setRotation(getName() + ".leftHand.pinky2", "x");
     simulator.setRotation(getName() + ".leftHand.pinky3", "x");
@@ -1771,27 +1765,27 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // right hand
 
-    simulator.attach(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
+    simulator.multiMap(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
     simulator.setRotation(getName() + ".rightHand.thumb1", "y");
     simulator.setRotation(getName() + ".rightHand.thumb2", "x");
     simulator.setRotation(getName() + ".rightHand.thumb3", "x");
 
-    simulator.attach(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
+    simulator.multiMap(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
     simulator.setRotation(getName() + ".rightHand.index", "x");
     simulator.setRotation(getName() + ".rightHand.index2", "x");
     simulator.setRotation(getName() + ".rightHand.index3", "x");
 
-    simulator.attach(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
+    simulator.multiMap(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
     simulator.setRotation(getName() + ".rightHand.majeure", "x");
     simulator.setRotation(getName() + ".rightHand.majeure2", "x");
     simulator.setRotation(getName() + ".rightHand.majeure3", "x");
 
-    simulator.attach(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
+    simulator.multiMap(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
     simulator.setRotation(getName() + ".rightHand.ringFinger", "x");
     simulator.setRotation(getName() + ".rightHand.ringFinger2", "x");
     simulator.setRotation(getName() + ".rightHand.ringFinger3", "x");
 
-    simulator.attach(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
+    simulator.multiMap(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
     simulator.setRotation(getName() + ".rightHand.pinky", "x");
     simulator.setRotation(getName() + ".rightHand.pinky2", "x");
     simulator.setRotation(getName() + ".rightHand.pinky3", "x");

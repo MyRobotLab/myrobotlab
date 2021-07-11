@@ -8,8 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -52,7 +54,6 @@ import org.myrobotlab.sensor.EncoderListener;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
 import org.myrobotlab.service.config.JMonkeyEngineConfig;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
@@ -199,8 +200,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   Map<String, String[]> multiMapped = new TreeMap<String, String[]>();
 
-  final Map<String, String> nameMappings = new TreeMap<String, String>();
-
   transient Map<String, List<ServiceGui>> nameMethodCallbackMap = new HashMap<String, List<ServiceGui>>();
 
   // https://stackoverflow.com/questions/16861727/jmonkey-engine-3-0-drawing-points
@@ -239,9 +238,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   int width = 1024;
 
-  protected Set<String> assets = new HashSet<>();
+  protected Set<String> modelPaths = new LinkedHashSet<>();
 
-  protected Map<String, UserData> nodes = new HashMap<>();
+  protected Map<String, UserData> nodes = new LinkedHashMap<>();
+
+  protected String cameraLookAt;
 
   public JMonkeyEngine(String n, String id) {
     super(n, id);
@@ -377,26 +378,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     addMsg("addNode", name);
   }
 
-  public void attach(Attachable service) throws Exception {
-    attach(service, (String[]) null);
-  }
-
-  public void attach(Attachable service, String... nodeNames) throws Exception {
-    attach(service.getName(), nodeNames);
-  }
-
   // Routing Attach - should be based on string type info and name (ie a
   // Registration)
-  public void attach(String name, String... nodeNames) throws Exception {
-
+  public void attach(Attachable attachable) throws Exception {
+    String name = attachable.getName();
     ServiceInterface service = Runtime.getService(name);
     if (service == null) {
       log.error("{} not found in registry", name);
       return;
-    }
-
-    if (nodeNames != null) {
-      multiMapped.put(name, nodeNames);
     }
 
     // We do type evaluation and routing based on string values vs instance
@@ -498,6 +487,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       log.error("cameraLookAt - cannot find {}", name);
       return;
     }
+    cameraLookAt = name;
     cameraLookAt(s);
   }
 
@@ -767,11 +757,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       startNode = rootNode;
     }
 
-    // FIXME - is this needed ?
-    if (nameMappings.containsKey(name)) {
-      name = nameMappings.get(name);
-    }
-
     Spatial child = startNode.getChild(name);
     return child;
   }
@@ -834,7 +819,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     if (axis != null) {
       rotMask = util.getUnitVector(axis); // Vector3f.UNIT_Y;
     } else {
-      rotMask = data.rotationMask;
+      rotMask = util.getUnitVector(data.rotationMask);
     }
 
     int axisIndex = Jme3Util.getIndexFromUnitVector(rotMask);
@@ -1129,7 +1114,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   // TODO - must be re-entrant - perhaps even on a schedule ?
   // TODO - removeNode
   public void loadResource(String inFileName) {
-    log.info("load({})", inFileName);
+    log.info("loadResource({})", inFileName);
 
     try {
 
@@ -1152,7 +1137,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
       if (!ext.equals("json")) {
         Spatial spatial = assetManager.loadModel(filename);
         spatial.setName(simpleName);
-
+        // hmmm - absolute paths ? this is fragile
+        // FIXME - somehow make relative work
         Node node = null;
 
         if (spatial instanceof Node) {
@@ -1174,8 +1160,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           jme3MsgQueue.add(msg);
         }
       }
-
-      assets.add(filename);
 
     } catch (Exception e) {
       error(e);
@@ -1205,6 +1189,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public void loadModels(String dirPath) {
+    modelPaths.add(dirPath);
+    traverseLoadModels(dirPath);
+  }
+  
+  public void traverseLoadModels(String dirPath) {
     log.info("loading models from {}", dirPath);
     File dir = new File(dirPath);
     if (!dir.exists()) {
@@ -1231,7 +1220,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // breadth first search ...
     for (File f : files) {
       if (f.isDirectory()) {
-        loadModels(f.getAbsolutePath());
+        traverseLoadModels(f.getAbsolutePath());
       }
     }
   }
@@ -1835,6 +1824,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   public Mapper setMapper(String name, int minx, int maxx, int miny, int maxy) {
+    return setMapper(name, (double) minx, (double) maxx, (double) miny, (double) maxy);
+  }
+
+  public Mapper setMapper(String name, double minx, double maxx, double miny, double maxy) {
     UserData node = getUserData(name);
     if (node == null) {
       error("setMapper %s does not exist", name);
@@ -1848,7 +1841,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     addMsg("setRotation", name, xRot, yRot, zRot);
   }
 
-  public void setRotation(String name, String rotation) {
+  public void setRotation(String name, String axis) {
     UserData o = getUserData(name);
     if (o == null) {
       error("setRotation %s could not be found", name);
@@ -1856,7 +1849,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
     // WRONG !!!! - getLocalUnitVector
     // o.rotationMask = util.getUnitVector(rotation);
-    o.rotationMask = util.getLocalUnitVector(o.getSpatial(), rotation);
+    // o.rotationMask = util.getLocalUnitVector(o.getSpatial(), rotation);
+    o.rotationMask = axis;
   }
 
   public void setSelected(Spatial newSelected) {
@@ -1935,6 +1929,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   private boolean usePhysics;
 
   private Thread mainThread;
+
+  transient protected JMonkeyEngineConfig config;
 
   public void simpleInitApp() {
 
@@ -2265,6 +2261,14 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
           }
         }
       }
+      
+      // if we have config to process
+      // process it
+      if (config != null) {
+        loadDelayed(config);
+        config = null;
+      }
+      
     } catch (Exception e) {
       log.error("{} startService exploded", getName(), e);
     }
@@ -2512,26 +2516,66 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   @Override
   public ServiceConfig getConfig() {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) initConfig(new JMonkeyEngineConfig());
-    config.assets = assets;
+    config.cameraLookAt = cameraLookAt;
+    config.modelPaths = new ArrayList<>();
+    for (String path : this.modelPaths) {
+      config.modelPaths.add(path);
+    }
+    Collections.sort(config.modelPaths);
     config.nodes = nodes;
+    config.multiMapped = multiMapped;
     return config;
   }
-
-  public ServiceConfig load(ServiceConfig c) {
+  
+  public ServiceConfig loadDelayed(ServiceConfig c) {
     JMonkeyEngineConfig config = (JMonkeyEngineConfig) c;
-    if (config.assets != null) {
-      for (String f : config.assets) {
-        loadResource(f);
+    
+    if (config.modelPaths != null) {
+      for (String modelPath : config.modelPaths) {
+        loadModels(modelPath);
       }
     }
 
     if (config.nodes != null) {
-      for (String f : config.nodes.keySet()) {
-        // loadResource(f);
+      for (String path : config.nodes.keySet()) {
+        UserData ud = config.nodes.get(path);
+        if (ud.mapper != null) {
+          MapperLinear m = ud.mapper;
+          setMapper(path, m.minX, m.maxX, m.minY, m.maxY);
+        }
+        if (ud.rotationMask != null) {
+          setRotation(path, ud.rotationMask);
+          // setRotation(path, ud.rotationMask.x, ud.rotationMask.y, ud.rotationMask.z);
+        }
       }
     }
+
+    for (String name : config.multiMapped.keySet()) {
+      multiMap(name, config.multiMapped.get(name));
+    }
     
+    if (config.cameraLookAt != null) {
+      cameraLookAt(config.cameraLookAt);
+    }
+
     return c;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    if (app != null) {
+      // if there is an app we can load immediately
+      loadDelayed(c);
+    } else {
+      // otherwise we'll need to delay loading
+      config = (JMonkeyEngineConfig)c;
+    }
+    return c;
+  }
+
+  public void multiMap(String name, String... nodeNames) {
+    if (nodeNames != null) {
+      multiMapped.put(name, nodeNames);
+    }
   }
 
 }
