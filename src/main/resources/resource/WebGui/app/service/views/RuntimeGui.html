@@ -24,7 +24,7 @@
     <b>configurations</b>
     <br/>
     <div class="form-group">
-        <select multiple class="form-control vertical-menu" ng-model="selectedConfig" id="selectedConfig" title="configurations">
+        <select multiple class="form-control vertical-menu" ng-change="setConfigName()" ng-model="selectedConfig" id="selectedConfig-id" title="configurations">
             <option ng-repeat="config in service.configList" ng-value="{{config}}">{{config}}</option>
         </select>
     </div>

@@ -27,7 +27,6 @@ import org.myrobotlab.arduino.DeviceSummary;
 import org.myrobotlab.arduino.Msg;
 import org.myrobotlab.framework.interfaces.Attachable;
 import org.myrobotlab.framework.interfaces.NameProvider;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.i2c.I2CBus;
 import org.myrobotlab.io.FileIO;
 import org.myrobotlab.io.Zip;
@@ -208,6 +207,11 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   int mrlCommBegin = 0;
 
   private volatile boolean syncInProgress = false;
+
+  /**
+   * the port the user attempted to connect to
+   */
+  protected String port;
 
   public Arduino(String n, String id) {
     super(n, id);
@@ -435,7 +439,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
       return;
     }
 
-    int pin = (servo.getPin() == null)?-1:getAddress(servo.getPin());
+    // int pin = (servo.getPin() == null)?-1:getAddress(servo.getPin());
+    int pin = getAddress(servo.getPin());
     // targetOutput is never null and is the input requested angle in degrees
     // for the servo.
     // defaulting to the rest angle.
@@ -448,6 +453,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     if (isConnected()) {
       int uS = degreeToMicroseconds(servo.getTargetOutput());
       msg.servoAttach(dm.getId(), pin, uS, (int) speed, servo.getName());
+      msg.servoAttachPin(dm.getId(), pin);
     }
     servo.attach(this);
   }
@@ -493,6 +499,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   public void connect(String port, int rate, int databits, int stopbits, int parity) {
 
     // test to see if we've been started. the serial might be null
+    this.port = port;
 
     try {
 
@@ -2269,52 +2276,18 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   @Override
   public ServiceConfig getConfig() {
     ArduinoConfig config = (ArduinoConfig) initConfig(new ArduinoConfig());
-
-    if (serial != null) {
-      if (serial.getPortName() != null) {
-        config.port = serial.getPortName();
-      } else {
-        config.port = serial.lastPortName;
-      }
-    }
-
-    if (deviceList.keySet().size() > 1) {
-
-      List<String> tmp = new ArrayList<>();
-      for (String n : deviceList.keySet()) {
-        if (!n.equals(getName())) {
-          tmp.add(n);
-        }
-      }
-
-      config.deviceList = new String[tmp.size()];
-      tmp.toArray(config.deviceList);
-
-    }
+    config.port = port;    
+    config.connect = isConnected();
     return config;
   }
 
-  // THIS MUST BE PUSHED HIGHER INTO SERVICE
+  @Override
   public ServiceConfig load(ServiceConfig c) {
     ArduinoConfig config = (ArduinoConfig) c;
 
     if (config.port != null) {
       connect(config.port);
     }
-
-    if (config.deviceList != null) {
-      for (String name : config.deviceList) {
-        ServiceInterface si = Runtime.getService(name);
-        if (si != null) {
-          try {
-            attach(si);
-          } catch (Exception e) {
-            error(e);
-          }
-        }
-      }
-    }
-
     return c;
   }
 

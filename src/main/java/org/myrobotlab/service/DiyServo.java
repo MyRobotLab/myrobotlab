@@ -372,7 +372,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return isPinArrayControlSet;
   }
 
-  public Boolean isInverted() {
+  public boolean isInverted() {
     return mapper.isInverted();
   }
 
@@ -703,7 +703,7 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return MathUtils.round(currentPosInput, roundPos);
   }
 
-  public Boolean isEnabled() {
+  public boolean isEnabled() {
     return !motorControl.isLocked();
   }
 

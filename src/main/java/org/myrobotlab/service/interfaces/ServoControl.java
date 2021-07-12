@@ -61,7 +61,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * isAutoDisable return value set by setAutoDisable
    * 
-   * @return Boolean
+   * @return boolean
    */
   boolean isAutoDisable();
 
@@ -189,14 +189,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * 
    * @return
    */
-  Boolean isEnabled();
+  boolean isEnabled();
 
   /**
    * Returns true if mapper is inverted
    * 
    * @return
    */
-  Boolean isInverted();
+  boolean isInverted();
 
   /**
    * Returns if the sevo is currently moving
@@ -250,9 +250,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * disable
    * 
    * @param autoDisable
-   *          - Boolean
+   *          - boolean
    */
-  void setAutoDisable(Boolean autoDisable);
+  void setAutoDisable(boolean autoDisable);
 
   /**
    * invert the map so a servo will go in reverse direction 0 == 180, 90 == 90,
@@ -261,8 +261,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * @param invert
    *          - true is to invert
    */
-  void setInverted(Boolean invert);
-
+  void setInverted(boolean invert);
+  
+  /**
+   * set a mapper to do the mapping between input and output for this servo control
+   * @param m
+   */
   void setMapper(Mapper m);
 
   /**
@@ -334,7 +338,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * sets the maximum speed for which setSpeed cannot go over
-   * @param velocity
+   * @param degreesPerSecond
    */
   void setMaxSpeed(Double degreesPerSecond);
 

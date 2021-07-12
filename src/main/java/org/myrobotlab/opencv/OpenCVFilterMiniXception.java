@@ -42,6 +42,7 @@ public class OpenCVFilterMiniXception extends OpenCVFilter implements Runnable {
 
   private transient Deeplearning4j dl4j;
   private CvFont font = cvFont(CV_FONT_HERSHEY_PLAIN);
+  protected Boolean running;
 
   public Map<String, Double> lastResult = null;
   private volatile IplImage lastImage = null;

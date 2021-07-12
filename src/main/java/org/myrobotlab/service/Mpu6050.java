@@ -52,9 +52,8 @@ import org.slf4j.Logger;
  * This is a port of the https://github.com/jrowberg/i2cdevlib/blob/master/Arduino/MPU6050/MPU6050.cpp
  * from Arduino C/C++ to Java. 
  * 
- */
-/**
- * ============================================ I2Cdev device library code is
+ * ============================================ 
+ * I2Cdev device library code is
  * placed under the MIT license Copyright (c) 2012 Jeff Rowberg Permission is
  * hereby granted, free of charge, to any person obtaining a copy of this
  * software and associated documentation files (the "Software"), to deal in the
@@ -69,7 +68,8 @@ import org.slf4j.Logger;
  * EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
  * OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE. ===============================================
+ * DEALINGS IN THE SOFTWARE. 
+ * ===============================================
  */
 
 public class Mpu6050 extends Service implements I2CControl, OrientationPublisher {
@@ -87,9 +87,11 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   public transient I2CController controller;
 
   public List<String> deviceAddressList = Arrays.asList("0x68", "0x69");
+  
   public String deviceAddress = "0x68";
 
   public List<String> deviceBusList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8");
+  
   public String deviceBus = "1";
 
   public static final int MPU6050_ADDRESS_AD0_LOW = 0x68; // address pin low
@@ -521,7 +523,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   public List<String> controllers;
   public String controllerName;
-  public boolean isAttached = false;
 
   // complementaryFiltered angles
   public double filtered_x_angle;
@@ -537,34 +538,6 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
         refresh();
         invoke("publishOrientation", new Orientation(filtered_x_angle, filtered_y_angle, filtered_z_angle));
       }
-    }
-  }
-
-  public static void main(String[] args) {
-    LoggingFactory.init("info");
-
-    try {
-
-      /*
-       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
-       * Runtime.start("gui", "SwingGui");
-       */
-
-      /*
-       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
-       * arduino.connect("COM4"); mpu6050.setController(arduino);
-       */
-
-      /*
-       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
-       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
-       */
-      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
-      int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
-      log.info("0xffd0 should be -48 is = {}", a);
-
-    } catch (Exception e) {
-      Logging.logError(e);
     }
   }
 
@@ -587,20 +560,12 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public void setDeviceBus(String deviceBus) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceBus = deviceBus;
     broadcastState();
   }
 
   @Override
   public void setDeviceAddress(String deviceAddress) {
-    if (isAttached) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-      return;
-    }
     this.deviceAddress = deviceAddress;
     broadcastState();
   }
@@ -4901,64 +4866,38 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
     listeners.remove(listener);
   }
 
-  @Override
-  public boolean isAttached(String name) {
-    return (controller != null && controller.getName().equals(name));
-  }
-
-  // This section contains all the new attach logic
-  @Override
-  public void attach(String service) throws Exception {
-    attach((Attachable) Runtime.getService(service));
-  }
-
-  @Override
-  public void attach(Attachable service) throws Exception {
-
-    if (I2CController.class.isAssignableFrom(service.getClass())) {
-      attachI2CController((I2CController) service);
-      return;
-    }
-  }
-
-  public void attach(String controllerName, String deviceBus, String deviceAddress) {
-    attach((I2CController) Runtime.getService(controllerName), deviceBus, deviceAddress);
+  public void attach(I2CController controller) {
+    attachI2CController(controller, deviceBus, deviceAddress);
   }
 
   public void attach(I2CController controller, String deviceBus, String deviceAddress) {
-
-    if (isAttached && this.controller != controller) {
-      log.error("Already attached to {}, use detach({}) first", this.controllerName);
-    }
-
-    controllerName = controller.getName();
-    log.info("{} attach {}", getName(), controllerName);
-
-    this.deviceBus = deviceBus;
-    this.deviceAddress = deviceAddress;
-
-    attachI2CController(controller);
-    isAttached = true;
-    broadcastState();
+    attachI2CController(controller, deviceBus, deviceAddress);
   }
 
-  public void attachI2CController(I2CController controller) {
+  public void attachI2CController(I2CController controller, String deviceBus, String deviceAddress) {
 
-    if (isAttached(controller))
-      return;
-
-    if (this.controllerName != controller.getName()) {
-      log.error("Trying to attached to {}, but already attached to ({})", controller.getName(), this.controllerName);
+    if (controller.equals(this.controller)) {
+      // already attached
       return;
     }
-
+    
+    if (deviceBus != null) {
+      this.deviceBus = deviceBus;
+    }
+    
+    if (deviceAddress != null) {
+      this.deviceAddress = deviceAddress;
+    }    
+    
+    this.controllerName = controller.getName();
     this.controller = controller;
-    isAttached = true;
+    
     controller.attachI2CControl(this);
+    
     log.info("Attached {} device on bus: {} address {}", controllerName, deviceBus, deviceAddress);
-    broadcastState();
+    
   }
-
+  
   // This section contains all the new detach logic
   // TODO: This default code could be in Attachable
   @Override
@@ -4973,16 +4912,14 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
       detachI2CController((I2CController) service);
       return;
     }
-  }
+  }  
 
   @Override
   public void detachI2CController(I2CController controller) {
 
     if (!isAttached(controller))
       return;
-
     controller.detachI2CControl(this);
-    isAttached = false;
     broadcastState();
   }
 
@@ -4994,7 +4931,7 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
   @Override
   public Set<String> getAttached() {
     HashSet<String> ret = new HashSet<String>();
-    if (controller != null && isAttached) {
+    if (controller != null) {
       ret.add(controller.getName());
     }
     return ret;
@@ -5012,10 +4949,44 @@ public class Mpu6050 extends Service implements I2CControl, OrientationPublisher
 
   @Override
   public boolean isAttached(Attachable instance) {
-    if (controller != null && controller.getName().equals(instance.getName())) {
-      return isAttached;
+    if (instance.getName().equals(controllerName)) {
+      return true;
     }
-    ;
     return false;
   }
+
+  public static void main(String[] args) {
+    LoggingFactory.init("info");
+
+    try {
+
+      /*
+       * Mpu6050 mpu6050 = (Mpu6050) Runtime.start("mpu6050", "Mpu6050");
+       * Runtime.start("gui", "SwingGui");
+       */
+
+      /*
+       * Arduino arduino = (Arduino) Runtime.start("Arduino","Arduino");
+       * arduino.connect("COM4"); mpu6050.setController(arduino);
+       */
+
+      /*
+       * RasPi raspi = (RasPi) Runtime.start("RasPi","RasPi");
+       * mpu6050.setController(raspi); mpu6050.dmpInitialize();
+       */
+      int[] buffer = new int[] { (int) 0xff, (int) 0xd0 };
+      int a = (byte) buffer[0] << 8 | buffer[1] & 0xff;
+      log.info("0xffd0 should be -48 is = {}", a);
+
+    } catch (Exception e) {
+      Logging.logError(e);
+    }
+  }
+
+  @Override
+  public void attachI2CController(I2CController controller) {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

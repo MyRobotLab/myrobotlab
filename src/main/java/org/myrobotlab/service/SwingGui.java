@@ -319,7 +319,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       if (si == null) {
         log.info("%s is not a service - please select the service to save", tabName);
       } else if (si.isLocal()) {
-        si.load();
+        try {
+          si.load();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
       } else {
         send(tabName, "load");
       }
@@ -332,7 +337,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
         if (si == null) {
           log.info("%s is not a service - please select the service to save", service);
         } else if (si.isLocal()) {
-          si.load();
+          try {
+            si.load();
+          } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          }
         } else {
           send(service, "load");
         }

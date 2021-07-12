@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.introspector.BeanAccess;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -624,6 +625,7 @@ public class CodecUtils {
     DumperOptions options = new DumperOptions();
     options.setIndent(2);
     options.setPrettyFlow(true);
+    // options.setBeanAccess(BeanAccess.FIELD);
     options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
     /**<pre> How to suppress null fields if desired
     Representer representer = new Representer() {
@@ -641,6 +643,7 @@ public class CodecUtils {
     */
 
     Yaml yaml = new Yaml(options);
+    // yaml.setBeanAccess(BeanAccess.FIELD);
     String c = yaml.dump(o);
     return c;
   }
@@ -653,6 +656,7 @@ public class CodecUtils {
     options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
     Yaml yaml = new Yaml(options);
+    // yaml.setBeanAccess(BeanAccess.FIELD);
     String c = yaml.dumpAll(o);
     return c;
   }
@@ -660,11 +664,13 @@ public class CodecUtils {
   public final static Iterable<Object> allFromYaml(InputStream is) {
     // Yaml yaml = new Yaml(new Constructor(clazz));
     Yaml yaml = new Yaml();
+    // yaml.setBeanAccess(BeanAccess.FIELD);
     return yaml.loadAll(is);
   }
 
   public final static <T extends Object> T fromYaml(String data, Class<T> clazz) {
     Yaml yaml = new Yaml(new Constructor(clazz));
+    // yaml.setBeanAccess(BeanAccess.FIELD);
     return (T) yaml.load(data);
   }
 

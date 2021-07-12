@@ -99,6 +99,14 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
         $scope.newType = serviceType
     }
 
+    $scope.setConfigName = function(){
+        console.info('setConfigName')
+        if ($scope.selectedConfig.length > 0){
+            $scope.service.configName = $scope.selectedConfig[0]
+            msg.sendTo('runtime', 'setConfigName', $scope.service.configName)
+        }
+    }
+
     $scope.start = function() {
 
         if ($scope.newName == null) {
@@ -157,7 +165,7 @@ angular.module('mrlapp.service.RuntimeGui', []).controller('RuntimeGuiCtrl', ['$
             break
 
         case 'onConfigList':
-            $scope.service.configList = inMsg.data[0]
+            $scope.service.configList = inMsg.data[0].sort()
             $scope.$apply()
             break
 

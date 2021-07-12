@@ -124,17 +124,15 @@ public class Intro extends Service {
   public static void main(String[] args) {
     try {
 
-      LoggingFactory.init(Level.WARN);
+      LoggingFactory.init(Level.INFO);
 
-      // Runtime.main(new String[] { "--spawned-from-agent", "--id", "intro",
-      // "-s", "intro", "Intro" });
-
+      Runtime.main(new String[] { "--from-launcher"});
       Runtime.start("intro", "Intro");
 
       // Arduino arduino = (Arduino)Runtime.start("arduino", "Arduino");
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-      // webgui.setSsl(true);
+      // webgui.setSsl(true); 
       webgui.autoStartBrowser(false);
       webgui.startService();
 

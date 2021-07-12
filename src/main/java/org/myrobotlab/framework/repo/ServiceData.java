@@ -98,6 +98,11 @@ public class ServiceData implements Serializable {
       log.debug("querying {}", fullClassName);
       try {
 
+        // filter out the package-info files
+        if (fullClassName.contains("package-info")) {
+          continue;
+        }
+        
         MetaData serviceType = (MetaData) getMetaData(fullClassName);
 
         if (!fullClassName.equals(serviceType.getType())) {
@@ -249,6 +254,7 @@ public class ServiceData implements Serializable {
       }
 
       type = getFullMetaTypeName(type);
+      
 
       // RETRO-GRADED for "nice" sized pr :(
       Class<?> c = Class.forName(type);

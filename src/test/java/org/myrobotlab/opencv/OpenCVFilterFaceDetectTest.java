@@ -28,7 +28,7 @@ public class OpenCVFilterFaceDetectTest extends AbstractOpenCVFilterTest {
     // it should have found 1 face
     OpenCVFilterFaceDetect f = (OpenCVFilterFaceDetect) filter;
     // expected vs actual
-    Assert.assertEquals("could not find the 1 face", 1, f.bb.size());
+    Assert.assertEquals("could not find the 1 face", 1, f.getFaces().size());
 
   }
 

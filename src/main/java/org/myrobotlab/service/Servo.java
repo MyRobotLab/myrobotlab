@@ -99,14 +99,14 @@ public class Servo extends AbstractServo implements ServoControl {
       firstMove = false;
     }
 
-    if (idleDisabled && !enabled) {
+    if (autoDisable && !enabled) {
       // if the servo was disable with a timer - re-enable it
       enable();
     }
     // purge any timers currently in process
     // if currently configured to autoDisable - the timer starts now
     // we cancel any pre-existing timer if it exists
-    purgeTask("idleDisable");
+    purgeTask("disable");
     // blocking move will be idleTime out enabled later.
 
     if (!enabled) {
@@ -203,7 +203,7 @@ public class Servo extends AbstractServo implements ServoControl {
       isMoving = false;
       if (autoDisable) {
         // and start our countdown
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
     return true;
@@ -224,20 +224,21 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig getConfig() {
     
     ServoConfig config = (ServoConfig) initConfig(new ServoConfig());
+        
     config.autoDisable = autoDisable;
+    config.enabled = enabled;
 
     if (mapper != null) {
       config.clip = mapper.isClip();
-      config.maxX = mapper.getMaxX();
-      config.maxY = mapper.getMaxY();
-      config.minX = mapper.getMinX();
-      config.minY = mapper.getMinY();
+      config.maxIn = mapper.getMaxX();
+      config.maxOut = mapper.getMaxY();
+      config.minIn = mapper.getMinX();
+      config.minOut = mapper.getMinY();
       config.inverted = mapper.isInverted();
     }
 
-    config.controller = controller;
-    config.enabled = enabled;
-    config.idleDisabled = idleDisabled;
+    // config.controller = controller;
+    
     config.idleTimeout = idleTimeout;
     config.pin = pin;
     config.rest = rest;
@@ -251,31 +252,17 @@ public class Servo extends AbstractServo implements ServoControl {
   public ServiceConfig load(ServiceConfig c) {
     ServoConfig config = (ServoConfig)c;
     
-    // common
-    // higher level :P
-    // config.name = getName();
-    // config.type = getSimpleName();
-
     autoDisable = config.autoDisable;
-    mapper = new MapperLinear(config.minX, config.maxX, config.minY, config.maxY);
+    mapper = new MapperLinear(config.minIn, config.maxIn, config.minOut, config.maxOut);
     mapper.setInverted(config.inverted);
     mapper.setClip(config.clip);    
     enabled = config.enabled;
-    idleDisabled = config.idleDisabled;
     idleTimeout = config.idleTimeout;
     pin = config.pin;
     rest = config.rest;
     speed = config.speed;
     sweepMax = config.sweepMax;
     sweepMin = config.sweepMin;
-    
-    if (config.controller != null) {
-      try {
-        attach(config.controller);
-      } catch (Exception e) {
-        error(e);
-      }
-    }    
 
     return c;
   }

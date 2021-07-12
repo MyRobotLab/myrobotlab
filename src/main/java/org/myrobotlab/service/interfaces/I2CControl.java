@@ -38,8 +38,6 @@ public interface I2CControl extends NameProvider, Attachable {
 
   public String getDeviceAddress();
 
-  public void attach(String controllerName, String deviceBus, String deviceAddress);
-
   public void attach(I2CController controller, String deviceBus, String deviceAddress);
 
   public void attachI2CController(I2CController controller);

@@ -32,6 +32,9 @@ import org.myrobotlab.serial.Port;
 import org.myrobotlab.serial.PortQueue;
 import org.myrobotlab.serial.PortStream;
 import org.myrobotlab.serial.SerialControl;
+import org.myrobotlab.service.config.ArduinoConfig;
+import org.myrobotlab.service.config.SerialConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.PortConnector;
 import org.myrobotlab.service.interfaces.PortPublisher;
 import org.myrobotlab.service.interfaces.QueueSource;
@@ -1252,6 +1255,30 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
 
   public void stopTcpServer() throws IOException {
     tcpSerialHub.stop();
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    SerialConfig config = (SerialConfig) initConfig(new SerialConfig());
+    config.port = lastPortName;
+    return config;
+  }
+
+  @Override
+  public ServiceConfig load(ServiceConfig c) {
+    SerialConfig config = (SerialConfig) c;
+
+    if (config.port != null) {
+      portName = config.port;
+      try {
+        if (isConnected()) {
+          connect(config.port);
+        }
+      } catch (Exception e) {
+        log.error("load connecting threw", e);
+      }
+    }
+    return c;
   }
 
   public static void main(String[] args) {

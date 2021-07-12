@@ -131,13 +131,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   static private transient Thread installerThread = null;
 
   private String configName = "default";
-  
+
   /**
    * The one config directory where all config is managed the {default} is the
    * current configuration set
    */
   protected String configDir = "data" + fs + "config";
-  
 
   /**
    * <pre>
@@ -452,11 +451,11 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
         runtime.broadcast("created", getFullName(name));
 
         // add all the service life cycle subscriptions
-        runtime.addListener("registered", name);
-        runtime.addListener("created", name);
-        runtime.addListener("started", name);
-        runtime.addListener("stopped", name);
-        runtime.addListener("released", name);
+        // runtime.addListener("registered", name);
+        // runtime.addListener("created", name);
+        // runtime.addListener("started", name);
+        // runtime.addListener("stopped", name);
+        // runtime.addListener("released", name);
       }
 
       // initialization of the new service - it gets local registery events
@@ -939,7 +938,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       }
 
     } catch (Exception e) {
-      error("could not find interfaces for %s", interfaze);
+      error("could not find interfaces for %s - %s %s", interfaze, e.getClass().getSimpleName(), e.getMessage());
+      log.error("getting class", e);
     }
 
     return results;
@@ -1421,17 +1421,17 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Publishing adding of new configuration sets (directories)
-   * to the config parent directory  typically data/config
+   * Publishing adding of new configuration sets (directories) to the config
+   * parent directory typically data/config
    * 
    * @return
    */
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
-    
+
     // config dir is technically the parent directory of
     // config sets
-    
+
     File configDir = new File(this.configDir);
     if (!configDir.exists()) {
       configDir.mkdirs();
@@ -1461,6 +1461,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
       configList.add(file.getName());
     }
+    Collections.sort(configList);
     return configList;
   }
 
@@ -2079,24 +2080,24 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * A function for runtime to "save" a service - or if the service does not exists
-   * save the "default" config of that type of service
+   * A function for runtime to "save" a service - or if the service does not
+   * exists save the "default" config of that type of service
+   * 
    * @param name
    * @return
    * @throws IOException
    */
-  public boolean export(String name /*, String type*/) throws IOException {
-      ServiceInterface si = getService(name);
-      if (si != null) {
-        si.save();
-      }
-      
-      // TODO - save default config for that service
-      // or default config
-      
-      return false;
-  }
+  public boolean export(String name /* , String type */) throws IOException {
+    ServiceInterface si = getService(name);
+    if (si != null) {
+      si.save();
+    }
 
+    // TODO - save default config for that service
+    // or default config
+
+    return false;
+  }
 
   /**
    * restart occurs after applying updates - user or config data needs to be
@@ -3305,7 +3306,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public String getConfigDir() {
     return configDir;
   }
-  
+
   public String setConfigDir(String dir) {
     if (dir == null) {
       error("config directory cannot be null");
@@ -3314,11 +3315,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     File file = new File(dir);
     if (file.exists() && !file.isDirectory()) {
       error("config directory must be a directory");
-    }    
-    configDir = dir;    
+    }
+    configDir = dir;
     return configDir;
   }
-
 
   public List<ServiceConfig> getConfigs() {
     return getConfigs(null, null, new String[] { "runtime", "security" });
@@ -3381,8 +3381,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return sc;
   }
 
-  
-
   /**
    * This helper method will create, load then start a service
    * 
@@ -3393,9 +3391,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * @return returns the service in the form of a ServiceInterface
    */
   static public ServiceInterface loadAndStart(String name, String type) {
-    ServiceInterface s = create(name, type);
-    s.load();
-    s.startService();
+    ServiceInterface s = null;
+    try {
+      s = create(name, type);
+      s.load();
+      s.startService();
+    } catch (Exception e) {
+      log.error("loadAndStart threw", e);
+    }
     return s;
   }
 
@@ -3403,7 +3406,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   public ServiceConfig getConfig() {
 
     RuntimeConfig config = (RuntimeConfig) initConfig(new RuntimeConfig());
-    config.id = getId();
+    // config.id = getId(); Not ready yet
 
     Map<String, ServiceInterface> services = getLocalServices();
     List<ServiceInterface> s = new ArrayList<>();
@@ -3422,12 +3425,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     return config;
   }
 
-  
   @Override
-  public boolean load(String filename) {
+  public ServiceConfig load(String filename) throws IOException {
     // When runtime calls load, we expect the full path to the runtime.yml file.
     // based on the directory structure, we need to set the current config name
     // so we can find the other services to load.
+    if (filename == null) {
+      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
+    }
     File f = new File(filename);
     setConfigName(f.getParentFile().getName());
     return super.load(filename);
@@ -3435,33 +3440,37 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   public ServiceConfig load(ServiceConfig c) {
     RuntimeConfig config = (RuntimeConfig) c;
-    setId(config.id);
+    setLocale(c.locale);
+    // setId(config.id); Very Fragile ! Cannot do this yet
     if (config.registry != null) {
-      
-      Map<String, ServiceConfig> configs = new HashMap<>();
-      
+      ServiceConfig sc = null;
       for (String name : config.registry) {
         if (name.equals("runtime")) {
           continue;
         }
         try {
-          File scFile = new File(getConfigDir() + fs  + getConfigName() + fs + name + ".yml");
+          File scFile = new File(getConfigDir() + fs + getConfigName() + fs + name + ".yml");
           if (!scFile.exists()) {
             warn("could not find service config file %s", scFile.getAbsolutePath());
             continue;
           }
-          String data = FileIO.toString(scFile);
-          Yaml yaml = new Yaml();
-          Object o = yaml.load(data);
 
-          ServiceConfig sc = null;
-          if (o.getClass().equals(ServiceConfig.class)) {
-            sc = CodecUtils.fromYaml(data, ServiceConfig.class);
-          } else {
-            // we have a derived type
-            sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
+          try {
+            String data = FileIO.toString(scFile);
+            Yaml yaml = new Yaml();
+            // yaml.setBeanAccess(BeanAccess.FIELD);
+            Object o = yaml.load(data);
+
+            if (o.getClass().equals(ServiceConfig.class)) {
+              sc = CodecUtils.fromYaml(data, ServiceConfig.class);
+            } else {
+              // we have a derived type
+              sc = (ServiceConfig) CodecUtils.fromYaml(data, o.getClass());
+            }
+          } catch (Exception e) {
+            error(e);
+            continue;
           }
-          configs.put(name, config);
           // start vs create ??? should we start with create go through all life
           // cycles ?
           log.info("starting create life-cycle for name: {} type: ", sc.name, sc.type);
@@ -3470,10 +3479,12 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           error(e);
         }
       } // for each service
-      
+
       // batch service life-cycle load
+      // keep configs around until after started - then attach
+      Map<String, ServiceConfig> configs = new HashMap<>();
       log.info("starting load life-cycle");
-      for (String name : configs.keySet()) {
+      for (String name : config.registry) {
         if (name.equals("runtime")) {
           continue;
         }
@@ -3482,19 +3493,56 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           error("service not found %s", name);
           continue;
         }
-        si.load(); // wonder how many problems will occur of applying config  
+        try {
+          sc = si.load();
+          configs.put(name, sc);
+        } catch (Exception e) {
+          error(e);
+        }
       }
-      
+
       log.info("starting start life-cycle");
-      // batch service life-cycle start      
-      for (String name : configs.keySet()) {
+      // batch service life-cycle start
+      for (String name : config.registry) {
         if (name.equals("runtime")) {
           continue;
         }
         ServiceInterface si = getService(name);
+        if (si == null) {
+          warn("could not start %s from config", name);
+          continue;
+        }
         si.startService();
       }
+
+      log.info("starting attach life-cycle");
+      // batch service life-cycle start
+      for (String name : config.registry) {
+        if (name.equals("runtime")) {
+          continue;
+        }
+        ServiceInterface si = getService(name);
+        if (si == null) {
+          warn("could not attach %s from config", name);
+          continue;
+        }
+
+        sc = configs.get(name);
+        if (sc.attach != null) {
+          for (String n : sc.attach) {
+            try {
+              // log.warn("attaching {} to {}", si.getName(), n);
+              si.attach(n);
+              si.broadcastState();
+            } catch (Exception e) {
+              error(e);
+            }
+          }
+        }
+      } // attach-life-cycle
+
     } // if registry
+    broadcastState();
     return c;
   }
 
@@ -3523,10 +3571,14 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
       error("could not release %s", filename);
     }
   }
+  
+  public boolean save() {
+    return save(null);
+  }
 
   /**
-   * Save runtime yml as well as all services
-   * configuration is saved in the configDir
+   * Save runtime yml as well as all services configuration is saved in the
+   * configDir
    */
   public boolean save(String filename) {
     try {
@@ -3564,11 +3616,19 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   public void setConfigName(String configName) {
-    this.configName = configName;    
+    this.configName = configName;
   }
-  
+
   public String getConfigName() {
     return configName;
+  }
+
+  public void subscribeToLifeCycleEvents(String name) {
+    addListener("registered", name);
+    addListener("created", name);
+    addListener("started", name);
+    addListener("stopped", name);
+    addListener("released", name);
   }
 
 }
