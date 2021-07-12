@@ -33,7 +33,7 @@ public class ArduinoServoConfigTest {
     LoggingFactory.init("info");
   }
   
-  // @Test
+  @Test
   public void generateSimpleConfigs() throws Exception {
 
     // create and connect the arduino to com5

@@ -134,6 +134,7 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
       deviceBusList.setSelectedItem(service.deviceBus);
       deviceAddressList.setSelectedItem(service.deviceAddress);
     }
+    /*
     if (service.isAttached) {
       attachButton.setText(detach);
       controllerList.setEnabled(false);
@@ -147,6 +148,7 @@ public class Mpu6050Gui extends ServiceGui implements ActionListener {
       deviceAddressList.setEnabled(true);
       refresh.setEnabled(false);
     }
+    */
     restoreListeners();
 
     accelX.setText(String.format("AccelX: %.3f G", service.accelGX));
