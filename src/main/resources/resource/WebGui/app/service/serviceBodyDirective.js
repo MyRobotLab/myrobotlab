@@ -57,7 +57,7 @@ angular.module('mrlapp.service').directive('serviceBody', ['$compile', '$templat
                     }
 
                     newscope.showPeers = function(show) {
-                        scope.panel.showPeers = show
+                       scope.panel.showPeerTable = show
                     }
 
                     newscope.export = function() {

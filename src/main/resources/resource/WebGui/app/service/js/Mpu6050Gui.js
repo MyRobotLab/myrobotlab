@@ -8,15 +8,12 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     // Don't think init is necessary for data that is bound
     $scope.controllerName = '';
     $scope.controllers = [];  
-    $scope.controllerLabel = 'Controller :';
-    $scope.deviceBusLabel = 'Bus :';
-    $scope.deviceAddressLabel = 'Address :';
     
     // Start of three.js scene and object creation
     // Create the scene
 	$log.info("Creating scene..");
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera( 75, 1, 0.1, 1000 );
+    var camera = new THREE.PerspectiveCamera( 25, 1, 0.5, 1000 );
 	var renderer = new THREE.WebGLRenderer();
 	renderer.setSize(400,400);
 	// Lightning
@@ -39,6 +36,8 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     var body = true;
     var fitLid = true;
     var blinn = true;
+
+    /* Don't know why this is missing from THREE - but it is...
     var teapotGeometry = new THREE.TeapotBufferGeometry( teapotSize,
 			tess,
 			bottom,
@@ -48,6 +47,18 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
 			blinn);
     
     var teapot = new THREE.Mesh(teapotGeometry, phongMaterial);   
+    */
+
+
+	const geometry = new THREE.BoxGeometry( 10, 10, 10 );
+	// const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+	const material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: true }  );
+	const teapot = new THREE.Mesh( geometry, material );
+
+	for ( var i = 0; i < geometry.faces.length; i ++ ) {
+        geometry.faces[ i ].color.setHex( Math.random() * 0xffffff );
+    }
+
 	var quarternion = new THREE.Quaternion(); 
 		
     scene.add(ambientLight);
@@ -56,8 +67,8 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
     // scene.add(gridHelper);
 
     camera.position.x = 0;
-    camera.position.y = 8;
-    camera.position.z = 50;
+    camera.position.y = 0;
+    camera.position.z = 40;
 
     renderer.render( scene, camera );
     // End of three.js scene creation and object creation  
@@ -133,11 +144,6 @@ angular.module('mrlapp.service.Mpu6050Gui', [])
         $scope.deviceAddress = address;
     }
     
-    // regrettably the onMethodMap dynamic
-    // generation of methods failed on this overloaded
-    // sweep method - there are several overloads in the
-    // Java service - although msg.sweep() was tried for ng-click
-    // for some reason Js resolved msg.sweep(null, null, null, null) :P
 
     msg.subscribe(this);
 }

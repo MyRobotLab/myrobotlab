@@ -1,5 +1,45 @@
-<div class="row col-md-12">
-    <div class="col-md-3"><b>Board Type</b> {{service.boardType}}<br />
+<div class="row">
+
+    <div class="col-md-3">
+        <b>board type</b>
+        {{service.boardType}}<br/>
+    </div>
+    <div class="col-md-9">&nbsp;</div>
+
+
+    <div class="col-md-1">
+        <button class="form-goup btn btn-default" title="clear consoles" ng-click="scan(service.bus)">scan i2c</button>
+    </div>
+    <div class="col-md-1">
+        <select ng-model="service.bus" class="form-goup form-control" title="format the data recieved as ascii, decimal or hex">
+            <option>0</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+    
+    <div class="col-md-10">&nbsp;</div>
+    <div class="col-md-1">
+        <b>bus</b><div ng-repeat="(index, pin) in service.validAddresses">{{index}} {{pin}}</div>
+
+    </div>
+    <div class="col-md-11">&nbsp;</div>
+
+
+    <div class="row col-md-4"></div>
+    <div class="row col-md-3"></div>
+    <div class="row col-md-12">
+        <img src="RasPi/raspi-3-pin-out.png" width="400"/>
+    </div>
+    <div class="row col-md-12">
+        <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400"/>
+    </div>
+</div>
+<!-- 
+
         <table>
             <tr>
                 <th>pin</th>
@@ -9,20 +49,10 @@
             </tr>
             <tr ng-repeat="(index, pin) in service.pinIndex">
                 <td><b>{{pin.pin}}</b></td>
-                <!-- td>{{pin.address}}</td -->
+                
                 <td><toggle on-class="btn-success" width="35" height="28" ng-model="selectedEnable" ng-change="makeDigital(pin.address)" width="80" height="30" on="" off=""/></td>
                 <td><toggle width="70" height="28" ng-model="selectedIo" ng-change="makeDigital(pin.address)" width="80" height="30" on="input" off="output"/></td>
                 <td ng-show={{pin.isAnalog}}><toggle width="70" height="28" ng-model="selectedAnalog" title="Virtual or Real Hardware" ng-change="makeDigital(pin.address)" width="80" height="30" on="analog" off="digital"/></td>
             </tr>
         </table>
-    </div>
-    <div class="col-md-5">
-        <img src="RasPi/raspi-3-model-b-rev-1.2.png" width="400" />
-    </div>
-    <div class="row col-md-4"></div>
-    <div class="row col-md-3"></div>
-    <div class="row col-md-5">
-        <img src="RasPi/raspi-3-pin-out.png" width="400" />
-    </div>
-    <div class="row col-md-4"></div>
-</div>
+-->
