@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.myrobotlab.arduino.BoardInfo;
@@ -59,14 +60,16 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   public static class I2CDeviceMap {
-    public I2CBus bus;
-    public I2CDevice device;
+    transient public I2CBus bus;
+    transient public I2CDevice device;
     public int deviceHandle;
     public String serviceName;
   }
 
-  // i2c bus
-  transient public static I2CBus i2c;
+  /**
+   * default bus current bus of raspi service 
+   */
+  String bus = "1";
 
   public static final int INPUT = 0x0;
 
@@ -81,8 +84,13 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   transient GpioPinDigitalOutput gpio01;
 
   transient GpioPinDigitalOutput gpio03;
+  
+  protected Map<Integer, Set<String>> validAddresses = new HashMap<>();
 
-  transient HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
+  /**
+   * for attached devices 
+   */
+  HashMap<String, I2CDeviceMap> i2cDevices = new HashMap<String, I2CDeviceMap>();
 
   /**
    * "quick fix" - no subscriptions nor listeners are made with other services,
@@ -149,32 +157,32 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   }
 
   void createI2cDevice(int bus, int address, String serviceName) {
-      String key = String.format("%d.%d", bus, address);
-      I2CDeviceMap devicedata = new I2CDeviceMap();
-      if (!i2cDevices.containsKey(key)) {
-        try {
-          if (wiringPi) {
-            int deviceHandle = I2C.wiringPiI2CSetup(address);
-            devicedata.serviceName = serviceName;
-            devicedata.bus = null;
-            devicedata.device = null;
-            devicedata.deviceHandle = deviceHandle;
-          } else {
-            I2CBus i2cBus = I2CFactory.getInstance(bus);
-            I2CDevice device = i2cBus.getDevice(address);
-            devicedata.serviceName = serviceName;
-            devicedata.bus = i2cBus;
-            devicedata.device = device;
-            devicedata.deviceHandle = -1;
-          }
-          i2cDevices.put(key, devicedata);
-          broadcastState();
-          log.info("Created device for {} key {}", serviceName, key);
-        } catch (Exception e) {
-          log.error("createI2cDevice failed", e);
-          error(e.getMessage());
+    String key = String.format("%d.%d", bus, address);
+    I2CDeviceMap devicedata = new I2CDeviceMap();
+    if (!i2cDevices.containsKey(key)) {
+      try {
+        if (wiringPi) {
+          int deviceHandle = I2C.wiringPiI2CSetup(address);
+          devicedata.serviceName = serviceName;
+          devicedata.bus = null;
+          devicedata.device = null;
+          devicedata.deviceHandle = deviceHandle;
+        } else {
+          I2CBus i2cBus = I2CFactory.getInstance(bus);
+          I2CDevice device = i2cBus.getDevice(address);
+          devicedata.serviceName = serviceName;
+          devicedata.bus = i2cBus;
+          devicedata.device = device;
+          devicedata.deviceHandle = -1;
         }
+        i2cDevices.put(key, devicedata);
+        broadcastState();
+        log.info("Created device for {} key {}", serviceName, key);
+      } catch (Exception e) {
+        log.error("createI2cDevice failed", e);
+        error(e.getMessage());
       }
+    }
   }
 
   @Override
@@ -445,10 +453,10 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
     super.startService();
     try {
       log.info("Initiating i2c");
-      i2c = I2CFactory.getInstance(I2CBus.BUS_1);
-      log.info("i2c initiated");
+      I2CFactory.getInstance(Integer.parseInt(bus));
+      log.info("i2c initiated on bus {}", bus);
+      // scan(); takes too long
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       log.error("i2c initiation failed", e);
     }
   }
@@ -548,6 +556,48 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   @Override
   public Integer getAddress(String pin) {
     return Integer.parseInt(pin);
+  }
+  
+  public void scan() {
+    scan(null);
+  }
+
+  public void scan(Integer busNumber) {
+
+    if (busNumber == null) {
+      busNumber = Integer.parseInt(bus);
+    }
+
+    try {
+
+      I2CBus bus = I2CFactory.getInstance(busNumber);
+
+      if (!validAddresses.containsKey(busNumber)) {
+        validAddresses.put(busNumber, new HashSet<>());
+      }
+      
+      Set<String> addresses = validAddresses.get(busNumber);
+
+      for (int i = 1; i < 128; i++) {
+        try {
+          I2CDevice device = bus.getDevice(i);
+          device.write((byte) 0);
+          addresses.add(Integer.toHexString(i));
+        } catch (Exception ignore) {
+        }
+      }
+
+      log.info("scan found: ---");
+      for (String a : addresses) {
+        log.info("address: "+ a);
+      }
+      log.info("----------");
+    } catch (Exception e) {
+      error("cannot access i2c bus %d", busNumber);
+      log.error("scan threw", e);
+    }
+    
+    broadcastState();
   }
 
 }
