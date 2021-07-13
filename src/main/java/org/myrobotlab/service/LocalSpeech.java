@@ -54,7 +54,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
   protected String mimicPath = getResourceDir() + fs + "mimic" + fs + "mimic.exe";
   protected String ttsCommand = null;
-  protected String filterChars = "\"\'\\n";
+  protected String filterChars = "\"\'\n";
   protected boolean removeExt = false;
   protected boolean ttsHack = false;
 
