@@ -21,8 +21,8 @@ angular.module('ModalController', [])
         }])
 
 angular.module('modalService', [])
-    .service('modalService', ['$uibModal', '$templateCache',
-        function ($uibModal, $templateCache) {
+    .service('modalService', ['$uibModal', '$templateCache', 'mrl',
+        function ($uibModal, $templateCache, mrl) {
 
             this.open = function (template, title, text, buttons, scope) {
                 if (!buttons) {
@@ -37,9 +37,8 @@ angular.module('modalService', [])
                     }
                 }
 
-                $uibModal.open({
-                    // template: $templateCache.get('modal-dialog.view.html'),
-                    templateUrl: template, //'widget/modal-dialog.view.html',
+                $uibModal.open({                    
+                    templateUrl: template,
                     controller: 'ModalController',
                     scope: scope,
                     resolve: {

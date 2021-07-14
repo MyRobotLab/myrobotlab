@@ -465,8 +465,9 @@ public class Joystick extends Service {
 
     Controller controller = controllers.get(index);
     String filename = String.format("%s-virtual-%s-%s.json", getName(), controller.getName(), ++index);
-
-    save(controller, filename);
+    
+    String json = CodecUtils.toJson(controller);    
+    FileIO.toFile(filename, json);
 
     // FIXME - non-symmetric save and load :(
     String fname = String.format("%s%s%s", FileIO.getCfgDir(), File.separator, filename);

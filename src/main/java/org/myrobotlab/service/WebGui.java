@@ -55,6 +55,8 @@ import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
+import org.myrobotlab.service.config.ServiceConfig;
+import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.slf4j.Logger;
@@ -351,7 +353,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     return Runtime.getInstance().getConnections(getName());
   }
 
-  public Config.Builder getConfig() {
+  public Config.Builder getNettosphereConfig() {
 
     Config.Builder configBuilder = new Config.Builder();
     try {
@@ -918,10 +920,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
     start();
   }
 
-  public boolean save() {
-    return super.save();
-  }
-
   /**
    * From UI events --to--&gt; MRL request to save panel data typically done
    * after user has changed or updated the UI in position, height, width, zIndex
@@ -1028,11 +1026,11 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
       if (nettosphere != null && nettosphere.isStarted()) {
         // is running
-        info("currently running on port %s - stop first, then start", port);
+        log.info("webgui already started on port {}", port);
         return;
       }
 
-      nettosphere = new Nettosphere.Builder().config(getConfig().build()).build();
+      nettosphere = new Nettosphere.Builder().config(getNettosphereConfig().build()).build();
       sleep(1000); // needed ?
 
       try {
@@ -1166,7 +1164,26 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
       jmdns = null;
     }
   }
+  
+  @Override
+  public ServiceConfig getConfig() {
+    WebGuiConfig config = (WebGuiConfig) initConfig(new WebGuiConfig());
+    config.port = port;
+    config.autoStartBrowser = autoStartBrowser;
+    
+    return config;
+  }
+  
+  public ServiceConfig load(ServiceConfig c) {
+    WebGuiConfig config = (WebGuiConfig)c;
 
+    if (config.port != null && (port != null && config.port.intValue() != port.intValue())) {
+      setPort(config.port);
+    }
+    autoStartBrowser(config.autoStartBrowser);
+    return config;
+  }
+  
   public static void main(String[] args) {
     LoggingFactory.init(Level.WARN);
 

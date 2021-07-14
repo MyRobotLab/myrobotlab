@@ -26,7 +26,6 @@
 package org.myrobotlab.framework;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -66,6 +65,7 @@ import org.myrobotlab.io.FileIO;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.logging.Logging;
 import org.myrobotlab.service.Runtime;
+import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.data.Locale;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.QueueReporter;
@@ -349,10 +349,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * 
    */
   public static void sleep(int millis) {
-    try {
-      Thread.sleep(millis);
-    } catch (InterruptedException e) {
-    }
+    sleep((long) millis);
   }
 
   public static void sleep(long millis) {
@@ -1281,37 +1278,108 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * method of de-serializing default will to load simple xml from name file
+   * Default load config method, subclasses should override this to support 
+   * service specific configuration in the service yaml files.
+   * 
+   * @param config
+   * @return
    */
-  @Override
-  public boolean load() {
-    return load(null, null);
+  public ServiceConfig load(ServiceConfig config) {
+    log.info("Default service config loading for service: {} type: {}", getName(), getType());
+    return config;
   }
 
-  public boolean load(Object o, String inCfgFileName) {
-    String filename = null;
-    if (inCfgFileName == null) {
-      filename = String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName()));
-    } else {
-      filename = inCfgFileName;
+  /**
+   * Default getConfig returns name and type with null service specific config
+   * 
+   * @return
+   */
+  public ServiceConfig getConfig() {
+    ServiceConfig sc = new ServiceConfig();
+    initConfig(sc);
+    return sc;
+  }
+
+  protected ServiceConfig initConfig(ServiceConfig config) {
+    config.name = getName();
+    config.type = getSimpleName();
+    if (Runtime.isRuntime(this)) {
+      config.locale = getLocaleTag();
+    } else if (locale != null && !locale.equals(Runtime.getInstance().getLocale())) {
+      config.locale = getLocaleTag();
+    }
+    Set<String> attached = getAttached();
+    // get locals
+    for (String n : attached) {
+      if (CodecUtils.isLocal(n, getId())) {
+        if (config.attach == null) {
+          config.attach = new ArrayList<>();
+        }
+        config.attach.add(n);
+      }
     }
 
-    File cfg = new File(filename);
-    if (cfg.exists()) {
-      try {
-        String json = FileIO.toString(filename);
-        if (!loadFromJson(o, json)) {
-          log.info("could not load file {}", filename);
-        } else {
-          return true;
-        }
-      } catch (Exception e) {
-        log.error("load threw", e);
-      }
-    } else {
-      log.info("cfg file {} does not exist", filename);
+    return config;
+  }
+
+  /**
+   * method of de-serializing default will to load simple xml from name file
+   * 
+   * @throws IOException
+   */
+  public ServiceConfig load() throws IOException {
+    return load((String) null);
+  }
+
+  /**
+   * loads a yaml configuration file from the file system default location will
+   * be data/config/{name}.yml
+   * 
+   * @param filename
+   * @return
+   * @throws IOException
+   */
+  public ServiceConfig load(String filename) throws IOException {
+
+    Runtime runtime = Runtime.getInstance();
+
+    if (filename == null) {
+      filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
     }
-    return false;
+
+    String format = filename.substring(filename.lastIndexOf(".") + 1);
+
+    Object o = null;
+    try {
+      o = Instantiator.getThrowableNewInstance(null, String.format("org.myrobotlab.service.config.%sConfig", getSimpleName()));
+    } catch (ClassNotFoundException e) {
+      log.info("no specific config available for {} of type {}", getName(), getSimpleName());
+    } catch (Exception e) {
+      error(e);
+    }
+    if (o == null) {
+      log.info("{}Config does not exist - using default ServiceConfig", getSimpleName());
+    }
+
+    Class<?> clazz = (o == null)?ServiceConfig.class:o.getClass();    
+    ServiceConfig config = null;
+    
+    String data = FileIO.toString(filename);
+    if ("json".equalsIgnoreCase(format)) {
+      config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
+    } else {
+      config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
+    }
+
+    // be aware - the service may or may not be started
+    load(config);
+    
+    // previously used to attempt to process attaches here
+    // attaches do not work well before starting - attaching
+    // has now been moved out to runtime
+
+    return config;
+
   }
 
   @Override
@@ -1557,58 +1625,62 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public boolean save() {
-
-    try {
-      File cfg = new File(String.format("%s%s%s.json", FileIO.getCfgDir(), fs, String.format("%s-%s", getClass().getSimpleName(), getName())));
-      // serializer.write(this, cfg);
-      // this is a spammy log message
-      // info("saving %s", cfg.getName());
-      if (this instanceof Runtime) {
-        // info("we cant serialize runtime yet");
-        return false;
-      }
-
-      String s = CodecUtils.toPrettyJson(this);
-      FileOutputStream out = new FileOutputStream(cfg);
-      out.write(s.getBytes());
-      out.close();
-    } catch (Exception e) {
-      log.error("save threw", e);
-      return false;
-    }
-    return true;
+    return save(null, null, null);
   }
 
-  public boolean save(Object o, String cfgFileName) {
+  public boolean save(String filename) {
+    return save(filename, null, null);
+  }
 
+  public boolean save(String filename, Boolean allowNullFields, Boolean saveNonConfigServices) {
     try {
-      File cfg = new File(String.format("%s%s%s", FileIO.getCfgDir(), fs, cfgFileName));
-      String s = CodecUtils.toJson(o);
-      FileOutputStream out = new FileOutputStream(cfg);
-      out.write(s.getBytes());
-      out.close();
+
+      if (allowNullFields == null) {
+        allowNullFields = true;
+      }
+
+      if (saveNonConfigServices == null) {
+        saveNonConfigServices = false;
+      }
+
+      if (filename == null) {
+        filename = Runtime.getInstance().getConfigDir() + fs + Runtime.getInstance().getConfigName() + fs + getName() + ".yml";
+      }
+
+      String format = filename.substring(filename.lastIndexOf(".") + 1);
+      ServiceConfig config = getConfig();
+
+      // bad idea of an optimizaton
+      /**
+       * <pre>
+       * if (config.getClass().equals(ServiceConfig.class) && !saveNonConfigServices && config.listeners == null) {
+       *   log.info("service {} without config - will not save file", getName());
+       *   return true;
+       * }
+       * </pre>
+       */
+
+      String data = null;
+      if ("json".equals(format.toLowerCase())) {
+        data = CodecUtils.toJson(config);
+      } else {
+        data = CodecUtils.toYaml(config);
+      }
+
+      FileIO.toFile(filename, data.getBytes());
+
+      info("saved %s config to %s", getName(), filename);
+      return true;
+
     } catch (Exception e) {
-      log.error("save threw", e);
-      return false;
+      error(e);
     }
-    return true;
+    return false;
   }
 
   public ServiceInterface getPeer(String peerKey) {
     String peerName = serviceType.getPeerActualName(peerKey);
     return Runtime.getService(peerName);
-  }
-
-  public boolean save(String cfgFileName, String data) {
-    // saves user data in the .myrobotlab directory
-    // with the file naming convention of name.<cfgFileName>
-    try {
-      FileIO.toFile(String.format("%s%s%s.%s", FileIO.getCfgDir(), fs, this.getName(), cfgFileName), data);
-    } catch (Exception e) {
-      Logging.logError(e);
-      return false;
-    }
-    return true;
   }
 
   public void send(String name, String method) {
@@ -1825,8 +1897,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   @Override
   public void loadAndStart() {
-    load();
-    startService();
+    try {
+      load();
+      startService();
+    } catch (Exception e) {
+      log.error("Load and Start failed.", e);
+    }
   }
 
   @Override
@@ -2224,7 +2300,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     // return all attached
     return outbox.getAttached(null);
   }
-  
+
   /**
    * returns all currently attached services to a specific publishing point
    */
@@ -2232,8 +2308,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   public Set<String> getAttached(String publishPoint) {
     return outbox.getAttached(publishPoint);
   }
-
-
 
   /**
    * This attach when overriden "routes" to the appropriately typed
@@ -2381,50 +2455,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
     this.id = id;
   }
 
-  public String export() throws IOException {
-    return export("data" + fs + "config" + fs + getName(), getName());
-  }
-
-  /**
-   * Export the current service to file named given
-   * 
-   * @param filename
-   * @return
-   * @throws IOException
-   */
-  public String export(String filename) throws IOException {
-    return export(filename, getName());
-  }
-
-  public String export(String filename, String names) throws IOException {
-    try {
-      String export = Runtime.getInstance().export(filename, names);
-      // String python = LangPyUtils.toPython(filename, names);
-      info("saved to %s", filename);
-      return export;
-    } catch (Exception e) {
-      error(e);
-    }
-    return null;
-  }
-  
-  public void startConfig(String[] names) {
-    try {
-      Runtime.getInstance().startConfig(names);
-    } catch(Exception e) {
-      error(e);
-    }
-  }
-
-  public void releaseConfig(String[] names) {
-    try {
-      Runtime.getInstance().releaseConfig(names);
-    } catch(Exception e) {
-      error(e);
-    }
-  }
-  
-  
   /**
    * non parameter version for use within a Service
    * 

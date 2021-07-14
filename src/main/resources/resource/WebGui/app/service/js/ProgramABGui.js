@@ -168,7 +168,10 @@ angular.module('mrlapp.service.ProgramABGui', []).controller('ProgramABGuiCtrl',
     }
 
     $scope.getBotInfo = function() {
-        return $scope.service.bots[$scope.service.currentBotName]
+        if ($scope.service && $scope.service.bots){
+            return $scope.service.bots[$scope.service.currentBotName]
+        }
+        return null
     }
 
     $scope.getCurrentSession = function() {

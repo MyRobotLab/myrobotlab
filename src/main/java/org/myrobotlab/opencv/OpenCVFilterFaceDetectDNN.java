@@ -188,7 +188,7 @@ public class OpenCVFilterFaceDetectDNN extends OpenCVFilter {
           classifications.put(FACE_LABEL, cl);
         }
         bb.add(rect);
-
+        data.putBoundingBoxArray(bb);
       }
     }
 

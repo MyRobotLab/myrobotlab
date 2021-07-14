@@ -12,7 +12,6 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
     var firstTime = true
 
     // init
-    $scope.pin = null
     $scope.min = 0
     $scope.max = 180
 
@@ -135,31 +134,31 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.inputFieldMin = function(){
+    $scope.inputFieldMin = function() {
         if ($scope.lockInputOutput) {
             $scope.outputSlider.minValue = $scope.inputSlider.minValue
         }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
-    $scope.inputFieldMax = function(){
+    $scope.inputFieldMax = function() {
         if ($scope.lockInputOutput) {
             $scope.outputSlider.maxValue = $scope.inputSlider.maxValue
         }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
-    $scope.outputFieldMin = function(){
+    $scope.outputFieldMin = function() {
         if ($scope.lockInputOutput) {
             $scope.inputSlider.minValue = $scope.outputSlider.minValue
         }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
-    $scope.outputFieldMax = function(){
+    $scope.outputFieldMax = function() {
         if ($scope.lockInputOutput) {
             $scope.inputSlider.maxValue = $scope.outputSlider.maxValue
         }
         msg.send('map', $scope.inputSlider.minValue, $scope.inputSlider.maxValue, $scope.outputSlider.minValue, $scope.outputSlider.maxValue)
     }
-    $scope.restField = function(){
+    $scope.restField = function() {
         msg.send('setRest', $scope.restSlider.value)
     }
 
@@ -231,22 +230,19 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.speedDisplay = 'Max'
         }
 
-        $scope.pin = service.pin
-
         $scope.pos.options.minLimit = service.mapper.minX
         $scope.pos.options.maxLimit = service.mapper.maxX
 
         $scope.restSlider.options.minLimit = service.mapper.minX
         $scope.restSlider.options.maxLimit = service.mapper.maxX
-        if($scope.restSlider.value < $scope.inputSlider.minValue){
+        if ($scope.restSlider.value < $scope.inputSlider.minValue) {
             $scope.restSlider.value = $scope.inputSlider.minValue
             msg.send('setRest', $scope.restSlider.value)
         }
-        if($scope.restSlider.value > $scope.inputSlider.maxValue){
+        if ($scope.restSlider.value > $scope.inputSlider.maxValue) {
             $scope.restSlider.value = $scope.inputSlider.maxValue
             msg.send('setRest', $scope.restSlider.value)
         }
-
 
         // ui initialization - good idea !
         // first time is 'status' - otherwise control
@@ -303,7 +299,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
             $scope.service.currentOutputPos = data.angle
             $scope.$apply()
             break
-
+        case 'onStatus':
+            break
         case 'onServoEvent':
             console.info("ServoEvent")
             console.info(data)
@@ -325,8 +322,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
         }
     }
 
-    $scope.setPin = function(inPin) {
-        $scope.pin = inPin
+    $scope.setPin = function() {
+        msg.send('setPin', $scope.service.pin)
     }
 
     $scope.setAutoDisable = function() {
@@ -351,8 +348,8 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
         let pos = $scope.pos.value;
         // currently taken from the slider's value :P - not good if the slider's value is not good :(
-        if ($scope.speedSlider.value == 501){
-            msg.send('attach', controller, pin, pos)            
+        if ($scope.speedSlider.value == 501) {
+            msg.send('attach', controller, pin, pos)
         } else {
             msg.send('attach', controller, pin, pos, $scope.speedSlider.value)
         }
@@ -363,7 +360,7 @@ angular.module('mrlapp.service.ServoGui', []).controller('ServoGuiCtrl', ['$time
 
     // msg.subscribe("publishMoveTo")
     msg.subscribe("publishServoEvent")
-//    msg.subscribe("publishEncoderData")
+    //    msg.subscribe("publishEncoderData")
     msg.subscribe("refreshControllers")
     msg.subscribe(this)
     msg.send('refreshControllers')

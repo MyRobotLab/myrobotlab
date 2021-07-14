@@ -25,10 +25,10 @@
                 </a>
             </li>
             <li>
-                <a href="" target="_blank">
+                <a href="" target="_blank" width="100%">
                     <i class="glyphicon glyphicon-equalizer"></i>                
-                    <span ng-show="!parentPanel.showPeers" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>                 
-                    <span ng-show="parentPanel.showPeers" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>                 
+                    <span ng-show="!parentPanel.showPeerTable" ng-click="showPeers(true)">&nbsp;&nbsp;show peers</span>                 
+                    <span ng-show="parentPanel.showPeerTable" ng-click="showPeers(false)">&nbsp;&nbsp;hide peers</span>                 
                 </a>
             </li>
             <li>
@@ -73,7 +73,7 @@
 </div>
 
 <!-- ================= begin peers ================== -->
-<div ng-show="parentPanel.showPeers">
+<div ng-show="parentPanel.showPeerTable">
 <table class="table table-sm">
   <thead>
     <tr>

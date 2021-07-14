@@ -62,8 +62,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * 
    */
   // joystick to motor axis defaults
-  String axisLeft = "y";
-  String axisRight = "rz";
+  protected String axisLeft = "y";
+  protected String axisRight = "rz";
   protected String brain;
   private String brainPath = "../github";
   protected String controller;
@@ -71,20 +71,21 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   protected String eye;
   protected String joystick;
 
-  String joystickControllerName = "Rumble";
+  protected String joystickControllerName = "Rumble";
 
-  final List<Status> lastErrors = new ArrayList<Status>();
-  Double maxX = 1.0;
-  Double maxY = 20.0;
+  protected final List<Status> lastErrors = new ArrayList<Status>();
+  protected Double maxX = 1.0;
+  protected Double maxY = 20.0;
 
   // FIXME - get/use defaults from controller ????
-  Double minX = -1.0;
-  Double minY = -20.0;
+  protected Double minX = -1.0;
+  protected Double minY = -20.0;
 
   protected String motorLeft;
-  String motorPortLeft = "m2";
+  
+  protected String motorPortLeft = "m2";
 
-  String motorPortRight = "m1";
+  protected String motorPortRight = "m1";
 
   protected String motorRight;
 
@@ -94,7 +95,7 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   // the broadcast'ing ability to broadcast to many
   protected String mouth;
 
-  String serialPort = "/dev/ttyUSB0";
+  protected String serialPort = "/dev/ttyUSB0";
 
   public WorkE(String n, String id) {
     super(n, id);
@@ -787,8 +788,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // FIXME - test create & substitution
       // FIXME - setters & getters for peers
 
-      WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
-      worke.startPeer("eye");
+      // WorkE worke = (WorkE) Runtime.start("worke", "WorkE");
+      // worke.startPeer("eye");
       /*
        * worke.startPeer("joystick"); worke.startPeer("motorLeft");
        * worke.startPeer("motorRight"); worke.startPeer("controller");
@@ -801,7 +802,8 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
       // polly.setKeys("XXXX", "XXXXXXX");
       // polly.speak("hello, i can talk !");
 
-      worke.export("worke");
+      // worke.save("worke.yml");
+      Runtime.getInstance().save();
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);

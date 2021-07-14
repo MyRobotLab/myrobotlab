@@ -193,6 +193,9 @@ public class ServiceLifeCycleTest extends AbstractTest {
     String catcher01FullName = catcher01.getFullName();
     String catcher02FullName = catcher02.getFullName();
 
+    /**<pre>
+     * perhaps all these subscriptions is a bad idea
+    
     // verify registered cross-pollination
     assertNotNull(catcher01.onRegistered.get(catcher02FullName)); 
     // catcher01 was created before catcher02
@@ -226,6 +229,8 @@ public class ServiceLifeCycleTest extends AbstractTest {
     catcher02.releaseService();
     assertTrue(catcher01.onStopped.contains(catcher02FullName));
     
+    </pre>
+     */
 
     
     // release peer

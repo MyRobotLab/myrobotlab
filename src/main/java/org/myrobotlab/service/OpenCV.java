@@ -54,7 +54,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 import org.bytedeco.javacv.CanvasFrame;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
@@ -118,6 +117,8 @@ import org.myrobotlab.opencv.Overlay;
 import org.myrobotlab.opencv.YoloDetectedObject;
 import org.myrobotlab.reflection.Reflector;
 import org.myrobotlab.service.abstracts.AbstractComputerVision;
+import org.myrobotlab.service.config.OpenCVConfig;
+import org.myrobotlab.service.config.ServiceConfig;
 // import org.myrobotlab.swing.VideoWidget2;
 import org.slf4j.Logger;
 
@@ -270,10 +271,10 @@ public class OpenCV extends AbstractComputerVision {
 
   public final static String POSSIBLE_FILTERS[] = { "AdaptiveThreshold", "AddMask", "Affine", "And", "BlurDetector", "BoundingBoxToFile", "Canny", "ColorTrack", "Copy",
       "CreateHistogram", "Detector", "Dilate", "DL4J", "DL4JTransfer", "Erode", "FaceDetect", "FaceDetectDNN", "FaceRecognizer", "FaceTraining", "Fauvist", "FindContours", "Flip",
-      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth", "KinectDepthMask",
-      "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown", "PyramidUp", "ResetImageRoi", "Resize",
-      "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector", "Threshold", "Tracker", "Transpose",
-      "Undistort", "Yolo" };
+      "FloodFill", "FloorFinder", "FloorFinder2", "GoodFeaturesToTrack", "Gray", "HoughLines2", "Hsv", "ImageSegmenter", "Input", "InRange", "Invert", "KinectDepth",
+      "KinectDepthMask", "KinectNavigate", "LKOpticalTrack", "Lloyd", "Mask", "MatchTemplate", "MiniXception", "MotionDetect", "Mouse", "Output", "Overlay", "PyramidDown",
+      "PyramidUp", "ResetImageRoi", "Resize", "SampleArray", "SampleImage", "SetImageROI", "SimpleBlobDetector", "Smooth", "Solr", "Split", "SURF", "Tesseract", "TextDetector",
+      "Threshold", "Tracker", "Transpose", "Undistort", "Yolo" };
 
   static final long serialVersionUID = 1L;
 
@@ -392,87 +393,6 @@ public class OpenCV extends AbstractComputerVision {
    */
   static public String[] getPossibleFilters() {
     return POSSIBLE_FILTERS;
-  }
-
-  public static void main(String[] args) throws Exception {
-
-    // TODO - Avoidance / Navigation Service
-    // ground plane
-    // http://stackoverflow.com/questions/6641055/obstacle-avoidance-with-stereo-vision
-    // radio lab - map cells location cells yatta yatta
-    // lkoptical disparity motion Time To Contact
-    // https://www.google.com/search?aq=0&oq=opencv+obst&gcx=c&sourceid=chrome&ie=UTF-8&q=opencv+obstacle+avoidance
-    //
-    LoggingFactory.init("info");
-
-    // Runtime.start("python", "Python");
-    OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
-    // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
-    // cv.addFilter(td);
-
-    // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
-    // cv.addFilter(md);
-
-//     cv.capture(4);
-    FFmpegFrameGrabber grabber = new FFmpegFrameGrabber("tcp://worke-pi:2222");
-    grabber.start();
-    cv.capture(grabber);;
-
-    // Runtime.start("gui", "SwingGui");
-
-    WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
-    webgui.autoStartBrowser(false);
-    webgui.startService();
-
-    // FFmpegFrameRecorder test = new
-
-    // FFmpegFrameRecorder recorder = new
-    // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
-    // recorder.setFormat("webm");
-    // recorder.start();
-
-    /**
-     * <pre>
-     * 
-     * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
-     *
-     * private void initLiveStream() throws FrameRecorder.Exception {
-     * 
-     * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
-     * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
-     * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-     * frameRecorder.setAudioCodec(0);
-     * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-     * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
-     * frameRecorder.setFrameRate(frameRate);
-     * frameRecorder.setVideoBitrate(5000);
-     * frameRecorder.setOption("content_type","video/webm");
-     * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
-     *
-     *
-     * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
-     * grabber.getImageWidth(), grabber.getImageHeight());
-     * recorder.setFormat(grabber.getFormat());
-     * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
-     * recorder.setFrameRate(grabber.getFrameRate());
-     * recorder.setVideoBitrate(grabber.getVideoBitrate());
-     * recorder.setVideoCodec(grabber.getVideoCodec());
-     * recorder.setVideoOption("preset", "ultrafast");
-     * recorder.setVideoCodecName("libx264");
-     * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
-     * 
-     */
-
-    boolean done = true;
-    if (done) {
-      return;
-    }
-
-    OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
-    cv.addFilter(depth);
-    cv.capture();
-    cv.addFilter("Yolo");
-
   }
 
   public void stopStreamer() {
@@ -1359,12 +1279,12 @@ public class OpenCV extends AbstractComputerVision {
            * canvasFrame.setSize(600, 480); canvasFrame.pack(); }
            * canvasFrame.showImage(b);
            */
-          
+
           if (canvasFrame == null) {
-            canvasFrame = new CanvasFrame(String.format("%s - %s",  getName(), displayFilter));
+            canvasFrame = new CanvasFrame(String.format("%s - %s", getName(), displayFilter));
             // canvasFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
           }
-          
+
           if (b != null) {
             canvasFrame.showImage(b);
           } else {
@@ -1374,13 +1294,11 @@ public class OpenCV extends AbstractComputerVision {
             }
           }
           /*
-          if (videoWidget == null) {
-            videoWidget = new VideoWidget2(getName());
-          }
-          
-          videoWidget.setVisible(true);
-          videoWidget.displayFrame(si);
-          */
+           * if (videoWidget == null) { videoWidget = new
+           * VideoWidget2(getName()); }
+           * 
+           * videoWidget.setVisible(true); videoWidget.displayFrame(si);
+           */
 
         } else if (canvasFrame != null && !nativeViewer) {
           canvasFrame.dispose();
@@ -1507,7 +1425,7 @@ public class OpenCV extends AbstractComputerVision {
   public ArrayList<Rect> publishMotionDetected(ArrayList<Rect> rects) {
     return rects;
   }
-  
+
   public Map<String, List<Classification>> publishClassification(Map<String, List<Classification>> data) {
     // log.info("Publish Classification in opencv!");
     // aggregate locally for fun - "better" is to send it to a search engine
@@ -1988,6 +1906,10 @@ public class OpenCV extends AbstractComputerVision {
   public void stopService() {
     super.stopService();
     stopCapture();
+    if (canvasFrame != null) {
+      canvasFrame.dispose();
+      canvasFrame = null;
+    }
   }
 
   public void setFormat(String format) {
@@ -2117,7 +2039,6 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   public void saveFile(String filename, String data) {
-    log.info("here !");
     FileOutputStream fos = null;
     try {
       String path = FileIO.gluePaths(getDataDir(), filename);
@@ -2136,6 +2057,133 @@ public class OpenCV extends AbstractComputerVision {
     } catch (Exception e) {
       error(e.getMessage());
     }
+  }
+
+  @Override
+  public ServiceConfig getConfig() {
+    OpenCVConfig config = (OpenCVConfig) initConfig(new OpenCVConfig());
+    config.capturing = capturing;
+    config.cameraIndex = cameraIndex;
+    // TODO: make the grabber config a nested object to clean this up..
+    config.grabberType = grabberType;
+    config.inputFile = inputFile;
+    config.inputSource = inputSource;
+    config.nativeViewer = nativeViewer;
+    config.webViewer = webViewer;
+    config.filters = new LinkedHashMap<>();
+    config.filters.putAll(filters);
+
+    return config;
+  }
+
+  public ServiceConfig load(ServiceConfig c) {
+    OpenCVConfig config = (OpenCVConfig) c;
+    setCameraIndex(config.cameraIndex);
+    setGrabberType(config.grabberType);
+    setInputFileName(config.inputFile);
+    setInputSource(config.inputSource);
+    
+    setNativeViewer(config.nativeViewer);
+    
+    setWebViewer(config.webViewer);
+    
+    filters.clear();
+    if (config.filters != null) {
+      for (OpenCVFilter f : config.filters.values()) {
+        addFilter(f);
+        // TODO: better configuration of the filter when it's added.
+      }
+    }
+    
+    if (config.capturing) {
+      capture();
+    }
+
+    return c;
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    try {
+      Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
+      LoggingFactory.init("INFO");
+
+      Runtime.getInstance().load();
+
+      // Runtime.start("python", "Python");
+      OpenCV cv = (OpenCV) Runtime.start("cv", "OpenCV");
+
+      // OpenCVFilterTextDetector td = new OpenCVFilterTextDetector("td");
+      // cv.addFilter(td);
+
+      // OpenCVFilterMotionDetect md = new OpenCVFilterMotionDetect("md");
+      // cv.addFilter(md);
+
+      // cv.capture(4);
+      // FFmpegFrameGrabber grabber = new
+      // FFmpegFrameGrabber("tcp://worke-pi:2222");
+      // grabber.start();
+      // cv.capture(grabber);;
+
+      // Runtime.start("gui", "SwingGui");
+
+      WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
+      webgui.autoStartBrowser(false);
+      webgui.startService();
+
+      // FFmpegFrameRecorder test = new
+
+      // FFmpegFrameRecorder recorder = new
+      // FFmpegFrameRecorder("tcp://localhost:9090?listen", 640, 480);
+      // recorder.setFormat("webm");
+      // recorder.start();
+
+      /**
+       * <pre>
+       * 
+       * https://stackoverflow.com/questions/43008150/android-javacv-ffmpeg-webstream-to-local-static-website
+       *
+       * private void initLiveStream() throws FrameRecorder.Exception {
+       * 
+       * frameRecorder = new FFmpegFrameRecorder("http://localhost:9090",
+       * imageWidth, imageHeight, 0); frameRecorder.setVideoOption("preset",
+       * "ultrafast"); frameRecorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+       * frameRecorder.setAudioCodec(0);
+       * frameRecorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+       * frameRecorder.setFormat("webm"); frameRecorder.setGopSize(10);
+       * frameRecorder.setFrameRate(frameRate);
+       * frameRecorder.setVideoBitrate(5000);
+       * frameRecorder.setOption("content_type","video/webm");
+       * frameRecorder.setOption("listen", "1"); frameRecorder.start(); }
+       *
+       *
+       * FrameRecorder recorder = new FFmpegFrameRecorder("out.mp4",
+       * grabber.getImageWidth(), grabber.getImageHeight());
+       * recorder.setFormat(grabber.getFormat());
+       * recorder.setPixelFormat(AV_PIX_FMT_YUV420P);
+       * recorder.setFrameRate(grabber.getFrameRate());
+       * recorder.setVideoBitrate(grabber.getVideoBitrate());
+       * recorder.setVideoCodec(grabber.getVideoCodec());
+       * recorder.setVideoOption("preset", "ultrafast");
+       * recorder.setVideoCodecName("libx264");
+       * recorder.setVideoCodec(AV_CODEC_ID_H264); recorder.start();
+       * 
+       */
+
+      boolean done = true;
+      if (done) {
+        return;
+      }
+
+      OpenCVFilterKinectDepth depth = new OpenCVFilterKinectDepth("depth");
+      cv.addFilter(depth);
+      cv.capture();
+      cv.addFilter("Yolo");
+
+    } catch (Exception e) {
+      log.error("main threw", e);
+    }
+
   }
 
 }

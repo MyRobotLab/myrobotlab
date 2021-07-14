@@ -2,9 +2,8 @@ package org.myrobotlab.jme3;
 
 import java.io.IOException;
 
-import org.myrobotlab.framework.Service;
-import org.myrobotlab.framework.interfaces.ServiceInterface;
 import org.myrobotlab.logging.LoggerFactory;
+import org.myrobotlab.math.MapperLinear;
 import org.myrobotlab.math.interfaces.Mapper;
 import org.myrobotlab.service.JMonkeyEngine;
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import org.slf4j.Logger;
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.export.Savable;
-import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -20,12 +18,7 @@ import com.jme3.scene.Spatial;
 public class UserData implements Savable {
   public final static Logger log = LoggerFactory.getLogger(UserData.class);
 
-  public String parentName;
-
   public transient JMonkeyEngine jme;
-
-  @Deprecated
-  public transient ServiceInterface service;
 
   public transient Spatial spatial;
 
@@ -34,22 +27,20 @@ public class UserData implements Savable {
    */
   public transient Geometry bb;
 
-  public Mapper mapper;
+  /**
+   * this could be jsut a Mapper interface, however, it cuts down on the 
+   * saved yml if its a concrete class
+   */
+  public MapperLinear mapper;
 
-  transient public Vector3f rotationMask;
-
-  transient public Vector3f localTranslation; // transitory ? init only ? INIT
-                                              // !!!
-  // probably - which means its local first
-  // loaded
-
-  transient public Vector3f initialRotation;
+  /**
+   * Rotation axis mask to be applied to a node
+   * Can be x, y, z - 
+   */
+  // public Vector3f rotationMaskx;
+  public String rotationMask;
 
   transient Node meta;
-
-  public Double currentAngle;
-
-  public String assetPath;
 
   String bbColor;
 
@@ -80,48 +71,15 @@ public class UserData implements Savable {
   public Mapper getMapper() {
     return mapper;
   }
-
-  public ServiceInterface getService() {
-    return service;
-  }
-
-  /**
-   * rotate object relative to its local coordinates in degrees
-   * 
-   * @param localAngle
-   */
-  public void rotateDegrees(float localAngle) {
-    rotateDegrees((double) localAngle);
-  }
-
-  /**
-   * rotate object relative to its local coordinates in degrees
-   * 
-   * @param localAngle
-   */
-  public void rotateDegrees(double localAngle) {
-    double deltaAngle = (currentAngle - localAngle) * 0.0174533; // Math.PI /
-                                                                 // 180;
-    Vector3f newAngle = rotationMask.mult((float) deltaAngle);
-    spatial.rotate(newAngle.x, newAngle.y, newAngle.z);
-    currentAngle = localAngle;
-    log.info("currentAngle {} newAngle {} deltaAngle {}", currentAngle, localAngle, deltaAngle);
-  }
-
-  public void setService(Service service) {
-    this.service = service;
-  }
-
+  
   @Override
   public void write(JmeExporter ex) throws IOException {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void read(JmeImporter im) throws IOException {
     // TODO Auto-generated method stub
-
   }
 
   public String toString() {
@@ -135,5 +93,8 @@ public class UserData implements Savable {
    * spatial.scale(scale); spatial.updateGeometricState();
    * spatial.updateModelBound(); }
    */
+  
+  public UserData() {
+  }
 
 }

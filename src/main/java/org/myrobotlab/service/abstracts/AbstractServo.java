@@ -62,7 +62,7 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * the servo. By default this is disabled.
    * 
    */
-  protected Boolean autoDisable = false;
+  protected boolean autoDisable = false;
 
   /**
    * The current servo controller that this servo is attached to. TODO: move
@@ -105,18 +105,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    */
   protected transient EncoderControl encoder; // this does not need to be
                                               // transient in the future
-
-  /**
-   * If the servo was disabled through an idle-timeout. If the servo is disabled
-   * through an idle-timeout, it can be re-enabled on next move. If the servo
-   * was disabled through a human or event which "manually" disabled the servo,
-   * the servo SHOULD NOT be enabled next move - this is an internal field
-   */
-  // TODO: KW: simplify this logic to avoid the need of this additional boolean
-  // here.
-  // grog: I doubt it can be simplified - the javadoc was clear in the
-  // requirements - non-trivial
-  protected boolean idleDisabled = false;
 
   /**
    * if autoDisable is true - then after any move a timer is set to disable the
@@ -185,8 +173,6 @@ public abstract class AbstractServo extends Service implements ServoControl, Ser
    * min sweep value
    */
   protected Double sweepMin = null;
-
-  transient protected ServoController sc;
 
   /**
    * synchronized servos - when this one moves, it sends move commands to these
@@ -420,6 +406,8 @@ private Double maxSpeed;
     controller = null;
     disable();
     send(sc, "detach", getName());
+    // 20210703 - grog I don't know why a sleep was put here
+    // junit ServoTest will fail without this :P
     sleep(500);
     firstMove = true;
     broadcastState();
@@ -439,8 +427,8 @@ private Double maxSpeed;
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
-        purgeTask("idleDisable");
-        addTaskOneShot(idleTimeout, "idleDisable");
+        purgeTask("disable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     }
 
@@ -532,15 +520,6 @@ private Double maxSpeed;
     return speed;
   }
 
-  /**
-   * a method called by the idle timer - we will know that this disable is
-   * allowed to re-enable
-   */
-  public void idleDisable() {
-    idleDisabled = true;
-    disable();
-  }
-
   public boolean isAttached(Attachable attachable) {
     return controller != null && controller.equals(attachable.getName());
   }
@@ -555,12 +534,12 @@ private Double maxSpeed;
   }
 
   @Override
-  public Boolean isEnabled() {
+  public boolean isEnabled() {
     return enabled;
   }
 
   @Override
-  public Boolean isInverted() {
+  public boolean isInverted() {
     return mapper.isInverted();
   }
 
@@ -724,16 +703,16 @@ private Double maxSpeed;
    * begin at the "end" of the movement.
    */
   @Override
-  public void setAutoDisable(Boolean autoDisable) {
+  public void setAutoDisable(boolean autoDisable) {
     if (autoDisable) {
       if (!isMoving) {
         // not moving - safe & expected to put in a disable
-        addTaskOneShot(idleTimeout, "idleDisable");
+        addTaskOneShot(idleTimeout, "disable");
       }
     } else {
-      purgeTask("idleDisable");
+      purgeTask("disable");
     }
-    boolean valueChanged = !this.autoDisable.equals(autoDisable);
+    boolean valueChanged = this.autoDisable != autoDisable;
     this.autoDisable = autoDisable;
     if (valueChanged) {
       broadcastState();
@@ -755,7 +734,7 @@ private Double maxSpeed;
   }
 
   @Override
-  public void setInverted(Boolean invert) {
+  public void setInverted(boolean invert) {
     mapper.setInverted(invert);
     broadcastState();
   }
@@ -872,7 +851,6 @@ private Double maxSpeed;
       timeEncoder.calculateTrajectory(getCurrentOutputPos(), getTargetOutput(), getSpeed());
     }
 
-    // purgeTask("idleDisable");
     broadcast("publishServoStop", this);
     broadcastState();
   }
@@ -977,9 +955,9 @@ private Double maxSpeed;
     // if we are "stopping" going from moving to not moving
     if (autoDisable && isMoving) {
       // we cancel any pre-existing timer if it exists
-      purgeTask("idleDisable");
+      purgeTask("disable");
       // and start our countdown
-      addTaskOneShot(idleTimeout, "idleDisable");
+      addTaskOneShot(idleTimeout, "disable");
     }
 
     // notify all blocking moves - we have stopped
@@ -1009,6 +987,11 @@ private Double maxSpeed;
       }
     }
     return name;
+  }
+  
+  public void startService() {
+    super.startService();
+    Runtime.getInstance().subscribeToLifeCycleEvents(getName());
   }
 
 }

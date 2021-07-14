@@ -2,14 +2,19 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.framework.Platform;
 import org.myrobotlab.logging.LoggerFactory;
 import org.myrobotlab.service.abstracts.AbstractSpeechSynthesis;
 import org.myrobotlab.service.data.AudioData;
 import org.myrobotlab.service.data.Locale;
 import org.slf4j.Logger;
+
+import com.google.gson.internal.LinkedTreeMap;
 
 /**
  * Local OS speech service
@@ -49,7 +54,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   protected String ttsPath = getResourceDir() + fs + "tts" + fs + "tts.exe";
   protected String mimicPath = getResourceDir() + fs + "mimic" + fs + "mimic.exe";
   protected String ttsCommand = null;
-  protected String filterChars = "\"\'";
+  protected String filterChars = "\"\'\n";
   protected boolean removeExt = false;
   protected boolean ttsHack = false;
 
@@ -226,7 +231,22 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
     }
 
     if (platform.isWindows()) {
-      Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
+      // Runtime.execute("cmd.exe", "/c", "\"" + cmd + "\"");
+      List<String> args = new ArrayList<>();
+      
+      // https://thinkpowershell.com/create-cortana-audio-files-from-text-using-powershell/
+      // https://mcpmag.com/articles/2018/03/07/talking-through-powershell.aspx
+
+      // windows 10 minimum - power shell interface - output in json
+      args.add("Add-Type -AssemblyName System.Speech;");
+      args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+      args.add("$speak.SelectVoice('"+getVoice().getVoiceProvider().toString()+"');");
+      args.add("$speak.SetOutputToWaveFile('"+localFileName+"');");
+      args.add("$speak.speak('" + toSpeak + "')");
+      String ret = Runtime.execute("powershell.exe", args, null, null, null);
+      
+      log.info("powershell returned : {}", ret);
+      
     } else if (platform.isMac()) {
       Runtime.execute(cmd);
     } else if (platform.isLinux()) {
@@ -253,9 +273,9 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   public String getAudioCacheExtension() {
     if (Platform.getLocalInstance().isMac()) {
       return ".aiff";
-    } else if (ttsHack) {
+    }/*else if (ttsHack) {
       return "0.mp3"; // ya stoopid no ?
-    }
+    }*/
     return ".wav"; // hopefully Linux festival can do this (if not can we ?)
   }
 
@@ -277,71 +297,50 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
     Platform platform = Platform.getLocalInstance();
 
-    // voices returned from local app
     String voicesText = null;
 
     if (platform.isWindows()) {
-      voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\"" + " -V" + "\"");
 
-      log.info("cmd {}", voicesText);
+      try {
 
-      String[] lines = voicesText.split(System.getProperty("line.separator"));
-      for (String line : lines) {
-        // String[] parts = cmd.split(" ");
-        // String gender = "female"; // unknown
-        String lang = "en-US"; // unknown
+        List<String> args = new ArrayList<>();
 
-        if (line.startsWith("Exit")) {
-          break;
-        }
-        String[] parts = line.split(" ");
-        if (parts.length < 2) { // some voices are not based on a standard
-                                // pattern
-          continue;
-        }
-        // lame-ass parsing ..
-        // standard sapi pattern is 5 parameters :
-        // INDEX PROVIDER VOICE_NAME PLATEFORM - LANG
-        // we need INDEX, VOICE_NAME, LANG
-        // but .. some voices dont use it, we will try to detect pattern and
-        // adapt if no respect about it :
+        // windows 10 minimum - power shell interface - output in json
+        args.add("Add-Type -AssemblyName System.Speech;");
+        args.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+        args.add("$speak.GetInstalledVoices() |");
+        args.add("Select-Object  -Property * | ");
+        // args.add("Select-Object -Property Culture, Name, Gender, Age");
+        args.add("ConvertTo-Json ");
+        voicesText = Runtime.execute("powershell.exe", args, null, null, null);
 
-        // INDEX :
-        String voiceProvider = parts[0];
+        // voicesText = Runtime.execute("cmd.exe", "/c", "\"\"" + ttsPath + "\""
+        // + " -V" + "\"");
 
-        // VOICE_NAME
-        String voiceName = "Unknown" + voiceProvider; // default name if there
-                                                      // is an issue
-        // it is standard, cool
-        if (parts.length >= 6) {
-          voiceName = parts[2];// line.trim();
-        }
-        // almost standard, we have INDEX PROVIDER VOICE_NAME
-        else if (parts.length > 2) {
-          voiceName = line.split(" ")[2];
-        }
-        // non standard at all ... but we catch it !
-        else {
-          voiceName = line.split(" ")[1];
+        log.info("voicesText {}", voicesText);
+
+        int pos0 = voicesText.indexOf("[");
+        int pos1 = voicesText.lastIndexOf("]");
+
+        if (pos0 == -1 || pos1 == -1) {
+          error("could not get voices - request returned: %s", voicesText);
         }
 
-        // LANG ( we just detect for a keyword inside the whole string, because
-        // position is random sometime )
-        // TODO: locale converter from keyword somewhere ?
+        String json = voicesText.substring(pos0, pos1 + 1);
 
-        if (line.toLowerCase().contains("french") || line.toLowerCase().contains("français")) {
-          lang = "fr-FR";
+        Object[] vo = CodecUtils.decodeArray(json);
+
+        for (Object v : vo) {
+          LinkedTreeMap<String, Object> m = (LinkedTreeMap<String, Object>) v;
+          LinkedTreeMap<String, Object> vi = (LinkedTreeMap<String, Object>) m.get("VoiceInfo");
+          String name = vi.get("Name").toString();
+          String gender = vi.get("Gender").toString().equals("1.0") ? "male" : "female";
+          String lang = vi.get("Culture").toString();
+          addVoice(name, gender, lang, name);
         }
 
-        try {
-          // verify integer
-          Integer.parseInt(voiceProvider);
-          // voice name cause issues because of spaces or (null), let's just use
-          // original number as name...
-          addVoice(voiceName, null, lang, voiceProvider);
-        } catch (Exception e) {
-          continue;
-        }
+      } catch (Exception e) {
+        error(e);
       }
     } else if (platform.isMac()) {
       // https://www.lifewire.com/mac-say-command-with-talking-terminal-2260772
@@ -380,12 +379,25 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
       Runtime.main(new String[] { "--id", "admin", "--from-launcher" });
       // LoggingFactory.init("WARN");
 
+      String program = "Add-Type -AssemblyName System.Speech";
+      // String[] program = new
+      // String[]{"powershell.exe","$PSVersionTable.PSVersion"};
+
+      List<String> arguments = new ArrayList<>();
+      // arguments.add("$PSVersionTable.PSVersion");
+      arguments.add("Add-Type -AssemblyName System.Speech;");
+      arguments.add("$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer;");
+      arguments.add("$speak.speak('HELLO !!!!');");
+      Runtime.execute("powershell.exe", arguments, null, null, null);
+      // log.info(ret);
+
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
 
       LocalSpeech mouth = (LocalSpeech) Runtime.start("mouth", "LocalSpeech");
-      mouth.setMimic();
+
+      // mouth.setMimic();
       mouth.speakBlocking("hello there mimic works");
 
       boolean done = true;

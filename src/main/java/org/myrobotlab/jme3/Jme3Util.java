@@ -163,8 +163,8 @@ public class Jme3Util {
 
     // default rotation is around Y axis unless specified
     Vector3f rotMask = Vector3f.UNIT_Y;
-    if (o.rotationMask != null) {
-      rotMask = o.rotationMask;
+    if (axis == null && o.rotationMask != null) {
+      axis = o.rotationMask;
     }
 
     // highest priority override is if the parameter is supplied

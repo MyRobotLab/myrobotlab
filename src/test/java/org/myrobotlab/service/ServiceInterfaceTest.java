@@ -55,7 +55,7 @@ public class ServiceInterfaceTest extends AbstractTest {
     return true;
   }
 
-  private boolean serviceInterfaceTest(String service) {
+  private boolean serviceInterfaceTest(String service) throws IOException {
     // see if we can start/stop and release the service.
 
     ServiceInterface foo = Runtime.create(service.toLowerCase(), service);
@@ -86,7 +86,7 @@ public class ServiceInterfaceTest extends AbstractTest {
   }
 
   @Test
-  public final void testAllServices() throws ClassNotFoundException {
+  public final void testAllServices() throws ClassNotFoundException, IOException {
     if (printMethods)System.out.println(String.format("Running %s.%s", getSimpleName(), getName()));
     
     ArrayList<String> servicesWithoutWebPages = new ArrayList<String>();

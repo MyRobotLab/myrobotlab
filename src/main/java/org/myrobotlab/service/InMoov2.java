@@ -2,7 +2,6 @@ package org.myrobotlab.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +94,12 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       log.error("onStarted threw", e);
     }
   }
+  
+  public void startService() {
+    super.startService();
+    Runtime runtime = Runtime.getInstance();
+    runtime.subscribeToLifeCycleEvents(getName());
+  }
 
   public void onCreated(String fullname) {
     log.info("{} created", fullname);
@@ -141,13 +146,19 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
       LoggingFactory.init(Level.INFO);
       Platform.setVirtual(true);
       Runtime.main(new String[] { "--from-launcher", "--id", "inmoov" });
-      Runtime.start("s01", "Servo");
-      InMoov2 i01 = (InMoov2) Runtime.start("i01", "InMoov2");
-      Runtime.start("s02", "Servo");
-
+      // Runtime.start("s01", "Servo");
+      Runtime.start("intro", "Intro");
+      
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       webgui.autoStartBrowser(false);
       webgui.startService();
+
+      
+      InMoov2 i01 = (InMoov2) Runtime.create("i01", "InMoov2");
+      i01.setVirtual(false);
+      i01.startService();
+      // Runtime.start("s02", "Servo");
+
 
       boolean done = true;
       if (done) {
@@ -243,7 +254,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   boolean isServoMixerActivated = false;
 
   // TODO - refactor into a Simulator interface when more simulators are borgd
-  transient JMonkeyEngine jme;
+  transient JMonkeyEngine simulator;
 
   String lastGestureExecuted;
 
@@ -323,7 +334,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // python = (Python) startPeer("python");
     python = (Python) Runtime.start("python", "Python"); // this crud should
                                                          // stop
-    load(locale.getTag());
+    // load(locale.getTag()); WTH ?
 
     // get events of new services and shutdown
     Runtime r = Runtime.getInstance();
@@ -632,7 +643,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public Simulator getSimulator() {
-    return jme;
+    return simulator;
   }
 
   public InMoov2Torso getTorso() {
@@ -725,14 +736,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   public boolean isServoMixerActivated() {
     return isServoMixerActivated;
-  }
-
-
-  /*
-   * iterate over each txt files in the directory
-   */
-  public void load(String locale) {
-    setLocale(locale);
   }
 
   public void loadGestures() {
@@ -1132,7 +1135,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   }
 
   public String setSpeechType(String speechType) {
-    // speechService = speechType;
     serviceType.setPeer("mouth", speechType);
     broadcastState();
     return speechType;
@@ -1634,14 +1636,14 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     speakBlocking(get("STARTINGVIRTUAL"));
 
-    if (jme != null) {
+    if (simulator != null) {
       log.info("start called twice - starting simulator is reentrant");
-      return jme;
+      return simulator;
     }
 
-    // jme = (JMonkeyEngine) startPeer("simulator");
-    jme = (JMonkeyEngine) Runtime.start("jme", "JMonkeyEngine");
+    simulator = (JMonkeyEngine) startPeer("simulator");
 
+    // DEPRECATED - should just user peer info
     isSimulatorActivated = true;
 
     // adding InMoov2 asset path to the jmonkey simulator
@@ -1657,57 +1659,57 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
     // Servo.eventsEnabledDefault(false);
     // jme.loadModels(assetPath); not needed - as InMoov2 unzips the model into
     // /resource/JMonkeyEngine/assets
-    jme.loadModels(assetPath);
+    simulator.loadModels(assetPath);
 
     // ========== gael's calibrations begin ======================
-    jme.setRotation(getName() + ".head.jaw", "x");
-    jme.setRotation(getName() + ".head.neck", "x");
-    jme.setRotation(getName() + ".head.rothead", "y");
-    jme.setRotation(getName() + ".head.rollNeck", "z");
-    jme.setRotation(getName() + ".head.eyeY", "x");
-    jme.setRotation(getName() + ".head.eyeX", "y");
-    jme.setRotation(getName() + ".head.eyelidLeft", "x");
-    jme.setRotation(getName() + ".head.eyelidRight", "x");
-    jme.setRotation(getName() + ".torso.topStom", "z");
-    jme.setRotation(getName() + ".torso.midStom", "y");
-    jme.setRotation(getName() + ".torso.lowStom", "x");
-    jme.setRotation(getName() + ".rightArm.bicep", "x");
-    jme.setRotation(getName() + ".leftArm.bicep", "x");
-    jme.setRotation(getName() + ".rightArm.shoulder", "x");
-    jme.setRotation(getName() + ".leftArm.shoulder", "x");
-    jme.setRotation(getName() + ".rightArm.rotate", "y");
-    jme.setRotation(getName() + ".leftArm.rotate", "y");
-    jme.setRotation(getName() + ".rightArm.omoplate", "z");
-    jme.setRotation(getName() + ".leftArm.omoplate", "z");
-    jme.setRotation(getName() + ".rightHand.wrist", "y");
-    jme.setRotation(getName() + ".leftHand.wrist", "y");
+    simulator.setRotation(getName() + ".head.jaw", "x");
+    simulator.setRotation(getName() + ".head.neck", "x");
+    simulator.setRotation(getName() + ".head.rothead", "y");
+    simulator.setRotation(getName() + ".head.rollNeck", "z");
+    simulator.setRotation(getName() + ".head.eyeY", "x");
+    simulator.setRotation(getName() + ".head.eyeX", "y");
+    simulator.setRotation(getName() + ".head.eyelidLeft", "x");
+    simulator.setRotation(getName() + ".head.eyelidRight", "x");
+    simulator.setRotation(getName() + ".torso.topStom", "z");
+    simulator.setRotation(getName() + ".torso.midStom", "y");
+    simulator.setRotation(getName() + ".torso.lowStom", "x");
+    simulator.setRotation(getName() + ".rightArm.bicep", "x");
+    simulator.setRotation(getName() + ".leftArm.bicep", "x");
+    simulator.setRotation(getName() + ".rightArm.shoulder", "x");
+    simulator.setRotation(getName() + ".leftArm.shoulder", "x");
+    simulator.setRotation(getName() + ".rightArm.rotate", "y");
+    simulator.setRotation(getName() + ".leftArm.rotate", "y");
+    simulator.setRotation(getName() + ".rightArm.omoplate", "z");
+    simulator.setRotation(getName() + ".leftArm.omoplate", "z");
+    simulator.setRotation(getName() + ".rightHand.wrist", "y");
+    simulator.setRotation(getName() + ".leftHand.wrist", "y");
 
-    jme.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
-    jme.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
-    jme.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
-    jme.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need
+    simulator.setMapper(getName() + ".head.jaw", 0, 180, -5, 80);
+    simulator.setMapper(getName() + ".head.neck", 0, 180, 20, -20);
+    simulator.setMapper(getName() + ".head.rollNeck", 0, 180, 30, -30);
+    simulator.setMapper(getName() + ".head.eyeY", 0, 180, 40, 140);
+    simulator.setMapper(getName() + ".head.eyeX", 0, 180, -10, 70); // HERE there need
     // to be
     // two eyeX (left and
     // right?)
-    jme.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);
-    jme.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
-    jme.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
+    simulator.setMapper(getName() + ".head.eyelidLeft", 0, 180, 40, 140);
+    simulator.setMapper(getName() + ".head.eyelidRight", 0, 180, 40, 140);
+    simulator.setMapper(getName() + ".rightArm.bicep", 0, 180, 0, -150);
+    simulator.setMapper(getName() + ".leftArm.bicep", 0, 180, 0, -150);
 
-    jme.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
-    jme.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
-    jme.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
-    jme.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
-    jme.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
-    jme.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
+    simulator.setMapper(getName() + ".rightArm.shoulder", 0, 180, 30, -150);
+    simulator.setMapper(getName() + ".leftArm.shoulder", 0, 180, 30, -150);
+    simulator.setMapper(getName() + ".rightArm.rotate", 0, 180, 80, -80);
+    simulator.setMapper(getName() + ".leftArm.rotate", 0, 180, -80, 80);
+    simulator.setMapper(getName() + ".rightArm.omoplate", 0, 180, 10, -180);
+    simulator.setMapper(getName() + ".leftArm.omoplate", 0, 180, -10, 180);
 
-    jme.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
-    jme.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
+    simulator.setMapper(getName() + ".rightHand.wrist", 0, 180, -20, 60);
+    simulator.setMapper(getName() + ".leftHand.wrist", 0, 180, 20, -60);
 
-    jme.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
-    jme.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
-    jme.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
+    simulator.setMapper(getName() + ".torso.topStom", 0, 180, -30, 30);
+    simulator.setMapper(getName() + ".torso.midStom", 0, 180, 50, 130);
+    simulator.setMapper(getName() + ".torso.lowStom", 0, 180, -30, 30);
 
     // ========== gael's calibrations end ======================
 
@@ -1715,101 +1717,101 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
     // ========== Requires VinMoov5.j3o ========================
 
-    jme.attach(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
-    jme.setRotation(getName() + ".leftHand.thumb1", "y");
-    jme.setRotation(getName() + ".leftHand.thumb2", "x");
-    jme.setRotation(getName() + ".leftHand.thumb3", "x");
+    simulator.multiMap(getName() + ".leftHand.thumb", getName() + ".leftHand.thumb1", getName() + ".leftHand.thumb2", getName() + ".leftHand.thumb3");
+    simulator.setRotation(getName() + ".leftHand.thumb1", "y");
+    simulator.setRotation(getName() + ".leftHand.thumb2", "x");
+    simulator.setRotation(getName() + ".leftHand.thumb3", "x");
 
-    jme.attach(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
-    jme.setRotation(getName() + ".leftHand.index", "x");
-    jme.setRotation(getName() + ".leftHand.index2", "x");
-    jme.setRotation(getName() + ".leftHand.index3", "x");
+    simulator.multiMap(getName() + ".leftHand.index", getName() + ".leftHand.index", getName() + ".leftHand.index2", getName() + ".leftHand.index3");
+    simulator.setRotation(getName() + ".leftHand.index", "x");
+    simulator.setRotation(getName() + ".leftHand.index2", "x");
+    simulator.setRotation(getName() + ".leftHand.index3", "x");
 
-    jme.attach(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
-    jme.setRotation(getName() + ".leftHand.majeure", "x");
-    jme.setRotation(getName() + ".leftHand.majeure2", "x");
-    jme.setRotation(getName() + ".leftHand.majeure3", "x");
+    simulator.multiMap(getName() + ".leftHand.majeure", getName() + ".leftHand.majeure", getName() + ".leftHand.majeure2", getName() + ".leftHand.majeure3");
+    simulator.setRotation(getName() + ".leftHand.majeure", "x");
+    simulator.setRotation(getName() + ".leftHand.majeure2", "x");
+    simulator.setRotation(getName() + ".leftHand.majeure3", "x");
 
-    jme.attach(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
-    jme.setRotation(getName() + ".leftHand.ringFinger", "x");
-    jme.setRotation(getName() + ".leftHand.ringFinger2", "x");
-    jme.setRotation(getName() + ".leftHand.ringFinger3", "x");
+    simulator.multiMap(getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger", getName() + ".leftHand.ringFinger2", getName() + ".leftHand.ringFinger3");
+    simulator.setRotation(getName() + ".leftHand.ringFinger", "x");
+    simulator.setRotation(getName() + ".leftHand.ringFinger2", "x");
+    simulator.setRotation(getName() + ".leftHand.ringFinger3", "x");
 
-    jme.attach(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
-    jme.setRotation(getName() + ".leftHand.pinky", "x");
-    jme.setRotation(getName() + ".leftHand.pinky2", "x");
-    jme.setRotation(getName() + ".leftHand.pinky3", "x");
+    simulator.multiMap(getName() + ".leftHand.pinky", getName() + ".leftHand.pinky", getName() + ".leftHand.pinky2", getName() + ".leftHand.pinky3");
+    simulator.setRotation(getName() + ".leftHand.pinky", "x");
+    simulator.setRotation(getName() + ".leftHand.pinky2", "x");
+    simulator.setRotation(getName() + ".leftHand.pinky3", "x");
 
     // left hand mapping complexities of the fingers
-    jme.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.index", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.index2", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.index3", 0, 180, -110, -179);
 
-    jme.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.majeure", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.majeure2", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.majeure3", 0, 180, -110, -179);
 
-    jme.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.ringFinger", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.ringFinger2", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.ringFinger3", 0, 180, -110, -179);
 
-    jme.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
-    jme.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.pinky", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.pinky2", 0, 180, -110, -179);
+    simulator.setMapper(getName() + ".leftHand.pinky3", 0, 180, -110, -179);
 
-    jme.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
-    jme.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
-    jme.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
+    simulator.setMapper(getName() + ".leftHand.thumb1", 0, 180, -30, -100);
+    simulator.setMapper(getName() + ".leftHand.thumb2", 0, 180, 80, 20);
+    simulator.setMapper(getName() + ".leftHand.thumb3", 0, 180, 80, 20);
 
     // right hand
 
-    jme.attach(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
-    jme.setRotation(getName() + ".rightHand.thumb1", "y");
-    jme.setRotation(getName() + ".rightHand.thumb2", "x");
-    jme.setRotation(getName() + ".rightHand.thumb3", "x");
+    simulator.multiMap(getName() + ".rightHand.thumb", getName() + ".rightHand.thumb1", getName() + ".rightHand.thumb2", getName() + ".rightHand.thumb3");
+    simulator.setRotation(getName() + ".rightHand.thumb1", "y");
+    simulator.setRotation(getName() + ".rightHand.thumb2", "x");
+    simulator.setRotation(getName() + ".rightHand.thumb3", "x");
 
-    jme.attach(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
-    jme.setRotation(getName() + ".rightHand.index", "x");
-    jme.setRotation(getName() + ".rightHand.index2", "x");
-    jme.setRotation(getName() + ".rightHand.index3", "x");
+    simulator.multiMap(getName() + ".rightHand.index", getName() + ".rightHand.index", getName() + ".rightHand.index2", getName() + ".rightHand.index3");
+    simulator.setRotation(getName() + ".rightHand.index", "x");
+    simulator.setRotation(getName() + ".rightHand.index2", "x");
+    simulator.setRotation(getName() + ".rightHand.index3", "x");
 
-    jme.attach(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
-    jme.setRotation(getName() + ".rightHand.majeure", "x");
-    jme.setRotation(getName() + ".rightHand.majeure2", "x");
-    jme.setRotation(getName() + ".rightHand.majeure3", "x");
+    simulator.multiMap(getName() + ".rightHand.majeure", getName() + ".rightHand.majeure", getName() + ".rightHand.majeure2", getName() + ".rightHand.majeure3");
+    simulator.setRotation(getName() + ".rightHand.majeure", "x");
+    simulator.setRotation(getName() + ".rightHand.majeure2", "x");
+    simulator.setRotation(getName() + ".rightHand.majeure3", "x");
 
-    jme.attach(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
-    jme.setRotation(getName() + ".rightHand.ringFinger", "x");
-    jme.setRotation(getName() + ".rightHand.ringFinger2", "x");
-    jme.setRotation(getName() + ".rightHand.ringFinger3", "x");
+    simulator.multiMap(getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger", getName() + ".rightHand.ringFinger2", getName() + ".rightHand.ringFinger3");
+    simulator.setRotation(getName() + ".rightHand.ringFinger", "x");
+    simulator.setRotation(getName() + ".rightHand.ringFinger2", "x");
+    simulator.setRotation(getName() + ".rightHand.ringFinger3", "x");
 
-    jme.attach(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
-    jme.setRotation(getName() + ".rightHand.pinky", "x");
-    jme.setRotation(getName() + ".rightHand.pinky2", "x");
-    jme.setRotation(getName() + ".rightHand.pinky3", "x");
+    simulator.multiMap(getName() + ".rightHand.pinky", getName() + ".rightHand.pinky", getName() + ".rightHand.pinky2", getName() + ".rightHand.pinky3");
+    simulator.setRotation(getName() + ".rightHand.pinky", "x");
+    simulator.setRotation(getName() + ".rightHand.pinky2", "x");
+    simulator.setRotation(getName() + ".rightHand.pinky3", "x");
 
-    jme.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.index", 0, 180, 65, -10);
+    simulator.setMapper(getName() + ".rightHand.index2", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.index3", 0, 180, 70, -10);
 
-    jme.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.majeure", 0, 180, 65, -10);
+    simulator.setMapper(getName() + ".rightHand.majeure2", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.majeure3", 0, 180, 70, -10);
 
-    jme.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.ringFinger", 0, 180, 65, -10);
+    simulator.setMapper(getName() + ".rightHand.ringFinger2", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.ringFinger3", 0, 180, 70, -10);
 
-    jme.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
-    jme.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
-    jme.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
+    simulator.setMapper(getName() + ".rightHand.pinky", 0, 180, 65, -10);
+    simulator.setMapper(getName() + ".rightHand.pinky2", 0, 180, 70, -10);
+    simulator.setMapper(getName() + ".rightHand.pinky3", 0, 180, 60, -10);
 
-    jme.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
-    jme.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
-    jme.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
+    simulator.setMapper(getName() + ".rightHand.thumb1", 0, 180, 30, 110);
+    simulator.setMapper(getName() + ".rightHand.thumb2", 0, 180, -100, -150);
+    simulator.setMapper(getName() + ".rightHand.thumb3", 0, 180, -100, -160);
 
     // We set the correct location view
-    jme.cameraLookAt(getName() + ".torso.lowStom");
+    simulator.cameraLookAt(getName() + ".torso.lowStom");
 
     // additional experimental mappings
     /*
@@ -1822,7 +1824,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
      * ".leftHand.index2", 0, 180, -90, -270); simulator.setMapper(getName() +
      * ".leftHand.index3", 0, 180, -90, -270);
      */
-    return jme;
+    return simulator;
   }
 
   public InMoov2Torso startTorso() {
@@ -2047,7 +2049,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   public void stopSimulator() {
     speakBlocking(get("STOPVIRTUAL"));
     releasePeer("simulator");
-    jme = null;
+    simulator = null;
     isSimulatorActivated = false;
   }
 

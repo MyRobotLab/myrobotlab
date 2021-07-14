@@ -87,7 +87,7 @@
         <div class="row">
             <form class="form-inline col-lg-12">
                 <div class="form-goup">
-                    <input type="text" ng-readonly="!isConnected" placeholder="send data here" ng-model="txData" class="form-control" press-enter="writeString(txData)">
+                    <textarea type="text" ng-readonly="!isConnected" placeholder="send data here" ng-model="txData" class="form-control" ng-trim="false"></textarea> <!-- press-enter="writeString(txData)" -->
                     <button class="btn btn-default" ng-readonly="!isConnected" ng-click="writeString(txData)" title="send the data in the data field">send</button>
                     <select ng-model="sendFormat" class="form-goup form-control" title="format the data sent &#10; ascii - send an ascii string &#10; hex - you can send a space delimited string of hex characters &#10; decimal - send a space delmited string of the values to be sent">
                         <option>ascii</option>

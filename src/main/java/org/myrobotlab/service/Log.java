@@ -111,8 +111,8 @@ public class Log extends Service implements Appender<ILoggingEvent> {
   }
 
   public String getLogLevel() {
-    ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-    logLevel = root.getLevel().toString();
+    Logging logging = LoggingFactory.getInstance();
+    logLevel = logging.getLevel();
     return logLevel;
   }
 

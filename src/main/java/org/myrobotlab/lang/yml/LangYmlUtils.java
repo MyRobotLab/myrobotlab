@@ -34,7 +34,7 @@ public class LangYmlUtils {
     }
 
     if (folder == null) {
-      folder = "data" + File.separator + "config" + File.separator + "default";
+      folder = Runtime.getInstance().getConfigDir() + File.separator + "default";
     }
 
     File dir = new File(folder);
@@ -99,7 +99,7 @@ public class LangYmlUtils {
 
      
       Yaml yaml = new Yaml(dumperOptions);
-      yaml.setBeanAccess(BeanAccess.FIELD);
+      // yaml.setBeanAccess(BeanAccess.FIELD);
       String yml = yaml.dump(si);
       content.append(yml);
 

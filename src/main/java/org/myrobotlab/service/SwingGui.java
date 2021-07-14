@@ -319,7 +319,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       if (si == null) {
         log.info("%s is not a service - please select the service to save", tabName);
       } else if (si.isLocal()) {
-        si.load();
+        try {
+          si.load();
+        } catch (IOException e1) {
+          // TODO Auto-generated catch block
+          e1.printStackTrace();
+        }
       } else {
         send(tabName, "load");
       }
@@ -332,7 +337,12 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
         if (si == null) {
           log.info("%s is not a service - please select the service to save", service);
         } else if (si.isLocal()) {
-          si.load();
+          try {
+            si.load();
+          } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+          }
         } else {
           send(service, "load");
         }
@@ -348,24 +358,11 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
       }
       // send(tabName, "save"); save has just become serialize
       String newFile = FileUtil.saveAsFileName(getFrame(), String.format("%s.py", tabName));
-      try {
-        if (newFile != null) {
-          export(newFile, newFile);
-        }
-      } catch (IOException e1) {
-        log.error("could not export {} to {}", tabName, newFile);
-      }
       info("exported %s", tabName);
     } else if ("export all".equals(cmd)) {
 
       String newFile = FileUtil.saveAsFileName(getFrame(), "export.py");
-      try {
-        if (newFile != null) {
-          export("swing");
-        }
-      } catch (IOException e1) {
-        log.error("could not export all to {}", newFile);
-      }
+
 
       info("saved all exported");
     } else {
