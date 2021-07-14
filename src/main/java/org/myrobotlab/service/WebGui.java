@@ -56,7 +56,6 @@ import org.myrobotlab.logging.LoggingFactory;
 import org.myrobotlab.net.BareBonesBrowserLaunch;
 import org.myrobotlab.net.Connection;
 import org.myrobotlab.service.config.ServiceConfig;
-import org.myrobotlab.service.config.ServoConfig;
 import org.myrobotlab.service.config.WebGuiConfig;
 import org.myrobotlab.service.interfaces.AuthorizationProvider;
 import org.myrobotlab.service.interfaces.Gateway;

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -72,9 +73,7 @@ public class Outbox implements Runnable, Serializable {
   /**
    * pub/sub listeners - HashMap &lt; {topic}, List {listeners} &gt;
    */
-  // FIXME - this should be Map not HashMap - although I suspect not specifying a concrete
-  // type messed something up at some point ?
-  public HashMap<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
+  public Map<String, List<MRLListener>> notifyList = new HashMap<String, List<MRLListener>>();
 
   List<MessageListener> listeners = new ArrayList<MessageListener>();
 
