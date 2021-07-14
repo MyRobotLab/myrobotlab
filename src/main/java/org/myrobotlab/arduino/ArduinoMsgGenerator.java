@@ -26,7 +26,7 @@ public class ArduinoMsgGenerator {
 
   public transient final static Logger log = LoggerFactory.getLogger(ArduinoMsgGenerator.class);
 
-  static final Integer MRLCOMM_VERSION = 67;
+  static final Integer MRLCOMM_VERSION = 68;
 
   private String ackEnabled = "true";
 
@@ -63,6 +63,7 @@ public class ArduinoMsgGenerator {
     deviceList.add("I2c");
     deviceList.add("NeoPixel");
     deviceList.add("Encoder");
+    deviceList.add("NeoPixel2");
   }
 
   static public final String toString(String filename) throws IOException {

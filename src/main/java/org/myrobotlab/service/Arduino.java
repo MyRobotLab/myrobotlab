@@ -52,6 +52,7 @@ import org.myrobotlab.service.interfaces.I2CController;
 import org.myrobotlab.service.interfaces.MotorControl;
 import org.myrobotlab.service.interfaces.MotorController;
 import org.myrobotlab.service.interfaces.MrlCommPublisher;
+import org.myrobotlab.service.interfaces.NeoPixel2Controller;
 import org.myrobotlab.service.interfaces.NeoPixelController;
 import org.myrobotlab.service.interfaces.PinArrayListener;
 import org.myrobotlab.service.interfaces.PinArrayPublisher;
@@ -69,7 +70,7 @@ import org.myrobotlab.service.interfaces.UltrasonicSensorControl;
 import org.myrobotlab.service.interfaces.UltrasonicSensorController;
 import org.slf4j.Logger;
 
-public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixelController,
+public class Arduino extends AbstractMicrocontroller implements I2CBusController, I2CController, SerialDataListener, ServoController, MotorController, NeoPixel2Controller, NeoPixelController,
     UltrasonicSensorController, PortConnector, RecordControl, PortListener, PortPublisher, EncoderController, PinArrayPublisher, MrlCommPublisher, ServoStatusPublisher {
 
   transient public final static Logger log = LoggerFactory.getLogger(Arduino.class);
@@ -2252,6 +2253,25 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     log.debug("CONTROLLER SERVO_STOPPED {}", name);
     return name;
   }
+  
+  @Override
+  public void neoPixel2Attach(String name, int pin, int numberOfPixels, int depth) {
+    ServiceInterface neopixel = Runtime.getService(name);
+    DeviceMapping dm = attachDevice(neopixel, new Object[] { pin, numberOfPixels, depth });
+    msg.neoPixel2Attach(dm.getId(), pin, numberOfPixels, depth);
+  }
+
+  @Override
+  public void neoPixel2WriteMatrix(String neopixel, int[] buffer) {
+    log.info("writing {} pixels : {}", buffer.length/5, buffer);
+    msg.neoPixel2WriteMatrix(getDeviceId(neopixel), buffer);
+  }
+
+  @Override
+  public void neoPixel2SetAnimation(String neopixel, int animation, int red, int green, int blue, int white, int speed) {
+    msg.neoPixel2SetAnimation(getDeviceId(neopixel), animation, red, green, blue, white, speed);
+  }
+
 
   @Override
   public ServiceConfig getConfig() {
@@ -2405,4 +2425,5 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
     }
   }
 
+  
 }

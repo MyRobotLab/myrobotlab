@@ -162,6 +162,12 @@ public:
   void setZeroPoint( byte deviceId);
   // > servoStop/deviceId
   void servoStop( byte deviceId);
+  // > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
+  void neoPixel2Attach( byte deviceId,  byte pin,  int numPixels,  byte depth);
+  // > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+  void neoPixel2SetAnimation( byte deviceId,  byte animation,  byte red,  byte green,  byte blue,  byte white,  long wait_ms);
+  // > neoPixel2WriteMatrix/deviceId/[] buffer
+  void neoPixel2WriteMatrix( byte deviceId,  byte bufferSize, const byte*buffer);
     // </generatedCallBacks>
   // end
 

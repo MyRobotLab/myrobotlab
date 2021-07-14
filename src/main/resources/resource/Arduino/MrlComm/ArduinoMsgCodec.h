@@ -9,7 +9,7 @@
  * 							src\resource\Arduino\generate\ArduinoMsgCodec.template.h
  */
 
-#define MRLCOMM_VERSION			67
+#define MRLCOMM_VERSION			68
 #define MAGIC_NUMBER            170 // 10101010
 #define MAX_MSG_SIZE			64
 
@@ -23,6 +23,7 @@
 #define DEVICE_TYPE_I2C    7
 #define DEVICE_TYPE_NEOPIXEL    8
 #define DEVICE_TYPE_ENCODER    9
+#define DEVICE_TYPE_NEOPIXEL2    10
 
 
 // < publishMRLCommError/str errorMsg
@@ -137,6 +138,12 @@
 #define PUBLISH_MRL_COMM_BEGIN 55
 // > servoStop/deviceId
 #define SERVO_STOP 56
+// > neoPixel2Attach/deviceId/pin/b16 numPixels/depth
+#define NEO_PIXEL2_ATTACH 57
+// > neoPixel2SetAnimation/deviceId/animation/red/green/blue/white/b32 wait_ms
+#define NEO_PIXEL2_SET_ANIMATION 58
+// > neoPixel2WriteMatrix/deviceId/[] buffer
+#define NEO_PIXEL2_WRITE_MATRIX 59
 
 
 
