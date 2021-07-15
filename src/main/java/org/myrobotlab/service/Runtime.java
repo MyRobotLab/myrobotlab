@@ -1441,21 +1441,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
     for (File file : files) {
       String n = file.getName();
 
-      Pattern p = Pattern.compile("[^a-z0-9_]", Pattern.CASE_INSENSITIVE);
-      Matcher m = p.matcher(n);
-
       if (!file.isDirectory()) {
         warn("ignoring %s expecting directory not file", n);
-        continue;
-      }
-
-      if (Character.isDigit(n.charAt(0))) {
-        warn("ignoring %s config dir cannot start with digit", n);
-        continue;
-      }
-
-      if (m.find()) {
-        warn("ignoring %s special character in name not allowed", n);
         continue;
       }
 

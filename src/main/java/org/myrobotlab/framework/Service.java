@@ -2353,7 +2353,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    */
   @Override
   public void attach(Attachable service) throws Exception {
-    info(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
+    warn(String.format("Service.attach does not know how to attach %s to a %s", service.getClass().getSimpleName(), this.getClass().getSimpleName()));
   }
 
   public boolean setVirtual(boolean b) {
