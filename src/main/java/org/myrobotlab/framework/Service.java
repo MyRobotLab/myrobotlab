@@ -1278,14 +1278,15 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * Default mergeConfig method, override if implemented
+   * Default load config method, subclasses should override this to support 
+   * service specific configuration in the service yaml files.
    * 
-   * @param c
+   * @param config
    * @return
    */
-  public ServiceConfig load(ServiceConfig c) {
+  public ServiceConfig load(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
-    return c;
+    return config;
   }
 
   /**
@@ -1346,7 +1347,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       filename = runtime.getConfigDir() + fs + runtime.getConfigName() + fs + getName() + ".yml";
     }
 
-    String data = FileIO.toString(filename);
     String format = filename.substring(filename.lastIndexOf(".") + 1);
 
     Object o = null;
@@ -1363,8 +1363,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
     Class<?> clazz = (o == null)?ServiceConfig.class:o.getClass();    
     ServiceConfig config = null;
-
-    if (format.toLowerCase().equals("json")) {
+    
+    String data = FileIO.toString(filename);
+    if ("json".equalsIgnoreCase(format)) {
       config = (ServiceConfig) CodecUtils.fromJson(data, clazz);
     } else {
       config = (ServiceConfig) CodecUtils.fromYaml(data, clazz);
@@ -1900,6 +1901,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
       load();
       startService();
     } catch (Exception e) {
+      log.error("Load and Start failed.", e);
     }
   }
 

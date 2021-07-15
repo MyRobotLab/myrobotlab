@@ -2064,6 +2064,7 @@ public class OpenCV extends AbstractComputerVision {
     OpenCVConfig config = (OpenCVConfig) initConfig(new OpenCVConfig());
     config.capturing = capturing;
     config.cameraIndex = cameraIndex;
+    // TODO: make the grabber config a nested object to clean this up..
     config.grabberType = grabberType;
     config.inputFile = inputFile;
     config.inputSource = inputSource;
@@ -2090,6 +2091,7 @@ public class OpenCV extends AbstractComputerVision {
     if (config.filters != null) {
       for (OpenCVFilter f : config.filters.values()) {
         addFilter(f);
+        // TODO: better configuration of the filter when it's added.
       }
     }
     

@@ -17,15 +17,13 @@ public class RuntimeMeta extends MetaData {
   public RuntimeMeta(String name) {
 
     super(name);
+    // TODO: can we remove this line?  it's not used locally, but it does initialize Platform...
     Platform platform = Platform.getLocalInstance();
     addDescription("is a singleton service responsible for the creation, starting, stopping, releasing and registration of all other services");
     addCategory("framework");
-
     includeServiceInOneJar(true);
     // apache 2.0 license
     addDependency("com.google.code.gson", "gson", "2.8.5");
-    // apache 2.0 license
-    addDependency("org.yaml", "snakeyaml", "1.17");
     // apache 2.0 license
     addDependency("org.apache.ivy", "ivy", "2.4.0-5");
     // apache 2.0 license
@@ -34,14 +32,11 @@ public class RuntimeMeta extends MetaData {
     addDependency("org.atmosphere", "wasync", "2.1.5");
     // apache 2.0 license
     addDependency("info.picocli", "picocli", "4.4.0");
-
     // all your logging needs
     addDependency("org.slf4j", "slf4j-api", "1.7.21");
     addDependency("ch.qos.logback", "logback-classic", "1.0.13");
+    // for config file support.
     addDependency("org.yaml", "snakeyaml", "1.29");
-
-    // addDependency("org.apache.maven", "maven-embedder", "3.1.1");
-    // addDependency("ch.qos.logback", "logback-classic", "1.2.3");
 
   }
 

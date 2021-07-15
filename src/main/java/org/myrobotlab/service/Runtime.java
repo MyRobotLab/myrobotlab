@@ -3519,6 +3519,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
           for (String n : sc.attach) {
             try {
               // log.warn("attaching {} to {}", si.getName(), n);
+              // TODO: if the services you are attaching have conflicting interfaces, this call is potentially ambigious as to it's meaning.
+              // Example: htmlfilter attaching to programab... both are text listeners, both are text publishers.  which direction do we define
+              // the attach in..
               si.attach(n);
               si.broadcastState();
             } catch (Exception e) {
