@@ -856,4 +856,10 @@ public class DiyServo extends AbstractServo implements ServoControl, PinListener
     return false;
   }
 
+  @Override
+  public String publishServoEnable(String name) {
+    // TODO: clean up the servo control publisher interface
+    return name;
+  }
+
 }

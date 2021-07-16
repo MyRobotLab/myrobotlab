@@ -30,5 +30,7 @@ public interface ServoControlPublisher {
    * @return
    */
   ServoControl publishServoStop(ServoControl sc);
+  
+  String publishServoEnable(String name); 
 
 }
