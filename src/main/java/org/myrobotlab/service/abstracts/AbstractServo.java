@@ -998,5 +998,25 @@ private Double maxSpeed;
     super.startService();
     Runtime.getInstance().subscribeToLifeCycleEvents(getName());
   }
+  
+  @Override
+  public String publishServoEnable(String name) {
+    // TODO Nothing calls this now?
+    log.info("Publish Servo Enable {}", name);
+    return name;
+  }
+
+  @Override
+  public void attachServoControlListener(String name) {
+    // TODO Auto-generated method stub
+    
+    // TODO: add the addListener calls. 
+    addListener("publishServoMoveTo", name);
+    addListener("publishMoveTo", name);
+    addListener("publishServoEnable", name);
+    addListener("publishServoDisable", name);
+    addListener("publishServoStop", name);
+    
+  }
 
 }

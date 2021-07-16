@@ -2673,5 +2673,16 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // TODO Auto-generated method stub
     return null;
   }
+
+  @Override
+  public void attachServoControlListener(String name) {
+    // TODO Auto-generated method stub
+    addListener("publishServoMoveTo", name);
+    addListener("publishMoveTo", name);
+    addListener("publishServoEnable", name);
+    addListener("publishServoDisable", name);
+    addListener("publishServoStop", name);
+    
+  }
   
 }

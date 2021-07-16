@@ -32,5 +32,7 @@ public interface ServoControlPublisher {
   ServoControl publishServoStop(ServoControl sc);
   
   String publishServoEnable(String name); 
+  
+  public void attachServoControlListener(String name);
 
 }

@@ -387,11 +387,5 @@ public class Servo extends AbstractServo implements ServoControl {
     }
   }
 
-  @Override
-  public String publishServoEnable(String name) {
-    // TODO Nothing calls this now?
-    log.info("Publish Servo Enable {}", name);
-    return name;
-  }
 
 }
