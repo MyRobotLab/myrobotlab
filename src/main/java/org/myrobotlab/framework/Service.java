@@ -1223,6 +1223,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
           for (MRLListener listener : subList) {
 
             Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
+            if (msg == null) {
+              log.error("Unable to create message.. null message created");
+            }
             msg.sendingMethod = methodName;
 
             // correct? get local (default?) gateway
@@ -1233,7 +1236,16 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                 log.info("{} cannot callback to listener {} does not exist for {} ", getName(), listener.callbackName, listener.callbackMethod);
               } else {
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
-                m.invoke(si, retobj);
+                if (m == null) {;
+                  log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
+                  
+                }
+                try {
+                  m.invoke(si, retobj);
+                } catch (Throwable e) {
+                  
+                  log.error("Invoke blew up! on: {} calling method {} ",si.getName(), m.toString(), e);
+                }
               }
             } else {
               send(msg);

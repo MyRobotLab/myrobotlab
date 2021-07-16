@@ -417,7 +417,7 @@ private Double maxSpeed;
   public void disable() {
     stop();
     enabled = false;
-    broadcast("publishServoDisable", this);
+    broadcast("publishServoDisable", (ServoControl)this);
     broadcastState();
   }
 
@@ -659,6 +659,11 @@ private Double maxSpeed;
     return sc;
   }
 
+  // TODO: why do we need this method here , invoke message cache misses otherwise.
+  public ServoControl publishServoEnable(AbstractServo sc) {
+    return publishServoEnable((ServoControl)sc);
+  }
+  
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
     return sc;

@@ -15,5 +15,7 @@ public interface ServoStatusListener {
    * @param name
    */
   public void onServoStopped(String name);
+  public void onServoStop(ServoControl sc);
+  public void onServoEnable(String name);
 
 }

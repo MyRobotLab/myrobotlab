@@ -57,6 +57,7 @@ import org.myrobotlab.service.config.ServiceConfig;
 import org.myrobotlab.service.interfaces.Gateway;
 import org.myrobotlab.service.interfaces.IKJointAngleListener;
 import org.myrobotlab.service.interfaces.ServoControl;
+import org.myrobotlab.service.interfaces.ServoStatusListener;
 import org.myrobotlab.service.interfaces.Simulator;
 import org.myrobotlab.swing.ServiceGui;
 import org.slf4j.Logger;
@@ -122,7 +123,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener {
+public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener {
 
   final static String CAMERA = "camera";
 
@@ -2578,4 +2579,44 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     }
   }
 
+  @Override
+  public void onServoStarted(String name) {
+    log.info("Jme On Servo Started {}", name);
+  }
+
+  @Override
+  public void onServoStopped(String name) {
+    log.info("Jme On Servo Stopped {}", name);
+  }
+
+  @Override
+  public void onServoEnable(String name) {
+    log.info("Jme On Servo Enabled {}", name);
+    
+  }
+
+  @Override
+  public void onServoStop(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme On Servo Stop with the servo control {}", sc);
+  }
+
+  
+  public void onServoDisable(ServoControl sc) {
+    // TODO Auto-generated method stub
+    log.info("Jme onServoDisable with the servo control {}", sc);
+  }
+
+  
+  public void publishServoEnable(String name) {
+    // TODO: unwire this.. jme shouldn't publish servo events.. 
+    // it should listen for them!
+    log.info("Jme publishServoEnable {}", name);
+  }
+  
+  public void onServoEnable(ServoControl sc) {
+    log.info("Jme onServoEnable SC {}", sc);
+  }
+
+  
 }
