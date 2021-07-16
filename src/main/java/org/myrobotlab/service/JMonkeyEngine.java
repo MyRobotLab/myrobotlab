@@ -125,7 +125,7 @@ import com.simsilica.lemur.style.BaseStyles;
  * @author GroG, calamity, kwatters, moz4r and many others ...
  *
  */
-public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener, ServoControlPublisher  {
+public class JMonkeyEngine extends Service implements Gateway, ActionListener, Simulator, EncoderListener, IKJointAngleListener, ServoStatusListener, ServoControlListener {
 
   final static String CAMERA = "camera";
 
@@ -2626,63 +2626,5 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
     // TODO Auto-generated method stub
     log.info("Jme onServoSetSpeed SC {}", sc);    
   }
-
-  // TODO: remove all of these following methods. they come some ServoControlPublisher.
-  // TODO: remove ServoControlPublisher from JME.. bu tto do so, we need to remove the 
-  // call that invokes publishServoEnable here!  
-  @Override
-  public String publishServoEnable(String name) {
-    // TODO: unwire this.. jme shouldn't publish servo events.. 
-    // it should listen for them!
-    log.info("Jme publishServoEnable {}", name);
-    return name;
-  }
-  
-  @Override
-  public ServoControl publishServoMoveTo(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ServoControl publishMoveTo(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ServoControl publishServoSetSpeed(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ServoControl publishServoEnable(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ServoControl publishServoDisable(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public ServoControl publishServoStop(ServoControl sc) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void attachServoControlListener(String name) {
-    // TODO Auto-generated method stub
-    addListener("publishServoMoveTo", name);
-    addListener("publishMoveTo", name);
-    addListener("publishServoEnable", name);
-    addListener("publishServoDisable", name);
-    addListener("publishServoStop", name);
-    
-  }
-  
+ 
 }
