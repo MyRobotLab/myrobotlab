@@ -94,6 +94,8 @@ public class WebSocketConnector extends Service implements TextPublisher {
 
   /**
    * Send a message over the websocket
+   * @param message the message to send
+   * @throws IOException boom
    * 
    */
   public void send(String message) throws IOException {

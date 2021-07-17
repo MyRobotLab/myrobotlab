@@ -809,6 +809,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
+   * @throws MqttException boom
    */
   public void subscribe(String topic, int qos) throws MqttException {
     if (!connected) {

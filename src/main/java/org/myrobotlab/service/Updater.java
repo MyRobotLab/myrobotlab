@@ -122,6 +122,9 @@ public class Updater extends Service {
 
   /**
    * Checks in the branches directory for the latest version of desired "branch"
+   * @param branch the branch to check
+   * @return the latest version
+   * @throws MrlException boom
    * 
    */
   public String getLatestLocalVersion(String branch) throws MrlException {
@@ -154,6 +157,9 @@ public class Updater extends Service {
   /**
    * This method gets all the version on a particular branch, if allowed remote
    * access it will ask the build server what successful builds exist
+   * @param branch the branch 
+   * @param allowRemote true/false
+   * @return a set
    * 
    */
   synchronized public Set<String> getVersions(String branch, Boolean allowRemote) {
@@ -171,6 +177,8 @@ public class Updater extends Service {
 
   /**
    * Get the local versions available for the selected branch.
+   * @param branch the branch 
+   * @return the set of local versions
    * 
    */
   public Set<String> getLocalVersions(String branch) {
@@ -193,6 +201,8 @@ public class Updater extends Service {
 
   /**
    * Get remote versions from jenkins
+   * @param branch the branch name
+   * @return the set of remote versions
    * 
    */
   public Set<String> getRemoteVersions(String branch) {
