@@ -2593,12 +2593,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   }
 
   @Override
-  public void onServoEnable(String name) {
-    log.info("Jme On Servo Enabled {}", name);
-    
-  }
-
-  @Override
   public void onServoStop(ServoControl sc) {
     // TODO Auto-generated method stub
     log.info("Jme On Servo Stop with the servo control {}", sc);
