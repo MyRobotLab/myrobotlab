@@ -850,6 +850,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+ * @param interfaze the interface
+ * @return a list of service names that have the interface
+ * @throws ClassNotFoundException boom
    * 
    */
   public static List<String> getServiceNamesFromInterface(String interfaze) throws ClassNotFoundException {

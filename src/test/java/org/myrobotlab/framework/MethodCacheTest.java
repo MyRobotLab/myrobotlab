@@ -48,6 +48,10 @@ public class MethodCacheTest extends AbstractTest {
 
   /**
    * find missing methods which did not appear through first cache pass
+ * @throws IllegalAccessException boom
+ * @throws IllegalArgumentException boom
+ * @throws InvocationTargetException boom
+ * @throws ClassNotFoundException boom
    * 
    */
   @Test
@@ -152,6 +156,13 @@ public class MethodCacheTest extends AbstractTest {
 
   /**
    * Testing json
+ * @throws IllegalAccessException boom
+ * @throws IllegalArgumentException boom
+ * @throws InvocationTargetException boom
+ * @throws ClassNotFoundException boom
+ * @throws NoSuchMethodException boom
+ * @throws SecurityException boom
+ * @throws InstantiationException boom
    * 
    */
   @Test
