@@ -359,6 +359,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   
   /**
    * comes in from runtime which owns the config list
+   * @param configList list of configs
    */
   public void onConfigList(List<String> configList){
     this.configList = configList;
@@ -368,6 +369,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * "re"-publishing runtime config list, because
    * I don't want to fix the js subscribeTo :P
+   * @return list of config names
    */
   public List<String> publishConfigList(){
     return configList;

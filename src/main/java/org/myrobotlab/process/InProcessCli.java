@@ -320,6 +320,8 @@ public class InProcessCli implements Runnable {
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
    * (remotely)
+   * @param data data
+   * @return message
    */
   public Message cliToMsg(String data) {
     return CodecUtils.cliToMsg(contextPath, "runtime@" + id, "runtime@" + remoteId, data);

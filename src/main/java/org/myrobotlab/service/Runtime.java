@@ -1049,6 +1049,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * yet
    * 
    * License - should be appropriately accepted or rejected by user
+   * @param serviceType the service tyype to install
+   * @param blocking if this should block until done.
    *
    */
   synchronized static public void install(String serviceType, Boolean blocking) {
@@ -1880,6 +1882,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * list the contents of a specific path
+   * @param contextPath c
+   * @param path p
+   * @return object
    * 
    */
   public Object ls(String contextPath, String path) {

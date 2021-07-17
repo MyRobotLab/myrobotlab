@@ -466,6 +466,8 @@ public abstract class ServiceGui implements WindowListener {
   /**
    * method to enable or disable all the children of a container - useful when a
    * single checkbox or button controls many other sub-configuration elements
+   * @param container c
+   * @param enabled e
    * 
    */
   static public void setEnabled(Container container, boolean enabled) {

@@ -42,6 +42,9 @@ public class Session {
 
   /**
    * Session for a user and bot
+   * @param programab program ab for this session
+   * @param userName username
+   * @param botInfo the bot for the session
    * 
    */
   public Session(ProgramAB programab, String userName, BotInfo botInfo) {

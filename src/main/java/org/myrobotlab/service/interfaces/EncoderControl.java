@@ -17,6 +17,8 @@ public interface EncoderControl extends Attachable {
 
   /**
    * publishes the EncoderData from the encoder
+   * @param data the data to publish
+   * @return encoder data
    */
   public EncoderData publishEncoderData(EncoderData data);
 

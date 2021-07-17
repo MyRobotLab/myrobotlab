@@ -414,6 +414,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * binds two objects together ...
+   * @param child child
+   * @param parent parent
    * 
    */
   public void bind(String child, String parent) {
@@ -1409,6 +1411,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * A method to accept Computer Vision data (from OpenCV or BoofCv) and to
    * appropriately delegate it out to more specific methods
+   * @param data cv data
    */
   public void onCvData(CvData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
@@ -1572,6 +1575,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * put text on the guiNode HUD display for jmonkey FIXME - do the same logic
    * in OpenCV overlay !
+   * @param text t
+   * @param x coordinate
+   * @param y coordinate
+   * @param color c
+   * @param size s
    * 
    */
   public void putText(String text, int x, int y, String color, Integer size) {
