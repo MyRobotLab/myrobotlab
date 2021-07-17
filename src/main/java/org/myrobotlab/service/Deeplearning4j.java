@@ -933,6 +933,9 @@ public class Deeplearning4j extends Service {
   /**
    * Evaluate a model against a given testing dataset Note iterator is reset
    * before evaluating.
+ * @param testIter interator
+ * @param model model
+ * @return accuracy score
    * 
    */
   public double evaluateModel(DataSetIterator testIter, ComputationGraph model) {

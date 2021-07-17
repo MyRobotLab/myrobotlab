@@ -244,6 +244,12 @@ public class InMoov2Head extends Service {
 
   /**
    * Move servos of the head - null is a none move
+   * @param neckPos p
+   * @param rotheadPos p  
+   * @param eyeXPos p 
+   * @param eyeYPos p
+   * @param jawPos p
+   * @param rollNeckPos p
    * 
    */
   public void moveTo(Double neckPos, Double rotheadPos, Double eyeXPos, Double eyeYPos, Double jawPos, Double rollNeckPos) {

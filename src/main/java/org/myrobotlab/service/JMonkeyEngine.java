@@ -777,6 +777,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * wrapper of "find" which "expects" a spatial back otherwise its an error
+ * @param name name
+ * @param startNode starting node 
+ * @return spatial object.
    * 
    */
   public Spatial get(String name, Node startNode) {
@@ -789,6 +792,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * get default axis local rotation in degrees
+ * @param name name of joint
+ * @return angle in degrees
    * 
    */
   public Float getAngle(String name) {
@@ -1338,6 +1343,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * onAnalog
+   * @param name name
+   * @param keyPressed key pressed 
+   * @param tpf tfp
    *
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
@@ -1639,6 +1647,8 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * rotate on the "default" axis to a location without using speed
+   * @param name name to rotate
+   * @param degrees amount to rotate
    * 
    */
   public void rotateTo(String name, double degrees) {
@@ -1647,6 +1657,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * rotate on the "default" axis using speed
+   * @param name name of joint
+   * @param degrees amount to move
+   * @param speed speed
    * 
    */
   public void rotateTo(String name, double degrees, double speed) {

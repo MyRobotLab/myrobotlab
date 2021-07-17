@@ -1467,8 +1467,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * shutdown and remove a service from the registry
-
+   * @param name shutdown and remove a service from the registry
    */
   static public void releaseService(String name) {
     Runtime.release(name);
