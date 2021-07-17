@@ -235,6 +235,7 @@ public class Pid extends Service {
   /**
    * does all the things that need to happen to ensure a bumpless transfer from
    * manual to automatic mode.
+   * @param key pid key
    */
   public void init(String key) {
     PidData piddata = data.get(key);
@@ -286,6 +287,8 @@ public class Pid extends Service {
    * Allows the controller Mode to be set to manual (0) or Automatic (non-zero)
    * when the transition from manual to auto occurs, the controller is
    * automatically initialized
+   * @param key pid key
+   * @param Mode mode to run in.
    */
   public void setMode(String key, int Mode) {
     PidData piddata = data.get(key);

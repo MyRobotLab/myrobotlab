@@ -1854,6 +1854,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called with only port - will default with defaulted pins
+   * @param port port for the sensor
+   * @return the ultrasonic sensor service
    */
   public UltrasonicSensor startUltraSonicRight(String port) {
     return startUltraSonicRight(port, 64, 63);
@@ -1861,6 +1863,10 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called explicitly with pin values
+   * @param port p
+   * @param trigPin trigger pin 
+   * @param echoPin echo pin
+   * @return the ultrasonic sensor
    * 
    */
   public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {

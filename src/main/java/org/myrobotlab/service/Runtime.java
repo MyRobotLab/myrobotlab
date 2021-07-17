@@ -863,6 +863,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * @param interfaze interface
+   * @return list of service names
    * 
    */ // FIXME !!! NOT RETURNING FULL NAMES !!!
   public static List<String> getServiceNamesFromInterface(Class<?> interfaze) {

@@ -709,6 +709,9 @@ public class Security extends Service implements AuthorizationProvider {
    * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
    * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
    * code which sets the key can be removed
+   * @param keyName name
+   * @param keyValue value
+   * @return the name of the key stored
    * 
    */
   public String setKey(String keyName, String keyValue) {

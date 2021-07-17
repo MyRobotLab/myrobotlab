@@ -389,6 +389,18 @@ public class InMoov2Head extends Service {
   /**
    * Set the put min and max values for all servoes in the head. input limits
    * are not modified.
+   * @param headXMin a
+   * @param headXMax a
+   * @param headYMin a
+   * @param headYMax a
+   * @param eyeXMin a
+   * @param eyeXMax a
+   * @param eyeYMin a
+   * @param eyeYMax a
+   * @param jawMin a
+   * @param jawMax a
+   * @param rollNeckMin a
+   * @param rollNeckMax a
    * 
    */
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
