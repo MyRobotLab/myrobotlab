@@ -81,6 +81,7 @@ public class ServoMixer extends Service {
 
   /**
    * typed attach
+   * @param servo the servo to attach
    * 
    */
   public void attachServo(Servo servo) {

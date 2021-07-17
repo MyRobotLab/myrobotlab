@@ -440,6 +440,7 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
   /**
    * Forces usage of wiringPi library (
    * http://wiringpi.com/reference/i2c-library/ )
+   * @param status wiring status for the pi
    * 
    */
   public void setWiringPi(boolean status) {

@@ -778,6 +778,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * TODO - future work would be to supply a query to the getServiceList(query)
    * such that interfaces, types, or processes ids, can selectively be queried
    * out of it
+   * @return list of registrations
    */
   synchronized public List<Registration> getServiceList() {
     List<Registration> ret = new ArrayList<>();
@@ -1992,6 +1993,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * getServiceTypeNames will publish service names based on some filter
    * criteria
+   * @param filter f
+   * @return array of service types
    * 
    */
   public String[] getServiceTypeNames(String filter) {
@@ -2486,6 +2489,10 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * FIXME - input parameters will need to change - at some point, a subscribe
    * to describe, and appropriate input parameters should replace the current
    * onRegistered system
+   * @param type t
+   * @param id i
+   * @param remoteUuid remote id
+   * @return describe results
    * 
    */
   public DescribeResults describe(String type, String id, String remoteUuid) {
@@ -2505,6 +2512,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * 
    * FIXME - describe(String[] filters) where filter can be name, type, local,
    * state, etc
+   * @param uuid u
+   * @param query q
+   * @return describe results
    * 
    * 
 
@@ -2545,6 +2555,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Describe results from remote query to describe
+   * @param results describe results
    * 
 
    */
@@ -2673,7 +2684,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * globally get all client
-
+   * @return connection map
    */
   public Map<String, Connection> getConnections() {
     return connections;
@@ -2682,6 +2693,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * separated by connection - send connection name and get filter results back
    * for a specific connections connected clients
+   * @param gatwayName name
+   * @return map of connections
    * 
    */
   public Map<String, Connection> getConnections(String gatwayName) {
@@ -2753,6 +2766,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * takes an id returns a connection uuid
+   * @param id id
+   * @return the connection
    * 
    */
   public Connection getRoute(String id) {
@@ -2765,6 +2780,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * get gateway based on remote address of a msg e.g. msg.getRemoteId()
+   * @param remoteId remote
+   * @return the gateway
    * 
    */
   public Gateway getGatway(String remoteId) {

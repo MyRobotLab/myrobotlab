@@ -85,6 +85,7 @@ public class Rekognition extends Service {
 
   /**
    * set the region - not sure which ones are supported
+   * @param region r
    * 
    */
   public void setRegion(Regions region) {

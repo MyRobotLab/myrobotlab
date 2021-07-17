@@ -41,6 +41,9 @@ public class Connection {
   /**
    * put in objects which should be transient - e.g. sockets all config and
    * other attributes should use put(key, object)
+   * @param key k
+   * @param o o
+   * @return previous value
    * 
    */
   public Object putTransient(String key, Object o) {

@@ -495,6 +495,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
 
   /**
    * publish of the "moveTo" from servo
+   * @param servo the servo that moved
    * 
    */
   public void onMoveTo(final Servo servo) {

@@ -19,6 +19,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   /**
    * This typically will suppress listening to itself when it speaks creating an
    * endless self dialog :P
+   * @param mouth the speech synthesis to attach
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth);
 
@@ -37,23 +38,27 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
 
   /**
    * track the state of listening process
+   * @return true if listening
    */
   public boolean isListening();
 
   /**
-   * Event is sent when the listening Service is actually listening or not.
+   * @param event Event is sent when the listening Service is actually listening or not.
    */
   @Deprecated /* use publishListening(boolean event) */
   public void listeningEvent(Boolean event);
 
   /**
    * speech synthesis interface - to not listen while speaking
+   * @param utterance the utterance that completed
    * 
    */
   public void onEndSpeaking(String utterance);
 
   /**
    * speech synthesis interface - to not listen while speaking
+   * @param utterance the utterance 
+   * @return the utterance
    * 
    */
   public String onStartSpeaking(String utterance);
@@ -70,18 +75,24 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
 
   /**
    * Publish event when listening or not listening ...
+   * @param event e
+   * @return the event
    * 
    */
   public boolean publishListening(boolean event);
 
   /**
    * the recognized text
+   * @param text text to be published
+   * @return the text
    * 
    */
   public String publishRecognized(String text);
 
   /**
    * the text in addition to any meta data like confidence rating
+   * @param result r
+   * @return listening event
    * 
    */
   public ListeningEvent publishListeningEvent(ListeningEvent result);
@@ -120,12 +131,13 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   /**
    * Setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
+   * @param word wake word to set
    * 
    */
   public void setWakeWord(String word);
 
   /**
-   * Get the current wake word
+   * @return  Get the current wake word
    * 
    */
   public String getWakeWord();

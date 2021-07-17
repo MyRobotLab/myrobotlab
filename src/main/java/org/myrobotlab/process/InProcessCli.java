@@ -89,6 +89,10 @@ public class InProcessCli implements Runnable {
    * process as the mrl instances. Its a general good model to follow, because
    * stdin/stdout is a pipe into and out of the instance, so just like
    * websockets, mqtt or xmpp it should behave the same
+   * @param s service
+   * @param senderName sender name 
+   * @param in input stream
+   * @param out output stream
    * 
    */
   public InProcessCli(ServiceInterface s, String senderName, InputStream in, OutputStream out) {

@@ -434,6 +434,12 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * Both can have collisions. When the parents of nodes change, the depth model
    * "should" change to reflect the changes in branches. The flat model does not
    * need to change, but has a higher likelyhood of collisions.
+   * @param tree t
+   * @param path p
+   * @param spatial s 
+   * @param includeGeometries include
+   * @param useDepthKeys depth
+   * @return map of user data
    * 
    */
   public Map<String, UserData> buildTree(Map<String, UserData> tree, String path, Spatial spatial, boolean includeGeometries, boolean useDepthKeys) {
@@ -1220,6 +1226,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * load a node with all potential children
+   * @param parentDirPath p
    */
   public void loadNode(String parentDirPath) {
     File parentFile = new File(parentDirPath);

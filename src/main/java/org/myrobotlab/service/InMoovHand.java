@@ -695,7 +695,7 @@ public class InMoovHand extends Service implements LeapDataListener, PinArrayLis
   }
 
   /**
-   * Set the array of pins that should be listened to.
+   * @param pins Set the array of pins that should be listened to.
    * 
    */
   public void setSensorPins(String[] pins) {
