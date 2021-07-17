@@ -101,8 +101,7 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * set default region for polly
-   * 
+   * @param regionName set default region for polly
    */
   public void setRegion(String regionName) {
     defaultRegion = Regions.fromName(regionName);

@@ -9,6 +9,7 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * This method should listen for Mouth events
    * 
    * FIXME - should be deprecated - use Attach Pattern !
+   * @param mouth m
    */
   @Deprecated /* use attachSpeechSynthesis(SpeechSynthesis mouth) */
   public void addMouth(SpeechSynthesis mouth);

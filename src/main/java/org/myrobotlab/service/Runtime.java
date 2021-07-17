@@ -899,6 +899,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
+   * @param interfaze interface
+   * @return results
    * 
    */
   public ServiceTypeNameResults getServiceTypeNamesFromInterface(String interfaze) {
@@ -1182,6 +1184,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * TODO - have rules on what registrations to accept - dependent on security,
    * desire, re-broadcasting configuration etc. TODO - determine rules on
    * re-broadcasting based on configuration
+   * @param registration registration
+   * @return registration
    * 
    */
   public final static synchronized Registration register(Registration registration) {
@@ -1363,8 +1367,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * sets task to shutdown in (n) seconds
-   * 
+   * @param seconds sets task to shutdown in (n) seconds
    */
   public static void shutdown(Integer seconds) {
     log.info("shutting down in {} seconds", seconds);
@@ -2718,7 +2721,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * list connections - current connection names to this mrl runtime
+   * @return list connections - current connection names to this mrl runtime
    * 
    */
   public Map<String, Connection> lc() {
@@ -3273,6 +3276,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * "Connection". This key should be retrievable, when a msg arrives at the
    * service which needs to be sent remotely. This key is used to get the
    * "Connection" to send the msg remotely
+   * @param string s
+   * @param uuid u
    * 
    */
   public void addLocalGatewayKey(String string, String uuid) {

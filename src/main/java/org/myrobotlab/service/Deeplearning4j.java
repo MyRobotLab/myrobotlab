@@ -921,6 +921,8 @@ public class Deeplearning4j extends Service {
 
   /**
    * Fit a model against a training set Note: iterator is reset before fitting
+   * @param trainIter training set iterator
+   * @param model the model itself
    * 
    */
   public void runFitter(DataSetIterator trainIter, ComputationGraph model) {

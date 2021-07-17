@@ -22,7 +22,7 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * set the speaker voice
-   * @param voice 
+   * @param voice name of voice to set.
    * @return success or failure
    * 
    */
