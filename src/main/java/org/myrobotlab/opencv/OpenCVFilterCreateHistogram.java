@@ -58,7 +58,6 @@ public class OpenCVFilterCreateHistogram extends OpenCVFilter {
    * creates a histogram in seperate channels TODO - display different channels
    * TODO -
    * 
-   * @param name
    */
   public OpenCVFilterCreateHistogram(String name) {
     super(name);

@@ -387,9 +387,6 @@ public class MrlComm implements SerialDataListener {
    * Attach an encoder of a given type. current supported types are 0 that means
    * only amt203A is supported... but soon type =1 will mean as5048a ...
    * 
-   * @param deviceId
-   * @param type
-   * @param pin
    */
   public void encoderAttach(Integer deviceId, Integer type, Integer pin) {
     if (type == 0) {

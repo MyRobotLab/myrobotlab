@@ -79,7 +79,6 @@ public class Intro extends Service {
   /**
    * execute an Intro resource script
    * 
-   * @param introScriptName
    */
   public void execScript(String introScriptName) {
     try {

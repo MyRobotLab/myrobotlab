@@ -208,7 +208,6 @@ public class Launcher {
    * a myrobotlab instance, depending on flags it might also start a client as
    * an interface to the spawned instance
    * 
-   * @param args
    */
   public static void main(String[] args) {
     try {

@@ -52,8 +52,6 @@ public class WebSocketConnector extends Service implements TextPublisher {
    * 
    * @param url
    *          the url of the websocket
-   * @throws URISyntaxException
-   * @throws IOException
    */
   public void connect(String url) throws URISyntaxException, IOException {
 
@@ -95,8 +93,6 @@ public class WebSocketConnector extends Service implements TextPublisher {
   /**
    * Send a message over the websocket
    * 
-   * @param message
-   * @throws IOException
    */
   public void send(String message) throws IOException {
     socket.fire(message);

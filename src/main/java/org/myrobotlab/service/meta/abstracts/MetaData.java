@@ -299,9 +299,6 @@ public class MetaData implements Serializable {
    * that this template will dynamically generate peer names depending on the
    * parents name
    * 
-   * @param key
-   * @param peerType
-   * @param comment
    */
   public void addPeer(String key, String peerType, String comment) {
     peers.put(key, new ServiceReservation(key, null, peerType, comment));

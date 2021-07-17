@@ -1441,8 +1441,6 @@ public class FileIO {
    * slash ... https://en.wikipedia.org/wiki/Backslash Bill Gates and IBM are
    * evil !
    * 
-   * @param path1
-   * @param path2
    * @return forward slash path
    */
   static public final String gluePathsForwardSlash(String path1, String path2) {

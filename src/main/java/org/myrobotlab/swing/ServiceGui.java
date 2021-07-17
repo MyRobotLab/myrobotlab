@@ -458,7 +458,6 @@ public abstract class ServiceGui implements WindowListener {
    * To be overriden if the ServiceGui designer wants to be notified of new
    * services.
    * 
-   * @param sw
    */
   public void onRegistered(final ServiceInterface sw) {
 
@@ -468,8 +467,6 @@ public abstract class ServiceGui implements WindowListener {
    * method to enable or disable all the children of a container - useful when a
    * single checkbox or button controls many other sub-configuration elements
    * 
-   * @param container
-   * @param enabled
    */
   static public void setEnabled(Container container, boolean enabled) {
     Component[] children = container.getComponents();

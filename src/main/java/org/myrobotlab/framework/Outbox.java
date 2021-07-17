@@ -313,7 +313,6 @@ public class Outbox implements Runnable, Serializable {
   /**
    * Safe detach for single subscriber
    * 
-   * @param name
    */
   synchronized public void detach(String name) {
     for (String topic : notifyList.keySet()) {

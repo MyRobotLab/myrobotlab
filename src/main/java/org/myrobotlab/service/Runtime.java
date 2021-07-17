@@ -3232,8 +3232,6 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * service which needs to be sent remotely. This key is used to get the
    * "Connection" to send the msg remotely
    * 
-   * @param string
-   * @param uuid
    */
   public void addLocalGatewayKey(String string, String uuid) {
     routeTable.addLocalGatewayKey(string, uuid);

@@ -149,8 +149,6 @@ public class Jme3Util {
   /**
    * absolute (local) rotation ..
    * 
-   * @param name
-   * @param degrees
    */
   public void rotateTo(String name, String axis, double degrees) {
     UserData o = jme.getUserData(name);

@@ -357,14 +357,6 @@ public class InMoov2Arm extends Service implements IKJointAngleListener {
    * This method sets the output min/max limits for all of the servos in the
    * arm. Input limits are unchanged.
    * 
-   * @param bicepMin
-   * @param bicepMax
-   * @param rotateMin
-   * @param rotateMax
-   * @param shoulderMin
-   * @param shoulderMax
-   * @param omoplateMin
-   * @param omoplateMax
    */
   public void setLimits(double bicepMin, double bicepMax, double rotateMin, double rotateMax, double shoulderMin, double shoulderMax, double omoplateMin, double omoplateMax) {
     bicep.setMinMaxOutput(bicepMin, bicepMax);

@@ -85,8 +85,6 @@ public class Http {
    * rename this is a common safety technique, so that other processes or
    * threads do not consume a partially downloaded file.
    * 
-   * @param theUrl
-   * @param outFile
    */
   public static void getSafePartFile(String theUrl, String outFile) {
     getSafePartFile(theUrl, outFile, true);

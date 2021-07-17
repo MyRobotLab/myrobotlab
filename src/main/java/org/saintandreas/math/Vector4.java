@@ -69,8 +69,6 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
     /**
      * Constructor instantiates a new <code>Vector4f</code> with provides
      * values.
-     *
-     * @param s
      */
     public Vector4(float s) {
       x = y= z = w = s;
@@ -176,7 +174,6 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
     }
 
     /**
-     * @param index
      * @return x value if index == 0, y value if index == 1 or z value if index ==
      *         2
      * @throws IllegalArgumentException

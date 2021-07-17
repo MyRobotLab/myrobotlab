@@ -658,7 +658,6 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
   /**
    * publish a null message to a topic - used for "events"
    * 
-   * @param topic
    */
   public void publish(String topic) {
     publish(topic, null);

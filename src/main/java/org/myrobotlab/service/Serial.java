@@ -264,7 +264,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * framework handle the details of local/remote and this function should
    * definitely NOT get a direct reference to the service
    * 
-   * @param name
    */
   public void addByteListener(String name) {
     log.info("Add Byte Listener for Name {}", name);

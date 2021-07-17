@@ -388,9 +388,6 @@ public class ImageDisplay extends Service implements MouseListener, ActionListen
   /**
    * Display an image by fading its alpha
    * 
-   * @param src
-   * @throws MalformedURLException
-   * @throws AWTException
    */
   public void displayFadeIn(String src) throws MalformedURLException, AWTException {
     display(null, src, null, null, null, null, null, null, true);

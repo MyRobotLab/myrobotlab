@@ -115,8 +115,6 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
 
     /**
      * Promote a 2 vec to a 3 vec
-     * @param v
-     * @param z
      */
     public Vector3f(@Nonnull Vector2f v, float z) {
       this(v.x, v.y, z);
@@ -124,7 +122,6 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
 
     /**
      * 
-     * @param v
      */
     public Vector3f(@Nonnull Vector2f v) {
       this(v, 0);
@@ -247,7 +244,6 @@ public final class Vector3f extends Vector<Vector3f> implements java.io.Serializ
     }
 
     /**
-     * @param index
      * @return x value if index == 0, y value if index == 1 or z value if index ==
      *         2
      * @throws IllegalArgumentException

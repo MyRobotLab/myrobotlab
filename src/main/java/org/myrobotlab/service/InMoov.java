@@ -1564,7 +1564,6 @@ public class InMoov extends Service implements IKJointAngleListener, JoystickLis
    * finish migration )
    * 
    * @return started ProgramAB service
-   * @throws IOException
    */
   public ProgramAB startBrain() throws IOException {
     if (chatBot == null) {

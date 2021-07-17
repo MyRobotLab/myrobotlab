@@ -41,10 +41,6 @@ public class DruppNeck extends Service {
    * will use the drupp ik solver to compute the angle for the up, middle, and
    * down servos.
    * 
-   * @param roll
-   * @param pitch
-   * @param yaw
-   * @throws Exception
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {
     // convert to radians

@@ -397,18 +397,6 @@ public class InMoovHead extends Service {
    * Sets the output min/max values for all servos in the inmoov head. input
    * limits are not modified.
    * 
-   * @param headXMin
-   * @param headXMax
-   * @param headYMin
-   * @param headYMax
-   * @param eyeXMin
-   * @param eyeXMax
-   * @param eyeYMin
-   * @param eyeYMax
-   * @param jawMin
-   * @param jawMax
-   * @param rollNeckMin
-   * @param rollNeckMax
    */
   public void setLimits(double headXMin, double headXMax, double headYMin, double headYMax, double eyeXMin, double eyeXMax, double eyeYMin, double eyeYMax, double jawMin,
       double jawMax, double rollNeckMin, double rollNeckMax) {

@@ -8,8 +8,6 @@ public interface EncoderController extends Attachable {
   /**
    * minimal attach
    * 
-   * @param control
-   * @throws Exception
    */
   public void attach(EncoderControl control) throws Exception;
 

@@ -86,7 +86,6 @@ public class Rekognition extends Service {
   /**
    * set the region - not sure which ones are supported
    * 
-   * @param region
    */
   public void setRegion(Regions region) {
     this.region = region;
@@ -111,9 +110,6 @@ public class Rekognition extends Service {
    * @param path
    *          - the path
    * @return - labels
-   * @throws FileNotFoundException
-   * @throws IOException
-   * @throws URISyntaxException
    */
   public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
     if (path == null) {
@@ -139,8 +135,6 @@ public class Rekognition extends Service {
    * @param inputStream
    *          - the stream of data
    * @return - labels found
-   * @throws FileNotFoundException
-   * @throws IOException
    */
   public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
     ByteBuffer imageBytes;

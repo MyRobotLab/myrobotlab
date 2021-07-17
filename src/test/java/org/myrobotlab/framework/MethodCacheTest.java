@@ -49,10 +49,6 @@ public class MethodCacheTest extends AbstractTest {
   /**
    * find missing methods which did not appear through first cache pass
    * 
-   * @throws IllegalAccessException
-   * @throws IllegalArgumentException
-   * @throws InvocationTargetException
-   * @throws ClassNotFoundException 
    */
   @Test
   public void findTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
@@ -157,13 +153,6 @@ public class MethodCacheTest extends AbstractTest {
   /**
    * Testing json
    * 
-   * @throws IllegalAccessException
-   * @throws IllegalArgumentException
-   * @throws InvocationTargetException
-   * @throws InstantiationException 
-   * @throws SecurityException 
-   * @throws NoSuchMethodException 
-   * @throws ClassNotFoundException 
    */
   @Test
   public void lossyJsonMethodTest() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException {

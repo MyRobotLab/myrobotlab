@@ -609,7 +609,6 @@ public class InMoov2Hand extends Service implements LeapDataListener, PinArrayLi
   /**
    * Set the array of pins that should be listened to.
    * 
-   * @param pins
    */
   public void setSensorPins(String[] pins) {
     // TODO, this should probably be a sorted set.. and sensorPins itself should

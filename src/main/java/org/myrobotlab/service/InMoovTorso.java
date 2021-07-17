@@ -269,12 +269,6 @@ public class InMoovTorso extends Service {
    * Sets the output min and max limits for all servos in the torso. input
    * limits are not changed.
    * 
-   * @param topStomMin
-   * @param topStomMax
-   * @param midStomMin
-   * @param midStomMax
-   * @param lowStomMin
-   * @param lowStomMax
    */
   public void setLimits(double topStomMin, double topStomMax, double midStomMin, double midStomMax, double lowStomMin, double lowStomMax) {
     topStom.setMinMaxOutput(topStomMin, topStomMax);

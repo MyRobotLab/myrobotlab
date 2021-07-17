@@ -622,7 +622,6 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
   /**
    * set the main status bar with Status information
    * 
-   * @param inStatus
    */
   public void setStatus(Status inStatus) {
 

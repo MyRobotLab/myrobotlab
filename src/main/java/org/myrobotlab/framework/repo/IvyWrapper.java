@@ -36,9 +36,6 @@ public class IvyWrapper extends Repo implements Serializable {
 
     private int level = Message.MSG_INFO;
 
-    /**
-     * @param level
-     */
     public IvyWrapperLogger(int level) {
       this.level = level;
     }

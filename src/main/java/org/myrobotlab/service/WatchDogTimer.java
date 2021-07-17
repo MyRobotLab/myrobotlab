@@ -275,8 +275,6 @@ public class WatchDogTimer extends Service {
   /**
    * named method to "check-in" - a service calls this function to say
    * "everything is ok"
-   * 
-   * @param checkPointName
    */
 
   public void checkPoint(String watchDogTimerName, String checkPointName) {

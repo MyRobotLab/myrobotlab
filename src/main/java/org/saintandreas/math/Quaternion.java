@@ -472,8 +472,6 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
   /**
    * Sets the values of this quaternion to the nlerp from itself to q2 by blend.
    * 
-   * @param q2
-   * @param blend
    */
   public Quaternion nlerp(Quaternion q2, float blend) {
     float dot = dot(q2);
