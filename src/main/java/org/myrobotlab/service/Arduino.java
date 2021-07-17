@@ -291,6 +291,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * String interface - this allows you to easily use url api requests like
    * /attach/nameOfListener/3
+ * @param listener the listener
+ * @param address the address
    */
   public void attach(String listener, int address) {
     attach((PinListener) Runtime.getService(listener), address);
@@ -669,6 +671,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * silly Arduino implementation - but keeping it since its familiar
    * digitalWrite/pin/value
+ * @param address the address
+ * @param value the value to write
    */
   public void digitalWrite(int address, int value) {
     log.info("digitalWrite {} {}", address, value);
@@ -949,6 +953,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * int type to describe the pin defintion to Pin.h 0 digital 1 analog
+ * @param pin the pin definition
+ * @return the type of pin
    * 
    */
   public Integer getMrlPinType(PinDefinition pin) {
@@ -2270,6 +2276,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
    * -Dfile.encoding=UTF-8
+   * @param args command line args
    * 
    */
   public static void main(String[] args) {
