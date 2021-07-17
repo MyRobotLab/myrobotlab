@@ -102,6 +102,7 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * mute or unmute
+   * @param mute true to mute
    * 
    */
   public void setMute(boolean mute);
@@ -123,6 +124,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * puts all speaking into blocking mode - default is false
+   * @param b true to block 
+   * @return blocking value
    * 
    */
   public Boolean setBlocking(Boolean b);
@@ -131,23 +134,28 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
    * This attach subscribes the the SpeechRecognizer to the SpeechSynthesizer so
    * the bot won't incorrectly recognize itself when its speaking ... otherwise
    * silly things can happen when talking to self...
+   * @param ear to attach
    */
   public void attachSpeechRecognizer(SpeechRecognizer ear);
 
   /**
    * Speech control controls volume, setting the voice, and of course "speak"
+   * @param control the speech synth to attach
    * 
    */
   public void attachSpeechControl(SpeechSynthesisControl control);
 
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
+   * @param key lookup word
+   * @param replacement replacement word.
    * 
    */
   public void replaceWord(String key, String replacement);
 
   /**
    * replace one word with another - instead of "biscuit" say "cookie"
+   * @param filter word filter to use
    */
   public void replaceWord(WordFilter filter);
 }

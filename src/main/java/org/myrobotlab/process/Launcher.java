@@ -207,7 +207,7 @@ public class Launcher {
    * Start class for myrobotlab.jar. Its primary concern is to build and launch
    * a myrobotlab instance, depending on flags it might also start a client as
    * an interface to the spawned instance
-   * 
+   * @param args args
    */
   public static void main(String[] args) {
     try {

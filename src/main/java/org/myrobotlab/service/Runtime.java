@@ -3048,6 +3048,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Main entry point for the MyRobotLab Runtime Check CmdOptions for list of
    * options -h help -v version -list jvm args -Dhttp.proxyHost=webproxy
    * f-Dhttp.proxyPort=80 -Dhttps.proxyHost=webproxy -Dhttps.proxyPort=80
+   * @param args cmd line args from agent spawn
    * 
    */
   public static void main(String[] args) {

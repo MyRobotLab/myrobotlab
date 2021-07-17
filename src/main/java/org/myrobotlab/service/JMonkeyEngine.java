@@ -1608,6 +1608,9 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * instant rotation on an particular axis
+ * @param name reference name
+ * @param axis axis
+ * @param degrees degree
    * 
    */
   public void rotateOnAxis(String name, String axis, double degrees) {
@@ -1616,6 +1619,10 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * incremental movement on an axis with a speed
+   * @param name name
+   * @param axis a
+   * @param degrees d 
+   * @param speed s
    * 
    */
   public void rotateOnAxis(String name, String axis, double degrees, double speed) {
