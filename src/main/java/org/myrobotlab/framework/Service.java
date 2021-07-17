@@ -1216,20 +1216,17 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
         return null; // should this be allowed to throw to a higher level ?
       }
       retobj = method.invoke(obj, params);
-
       if (blockLocally) {
         List<MRLListener> subList = outbox.notifyList.get(methodName);
+        // correct? get local (default?) gateway
+        Runtime runtime = Runtime.getInstance();
         if (subList != null) {
           for (MRLListener listener : subList) {
-
             Message msg = Message.createMessage(getFullName(), listener.callbackName, listener.callbackMethod, retobj);
             if (msg == null) {
               log.error("Unable to create message.. null message created");
             }
             msg.sendingMethod = methodName;
-
-            // correct? get local (default?) gateway
-            Runtime runtime = Runtime.getInstance();
             if (runtime.isLocal(msg)) {
               ServiceInterface si = Runtime.getService(listener.callbackName);
               if (si == null) {
@@ -1238,12 +1235,12 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
                 Method m = cache.getMethod(si.getClass(), listener.callbackMethod, retobj);
                 if (m == null) {;
                   log.warn("Null Method as a result of cache lookup. {} {} {}", si.getClass(), listener.callbackMethod, retobj);
-                  
                 }
                 try {
                   m.invoke(si, retobj);
                 } catch (Throwable e) {
-                  
+                  // we attempted to invoke this , it blew up.  Catch it here, continue  
+                  // through the rest of the listeners instead of bombing out.
                   log.error("Invoke blew up! on: {} calling method {} ",si.getName(), m.toString(), e);
                 }
               }
