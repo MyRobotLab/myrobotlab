@@ -77,8 +77,7 @@ public class Intro extends Service {
   }
 
   /**
-   * execute an Intro resource script
-   * 
+   * @param introScriptName execute an Intro resource script
    */
   public void execScript(String introScriptName) {
     try {
@@ -92,6 +91,8 @@ public class Intro extends Service {
 
   /**
    * This method will load a python file into the python interpreter.
+   * @param file the python file to load
+   * @return true/false
    */
   @Deprecated
   public boolean loadFile(String file) {

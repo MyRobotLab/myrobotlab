@@ -86,7 +86,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * set the tts command template
+   * @param ttsCommand set the tts command template
    * 
    */
   public void setTtsCommand(String ttsCommand) {
@@ -95,15 +95,14 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * get the tts command template
-   * 
+   * @return get the tts command template
    */
   public String getTtsCommand() {
     return ttsCommand;
   }
 
   /**
-   * setFestival sets the Windows tts template
+   * @return  setFestival sets the Windows tts template
    * 
    */
   public boolean setTts() {
@@ -118,7 +117,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * setMimic sets the Windows mimic template
+   * @return setMimic sets the Windows mimic template
    */
   public boolean setMimic() {
     removeExt(false);
@@ -132,7 +131,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * setSay sets the Mac say template
+   * @return setSay sets the Mac say template
    */
   public boolean setSay() {
     removeExt(false);
@@ -146,7 +145,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * setFestival sets the Linux tts to festival template
+   * @return setFestival sets the Linux tts to festival template
    */
   public boolean setFestival() {
     removeExt(false);
@@ -160,7 +159,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   }
 
   /**
-   * setEspeak sets the Linux tts to espeak template
+   * @return setEspeak sets the Linux tts to espeak template
    */
   public boolean setEspeak() {
     removeExt(false);
@@ -173,6 +172,7 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * String of characters to filter out of text to create the tts command.
    * Typically double quotes should be filtered out of the command as creating
    * the text to speech process command can be broken by double quotes
+   * @param filter chars to filter.
    * 
    */
   public void setFilter(String filter) {

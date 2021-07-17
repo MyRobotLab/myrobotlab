@@ -400,6 +400,8 @@ public class ServoMixer extends Service {
   /**
    * Takes name of a file and a json encoded string of a sequence, saves it to
    * file and sets the "current" sequence to the data
+   * @param filename the filename to save the sequence as
+   * @param json the json to save
    * 
    */
   public void saveSequence(String filename, String json) {
