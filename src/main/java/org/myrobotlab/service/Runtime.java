@@ -1025,6 +1025,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Get version returns the current version of mrl. It must be done this way,
    * because the version may be queried on the command line without the desire
    * to start a "Runtime"
+   * @return the version of the running platform instance
    * 
    */
   public static String getVersion() {
@@ -1421,7 +1422,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Publishing adding of new configuration sets (directories) to the config
    * parent directory typically data/config
-
+   * @return list of configs
    */
   public List<String> publishConfigList() {
     configList = new ArrayList<>();
@@ -1881,7 +1882,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * list the contents of the current working directory
-
+   * @return object
    */
   public Object ls() {
     return ls(null, null);
@@ -1995,6 +1996,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    *
    * The serviceData.xml lists all service types, dependencies, categories and
    * other relevant information regarding service creation
+   * @return list of all service type names 
    */
   public String[] getServiceTypeNames() {
     return getServiceTypeNames("all");
@@ -2961,6 +2963,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * Attempt to get the most likely valid address priority would be a lan
    * address - possibly the smallest class
+   * @return string address
    * 
    */
   public String getAddress() {

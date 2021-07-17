@@ -457,6 +457,7 @@ public abstract class ServiceGui implements WindowListener {
    * onRegistered is called on all service guis when a ne service is registered.
    * To be overriden if the ServiceGui designer wants to be notified of new
    * services.
+   * @param sw service interface registered
    * 
    */
   public void onRegistered(final ServiceInterface sw) {

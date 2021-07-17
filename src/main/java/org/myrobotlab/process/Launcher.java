@@ -157,6 +157,7 @@ public class Launcher {
 
   /**
    * prints help to the console
+   * @return the help 
    */
   static public String mainHelp() {
     String help = new CommandLine(new CmdOptions()).getUsageMessage();

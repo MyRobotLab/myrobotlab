@@ -2396,6 +2396,7 @@ public class RoboClaw extends AbstractMotorController implements EncoderPublishe
   Receive: [P(4 bytes), I(4 bytes), D(4 bytes), MaxI(4 byte), Deadzone(4 byte),
   MinPos(4 byte), MaxPos(4 byte), CRC(2 bytes)]
    * </pre>
+   * @return pid data
    */
   public PidData readPidM2() {
     byte[] data = sendReadPacket(30, address, 64);

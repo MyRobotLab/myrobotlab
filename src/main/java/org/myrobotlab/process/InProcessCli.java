@@ -345,6 +345,8 @@ public class InProcessCli implements Runnable {
 
   /**
    * get context specific path
+   * @param uuid uuid
+   * @return string representing cli prompt
    * 
    */
   public String getPrompt(String uuid) {

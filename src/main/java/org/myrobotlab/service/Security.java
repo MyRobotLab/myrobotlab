@@ -126,6 +126,7 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * I think it might be easier concept to use a singleton for this service ...
    * Almost "always" better to have a singleton instance vs static methods !!!
+   * @return the security service (singleton)
    * 
    */
   public static Security getInstance() {
@@ -398,6 +399,7 @@ public class Security extends Service implements AuthorizationProvider {
    * 
    * @param name
    *          - the name of the security key
+   * @return the property for a given key
    */
   public String getKey(String name) {
     if (store.containsKey(name)) {
