@@ -557,6 +557,8 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
    * mrl.js
    * 
    * the format of the key needs to be {name}.method
+   * @param key key
+   * @param sg gui
    * 
    */
   public void subscribeToServiceMethod(String key, ServiceGui sg) {
@@ -621,6 +623,7 @@ public class SwingGui extends Service implements Gateway, WindowListener, Action
 
   /**
    * set the main status bar with Status information
+   * @param inStatus status
    * 
    */
   public void setStatus(Status inStatus) {

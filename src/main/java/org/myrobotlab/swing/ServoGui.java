@@ -776,6 +776,7 @@ public class ServoGui extends ServiceGui implements ActionListener, ChangeListen
   /**
    * call back to hand new services registered we want to update our list of
    * possible controllers and encoders
+   * @param s registration
    * 
    */
   public void onRegistered(Registration s) {
