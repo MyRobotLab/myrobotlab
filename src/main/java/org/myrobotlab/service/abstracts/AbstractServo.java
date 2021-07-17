@@ -1008,11 +1008,11 @@ private Double maxSpeed;
 
   @Override
   public void attachServoControlListener(String name) {
-    // TODO Auto-generated method stub
-    
-    // TODO: add the addListener calls. 
+    // Add the listener calls. 
     addListener("publishServoMoveTo", name);
     addListener("publishMoveTo", name);
+    // TODO: this is an ambigious call because we have two flavors of this method.
+    // one that takes/returns the string name.. the other that takes/returns the ServoControl.
     addListener("publishServoEnable", name);
     addListener("publishServoDisable", name);
     addListener("publishServoStop", name);
