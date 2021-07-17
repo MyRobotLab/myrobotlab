@@ -150,6 +150,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    *            the value to multiply this vector by.
    * @param add
    *            the value to add
+   * @return r
    */
   public final ResultType scaleAdd(float scalar, ResultType add) {
     return mult(scalar).add(add);
@@ -194,6 +195,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   /**
    * Not marked final as quaternions have a different
    * idea of the inverse 
+   * @param v v
+   * @return result type
    */
   public ResultType mult(@Nonnull ResultType v) {
     float[] a = toArray();
@@ -207,7 +210,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   /**
    * Not marked final as quaternions have a different
    * idea of the inverse 
-
+   * @return r
    */
   public ResultType inverse() {
     float[] a = toArray();
@@ -242,6 +245,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>maxLocal</code> computes the maximum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
+   * @param v v
+   * @return r
    */
   public final ResultType max(ResultType v){
     float[] a = toArray();
@@ -256,6 +261,8 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>minLocal</code> computes the minimum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
+   * @param v v
+   * @return r
    */
   public final ResultType min(ResultType v){
     float[] a = toArray();
@@ -272,6 +279,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * 
    * @param v
    *          the object to compare for equality
+   * @param epsilon e
    * @return true if they are equal
    */
   public final boolean equalsEpsilon(ResultType v, float epsilon) {

@@ -81,6 +81,7 @@ public final class Vector4f extends Vector4<Vector4f> implements java.io.Seriali
     /**
      * Constructor instantiates a new <code>Vector3f</code> with default
      * values of (0,0,0).
+     * @param s s
      *
      */
     public Vector4f(float s) {
@@ -108,6 +109,8 @@ public final class Vector4f extends Vector4<Vector4f> implements java.io.Seriali
      * Constructor instantiates a new <code>Vector3f</code> that is a copy
      * of the provided vector
      * @param v The Vector3f to copy
+     * @param z z
+     * @param w w
      */
     public Vector4f( Vector2f v, float z, float w ) {
       super(v.x, v.y, z, w);
@@ -117,6 +120,7 @@ public final class Vector4f extends Vector4<Vector4f> implements java.io.Seriali
      * Constructor instantiates a new <code>Vector3f</code> that is a copy
      * of the provided vector
      * @param v The Vector3f to copy
+     * @param z z
      */
     public Vector4f( Vector2f v, float z) {
       super(v.x, v.y, z, 1);
@@ -135,6 +139,7 @@ public final class Vector4f extends Vector4<Vector4f> implements java.io.Seriali
      * Constructor instantiates a new <code>Vector3f</code> that is a copy
      * of the provided vector
      * @param v The Vector3f to copy
+     * @param w w
      */
     public Vector4f( Vector3f v, float w ) {
       super(v.x, v.y, v.z, w);
