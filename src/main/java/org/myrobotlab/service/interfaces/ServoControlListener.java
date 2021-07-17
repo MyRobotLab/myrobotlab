@@ -6,8 +6,6 @@ package org.myrobotlab.service.interfaces;
  * for example.  If the ServoControl has it's moveTo method called, 
  * the onMoveTo will be invoked to inform listeners that the servo was moved
  * 
- * @param sc
- * @return
  */
 public interface ServoControlListener {
 

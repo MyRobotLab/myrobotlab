@@ -272,7 +272,7 @@ public class OpenCVFilterFaceRecognizer extends OpenCVFilter {
   /**
    * Save the current model to the faceModelFilename
    * 
-   * @throws IOException
+   * @throws IOException if the save fails
    */
   public void save() throws IOException {
     save(faceModelFilename);

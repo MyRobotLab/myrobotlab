@@ -40,6 +40,7 @@ package org.saintandreas.math;
  *
  * @author Maarten Steur
  * @author Brad Davis
+ * @param <ResultType> result type
  */
 
 public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Vector<ResultType> implements java.io.Serializable {
@@ -69,14 +70,11 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
     /**
      * Constructor instantiates a new <code>Vector4f</code> with provides
      * values.
-     *
-     * @param s
+     * @param s value
      */
     public Vector4(float s) {
       x = y= z = w = s;
     }
-
-
 
     /**
      * Constructor instantiates a new <code>Vector4f</code> with provides
@@ -176,7 +174,7 @@ public abstract class Vector4<ResultType extends Vector4<ResultType>> extends Ve
     }
 
     /**
-     * @param index
+     * @param index i
      * @return x value if index == 0, y value if index == 1 or z value if index ==
      *         2
      * @throws IllegalArgumentException

@@ -63,8 +63,8 @@ public class Polly extends AbstractSpeechSynthesis {
    * for the user's convenience for amazon other cloud providers have single
    * keys or different details
    * 
-   * @param keyId
-   * @param keyIdSecret
+   * @param keyId aws polly user key
+   * @param keyIdSecret aws polly user secret
    */
   public void setKeys(String keyId, String keyIdSecret) {
     setKey(AMAZON_POLLY_USER_KEY, keyId);
@@ -101,9 +101,7 @@ public class Polly extends AbstractSpeechSynthesis {
   }
 
   /**
-   * set default region for polly
-   * 
-   * @param regionName
+   * @param regionName set default region for polly
    */
   public void setRegion(String regionName) {
     defaultRegion = Regions.fromName(regionName);

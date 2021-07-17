@@ -138,9 +138,9 @@ public class CmdOptions {
   /**
    * Command options data object will return the options in List form
    * to be appended to the ProcessBuilder(List)
+ * @return the list of output command
+ * @throws IOException boom
    * 
-   * @return
-   * @throws IOException
    */
   public List<String> getOutputCmd() throws IOException {
 

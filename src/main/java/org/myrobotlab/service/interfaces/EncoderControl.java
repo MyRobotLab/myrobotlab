@@ -17,23 +17,18 @@ public interface EncoderControl extends Attachable {
 
   /**
    * publishes the EncoderData from the encoder
-   * 
-   * @param data
-   * @return data
+   * @param data the data to publish
+   * @return encoder data
    */
   public EncoderData publishEncoderData(EncoderData data);
 
   /**
-   * return the state of streaming encoder data
-   * 
-   * @return
+   * @return the state of streaming encoder data
    */
   public Boolean isEnabled();
 
   /**
-   * the position of the encoder in degrees or cm for linear encoder ?
-   * 
-   * @return
+   * @return  the position of the encoder in degrees or cm for linear encoder ?
    */
   public Double getPos();
 

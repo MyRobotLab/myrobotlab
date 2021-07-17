@@ -5,8 +5,6 @@ package org.myrobotlab.service.interfaces;
  * called.  ServoControlListeners will be informed of the control
  * message.
  * 
- * @param sc 
- * @return
  */
 public interface ServoControlPublisher {
 

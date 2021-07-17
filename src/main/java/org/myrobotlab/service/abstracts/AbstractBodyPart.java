@@ -31,7 +31,7 @@ public abstract class AbstractBodyPart extends Service {
   }
 
   /**
-   * get attached body parts ( parents )
+   * @return get attached body parts ( parents )
    */
   public ArrayList<BodyPart> getBodyParts() {
 
@@ -48,6 +48,8 @@ public abstract class AbstractBodyPart extends Service {
 
   /**
    * get a ServoControl element inside the branches by name
+   * @param identifier the id
+   * @return the servo control 
    */
   public ServoControl getServo(String identifier) {
     return (ServoControl) thisNode.getNode(thisNode.findNode(identifier)).getValue();
@@ -55,6 +57,8 @@ public abstract class AbstractBodyPart extends Service {
 
   /**
    * get a BodyPart element inside the branches by name
+   * @param identifier the name/id
+   * @return the body part
    */
   public BodyPart getBodyPart(String identifier) {
     return (BodyPart) thisNode.getNode(thisNode.findNode(identifier)).getValue();
@@ -68,6 +72,8 @@ public abstract class AbstractBodyPart extends Service {
    * Please note syntax order for information : HAND thumb, index, majeure,
    * ringFinger, pinky, wrist ARM bicep, rotate, shoulder, omoplate HEAD neck,
    * rothead, rollNeck, eyeX, eyeY, jaw
+ * @param node the node
+ * @param servoPos the positions varargs
    */
   public void moveTo(String node, Double... servoPos) {
     checkParameters(node, servoPos.length);
@@ -81,6 +87,8 @@ public abstract class AbstractBodyPart extends Service {
   /**
    * move a group of servo And wait for every servo of the group reached the
    * asked position
+ * @param node the node
+ * @param servoPos the positions
    */
   public void moveToBlocking(String node, Double... servoPos) {
     checkParameters(node, servoPos.length);
@@ -107,6 +115,7 @@ public abstract class AbstractBodyPart extends Service {
   }
 
   /**
+   * @param bodyPart the bod=y part name
    * @return childsServo : the servos attached to the bodyPart
    */
   public ArrayList<ServoControl> getAcuators(String bodyPart) {

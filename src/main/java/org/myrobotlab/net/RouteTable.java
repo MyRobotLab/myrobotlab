@@ -50,8 +50,8 @@ public class RouteTable {
 
   /**
    * Thread safe removal of routes
+   * @param uuid route id to remove.
    * 
-   * @param uuid
    */
   public void removeRoute(String uuid) {
     Map<String, RouteEntry> newTable = new HashMap<>();

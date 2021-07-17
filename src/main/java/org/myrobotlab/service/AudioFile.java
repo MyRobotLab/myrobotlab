@@ -225,7 +225,7 @@ public class AudioFile extends Service {
    * 
    * @param filename
    *          - name of file relative to the resource dir
-   * @param isBlocking
+   * @param isBlocking if the playback should block
    */
   public void playResource(String filename, Boolean isBlocking) {
     playFile(getResourceDir() + File.separator + filename, isBlocking);

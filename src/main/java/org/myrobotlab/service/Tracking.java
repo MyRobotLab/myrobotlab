@@ -158,6 +158,8 @@ public class Tracking extends Service {
 
   /**
    * generic method to compute filter output after setState()
+   * @param filterName name
+   * @param state state
    */
   public void execFilterFunctions(String filterName, String state) {
     if (!Arrays.asList(OpenCV.getPossibleFilters()).contains(filterName)) {

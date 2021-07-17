@@ -223,6 +223,8 @@ public class Msg {
 
   /**
    * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   * @param arduino  - the mrlcomm publisher 
+   * @param serial - the serial device that is being used for communication
    */
 
   // public void publishMRLCommError(String errorMsg/*str*/){}

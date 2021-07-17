@@ -232,6 +232,8 @@ public class Python extends Service {
 
   /**
    * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
+   * @param pythonRefName python variable name
+   * @param o value to set
    */
   public void set(String pythonRefName, Object o) {
     interp.set(pythonRefName, o);
@@ -253,8 +255,8 @@ public class Python extends Service {
    * Get the value of the Python variable e.g. Integer x =
    * (Integer)python.getValue("my_var")
    * 
-   * @param pythonRefName
-   * @return
+   * @param pythonRefName the reference name for the python object
+   * @return the python object
    */
   public Object get(String pythonRefName) {
     PyObject o = getPyObject(pythonRefName);
@@ -475,7 +477,9 @@ public class Python extends Service {
   }
 
   /**
-   * execute code
+   * execute code (blocking)
+   * @param code string of code to run
+   * @return true/false
    */
   public boolean exec(String code) {
     return exec(code, true);
@@ -563,6 +567,8 @@ public class Python extends Service {
    * 
    * @param filename
    *          the full path name of the python file to execute
+   * @return true/false 
+   * @throws IOException boom 
    */
   public boolean execFile(String filename) throws IOException {
     return execFile(filename, true);
@@ -570,10 +576,11 @@ public class Python extends Service {
 
   /**
    * executes an external Python file
+   * @param filename file to exec
+   * @param block true if blocking exec
+   * @return true/false
+   * @throws IOException boom 
    * 
-   * @param filename
-   * @param block
-   * @throws IOException
    */
   public boolean execFile(String filename, boolean block) throws IOException {
     String script = FileIO.toString(filename);
@@ -655,7 +662,7 @@ public class Python extends Service {
   /**
    * load a official "service" script maintained in myrobotlab
    * 
-   * @param serviceType
+   * @param serviceType the type of service
    */
   public void loadServiceScript(String serviceType) {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
@@ -789,7 +796,7 @@ public class Python extends Service {
    * stop all scripts (not sure the pros/cons of this management vs
    * thread.interruptAllThreads())
    * 
-   * @return
+   * @return false
    */
   public boolean stop() {
     log.info("stopping all scripts");

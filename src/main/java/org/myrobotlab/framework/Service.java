@@ -406,8 +406,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Non-static getResourceDir() will return /resource/{service type name} e.g.
    * /resource/Arduino
+ * @return  the resource directory
    * 
-   * @return
    */
   public String getResourceDir() {
     return getResourceDir(getClass());
@@ -417,9 +417,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Static getResourceDir(Class clazz) will return the appropriate resource
    * directory, typically it will be /resource/{MetaData} but depending if run
    * in the presence of other developing directories.
+ * @param clazz the class name
+ * @return the resource dir
    * 
-   * @param clazz
-   * @return
    */
   static public String getResourceDir(Class<?> clazz) {
     return getResourceDir(clazz.getSimpleName(), null);
@@ -440,10 +440,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *     2. src/resource/{MetaData} or
    *     3. ../{MetaData}/resource/{MetaData}
    * </pre>
+ * @param serviceType the type of service
+ * @param additionalPath to glue together
+ * @return the full resolved path
    * 
-   * @param serviceType
-   * @param additionalPath
-   * @return
    */
   static public String getResourceDir(String serviceType, String additionalPath) {
 
@@ -474,10 +474,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * non static get resource path return the path to a resource - since the root
    * can change depending if in debug or runtime - it gets the appropriate root
-   * and adds the additionalPath..
+   * and adds the additionalPath.. 
+ * @param additionalPath additional paths to add to the resource path
+ * @return the combined file path
    * 
-   * @param additionalPath
-   * @return
    */
   public String getResourcePath(String additionalPath) {
     return FileIO.gluePaths(getResourceDir(), additionalPath);
@@ -487,8 +487,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * All resource access should be using this method. Util.getResource... should
    * be deprecated. This should be the one source which determines the location
    * and resolves the priority of setting this configuration
+ * @return the root folder for the resource dir
    * 
-   * @return
    */
 
   static public String getResourceRoot() {
@@ -503,9 +503,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * list of resources for this service top level
    * 
-   * @return
+ * @return list of resources for this service top level
+   * 
    */
   public File[] getResourceDirList() {
     return getResourceDirList(null);
@@ -518,7 +518,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          - the type of service
    * @param resourceName
    *          - the path of the resource
-   * @return
+ * @return the bytes of the resource
    */
   static public byte[] getResource(String serviceType, String resourceName) {
     String filename = getResourceDir(serviceType, resourceName);
@@ -543,10 +543,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * static getResource(Class, resourceName) to access a different services
    * resources
+ * @param clazz the class
+ * @param resourceName the resource name
+ * @return bytes of the resource
    * 
-   * @param clazz
-   * @param resourceName
-   * @return
    */
   static public byte[] getResource(Class<?> clazz, String resourceName) {
     return getResource(clazz.getSimpleName(), resourceName);
@@ -555,9 +555,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Get a resource as a string. This will follow the conventions of finding the
    * appropriate resource dir
+ * @param resourceName the name of the resource
+ * @return the string of the bytes , assuming utf-8
    * 
-   * @param resourceName
-   * @return
    */
   public String getResourceAsString(String resourceName) {
     byte[] data = getResource(resourceName);
@@ -590,9 +590,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Constructor of service, reservedkey typically is a services name and inId
    * will be its process id
+ * @param reservedKey the service name
+ * @param inId process id
    * 
-   * @param reservedKey
-   * @param inId
    */
   public Service(String reservedKey, String inId) {
 
@@ -661,10 +661,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * get a list of resource files in a resource path
    * 
-   * @param additionalPath
-   * @return
+ * @param additionalPath get a list of resource files in a resource path
+ * @return list of files
+   * 
    */
   public File[] getResourceDirList(String additionalPath) {
     String resDir = getResourceDir(getClass(), additionalPath);
@@ -1180,11 +1180,11 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * thread blocking invoke call on different service in the same process
+ * @param serviceName the service to invoke on
+ * @param methodName the method to invoke
+ * @param params var args of the params to pass
+ * @return the returned value from invoking
    * 
-   * @param serviceName
-   * @param methodName
-   * @param params
-   * @return
    */
   final public Object invokeOn(String serviceName, String methodName, Object... params) {
     return invokeOn(false, Runtime.getService(serviceName), methodName, params);
@@ -1290,8 +1290,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Default load config method, subclasses should override this to support 
    * service specific configuration in the service yaml files.
    * 
-   * @param config
-   * @return
    */
   public ServiceConfig load(ServiceConfig config) {
     log.info("Default service config loading for service: {} type: {}", getName(), getType());
@@ -1301,7 +1299,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * Default getConfig returns name and type with null service specific config
    * 
-   * @return
    */
   public ServiceConfig getConfig() {
     ServiceConfig sc = new ServiceConfig();
@@ -1334,7 +1331,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * method of de-serializing default will to load simple xml from name file
    * 
-   * @throws IOException
    */
   public ServiceConfig load() throws IOException {
     return load((String) null);
@@ -1343,10 +1339,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * loads a yaml configuration file from the file system default location will
    * be data/config/{name}.yml
+ * @param filename the file to load
+ * @return service config loaded from file.
+ * @throws IOException if an error occurs reading the file
    * 
-   * @param filename
-   * @return
-   * @throws IOException
    */
   public ServiceConfig load(String filename) throws IOException {
 
@@ -1747,8 +1743,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *                &lt;--                            &lt;--
    * </pre>
    * 
-   * @throws TimeoutException
-   * @throws InterruptedException
    */
   public Object sendBlocking(Message msg, Integer timeout) throws InterruptedException, TimeoutException {
     if (Runtime.getInstance().isLocal(msg)) {
@@ -1775,9 +1769,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    *          - max time to wait in ms
    * @param sendMsg
    *          - optional message to send to the remote topic
-   * @return
-   * @throws InterruptedException
-   * @throws TimeoutException
+   * @return the returned object
+   * @throws InterruptedException boom
+   * @throws TimeoutException boom
    */
   protected Object waitOn(String fullName, String method, Integer timeout, Message sendMsg) throws InterruptedException, TimeoutException {
 
@@ -2466,8 +2460,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * non parameter version for use within a Service
+ * @return bytes of png image
    * 
-   * @return
    */
   public byte[] getServiceIcon() {
     return getServiceIcon(getClass().getSimpleName());
@@ -2475,9 +2469,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * static class version for use when class is available "preferred"
+ * @param serviceType the type of service
+ * @return the bytes representing it's icon (png)
    * 
-   * @param serviceType
-   * @return
    */
   public static byte[] getServiceIcon(Class<?> serviceType) {
     return getServiceIcon(serviceType.getSimpleName());
@@ -2486,9 +2480,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * One place to get the ServiceIcons so that we can avoid a lot of strings
    * with "resource/Servo.png"
+ * @param serviceType name of the service type
+ * @return byte array of the icon image (png)
    * 
-   * @param serviceType
-   * @return
    */
   public static byte[] getServiceIcon(String serviceType) {
     try {
@@ -2523,8 +2517,8 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * Determine if the service is operating in dev mode. isJar() is no longer
    * appropriate - as some services are modular and can be operating outside in
    * develop mode in a different repo with a "runtime" myrobotlab.jar.
+ * @return true if running inside an IDE
    * 
-   * @return
    */
   public boolean isDev() {
     // 2 folders to check
@@ -2546,9 +2540,9 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   /**
    * localize a key - details are
    * http://myrobotlab.org/content/localization-myrobotlab-and-inmoov-languagepacks
+ * @param key key to lookup in localize
+ * @return localized string for key
    * 
-   * @param key
-   * @return
    */
   public String localize(String key) {
     return localize(key, (Object[]) null);
@@ -2556,10 +2550,10 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
 
   /**
    * String format template processing localization
+ * @param key lookup key
+ * @param args var args
+ * @return localized string for key
    * 
-   * @param key
-   * @param args
-   * @return
    */
   public String localize(String key, Object... args) {
 
@@ -2613,7 +2607,6 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * set the current locale for this service - initial locale would have been
    * set by Runtimes locale
    * 
-   * @param code
    */
   public void setLocale(String code) {
     locale = new Locale(code);
@@ -2623,9 +2616,7 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
   }
 
   /**
-   * get country tag of current locale
-   * 
-   * @return
+   * @return get country tag of current locale
    */
   public String getCountry() {
     return locale.getCountry();
@@ -2637,33 +2628,29 @@ public abstract class Service implements Runnable, Serializable, ServiceInterfac
    * to use This function is used to simplify all of that - since we are
    * primarily interested in language and do not usually need the distinction
    * between regions in this context
+ * @return the language from the locale
    * 
-   * @return
    */
   public String getLanguage() {
     return locale.getLanguage();
   }
 
   /**
-   * return the current locale
+ * @return the current locale
    */
   public Locale getLocale() {
     return locale;
   }
 
   /**
-   * get country name of current locale
-   * 
-   * @return
+   * @return get country name of current locale
    */
   public String getDisplayLanguage() {
     return locale.getDisplayLanguage();
   }
 
   /**
-   * get current locale tag - this is of the form en-BR en-US including region
-   * 
-   * @return
+   * @return get current locale tag - this is of the form en-BR en-US including region
    */
   public String getLocaleTag() {
     return locale.getTag();

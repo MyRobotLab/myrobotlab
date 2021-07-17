@@ -94,10 +94,8 @@ public class AudioData implements Serializable {
   }
 
   /**
-   * returns the length of the file in milliseconds currently only works "AFTER"
+   * @return the length of the file in milliseconds currently only works "AFTER"
    * its been played
-   * 
-   * @return
    */
   public Long getLength() {
     if (startTs == null || stopTs == null) {

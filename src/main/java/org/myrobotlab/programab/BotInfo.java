@@ -43,7 +43,7 @@ public class BotInfo {
    * task to save predicates and getting responses will eventually call getBot
    * we don't want initialization to create 2 when only one is needed
    * 
-   * @return
+   * @return the bot object
    */
   public synchronized Bot getBot() {
     if (bot == null) {

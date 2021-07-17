@@ -124,7 +124,7 @@ public class TcpSerialHub implements Runnable {
    *          - listening port
    * @param inThreads
    *          - number of handler threads
-   * @throws IOException
+ * @throws IOException boom
    */
   synchronized public void start(Integer inPort, Integer inThreads) throws IOException {
 

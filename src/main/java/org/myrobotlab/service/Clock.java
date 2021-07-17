@@ -131,9 +131,8 @@ public class Clock extends Service {
 
   /**
    * Date is published at an interval here
-   * 
-   * @param time
-   * @return
+   * @param time t
+   * @return t
    */
   public Date pulse(Date time) {
     return time;

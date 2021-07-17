@@ -607,6 +607,7 @@ public final class Matrix3f implements java.io.Serializable {
    * 
    * @param scale
    *          The scale applied to each of the X, Y and Z output values.
+   * @return m
    */
   public Matrix3f scale(Vector3f scale) {
     return new Matrix3f(m00 * scale.x, m01 * scale.y, m02 * scale.z, m10

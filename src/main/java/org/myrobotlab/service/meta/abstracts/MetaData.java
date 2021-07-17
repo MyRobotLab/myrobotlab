@@ -298,10 +298,10 @@ public class MetaData implements Serializable {
    * typical adding of a service reservation .. the actual name is left null, so
    * that this template will dynamically generate peer names depending on the
    * parents name
+   * @param key k
+   * @param peerType p 
+   * @param comment c
    * 
-   * @param key
-   * @param peerType
-   * @param comment
    */
   public void addPeer(String key, String peerType, String comment) {
     peers.put(key, new ServiceReservation(key, null, peerType, comment));

@@ -126,8 +126,8 @@ public class Security extends Service implements AuthorizationProvider {
   /**
    * I think it might be easier concept to use a singleton for this service ...
    * Almost "always" better to have a singleton instance vs static methods !!!
+   * @return the security service (singleton)
    * 
-   * @return
    */
   public static Security getInstance() {
     return (Security) Runtime.start("security", "Security");
@@ -343,9 +343,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * remove a key from the keystore
    * 
-   * @param keyName
+   * 
+   * @param keyName remove a key from the keystore
    */
   public void deleteKey(String keyName) {
     if (store.containsKey(keyName)) {
@@ -399,7 +399,7 @@ public class Security extends Service implements AuthorizationProvider {
    * 
    * @param name
    *          - the name of the security key
-   * @return
+   * @return the property for a given key
    */
   public String getKey(String name) {
     if (store.containsKey(name)) {
@@ -415,9 +415,9 @@ public class Security extends Service implements AuthorizationProvider {
   }
 
   /**
-   * return the set of key names currently stored in the key store
+   * @return the set of key names currently stored in the key store
    * 
-   * @return
+   * 
    */
   public Set<String> getKeyNames() {
     Set<String> ret = new TreeSet<String>();
@@ -711,9 +711,10 @@ public class Security extends Service implements AuthorizationProvider {
    * Set a key with a keyname .. e.g. AWS_SECRET with a value e.g.
    * ERM23!933-df3j2l4kjfu Once a key is set its in an encrypted store and the
    * code which sets the key can be removed
+   * @param keyName name
+   * @param keyValue value
+   * @return the name of the key stored
    * 
-   * @param keyName
-   * @param keyValue
    */
   public String setKey(String keyName, String keyValue) {
     store.put(keyName, keyValue);

@@ -84,9 +84,9 @@ public class Http {
    * download the file as {filename}.part until it is complete, then do an os
    * rename this is a common safety technique, so that other processes or
    * threads do not consume a partially downloaded file.
+   * @param theUrl url
+   * @param outFile file to save
    * 
-   * @param theUrl
-   * @param outFile
    */
   public static void getSafePartFile(String theUrl, String outFile) {
     getSafePartFile(theUrl, outFile, true);

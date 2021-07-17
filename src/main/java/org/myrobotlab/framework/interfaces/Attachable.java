@@ -18,27 +18,26 @@ public interface Attachable extends NameProvider {
 
   /**
    * implementation of attaching a service
+ * @param service the service to attach to
+ * @throws Exception if an error occcurs
    * 
-   * @param service
-   * @throws Exception
    */
   public void attach(Attachable service) throws Exception;
 
   /**
    * Explicit/custom callback name
-   * 
-   * @param localTopic
-   * @param otherService
-   * @param callback
+ * @param localTopic the local topic 
+ * @param otherService  the remote serivce
+ * @param callback the method to call on the remote service
    */
   public void addListener(String localTopic, String otherService, String callback);
 
   /**
    * Preferred add listener, a callback will be created. from
    * CodecUtils.getCallbackTopicName pub/get{Method} called on on{Method}
+ * @param localTopic the local publish method
+ * @param otherService  the remote service to call the on method.
    * 
-   * @param localTopic
-   * @param otherService
    */
   public void addListener(String localTopic, String otherService);
 
@@ -46,9 +45,9 @@ public interface Attachable extends NameProvider {
 
   /**
    * Preferred remove listener
+ * @param localTopic the local publish method
+ * @param otherService the remote servie
    * 
-   * @param localTopic
-   * @param otherService
    */
   public void removeListener(String localTopic, String otherService);
 
@@ -64,8 +63,8 @@ public interface Attachable extends NameProvider {
 
   /**
    * implementation of detaching an attached service
-   * 
-   * @param service
+ * @param service the service to detach from
+   *
    */
   public void detach(Attachable service);
 
@@ -89,9 +88,9 @@ public interface Attachable extends NameProvider {
   
   /**
    * get all attached to a specific publishing point/method
+ * @param publishingPoint the publishing method.
+ * @return a set of attached services
    * 
-   * @param publishingPoint
-   * @return
    */
   public Set<String> getAttached(String publishingPoint);
 
@@ -115,9 +114,9 @@ public interface Attachable extends NameProvider {
 
   /**
    * safe method to query interface without having to invoke class
+ * @param interfaze the interface to test
+ * @return true if it has the interface
    * 
-   * @param interfaze
-   * @return
    */
   public boolean hasInterface(String interfaze);
 
@@ -127,9 +126,9 @@ public interface Attachable extends NameProvider {
 
   /**
    * safe method to query interface without having to invoke class
+ * @param clazz the class
+ * @return  true if it is of the specified type
    * 
-   * @param clazz
-   * @return
    */
   public boolean isType(String clazz);
 

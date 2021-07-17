@@ -657,8 +657,8 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
 
   /**
    * publish a null message to a topic - used for "events"
+   * @param topic t
    * 
-   * @param topic
    */
   public void publish(String topic) {
     publish(topic, null);
@@ -810,6 +810,7 @@ public class Mqtt extends Service implements MqttCallback, IMqttActionListener, 
    * @param qos
    *          the maximum quality of service to receive messages at for this
    *          subscription
+   * @throws MqttException boom
    */
   public void subscribe(String topic, int qos) throws MqttException {
     if (!connected) {

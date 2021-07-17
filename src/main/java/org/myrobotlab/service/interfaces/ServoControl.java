@@ -66,9 +66,8 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   boolean isAutoDisable();
 
   /**
-   * name of the current controllers - empty if not set
+   * @return name of the current controllers - empty if not set
    * 
-   * @return
    */
   String getController();
 
@@ -80,16 +79,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   EncoderControl getEncoder();
 
   /**
-   * The last time the servo was asked to move (system current time in ms?)
+   * @return The last time the servo was asked to move (system current time in ms?)
    * 
-   * @return
    */
   long getLastActivityTime();
 
   /**
-   * get this servos mapper
+   * @return get this servos mapper
    * 
-   * @return
    */
   Mapper getMapper();
 
@@ -139,10 +136,9 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   double getRest();
 
   /**
-   * Return current speed if set - if speed/speed control is not being use it is
+   * @return current speed if set - if speed/speed control is not being use it is
    * null.
    * 
-   * @return
    */
   Double getSpeed();
 
@@ -163,15 +159,14 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   double getTargetOutput();
 
   /**
-   * This method returns the input target position of the servo. This is the
+   * @return This method returns the input target position of the servo. This is the
    * input position that the servo was requested to move to.
    * 
-   * @return
    */
   double getTargetPos();
 
   /**
-   * When moveBlocking is in motion, not only should it block the calling thread
+   * @return When moveBlocking is in motion, not only should it block the calling thread
    * until the end of the move, it should also prevent (cancel) other threads
    * (even ones doing moveTo commands) until its done... conversely
    * mutli-threaded moveTo commands are a free-for-all .. if you call a servo
@@ -180,28 +175,23 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * called from a different thread it should be blocked until the original is
    * finished.
    * 
-   * @return
    */
   boolean isBlocking();
 
   /**
-   * is the servo currently sending pwm position control
-   * 
-   * @return
+   * @return is the servo currently sending pwm position control
    */
   boolean isEnabled();
 
   /**
-   * Returns true if mapper is inverted
+   * @return true if mapper is inverted
    * 
-   * @return
    */
   boolean isInverted();
 
   /**
-   * Returns if the sevo is currently moving
+   * @return if the sevo is currently moving
    * 
-   * @return
    */
   boolean isMoving();
 
@@ -351,6 +341,7 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
 
   /**
    * synchronizing servos together e.g. leftEye.sync(rightEye)
+   * @param sc the servo to sync with.
    */
   void sync(ServoControl sc);
 

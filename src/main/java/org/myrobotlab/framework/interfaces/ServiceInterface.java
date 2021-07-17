@@ -20,28 +20,19 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    * address information (otherService/callback) for a topic callback Adds an
    * entry on the notify list
    * 
-   * @param localTopic
-   *          l
-   * @param otherService
-   *          o
-   * @param callback
-   *          c
    * 
-   */
-
-  /**
    * virtualize the service, in this mode the service should not use any "real"
    * hardware
+ * @param b true to set the virtual mode
+ * @return the value
    * 
-   * @param b
-   * @return
    */
   public boolean setVirtual(boolean b);
 
   /**
    * check to see if the service is running in a virtual mode
+   * @return true if in virtual mode.
    * 
-   * @return
    */
   public boolean isVirtual();
 
@@ -100,17 +91,17 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void startService();
   
   /**
-   * get a services current config
-   * @return
+   *  @return get a services current config
+   *
    */
   public ServiceConfig getConfig();
   
   /**
    * Configure a service by merging in configuration
-   * @param c
-   * @return
+ * @param config the config to load
+ * @return the loaded config.
    */
-  public ServiceConfig load(ServiceConfig c);
+  public ServiceConfig load(ServiceConfig config);
 
   /**
    * loads json config and starts the service
@@ -137,9 +128,8 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public boolean isRunning();
 
   /**
-   * the order this service was created in relation to the other service
-   * 
-   * @param creationCount
+   * @param creationCount the order this service was created in 
+   * relation to the other service
    */
   public void setOrder(int creationCount);
 

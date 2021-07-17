@@ -63,8 +63,8 @@ public class Rekognition extends Service {
    * and saves the credentials in the .myrobotlab/store file. Once this is run
    * once
    * 
-   * @param accessKey
-   * @param secretKey
+   * @param accessKey aws access key
+   * @param secretKey aws secret key
    */
   public void setCredentials(String accessKey, String secretKey) {
     Security security = Runtime.getSecurity();
@@ -85,17 +85,17 @@ public class Rekognition extends Service {
 
   /**
    * set the region - not sure which ones are supported
+   * @param region r
    * 
-   * @param region
    */
   public void setRegion(Regions region) {
     this.region = region;
   }
 
   /**
-   * returns an initialized client or throws with an error
+   * @return an initialized client or throws with an error
    * 
-   * @return
+   * 
    */
   public AmazonRekognition getClient() {
     if (rekognitionClient == null) {
@@ -111,9 +111,9 @@ public class Rekognition extends Service {
    * @param path
    *          - the path
    * @return - labels
-   * @throws FileNotFoundException
-   * @throws IOException
-   * @throws URISyntaxException
+   * @throws FileNotFoundException boom
+   * @throws IOException boom
+   * @throws URISyntaxException boom 
    */
   public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
     if (path == null) {
@@ -139,8 +139,8 @@ public class Rekognition extends Service {
    * @param inputStream
    *          - the stream of data
    * @return - labels found
-   * @throws FileNotFoundException
-   * @throws IOException
+   * @throws FileNotFoundException boom
+   * @throws IOException boom
    */
   public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
     ByteBuffer imageBytes;
@@ -151,8 +151,9 @@ public class Rekognition extends Service {
   /**
    * Hopefully, Label is serializable, otherwise it needs to return a list of
    * POJOs.
+   * @param imageBytes image data
+   * @return list of labels extracted
    * 
-   * @return
    */
   public List<Label> getLabels(ByteBuffer imageBytes) {
     AmazonRekognition client = getClient();

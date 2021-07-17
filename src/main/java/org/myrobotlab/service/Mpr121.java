@@ -379,7 +379,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   /**
    * Initiate the MPR121 to use all inputs for sensing
    * 
-   * @return
+   * @return true if it began
    */
   public boolean begin() {
 
@@ -475,6 +475,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
    * This method starts the MPR121 measuring pins = Number of pins to use for
    * measuring starting with ELE0 as number 1 Setting pins = 0 will stop
    * measuring
+   * @param pins pins
    */
   public void setRunMode(int pins) {
     writeRegister(ELECTRODE_CONFIGURAION_REGISTER, pins + 1);

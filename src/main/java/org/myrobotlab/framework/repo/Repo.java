@@ -422,8 +422,8 @@ public abstract class Repo {
    * searches through dependencies directly defined by the service and all Peers
    * - recursively searches for their dependencies if any are not found -
    * returns false
-   * 
-   * @param fullTypeName
+ * @param fullTypeName the full type name of the service.
+
    * @return true/false
    */
   public boolean isServiceTypeInstalled(String fullTypeName) {

@@ -69,11 +69,11 @@ public class WebkitSpeechSynthesis extends AbstractSpeechSynthesis {
 
   /**
    * This method is called by the browser, and it populates the list of voices.
+   * @param index i
+   * @param name n
+   * @param lang l
+   * @param def d
    * 
-   * @param index
-   * @param name
-   * @param lang
-   * @param def
    */
   public void addWebKitVoice(Integer index, String name, String lang, Boolean def) {
     nameToIndex.put(name, index);
