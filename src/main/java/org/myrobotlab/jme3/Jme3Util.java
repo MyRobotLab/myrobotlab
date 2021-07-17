@@ -148,6 +148,9 @@ public class Jme3Util {
 
   /**
    * absolute (local) rotation ..
+ * @param name the name to rotate
+ * @param axis which axis to rotate
+ * @param degrees the degrees
    * 
    */
   public void rotateTo(String name, String axis, double degrees) {

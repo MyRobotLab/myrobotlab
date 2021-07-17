@@ -4,6 +4,8 @@ public interface Mapper {
 
   /**
    * inverse fn of calcOutput
+ * @param out the output of the mapper
+ * @return the reverse calculated input
    * 
    */
   double calcInput(double out);
@@ -11,6 +13,8 @@ public interface Mapper {
   /**
    * main method of the Mapper - ratio of ranges are applied in addition to any
    * limits which exist
+ * @param in the input value to the mapper
+ * @return the calculated output
    * 
    */
   double calcOutput(double in);
@@ -53,6 +57,10 @@ public interface Mapper {
    * output when calcOutput is called output = mapper.calcOutput(0.7) output
    * would be 0.7 function which "only" sets the range mapping value without
    * setting input or output limits
+ * @param minX min input
+ * @param maxX max input
+ * @param minY min output
+ * @param maxY max output
    * 
    */
   void map(double minX, double maxX, double minY, double maxY);
@@ -60,10 +68,10 @@ public interface Mapper {
   /**
    * Integer form of map
    * 
-   * @param minX
-   * @param maxX
-   * @param minY
-   * @param maxY
+   * @param minX min input
+   * @param maxX max input
+   * @param minY min output
+   * @param maxY max output
    */
   void map(int minX, int maxX, int minY, int maxY);
 
@@ -103,11 +111,12 @@ public interface Mapper {
    * specified as minX and maxX. The resulting computed values will also be
    * constrained to minY and maxY If false, inputs and outputs will not be
    * clipped, but rather a normal linear mapping will apply.
+ * @param clip true to clip the values
    */
   void setClip(boolean clip);
 
   /**
-   * Return true if the mapper is set to clip the input and output values.
+   * @return  true if the mapper is set to clip the input and output values.
    * otherwise false.
    */
   boolean isClip();

@@ -168,6 +168,8 @@ public class CodecUtils {
 
   /**
    * Gets the instance id from a service name
+ * @param name the name of the instance
+ * @return the name of the instance
    * 
    */
   static public final String getId(String name) {

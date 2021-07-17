@@ -91,6 +91,11 @@ public class FileIO {
   /**
    * compares two files - throws if they are not identical, good to use in
    * testing
+ * @param filename1 first file
+ * @param filename2 second file
+ * @return true if they're equal
+ * @throws FileComparisonException boom 
+ * @throws IOException boom
    * 
    */
   static public final boolean compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
@@ -114,6 +119,9 @@ public class FileIO {
 
   /**
    * Copy the contents of dir into the path destination s
+ * @param dir source directories
+ * @param path dest path
+ * @throws IOException boom
    * 
    */
 
@@ -125,6 +133,9 @@ public class FileIO {
 
   /**
    * A simple copy method which works like a 'regular' operating system copy
+ * @param src source file
+ * @param dst dest file
+ * @throws IOException boom
    * 
    */
   static public final void copy(File src, File dst) throws IOException {
@@ -158,6 +169,9 @@ public class FileIO {
 
   /**
    * copy file or folder from one place to another with string interface
+ * @param src source file
+ * @param dst dest file
+ * @throws IOException boom
    * 
    */
   static public final void copy(String src, String dst) throws IOException {
@@ -196,6 +210,9 @@ public class FileIO {
    *          - the folder or file to extract from the root
    * @param dst
    *          - target location
+ * @param overwrite true/false to override
+ * @return something
+ * @throws IOException boom 
    */
   static public final boolean extract(String root, String src, String dst, boolean overwrite) throws IOException {
     log.info("extract(root={}, src={}, dst={}, overwrite={})", root, src, dst, overwrite);
@@ -439,6 +456,8 @@ public class FileIO {
    * might not know where the source is. Runtime has no source.
    * 
    * A better solution might be to maintain a list of services as a text file :(
+ * @return list of services
+ * @throws IOException boom
    * 
    */
   static public final List<String> getServiceList() throws IOException {
@@ -478,7 +497,10 @@ public class FileIO {
   }
 
   /**
-   * list the contents of 'self' at directory 'src'
+   *
+   * @param src the source
+   * @return  list the contents of 'self' at directory 'src'
+   * @throws IOException boom
    * 
    */
   static public final List<URL> listContents(String src) throws IOException {
@@ -492,6 +514,13 @@ public class FileIO {
   /**
    * list the contents of a file system directory or list the contents of a jar
    * file directory
+ * @param root the root
+ * @param src source
+ * @param recurse should it recurse
+ * @param include include
+ * @param exclude excludes
+ * @return a list of urls
+ * @throws IOException boom
    * 
    */
   static public final List<URL> listContents(String root, String src, boolean recurse, String[] include, String[] exclude) throws IOException {
@@ -1056,6 +1085,8 @@ public class FileIO {
 
   /**
    * removes a file or recursively removes directory
+ * @param file the file to remove
+ * @return true/false if it was removed
    * 
    */
   static public final boolean rm(File file) {
@@ -1197,6 +1228,9 @@ public class FileIO {
 
   /**
    * Copies bytes from src to dst, src must be a file, dst may or may not exist
+ * @param src the source file
+ * @param dst dest file
+ * @throws IOException boom
    * 
    */
   static public void copyBytes(String src, String dst) throws IOException {
@@ -1380,6 +1414,8 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+ * @param input the input file
+ * @return the intput stream with default charset encoding.
    * 
    */
   public static InputStream toInputStream(String input) {
@@ -1388,6 +1424,9 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+ * @param input the input file
+ * @param encoding the input encoding
+ * @return the input stream with encoding specified.
    * 
    */
   public static InputStream toInputStream(String input, Charset encoding) {
@@ -1396,6 +1435,10 @@ public class FileIO {
 
   /**
    * Taken from Commons-io IOUtils
+ * @param input the input file
+ * @param encoding target encoding to decode as
+ * @return an input stream with encoding specified
+ * @throws IOException boom
    * 
    */
   public static InputStream toInputStream(String input, String encoding) throws IOException {
@@ -1440,6 +1483,8 @@ public class FileIO {
    * requesting resource stream references. Network access of course is forward
    * slash ... https://en.wikipedia.org/wiki/Backslash Bill Gates and IBM are
    * evil !
+ * @param path1 the first part of the path
+ * @param path2 the second part of the path
    * 
    * @return forward slash path
    */
