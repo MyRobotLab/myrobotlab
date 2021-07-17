@@ -82,7 +82,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * Part of service life cycle - a new servo has been started
    */
   public void onStarted(String fullname) {
-    log.info("{} started");
+    log.info("{} started", fullname);
     try {
       ServiceInterface si = Runtime.getService(fullname);
       if ("Servo".equals(si.getSimpleName())) {

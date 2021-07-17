@@ -2210,7 +2210,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   }
 
   public void ackTimeout() {
-    log.warn("Ack Timeout seen.  TODO: consider resetting the com port, reconnecting and re syncing all devices.");
+    log.warn("Ack Timeout seen.  TODO: consider resetting the com port {}, reconnecting and re syncing all devices.", port);
   }
 
   public void publishMrlCommBegin(Integer version) {

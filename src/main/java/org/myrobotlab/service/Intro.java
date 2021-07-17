@@ -124,6 +124,8 @@ public class Intro extends Service {
   public static void main(String[] args) {
     try {
 
+      // for mary tts on java11...
+      System.setProperty("java.version", "11.0");
       LoggingFactory.init(Level.INFO);
 
       Runtime.main(new String[] { "--from-launcher"});
@@ -133,7 +135,7 @@ public class Intro extends Service {
 
       WebGui webgui = (WebGui) Runtime.create("webgui", "WebGui");
       // webgui.setSsl(true); 
-      webgui.autoStartBrowser(false);
+      webgui.autoStartBrowser(true);
       webgui.startService();
 
     } catch (Exception e) {
