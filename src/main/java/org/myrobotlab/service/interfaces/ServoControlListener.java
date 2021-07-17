@@ -1,37 +1,28 @@
 package org.myrobotlab.service.interfaces;
 
+/**
+ * control message listener interface.  These methods get called 
+ * when these control events are seen.  
+ * for example.  If the ServoControl has it's moveTo method called, 
+ * the onMoveTo will be invoked to inform listeners that the servo was moved
+ * 
+ * @param sc
+ * @return
+ */
 public interface ServoControlListener {
-  /**
-   * publishing servo's move
-   * 
-   * @param sc
-   * @return
-   */
-  /**
-   * control message listener interface.  This handles events like servo moving
-   * start/stop/ set speed ..
-   * 
-   * TODO: this interface overlaps a bit with ServoStatusListener 
-   * 
-   * @param sc
-   * @return
-   */
-  void onServoMoveTo(ServoControl sc);
 
-  void onMoveTo(ServoControl sc);
+  public void onServoMoveTo(ServoControl sc);
 
-  void onServoSetSpeed(ServoControl sc);
+  public void onMoveTo(ServoControl sc);
 
-  void onServoEnable(ServoControl sc);
+  public void onServoSetSpeed(ServoControl sc);
 
-  void onServoDisable(ServoControl sc);
+  public void onServoEnable(ServoControl sc);
 
-  /**
-   * Publishing topic for a servo stop event - returns position
-   * 
-   * @param sc
-   * @return
-   */
-  void onServoStop(ServoControl sc);
+  public void onServoDisable(ServoControl sc);
+
+  public void onServoStop(ServoControl sc);
+  
+  public void onServoEnable(String name); 
 
 }

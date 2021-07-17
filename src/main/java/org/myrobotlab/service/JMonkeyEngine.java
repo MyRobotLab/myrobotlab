@@ -2608,6 +2608,11 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   public void onServoEnable(ServoControl sc) {
     log.info("Jme onServoEnable SC {}", sc);
   }
+  
+  @Override
+  public void onServoEnable(String name) {
+    log.info("Jme onServoEnable {}", name);
+  }
 
   @Override
   public void onMoveTo(ServoControl sc) {
