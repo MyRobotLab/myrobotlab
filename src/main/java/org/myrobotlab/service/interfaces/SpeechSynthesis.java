@@ -22,6 +22,8 @@ public interface SpeechSynthesis extends NameProvider, TextListener, LocaleProvi
 
   /**
    * set the speaker voice
+   * @param voice 
+   * @return success or failure
    * 
    */
   public boolean setVoice(String voice);

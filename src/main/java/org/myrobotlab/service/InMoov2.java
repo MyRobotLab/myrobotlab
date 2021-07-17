@@ -64,6 +64,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * @param someScriptName execute a resource script
+   * @returns success or failure
    */
   public boolean execScript(String someScriptName) {
     try {

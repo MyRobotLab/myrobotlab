@@ -750,6 +750,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    *          - name of node
    * @param startNode
    *          - the node to start search
+   * @return spatial object
    */
   public Spatial find(String name, Node startNode) {
     if (name.equals(ROOT)) {

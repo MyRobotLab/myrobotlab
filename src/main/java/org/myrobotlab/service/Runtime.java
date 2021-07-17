@@ -945,6 +945,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * return a list of services which are currently running and implement a
    * specific interface
+   * @param interfaze class
+   * @return list of service interfaces
    * 
    */
   public static synchronized List<ServiceInterface> getServicesFromInterface(Class<?> interfaze) {
@@ -1938,6 +1940,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * serviceName at id
+   * @return runtime name with instance id.
    * 
    */
   public String whoami() {
@@ -2438,6 +2441,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Return supported system languages
+   * @return map of languages to locales
    */
   public Map<String, Locale> getLanguages() {
     return Locale.getAvailableLanguages();
@@ -2723,6 +2727,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * get a specific clients data
+   * @param uuid uuid to get
+   * @return connection for uuid
    * 
    */
   public Connection getConnection(String uuid) {
@@ -2730,7 +2736,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   }
 
   /**
-   * Globally get all connection uuids
+   * @return Globally get all connection uuids
    * 
    */
   public List<String> getConnectionUuids() {
