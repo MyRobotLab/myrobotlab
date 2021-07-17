@@ -318,7 +318,7 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   }
 
   /**
-   * Refresh the list of running services that can be selected in the GUI
+   * @return Refresh the list of running services that can be selected in the GUI
    */
   public List<String> refreshControllers() {
     controllers = Runtime.getServiceNamesFromInterface(I2CController.class);
@@ -343,6 +343,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion for setting the pwm
+ * @param pinAddress the pin address
+ * @param pulseWidthOn the on width
+ * @param pulseWidthOff the off width
    * 
    */
   public void setPWM(Integer pinAddress, Integer pulseWidthOn, Integer pulseWidthOff) {
@@ -368,6 +371,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * type conversion to set the pwm frequency
+   * @param pin the pin
+   * @param hz the frequency
    * 
    */
   public void setPWMFreq(Integer pin, Integer hz) {
@@ -376,6 +381,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
 
   /**
    * Set the PWM frequency i.e. the frequency between positive pulses.
+ * @param pin the pin
+ * @param hz the frequency in hz
    * 
    */
   public void setPWMFreq(String pin, Integer hz) { // Analog servos run at ~60
