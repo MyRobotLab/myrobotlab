@@ -40,6 +40,10 @@ public class DruppNeck extends Service {
    * Specify the roll, pitch and yaw in degrees to move the drupp neck to. this
    * will use the drupp ik solver to compute the angle for the up, middle, and
    * down servos.
+ * @param roll degrees
+ * @param pitch degrees 
+ * @param yaw degrees
+ * @throws Exception boom
    * 
    */
   public void moveTo(double roll, double pitch, double yaw) throws Exception {

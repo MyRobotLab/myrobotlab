@@ -110,6 +110,9 @@ public class Rekognition extends Service {
    * @param path
    *          - the path
    * @return - labels
+   * @throws FileNotFoundException boom
+   * @throws IOException boom
+   * @throws URISyntaxException boom 
    */
   public List<Label> getLabels(String path) throws FileNotFoundException, IOException, URISyntaxException {
     if (path == null) {
@@ -135,6 +138,8 @@ public class Rekognition extends Service {
    * @param inputStream
    *          - the stream of data
    * @return - labels found
+   * @throws FileNotFoundException boom
+   * @throws IOException boom
    */
   public List<Label> getLabels(InputStream inputStream) throws FileNotFoundException, IOException {
     ByteBuffer imageBytes;
@@ -145,6 +150,8 @@ public class Rekognition extends Service {
   /**
    * Hopefully, Label is serializable, otherwise it needs to return a list of
    * POJOs.
+   * @param imageBytes image data
+   * @return list of labels extracted
    * 
    */
   public List<Label> getLabels(ByteBuffer imageBytes) {

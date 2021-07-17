@@ -259,6 +259,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * ready .. ? Several speech synthesis services require cloud api keys or in
    * some cases, only certain operating systems are supported. We are going to
    * be pessimistic - MarySpeech is "always" ready :)
+ * @param n the name of the service
+ * @param id the id of the instance
    */
 
   public AbstractSpeechSynthesis(String n, String id) {
@@ -640,6 +642,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    *          - the audoData for parameters
    * @param speak
    *          - the text to speak
+   * @param block true/false
    * @return block - to block or not
    */
   public AudioData process(AudioData audioData, String speak, boolean block) {
@@ -729,7 +732,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * @param toSpeak
    *          text
    * 
-   * @return byte[]
+   * @return AudioData with raw data.
+   * @throws Exception boom
    */
   abstract public AudioData generateAudioData(AudioData audioData, String toSpeak) throws Exception;
 
@@ -863,7 +867,7 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
   }
 
   /**
-   * default cache file type
+   * @return default cache file type 
    */
   public String getAudioCacheExtension() {
     return ".mp3";

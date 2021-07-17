@@ -2055,6 +2055,9 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * A function for runtime to "save" a service - or if the service does not
    * exists save the "default" config of that type of service
+   * @param name name of service to export
+   * @return true/false
+   * @throws IOException boom
    * 
    */
   public boolean export(String name /* , String type */) throws IOException {

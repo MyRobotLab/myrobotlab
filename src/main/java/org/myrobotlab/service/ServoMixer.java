@@ -118,6 +118,8 @@ public class ServoMixer extends Service {
 
   /**
    * Save a {name}.pose file to the current poses directory.
+   * @param name name to save pose as
+   * @throws IOException boom
    * 
    */
   public void savePose(String name) throws IOException {

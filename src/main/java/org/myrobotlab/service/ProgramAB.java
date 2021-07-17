@@ -143,8 +143,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * checks to see if valid bot dir
-   * 
+   * @param botDir checks to see if valid bot dir
+   * @return true/false
    */
   public boolean checkIfValid(File botDir) {
     File aiml = new File(FileIO.gluePaths(botDir.getAbsolutePath(), "aiml"));
@@ -184,8 +184,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This is the main method that will ask for the current bot's chat session to
    * respond to It returns a Response object.
+   * @param text the input utterance
+   * @return the programab response
    * 
-
    */
   public Response getResponse(String text) {
     return getResponse(getCurrentUserName(), text);
@@ -208,6 +209,10 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * Full get response method . Using this method will update the current
    * user/bot name if different from the current session.
+   * @param userName username
+   * @param botName bot name
+   * @param text utterace
+   * @return programab response to utterance
    * 
    */
   public Response getResponse(String userName, String botName, String text) {
@@ -217,11 +222,14 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * Gets a response and optionally update if this is the current bot session
    * that's active globally.
+ * @param userName username
+ * @param botName botname
+ * @param text utterance
    * 
    * @param updateCurrentSession
    *          (specify if the currentbot/currentuser name should be updated in
    *          the programab service.)
-   * @return
+   * @return the response
    * 
    *         TODO - no one cares about starting sessions, starting a new session
    *         could be as simple as providing a different username, or botname in
@@ -276,6 +284,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method specifics how many times the robot will respond with the same
    * thing before forcing a different (default?) response instead.
+   * @param val foo
    */
   public void repetitionCount(int val) {
     org.alicebot.ab.MagicNumbers.repetition_count = val;
@@ -305,6 +314,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Add a value to a set for the current session
+   * @param setName name of the set
+   * @param setValue value to add to the set
    */
   public void addToSet(String setName, String setValue) {
     // add to the set for the bot.
@@ -392,6 +403,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    * @param delay
    *          - min amount of time that must have transpired since the last
    * @return the response
+   * @throws IOException boom
    */
   public Response troll(String userName, String text, Long delay) throws IOException {
     Session session = getSession(userName, getCurrentBotName());
@@ -446,7 +458,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   }
 
   /**
-   * publish a response generated from a session in the programAB service.
+   * @param response publish a response generated from a session in the programAB service.
+   * @return the response
    * 
    */
   public Response publishResponse(Response response) {
@@ -470,6 +483,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * publish the contents of the mrl tag from an oob message in the aiml. The
    * result of this is displayed in the chatbot debug console.
+   * @param oobText the out of band text to publish
+   * @return oobtext
    * 
    */
   public String publishOOBText(String oobText) {
@@ -479,6 +494,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method will close the current bot, and reload it from AIML It then
    * will then re-establish only the session associated with userName.
+   * @param userName username for the session
+   * @param botName the bot name being chatted with
+   * @throws IOException boom
    * 
    */
   public void reloadSession(String userName, String botName) throws IOException {
@@ -489,6 +507,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Save all the predicates for all known sessions.
+   * @throws IOException boom
    */
   public void savePredicates() throws IOException {
     for (Session session : sessions.values()) {
@@ -510,6 +529,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * set a bot property - the result will be serialized to config/properties.txt
+ * @param name property name to set for current bot/session
+ * @param value value to set for current bot/session
    */
   public void setBotProperty(String name, String value) {
     setBotProperty(getCurrentBotName(), name, value);
@@ -517,6 +538,9 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * set a bot property - the result will be serialized to config/properties.txt
+   * @param botName bot name
+   * @param name bot property name
+   * @param value value to set the property too
    */
   public void setBotProperty(String botName, String name, String value) {
     info("setting %s property %s:%s", getCurrentBotName(), name, value);
@@ -580,6 +604,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *          3. Locale is completely invalid - it is now part of the bot
    *          description in mrl.properties and shouldn't be defined externally,
    *          unles its pulled from Runtime
+   * @return the session that is started 
    */
 
   public Session startSession(String path, String userName, String botName, java.util.Locale locale) {
@@ -615,6 +640,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * setting the current session is equivalent to setting current user name and
    * current bot name
+   * @param userName username
+   * @param botName botname
    * 
    */
   public void setCurrentSession(String userName, String botName) {
@@ -676,6 +703,8 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * Verifies and adds a new path to the search directories for bots
+   * @param path the path to add a bot from
+   * @return the path if successful. o/w null
    * 
    */
   public String addBotPath(String path) {
@@ -779,6 +808,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
    *  /data/ProgramAB is higher priority
    *  /../ProgramAB/
    * </pre>
+   * @return bot paths
    */
   public Set<String> initBotPaths() {
 
@@ -832,6 +862,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
   /**
    * This method can be used to get a listing of all bots available in the bots
    * directory.
+   * @return list of botnames
    * 
    */
   public List<String> getBots() {
@@ -967,6 +998,7 @@ public class ProgramAB extends Service implements TextListener, TextPublisher, L
 
   /**
    * reload current session
+   * @throws IOException boom
    * 
    */
   public void reload() throws IOException {

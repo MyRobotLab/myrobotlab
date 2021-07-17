@@ -232,6 +232,8 @@ public class Python extends Service {
 
   /**
    * Set a Python variable with a value from Java e.g. python.set("my_var", 5)
+   * @param pythonRefName python variable name
+   * @param o value to set
    */
   public void set(String pythonRefName, Object o) {
     interp.set(pythonRefName, o);
@@ -475,7 +477,9 @@ public class Python extends Service {
   }
 
   /**
-   * execute code
+   * execute code (blocking)
+   * @param code string of code to run
+   * @return true/false
    */
   public boolean exec(String code) {
     return exec(code, true);
@@ -563,6 +567,8 @@ public class Python extends Service {
    * 
    * @param filename
    *          the full path name of the python file to execute
+   * @return true/false 
+   * @throws IOException boom 
    */
   public boolean execFile(String filename) throws IOException {
     return execFile(filename, true);
@@ -570,6 +576,10 @@ public class Python extends Service {
 
   /**
    * executes an external Python file
+   * @param filename file to exec
+   * @param block true if blocking exec
+   * @return true/false
+   * @throws IOException boom 
    * 
    */
   public boolean execFile(String filename, boolean block) throws IOException {

@@ -1227,6 +1227,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * start servos - no controllers
+ * @throws Exception boom
    */
   public void startServos() throws Exception {
     startServos(null, null);
