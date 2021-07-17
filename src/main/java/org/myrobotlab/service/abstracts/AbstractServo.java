@@ -417,7 +417,7 @@ private Double maxSpeed;
   public void disable() {
     stop();
     enabled = false;
-    broadcast("publishServoDisable", this);
+    broadcast("publishServoDisable", (ServoControl)this);
     broadcastState();
   }
 
@@ -659,6 +659,11 @@ private Double maxSpeed;
     return sc;
   }
 
+  // TODO: why do we need this method here , invoke message cache misses otherwise.
+  public ServoControl publishServoEnable(AbstractServo sc) {
+    return publishServoEnable((ServoControl)sc);
+  }
+  
   @Override
   public ServoControl publishServoMoveTo(ServoControl sc) {
     return sc;
@@ -992,6 +997,26 @@ private Double maxSpeed;
   public void startService() {
     super.startService();
     Runtime.getInstance().subscribeToLifeCycleEvents(getName());
+  }
+  
+  @Override
+  public String publishServoEnable(String name) {
+    // TODO Nothing calls this now?
+    log.info("Publish Servo Enable {}", name);
+    return name;
+  }
+
+  @Override
+  public void attachServoControlListener(String name) {
+    // Add the listener calls. 
+    addListener("publishServoMoveTo", name);
+    addListener("publishMoveTo", name);
+    // TODO: this is an ambigious call because we have two flavors of this method.
+    // one that takes/returns the string name.. the other that takes/returns the ServoControl.
+    addListener("publishServoEnable", name);
+    addListener("publishServoDisable", name);
+    addListener("publishServoStop", name);
+    
   }
 
 }

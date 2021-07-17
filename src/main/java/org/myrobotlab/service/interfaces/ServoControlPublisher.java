@@ -1,34 +1,29 @@
 package org.myrobotlab.service.interfaces;
 
+/**
+ * Servo will invoke these when various control methods are
+ * called.  ServoControlListeners will be informed of the control
+ * message.
+ * 
+ * @param sc 
+ * @return
+ */
 public interface ServoControlPublisher {
-  /**
-   * publishing servo's move
-   * 
-   * @param sc
-   * @return
-   */
-  /**
-   * control message publishing moveTo
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishServoMoveTo(ServoControl sc);
 
-  ServoControl publishMoveTo(ServoControl sc);
+  public ServoControl publishServoMoveTo(ServoControl sc);
 
-  ServoControl publishServoSetSpeed(ServoControl sc);
+  public ServoControl publishMoveTo(ServoControl sc);
 
-  ServoControl publishServoEnable(ServoControl sc);
+  public ServoControl publishServoSetSpeed(ServoControl sc);
 
-  ServoControl publishServoDisable(ServoControl sc);
+  public ServoControl publishServoEnable(ServoControl sc);
 
-  /**
-   * Publishing topic for a servo stop event - returns position
-   * 
-   * @param sc
-   * @return
-   */
-  ServoControl publishServoStop(ServoControl sc);
+  public ServoControl publishServoDisable(ServoControl sc);
+
+  public ServoControl publishServoStop(ServoControl sc);
+  
+  public String publishServoEnable(String name);
+  
+  public void attachServoControlListener(String name);
 
 }

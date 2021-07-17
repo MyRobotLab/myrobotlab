@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.myrobotlab.codec.CodecUtils;
 import org.myrobotlab.logging.LoggerFactory;
 import org.slf4j.Logger;
@@ -336,7 +337,7 @@ public class MethodCache {
       if (possibleMatches == null) {
         // log.error("there were no possible matches for ordinal key {} - does
         // the method exist?", ordinalKey);
-        // log.error("{}.{}.{}", fullType, methodName, paramTypeNames);
+        log.error("Method Cache look up Failed! {}.{}.({})", fullType, methodName, StringUtils.join(paramTypeNames, ","));
         return null;
       }
       if (possibleMatches.size() == 1) {

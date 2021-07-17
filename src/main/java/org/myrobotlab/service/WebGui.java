@@ -643,7 +643,7 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
 
         // check if we will execute it locally
         if (isLocal(msg)) {
-          log.info("invoking local msg {}", msg.toString());
+          log.debug("invoking local msg {}", msg.toString());
 
           String serviceName = msg.getFullName();
           Class<?> clazz = Runtime.getClass(serviceName);
