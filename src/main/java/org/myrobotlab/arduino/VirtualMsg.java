@@ -222,6 +222,9 @@ public class VirtualMsg {
 
   /**
    * These methods will be invoked from the Msg class as callbacks from MrlComm.
+   * @param arduino - the virtual mrlcomm device
+   * @param serial - the virtual serial port to use
+   * 
    */
 
   // public void getBoardInfo(){}
