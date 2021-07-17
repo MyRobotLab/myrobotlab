@@ -20,12 +20,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    * address information (otherService/callback) for a topic callback Adds an
    * entry on the notify list
    * 
-   * @param localTopic
-   *          l
-   * @param otherService
-   *          o
-   * @param callback
-   *          c
    * 
    * virtualize the service, in this mode the service should not use any "real"
    * hardware
