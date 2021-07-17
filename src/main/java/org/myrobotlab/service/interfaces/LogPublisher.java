@@ -23,6 +23,9 @@ public interface LogPublisher extends NameProvider {
 
   /**
    * a way to publish the log messages and log entries
+   * @param method method
+   * @param params params
+   * @return returned object
    * 
    */
   public Object invoke(String method, Object... params);

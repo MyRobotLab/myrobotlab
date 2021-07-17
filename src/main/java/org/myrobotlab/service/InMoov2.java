@@ -105,6 +105,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will load a python file into the python interpreter.
+ * @param file file to load
+ * @return success/failure
    */
   @Deprecated /* use execScript - this doesn't handle resources correctly */
   public static boolean loadFile(String file) {
@@ -494,6 +496,8 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * This method will try to launch a python command with error handling
+   * @param gesture the gesture
+   * @return gesture result
    */
   public String execGesture(String gesture) {
 
@@ -748,6 +752,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
    * 
    * @param directory
    *          - the directory that contains the gesture python files.
+   * @return true/false
    */
   public boolean loadGestures(String directory) {
     speakBlocking(get("STARTINGGESTURES"));

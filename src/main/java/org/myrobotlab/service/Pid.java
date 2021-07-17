@@ -312,6 +312,8 @@ public class Pid extends Service {
    * @param key
    *          - named pid compute instance, so the Pid "service" can manage pid
    *          systems
+   * @param min m
+   * @param max m
    * 
    */
   public void setOutputRange(String key, double min, double max) {

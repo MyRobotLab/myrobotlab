@@ -1228,6 +1228,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * resources, and removes registry entries
    *
    * FIXME - clean up subscriptions from released
+   * @param inName name to release
+   * @return true/false
    * 
    */
   public synchronized static boolean release(String inName) {
@@ -1489,6 +1491,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
   /**
    * FIXME - can this be renamed back to attach ? jump to another process using
    * the cli
+   * @param id instance id.
+   * @return string
    * 
    */
   // FIXME - remove - the way to 'jump' is just to change
@@ -3529,6 +3533,7 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
    * Release a configuration set - this depends on a runtime file - and it will
    * release all the services defined in it, with the exception of the
    * originally started services
+   * @param filename config filename to release
    * 
    */
   public void releaseConfig(String filename) {

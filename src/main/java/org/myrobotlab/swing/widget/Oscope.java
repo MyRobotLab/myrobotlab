@@ -108,6 +108,7 @@ public class Oscope extends ServiceGui implements ActionListener {
 
   /**
    * process the pin data for each pin
+   * @param data published pin data 
    */
   public void onPinArray(final PinData[] data) {
     for (PinData pinData : data) {

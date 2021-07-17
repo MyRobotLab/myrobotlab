@@ -1033,6 +1033,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * 
    * @param path
    *          - full path for a depth tree, name for a flat map
+   * @return userdata
    */
   public UserData getUserData(String path /* , boolean useDepth */) {
 
@@ -1169,6 +1170,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * load a known file type
+   * @param inFileName input file name
    */
   public void loadFile(String inFileName) {
     File file = getFile(inFileName);
@@ -1276,6 +1278,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * based on a directory structure - add missing nodes and bindings top node
    * will be bound to root
+   * @param dirPath dir
    *
    */
   public void loadNodes(String dirPath) {

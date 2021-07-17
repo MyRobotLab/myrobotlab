@@ -639,6 +639,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation.
+   * @return m
    */
   public static Matrix4f fromAngleAxis(float angle, Vector3f axis) {
     Vector3f normAxis = axis.normalize();
@@ -653,6 +654,7 @@ public final class Matrix4f implements java.io.Serializable {
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation (already normalized).
+   * @return m
    */
   public static Matrix4f fromAngleNormalAxis(float angle, Vector3f axis) {
     Matrix4fTemp m = new Matrix4fTemp();
@@ -794,6 +796,7 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
+   * @return v
    */
   public Vector3f multNormal(Vector3f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z;

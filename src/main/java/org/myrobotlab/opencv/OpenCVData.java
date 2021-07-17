@@ -291,6 +291,8 @@ public class OpenCVData extends CvData {
    * the generalized getImage returns the 'latest' output - if that does not
    * exist it return the original input - most other type converters should use
    * this method
+ * @param filterKey name of filter
+ * @return ipl image from filter
    * 
    */
   public IplImage getImage(String filterKey) {

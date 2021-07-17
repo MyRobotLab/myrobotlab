@@ -65,6 +65,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * 
    * @param matrix
    *          the matrix that defines the rotation.
+   * @return q
    */
   public static Quaternion fromMatrix3f(Matrix3f matrix) {
     return fromMatrix3f(matrix.m00, matrix.m01, matrix.m02, matrix.m10, matrix.m11,
@@ -175,6 +176,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * @param zAngle
    *          the Euler roll of rotation (in radians). (aka Bank, often rot
    *          around z)
+   * @return q
    */
   public static Quaternion fromAngles(float xAngle, float yAngle, float zAngle) {
     float angle;
@@ -289,6 +291,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * matrix. The result is stored in result. 4th row and 4th column values are
    * untouched. Note: the result is created from a normalized version of this
    * quat.
+   * @return matrix
    */
   public Matrix4f toRotationMatrix4f() {
     float norm = norm();
@@ -326,6 +329,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * 
    * @param i
    *          the column to retrieve. Must be between 0 and 2.
+   * @return v
    */
   public Vector3f getRotationColumn(int i) {
     float norm = norm();
@@ -392,6 +396,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    *          the angle to rotate (in radians).
    * @param axis
    *          the axis of rotation (already normalized).
+   * @return q
    */
   public static Quaternion fromAngleNormalAxis(float angle, Vector3f axis) {
     if (axis.x == 0 && axis.y == 0 && axis.z == 0) {
@@ -414,6 +419,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    *          the second quaternion.
    * @param t
    *          the amount to interpolate between the two quaternions.
+   * @return q
    */
   public static Quaternion slerp(Quaternion q1, Quaternion q2, float t) {
     return q1.slerp(q2, t);
@@ -427,6 +433,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    *          Final interpolation value
    * @param changeAmnt
    *          The amount diffrence
+   * @return q
    */
   public Quaternion slerp(Quaternion q2, float changeAmnt) {
     if (this.x == q2.x && this.y == q2.y && this.z == q2.z && this.w == q2.w) {
@@ -519,6 +526,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * 
    * @param matrix
    *          the matrix to apply to this quaternion.
+   * @return q
    */
   public Quaternion apply(Matrix3f matrix) {
     return mult(Quaternion.fromMatrix3f(matrix));
@@ -535,6 +543,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    * @param axis
    *          the array containing the three vectors representing the coordinate
    *          system.
+   * @return q
    */
   public static Quaternion fromAxes(Vector3f[] axis) {
     return fromAxes(axis[0], axis[1], axis[2]);
@@ -554,6 +563,7 @@ public final class Quaternion extends Vector4<Quaternion> implements java.io.Ser
    *          vector representing the y-axis of the coordinate system.
    * @param zAxis
    *          vector representing the z-axis of the coordinate system.
+   * @return q
    */
   public static Quaternion fromAxes(Vector3f xAxis, Vector3f yAxis,
       Vector3f zAxis) {
