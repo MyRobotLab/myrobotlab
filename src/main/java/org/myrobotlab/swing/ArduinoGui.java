@@ -423,6 +423,7 @@ public class ArduinoGui extends ServiceGui implements ActionListener, ItemListen
 
   /**
    * updates ui - called from both initialization &amp; onState
+   * @param arduino the arduino 
    * 
    */
   public void update(final Arduino arduino) { // TODO - all onState data
