@@ -160,6 +160,7 @@ public class ServoMixer extends Service {
   /**
    * Get a pose by name - name corresponds to the filename of the file in the
    * servoMixerDirectory
+   * @param name name of the post to load.
    * 
    * @return the loaded pose object
    */
@@ -233,6 +234,8 @@ public class ServoMixer extends Service {
 
   /**
    * Export Python representation of a sequence
+   * @param name does nothing..
+   * @return null
    * 
    */
   public String exportSequence(String name) {

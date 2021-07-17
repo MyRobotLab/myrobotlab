@@ -76,6 +76,22 @@ public final class Matrix4f implements java.io.Serializable {
 
   /**
    * constructs a matrix with the given values.
+ * @param m00 a
+ * @param m01 a
+ * @param m02 a
+ * @param m03 a
+ * @param m10 a
+ * @param m11 a
+ * @param m12 a
+ * @param m13 a
+ * @param m20 a
+ * @param m21 a
+ * @param m22 a
+ * @param m23 a
+ * @param m30 a
+ * @param m31 a
+ * @param m32 a
+ * @param m33 a
    * 
    */
   public Matrix4f( //

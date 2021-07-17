@@ -424,6 +424,7 @@ public class OpenCVFilterFaceTraining extends OpenCVFilter {
   /**
    * FIXME - haarcascade face finder "works" but should be put in a
    * interface/framework which treats it like a "generalized" classifier
+   * @param name name of the filter
    * 
    */
   public OpenCVFilterFaceTraining(String name) {

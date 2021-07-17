@@ -2725,6 +2725,8 @@ public class Runtime extends Service implements MessageListener, ServiceLifeCycl
 
   /**
    * Get connection ids that belong to a specific gateway
+   * @param name n
+   * @return list of uuids
    * 
    */
   public List<String> getConnectionUuids(String name) {
