@@ -879,8 +879,8 @@ public class Deeplearning4j extends Service {
    *          specifies the frozen layer of the model
    * @param numClasses
    *          the new number of outputs for the model.
-   * @return
-   * @throws IOException
+   * @return the loaded computation graph
+   * @throws IOException if there was an error reading the model
    */
   public ComputationGraph createVGG16TransferModel(String featureExtractionLayer, int numClasses) throws IOException {
     log.info("Loading org.deeplearning4j.transferlearning.vgg16...\n\n");
@@ -922,8 +922,6 @@ public class Deeplearning4j extends Service {
   /**
    * Fit a model against a training set Note: iterator is reset before fitting
    * 
-   * @param trainIter
-   * @param model
    */
   public void runFitter(DataSetIterator trainIter, ComputationGraph model) {
     trainIter.reset();
@@ -936,9 +934,6 @@ public class Deeplearning4j extends Service {
    * Evaluate a model against a given testing dataset Note iterator is reset
    * before evaluating.
    * 
-   * @param testIter
-   * @param model
-   * @return
    */
   public double evaluateModel(DataSetIterator testIter, ComputationGraph model) {
     testIter.reset();

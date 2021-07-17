@@ -194,7 +194,6 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   /**
    * Not marked final as quaternions have a different
    * idea of the inverse 
-   * @return
    */
   public ResultType mult(@Nonnull ResultType v) {
     float[] a = toArray();
@@ -208,7 +207,7 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
   /**
    * Not marked final as quaternions have a different
    * idea of the inverse 
-   * @return
+
    */
   public ResultType inverse() {
     float[] a = toArray();
@@ -243,8 +242,6 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>maxLocal</code> computes the maximum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
-   * @param v
-   * @return
    */
   public final ResultType max(ResultType v){
     float[] a = toArray();
@@ -259,8 +256,6 @@ public abstract class Vector<ResultType extends Vector<ResultType>> {
    * <code>minLocal</code> computes the minimum value for each
    * component in this and <code>other</code> vector. The result is stored
    * in this vector.
-   * @param v
-   * @return
    */
   public final ResultType min(ResultType v){
     float[] a = toArray();

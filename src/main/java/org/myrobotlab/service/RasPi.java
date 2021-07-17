@@ -282,7 +282,6 @@ public class RasPi extends AbstractMicrocontroller implements I2CController, Gpi
    * Check if wiringPi library is used. Returns true when wiringPi library is
    * used
    * 
-   * @return
    */
   public boolean getWiringPi() {
     return wiringPi;

@@ -221,8 +221,6 @@ public class StringUtil {
    * readable string values for the bytes are considered unsigned. (range 0-255)
    * not (-128 to 127)
    * 
-   * @param bytes
-   * @return
    */
   public static String byteArrayToIntString(byte[] bytes) {
     if (bytes.length == 0) {

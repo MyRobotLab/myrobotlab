@@ -207,7 +207,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    *          - offset into bytes
    * @param length
    *          - length of data to convert
-   * @return
    */
   public static int bytesToInt(int[] bytes, int offset, int length) {
     return (int) bytesToLong(bytes, offset, length);
@@ -216,10 +215,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * conversion utility TODO - support endianess
    * 
-   * @param bytes
-   * @param offset
-   * @param length
-   * @return
    */
   public static long bytesToLong(int[] bytes, int offset, int length) {
 
@@ -825,8 +820,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * publish a byte array of data that was read from the serial port.
    * 
-   * @param bytes
-   * @return
    */
   public byte[] publishBytes(byte[] bytes) {
     // log.info("Serial Port {} Publish Bytes: {}", getPortName() , bytes);
@@ -836,8 +829,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * Publishing receive data to and end point
    * 
-   * @param data
-   * @return
    */
   public int publishRX(Integer data) {
     return data;
@@ -846,8 +837,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
   /**
    * Publishing transmit data to a publishing point
    * 
-   * @param data
-   * @return
    */
   public Integer publishTX(Integer data) {
     return data;
@@ -876,9 +865,6 @@ public class Serial extends Service implements SerialControl, QueueSource, Seria
    * return a byte array represending all the input pending data at the time
    * it's called. If there is no input data, null is returned.
    * 
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
    */
   synchronized public byte[] readBytes() throws IOException, InterruptedException {
     int size = blockingRX.size();

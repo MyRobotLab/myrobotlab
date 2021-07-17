@@ -90,10 +90,6 @@ public class InProcessCli implements Runnable {
    * stdin/stdout is a pipe into and out of the instance, so just like
    * websockets, mqtt or xmpp it should behave the same
    * 
-   * @param s
-   * @param senderName
-   * @param in
-   * @param out
    */
   public InProcessCli(ServiceInterface s, String senderName, InputStream in, OutputStream out) {
     this.service = s;
@@ -324,9 +320,6 @@ public class InProcessCli implements Runnable {
    * This is the Cli encoder - it takes a line of text and generates the
    * appropriate msg from it to either invoke (locally) or sendBlockingRemote
    * (remotely)
-   * 
-   * @param data
-   * @return
    */
   public Message cliToMsg(String data) {
     return CodecUtils.cliToMsg(contextPath, "runtime@" + id, "runtime@" + remoteId, data);
@@ -347,8 +340,6 @@ public class InProcessCli implements Runnable {
   /**
    * get context specific path
    * 
-   * @param uuid
-   * @return
    */
   public String getPrompt(String uuid) {
     return String.format("[%s@%s %s]%s", name, remoteId, cwd, "#");
@@ -390,8 +381,6 @@ public class InProcessCli implements Runnable {
 
   /**
    * Incoming Message - likely from local/remote runtime
-   * 
-   * @param msg
    */
   public void onMsg(Message msg) {
 

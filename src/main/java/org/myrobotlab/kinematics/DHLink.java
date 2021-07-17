@@ -367,7 +367,6 @@ public class DHLink implements Serializable {
    * world encoder/joint angle for the link. This value will be added to the IK
    * solved angles prior to invoking publishJointAngle.
    * 
-   * @return
    */
   public double getOffset() {
     return offset;

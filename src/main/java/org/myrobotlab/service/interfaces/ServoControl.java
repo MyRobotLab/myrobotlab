@@ -68,7 +68,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * name of the current controllers - empty if not set
    * 
-   * @return
    */
   String getController();
 
@@ -82,14 +81,12 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
   /**
    * The last time the servo was asked to move (system current time in ms?)
    * 
-   * @return
    */
   long getLastActivityTime();
 
   /**
    * get this servos mapper
    * 
-   * @return
    */
   Mapper getMapper();
 
@@ -142,7 +139,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * Return current speed if set - if speed/speed control is not being use it is
    * null.
    * 
-   * @return
    */
   Double getSpeed();
 
@@ -166,7 +162,6 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * This method returns the input target position of the servo. This is the
    * input position that the servo was requested to move to.
    * 
-   * @return
    */
   double getTargetPos();
 
@@ -180,28 +175,25 @@ public interface ServoControl extends AbsolutePositionControl, EncoderListener, 
    * called from a different thread it should be blocked until the original is
    * finished.
    * 
-   * @return
    */
   boolean isBlocking();
 
   /**
    * is the servo currently sending pwm position control
    * 
-   * @return
+
    */
   boolean isEnabled();
 
   /**
    * Returns true if mapper is inverted
    * 
-   * @return
    */
   boolean isInverted();
 
   /**
    * Returns if the sevo is currently moving
    * 
-   * @return
    */
   boolean isMoving();
 

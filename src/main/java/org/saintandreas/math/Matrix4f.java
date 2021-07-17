@@ -794,7 +794,6 @@ public final class Matrix4f implements java.io.Serializable {
    * 
    * @param vec
    *          vec to multiply against.
-   * @return
    */
   public Vector3f multNormal(Vector3f vec) {
     float vx = vec.x, vy = vec.y, vz = vec.z;

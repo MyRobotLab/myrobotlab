@@ -330,8 +330,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * Because all AbstractSpeechSynthesis derived classes use audioFile it is
    * also an AudioData publisher.
    * 
-   * @param data
-   * @return
+   * @param data data to be published.
+   * @return AudioData object
    */
   public AudioData publishAudioStart(AudioData data) {
     return data;
@@ -341,8 +341,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * Because all AbstractSpeechSynthesis derived classes use audioFile it is
    * also an AudioData publisher.
    * 
-   * @param data
-   * @return
+   * @param data data to be published
+   * @return the data for the end audio event.
    */
   public AudioData publishAudioEnd(AudioData data) {
     return data;
@@ -534,8 +534,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * publishStartSpeaking text because the pre-processor/parser may need to
    * break it up into pieces to handle effects and other details
    * 
-   * @param toSpeak
-   * @return
+   * @param toSpeak the string to be spoken.
+   * @return the same string.
    */
   public String publishSpeechRequested(String toSpeak) {
     return toSpeak;
@@ -891,8 +891,8 @@ public abstract class AbstractSpeechSynthesis extends Service implements SpeechS
    * attempt to set language with tag, display and/or runtime Locale ??? - ie no
    * param
    * 
-   * @param lang
-   * @return
+   * @param lang the language to set
+   * @return true if the language was successfully set.
    */
   public boolean setLanguage(String lang) {
 

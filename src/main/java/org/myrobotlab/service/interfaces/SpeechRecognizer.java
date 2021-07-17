@@ -19,8 +19,6 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   /**
    * This typically will suppress listening to itself when it speaks creating an
    * endless self dialog :P
-   * 
-   * @param mouth
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth);
 
@@ -28,7 +26,6 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * Set up subscriptions/listeners to publish recognized text too this text
    * listener
    * 
-   * @param listener
    */
   public void attachTextListener(TextListener listener);
 
@@ -52,15 +49,12 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   /**
    * speech synthesis interface - to not listen while speaking
    * 
-   * @param utterance
    */
   public void onEndSpeaking(String utterance);
 
   /**
    * speech synthesis interface - to not listen while speaking
    * 
-   * @param utterance
-   * @return TODO
    */
   public String onStartSpeaking(String utterance);
 
@@ -77,24 +71,18 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
   /**
    * Publish event when listening or not listening ...
    * 
-   * @param event
-   * @return
    */
   public boolean publishListening(boolean event);
 
   /**
    * the recognized text
    * 
-   * @param text
-   * @return
    */
   public String publishRecognized(String text);
 
   /**
    * the text in addition to any meta data like confidence rating
    * 
-   * @param result
-   * @return
    */
   public ListeningEvent publishListeningEvent(ListeningEvent result);
 
@@ -133,14 +121,12 @@ public interface SpeechRecognizer extends NameProvider, TextPublisher, LocalePro
    * Setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
    * 
-   * @param word
    */
   public void setWakeWord(String word);
 
   /**
    * Get the current wake word
    * 
-   * @return
    */
   public String getWakeWord();
 

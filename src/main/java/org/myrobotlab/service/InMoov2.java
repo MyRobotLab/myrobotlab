@@ -63,9 +63,7 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   static String speechRecognizer = "WebkitSpeechRecognition";
 
   /**
-   * execute a resource script
-   * 
-   * @param someScriptName
+   * @param someScriptName execute a resource script
    */
   public boolean execScript(String someScriptName) {
     try {
@@ -370,7 +368,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * "re"-publishing runtime config list, because
    * I don't want to fix the js subscribeTo :P
-   * @return
    */
   public List<String> publishConfigList(){
     return configList;
@@ -1230,8 +1227,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * start servos - no controllers
-   * 
-   * @throws Exception
    */
   public void startServos() throws Exception {
     startServos(null, null);
@@ -1856,9 +1851,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
 
   /**
    * called with only port - will default with defaulted pins
-   * 
-   * @param port
-   * @return
    */
   public UltrasonicSensor startUltraSonicRight(String port) {
     return startUltraSonicRight(port, 64, 63);
@@ -1867,10 +1859,6 @@ public class InMoov2 extends Service implements TextListener, TextPublisher, Joy
   /**
    * called explicitly with pin values
    * 
-   * @param port
-   * @param trigPin
-   * @param echoPin
-   * @return
    */
   public UltrasonicSensor startUltraSonicRight(String port, int trigPin, int echoPin) {
 

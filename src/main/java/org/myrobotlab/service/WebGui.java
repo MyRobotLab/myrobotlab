@@ -147,8 +147,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * needed to get the api key to select the appropriate api processor
    * 
-   * @param uri
-   * @return
    */
   static public String getApiKey(String uri) {
     int pos = uri.indexOf(CodecUtils.PARAMETER_API);
@@ -321,8 +319,6 @@ public class WebGui extends Service implements AuthorizationProvider, Gateway, H
   /**
    * String broadcast to specific client
    * 
-   * @param uuid
-   * @param str
    */
   public void broadcast(String uuid, String str) {
     Broadcaster broadcaster = getBroadcasterFactory().lookup(uuid);

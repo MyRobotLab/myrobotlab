@@ -330,7 +330,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * 
    * @param encoder
    *          - the encoder control to attach
-   * @throws Exception
+   * @throws Exception if an error occurred trying to attach the encoder
    */
   @Override
   public void attach(EncoderControl encoder) throws Exception {
@@ -459,7 +459,7 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
 
   /**
    * 
-   * @param dm
+   * @param dm the arduino device mapping
    */
   public void reattach(DeviceMapping dm) {
 
@@ -1596,9 +1596,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * publishEcho/b32 sInt/str name1/b8/bu32 bui32/b32 bi32/b9/str name2/[]
    * 
-   * @param myFloat
-   * @param myByte
-   * @param secondFloat
    */
   public void publishEcho(float myFloat, int myByte, float secondFloat) {
     log.info("myFloat {} {} {} ", myFloat, myByte, secondFloat);
@@ -1658,8 +1655,8 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * error from mrlcom in string form
    * 
-   * @param errorMsg
-   * @return
+   * @param errorMsg a string representing the error message
+   * @return the published error message
    */
   // < publishMRLCommError/str errorMsg
   public String publishMRLCommError(String errorMsg/* str */) {
@@ -1743,9 +1740,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
   /**
    * FIXME - I bet this doesnt work - test it
    * 
-   * @param deviceId
-   * @param data
-   * @return
    */
   public SerialRelayData publishSerialData(Integer deviceId, int[] data) {
     SerialRelayData serialData = new SerialRelayData(deviceId, data);
@@ -2277,7 +2271,6 @@ public class Arduino extends AbstractMicrocontroller implements I2CBusController
    * -Djava.library.path=libraries/native -Djna.library.path=libraries/native
    * -Dfile.encoding=UTF-8
    * 
-   * @param args
    */
   public static void main(String[] args) {
     try {

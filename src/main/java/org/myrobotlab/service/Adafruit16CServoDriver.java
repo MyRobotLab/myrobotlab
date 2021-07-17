@@ -329,8 +329,8 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
    * function to convert labeled pins into address locations pin examples would
    * be D5, D6, ... on an Arduino or some other string value
    * 
-   * @param pin
-   * @return
+   * @param pin the string representation of the pin
+   * @return the integer representation of the pin address
    */
   public int getAddress(String pin) {
     try {
@@ -344,9 +344,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * type conversion for setting the pwm
    * 
-   * @param pinAddress
-   * @param pulseWidthOn
-   * @param pulseWidthOff
    */
   public void setPWM(Integer pinAddress, Integer pulseWidthOn, Integer pulseWidthOff) {
     setPWM(pinAddress + "", pulseWidthOn, pulseWidthOff);
@@ -355,9 +352,9 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * Set the pwm pulsewidth
    * 
-   * @param pinLabel
-   * @param pulseWidthOn
-   * @param pulseWidthOff
+   * @param pinLabel a label for the pin
+   * @param pulseWidthOn the on pulse width
+   * @param pulseWidthOff the off pulse width
    */
   public void setPWM(String pinLabel, Integer pulseWidthOn, Integer pulseWidthOff) {
     // TODO - handle pin label mappings if necessary
@@ -372,8 +369,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * type conversion to set the pwm frequency
    * 
-   * @param pin
-   * @param hz
    */
   public void setPWMFreq(Integer pin, Integer hz) {
     setPWMFreq(pin + "", hz);
@@ -382,8 +377,6 @@ public class Adafruit16CServoDriver extends Service implements I2CControl, Servo
   /**
    * Set the PWM frequency i.e. the frequency between positive pulses.
    * 
-   * @param pin
-   * @param hz
    */
   public void setPWMFreq(String pin, Integer hz) { // Analog servos run at ~60
                                                    // Hz

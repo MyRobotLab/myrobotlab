@@ -42,9 +42,6 @@ public class Connection {
    * put in objects which should be transient - e.g. sockets all config and
    * other attributes should use put(key, object)
    * 
-   * @param key
-   * @param o
-   * @return
    */
   public Object putTransient(String key, Object o) {
     return attributes.put(key, o);

@@ -387,9 +387,7 @@ public class OpenCV extends AbstractComputerVision {
   }
 
   /**
-   * get the current list of possible filter types
-   * 
-   * @return
+   * @return get the current list of possible filter types
    */
   static public String[] getPossibleFilters() {
     return POSSIBLE_FILTERS;
@@ -664,9 +662,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * add filter by name and type e.g. addFilter("c1","Canny")
    * 
-   * @param name
-   * @param filterType
-   * @return
    */
   public OpenCVFilter addFilter(String name, String filterType) {
     String type = String.format("org.myrobotlab.opencv.OpenCVFilter%s", filterType);
@@ -710,8 +705,6 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * capture from a camera
-   * 
-   * @param cameraIndex
    */
   public void capture(Integer cameraIndex) {
     if (cameraIndex == null) {
@@ -731,7 +724,6 @@ public class OpenCV extends AbstractComputerVision {
    * frame grabber for the job. Typically this will the the FFmpeg grabber since
    * its the most capable of decoding different filetypes.
    * 
-   * @param filename
    */
   public void capture(String filename) {
     stopCapture();
@@ -751,7 +743,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * default 5 second wait
    * 
-   * @return
    */
   public Map<String, List<Classification>> getClassifications() {
     return getClassifications(5000);
@@ -828,8 +819,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * get a filter by name
    * 
-   * @param name
-   * @return
    */
   public OpenCVFilter getFilter(String name) {
     return filters.get(name);
@@ -1183,9 +1172,6 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * conversion from buffered image to base64 encoded jpg
-   * 
-   * @param img
-   * @return
    */
   public String toBase64Jpg(BufferedImage img) {
     try {
@@ -1377,9 +1363,6 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * base 64 jpg frame image
-   * 
-   * @param data
-   * @return
    */
   public WebImage publishWebDisplay(WebImage data) {
     return data;
@@ -1456,7 +1439,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * Publishing method for filters - used internally
    * 
-   * @param filterWrapper
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
    */
@@ -1467,7 +1449,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * Publishing method for filters - uses string parameter for remote invocation
    * 
-   * @param name
    * @return FilterWrapper solves the problem of multiple types being resolved
    *         in the setFilterState(FilterWrapper data) method
    */
@@ -1530,10 +1511,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * creates a new overlay of text
    * 
-   * @param format
-   * @param x
-   * @param y
-   * @param color
    */
   public void putText(int x, int y, String format, String color) {
     Overlay overlay = new Overlay(x, y, format, color);
@@ -1543,8 +1520,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * the "light weight" put - it does not create any new cv objects
    * 
-   * @param format
-   * @param args
    */
   public void putText(String format, Object... args) {
     if (overlays.containsKey(format)) {
@@ -1662,8 +1637,6 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * records a single frame to the filesystem from our data
-   * 
-   * @return
    */
   public String recordFrame() {
     try {
@@ -1679,8 +1652,6 @@ public class OpenCV extends AbstractComputerVision {
 
   /**
    * remove a filter by name
-   * 
-   * @param name
    */
   synchronized public void removeFilter(String name) {
     if (filters.containsKey(name)) {
@@ -1812,9 +1783,6 @@ public class OpenCV extends AbstractComputerVision {
   /**
    * Json encoded filter to be used to update state information within the named
    * filter
-   * 
-   * @param name
-   * @param data
    */
   public void setFilterState(String name, String data) {
     OpenCVFilter filter = getFilter(name);

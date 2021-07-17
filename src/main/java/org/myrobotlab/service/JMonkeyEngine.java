@@ -415,8 +415,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * binds two objects together ...
    * 
-   * @param child
-   * @param parent
    */
   public void bind(String child, String parent) {
     addMsg("bind", child, parent);
@@ -435,11 +433,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * "should" change to reflect the changes in branches. The flat model does not
    * need to change, but has a higher likelyhood of collisions.
    * 
-   * @param tree
-   * @param path
-   * @param spatial
-   * @param useDepthKeys
-   * @return
    */
   public Map<String, UserData> buildTree(Map<String, UserData> tree, String path, Spatial spatial, boolean includeGeometries, boolean useDepthKeys) {
     if (useDepthKeys) {
@@ -749,7 +742,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    *          - name of node
    * @param startNode
    *          - the node to start search
-   * @return
    */
   public Spatial find(String name, Node startNode) {
     if (name.equals(ROOT)) {
@@ -784,9 +776,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * wrapper of "find" which "expects" a spatial back otherwise its an error
    * 
-   * @param name
-   * @param startNode
-   * @return
    */
   public Spatial get(String name, Node startNode) {
     Spatial ret = find(name, startNode);
@@ -799,8 +788,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * get default axis local rotation in degrees
    * 
-   * @param name
-   * @return
    */
   public Float getAngle(String name) {
     return getAngle(name, null);
@@ -1033,7 +1020,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * 
    * @param path
    *          - full path for a depth tree, name for a flat map
-   * @return
    */
   public UserData getUserData(String path /* , boolean useDepth */) {
 
@@ -1170,8 +1156,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * load a known file type
-   * 
-   * @param inFileName
    */
   public void loadFile(String inFileName) {
     File file = getFile(inFileName);
@@ -1229,8 +1213,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * load a node with all potential children
-   * 
-   * @param parentDirPath
    */
   public void loadNode(String parentDirPath) {
     File parentFile = new File(parentDirPath);
@@ -1280,8 +1262,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * based on a directory structure - add missing nodes and bindings top node
    * will be bound to root
-   * 
-   * @param dirPath
+   *
    */
   public void loadNodes(String dirPath) {
     File dir = new File(dirPath);
@@ -1355,10 +1336,7 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
 
   /**
    * onAnalog
-   * 
-   * @param name
-   * @param keyPressed
-   * @param tpf
+   *
    */
   public void onAnalog(String name, float keyPressed, float tpf) {
     // log.info("onAnalog [{} {} {}]", name, keyPressed, tpf);
@@ -1431,8 +1409,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * A method to accept Computer Vision data (from OpenCV or BoofCv) and to
    * appropriately delegate it out to more specific methods
-   * 
-   * @param data
    */
   public void onCvData(CvData data) {
     // onPointCloud(data.getPointCloud()); FIXME - brittle and not correct
@@ -1597,9 +1573,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * put text on the guiNode HUD display for jmonkey FIXME - do the same logic
    * in OpenCV overlay !
    * 
-   * @param text
-   * @param x
-   * @param y
    */
   public void putText(String text, int x, int y, String color, Integer size) {
     HudText hud = null;
@@ -1636,9 +1609,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * instant rotation on an particular axis
    * 
-   * @param name
-   * @param axis
-   * @param degrees
    */
   public void rotateOnAxis(String name, String axis, double degrees) {
     addMsg("rotateTo", name, axis, degrees);
@@ -1647,9 +1617,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * incremental movement on an axis with a speed
    * 
-   * @param name
-   * @param axis
-   * @param degrees
    */
   public void rotateOnAxis(String name, String axis, double degrees, double speed) {
     interpolator.addAnimation("rotateTo", name, axis, degrees, speed);
@@ -1658,8 +1625,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * rotate on the "default" axis to a location without using speed
    * 
-   * @param name
-   * @param degrees
    */
   public void rotateTo(String name, double degrees) {
     addMsg("rotateTo", name, null, degrees);
@@ -1668,9 +1633,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
   /**
    * rotate on the "default" axis using speed
    * 
-   * @param name
-   * @param degrees
-   * @param speed
    */
   public void rotateTo(String name, double degrees, double speed) {
     interpolator.addAnimation("rotateTo", name, null, degrees, speed);
@@ -2489,7 +2451,6 @@ public class JMonkeyEngine extends Service implements Gateway, ActionListener, S
    * 
    * FIXME REMOVE !!!
    * 
-   * @param servo
    */
   @Override
   public void onServoMoveTo(ServoControl servo) {

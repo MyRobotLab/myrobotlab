@@ -230,7 +230,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   /**
    * TODO - make a brain interface ??
    * 
-   * @param service
    */
   public void attachBrain(ProgramAB service) {
     brain = service.getName();
@@ -555,8 +554,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * left movement publishing point - this should probably go into a
    * ChassiControl interface
    * 
-   * @param pwr
-   * @return
    */
   public double publishMotorLeftMove(double pwr) {
     log.info("publish left -> {}", pwr);
@@ -567,8 +564,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
    * right movement publishing point - this should probably go into a
    * ChassiControl interface
    * 
-   * @param pwr
-   * @return
    */
   public double publishMotorRightMove(double pwr) {
     log.info("publish right -> {}", pwr);
@@ -699,8 +694,6 @@ public class WorkE extends Service implements StatusListener, TextPublisher, Spe
   /**
    * must NOT end in bots - is its parent folder
    * 
-   * @param path
-   * @return
    */
   public String setBrainPath(String path) {
     brainPath = path;

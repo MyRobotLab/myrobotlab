@@ -92,11 +92,6 @@ public class FileIO {
    * compares two files - throws if they are not identical, good to use in
    * testing
    * 
-   * @param filename1
-   * @param filename2
-   * @return
-   * @throws FileComparisonException
-   * @throws IOException
    */
   static public final boolean compareFiles(String filename1, String filename2) throws FileComparisonException, IOException {
     File file1 = new File(filename1);
@@ -120,9 +115,6 @@ public class FileIO {
   /**
    * Copy the contents of dir into the path destination s
    * 
-   * @param dir
-   * @param path
-   * @throws IOException
    */
 
   final public static void copy(File[] dir, String path) throws IOException {
@@ -134,9 +126,6 @@ public class FileIO {
   /**
    * A simple copy method which works like a 'regular' operating system copy
    * 
-   * @param src
-   * @param dst
-   * @throws IOException
    */
   static public final void copy(File src, File dst) throws IOException {
     log.info("copying from {} to {}", src, dst);
@@ -170,9 +159,6 @@ public class FileIO {
   /**
    * copy file or folder from one place to another with string interface
    * 
-   * @param src
-   * @param dst
-   * @throws IOException
    */
   static public final void copy(String src, String dst) throws IOException {
     copy(new File(src), new File(dst));
@@ -210,9 +196,6 @@ public class FileIO {
    *          - the folder or file to extract from the root
    * @param dst
    *          - target location
-   * @param overwrite
-   * @return true/false
-   * @throws IOException
    */
   static public final boolean extract(String root, String src, String dst, boolean overwrite) throws IOException {
     log.info("extract(root={}, src={}, dst={}, overwrite={})", root, src, dst, overwrite);
@@ -457,8 +440,6 @@ public class FileIO {
    * 
    * A better solution might be to maintain a list of services as a text file :(
    * 
-   * @return
-   * @throws IOException
    */
   static public final List<String> getServiceList() throws IOException {
 
@@ -499,9 +480,6 @@ public class FileIO {
   /**
    * list the contents of 'self' at directory 'src'
    * 
-   * @param src
-   * @return list of urls
-   * @throws IOException
    */
   static public final List<URL> listContents(String src) throws IOException {
     return listContents(getRoot(), src, true, null, null);
@@ -515,13 +493,6 @@ public class FileIO {
    * list the contents of a file system directory or list the contents of a jar
    * file directory
    * 
-   * @param root
-   * @param src
-   * @param recurse
-   * @param include
-   * @param exclude
-   * @return
-   * @throws IOException
    */
   static public final List<URL> listContents(String root, String src, boolean recurse, String[] include, String[] exclude) throws IOException {
     List<URL> classes = new ArrayList<URL>();
@@ -1086,8 +1057,6 @@ public class FileIO {
   /**
    * removes a file or recursively removes directory
    * 
-   * @param file
-   * @return true/false
    */
   static public final boolean rm(File file) {
     if (file.isDirectory())
@@ -1229,9 +1198,6 @@ public class FileIO {
   /**
    * Copies bytes from src to dst, src must be a file, dst may or may not exist
    * 
-   * @param src
-   * @param dst
-   * @throws IOException
    */
   static public void copyBytes(String src, String dst) throws IOException {
     FileInputStream fis = new FileInputStream(src);
@@ -1415,8 +1381,6 @@ public class FileIO {
   /**
    * Taken from Commons-io IOUtils
    * 
-   * @param input
-   * @return
    */
   public static InputStream toInputStream(String input) {
     return toInputStream(input, Charset.defaultCharset());
@@ -1425,9 +1389,6 @@ public class FileIO {
   /**
    * Taken from Commons-io IOUtils
    * 
-   * @param input
-   * @param encoding
-   * @return
    */
   public static InputStream toInputStream(String input, Charset encoding) {
     return new ByteArrayInputStream(input.getBytes(Charsets.toCharset(encoding)));
@@ -1436,10 +1397,6 @@ public class FileIO {
   /**
    * Taken from Commons-io IOUtils
    * 
-   * @param input
-   * @param encoding
-   * @return
-   * @throws IOException
    */
   public static InputStream toInputStream(String input, String encoding) throws IOException {
     byte[] bytes = input.getBytes(Charsets.toCharset(encoding));
@@ -1465,7 +1422,7 @@ public class FileIO {
    * 
    * @param filename
    *          - name of file
-   * @return
+   * @return a string if successful otherwise null
    */
   public static String toSafeString(String filename) {
     try {

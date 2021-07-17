@@ -379,7 +379,7 @@ public class Mpr121 extends Service implements I2CControl, PinArrayControl {
   /**
    * Initiate the MPR121 to use all inputs for sensing
    * 
-   * @return
+   * @return true if it began
    */
   public boolean begin() {
 

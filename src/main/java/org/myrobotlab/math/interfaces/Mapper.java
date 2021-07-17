@@ -5,8 +5,6 @@ public interface Mapper {
   /**
    * inverse fn of calcOutput
    * 
-   * @param out
-   * @return
    */
   double calcInput(double out);
 
@@ -14,46 +12,37 @@ public interface Mapper {
    * main method of the Mapper - ratio of ranges are applied in addition to any
    * limits which exist
    * 
-   * @param in
-   * @return
    */
   double calcOutput(double in);
 
   /**
-   * This is the input minimum value for the mapper.
-   * 
-   * @return
+   * @return This is the input minimum value for the mapper.
    */
   public double getMinX();
 
   /**
-   * This is the maximum input value for the mapper.
-   * 
-   * @return
+   * @return This is the maximum input value for the mapper.
    */
   public double getMaxX();
 
   /**
-   * This is the minimum output value that the mapper will return assuming the
+   * @return This is the minimum output value that the mapper will return assuming the
    * input falls between minX and maxX.
+  
    * 
-   * @return
    */
   public double getMinY();
 
   /**
-   * This is the maximum output value that the mapper will return assuming the
+   * @return This is the maximum output value that the mapper will return assuming the
    * input falls between minX and maxX
    * 
-   * @return
    */
 
   public double getMaxY();
 
   /**
-   * Returns true if the minY is greater than the maxY
-   * 
-   * @return
+   * @return Returns true if the minY is greater than the maxY
    */
 
   boolean isInverted();

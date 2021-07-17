@@ -253,8 +253,8 @@ public class Python extends Service {
    * Get the value of the Python variable e.g. Integer x =
    * (Integer)python.getValue("my_var")
    * 
-   * @param pythonRefName
-   * @return
+   * @param pythonRefName the reference name for the python object
+   * @return the python object
    */
   public Object get(String pythonRefName) {
     PyObject o = getPyObject(pythonRefName);
@@ -571,9 +571,6 @@ public class Python extends Service {
   /**
    * executes an external Python file
    * 
-   * @param filename
-   * @param block
-   * @throws IOException
    */
   public boolean execFile(String filename, boolean block) throws IOException {
     String script = FileIO.toString(filename);
@@ -655,7 +652,7 @@ public class Python extends Service {
   /**
    * load a official "service" script maintained in myrobotlab
    * 
-   * @param serviceType
+   * @param serviceType the type of service
    */
   public void loadServiceScript(String serviceType) {
     String filename = getResourceRoot() + fs + serviceType + fs + String.format("%s.py", serviceType);
@@ -789,7 +786,7 @@ public class Python extends Service {
    * stop all scripts (not sure the pros/cons of this management vs
    * thread.interruptAllThreads())
    * 
-   * @return
+   * @return false
    */
   public boolean stop() {
     log.info("stopping all scripts");

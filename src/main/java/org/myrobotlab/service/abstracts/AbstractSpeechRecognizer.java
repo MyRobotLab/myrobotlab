@@ -165,7 +165,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * recognitions we spoke and fall into the infinite loop of internal dialog
    * talkig to ourselves ...
    * 
-   * @param mouth
    */
   public void attachSpeechSynthesis(SpeechSynthesis mouth) {
     if (mouth == null) {
@@ -199,9 +198,7 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
   }
 
   /**
-   * Get the current wake word
-   * 
-   * @return
+   * @return Get the current wake word
    */
   public String getWakeWord() {
     return wakeWord;
@@ -470,7 +467,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * setting the wake word - wake word behaves as a switch to turn on "active
    * listening" similar to "hey google"
    * 
-   * @param word
    */
   public void setWakeWord(String word) {
     if (word == null || word.trim().length() == 0) {
@@ -490,7 +486,6 @@ public abstract class AbstractSpeechRecognizer extends Service implements Speech
    * length of idle time or silence until the wake word is needed to activate
    * again
    * 
-   * @param wakeWordTimeoutSeconds
    */
   public void setWakeWordTimeout(Integer wakeWordTimeoutSeconds) {
     wakeWordIdleTimeoutSeconds = wakeWordTimeoutSeconds;

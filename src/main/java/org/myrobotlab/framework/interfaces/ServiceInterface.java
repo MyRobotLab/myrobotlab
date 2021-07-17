@@ -27,21 +27,15 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
    * @param callback
    *          c
    * 
-   */
-
-  /**
    * virtualize the service, in this mode the service should not use any "real"
    * hardware
    * 
-   * @param b
-   * @return
    */
   public boolean setVirtual(boolean b);
 
   /**
    * check to see if the service is running in a virtual mode
    * 
-   * @return
    */
   public boolean isVirtual();
 
@@ -100,15 +94,13 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   public void startService();
   
   /**
-   * get a services current config
-   * @return
+   *  @return get a services current config
+   *
    */
   public ServiceConfig getConfig();
   
   /**
    * Configure a service by merging in configuration
-   * @param c
-   * @return
    */
   public ServiceConfig load(ServiceConfig c);
 
@@ -139,7 +131,6 @@ public interface ServiceInterface extends ServiceLifeCycleListener, ServiceQueue
   /**
    * the order this service was created in relation to the other service
    * 
-   * @param creationCount
    */
   public void setOrder(int creationCount);
 

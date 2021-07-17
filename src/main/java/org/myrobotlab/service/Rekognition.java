@@ -63,8 +63,8 @@ public class Rekognition extends Service {
    * and saves the credentials in the .myrobotlab/store file. Once this is run
    * once
    * 
-   * @param accessKey
-   * @param secretKey
+   * @param accessKey aws access key
+   * @param secretKey aws secret key
    */
   public void setCredentials(String accessKey, String secretKey) {
     Security security = Runtime.getSecurity();
@@ -93,9 +93,9 @@ public class Rekognition extends Service {
   }
 
   /**
-   * returns an initialized client or throws with an error
+   * @return an initialized client or throws with an error
    * 
-   * @return
+   * 
    */
   public AmazonRekognition getClient() {
     if (rekognitionClient == null) {
@@ -152,7 +152,6 @@ public class Rekognition extends Service {
    * Hopefully, Label is serializable, otherwise it needs to return a list of
    * POJOs.
    * 
-   * @return
    */
   public List<Label> getLabels(ByteBuffer imageBytes) {
     AmazonRekognition client = getClient();

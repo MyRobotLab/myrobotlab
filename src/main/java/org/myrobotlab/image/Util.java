@@ -217,9 +217,6 @@ public class Util {
    * its not a Service it should be using Service.getResource(class,
    * resourceName)
    * 
-   * @param path
-   * @param defaultImage
-   * @return
    */
   @Deprecated
   public static Image getImage(String path, String defaultImage) {

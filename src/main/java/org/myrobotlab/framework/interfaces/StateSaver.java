@@ -12,13 +12,13 @@ public interface StateSaver {
 
   /**
    * save to current default location 
-   * @return
+   * @return true if successful
    */
   public boolean save();
   
   /**
    * save to a specific location
-   * @return
+   * @return true if successful
    */
   public boolean save(String filename);
 }

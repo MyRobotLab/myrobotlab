@@ -88,7 +88,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   /**
    * set the tts command template
    * 
-   * @param ttsCommand
    */
   public void setTtsCommand(String ttsCommand) {
     info("LocalSpeech template is now: %s", ttsCommand);
@@ -98,7 +97,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   /**
    * get the tts command template
    * 
-   * @return
    */
   public String getTtsCommand() {
     return ttsCommand;
@@ -107,7 +105,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
   /**
    * setFestival sets the Windows tts template
    * 
-   * @return
    */
   public boolean setTts() {
     removeExt(false);
@@ -122,8 +119,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   /**
    * setMimic sets the Windows mimic template
-   * 
-   * @return
    */
   public boolean setMimic() {
     removeExt(false);
@@ -138,8 +133,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   /**
    * setSay sets the Mac say template
-   * 
-   * @return
    */
   public boolean setSay() {
     removeExt(false);
@@ -154,8 +147,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   /**
    * setFestival sets the Linux tts to festival template
-   * 
-   * @return
    */
   public boolean setFestival() {
     removeExt(false);
@@ -170,8 +161,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
 
   /**
    * setEspeak sets the Linux tts to espeak template
-   * 
-   * @return
    */
   public boolean setEspeak() {
     removeExt(false);
@@ -185,7 +174,6 @@ public class LocalSpeech extends AbstractSpeechSynthesis {
    * Typically double quotes should be filtered out of the command as creating
    * the text to speech process command can be broken by double quotes
    * 
-   * @param filter
    */
   public void setFilter(String filter) {
     filterChars = filter;
